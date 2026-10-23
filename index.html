@@ -1098,7 +1098,7 @@ def _ms_process(job_text):
   ];
   const customFunctions=[];
   try{const saved=JSON.parse(localStorage.getItem('promath-custom-functions-v1')||'[]');if(Array.isArray(saved))for(const item of saved.slice(0,60))if(item&&/^[A-Za-z][A-Za-z0-9_]*$/.test(item.name)&&Array.isArray(item.params)&&typeof item.expression==='string')customFunctions.push(item);}catch{}
-  paletteGroups.push({name:'Custom functions',groups:[{name:'Custom function',items:customFunctions.map(f=>[f.name,f.name+' ('+f.params.join(', ')+')',f.name+'('+f.params.join(',')+')'])]}]});
+  paletteGroups.push({name:'Custom functions',groups:[{name:'Custom function',items:customFunctions.map(f=>[f.name,f.name+' ('+f.params.join(', ')+')',f.name+'('+f.params.join(',')+')'])}]});
   const customGroup=paletteGroups[paletteGroups.length-1].groups[0];
   const saveCustom=()=>{customGroup.items=customFunctions.map(f=>[f.name,f.name+' ('+f.params.join(', ')+')',f.name+'('+f.params.join(',')+')']);try{localStorage.setItem('promath-custom-functions-v1',JSON.stringify(customFunctions));}catch{}document.getElementById('palette-search').dispatchEvent(new Event('input'));};
   const customPanel=document.createElement('details');customPanel.className='panel';customPanel.id='custom-function-panel';

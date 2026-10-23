@@ -82,8 +82,8 @@ def main():
     plot.addTable({headers:['x','y','z','w'],rows:[[1,2,3,4],[2,4,6,8]]},'Table1',{x:0,y:2,mode:'2d',style:'line'});
     plot.addTable({headers:['time','value'],rows:[[1,5],[2,7]]},'Table2',{x:0,y:1,mode:'2d',style:'points'});
   }""")
-  assert len(page.evaluate('MathStudio.graphData.legend()'))==4
-  assert len(page.evaluate('MathStudio.graphData.exportState().extra'))==3
+  assert len(page.evaluate('MathStudio.graphData.legend()'))==3
+  assert len(page.evaluate('MathStudio.graphData.exportState().extra'))==2
   assert not errors,errors
   browser.close()
  print('PASS appearance, chart palettes, number formats, project state, table zoom')

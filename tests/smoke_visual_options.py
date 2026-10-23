@@ -61,6 +61,7 @@ def main():
   page.locator('#table-zoom-reset').click()
   assert page.locator('#table-zoom-value').inner_text()=='100%'
   # Named custom functions are available across numeric workspaces.
+  page.locator('#custom-function-panel').evaluate('(e)=>e.open=true')
   page.locator('#cf-name').fill('myfun')
   page.locator('#cf-params').fill('x')
   page.locator('#cf-body').fill('x^2+1')

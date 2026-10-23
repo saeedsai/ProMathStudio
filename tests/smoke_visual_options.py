@@ -66,6 +66,7 @@ def main():
   page.locator('#cf-params').fill('x')
   page.locator('#cf-body').fill('x^2+1')
   page.locator('#cf-save').click()
+  assert any(f['name']=='myfun' for f in page.evaluate('MathStudio.customFunctions.list()')), page.locator('#cf-message').inner_text()
   assert page.evaluate('MathStudio.customFunctions.evaluate("myfun",[3])')==10
   assert page.evaluate('MathStudio.dataTables.formula("myfun(3)","Data1")')==10
   page.locator('#cf-name').fill('pyfun')

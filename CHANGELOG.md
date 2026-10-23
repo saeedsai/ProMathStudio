@@ -1,3 +1,12 @@
+## 2026-10-23 — Advanced mathematics and contextual interface
+
+- Linear, polynomial, exponential, logarithmic, power and Gaussian regression from Data Tables, including fitted graph overlays, R², RMSE and sample counts.
+- Forward/inverse Laplace and Fourier notation and SymPy calculations.
+- ODE/PDE analytical solution options via SymPy dsolve/pdsolve (limited supported classes).
+- 72 additional physics equations in six organized categories.
+- Floating Symbols/Examples/Options/Help menus and collapsible advanced settings.
+- Added advanced math regression tests, source module and documentation.
+
 ## 2026-10-23 — Data Tables and data-driven charts
 
 - Fifth workspace with multiple editable spreadsheet-style tables, column editing, formulas, row filter/sort, and browser-backed project persistence.

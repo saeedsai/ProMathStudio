@@ -45,3 +45,7 @@ Static checks and browser smoke must pass for a code update; verify high-risk ma
 ## CSV/JSON imported-data smoke tests
 
 After Playwright is installed, run `python tests/smoke_graph_import.py`. The test covers CSV quoted cells, numeric coordinate parsing, 2D/3D selection, X/Y/Z plotting, grid style, fit axes, export/import of project JSON and validation errors. The CI and Pages workflows run this before deployment.
+
+## Advanced math CI coverage
+
+Run `python tests/smoke_advanced_math.py` after installing development dependencies and Playwright Chromium. It checks all 72 new physics examples, the six fit families, fitted graph overlays, saved model settings, floating Help/mobile menus, and uses the embedded SymPy Python evaluator for Laplace, Fourier, ODE and PDE unit checks. It does not test live Pyodide package downloads, which still need a manual online browser check.

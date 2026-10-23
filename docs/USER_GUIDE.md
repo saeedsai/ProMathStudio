@@ -47,3 +47,7 @@ Tab navigates controls; Enter in the editor adds/saves an equation, Shift+Enter 
 ## More information
 
 [Syntax reference](SYNTAX_REFERENCE.md) · [Exports](EXPORTS.md) · [Troubleshooting](TROUBLESHOOTING.md)
+
+## Advanced mathematics and floating menus
+
+Floating top buttons show **Symbols**, **Examples**, **Options** and **Help**. The searchable Math Library and example categories open in sliding menus. Options toggles history, Python code and detailed explanations. Help provides nested guides, including curve fitting and ODE/PDE limitations. The Connected Workspaces panel remains at the bottom. Graph axes have an optional collapsible advanced menu. See [Advanced mathematics](ADVANCED_MATHEMATICS.md).

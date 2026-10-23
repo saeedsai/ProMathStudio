@@ -36,3 +36,10 @@ This roadmap lists **future work**, not functionality guaranteed in the current 
 ## Definition of done for new features
 
 A feature needs a user-facing implementation, documentation update, automated tests where feasible, checked desktop/mobile behavior, and a recorded changelog entry. Do not claim deployment until the published site has been verified.
+
+## Future advanced mathematics
+
+- [ ] Add initial/boundary conditions to ODE/PDE operations where supported by SymPy.
+- [ ] Explicit 2D/3D PDE numerical solvers with discretization/boundary conditions and error diagnostics.
+- [ ] Weighted and robust regression, confidence bands, residual charts, and outlier controls.
+- [ ] Richer drag-and-drop contextual tool navigation with accessibility testing.

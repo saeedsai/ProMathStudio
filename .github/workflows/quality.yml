@@ -34,3 +34,5 @@ jobs:
         run: python tests/smoke_graph_import.py
       - name: Spreadsheet and chart regression
         run: python tests/smoke_data_tables.py
+      - name: Advanced math + UI regression
+        run: python tests/smoke_advanced_math.py

@@ -1,10 +1,12 @@
-"""Embed src/data-tables.js into index.html for standalone offline distribution."""
+"""Rebuild standalone index.html by embedding both source modules."""
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
-p=root/'index.html'
-s=p.read_text(encoding='utf-8')
-start='<script id="mathstudio-data-tables">'
-i=s.index(start)+len(start);j=s.index('</script>',i)
-s=s[:i]+'\n'+(root/'src/data-tables.js').read_text(encoding='utf-8')+'\n'+s[j:]
-p.write_text(s,encoding='utf-8')
-print('Updated standalone index.html')
+index=root/'index.html'
+text=index.read_text(encoding='utf-8')
+for tag,source in [('mathstudio-data-tables','src/data-tables.js'),('promath-advanced-features','src/advanced-features.js')]:
+    start=f'<script id="{tag}">\n'
+    i=text.index(start)+len(start)
+    end=text.index('</script>',i)
+    text=text[:i]+(root/source).read_text(encoding='utf-8').rstrip('\n')+'\n'+text[end:]
+index.write_text(text,encoding='utf-8')
+print('Rebuilt standalone index.html')

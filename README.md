@@ -80,3 +80,7 @@ Under **2D & 3D Graphs → Import CSV / JSON data to graph**, upload local data,
 ## Data Tables workspace
 
 Use **Data tables** to edit multiple spreadsheet-like tables, enter safe formulas (for example `=A2*B2`, `=SUM(A2:A10)`, `=IF(A2>0,B2,0)`), filter and sort, join two tables (INNER/LEFT/RIGHT/FULL) or combine tables with UNION ALL/DISTINCT, INTERSECT and EXCEPT. Import or export **CSV, TSV and JSON** here, then send a table to **Graphs** for 2D and 3D scatter/grid/line plots, **bar charts** or **pie charts**. Your tables and raw formulas are saved inside the shared project JSON. [Read the Data Tables guide](docs/DATA_TABLES.md).
+
+## Advanced mathematics and simpler interface
+
+New features: **linear/polynomial (degree 2–6), exponential, logarithmic, power and Gaussian curve fitting**, with R² and RMSE displayed on the 2D graph alongside data. The Equation Editor typesets **Laplace/Fourier and inverse transforms**; SymPy computes these plus analytical ODE/PDE solutions for supported classes. The physics example library includes **72 new examples**. Floating **Symbols**, **Examples**, **Options** and **Help** replace the always-open palette; axis bounds are tucked into an expandable menu. The shared Working Equation remains at the bottom. See [Advanced mathematics and Help](docs/ADVANCED_MATHEMATICS.md).

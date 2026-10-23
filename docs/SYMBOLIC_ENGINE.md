@@ -47,3 +47,9 @@ The Python evaluator is embedded in a `type="text/plain"` script tag and receive
 - **Huge expressions hang:** reduce expression size or simplify in stages.
 
 [Full limitations](FEATURES_AND_LIMITATIONS.md)
+
+## Laplace/Fourier transforms and differential equation solving
+
+The Equation Editor can render `laplace(exp(-2*t),t,s)`, `inverse_laplace(1/(s+2),s,t)`, `fourier(exp(-x^2),x,k)` and inverse Fourier notation as MathML/LaTeX/Word-ready equations. In Symbolic Solver, choose the corresponding operation and provide the input and output variables; the SymPy worker executes the transformation. Fourier uses SymPy's `exp(-2*pi*i*k*x)` convention.
+
+Solve ODE uses `sympy.dsolve` for recognized ODEs such as `diff(y(t),t)+y(t)=0`; Solve PDE uses `sympy.pdsolve` for recognized classes such as `pdiff(u(x,t),t)+pdiff(u(x,t),x)=0`. Arbitrary initial/boundary conditions, unsupported equations, and numerical PDE solvers are **not** supported. The solver will report an error rather than invent a result. See [Advanced mathematics](ADVANCED_MATHEMATICS.md).

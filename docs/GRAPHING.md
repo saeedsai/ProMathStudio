@@ -68,3 +68,7 @@ The graph draws the full **surface** `z=sin(x*y)` and highlights its
 ## Import external data
 
 Import CSV, TSV or JSON tables into 2D and 3D graphs without a server. You can map columns to X/Y/Z, overlay measurement points on equation plots, connect points in file order, or draw complete rectangular 3D grid meshes. Click **Fit axes to data** to adjust bounds. Imported rows are included in the project backup. See [Data import](DATA_IMPORT.md).
+
+## Curve fitting from Data Tables
+
+Select a table and numeric X/Y columns, choose scatter or 2D line, and press **Fit and show on graph**. Models include linear, polynomial (degrees 2–6), exponential, logarithmic, power and Gaussian. The fitted equation overlays the measured points, with R², RMSE and sample count. Exponential/Gaussian require positive Y; logarithmic/power require positive X. Only 2D line/scatter supports fitting. See [Advanced mathematics](ADVANCED_MATHEMATICS.md).

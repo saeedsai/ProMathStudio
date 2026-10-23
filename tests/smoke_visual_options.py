@@ -69,6 +69,19 @@ def main():
   assert any(f['name']=='myfun' for f in page.evaluate('MathStudio.customFunctions.list()')), page.locator('#cf-message').inner_text()
   assert page.evaluate('MathStudio.customFunctions.evaluate("myfun",[3])')==10
   assert page.evaluate('MathStudio.dataTables.formula("myfun(3)","Data1")')==10
+  page.locator('#cf-name').fill('threshold')
+  page.locator('#cf-params').fill('x')
+  page.locator('#cf-body').fill('if(x>1,x^2,0)')
+  page.locator('#cf-save').click()
+  assert any(f['name']=='threshold' for f in page.evaluate('MathStudio.customFunctions.list()')), page.locator('#cf-message').inner_text()
+  assert page.evaluate('MathStudio.customFunctions.evaluate("threshold",[2])')==4
+  assert page.evaluate('MathStudio.customFunctions.evaluate("threshold",[0.5])')==0
+  assert page.evaluate('MathStudio.dataTables.formula("threshold(3)","Data1")')==9
+  page.locator('[data-workspace="calculator"]').click()
+  page.locator('#calc-input').fill('threshold(2)')
+  page.locator('#calc-execute').click()
+  assert page.locator('#calc-result-plain').inner_text()=='= 4'
+
   page.locator('#cf-name').fill('pyfun')
   page.locator('#cf-type').select_option('python')
   page.locator('#cf-body').fill('def pyfun(x): return math.sin(x) + x**2')

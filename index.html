@@ -1096,6 +1096,35 @@ def _ms_process(job_text):
       {name:'Operators & accents',items:[['±','Plus/minus','+-'],['∓','Minus/plus','-+'],['×','Multiplication','*'],['⊗','Tensor product','otimes'],['⊕','Direct sum','oplus'],['∠','Angle','angle(A,B,C)'],['°','Degree','degree'],['∴','Therefore','therefore'],['over','Overbrace','overbrace(a+b)'],['under','Underbrace','underbrace(a+b)']]}
     ]}
   ];
+  const customFunctions=[];
+  try{const saved=JSON.parse(localStorage.getItem('promath-custom-functions-v1')||'[]');if(Array.isArray(saved))for(const item of saved.slice(0,60))if(item&&/^[A-Za-z][A-Za-z0-9_]*$/.test(item.name)&&Array.isArray(item.params)&&typeof item.expression==='string')customFunctions.push(item);}catch{}
+  paletteGroups.push({name:'Custom functions',groups:[{name:'Custom function',items:customFunctions.map(f=>[f.name,f.name+' ('+f.params.join(', ')+')',f.name+'('+f.params.join(',')+')'])]}]});
+  const customGroup=paletteGroups[paletteGroups.length-1].groups[0];
+  const saveCustom=()=>{customGroup.items=customFunctions.map(f=>[f.name,f.name+' ('+f.params.join(', ')+')',f.name+'('+f.params.join(',')+')']);try{localStorage.setItem('promath-custom-functions-v1',JSON.stringify(customFunctions));}catch{}document.getElementById('palette-search').dispatchEvent(new Event('input'));};
+  const customPanel=document.createElement('details');customPanel.className='panel';customPanel.id='custom-function-panel';
+  customPanel.style.padding='14px';customPanel.innerHTML='<summary style="cursor:pointer;font-weight:700">Custom functions · Formula / Python</summary><p class="small-note">Use named functions in Calculator, Graph and numeric Data Tables formulas. Python mode supports a single <code>def name(x): return math.sin(x)</code> expression, not arbitrary Python statements.</p><div class="data-toolbar"><label>Name<input id="cf-name" placeholder="myfunc"></label><label>Arguments<input id="cf-params" value="x" placeholder="x,y"></label><label>Type<select id="cf-type"><option value="formula">Formula</option><option value="python">Python return expression</option></select></label></div><textarea id="cf-body" rows="3" style="width:100%" placeholder="sin(x)+x^2"></textarea><div class="data-toolbar"><button type="button" id="cf-save">Save function</button><button type="button" id="cf-delete">Delete named function</button></div><p id="cf-message" role="status"></p><div id="cf-list"></div>';
+  document.getElementById('connected-hub').after(customPanel);
+  function refreshCustomList(){const el=document.getElementById('cf-list');el.replaceChildren();for(const item of customFunctions){const button=document.createElement('button');button.type='button';button.className='secondary small';button.textContent=item.name+'('+item.params.join(',')+')';button.addEventListener('click',()=>{document.getElementById('cf-name').value=item.name;document.getElementById('cf-params').value=item.params.join(',');document.getElementById('cf-type').value=item.type||'formula';document.getElementById('cf-body').value=item.source||item.expression;});el.append(button);}}
+  function normalizeCustom(type,body,name,params){
+    if(type==='formula')return body.trim();
+    const raw=body.trim(),match=/^def\s+([A-Za-z][\w]*)\s*\(([^)]*)\)\s*:\s*(?:\n\s*)?return\s+([^\n]+)\s*$/m.exec(raw);
+    let expression=raw;
+    if(match){if(match[1]!==name||match[2].replace(/\s+/g,'')!==params.join(','))throw Error('Python def signature must match the function name and arguments.');expression=match[3];}
+    if(/\b(import|exec|eval|lambda|for|while|class|open|__|await|yield)\b|\[|\]|\{|\}/.test(expression))throw Error('Only safe numeric Python return expressions are supported.');
+    return expression.replace(/\bmath\./g,'').replace(/\*\*/g,'^').replace(/\babs\(/g,'abs(');
+  }
+  document.getElementById('cf-save').addEventListener('click',()=>{
+    const status=document.getElementById('cf-message');
+    try{const name=document.getElementById('cf-name').value.trim(),params=document.getElementById('cf-params').value.split(',').map(x=>x.trim()),type=document.getElementById('cf-type').value,source=document.getElementById('cf-body').value;
+      if(!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)||params.length>6||params.some(p=>!/^[A-Za-z][A-Za-z0-9_]*$/.test(p))||new Set(params).size!==params.length)throw Error('Use a valid name and 1–6 distinct argument names.');
+      if(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow'].includes(name.toLowerCase()))throw Error('This name is reserved.');
+      const expression=normalizeCustom(type,source,name,params);parseRaw(expression);
+      const entry={name,params,expression,source,type};const index=customFunctions.findIndex(f=>f.name.toLowerCase()===name.toLowerCase());if(index>=0)customFunctions[index]=entry;else{if(customFunctions.length>=60)throw Error('Maximum 60 custom functions.');customFunctions.push(entry);}
+      saveCustom();refreshCustomList();status.textContent='Saved '+name+'. Available under Symbols → Custom functions.';
+    }catch(e){status.textContent=e.message;}
+  });
+  document.getElementById('cf-delete').addEventListener('click',()=>{const name=document.getElementById('cf-name').value.trim(),i=customFunctions.findIndex(f=>f.name===name);if(i>=0){customFunctions.splice(i,1);saveCustom();refreshCustomList();document.getElementById('cf-message').textContent='Deleted '+name+'.';}});
+  refreshCustomList();
   function initPalette(){
     const nav=document.getElementById('palette-nav'),search=document.getElementById('palette-search');
     const all=paletteGroups.flatMap(g=>g.groups.flatMap(c=>c.items));
@@ -1873,6 +1902,13 @@ def _ms_process(job_text):
       }
       case 'call':{
         const name=ast.name.toLowerCase();
+        const custom=customFunctions.find(f=>f.name.toLowerCase()===name);
+        if(custom){
+          if(ast.args.length!==custom.params.length)throw Error(custom.name+' requires '+custom.params.length+' arguments.');
+          const args=ast.args.map(go),next={...env};
+          custom.params.forEach((key,i)=>{next[key]=args[i];});
+          v=numeric(parseRaw(custom.expression),next,angle,depth+1);break;
+        }
         if(name==='if'||name==='piecewise'){
           if(ast.args.length!==3)throw Error('Use if(condition, expression_if_true, expression_if_false).');
           v=go(nearTrue(go(ast.args[0]))?ast.args[1]:ast.args[2]);break;
@@ -1947,6 +1983,7 @@ def _ms_process(job_text):
     }
     return assertFinite(v);
   }
+  window.MathStudio.customFunctions={list:()=>customFunctions.map(x=>({...x})),evaluate:(name,args)=>{const expression=name+'('+args.map(v=>String(v)).join(',')+')';return numeric(parseRaw(expression)).re;},restore:items=>{if(!Array.isArray(items))return;customFunctions.splice(0,customFunctions.length,...items.filter(f=>f&&typeof f.name==='string'&&Array.isArray(f.params)&&typeof f.expression==='string').slice(0,60));saveCustom();refreshCustomList();}};
   function formatScalar(n, digits=12){
     if(!Number.isFinite(n))return String(n);
     if(Math.abs(n)<1e-13)return '0';
@@ -3123,6 +3160,12 @@ def _ms_process(job_text):
     return compute(expr,t,stack);
   }
   function compute(expr,t,stack){
+    expr=String(expr).replace(/\b([A-Za-z][A-Za-z0-9_]*)\(([^()]*)\)/g,(all,name,body)=>{
+      const fn=window.MathStudio.customFunctions?.list().find(f=>f.name.toLowerCase()===name.toLowerCase());
+      if(!fn)return all;
+      const values=splitArgs(body).map(part=>compute(part,t,stack));
+      return '('+window.MathStudio.customFunctions.evaluate(name,values)+')';
+    });
     expr=String(expr).replace(/\bIF\(([^()]*)\)/gi,(all,body)=>'('+number(formula('IF('+body+')',t,stack))+')');
     // Aggregations accept ranges or comma-separated arguments. Nested expressions are supported by the recursive evaluator.
     expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\s*\(([^()]*)\)/gi,(all,fn,body)=>{

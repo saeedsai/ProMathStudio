@@ -11,10 +11,11 @@ def main():
   page.set_content((ROOT/'index.html').read_text(encoding='utf-8'),wait_until='load')
   page.locator('[data-workspace="data"]').click()
   assert page.locator('#data-panel').is_visible()
-  page.evaluate("""() => {MathStudio.dataTables.active.rows[0]=['3','2','=A2*B2'];}""")
+  page.evaluate("""() => {MathStudio.dataTables.active.rows[0]=['3','2','=A1*B1'];}""")
+  assert page.locator('#dt-sheet tbody tr:first-child th.dt-rownum').inner_text()=='1'
   assert page.evaluate('MathStudio.dataTables.calculate()[0][2]')==6
-  assert page.evaluate('MathStudio.dataTables.formula("SUM(A2:A4)+IF(A2>2,5,0)","Data1")')==11
-  page.evaluate("""() => {MathStudio.dataTables.active.rows[0][2]='=C2';}""")
+  assert page.evaluate('MathStudio.dataTables.formula("SUM(A1:A3)+IF(A1>2,5,0)","Data1")')==11
+  page.evaluate("""() => {MathStudio.dataTables.active.rows[0][2]='=C1';}""")
   assert page.evaluate('MathStudio.dataTables.calculate()[0][2]')=='#CYCLE'
   page.locator('#dt-import').set_input_files({'name':'orders.csv','mimeType':'text/csv','buffer':b'id,sku,amount\n1,A,10\n2,B,25\n3,C,15\n'})
   page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="orders")')

@@ -2798,7 +2798,7 @@ def _ms_process(job_text):
   const style=$('graph-data-style'),preview=$('graph-data-preview');
   const MAX_BYTES=1_000_000,MAX_ROWS=6000,MAX_COLS=32,MAX_CELL=8000;
   let dataset=null;
-  let series=[];
+  let series=[],extraSeries=[];
   const palette=['#e05663','#15a5ad','#735bd7','#d17b2d','#17a15a'];
   const message=(text,error=false)=>{status.textContent=text;status.classList.toggle('error',error);};
   const trim=s=>String(s??'').trim();
@@ -2925,7 +2925,7 @@ def _ms_process(job_text):
       points.push({x,y,z});
     }
     if(!points.length)throw Error('No valid numeric coordinate rows for the chosen axes.');
-    series=[{kind:'data',name:dataset.name+' ('+[dataset.headers[xi],dataset.headers[yi],...(getMode()==='3d'?[dataset.headers[zi]]:[])].join(', ')+')',color:palette[0],points,skipped}];
+    series=[{kind:'data',name:dataset.name+' ('+[dataset.headers[xi],dataset.headers[yi],...(getMode()==='3d'?[dataset.headers[zi]]:[])].join(', ')+')',color:palette[0],points,skipped,style:style.value}].concat(extraSeries);
     message(`${points.length} numeric row(s) ready, ${skipped} skipped. ${getMode()==='2d'?'2D':'3D'} ${style.value==='points'?'scatter':style.value==='grid'?'grid/point':'connected'} plot; click Fit to data to adjust bounds.`);
   }
   function loadTable(table,name,mapping=null){
@@ -2944,10 +2944,24 @@ def _ms_process(job_text):
     updatePreview();
     try{makeSeries();}catch(e){dataset=old;throw e;}
   }
+  function addTable(table,name,mapping={}){
+    const next=validateTable(table,name),xi=Number(mapping.x),yi=Number(mapping.y),zi=Number(mapping.z),mode=mapping.mode||getMode();
+    if(!Number.isInteger(xi)||!Number.isInteger(yi)||xi<0||yi<0||xi>=next.headers.length||yi>=next.headers.length||xi===yi)throw Error('Choose valid distinct X/Y columns.');
+    if(mode==='3d'&&(!Number.isInteger(zi)||zi<0||zi>=next.headers.length||zi===xi||zi===yi))throw Error('Choose distinct X/Y/Z columns.');
+    if(extraSeries.length>=20)throw Error('Maximum 20 additional data series.');
+    const points=next.rows.map(row=>({x:cleanNumber(row[xi]),y:cleanNumber(row[yi]),z:mode==='3d'?cleanNumber(row[zi]):0})).filter(p=>p.x!==null&&p.y!==null&&p.z!==null);
+    if(!points.length)throw Error('No numeric rows in selected columns.');
+    const entry={kind:'data',name:next.name+' ('+[next.headers[xi],next.headers[yi],...(mode==='3d'?[next.headers[zi]]:[])].join(', ')+')',color:palette[(extraSeries.length+1)%palette.length],points,skipped:next.rows.length-points.length,style:mapping.style||'points',origin:{table:{headers:next.headers,rows:next.rows},name:next.name,mapping:{...mapping,mode}}};
+    extraSeries.push(entry);
+    if(!dataset)loadTable(table,name,mapping);
+    else series=[series[0],...extraSeries];
+    $('graph-plot').click();return entry;
+  }
+  function clearExtra(){extraSeries=[];if(dataset)makeSeries();$('graph-plot').click();}
   function currentRange(){return window.MathStudio.advanced.getGraphState().bounds;}
   function fit(){
     if(!hasData())throw Error('Import data with numeric columns first.');
-    const pts=series[0].points,mode=getMode();
+    const pts=series.flatMap(entry=>entry.points),mode=getMode();
     const bounds={...currentRange()};
     for(const axis of mode==='3d'?['x','y','z']:['x','y']){
       let min=Math.min(...pts.map(p=>p[axis])),max=Math.max(...pts.map(p=>p[axis]));
@@ -2957,7 +2971,7 @@ def _ms_process(job_text):
     for(const [key,val] of Object.entries(bounds))$("graph-"+key).value=String(+val.toPrecision(9));
     $('graph-plot').click();
   }
-  function seriesPaint(entry){return window.MathStudio.graphAppearance?.color(0)||entry.color;}
+  function seriesPaint(entry){return entry.color;}
   function drawDataMarker(ctx,x,y){
     const shape=document.getElementById('plot-points')?.value||'circle',r=4.2;
     ctx.beginPath();
@@ -2970,7 +2984,7 @@ def _ms_process(job_text):
     const {range,w,h}=props,{xmin,xmax,ymin,ymax}=range;
     const sx=x=>(x-xmin)/(xmax-xmin)*w,sy=y=>h-(y-ymin)/(ymax-ymin)*h;
     const pts=entry.points.filter(p=>p.x>=xmin&&p.x<=xmax&&p.y>=ymin&&p.y<=ymax);
-    if(style.value!=='points'){
+    if((entry.style||style.value)!=='points'){
       ctx.save();ctx.strokeStyle=seriesPaint(entry);ctx.lineWidth=window.MathStudio.graphAppearance?.width()||2.5;ctx.setLineDash(window.MathStudio.graphAppearance?.dash()||[]);ctx.beginPath();let prev=null;
       for(const p of pts){if(!prev)ctx.moveTo(sx(p.x),sy(p.y));else ctx.lineTo(sx(p.x),sy(p.y));prev=p;}ctx.stroke();ctx.restore();
     }
@@ -2983,7 +2997,7 @@ def _ms_process(job_text):
     const pts=entry.points.filter(p=>p.x>=range.xmin&&p.x<=range.xmax&&p.y>=range.ymin&&p.y<=range.ymax&&p.z>=range.zmin&&p.z<=range.zmax);
     // Grid coordinates may be unordered. Reconstruct an irregular rectangular mesh only
     // when every x/y grid location has a numeric z (one point per pair).
-    if(style.value==='grid'){
+    if((entry.style||style.value)==='grid'){
       const xs=[...new Set(pts.map(p=>p.x))].sort((a,b)=>a-b),ys=[...new Set(pts.map(p=>p.y))].sort((a,b)=>a-b);
       if(xs.length>1&&ys.length>1&&xs.length*ys.length<=10000&&xs.length*ys.length===pts.length){
         const map=new Map(pts.map(p=>[p.x+'|'+p.y,p]));
@@ -2995,12 +3009,12 @@ def _ms_process(job_text):
             const corners=q.map(p=>persp(p.x,p.y,p.z));quads.push({corners,depth:corners.reduce((n,p)=>n+p.depth,0)/4});
           }
           quads.sort((a,b)=>b.depth-a.depth);
-          ctx.save();ctx.fillStyle='rgba(224,86,99,.20)';ctx.strokeStyle='rgba(174,43,75,.48)';ctx.lineWidth=1.3;
+          ctx.save();ctx.fillStyle=entry.color+'33';ctx.strokeStyle=entry.color;ctx.lineWidth=1.3;
           for(const q of quads){ctx.beginPath();q.corners.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.stroke();}ctx.restore();
         }
       }
     }
-    if(style.value==='line'){
+    if((entry.style||style.value)==='line'){
       ctx.save();ctx.strokeStyle=seriesPaint(entry);ctx.lineWidth=window.MathStudio.graphAppearance?.width()||2.4;ctx.setLineDash(window.MathStudio.graphAppearance?.dash()||[]);ctx.beginPath();let started=false;
       for(const p of pts){const projected=persp(p.x,p.y,p.z);if(!started)ctx.moveTo(projected.x,projected.y);else ctx.lineTo(projected.x,projected.y);started=true;}ctx.stroke();ctx.restore();
     }
@@ -3011,11 +3025,11 @@ def _ms_process(job_text):
     if(!hasData())return;
     for(const entry of series)if(props.mode==='2d')draw2D(ctx,props,entry);else draw3D(ctx,props,entry);
   }
-  function legend(){return hasData()?series.map(({name,color})=>({name,color:window.MathStudio.graphAppearance?.color(0)||color})):[];}
+  function legend(){return hasData()?series.map(({name,color})=>({name,color})):[];}
   function info(){return hasData()?`${series[0].points.length} imported data points from ${dataset.name}`:'';}
   function exportState(){
     if(!dataset)return null;
-    return {name:dataset.name,headers:dataset.headers,rows:dataset.rows,x:selectors.x.value,y:selectors.y.value,z:selectors.z.value,style:style.value};
+    return {name:dataset.name,headers:dataset.headers,rows:dataset.rows,x:selectors.x.value,y:selectors.y.value,z:selectors.z.value,style:style.value,extra:extraSeries.map(e=>e.origin)};
   }
   function restoreState(state){
     if(state===null||state===undefined){clear(false);return;}
@@ -3025,10 +3039,11 @@ def _ms_process(job_text):
       const selected=Number(state[key]);if(Number.isInteger(selected)&&selected>=0&&selected<dataset.headers.length)selectors[key].value=String(selected);
     }
     if(['points','line','grid'].includes(state.style))style.value=state.style;
+    extraSeries=[];for(const item of (Array.isArray(state.extra)?state.extra:[]).slice(0,20)){if(!item?.table||!item?.mapping)continue;try{addTable(item.table,item.name,item.mapping);}catch{}}
     makeSeries();
   }
   function clear(redraw=true){
-    dataset=null;series=[];$('graph-data-active').hidden=true;source.textContent='No file loaded.';
+    dataset=null;series=[];extraSeries=[];$('graph-data-active').hidden=true;source.textContent='No file loaded.';
     preview.replaceChildren();fileInput.value='';message('No dataset loaded. Import CSV or JSON to add data to the graph.');
     if(redraw)$('graph-plot').click();
   }
@@ -3054,7 +3069,7 @@ def _ms_process(job_text):
     if(dataset){try{makeSeries();$('graph-plot').click();}catch(e){series=[];message(e.message,true);}}
   }));
   $('graph-data-z-label').hidden=getMode()!=='3d';
-  window.MathStudio.graphData={hasData,draw,legend,info,exportState,restoreState,refresh:()=>{if(dataset){makeSeries();}},parseCSV:csvRows,parseJSON:jsonRows,importFile,loadTable,clear,getState:()=>dataset?{...exportState(),points:series[0]?.points.slice()}:null};
+  window.MathStudio.graphData={hasData,draw,legend,info,exportState,restoreState,refresh:()=>{if(dataset){makeSeries();}},parseCSV:csvRows,parseJSON:jsonRows,importFile,loadTable,addTable,clearExtra,clear,getState:()=>dataset?{...exportState(),points:series[0]?.points.slice()}:null};
 })();
 </script>
 <script id="mathstudio-data-tables">
@@ -3123,7 +3138,7 @@ def _ms_process(job_text):
     <label>Graph type<select id="dt-chart-type"><option value="scatter">2D scatter</option><option value="line">2D line</option><option value="scatter3d">3D scatter</option><option value="grid3d">3D grid mesh</option><option value="bar">Bar chart</option><option value="pie">Pie chart</option></select></label>
     <label>Category / X<select id="dt-graph-x"></select></label><label>Values / Y<select id="dt-graph-y"></select></label>
     <label id="dt-graph-z-label">Z<select id="dt-graph-z"></select></label>
-    <button id="dt-plot-table" class="primary" type="button">Plot table</button></div>
+    <button id="dt-plot-table" class="primary" type="button">Plot table</button><button id="dt-add-series" class="secondary" type="button">＋ Add series</button><button id="dt-clear-series" class="secondary" type="button">Clear added series</button></div>
     <p class="graph-data-muted" id="dt-chart-status" role="status">Select a data table and chart.</p>`;
   $('graph-examples').after(graphControls);
   const chartDiv=el('div',{id:'dt-graph-chart'}); chartDiv.hidden=true;
@@ -3302,6 +3317,18 @@ def _ms_process(job_text):
     $('graph-plot').click();$('dt-chart-status').textContent='Plotted '+t.name+' as '+kind+'. Equation plots can also be added.';
   }
   $('dt-plot-table').addEventListener('click',()=>safeAction(sendToGraph));
+  $('dt-add-series').addEventListener('click',()=>safeAction(()=>{
+    const table=tables.find(t=>t.id===$('dt-graph-table').value)||active(),kind=$('dt-chart-type').value;
+    if(['bar','pie'].includes(kind))throw Error('Overlay supports 2D/3D scatter, line, and grid.');
+    const mode=['scatter3d','grid3d'].includes(kind)?'3d':'2d';
+    window.MathStudio.advanced.mode('graph');
+    if(window.MathStudio.advanced.currentGraphMode()!==mode){if(mode==='3d')window.MathStudio.advanced.plot3D();else window.MathStudio.advanced.plot2D();}
+    chartDiv.hidden=true;document.querySelector('#graph-panel .graph-canvas-wrap').classList.remove('workspace-hidden');
+    const mapping={x:Number($('dt-graph-x').value),y:Number($('dt-graph-y').value),z:Number($('dt-graph-z').value),mode,style:kind==='line'?'line':kind==='grid3d'?'grid':'points'};
+    window.MathStudio.graphData.addTable({headers:table.columns,rows:evaluated(table)},table.name,mapping);
+    $('dt-chart-status').textContent='Added series from '+table.name+'. Select another Y column or table to overlay.';
+  }));
+  $('dt-clear-series').addEventListener('click',()=>window.MathStudio.graphData.clearExtra());
   $('dt-send-graph').addEventListener('click',()=>safeAction(()=>{$('dt-graph-table').value=active().id;chartColumns();sendToGraph();}));
   // Export PNG via the canvas data URL; handle binary bytes without string-encoding conversion.
   $('dt-chart-download').onclick=()=>{const a=el('a',{href:$('dt-chart-canvas').toDataURL('image/png'),download:'ProMathStudio_chart.png'});document.body.append(a);a.click();a.remove();};

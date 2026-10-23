@@ -2168,7 +2168,7 @@ self.onmessage=async ({data})=>{
   function executeCalc(){
     const src=calcin.value.trim();if(!src)return;
     try{
-      const pyCall=/^([A-Za-z][A-Za-z0-9_]*)\\s*\\((.*)\\)$/.exec(src);
+      const pyCall=/^([A-Za-z][A-Za-z0-9_]*)\s*\((.*)\)$/.exec(src);
       const fn=pyCall&&window.MathStudio.customFunctions?.find(pyCall[1]);
       if(fn?.type==='python'){
         const args=pyCall[2].trim()?pyCall[2].split(',').map(value=>{

@@ -1118,7 +1118,7 @@ def _ms_process(job_text):
     try{const name=document.getElementById('cf-name').value.trim(),params=document.getElementById('cf-params').value.split(',').map(x=>x.trim()),type=document.getElementById('cf-type').value,source=document.getElementById('cf-body').value;
       if(!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)||params.length>6||params.some(p=>!/^[A-Za-z][A-Za-z0-9_]*$/.test(p))||new Set(params).size!==params.length)throw Error('Use a valid name and 1–6 distinct argument names.');
       if(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow'].includes(name.toLowerCase()))throw Error('This name is reserved.');
-      const expression=normalizeCustom(type,source,name,params);parseRaw(expression);
+      const expression=normalizeCustom(type,source,name,params);const parsed=evaluate(expression);if(parsed.incomplete)throw Error('Complete the function expression.');
       const entry={name,params,expression,source,type};const index=customFunctions.findIndex(f=>f.name.toLowerCase()===name.toLowerCase());if(index>=0)customFunctions[index]=entry;else{if(customFunctions.length>=60)throw Error('Maximum 60 custom functions.');customFunctions.push(entry);}
       saveCustom();refreshCustomList();status.textContent='Saved '+name+'. Available under Symbols → Custom functions.';
     }catch(e){status.textContent=e.message;}
@@ -1456,6 +1456,11 @@ def _ms_process(job_text):
   renderNotebook();refresh();
   // Expose a small test-friendly API, independent of the user interface.
   window.MathStudio={parse:evaluate,latex,render:mathElement,python:pythonDocument,word:makeWordBlob,palette:paletteGroups};
+  window.MathStudio.customFunctions={
+    list:()=>customFunctions.map(f=>({...f})),
+    find:name=>customFunctions.find(f=>f.name.toLowerCase()===String(name).toLowerCase()),
+    restore:items=>{if(!Array.isArray(items))return;customFunctions.splice(0,customFunctions.length,...items.filter(f=>f&&/^[A-Za-z][A-Za-z0-9_]*$/.test(f.name)&&Array.isArray(f.params)&&typeof f.expression==='string').slice(0,60));saveCustom();refreshCustomList();}
+  };
   // Math Studio symbolic kernel: exact rational polynomial algebra, no network/eval.
   const casLimit={degree:30,power:14,digits:70};
   function casError(s){throw new Error(s);}
@@ -1909,7 +1914,7 @@ def _ms_process(job_text):
       }
       case 'call':{
         const name=ast.name.toLowerCase();
-        const custom=customFunctions.find(f=>f.name.toLowerCase()===name);
+        const custom=window.MathStudio.customFunctions?.find(name);
         if(custom){
           if(ast.args.length!==custom.params.length)throw Error(custom.name+' requires '+custom.params.length+' arguments.');
           const args=ast.args.map(go),next={...env};
@@ -1990,7 +1995,7 @@ def _ms_process(job_text):
     }
     return assertFinite(v);
   }
-  window.MathStudio.customFunctions={list:()=>customFunctions.map(x=>({...x})),evaluate:(name,args)=>{const expression=name+'('+args.map(v=>String(v)).join(',')+')';return numeric(parseRaw(expression)).re;},restore:items=>{if(!Array.isArray(items))return;customFunctions.splice(0,customFunctions.length,...items.filter(f=>f&&typeof f.name==='string'&&Array.isArray(f.params)&&typeof f.expression==='string').slice(0,60));saveCustom();refreshCustomList();}};
+  window.MathStudio.customFunctions.evaluate=(name,args)=>{const expression=name+'('+args.map(v=>String(v)).join(',')+')';return numeric(parseRaw(expression)).re;};
   function formatScalar(n, digits=12){
     if(!Number.isFinite(n))return String(n);
     if(Math.abs(n)<1e-13)return '0';

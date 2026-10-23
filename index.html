@@ -1146,7 +1146,7 @@ def _ms_process(job_text):
               const input=mode==='calculator'?document.getElementById('calc-input'):mode==='graph'?document.getElementById('graph-input'):null;
               if(input){
                 input.focus();const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
-                input.setRangeText(code,start,end,'end');input.dispatchEvent(new Event('input',{bubbles:true}));
+                input.setRangeText(code,start,end,'end');input.dispatchEvent(new Event('input',{bubbles:true}));document.body.classList.remove('library-open');
               }else insertText(code);
             });grid.appendChild(b);found++;}
           inner.appendChild(grid);top.appendChild(inner);

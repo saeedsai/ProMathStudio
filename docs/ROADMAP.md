@@ -43,3 +43,11 @@ A feature needs a user-facing implementation, documentation update, automated te
 - [ ] Explicit 2D/3D PDE numerical solvers with discretization/boundary conditions and error diagnostics.
 - [ ] Weighted and robust regression, confidence bands, residual charts, and outlier controls.
 - [ ] Richer drag-and-drop contextual tool navigation with accessibility testing.
+
+## Numerical solver extensions (future, not implemented)
+
+- [ ] Nonlinear least-squares fitting of general residual systems with constraints and Jacobians.
+- [ ] Boundary-value ODE shooting/collocation, adaptive mesh/error estimators.
+- [ ] Two-dimensional finite-element/finite-volume PDE operators, geometry and boundary editors.
+- [ ] Python worker package policies and explicit offline cache/download management.
+- [ ] Persisted workbook filter views and accessible keyboard-operated menus.

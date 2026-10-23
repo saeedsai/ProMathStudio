@@ -84,3 +84,14 @@ Use **Data tables** to edit multiple spreadsheet-like tables, enter safe formula
 ## Advanced mathematics and simpler interface
 
 New features: **linear/polynomial (degree 2–6), exponential, logarithmic, power and Gaussian curve fitting**, with R² and RMSE displayed on the 2D graph alongside data. The Equation Editor typesets **Laplace/Fourier and inverse transforms**; SymPy computes these plus analytical ODE/PDE solutions for supported classes. The physics example library includes **72 new examples**. Floating **Symbols**, **Examples**, **Options** and **Help** replace the always-open palette; axis bounds are tucked into an expandable menu. The shared Working Equation remains at the bottom. See [Advanced mathematics and Help](docs/ADVANCED_MATHEMATICS.md).
+
+## Numerical solvers, calculator calculus and Python data analysis
+
+- **Numerical nonlinear equations:** search real roots on a specified interval using bracketed bisection and local Newton searches. For systems of 2–3 equations, use damped Newton with initial guesses and residual diagnostics.
+- **Numerical PDEs with stated assumptions:** finite-difference **1D Poisson** (`-u_xx=f(x)`, fixed Dirichlet endpoints) and **1D heat** (`u_t=αu_xx`, initial profile and fixed endpoints), including CFL stability checks. These are not arbitrary PDE solvers.
+- **Harmonized calculator:** numerical `diff(sin(x),x,0)`, `int(x^2,x,0,3)`, `sum(k^2,k,1,10)` and `prod(k,k,1,5)` use the shared expression parser, with optional scalar variable assignments.
+- **Simpler Data Tables:** the grid remains central; Table, Filter, Combine, Files and Python submenus contain advanced actions. Non-destructive column filters support text/numeric conditions.
+- **Python with pandas:** write code against a `tables` dictionary of DataFrames in a browser worker; set `result` to a DataFrame to import a **new** table. Initial Pyodide/pandas loading requires internet, and user-written Python code may make network requests. Run only code you trust.
+
+[Complete numerical/Python guide](docs/NUMERICAL_AND_PYTHON.md).
+

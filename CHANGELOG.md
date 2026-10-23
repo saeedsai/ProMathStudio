@@ -1,3 +1,11 @@
+## 2026-10-23 — Numerical methods and Python Data Tables
+
+- Added real nonlinear root searches, damped Newton systems, 1D heat/Poisson finite-difference methods, numerical output tables, and graph routing.
+- Calculator and editor now share numeric differentiation, definite integrals, finite sums and finite products; calculator also supports scalar variable assignments.
+- Reorganized Data Tables into Table, Filter, Combine, Files and Python submenus, with non-destructive advanced numeric/text column filters.
+- Added on-demand browser Python/pandas worker, captured output and import of returned DataFrames as new tables, plus runtime safeguards and explicit limits.
+- Added documentation, browser/numerical regression tests and build integration. No claim of general numerical PDE support or verified first-use CDN behavior.
+
 ## 2026-10-23 — Advanced mathematics and contextual interface
 
 - Linear, polynomial, exponential, logarithmic, power and Gaussian regression from Data Tables, including fitted graph overlays, R², RMSE and sample counts.

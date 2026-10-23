@@ -1,0 +1,87 @@
+# Numerical mathematics, calculator calculus, Data Tables filters and Python
+
+This release extends the existing symbolic solver; **numerical algorithms approximate solutions under explicitly supplied conditions**. They do not prove that all solutions have been found and are not universal PDE solvers.
+
+## Nonlinear real roots
+
+Open **Symbolic Solver → Numerical methods / PDE**. Select **Real nonlinear roots** and enter an equation such as `sin(x)-x/2=0`, variable `x`, and an interval such as `-4` to `4`. The solver combines bracketed bisection with local Newton searches to catch some even-multiplicity roots. It returns real solutions found in the interval, not arbitrary complex roots or certified enumeration. The method can miss roots near poles, oscillatory behavior or beyond its sampling resolution.
+
+## Nonlinear systems (2–3 unknowns)
+
+Set **2–3 nonlinear equations**, enter one equation per line or semicolon, variables separated by commas, and initial guesses in the same order. Example:
+
+```text
+Equations: x^2+y^2=5; x-y=1
+Variables: x,y
+Guesses:   1,1
+```
+
+A damped Newton method with a numerical Jacobian seeks a local solution. It reports iterations, the residual norm and convergence status. If the Jacobian is singular, choose a different initial guess. **Convergence does not guarantee that the solution is unique.**
+
+## One-dimensional Poisson equation
+
+Select **1D Poisson**, where the implemented convention is:
+
+\[-u''(x)=f(x),\qquad x\in[a,b],\qquad u(a)=L,\ u(b)=R.\]
+
+Specify the source `f(x)`, domain, fixed endpoint values and number of **spatial intervals**. The implementation uses second-order centered finite differences and a tridiagonal Thomas solver. The generated table contains `x, u` and can be graphed as a 2D line. Example: `pi^2*sin(pi*x)`, domain `0`–`1`, and both endpoint values 0 approximates `sin(pi*x)`.
+
+## One-dimensional heat equation
+
+Select **1D heat** to solve:
+
+\[u_t=\alpha u_{xx}\]
+
+with a given initial profile `u(x,0)`, positive diffusivity `α`, domain, final time, and fixed Dirichlet endpoint values. The solver uses explicit **forward-time, centered-space (FTCS)** differences. It enforces the stability condition:
+
+\[\alpha\,\frac{\Delta t}{(\Delta x)^2}\leq 0.5.\]
+
+Choose more time steps if you see an instability warning. The generated table has `x, t, u` and can be plotted as a 3D grid using the existing Data Tables → Graphs mapping. Example: domain 0–1, `alpha=0.1`, initial expression `sin(pi*x)`, boundary values 0, 40 spatial intervals, 200 time steps, final time 0.1. The reported table may sample output time frames to limit its size.
+
+**PDE limitations:** These numerical methods cover only the **one-dimensional** heat and Poisson models specified above. They do not infer equations, initial conditions, arbitrary geometries, mixed/Neumann boundaries, nonlinear PDEs or spatially varying diffusivity. The **SymPy analytical ODE/PDE** tools remain available separately for supported closed-form classes.
+
+## Shared mathematics in Calculator
+
+Calculator, Graphs and Numerical Solver use the same native mathematical AST parser and numeric evaluator. In **Calculator → Variable assignments & advanced numeric math**, add scalar values such as `x=2` and `y=3` (one per line), then evaluate expressions using the variables. Supported numerical calculus includes:
+
+| Expression | Approximate value | Meaning |
+|---|---:|---|
+| `diff(sin(x),x,0)` | 1 | Central-difference derivative |
+| `int(x^2,x,0,3)` | 9 | Composite Simpson definite integral |
+| `sum(k^2,k,1,10)` | 385 | Discrete finite sum |
+| `prod(k,k,1,5)` | 120 | Finite product |
+
+For symbolic forms such as an **indefinite integral**, use Symbolic Solver. These numerical operations evaluate at specified values/bounds; they do not return a symbolic antiderivative or derivative.
+
+## Data Tables menus and filters
+
+The sheet remains the main workspace; functions are grouped in the **Table**, **Filter**, **Combine**, **Files** and **Python** submenus. Use the Filter submenu to select a column and condition: contains, starts with, equals/does not equal, numeric greater/less than (including inclusive variants), or empty. Click **Apply filter** to hide nonmatching rows. The filtered view does not alter the underlying workbook data or row numbers; use **Remove column filter** to restore all visible rows. Existing quick text search remains available inside the Filter submenu.
+
+## Python data analysis with pandas
+
+Select **Data Tables → Python** to open the code editor. On first use, Pyodide/pandas downloads from a CDN; Python is then executed **in a dedicated Web Worker** only when **Run Python** is pressed. This is **user-authored code**, not an unrestricted remote API. Workers do not get the parent page DOM, but Python scripts may still initiate network requests. **Run only scripts you trust.** Execution has a time limit and results are capped to the workbook's table limits.
+
+The Python environment exposes:
+
+- `tables`: a dictionary from table names to pandas `DataFrame` objects, with fully evaluated workbook cell values. Numeric columns are converted when all entries are numeric.
+- `pd`: the pandas package.
+- `result`: set this variable to a pandas `DataFrame`, or a dictionary mapping new table names to DataFrames, to import the returned data as **new tables**.
+- `print(...)`: captured as text in the output area.
+
+Example:
+
+```python
+import pandas as pd
+name, df = next(iter(tables.items()))
+print(name, len(df))
+# Work on a copy; the source workbook remains unchanged.
+result = df.select_dtypes(include='number').describe().reset_index()
+```
+
+A second example is available from **Example: groupby**. Python execution does **not** overwrite existing tables automatically; results are imported as new tables. Export a **Save project** JSON backup to retain them. Graph the new table using the existing 2D/3D/bar/pie chart controls.
+
+## Security and verification
+
+The native JS evaluator and numerical solvers do not use arbitrary JavaScript `eval()` or dynamic Function execution. The explicitly requested Python editor runs code in a worker on the user's own computer; code from unknown sources can be dangerous even in a worker. Imported CSV/JSON is interpreted as data, not Python code. The on-device browser workspaces do not have a server database.
+
+Browser regressions cover nonlinear roots, local equation systems, heat/Poisson reference cases, CFL rejection, numerical calculus, menu/filter behavior, and Python worker script construction. **Live CDN loading and full pandas execution require online browser validation.**

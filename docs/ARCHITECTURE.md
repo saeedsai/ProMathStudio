@@ -58,3 +58,9 @@ These are **internal** interfaces and can change. Verify call signatures in sour
 - Third-party code fetch is a supply-chain dependency when SymPy is loaded; use pinned versions, dependency review and CSP if deploying as a larger product.
 
 [Development notes](DEVELOPMENT.md) · [Project format](PROJECT_FORMAT.md)
+
+## Numerical mathematics and Python data-analysis module
+
+`src/numerical-data.js` is embedded in `index.html` in the `promath-numerical-data` script after other math workspaces. It accesses the shared AST calculator via `MathStudio.advanced.numeric` and exposes pure numerical algorithms in `MathStudio.numerical` (nonlinear scalar roots, small systems, 1D heat and Poisson). The Data Tables menus move existing DOM elements without changing their IDs or event listeners. Filters hide displayed rows without editing the data source.
+
+User-requested Python executes in a **separate Web Worker** with Pyodide and pandas, which needs a CDN on first use. Workbook data are copied to the worker; `result` DataFrames return as new tables. The worker has no DOM access, but arbitrary user Python is still potentially dangerous and may initiate network requests. No user-provided code runs automatically.

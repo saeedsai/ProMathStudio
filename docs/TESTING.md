@@ -49,3 +49,7 @@ After Playwright is installed, run `python tests/smoke_graph_import.py`. The tes
 ## Advanced math CI coverage
 
 Run `python tests/smoke_advanced_math.py` after installing development dependencies and Playwright Chromium. It checks all 72 new physics examples, the six fit families, fitted graph overlays, saved model settings, floating Help/mobile menus, and uses the embedded SymPy Python evaluator for Laplace, Fourier, ODE and PDE unit checks. It does not test live Pyodide package downloads, which still need a manual online browser check.
+
+## Numerical methods / table workflow regression
+
+Run `python tests/smoke_numerical_data.py` after installing Playwright Chromium. It checks nonlinear and repeated scalar roots, a 2×2 Newton system, heat/Poisson reference accuracy and CFL stability rejection, shared calculator calculus, table imports, menu visibility, column-filter behavior, and the on-demand Python worker's JavaScript/Python syntax. Live Pyodide/pandas downloads are **not** exercised by the offline CI; check the Python Run button in a network-enabled browser before production use.

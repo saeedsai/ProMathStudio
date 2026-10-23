@@ -51,3 +51,11 @@ Tab navigates controls; Enter in the editor adds/saves an equation, Shift+Enter 
 ## Advanced mathematics and floating menus
 
 Floating top buttons show **Symbols**, **Examples**, **Options** and **Help**. The searchable Math Library and example categories open in sliding menus. Options toggles history, Python code and detailed explanations. Help provides nested guides, including curve fitting and ODE/PDE limitations. The Connected Workspaces panel remains at the bottom. Graph axes have an optional collapsible advanced menu. See [Advanced mathematics](ADVANCED_MATHEMATICS.md).
+
+## Numerical methods and spreadsheet Python
+
+In **Symbolic Solver**, press **Numerical methods / PDE** to open a collapsed solver with four methods. Enter a real equation and bracket; a small system and guesses; or a 1D Poisson/heat source/initial expression with domain and boundary conditions. The heat solver rejects unstable time steps. Use **Save output to Data Tables** or **Show numerical results in Graphs** for plots.
+
+In **Calculator → Variable assignments & advanced numeric math**, assign scalars and use `diff`, `int`, `sum`, and `prod` with evaluation points and bounds.
+
+In **Data Tables**, keep the sheet visible and open Table, Filter, Combine, Files or Python as needed. Filter conditions apply to displayed rows only. The Python editor runs your own code with pandas in a browser worker; new `result` DataFrames become new tables. For syntax, method assumptions, limitations and examples, see [Numerical methods and Python](NUMERICAL_AND_PYTHON.md).

@@ -20,7 +20,7 @@ def main():
   page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="orders")')
   page.locator('#dt-import').set_input_files({'name':'products.json','mimeType':'application/json','buffer':json.dumps([{'id':1,'name':'alpha','price':2},{'id':2,'name':'beta','price':5}]).encode()})
   page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="products")')
-  page.locator('#dt-left').select_option(label='orders')
+  # Database actions have moved into the Combine submenu; verify the menu UX.\n  page.locator('#data-menu-navigation > details').nth(2).evaluate('(e)=>e.open=true')\n  page.locator('#dt-left').select_option(label='orders')
   page.locator('#dt-right').select_option(label='products')
   page.locator('#dt-op').select_option('left');page.locator('#dt-run').click()
   assert len(page.evaluate('MathStudio.dataTables.tables.at(-1).rows'))==3

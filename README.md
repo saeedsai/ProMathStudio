@@ -79,7 +79,7 @@ Under **2D & 3D Graphs → Import CSV / JSON data to graph**, upload local data,
 
 ## Data Tables workspace
 
-Use **Data tables** to edit multiple spreadsheet-like tables, enter safe formulas (for example `=A2*B2`, `=SUM(A2:A10)`, `=IF(A2>0,B2,0)`), filter and sort, join two tables (INNER/LEFT/RIGHT/FULL) or combine tables with UNION ALL/DISTINCT, INTERSECT and EXCEPT. Import or export **CSV, TSV and JSON** here, then send a table to **Graphs** for 2D and 3D scatter/grid/line plots, **bar charts** or **pie charts**. Your tables and raw formulas are saved inside the shared project JSON. [Read the Data Tables guide](docs/DATA_TABLES.md).
+Use **Data tables** to edit multiple spreadsheet-like tables, enter safe formulas (for example `=A1*B1`, `=SUM(A1:A9)`, `=IF(A1>0,B1,0)`), filter and sort, join two tables (INNER/LEFT/RIGHT/FULL) or combine tables with UNION ALL/DISTINCT, INTERSECT and EXCEPT. Import or export **CSV, TSV and JSON** here, then send a table to **Graphs** for 2D and 3D scatter/grid/line plots, **bar charts** or **pie charts**. Your tables and raw formulas are saved inside the shared project JSON. [Read the Data Tables guide](docs/DATA_TABLES.md).
 
 ## Advanced mathematics and simpler interface
 
@@ -101,3 +101,11 @@ New features: **linear/polynomial (degree 2–6), exponential, logarithmic, powe
 Context menus are available for cells, rows, column headings and tabs in Data Tables, plus Calculator, Editor, Solver and Graphs. Use **right-click**, **Shift+F10**, or long-press. New Calculator input modes DEC/BIN/HEX accept `0b1010`, `0xFF`, base arithmetic and safe-integer bitwise functions; click an output chip to copy a representation. Math Library insertion now targets Calculator when it is active. [Complete guide](docs/CONTEXT_MENUS.md).
 
 **Hosting:** GitHub Pages publishes automatically from `main` through its branch-based Pages build. The optional explicit Pages workflow is manual-only to avoid duplicate deployments; automatic CI quality checks still run on each push. See [Deployment](docs/DEPLOYMENT.md).
+
+## Custom functions and multi-series plots
+
+Open **Custom functions · Formula / Python**, enter a function name, argument list, and mathematical definition, then select **Save function**. Saved definitions appear under **Symbols → Custom functions** and can be used in the calculator, graph expressions, and numeric Data Tables formulas. For example, define `squareplus(x) = x^2+1`, then use `squareplus(3)` or `=squareplus(A1)`.
+
+The Python option accepts a **restricted single-return mathematical expression**, such as `def squareplus(x): return x**2 + 1` or `def wave(x): return math.sin(x)`. These are parsed as mathematical expressions for safe, synchronous cross-workspace evaluation; arbitrary Python statements, imports, modules, side effects, loops, and full Pyodide function execution are **not supported** by custom functions yet.
+
+To compare multiple data series on one plot, go to **2D / 3D Graphs → Table / Graph type / X, Y, Z**, choose a column mapping, and click **Add series**. Repeat with another Y column or a different table. Supported overlays include 2D scatter and lines and 3D scatter/grid data. Use **Clear added series** to remove additional datasets; plotted series and custom functions are included in project backups. **Plot table** retains its original replace-plot behavior.

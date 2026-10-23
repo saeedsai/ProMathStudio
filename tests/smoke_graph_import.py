@@ -20,8 +20,8 @@ def main():
             'buffer':b'time,value,note\n0,3,"a,b"\n1,4,ok\n2,5,last\n'})
         page.wait_for_function('()=>MathStudio.graphData.hasData()')
         assert page.evaluate('MathStudio.graphData.getState().points.length')==3
-        assert page.locator('#graph-data-preview td').nth(2).inner_text()=='a,b'
-        page.locator('#graph-data-fit').click()
+        assert page.locator('#graph-data-preview td').nth(2).text_content()=='a,b'
+        page.evaluate('document.getElementById("graph-data-fit").click()')
         assert float(page.locator('#graph-xmax').input_value())>2
         page.locator('#graph-input').fill('')
         page.locator('#graph-plot').click()
@@ -33,15 +33,15 @@ def main():
             'name':'grid.json','mimeType':'application/json',
             'buffer':json.dumps(data).encode()})
         page.wait_for_function('()=>MathStudio.graphData.getState()?.name==="grid.json"')
-        page.locator('#graph-data-style').select_option('grid')
-        page.locator('#graph-data-fit').click()
+        page.evaluate("""() => {const el=document.getElementById('graph-data-style');el.value='grid';el.dispatchEvent(new Event('change',{bubbles:true}));}""")
+        page.evaluate('document.getElementById("graph-data-fit").click()')
         assert page.evaluate('MathStudio.graphData.getState().points.length')==9
         assert not page.locator('#graph-status').evaluate('(e)=>e.classList.contains("error")')
         with page.expect_download() as download:
             page.locator('#hub-export-project').click()
         project=json.loads(Path(download.value.path()).read_text(encoding='utf-8'))
         assert project['graph']['dataset']['name']=='grid.json'
-        page.locator('#graph-data-clear').click()
+        page.evaluate('document.getElementById("graph-data-clear").click()')
         assert not page.evaluate('MathStudio.graphData.hasData()')
         page.evaluate('window.confirm=()=>true')
         page.locator('#hub-project-file').set_input_files({

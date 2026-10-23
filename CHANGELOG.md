@@ -1,3 +1,12 @@
+## 2026-10-23 — Data Tables and data-driven charts
+
+- Fifth workspace with multiple editable spreadsheet-style tables, column editing, formulas, row filter/sort, and browser-backed project persistence.
+- Relational INNER/LEFT/RIGHT/FULL JOIN, UNION ALL/DISTINCT, INTERSECT, EXCEPT, all producing new tables.
+- CSV/TSV/JSON import and CSV/JSON export moved into Data Tables; old chart importer remains as an advanced mapping control there.
+- Cross-workspace plots of X/Y/Z data plus grouped bar and pie charts.
+- About and README contain author/contact; MIT license added.
+- Browser tests, standalone HTML source and developer build script.
+
 # Changelog
 
 Changes are documented in functional groups; historical version numbers are not reconstructed where no tagged release is available.

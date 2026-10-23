@@ -65,9 +65,9 @@ The repository also includes a GitHub Actions workflow for automated regression 
 
 Local notebook, calculator history and the working expression are saved in browser localStorage (subject to storage availability); a project backup can be exported as JSON. Full SymPy is fetched from a Pyodide CDN, then executes in the browser. Do not assume browser storage is permanent—export backups. See [Project format](docs/PROJECT_FORMAT.md).
 
-## Licensing
+## Author and license
 
-No open-source license has been selected for this repository. A public GitHub repository is **not automatically open source**; contributors should not assume reuse rights until the owner adds a license.
+Created by **Saeed Mohammad Salehi**. Contact: **Saeedmsalehi1990@gmail.com**. Licensed under the [MIT License](LICENSE).
 
 **3D paired-equation example:** enter `Y=x×x` and `z=sin(x×y)` on separate lines to show the surface and its highlighted curve `(x,x²,sin(x³))`. See [Graphing](docs/GRAPHING.md).
 
@@ -76,3 +76,7 @@ No open-source license has been selected for this repository. A public GitHub re
 ### Plot imported CSV / JSON datasets
 
 Under **2D & 3D Graphs → Import CSV / JSON data to graph**, upload local data, select X/Y/Z columns, plot points/lines or a rectangular 3D grid, and **Fit axes to data**. Imported datasets overlay equations and are included in the project JSON backup. See [Data import](docs/DATA_IMPORT.md) and the [sample files](examples/).
+
+## Data Tables workspace
+
+Use **Data tables** to edit multiple spreadsheet-like tables, enter safe formulas (for example `=A2*B2`, `=SUM(A2:A10)`, `=IF(A2>0,B2,0)`), filter and sort, join two tables (INNER/LEFT/RIGHT/FULL) or combine tables with UNION ALL/DISTINCT, INTERSECT and EXCEPT. Import or export **CSV, TSV and JSON** here, then send a table to **Graphs** for 2D and 3D scatter/grid/line plots, **bar charts** or **pie charts**. Your tables and raw formulas are saved inside the shared project JSON. [Read the Data Tables guide](docs/DATA_TABLES.md).

@@ -1,0 +1,52 @@
+"""Browser regression for Data Tables and integration with 2D/3D graphs."""
+from pathlib import Path
+import json, os
+from playwright.sync_api import sync_playwright
+ROOT=Path(__file__).resolve().parents[1]
+def main():
+ with sync_playwright() as p:
+  browser=p.chromium.launch(headless=True,executable_path=os.getenv('CHROMIUM_PATH') or None,args=['--no-sandbox'])
+  page=browser.new_page(accept_downloads=True,viewport={'width':1350,'height':920})
+  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+  page.set_content((ROOT/'index.html').read_text(encoding='utf-8'),wait_until='load')
+  page.locator('[data-workspace="data"]').click()
+  assert page.locator('#data-panel').is_visible()
+  page.evaluate("""() => {MathStudio.dataTables.active.rows[0]=['3','2','=A2*B2'];}""")
+  assert page.evaluate('MathStudio.dataTables.calculate()[0][2]')==6
+  assert page.evaluate('MathStudio.dataTables.formula("SUM(A2:A4)+IF(A2>2,5,0)","Data1")')==11
+  page.evaluate("""() => {MathStudio.dataTables.active.rows[0][2]='=C2';}""")
+  assert page.evaluate('MathStudio.dataTables.calculate()[0][2]')=='#CYCLE'
+  page.locator('#dt-import').set_input_files({'name':'orders.csv','mimeType':'text/csv','buffer':b'id,sku,amount\n1,A,10\n2,B,25\n3,C,15\n'})
+  page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="orders")')
+  page.locator('#dt-import').set_input_files({'name':'products.json','mimeType':'application/json','buffer':json.dumps([{'id':1,'name':'alpha','price':2},{'id':2,'name':'beta','price':5}]).encode()})
+  page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="products")')
+  page.locator('#dt-left').select_option(label='orders')
+  page.locator('#dt-right').select_option(label='products')
+  page.locator('#dt-op').select_option('left');page.locator('#dt-run').click()
+  assert len(page.evaluate('MathStudio.dataTables.tables.at(-1).rows'))==3
+  page.locator('#dt-op').select_option('unionall');page.locator('#dt-run').click()
+  assert page.evaluate('MathStudio.dataTables.tables.at(-1).rows.length')==5
+  page.locator('[data-workspace="graph"]').click()
+  page.locator('#dt-graph-table').select_option(label='orders')
+  page.locator('#dt-chart-type').select_option('bar')
+  page.locator('#dt-graph-x').select_option('1')
+  page.locator('#dt-graph-y').select_option('2')
+  page.locator('#dt-plot-table').click();assert page.locator('#dt-graph-chart').is_visible()
+  page.locator('#dt-chart-type').select_option('pie')
+  page.locator('#dt-plot-table').click();assert page.locator('#dt-graph-chart').is_visible()
+  page.locator('#dt-chart-type').select_option('scatter')
+  page.locator('#dt-graph-x').select_option('0')
+  page.locator('#dt-graph-y').select_option('2')
+  page.locator('#dt-plot-table').click()
+  assert page.evaluate('MathStudio.graphData.getState().points.length')==3
+  with page.expect_download() as d:page.locator('#hub-export-project').click()
+  project=json.loads(Path(d.value.path()).read_text())
+  assert len(project['tables']['tables'])>=5
+  page.evaluate('window.confirm=()=>true')
+  page.locator('#hub-project-file').set_input_files({'name':'backup.json','mimeType':'application/json','buffer':json.dumps(project).encode()})
+  page.wait_for_function('()=>MathStudio.dataTables.tables.length>=5')
+  assert 'Saeedmsalehi1990@gmail.com' in page.locator('#about-panel').text_content()
+  assert not errors,errors
+  browser.close()
+ print('PASS Data Tables formulas, join, union, CSV/JSON, bar, pie, graph, backup')
+if __name__=='__main__':main()

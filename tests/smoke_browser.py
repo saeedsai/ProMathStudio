@@ -49,6 +49,33 @@ def main():
         page.locator('#graph-plot').click()
         assert page.locator('#graph-canvas').is_visible()
 
+        # Paired 3D graph y=f(x) on z=g(x,y), Unicode multiplication and uppercase Y.
+        page.locator('#graph-input').fill('Y=x×x\nz=sin(x×y)')
+        page.locator('#graph-plot').click()
+        assert not page.locator('#graph-status').evaluate('(e) => e.classList.contains("error")')
+        assert '1 surface(s) and 1 constrained 3D curve(s)' in page.locator('#graph-status').inner_text()
+        assert page.evaluate('window.MathStudio.advanced.graphCompile().map(f => f.kind)') == ['surface', 'trace']
+        assert page.locator('#graph-legend .graph-legend-line').count() == 2
+        # Verify the highlighted trace is drawn on the canvas, not only in legend.
+        pixels = page.evaluate("""() => {
+            const c=document.querySelector('#graph-canvas'), data=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+            let total=0;
+            for(let i=0;i<data.length;i+=4) if(data[i]>170 && data[i+1]<150 && data[i+2]<170)total++;
+            return total;
+        }""")
+        assert pixels > 100, pixels
+        # Existing multiple 3D surfaces still work, as does a lone y=f(x) curve.
+        page.locator('#graph-input').fill('z=x^2+y^2\nz=sin(x)')
+        page.locator('#graph-plot').click()
+        assert page.evaluate('window.MathStudio.advanced.graphCompile().map(f => f.kind)') == ['surface','surface']
+        page.locator('#graph-input').fill('y=x^2')
+        page.locator('#graph-plot').click()
+        assert page.evaluate('window.MathStudio.advanced.graphCompile().map(f => f.kind)') == ['trace']
+        page.locator('#hub-expression').fill('Y=x×x\nz=sin(x×y)')
+        page.locator('[data-hub-to="graph3d"]').click()
+        assert page.locator('#graph-input').input_value() == 'Y=x×x\nz=sin(x×y)'
+        assert '1 constrained 3D curve(s)' in page.locator('#graph-status').inner_text()
+
         with page.expect_download() as download_info:
             page.locator('#hub-export-project').click()
         assert download_info.value.suggested_filename.endswith('.json')

@@ -49,3 +49,11 @@
 - Enter `y=if(x<0,-x,x)` in the 2D graph for absolute-value-like piecewise behavior.
 
 [Back to user guide](USER_GUIDE.md)
+
+
+## Paired 3D equations
+
+Enter `Y=x×x` on the first line and `z=sin(x×y)` on the second line
+of the **3D graph**. This renders a surface and a highlighted curve
+`(x, x², sin(x³))`. Use a newline or semicolon to separate lines;
+`×` and `*` both mean multiplication.

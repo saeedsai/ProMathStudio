@@ -2,6 +2,12 @@
 
 Changes are documented in functional groups; historical version numbers are not reconstructed where no tagged release is available.
 
+## 2026-10-23 — 3D constrained-curve graphing
+
+- Plot `y=f(x)` together with `z=g(x,y)` as a highlighted 3D curve on the surface.
+- Support uppercase `Y`, `×` multiplication, multiline shared workspace input, and existing multi-surface plots.
+- Add Chromium regression coverage and graphing documentation.
+
 ## 2026-10-23 — Initial GitHub publication and documentation
 
 - Published the connected single-page HTML mathematical application as `index.html`.

@@ -221,7 +221,7 @@
     .hub-inputs label.hub-variable{flex:0 0 90px}
     .hub-inputs select,.hub-inputs input{border:1px solid #d2dbee;border-radius:8px;background:white;padding:9px;color:#35415a;min-width:0;width:100%;font-size:12px}
     .hub-input-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-    #hub-expression{min-width:0;flex:1 1 270px;border:1px solid #b9c6ec;background:white;border-radius:9px;padding:12px 13px;font:14px/1.4 Consolas,'Liberation Mono',monospace;color:#283b71;outline-offset:2px}
+    #hub-expression{min-width:0;flex:1 1 270px;border:1px solid #b9c6ec;background:white;border-radius:9px;padding:12px 13px;font:14px/1.4 Consolas,'Liberation Mono',monospace;color:#283b71;outline-offset:2px;resize:vertical;min-height:60px}
     .hub-input-row button{min-height:42px}
     .hub-preview{min-height:56px;max-height:135px;overflow:auto;background:white;border:1px dashed #dce3f3;border-radius:9px;margin-top:10px;display:flex;justify-content:center;align-items:center;padding:12px;color:#8693aa;font-size:12px}
     .hub-preview math{font-family:'Cambria Math',math;font-size:clamp(19px,2.3vw,29px);color:#233452}
@@ -271,7 +271,7 @@
         </label>
         <label for="hub-variable" class="hub-variable">Solve for <input id="hub-variable" aria-label="Variable for symbolic solver" value="x" maxlength="24" spellcheck="false"></label>
       </div>
-      <div class="hub-input-row"><input type="text" id="hub-expression" autocomplete="off" spellcheck="false" placeholder="Type once here, or pick from your notebook…" aria-label="Shared working math expression"><button type="button" id="hub-grab" class="secondary small" title="Capture input from the open workspace">↑ Use open input</button><button type="button" id="hub-clear" class="secondary small" title="Clear only the shared expression">Clear</button></div>
+      <div class="hub-input-row"><textarea id="hub-expression" rows="2" spellcheck="false" placeholder="Enter one equation or several lines, e.g. y=x*x and z=sin(x*y)" aria-label="Shared working math expression"></textarea><button type="button" id="hub-grab" class="secondary small" title="Capture input from the open workspace">↑ Use open input</button><button type="button" id="hub-clear" class="secondary small" title="Clear only the shared expression">Clear</button></div>
       <div class="hub-preview" id="hub-preview" aria-live="polite">Write an equation or select a saved one.</div>
       <div class="hub-actions" aria-label="Send this expression to any math workspace"><span class="hub-send-label">Send to</span>
         <button class="hub-send" type="button" data-hub-to="editor">∑ Editor</button>
@@ -350,7 +350,7 @@
     <section class="panel" id="graph-panel" aria-label="2D and 3D function graphs">
       <div class="panel-head"><div class="panel-title"><span class="step">01</span> Interactive graphing <span class="cas-label">Canvas 2D / 3D</span></div><span class="small-note">Drag to move or rotate · Scroll to zoom</span></div>
       <div class="graph-wrap">
-        <div class="graph-mode-row"><div class="graph-mode-switch" role="group" aria-label="Graph dimensions"><button class="graph-mode active" type="button" data-graph-mode="2d">2D · y = f(x)</button><button class="graph-mode" type="button" data-graph-mode="3d">3D · z = f(x,y)</button></div><button class="secondary small" type="button" id="graph-import">Use current equation</button></div>
+        <div class="graph-mode-row"><div class="graph-mode-switch" role="group" aria-label="Graph dimensions"><button class="graph-mode active" type="button" data-graph-mode="2d">2D · y = f(x)</button><button class="graph-mode" type="button" data-graph-mode="3d">3D · z=f(x,y), y=f(x)</button></div><button class="secondary small" type="button" id="graph-import">Use current equation</button></div>
         <label for="graph-input" class="graph-input-label">Functions <span id="graph-hint">One y=f(x) per line. Compare several functions.</span></label>
         <textarea id="graph-input" rows="4" spellcheck="false">y = sin(x)
 y = cos(x)</textarea>
@@ -358,8 +358,8 @@ y = cos(x)</textarea>
         <div class="graph-controls"><label>X min <input type="number" id="graph-xmin" value="-10" step="any"></label><label>X max <input type="number" id="graph-xmax" value="10" step="any"></label><label class="graph-y-control">Y min <input type="number" id="graph-ymin" value="-5" step="any"></label><label class="graph-y-control">Y max <input type="number" id="graph-ymax" value="5" step="any"></label><label class="graph-z-control" hidden>Z min <input type="number" id="graph-zmin" value="-8" step="any"></label><label class="graph-z-control" hidden>Z max <input type="number" id="graph-zmax" value="8" step="any"></label></div>
         <div class="graph-actions"><button class="secondary" type="button" data-forward="graph" data-destination="editor">Send function to Editor</button><button class="secondary" type="button" data-forward="graph" data-destination="solver">Send function to Solver</button><button id="graph-plot" type="button" class="primary">↗ Plot functions</button><button id="graph-reset" class="secondary" type="button">Reset view</button><button id="graph-save" class="secondary" type="button">↓ Export PNG</button></div>
         <div class="graph-canvas-wrap"><canvas id="graph-canvas" width="1160" height="680" aria-label="Interactive mathematical graph" role="img"></canvas><div class="graph-legend" id="graph-legend"></div></div>
-        <div id="graph-status" class="graph-status" role="status">Plot y=f(x), parametric-free expressions, or z=f(x,y). Supported: polynomials, rational functions, trig, logs, powers, abs, min/max, and if(condition, true, false).</div>
-        <details class="graph-help"><summary>Supported functions and interactions</summary><p>2D: <code>y=x^2</code>, <code>y=1/(x-1)</code>, <code>y=sin(3x)</code>, <code>y=exp(-x^2)</code>, or <code>y=if(x&lt;0,-x,x)</code>. Separate curves by newline. 3D: <code>z=sin(sqrt(x^2+y^2))</code>, <code>z=x^2-y^2</code>, or <code>z=exp(-(x^2+y^2)/5)</code>. Rotate 3D by dragging and zoom with the mouse wheel. Radian trig notation is used for graphs.</p></details>
+        <div id="graph-status" class="graph-status" role="status">Plot y=f(x) in 2D; plot z=f(x,y) alone or pair it with y=f(x) to highlight a curve in 3D. Supported: polynomials, rational functions, trig, logs, powers, abs, min/max, and if(condition, true, false).</div>
+        <details class="graph-help"><summary>Supported functions and interactions</summary><p>2D: <code>y=x^2</code>, <code>y=1/(x-1)</code>, <code>y=sin(3x)</code>, <code>y=exp(-x^2)</code>, or <code>y=if(x&lt;0,-x,x)</code>. Separate curves by newline. 3D: <code>z=sin(sqrt(x^2+y^2))</code>, <code>z=x^2-y^2</code>, or the paired lines <code>y=x×x</code> and <code>z=sin(x×y)</code>. Paired equations draw the surface and highlight its constrained 3D curve <code>(x, x², sin(x³))</code>. A single <code>y=f(x)</code> is drawn as a curve on the z=0 plane. Rotate by dragging and zoom with the mouse wheel. Radian trig notation is used for graphs.</p></details>
       </div>
     </section>
     <div class="tip" id="grouping-tip"><span aria-hidden="true">✦</span><div><strong>Fractions and parentheses:</strong> For a denominator of <em>x − 1</em>, type <code>x/(x-1)</code>. For an exponent of −½, type <code>^(-1/2)</code> or <code>^-1/2</code>. This prevents ambiguous grouping.</div></div>
@@ -1893,8 +1893,37 @@ def _ms_process(job_text):
   function compileGraph(){
     const lines=$('graph-input').value.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
     if(!lines.length)throw Error('Type at least one function to plot.');
-    if(lines.length>8)throw Error('Plot a maximum of eight functions at a time.');
-    return lines.map((text,i)=>({name:text,ast:parseRaw(graphSource(text)),color:svgColors[i%svgColors.length]}));
+    if(lines.length>8)throw Error('Plot a maximum of eight equations at a time.');
+    if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:svgColors[i%svgColors.length]}));
+    // In 3D, y=f(x) constrains a one-dimensional curve on each z=f(x,y) surface.
+    // For example, y=x*x and z=sin(x*y) describe (x, x², sin(x³)).
+    const constraints=lines.filter(line=>/^y\s*=/i.test(line));
+    if(constraints.length>1)throw Error('Use one y=f(x) constraint per 3D plot. You can pair it with several z=f(x,y) surfaces.');
+    const yLine=constraints[0];
+    const yAst=yLine?parseRaw(graphSource(yLine)):null;
+    if(yAst&&containsVariable(yAst,'y'))throw Error('The 3D constraint must be y=f(x), without y on the right-hand side.');
+    const surfaces=lines.filter(line=>!/^y\s*=/i.test(line)).map((text,i)=>({
+      name:text,kind:'surface',ast:parseRaw(graphSource(text)),color:svgColors[i%svgColors.length]
+    }));
+    if(!yAst)return surfaces;
+    const traces=surfaces.length?surfaces.map((f,i)=>({
+      name:yLine+' ∩ '+f.name,kind:'trace',yAst,zAst:f.ast,color:i===0?'#e74764':svgColors[(i+3)%svgColors.length]
+    })):[{name:yLine+' (z=0)',kind:'trace',yAst,zAst:null,color:'#e74764'}];
+    return [...surfaces,...traces];
+  }
+  function containsVariable(ast,variable){
+    if(!ast||typeof ast!=='object')return false;
+    if(ast.kind==='symbol')return ast.value.toLowerCase()===variable;
+    if(Array.isArray(ast))return ast.some(item=>containsVariable(item,variable));
+    return Object.entries(ast).some(([key,value])=>key!=='value'&&containsVariable(value,variable)) ||
+      (ast.kind!=='symbol'&&ast.value&&typeof ast.value==='object'&&containsVariable(ast.value,variable));
+  }
+  function tracePoint(f,x){
+    const y=sampled(f.yAst,x);
+    if(!Number.isFinite(y)||y<range.ymin||y>range.ymax)return null;
+    const z=f.zAst?sampled(f.zAst,x,y):0;
+    if(!Number.isFinite(z)||z<range.zmin||z>range.zmax)return null;
+    return {x,y,z};
   }
   function sampled(ast,x,y=0){try{const v=numeric(ast,{x:C(x),y:C(y)},'rad');return Math.abs(v.im)>1e-9?NaN:v.re;}catch{return NaN;}}
   function niceStep(span){const n=Math.pow(10,Math.floor(Math.log10(span/8))),u=span/8/n;return n*(u<1.5?1:u<3.5?2:u<7.5?5:10);}
@@ -1952,6 +1981,7 @@ def _ms_process(job_text):
     }
     const N=38,quads=[];
     for(const [idx,func] of graphExpr.entries()){
+      if(func.kind==='trace')continue;
       const samples=[];
       for(let ix=0;ix<=N;ix++){
         const row=[];for(let iy=0;iy<=N;iy++){
@@ -1975,33 +2005,61 @@ def _ms_process(job_text):
       ctx.strokeStyle=`hsla(${hue},75%,30%,0.27)`;ctx.lineWidth=.7;
       const [a,b,c,d]=q.corners;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.lineTo(d.x,d.y);ctx.closePath();ctx.fill();ctx.stroke();
     }
+    // Constrained curves are drawn after the translucent surface mesh so users
+    // can see the intersection y=f(x), z=g(x,f(x)) without it disappearing.
+    for(const func of graphExpr.filter(item=>item.kind==='trace')){
+      const points=[];
+      for(let k=0;k<=720;k++){
+        const x=range.xmin+(range.xmax-range.xmin)*k/720;
+        const point=tracePoint(func,x);
+        points.push(point?persp(point.x,point.y,point.z):null);
+      }
+      const stroke=(color,width)=>{
+        ctx.beginPath();let started=false,prev=null;
+        for(const point of points){
+          if(!point){started=false;prev=null;continue;}
+          if(!started || (prev&&Math.hypot(point.x-prev.x,point.y-prev.y)>w*.12))ctx.moveTo(point.x,point.y);
+          else ctx.lineTo(point.x,point.y);
+          prev=point;started=true;
+        }
+        ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+      };
+      stroke('#ffffff',8);
+      stroke(func.color,5);
+    }
     ctx.fillStyle='#71809d';ctx.font='13px Arial';ctx.fillText('Drag to rotate · Scroll to zoom · X / Y / Z ranges can be edited',18,h-17);
   }
   function legend(){const frame=$('graph-legend');frame.replaceChildren();for(const [i,f] of graphExpr.entries()){
-    const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=graphMode==='3d'?`hsl(${(218+i*59)%360} 70% 55%)`:f.color;
+    const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=f.kind==='trace'?f.color:graphMode==='3d'?`hsl(${(218+i*59)%360} 70% 55%)`:f.color;
     const t=document.createElement('span');t.textContent=f.name;row.append(sw,t);frame.append(row);
   }}
   function drawGraph(){if(graphCanvas.width!==w||graphCanvas.height!==h){graphCanvas.width=w;graphCanvas.height=h}if(graphMode==='3d')draw3D();else draw2D();legend();}
   function plot(){
     try{updateRange();graphExpr=compileGraph();drawGraph();
-      let hasRealSamples=false;
+      let hasRealSamples=false,hasTraceSamples=false;
       for(const func of graphExpr){
-        for(let k=0;k<=32&&!hasRealSamples;k++){
-          const x=range.xmin+(range.xmax-range.xmin)*k/32;
-          for(let t=0;t<(graphMode==='3d'?7:1);t++){
+        for(let k=0;k<=96;k++){
+          const x=range.xmin+(range.xmax-range.xmin)*k/96;
+          if(func.kind==='trace'){
+            if(tracePoint(func,x)){hasTraceSamples=true;hasRealSamples=true;break;}
+          }else for(let t=0;t<(graphMode==='3d'?7:1);t++){
             const y=graphMode==='3d'?range.ymin+(range.ymax-range.ymin)*t/6:0;
             if(Number.isFinite(sampled(func.ast,x,y))){hasRealSamples=true;break;}
           }
+          if(hasRealSamples&&func.kind!=='trace')break;
         }
       }
-      graphMsg(hasRealSamples?'Displaying '+graphExpr.length+' '+(graphExpr.length===1?'function':'functions')+' in '+(graphMode==='2d'?'2D':'3D')+'. '+(graphMode==='3d'?'Drag to rotate the surface; scroll to zoom.':'Drag to pan; scroll to zoom.'):'No real-valued points in this view. A function may be complex or undefined here; adjust the domain or plot its original real-valued equation.',!hasRealSamples);
+      const traces=graphExpr.filter(f=>f.kind==='trace').length;
+      const surfaces=graphExpr.filter(f=>f.kind==='surface').length;
+      const summary=graphMode==='3d'&&traces?`Displaying ${surfaces} surface(s) and ${traces} constrained 3D curve(s). ${hasTraceSamples?'The bright line follows y=f(x) on z=f(x,y).':'The curve is outside the current Y/Z range; adjust graph bounds.'} Drag to rotate.`:'Displaying '+graphExpr.length+' '+(graphExpr.length===1?'function':'functions')+' in '+(graphMode==='2d'?'2D':'3D')+'. '+(graphMode==='3d'?'Drag to rotate the surface; scroll to zoom.':'Drag to pan; scroll to zoom.');
+      graphMsg(hasRealSamples?summary:'No real-valued points in this view. A function may be complex or undefined here; adjust the domain or plot its original real-valued equation.',!hasRealSamples||traces>0&&!hasTraceSamples);
     }catch(e){graphMsg(e.message,true);}
   }
   function setRanges(r){for(const [key,value] of Object.entries(r))if($('graph-'+key))$('graph-'+key).value=value;range={...range,...r};}
   function switchGraph(mode){
     graphMode=mode;
     for(const b of document.querySelectorAll('[data-graph-mode]'))b.classList.toggle('active',b.dataset.graphMode===mode);
-    $('graph-hint').textContent=mode==='2d'?'One y=f(x) per line. Compare several functions.':'One z=f(x,y) per line. Rotate the surface by dragging.';
+    $('graph-hint').textContent=mode==='2d'?'One y=f(x) per line. Compare several functions.':'One z=f(x,y) per line. You can also pair y=f(x) with z=f(x,y) to draw a 3D curve on the surface.';
     for(const el of document.querySelectorAll('.graph-z-control'))el.hidden=mode!=='3d';
     for(const el of document.querySelectorAll('.graph-y-control'))el.querySelector('input').disabled=false;
     setRanges(mode==='2d'?graphDef2:graphDef3);
@@ -2010,13 +2068,13 @@ def _ms_process(job_text):
     fillGraphExamples();plot();
   }
   const examples2=[['Sine & cosine','y=sin(x)\ny=cos(x)'],['Parabola','y=x^2-2*x-3'],['Rational','y=1/(x-1)'],['Exponential','y=exp(-x^2/4)'],['Piecewise','y=if(x<0,-x,x)'],['Inverse trig','y=asin(x)']];
-  const examples3=[['Radial ripple','z=sin(sqrt(x^2+y^2))'],['Saddle','z=(x^2-y^2)/6'],['Gaussian peak','z=6*exp(-(x^2+y^2)/8)'],['Wave surface','z=sin(x)*cos(y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),sin(x)*cos(y))']];
+  const examples3=[['Radial ripple','z=sin(sqrt(x^2+y^2))'],['Saddle','z=(x^2-y^2)/6'],['Gaussian peak','z=6*exp(-(x^2+y^2)/8)'],['Wave surface','z=sin(x)*cos(y)'],['Curve on surface','y=x×x\nz=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),sin(x)*cos(y))']];
   function fillGraphExamples(){const frame=$('graph-examples');frame.replaceChildren();for(const [name,code] of graphMode==='2d'?examples2:examples3){const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',()=>{$('graph-input').value=code;plot();});frame.append(b)}}
   $('graph-plot').addEventListener('click',plot);
   $('graph-reset').addEventListener('click',()=>{setRanges(graphMode==='2d'?graphDef2:graphDef3);azimuth=-.72;elevation=.46;zoom3d=1;plot();});
   $('graph-import').addEventListener('click',()=>{const raw=$('equation-input').value.trim();if(!raw){graphMsg('Write an equation in the Equation editor first.',true);return;}
     if(graphMode==='2d')$('graph-input').value=/^[a-z]\s*\(/i.test(raw)?raw:'y='+raw;
-    else $('graph-input').value=/^z\s*=/i.test(raw)?raw:'z='+raw;
+    else $('graph-input').value=/^\s*[yz]\s*=/i.test(raw)?raw:'z='+raw;
     plot();
   });
   $('graph-save').addEventListener('click',()=>{drawGraph();const a=document.createElement('a');a.href=graphCanvas.toDataURL('image/png');a.download='MathStudio_'+graphMode+'_graph.png';document.body.append(a);a.click();a.remove();graphMsg('Graph exported as a PNG image.');});
@@ -2182,6 +2240,16 @@ def _ms_process(job_text):
   function toGraph(raw, mode){
     raw=normalize(raw);if(!raw)throw Error('Choose an equation to graph.');
     const is3=mode==='3d';
+    // Keep related assignments together when transferring a 3D equation system.
+    // A line break is meaningful: y=f(x) constrains the z=g(x,y) surface.
+    if(is3){
+      const equations=raw.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
+      if(equations.length>1){
+        if(!equations.every(x=>/^[yz]\s*=/i.test(x)))throw Error('For paired 3D functions use lines y=f(x) and z=g(x,y).');
+        return equations.join('\n');
+      }
+      if(/^y\s*=/i.test(raw))return raw;
+    }
     const selectedVar=(ui.variable.value||'x').trim();
     // Mathematical equalities become residual curves: f(x)=g(x) -> y=f(x)-g(x).
     // Explicit graph definitions y=f(x), z=f(x,y) are kept as functions.

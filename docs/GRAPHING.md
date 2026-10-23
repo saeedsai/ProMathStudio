@@ -42,3 +42,25 @@ Typing an equation such as `x^2=1` and sending it to **Graph 2D** converts it to
 The canvas evaluator supports conventional arithmetic, trig, logarithms, exponentials, abs and some piecewise forms; unsupported syntax produces a graph status/error instead of an arbitrary code execution. Trigonometric graph inputs use radians irrespective of calculator angle mode. Sampled plots cannot faithfully show every discontinuity, vertical asymptote or steep/narrow feature. There is no general implicit/parametric plotter.
 
 [Syntax](SYNTAX_REFERENCE.md) · [Features and limitations](FEATURES_AND_LIMITATIONS.md)
+
+
+## Paired 3D equations: curve on a surface
+
+In the 3D graph, enter these equations on separate lines:
+
+```text
+Y=x×x
+z=sin(x×y)
+```
+
+The graph draws the full **surface** `z=sin(x*y)` and highlights its
+**intersection curve** with `y=x²`, parameterized by
+`(x, x², sin(x³))`. The red curve follows the blue surface.
+
+- Multiplication accepts both `×` and `*`; assignment labels are case-insensitive.
+- A lone `y=f(x)` plots a 3D curve with `z=0`.
+- One `y=f(x)` can be paired with one or more `z=g(x,y)` surfaces.
+- Multiple `z=f(x,y)` surfaces still work without a constraint.
+- The right side of `y=f(x)` must not depend on `y`.
+- Use the shared **Working equation** multiline field to send both lines to Graph 3D.
+- If the curve lies outside the selected Y or Z bounds, widen the ranges.

@@ -4,17 +4,17 @@
 
 ProMathStudio is a static HTML site. The application entry point is root `index.html`, so no compilation is required.
 
-### Option A — GitHub Actions deployment (preferred if workflows are permitted)
+### Option A — Manual GitHub Actions deployment
 
 1. Go to the repository's **Settings → Pages**.
 2. Under **Build and deployment → Source**, select **GitHub Actions**.
-3. Push to `main` or run the **Deploy GitHub Pages** workflow manually.
+3. Run the **Deploy GitHub Pages** workflow manually from Actions (the automatic trigger is disabled to avoid conflicts with branch-based Pages publishing).
 4. Wait for **Quality checks** and deployment jobs; do not assume success from a commit alone.
 5. Once published, verify https://saeedsai.github.io/ProMathStudio/ on desktop and mobile.
 
 The workflow deploys the static root after automated tests. It needs repository Actions and Pages permissions. Pages settings are a GitHub repository configuration and cannot be enabled merely by committing a workflow file.
 
-### Option B — Publish directly from a branch
+### Option B — Publish directly from a branch (current automatic configuration)
 
 1. In **Settings → Pages**, choose **Deploy from a branch**.
 2. Select `main` and `/ (root)`.
@@ -38,3 +38,7 @@ GitHub Pages serves HTTPS static assets; it does not execute server-side Python.
 ## Troubleshooting
 
 A 404 usually means Pages has not finished publishing or Source is set incorrectly. A workflow failure must be diagnosed from **Actions** logs, not fixed by bypassing checks. For the full checklist see [Troubleshooting](TROUBLESHOOTING.md).
+
+## Preventing duplicate deployment conflicts
+
+As of October 23, 2026, the repository has a successful automatic **pages build and deployment** workflow from `main` (branch-source publishing), and **Quality checks** independently on each push. The **Deploy GitHub Pages** Actions workflow is **manual only** to avoid competing simultaneous deployment requests. GitHub Actions deployment can be enabled instead by first switching Settings → Pages → Source to GitHub Actions and then restoring a push trigger, while disabling the branch-source publisher. Avoid running both mechanisms concurrently.

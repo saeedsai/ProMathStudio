@@ -99,3 +99,5 @@ New features: **linear/polynomial (degree 2–6), exponential, logarithmic, powe
 ### Right-click actions and binary/hex calculator
 
 Context menus are available for cells, rows, column headings and tabs in Data Tables, plus Calculator, Editor, Solver and Graphs. Use **right-click**, **Shift+F10**, or long-press. New Calculator input modes DEC/BIN/HEX accept `0b1010`, `0xFF`, base arithmetic and safe-integer bitwise functions; click an output chip to copy a representation. Math Library insertion now targets Calculator when it is active. [Complete guide](docs/CONTEXT_MENUS.md).
+
+**Hosting:** GitHub Pages publishes automatically from `main` through its branch-based Pages build. The optional explicit Pages workflow is manual-only to avoid duplicate deployments; automatic CI quality checks still run on each push. See [Deployment](docs/DEPLOYMENT.md).

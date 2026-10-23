@@ -40,6 +40,8 @@ jobs:
         run: python tests/smoke_advanced_math.py
       - name: Numerical solver, filtering and Python worker smoke
         run: python tests/smoke_numerical_data.py
+      - name: Context menus and programmer calculator smoke test
+        run: python tests/smoke_context_actions.py
 
   deploy:
     name: Publish static Math Studio

@@ -253,7 +253,16 @@
     .cas-equation{flex-wrap:wrap}.hub-result-select{max-width:165px}
     @media(max-width:760px){.hub{padding:14px 12px 13px}.hub-top h2{font-size:17px}.hub-inputs label.hub-variable{flex-basis:68px}.hub-live{display:inline-block;margin-top:5px}.hub-send{flex:1 1 auto;padding:9px 7px}.hub-send-label{width:100%}.hub-input-row .secondary{flex:1}.hub-input-row{align-items:stretch}.eq-actions{flex-wrap:wrap}.hub-notebook-route{max-width:120px}.hub-preview math{font-size:21px}}
     @media(max-width:390px){.hub-inputs{flex-wrap:wrap}.hub-inputs label.hub-variable{flex:1 1 100%}.hub-input-row button{font-size:11px}}
-</style>
+    .calc-radix-result{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .calc-base-chip{border:1px solid #cfd9ee;background:#f4f7ff;border-radius:7px;color:#314a86;font:600 11px/1.5 Consolas,monospace;padding:5px 7px;max-width:100%;overflow-wrap:anywhere}
+    #calc-radix{min-width:100px}
+    .context-actions{position:fixed;z-index:300;background:#fff;border:1px solid #ced9ec;border-radius:12px;box-shadow:0 12px 38px #14203f42;min-width:200px;max-width:min(310px,90vw);max-height:min(540px,75vh);overflow-y:auto;padding:7px;outline:none}
+    .context-actions[hidden]{display:none!important}.context-actions button{display:block;width:100%;padding:9px 13px;text-align:left;font-size:13px;color:#273b5b;background:transparent;border:0;border-radius:7px}
+    .context-actions button:hover,.context-actions button:focus-visible{background:#edf3ff;color:#244dae;outline:none}.context-actions .context-heading{font-size:10px;color:#8490a5;padding:6px 12px;letter-spacing:.6px;text-transform:uppercase;font-weight:750}
+    .context-actions .context-separator{border-top:1px solid #e5eaf3;margin:5px 0}
+    .programmer-tools{margin:9px 0;padding:7px 0;color:#5166a0}.programmer-tools>summary{cursor:pointer;font-size:12px;font-weight:700}.programmer-tools .calc-prog-buttons{display:flex;gap:5px;flex-wrap:wrap;padding:7px 0}
+    .programmer-tools button{border:1px solid #d5dff0;border-radius:7px;background:#f7f9ff;color:#41528b;padding:5px 9px}
+    </style>
 </head>
 <body>
 <div class="shell">
@@ -281,8 +290,8 @@
         <div class="calc-main">
           <label for="calc-input" class="calc-label">Calculate an expression</label>
           <div class="calc-expression-wrap"><input id="calc-input" spellcheck="false" autocomplete="off" placeholder="Try: 5! + sin(pi/2) or sqrt(-1)" /><button id="calc-clear" class="secondary" type="button" title="Clear calculator">C</button></div>
-          <div class="calc-quick-options"><label>Angle units <select id="calc-angle"><option value="rad">Radians</option><option value="deg">Degrees</option></select></label><label>Precision <select id="calc-precision"><option value="6">6 digits</option><option value="10">10 digits</option><option value="12" selected>12 digits</option><option value="15">15 digits</option></select></label><span class="calc-ans" id="calc-ans">Ans: —</span></div>
-          <div class="calc-result" aria-live="polite"><div class="calc-result-label">RESULT</div><div id="calc-result-math" class="calc-result-math">0</div><div id="calc-result-plain" class="calc-result-plain">Enter a calculation or use the keypad</div></div>
+          <div class="calc-quick-options"><label>Angle units <select id="calc-angle"><option value="rad">Radians</option><option value="deg">Degrees</option></select></label><label>Precision <select id="calc-precision"><option value="6">6 digits</option><option value="10">10 digits</option><option value="12" selected>12 digits</option><option value="15">15 digits</option></select></label><label>Input radix <select id="calc-radix" aria-label="Calculator input number base"><option value="dec">Decimal (10)</option><option value="bin">Binary (2)</option><option value="hex">Hexadecimal (16)</option></select></label><span class="calc-ans" id="calc-ans">Ans: —</span></div>
+          <div class="calc-result" aria-live="polite"><div class="calc-result-label">RESULT</div><div id="calc-result-math" class="calc-result-math">0</div><div id="calc-result-plain" class="calc-result-plain">Enter a calculation or use the keypad</div><div id="calc-radix-result" class="calc-radix-result" aria-live="polite"></div></div>
           <div class="calc-buttons" id="calc-buttons" aria-label="Scientific calculator keypad"></div>
           <div class="calc-footer"><button class="primary" id="calc-execute" type="button">= Calculate <span>↵</span></button><button class="secondary" id="calc-use-editor" type="button">Send to equation editor</button><button class="secondary" id="calc-copy" type="button">Copy result</button><button class="secondary" id="hub-calc-result" type="button">↑ Use answer as working equation</button><button class="secondary" data-forward="calculator" data-destination="solver" type="button">Solve answer</button><button class="secondary" data-forward="calculator" data-destination="graph2d" type="button">Graph answer</button></div>
           <div id="calc-message" class="calc-message" role="status">Supports real and complex arithmetic. For equations containing unknowns, use Symbolic solver.</div>
@@ -997,7 +1006,16 @@ def _ms_process(job_text):
     try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);}else{const box=document.createElement('textarea');box.value=text;box.style.position='fixed';box.style.opacity='0';document.body.appendChild(box);box.select();const copied=document.execCommand('copy');box.remove();if(!copied)throw new Error('Copy failed');}showToast('LaTeX copied to clipboard');}
     catch(e){showToast('Copy unavailable — use Export .tex');}
   }
-  function insertText(text,caret){const start=input.selectionStart,end=input.selectionEnd;input.setRangeText(text,start,end,'end');const position=start+(Number.isFinite(caret)?caret:text.length);input.setSelectionRange(position,position+(Number.isFinite(caret)?1:0));input.focus();refresh();}
+  function insertText(text,caret){
+    const calculatorMode=!!document.querySelector('[data-workspace="calculator"].active');
+    const target=calculatorMode?document.getElementById('calc-input'):input;
+    const start=target.selectionStart,end=target.selectionEnd;
+    target.setRangeText(text,start,end,'end');
+    const position=start+(Number.isFinite(caret)?caret:text.length);
+    target.setSelectionRange(position,position+(Number.isFinite(caret)?1:0));
+    target.dispatchEvent(new Event('input',{bubbles:true}));target.focus();
+    if(calculatorMode){document.body.classList.remove('library-open');}else refresh();
+  }
   function loadExample(raw){editId=null;btnAdd.innerHTML='＋ Add equation <span aria-hidden="true">↵</span>';cancelEdit.hidden=true;input.value=raw;refresh();renderNotebook();input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}
   function exportLatex(){
     if(!equations.length){showToast('Add an equation before exporting');return;}
@@ -1034,7 +1052,7 @@ def _ms_process(job_text):
     propto:['∝','\\propto'],perp:['⊥','\\perp'],parallel:['∥','\\parallel'],therefore:['∴','\\therefore'],
     oplus:['⊕','\\oplus'],otimes:['⊗','\\otimes'],cdot:['·','\\cdot'],times:['×','\\times'],degree:['°','^\\circ']
   });
-  const extraFunctions=['if','piecewise','log10','log2','sign','mod','atan2','round','sinc','factorial','array','matrix','pmatrix','bmatrix','vmatrix','det','cases','vector','binom','choose','diff','pdiff','diffn','grad','divergence','curl','laplacian','oint','iint','iiint','norm','dot','cross','transpose','conj','trace','rank','set','union','intersect','expect','variance','prob','cov','max','min','gcd','lcm','arg','sign','ln','log','exp','i','angle','underbrace','overbrace','tilde','underline','evaluate','bigcup','bigcap','floor','ceil','sech','laplace','inverse_laplace','fourier','inverse_fourier'];
+  const extraFunctions=['if','piecewise','log10','log2','sign','mod','atan2','round','sinc','factorial','array','matrix','pmatrix','bmatrix','vmatrix','det','cases','vector','binom','choose','diff','pdiff','diffn','grad','divergence','curl','laplacian','oint','iint','iiint','norm','dot','cross','transpose','conj','trace','rank','set','union','intersect','expect','variance','prob','cov','max','min','gcd','lcm','band','bor','bxor','bnot','shl','shr','arg','sign','ln','log','exp','i','angle','underbrace','overbrace','tilde','underline','evaluate','bigcup','bigcap','floor','ceil','sech','laplace','inverse_laplace','fourier','inverse_fourier'];
   extraFunctions.forEach(x=>functions.add(x));
   const paletteGroups=[
     {name:'Calculator & constants',groups:[{name:'Fundamental constants',items:[['π','Pi ≈ 3.14159','pi'],['e','Euler number ≈ 2.71828','e'],['i','Imaginary unit','i'],['τ','Tau = 2π','tau'],['∞','Infinity','infty']]},{name:'Scientific operations',items:[['n!','Factorial','5!'],['sin⁻¹','Arc sine','asin(x)'],['cos⁻¹','Arc cosine','acos(x)'],['tan⁻¹','Arc tangent','atan(x)'],['ln','Natural logarithm','ln(x)'],['log₁₀','Logarithm base 10','log10(x)'],['eˣ','Exponential','exp(x)'],['√','Square root','sqrt(x)']] }]},
@@ -1899,6 +1917,15 @@ def _ms_process(job_text):
           case 'min':v=r(Math.min(...a.map(scalar)));break;case 'max':v=r(Math.max(...a.map(scalar)));break;
           case 'floor':v=r(Math.floor(scalar(a0)));break;case 'ceil':v=r(Math.ceil(scalar(a0)));break;case 'round':v=r(Math.round(scalar(a0)));break;
           case 'sign':v=r(Math.sign(scalar(a0)));break;case 'mod':v=r(scalar(a0)%scalar(a[1]));break;
+          case 'band':case 'bor':case 'bxor':case 'bnot':case 'shl':case 'shr':{
+            const toBits=part=>{const number=scalar(part);if(!Number.isSafeInteger(number))throw Error('Bitwise operations require safe integer arguments.');return BigInt(number);};
+            const b0=toBits(a0),b1=a.length>1?toBits(a[1]):0n;
+            if(['band','bor','bxor','shl','shr'].includes(name)&&a.length!==2)throw Error(name+' needs two integer arguments.');
+            if(['shl','shr'].includes(name)&&(b1<0n||b1>52n))throw Error('Shift must be between 0 and 52 bits.');
+            const result=name==='band'?b0&b1:name==='bor'?b0|b1:name==='bxor'?b0^b1:name==='bnot'?~b0:name==='shl'?b0<<b1:b0>>b1;
+            if(result>BigInt(Number.MAX_SAFE_INTEGER)||result<BigInt(Number.MIN_SAFE_INTEGER))throw Error('Bitwise result exceeds 53-bit exact integer limit.');
+            v=r(Number(result));break;
+          }
           case 'factorial':v=factorial(a0);break;
           case 'frac':v=div(a0,a[1]);break;
           case 'pow':v=pow(a0,a[1]);break;
@@ -1991,20 +2018,57 @@ def _ms_process(job_text):
   keys.forEach(([label,value,cat])=>{
     const b=document.createElement('button');b.type='button';b.className='calc-key '+cat;b.textContent=label;b.dataset.value=value;b.addEventListener('click',()=>insertCalc(value));keypad.appendChild(b);
   });
+  function calculatorBaseInput(source){
+    const base=$('calc-radix').value;
+    const input=String(source).trim();
+    if(!input)return {expression:'',exact:null};
+    // Exact integer-only entry: use BigInt even above Number.MAX_SAFE_INTEGER.
+    if(/^[+-]?(?:0[xX][0-9a-fA-F]+|0[bB][01]+)$/.test(input)||
+        base==='hex'&&/^[+-]?[0-9a-fA-F]+$/.test(input)||
+        base==='bin'&&/^[+-]?[01]+$/.test(input)){
+      const sign=input[0]==='-'?-1n:1n,body=input.replace(/^[+-]/,'');
+      const normalized=/^0[xX]/.test(body)?'0x'+body.slice(2):/^0[bB]/.test(body)?'0b'+body.slice(2):base==='hex'?'0x'+body:base==='bin'?'0b'+body:body;
+      return {expression:null,exact:BigInt(normalized)*sign};
+    }
+    const expression=input.replace(/\b0(?:[xX][0-9a-zA-Z]+|[bB][0-9a-zA-Z]+)\b/g,part=>{
+      const hex=/^0[xX][0-9a-fA-F]+$/.test(part),bin=/^0[bB][01]+$/.test(part);
+      if(!hex&&!bin)throw Error('Invalid binary/hexadecimal number: '+part);
+      const n=BigInt('0'+(hex?'x':'b')+part.slice(2));
+      if(n>BigInt(Number.MAX_SAFE_INTEGER))throw Error('Base arithmetic supports up to 53-bit safe integers; enter a single larger literal for exact conversion.');
+      return n.toString(10);
+    });
+    if(base==='bin'&&/^[01]+(?:\s*[-+*/^()]\s*[01]+)*$/.test(expression))
+      return {expression:expression.replace(/\b[01]+\b/g,token=>BigInt('0b'+token).toString()),exact:null};
+    if(base==='hex'&&/^[0-9A-Fa-f]+(?:\s*[-+*/^()]\s*[0-9A-Fa-f]+)*$/.test(expression))
+      return {expression:expression.replace(/\b[0-9A-Fa-f]+\b/g,token=>BigInt('0x'+token).toString()),exact:null};
+    return {expression,exact:null};
+  }
+  function showCalculatorBase(integer){
+    const output=$('calc-radix-result');output.replaceChildren();
+    if(integer===null)return;
+    for(const [label,number] of [['DEC',integer.toString(10)],['HEX',(integer<0n?'-':'')+'0x'+(integer<0n?-integer:integer).toString(16).toUpperCase()],['BIN',(integer<0n?'-':'')+'0b'+(integer<0n?-integer:integer).toString(2)]]){
+      const chip=document.createElement('button');chip.type='button';chip.className='calc-base-chip';chip.textContent=label+': '+number;
+      chip.title='Copy '+label+' value';chip.addEventListener('click',()=>{navigator.clipboard?.writeText(number).catch(()=>{});});output.append(chip);
+    }
+  }
   function executeCalc(){
     const src=calcin.value.trim();if(!src)return;
     try{
-      const ast=parseRaw(src),digits=Number($('calc-precision').value),z=numeric(ast,{...(window.MathStudio.extraMath?.variables||{}),Ans:ans},$('calc-angle').value),display=formatComplex(z,digits);
-      ans=z;
+      const parsed=calculatorBaseInput(src),digits=Number($('calc-precision').value);
+      const z=parsed.exact!==null?C(Number(parsed.exact)):numeric(parseRaw(parsed.expression),{...(window.MathStudio.extraMath?.variables||{}),Ans:ans},$('calc-angle').value);
+      const integer=parsed.exact!==null?parsed.exact:(Math.abs(z.im)<1e-12&&Number.isSafeInteger(z.re)?BigInt(z.re):null);
+      const display=parsed.exact!==null?parsed.exact.toString(10):formatComplex(z,digits);
+      const tooLarge=parsed.exact!==null&&(parsed.exact>BigInt(Number.MAX_SAFE_INTEGER)||parsed.exact<BigInt(Number.MIN_SAFE_INTEGER));
+      ans=tooLarge?C(0):z;
       calcres.replaceChildren();
       try{calcres.appendChild(studio.render(studio.parse(display.replace(/\s/g,'')).ast));}catch{calcres.textContent=display;}
-      calcplain.textContent='= '+display;
+      calcplain.textContent='= '+display;showCalculatorBase(integer);
       $('calc-ans').textContent='Ans: '+display;
-      calcmsg.classList.remove('error');calcmsg.textContent='Calculated in '+($('calc-angle').value==='deg'?'degree':'radian')+' mode. Inverse trigonometric results follow the selected angle units.';
+      calcmsg.classList.remove('error');calcmsg.textContent=tooLarge?'Exact integer conversion shown; this literal is larger than 53 bits, so Ans cannot be reused for precise arithmetic.':'Calculated in '+($('calc-angle').value==='deg'?'degree':'radian')+' mode. Inverse trigonometric results follow the selected angle units.';
       history.unshift({expr:src,result:display});history=history.slice(0,40);storeHistory();historyDraw();
       lastCalc={expression:src,result:display};
       window.dispatchEvent(new CustomEvent('mathstudio:calculator-result',{detail:lastCalc}));
-    }catch(e){lastCalc=null;calcres.textContent='Error';calcplain.textContent=e.message;calcmsg.classList.add('error');calcmsg.textContent=e.message;}
+    }catch(e){showCalculatorBase(null);lastCalc=null;calcres.textContent='Error';calcplain.textContent=e.message;calcmsg.classList.add('error');calcmsg.textContent=e.message;}
   }
   $('calc-execute').addEventListener('click',executeCalc);
   calcin.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();executeCalc();}});
@@ -2014,6 +2078,7 @@ def _ms_process(job_text):
   $('calc-use-editor').addEventListener('click',()=>{$('equation-input').value=calcin.value;$('equation-input').dispatchEvent(new Event('input',{bubbles:true}));changeMode('editor');$('equation-input').focus();});
   for(const b of document.querySelectorAll('[data-calc-example]'))b.addEventListener('click',()=>{calcin.value=b.dataset.calcExample;executeCalc();});
   historyDraw();
+  window.MathStudio.calculatorActions={insert:insertCalc,run:executeCalc,base:calculatorBaseInput};
 
   // Function plotting (safe AST evaluator shared with calculator; no eval() or arbitrary code).
   let graphMode='2d',graphExpr=[],azimuth=-.72,elevation=.46,zoom3d=1;
@@ -2265,10 +2330,11 @@ def _ms_process(job_text):
     currentMode:()=>activeMode,
     setCalculator:(raw,run=false)=>{calcin.value=String(raw);if(run)executeCalc();},
     getCalculator:()=>lastCalc?{...lastCalc}:null,
-    getCalculatorState:()=>({expression:calcin.value,result:lastCalc,angle:$('calc-angle').value,precision:$('calc-precision').value,history:history.slice()}),
+    getCalculatorState:()=>({expression:calcin.value,result:lastCalc,angle:$('calc-angle').value,precision:$('calc-precision').value,radix:$('calc-radix').value,history:history.slice()}),
     restoreCalculatorState:data=>{
       calcin.value=typeof data.expression==='string'?data.expression.slice(0,12000):'';
       if(['rad','deg'].includes(data.angle))$('calc-angle').value=data.angle;
+      if(['dec','bin','hex'].includes(data.radix))$('calc-radix').value=data.radix;
       if(['6','10','12','15'].includes(String(data.precision)))$('calc-precision').value=String(data.precision);
       history=Array.isArray(data.history)?data.history.filter(h=>h&&typeof h.expr==='string'&&typeof h.result==='string').slice(0,40):[];
       lastCalc=data.result&&typeof data.result.result==='string'?data.result:null;
@@ -3108,7 +3174,7 @@ def _ms_process(job_text):
   $('dt-send-graph').addEventListener('click',()=>safeAction(()=>{$('dt-graph-table').value=active().id;chartColumns();sendToGraph();}));
   // Export PNG via the canvas data URL; handle binary bytes without string-encoding conversion.
   $('dt-chart-download').onclick=()=>{const a=el('a',{href:$('dt-chart-canvas').toDataURL('image/png'),download:'ProMathStudio_chart.png'});document.body.append(a);a.click();a.remove();};
-  window.MathStudio.dataTables={appendExpression:text=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Maximum 6,000 rows');const row=t.columns.map(()=>'' );row[0]=String(text).slice(0,8000);t.rows.push(row);render();save();return t;},get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows)};
+  window.MathStudio.dataTables={appendExpression:text=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Maximum 6,000 rows');const row=t.columns.map(()=>'' );row[0]=String(text).slice(0,8000);t.rows.push(row);render();save();return t;},get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows),refresh:()=>{render();save()}};
   try{const stored=JSON.parse(localStorage.getItem('mathstudio-tables-v1')||'null');restoreState(stored);}catch{restoreState(null);}
 })();
 
@@ -3212,7 +3278,7 @@ const css=document.createElement('style');css.textContent=`
   #quick-menu{position:fixed;top:12px;right:16px;z-index:130;display:flex;gap:7px;padding:7px;background:#ffffffee;border:1px solid #dfe5f3;border-radius:12px;box-shadow:0 5px 25px #26345618;backdrop-filter:blur(10px)}
   #quick-menu button{border:0;background:#eef2ff;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:750;color:#3b51ab}
   #quick-menu button:hover{background:#dbe5ff}
-  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols{display:block!important}
+  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols,body.ws-calculator #quick-symbols{display:block!important}
   #examples .examples{display:none}body.examples-open #examples .examples{display:grid}
   #examples{min-height:65px;scroll-margin-top:76px}
   body.examples-open #examples{position:fixed;right:0;top:65px;width:min(660px,95vw);height:calc(100vh - 75px);overflow:auto;padding:20px;background:#fff;border-radius:14px 0 0 14px;z-index:120;box-shadow:-10px 0 70px #071b3455;margin:0}
@@ -3249,7 +3315,7 @@ $('quick-help').addEventListener('click',()=>{closeMenus();$('help-dialog').show
 $('ui-close').addEventListener('click',closeMenus);
 for(const [box,cls] of [['ui-history','ui-history-on'],['ui-python','ui-python-on'],['ui-details','ui-details-on']])$(''+box).addEventListener('change',e=>document.body.classList.toggle(cls,e.target.checked));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenus();});
-for(const b of document.querySelectorAll('[data-workspace]'))b.addEventListener('click',()=>{closeMenus();document.body.classList.remove('ws-editor');document.body.classList.toggle('ws-editor',b.dataset.workspace==='editor');});
+for(const b of document.querySelectorAll('[data-workspace]'))b.addEventListener('click',()=>{closeMenus();document.body.classList.remove('ws-editor');document.body.classList.toggle('ws-editor',b.dataset.workspace==='editor');document.body.classList.toggle('ws-calculator',b.dataset.workspace==='calculator');});
 document.body.classList.add('ws-editor');
 // Examples are in a contextual sliding drawer. Selecting one closes the drawer.
 $('examples-list').addEventListener('click',e=>{if(e.target.closest('button'))closeMenus();});
@@ -3411,10 +3477,9 @@ function simplifyTable(){const data=$('data-panel'),area=data.querySelector('.da
   const pythonMenu=menu('Python',el('div',{id:'python-panel'}));
   nav.append(tableMenu,filterMenu,opMenu,importMenu,pythonMenu);bar.append(nav);
   const quick=el('div',{class:'data-toolbar'});
-  const add=el('button',{class:'secondary',type:'button'},'＋ Row');add.addEventListener('click',()=>$('dt-add-row').click());
   const showFilter=el('button',{class:'secondary',type:'button'},'Filter rows');showFilter.addEventListener('click',()=>{filterMenu.open=true;closeOtherMenus(filterMenu);});
   const openPython=el('button',{class:'secondary',type:'button'},'Python');openPython.addEventListener('click',()=>{pythonMenu.open=true;closeOtherMenus(pythonMenu);});
-  quick.append(add,showFilter,openPython);bar.append(quick);
+  quick.append(showFilter,openPython);bar.append(quick);
   area.insertBefore(bar,area.querySelector('#dt-tabs'));
   for(const m of nav.children)m.querySelector('summary').addEventListener('click',()=>{if(!m.open)closeOtherMenus(m)});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')for(const m of nav.children)m.open=false;});
@@ -3576,6 +3641,119 @@ $('dt-python-run').addEventListener('click',()=>{if(pyBusy)return;try{
 M.dataTools={filter:(rule)=>{if(rule)filterState.byTable.set(M.dataTables.active.id,rule);else filterState.byTable.delete(M.dataTables.active.id);filterTable();},getFilteredRows:()=>[...$('dt-sheet').querySelectorAll('tbody tr')].filter(tr=>!tr.hidden).length,stopPython:stopPy};
 // Extend Help menu with explicit numerical/Python workflows.
 const topics=$('help-topics');if(topics)topics.insertAdjacentHTML('beforeend',`<details class="help-topic"><summary>Numerical nonlinear equations and PDE methods</summary><p>Solver → Numerical methods. Roots: interval and tolerance; systems: 2–3 equations and initial guesses; Poisson: -u″=f with Dirichlet endpoints; Heat: u_t=αu_xx, initial profile and endpoints. Explicit heat method requires α Δt/Δx² ≤ 0.5. Numerical results are approximate, not guaranteed globally or for every PDE. Save to Data Tables and graph.</p></details><details class="help-topic"><summary>Data Tables: filters, menus and Python</summary><p>Use Table, Filter, Combine, Files, or Python submenus above the sheet. Filter lets you choose a column and a numeric or text condition without modifying source rows. Python runs selected code through a Pyodide/pandas worker and can return a new DataFrame as <code>result</code>. Only run trusted code. Use Save Project to keep derived tables.</p></details>`);
+})();
+</script>
+<script id="promath-context-actions">
+/* ProMathStudio: accessible, contextual commands. No eval or hidden clipboard access. */
+(()=>{
+  'use strict';
+  const $=id=>document.getElementById(id), MS=window.MathStudio;
+  const popup=document.createElement('div');popup.id='workspace-context-menu';popup.className='context-actions';popup.setAttribute('role','menu');popup.setAttribute('aria-label','Contextual workspace actions');popup.tabIndex=-1;popup.hidden=true;document.body.append(popup);
+  let selection=null,internalClipboard='',returnFocus=null;
+  const status=text=>{const id=selection?.area==='table'?'dt-status':selection?.area==='calc'?'calc-message':'hub-status';const e=$(id);if(e)e.textContent=text;};
+  const note=e=>{status(e.message||String(e));};
+  const close=()=>{popup.hidden=true;selection=null;};
+  const copy=async data=>{internalClipboard=String(data??'');try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(internalClipboard);}catch{}return internalClipboard;};
+  const paste=async()=>{try{if(navigator.clipboard?.readText){const r=await navigator.clipboard.readText();if(r!==undefined)return r;}}catch{}return internalClipboard;};
+  const insert=(el,value)=>{if(!el)return;const start=el.selectionStart??el.value.length,end=el.selectionEnd??start;el.setRangeText(String(value),start,end,'end');el.dispatchEvent(new Event('input',{bubbles:true}));el.focus();};
+  const active=()=>MS.dataTables?.active;
+  const update=()=>MS.dataTables?.refresh?.();
+  const validate=(t,rows=t.rows.length,cols=t.columns.length)=>{if(rows>6000||cols>32)throw Error('The workbook supports up to 6,000 rows and 32 columns.');};
+  function rowInsert(index,values){const t=active();validate(t,t.rows.length+1);t.rows.splice(index,0,values?values.map(x=>String(x).slice(0,8000)):t.columns.map(()=>''));update();}
+  function rowDelete(index){const t=active();if(!t.rows[index])throw Error('Row not found.');if(!confirm('Delete row '+(index+2)+'? This cannot be undone.'))return;t.rows.splice(index,1);update();}
+  function colInsert(index){const t=active();validate(t,t.rows.length,t.columns.length+1);t.columns.splice(index,0,'Column'+(t.columns.length+1));t.rows.forEach(row=>row.splice(index,0,''));update();}
+  function colDelete(index){const t=active();if(t.columns.length<=1)throw Error('Keep at least one column.');if(!confirm('Delete column '+t.columns[index]+'? This cannot be undone.'))return;t.columns.splice(index,1);t.rows.forEach(row=>row.splice(index,1));update();}
+  const validCoord=(r,c)=>{const t=active();if(!t||r<0||c<0||r>=t.rows.length||c>=t.columns.length)throw Error('Selected table cell is unavailable.');return t;};
+  const setCell=(r,c,v)=>{const t=validCoord(r,c);t.rows[r][c]=String(v??'').slice(0,8000);update();};
+  const csvEscape=v=>String(v??'').includes('\t')||String(v).includes('\n')?'"'+String(v).replace(/"/g,'""')+'"':String(v??'');
+  function parseClipboard(content){return String(content).replace(/\r\n/g,'\n').split('\n').filter((s,i,arr)=>i<arr.length-1||s!=='').map(line=>line.split('\t'));}
+  const pasteCells=async(r,c)=>{const text=await paste();if(!text){status('Clipboard is empty.');return;}const t=active(),rows=parseClipboard(text);if(!rows.length)return;const maxWidth=Math.max(...rows.map(x=>x.length)),maxRows=r+rows.length,maxCols=c+maxWidth;validate(t,maxRows,maxCols);
+    while(t.rows.length<maxRows)t.rows.push(t.columns.map(()=>''));while(t.columns.length<maxCols){t.columns.push('Column'+(t.columns.length+1));t.rows.forEach(x=>x.push(''));}
+    rows.forEach((row,ri)=>row.forEach((v,ci)=>{t.rows[r+ri][c+ci]=String(v).slice(0,8000);}));update();status('Pasted '+rows.length+' row(s) into table.');};
+  function filterEquals(column,content){const t=active(),filter=$('dt-filter-column'),op=$('dt-filter-op'),value=$('dt-filter-value');if(!filter||!t)return;
+    const details=$('data-menu-navigation')?.querySelectorAll('details')[1];if(details)details.open=true;
+    filter.value=String(column);op.value='eq';value.value=String(content);$('dt-filter-apply').click();}
+  function openPalette(){const btn=$('quick-symbols');if(!btn)return;const body=document.body;if(!body.classList.contains('library-open'))btn.click();$('palette-search')?.focus();}
+  const dispatchRoute=(dest,raw)=>{const bridge=MS.bridge;bridge?.transfer(dest,raw,{source:'context menu'});};
+  const item=(title,run,{danger=false}={})=>({title,run,danger});
+  function actions(sel){const {area,kind,row:r,col:c,raw,target}=sel,items=[];const t=active();
+    if(area==='table'){
+      if(kind==='cell'){
+        const src=()=>String(t.rows[r]?.[c]??'');
+        items.push(item('Copy cell (formula)',()=>copy(src())),item('Copy displayed value',()=>copy(MS.dataTables.calculate(t)[r]?.[c]??'')),item('Cut cell',async()=>{await copy(src());setCell(r,c,'');}),item('Paste into cell / range',()=>pasteCells(r,c)),item('Clear cell',()=>setCell(r,c,'')),item('Send cell → Working equation',()=>{$('dt-to-working').click();}),item('Filter column = this value',()=>filterEquals(c,MS.dataTables.calculate(t)[r][c])),item('Insert row above',()=>rowInsert(r)),item('Insert row below',()=>rowInsert(r+1)),item('Duplicate row below',()=>rowInsert(r+1,t.rows[r].slice())),item('Delete this row',()=>rowDelete(r),{danger:true}),item('Insert column left',()=>colInsert(c)),item('Insert column right',()=>colInsert(c+1)),item('Delete this column',()=>colDelete(c),{danger:true}));
+      }else if(kind==='row'){
+        items.push(item('Copy row (tab-separated)',()=>copy(t.rows[r].map(csvEscape).join('\t'))),item('Paste row',()=>pasteCells(r,0)),item('Insert row above',()=>rowInsert(r)),item('Insert row below',()=>rowInsert(r+1)),item('Duplicate row',()=>rowInsert(r+1,t.rows[r].slice())),item('Delete row',()=>rowDelete(r),{danger:true}));
+      }else if(kind==='column'){
+        items.push(item('Rename column',()=>{const name=prompt('Column header',t.columns[c]);if(name!==null){t.columns[c]=String(name).slice(0,80)||t.columns[c];update();}}),item('Copy column',()=>copy([t.columns[c],...t.rows.map(row=>row[c])].map(csvEscape).join('\n'))),item('Filter by column…',()=>{$('dt-filter-column').value=String(c);const details=$('data-menu-navigation')?.querySelectorAll('details')[1];if(details)details.open=true;}),item('Sort ascending',()=>{$('dt-sortcol').value=String(c);$('dt-sortdir').value='asc';$('dt-sort').click();}),item('Sort descending',()=>{$('dt-sortcol').value=String(c);$('dt-sortdir').value='desc';$('dt-sort').click();}),item('Insert column left',()=>colInsert(c)),item('Insert column right',()=>colInsert(c+1)),item('Delete column',()=>colDelete(c),{danger:true}));
+      }else if(kind==='tab'){
+        items.push(item('Rename table',()=>{$('dt-rename').click();}),item('Duplicate table',()=>{$('dt-copy').click();}),item('Export CSV',()=>{$('dt-export-csv').click();}),item('Export JSON',()=>{$('dt-export-json').click();}),item('Delete table',()=>{$('dt-remove').click();},{danger:true}));
+      }else {
+        items.push(item('New table',()=>{$('dt-new').click();}),item('Add row',()=>{$('dt-add-row').click();}),item('Add column',()=>{$('dt-add-col').click();}),item('Import CSV/JSON',()=>{$('dt-import').click();}),item('Export as CSV',()=>{$('dt-export-csv').click();}),item('Export as JSON',()=>{$('dt-export-json').click();}));
+      }
+    } else if(area==='calc'){
+      const input=$('calc-input');items.push(item('Calculate expression',()=>{$('calc-execute').click();}),item('Open symbol library',openPalette),item('Copy expression',()=>copy(input.value)),item('Paste expression',async()=>insert(input,await paste())),item('Copy numeric result',()=>copy($('calc-result-plain').textContent.replace(/^=\s*/,''))),item('Use result as expression',()=>{input.value=$('calc-result-plain').textContent.replace(/^=\s*/,'');input.focus();}),item('Binary mode',()=>{$('calc-radix').value='bin';}),item('Hexadecimal mode',()=>{$('calc-radix').value='hex';}),item('Decimal mode',()=>{$('calc-radix').value='dec';}),item('Send to Symbolic Solver',()=>dispatchRoute('solver',input.value)),item('Clear expression',()=>{$('calc-clear').click();}));
+    }else if(area==='editor'||area==='solver'||area==='graph'){
+      const input=$(area==='graph'?'graph-input':'equation-input');const value=input?.value||'';
+      items.push(item('Copy expression',()=>copy(value)),item('Paste expression',async()=>insert(input,await paste())),item('Open symbol library',openPalette));
+      if(area==='editor'){items.push(item('Save equation in notebook',()=>$('add-btn').click()),item('Copy LaTeX',()=>$('copy-latex').click()),item('Send to Solver',()=>dispatchRoute('solver',value)),item('Send to Calculator',()=>dispatchRoute('calculator',value)));}
+      if(area==='solver')items.push(item('Run symbolic operation',()=>$('cas-run').click()),item('Save solved results',()=>$('cas-save').click()),item('Open numerical solver',()=>$('num-open')?.click()));
+      if(area==='graph')items.push(item('Plot functions',()=>$('graph-plot').click()),item('Reset graph view',()=>$('graph-reset').click()),item('Export PNG',()=>$('graph-save').click()),item('Send to editor',()=>dispatchRoute('editor',value)));
+      items.push(item('Clear expression',()=>{input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));}));
+    }else if(area==='graph-canvas')items.push(item('Export graph PNG',()=>$('graph-save').click()),item('Reset graph view',()=>$('graph-reset').click()),item('Show plotted expression in Editor',()=>dispatchRoute('editor',$('graph-input').value)));
+    else if(area==='chart')items.push(item('Export chart PNG',()=>$('dt-chart-download').click()),item('Show data tables',()=>MS.advanced.mode('data')));
+    else if(area==='notebook'){
+      const wrap=target.closest('.equation-item');const buttons=[...wrap.querySelectorAll('button')],by=x=>buttons.find(b=>(b.textContent||'').trim()===x);
+      if(by('Edit'))items.push(item('Edit equation',()=>by('Edit').click()));
+      if(by('Copy'))items.push(item('Copy equation',()=>by('Copy').click()));
+      if(by('Delete'))items.push(item('Delete equation',()=>by('Delete').click(),{danger:true}));
+      const route=wrap.querySelector('.hub-notebook-route');if(route)for(const [v,title] of [['calculator','Send to Calculator'],['solver','Send to Solver'],['graph2d','Plot as 2D graph']])items.push(item(title,()=>{route.value=v;route.dispatchEvent(new Event('change',{bubbles:true}));}));
+    }else if(area==='working'){
+      const field=$('hub-expression');items.push(item('Copy working equation',()=>copy(field.value)),item('Paste working equation',async()=>insert(field,await paste())));
+      for(const [v,title] of [['editor','Send to Editor'],['calculator','Send to Calculator'],['solver','Send to Solver'],['graph2d','Send to 2D Graph'],['graph3d','Send to 3D Graph']])items.push(item(title,()=>dispatchRoute(v,field.value)));
+    }
+    return items;
+  }
+  function detect(target){
+    const tab=target.closest('#dt-tabs .dt-tab');if(tab){const tabs=[...$('dt-tabs').children],index=tabs.indexOf(tab);if(index>=0)return {area:'table',kind:'tab',tabIndex:index,target};}
+    if(target.closest('#dt-sheet')){const colHead=target.closest('thead th');if(colHead){const col=colHead.cellIndex-1;if(col>=0)return {area:'table',kind:'column',col,target};return {area:'table',kind:'general',target};}
+      const cell=target.closest('tbody td'),rowHead=target.closest('tbody th');if(cell){const input=cell.querySelector('input');return {area:'table',kind:'cell',row:Number(input.dataset.row),col:Number(input.dataset.col),target};}
+      if(rowHead){const row=Number(rowHead.textContent)-2;return {area:'table',kind:'row',row,target};}return {area:'table',kind:'general',target};}
+    if(target.closest('#data-panel'))return {area:'table',kind:'general',target};
+    if(target.closest('#calc-input')||target.closest('#calc-result-math')||target.closest('#calc-result-plain')||target.closest('#calc-buttons'))return {area:'calc',target};
+    if(target.closest('#equation-input'))return {area:document.querySelector('[data-workspace="solver"].active')?'solver':'editor',target};
+    if(target.closest('#graph-input'))return {area:'graph',target};
+    if(target.closest('#graph-canvas'))return {area:'graph-canvas',target};
+    if(target.closest('#dt-chart-canvas'))return {area:'chart',target};
+    if(target.closest('.equation-item'))return {area:'notebook',target};
+    if(target.closest('#hub-expression'))return {area:'working',target};
+    return null;
+  }
+  function open(event){const sel=detect(event.target);if(!sel){close();return false;}
+    if(sel.kind==='tab'){const b=$('dt-tabs').children[sel.tabIndex];if(b&&!b.classList.contains('active'))b.click();}
+    const commands=actions(sel);if(!commands.length)return false;
+    selection=sel;returnFocus=event.target;popup.replaceChildren();
+    const heading=document.createElement('div');heading.className='context-heading';heading.textContent=sel.area==='table'?'Data Tables — '+(sel.kind||'actions'):sel.area+' actions';popup.append(heading);
+    for(const cmd of commands){const b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');b.textContent=cmd.title;if(cmd.danger)b.style.color='#b03648';b.addEventListener('click',async()=>{close();try{await cmd.run();}catch(e){note(e);}});popup.append(b);}
+    popup.hidden=false;popup.style.left='0px';popup.style.top='0px';const rect=popup.getBoundingClientRect();const x=Math.max(6,Math.min(event.clientX||20,innerWidth-rect.width-6)),y=Math.max(6,Math.min(event.clientY||20,innerHeight-rect.height-6));popup.style.left=x+'px';popup.style.top=y+'px';popup.focus({preventScroll:true});return true;
+  }
+  document.addEventListener('contextmenu',e=>{if(popup.contains(e.target))return;if(detect(e.target)){e.preventDefault();open(e);}else close();},true);
+  document.addEventListener('pointerdown',e=>{if(!popup.hidden&&!popup.contains(e.target))close();},true);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!popup.hidden){e.preventDefault();close();returnFocus?.focus?.({preventScroll:true});}
+    if((e.shiftKey&&e.key==='F10'||e.key==='ContextMenu')&&detect(document.activeElement)){e.preventDefault();const rect=document.activeElement.getBoundingClientRect();open({target:document.activeElement,clientX:rect.left+25,clientY:rect.top+25});}
+    if(!popup.hidden&&['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const opts=[...popup.querySelectorAll('[role=menuitem]')],i=opts.indexOf(document.activeElement),delta=e.key==='ArrowDown'?1:-1;opts[(i+delta+opts.length)%opts.length]?.focus();}
+  },true);
+  // Touch and pen long press are alternatives to mouse right-click.
+  let longPress=null,start=null;
+  document.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||!detect(e.target))return;start={x:e.clientX,y:e.clientY,target:e.target};clearTimeout(longPress);longPress=setTimeout(()=>{if(start)open({...start});start=null;},600);},false);
+  document.addEventListener('pointermove',e=>{if(start&&Math.hypot(e.clientX-start.x,e.clientY-start.y)>12){start=null;clearTimeout(longPress);}},false);
+  for(const event of ['pointerup','pointercancel','scroll'])document.addEventListener(event,()=>{start=null;clearTimeout(longPress);},true);
+  // Bitwise functions and base-specific literals can be added from a collapsed tool group.
+  const controls=document.createElement('details');controls.className='programmer-tools';controls.innerHTML='<summary>Binary · Hex · Bitwise tools</summary><div class="calc-prog-buttons"></div><small>Examples: 0b1010+0xF, band(0xFF,0b1010), bxor(15,3), shl(3,2). Unprefixed digits use the selected input radix. Exact conversion works for large standalone literals.</small>';
+  $('calc-buttons').before(controls);const wrapper=controls.querySelector('div');
+  for(const [label,value] of [['0b','0b'],['0x','0x'],['AND','band(, )'],['OR','bor(, )'],['XOR','bxor(, )'],['NOT','bnot('],['<<','shl(, )'],['>>','shr(, )']]){const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.title='Insert '+value;btn.addEventListener('click',()=>insert($('calc-input'),value));wrapper.append(btn);}
+  // Append to existing help page, retaining previous topical help.
+  const topics=$('help-topics');if(topics){const detail=document.createElement('details');detail.className='help-topic';detail.innerHTML='<summary>Right-click actions and binary/hexadecimal calculator</summary><p>Right-click a table cell, row number, column header or table tab for Copy, Paste, Insert, Delete, Sort and Filter. Right-click expressions in Calculator, Editor, Solver or Graph for relevant commands. On mobile, long-press a cell. Shift+F10 opens a menu from the keyboard. Destructive actions require confirmation. Table edits retain existing literal formulas; row/column insertions do not automatically rewrite references.</p><p>Calculator accepts <code>0b1010</code> and <code>0xFF</code>, DEC/BIN/HEX input modes, and bitwise functions <code>band</code>, <code>bor</code>, <code>bxor</code>, <code>bnot</code>, <code>shl</code>, <code>shr</code>. Scientific expressions use decimal unless base mode is active. Binary/hex arithmetic is limited to exact 53-bit integers, while standalone integer literal conversion supports BigInt.</p>';topics.append(detail);}
+  MS.contextActions={openAt:(target,x=40,y=40)=>open({target,clientX:x,clientY:y}),close,clipboard:()=>internalClipboard,pasteCells};
 })();
 </script>
 </body>

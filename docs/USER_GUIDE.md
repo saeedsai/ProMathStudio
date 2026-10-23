@@ -59,3 +59,7 @@ In **Symbolic Solver**, press **Numerical methods / PDE** to open a collapsed so
 In **Calculator → Variable assignments & advanced numeric math**, assign scalars and use `diff`, `int`, `sum`, and `prod` with evaluation points and bounds.
 
 In **Data Tables**, keep the sheet visible and open Table, Filter, Combine, Files or Python as needed. Filter conditions apply to displayed rows only. The Python editor runs your own code with pandas in a browser worker; new `result` DataFrames become new tables. For syntax, method assumptions, limitations and examples, see [Numerical methods and Python](NUMERICAL_AND_PYTHON.md).
+
+## Right-click / long-press actions and numeric bases
+
+Right-click or long-press a table cell, row number, header, table tab, Calculator, Editor, Solver or Graph to open item-specific actions. Use Shift+F10 on a focused control and Escape to close. Calculator has DEC/BIN/HEX modes plus mixed `0x`/`0b` expressions; the Symbols drawer is available in Calculator and inserts into its expression window. For precise limits and details see [Context menus and number bases](CONTEXT_MENUS.md).

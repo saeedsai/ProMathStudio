@@ -1,9 +1,9 @@
-"""Rebuild standalone index.html by embedding both source modules."""
+"""Rebuild standalone index.html by embedding the standalone source modules."""
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 index=root/'index.html'
 text=index.read_text(encoding='utf-8')
-for tag,source in [('mathstudio-data-tables','src/data-tables.js'),('promath-advanced-features','src/advanced-features.js'),('promath-numerical-data','src/numerical-data.js')]:
+for tag,source in [('mathstudio-data-tables','src/data-tables.js'),('promath-advanced-features','src/advanced-features.js'),('promath-numerical-data','src/numerical-data.js'),('promath-context-actions','src/context-actions.js')]:
     start=f'<script id="{tag}">\n'
     i=text.index(start)+len(start)
     end=text.index('</script>',i)

@@ -142,10 +142,9 @@ function simplifyTable(){const data=$('data-panel'),area=data.querySelector('.da
   const pythonMenu=menu('Python',el('div',{id:'python-panel'}));
   nav.append(tableMenu,filterMenu,opMenu,importMenu,pythonMenu);bar.append(nav);
   const quick=el('div',{class:'data-toolbar'});
-  const add=el('button',{class:'secondary',type:'button'},'＋ Row');add.addEventListener('click',()=>$('dt-add-row').click());
   const showFilter=el('button',{class:'secondary',type:'button'},'Filter rows');showFilter.addEventListener('click',()=>{filterMenu.open=true;closeOtherMenus(filterMenu);});
   const openPython=el('button',{class:'secondary',type:'button'},'Python');openPython.addEventListener('click',()=>{pythonMenu.open=true;closeOtherMenus(pythonMenu);});
-  quick.append(add,showFilter,openPython);bar.append(quick);
+  quick.append(showFilter,openPython);bar.append(quick);
   area.insertBefore(bar,area.querySelector('#dt-tabs'));
   for(const m of nav.children)m.querySelector('summary').addEventListener('click',()=>{if(!m.open)closeOtherMenus(m)});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')for(const m of nav.children)m.open=false;});

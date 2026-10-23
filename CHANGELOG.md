@@ -1,3 +1,12 @@
+## 2026-10-23 — Context menus, Calculator BIN/HEX, and symbol routing
+
+- Added contextual commands across five workspaces and their editable surfaces, with keyboard and touch access.
+- Added copy/cut/paste, row/column/table modification, sort/filter and graph/image commands in right-click menus.
+- Moved redundant Add Row shortcut to table menus/context options; retained visible discoverable primary controls.
+- Added DEC/BIN/HEX input radix, BigInt standalone base conversion, and safe-integer bitwise functions.
+- Fixed Math Library insertion to target Calculator's input when Calculator is selected.
+- Added context-menu help, source module and browser regression tests.
+
 ## 2026-10-23 — Numerical methods and Python Data Tables
 
 - Added real nonlinear root searches, damped Newton systems, 1D heat/Poisson finite-difference methods, numerical output tables, and graph routing.

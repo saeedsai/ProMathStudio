@@ -63,7 +63,7 @@
     <label>Graph type<select id="dt-chart-type"><option value="scatter">2D scatter</option><option value="line">2D line</option><option value="scatter3d">3D scatter</option><option value="grid3d">3D grid mesh</option><option value="bar">Bar chart</option><option value="pie">Pie chart</option></select></label>
     <label>Category / X<select id="dt-graph-x"></select></label><label>Values / Y<select id="dt-graph-y"></select></label>
     <label id="dt-graph-z-label">Z<select id="dt-graph-z"></select></label>
-    <button id="dt-plot-table" class="primary" type="button">Plot table</button></div>
+    <button id="dt-plot-table" class="primary" type="button">Plot table</button><button id="dt-add-series" class="secondary" type="button">＋ Add series</button><button id="dt-clear-series" class="secondary" type="button">Clear added series</button></div>
     <p class="graph-data-muted" id="dt-chart-status" role="status">Select a data table and chart.</p>`;
   $('graph-examples').after(graphControls);
   const chartDiv=el('div',{id:'dt-graph-chart'}); chartDiv.hidden=true;
@@ -100,6 +100,12 @@
     return compute(expr,t,stack);
   }
   function compute(expr,t,stack){
+    expr=String(expr).replace(/\b([A-Za-z][A-Za-z0-9_]*)\(([^()]*)\)/g,(all,name,body)=>{
+      const fn=window.MathStudio.customFunctions?.list().find(f=>f.name.toLowerCase()===name.toLowerCase());
+      if(!fn)return all;
+      const values=splitArgs(body).map(part=>compute(part,t,stack));
+      return '('+window.MathStudio.customFunctions.evaluate(name,values)+')';
+    });
     expr=String(expr).replace(/\bIF\(([^()]*)\)/gi,(all,body)=>'('+number(formula('IF('+body+')',t,stack))+')');
     // Aggregations accept ranges or comma-separated arguments. Nested expressions are supported by the recursive evaluator.
     expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\s*\(([^()]*)\)/gi,(all,fn,body)=>{
@@ -236,6 +242,18 @@
     $('graph-plot').click();$('dt-chart-status').textContent='Plotted '+t.name+' as '+kind+'. Equation plots can also be added.';
   }
   $('dt-plot-table').addEventListener('click',()=>safeAction(sendToGraph));
+  $('dt-add-series').addEventListener('click',()=>safeAction(()=>{
+    const table=tables.find(t=>t.id===$('dt-graph-table').value)||active(),kind=$('dt-chart-type').value;
+    if(['bar','pie'].includes(kind))throw Error('Overlay supports 2D/3D scatter, line, and grid.');
+    const mode=['scatter3d','grid3d'].includes(kind)?'3d':'2d';
+    window.MathStudio.advanced.mode('graph');
+    if(window.MathStudio.advanced.currentGraphMode()!==mode){if(mode==='3d')window.MathStudio.advanced.plot3D();else window.MathStudio.advanced.plot2D();}
+    chartDiv.hidden=true;document.querySelector('#graph-panel .graph-canvas-wrap').classList.remove('workspace-hidden');
+    const mapping={x:Number($('dt-graph-x').value),y:Number($('dt-graph-y').value),z:Number($('dt-graph-z').value),mode,style:kind==='line'?'line':kind==='grid3d'?'grid':'points'};
+    window.MathStudio.graphData.addTable({headers:table.columns,rows:evaluated(table)},table.name,mapping);
+    $('dt-chart-status').textContent='Added series from '+table.name+'. Select another Y column or table to overlay.';
+  }));
+  $('dt-clear-series').addEventListener('click',()=>window.MathStudio.graphData.clearExtra());
   $('dt-send-graph').addEventListener('click',()=>safeAction(()=>{$('dt-graph-table').value=active().id;chartColumns();sendToGraph();}));
   // Export PNG via the canvas data URL; handle binary bytes without string-encoding conversion.
   $('dt-chart-download').onclick=()=>{const a=el('a',{href:$('dt-chart-canvas').toDataURL('image/png'),download:'ProMathStudio_chart.png'});document.body.append(a);a.click();a.remove();};

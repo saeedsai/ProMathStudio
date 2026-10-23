@@ -60,6 +60,30 @@ def main():
   assert page.locator('#table-zoom-value').inner_text()=='150%'
   page.locator('#table-zoom-reset').click()
   assert page.locator('#table-zoom-value').inner_text()=='100%'
+  # Named custom functions are available across numeric workspaces.
+  page.locator('#custom-function-panel').evaluate('(e)=>e.open=true')
+  page.locator('#cf-name').fill('myfun')
+  page.locator('#cf-params').fill('x')
+  page.locator('#cf-body').fill('x^2+1')
+  page.locator('#cf-save').click()
+  assert any(f['name']=='myfun' for f in page.evaluate('MathStudio.customFunctions.list()')), page.locator('#cf-message').inner_text()
+  assert page.evaluate('MathStudio.customFunctions.evaluate("myfun",[3])')==10
+  assert page.evaluate('MathStudio.dataTables.formula("myfun(3)","Data1")')==10
+  page.locator('#cf-name').fill('pyfun')
+  page.locator('#cf-type').select_option('python')
+  page.locator('#cf-body').fill('def pyfun(x): return math.sin(x) + x**2')
+  page.locator('#cf-save').click()
+  assert abs(page.evaluate('MathStudio.customFunctions.evaluate("pyfun",[2])')-(4+__import__('math').sin(2)))<1e-8
+  # Overlay multiple column mappings and a second table without replacing existing data.
+  page.evaluate("""() => {
+    const plot=MathStudio.graphData;
+    plot.clear(false);
+    plot.addTable({headers:['x','y','z','w'],rows:[[1,2,3,4],[2,4,6,8]]},'Table1',{x:0,y:1,mode:'2d',style:'points'});
+    plot.addTable({headers:['x','y','z','w'],rows:[[1,2,3,4],[2,4,6,8]]},'Table1',{x:0,y:2,mode:'2d',style:'line'});
+    plot.addTable({headers:['time','value'],rows:[[1,5],[2,7]]},'Table2',{x:0,y:1,mode:'2d',style:'points'});
+  }""")
+  assert len(page.evaluate('MathStudio.graphData.legend()'))==3
+  assert len(page.evaluate('MathStudio.graphData.exportState().extra'))==2
   assert not errors,errors
   browser.close()
  print('PASS appearance, chart palettes, number formats, project state, table zoom')

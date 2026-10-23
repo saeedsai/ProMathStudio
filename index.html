@@ -2754,7 +2754,7 @@ def _ms_process(job_text):
     return {format:'mathstudio-project',version:1,date:new Date().toISOString(),working:state.active,origin:state.origin,
       recent:state.recent,notebook:engine.notebookBridge.list(),calculator:engine.advanced.getCalculatorState(),
       solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value},
-      graph:engine.advanced.getGraphState(),tables:window.MathStudio.dataTables?.exportState()||null,fit:window.MathStudio.curveFit?.exportState()||null};
+      graph:engine.advanced.getGraphState(),customFunctions:window.MathStudio.customFunctions?.list()||[],tables:window.MathStudio.dataTables?.exportState()||null,fit:window.MathStudio.curveFit?.exportState()||null};
   }
   $('hub-export-project').addEventListener('click',()=>{
     const blob=new Blob([JSON.stringify(projectData(),null,2)],{type:'application/json'});
@@ -2771,7 +2771,7 @@ def _ms_process(job_text):
       if(!confirm('Import this project? Existing saved notebook entries and calculator history will be replaced.'))return;
       engine.notebookBridge.replace(data.notebook);
       engine.advanced.restoreCalculatorState(data.calculator||{});
-      engine.advanced.restoreGraphState(data.graph||{});window.MathStudio.dataTables?.restoreState(data.tables||null);window.MathStudio.curveFit?.restoreState(data.fit||null);
+      window.MathStudio.customFunctions?.restore(data.customFunctions||[]);engine.advanced.restoreGraphState(data.graph||{});window.MathStudio.dataTables?.restoreState(data.tables||null);window.MathStudio.curveFit?.restoreState(data.fit||null);
       if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';}
       state.recent=Array.isArray(data.recent)?data.recent.filter(r=>r&&typeof r.raw==='string').slice(0,14):[];
       state.calculator=engine.advanced.getCalculator();state.solver=null;

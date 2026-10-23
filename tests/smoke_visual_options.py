@@ -28,7 +28,19 @@ def main():
   page.locator('#plot-line-width').select_option('5')
   page.locator('#graph-input').fill('y=x^2')
   page.locator('#graph-plot').click()
-  assert page.evaluate('MathStudio.graphAppearance.color(0)')=='#ee394c'
+  assert page.evaluate('MathStudio.graphAppearance.color(0)')=='#536be8'
+  assert page.locator('#plot-series-colors input[type=color]').count()==1
+  page.locator('#plot-color').fill('#ff8844')
+  assert page.evaluate('MathStudio.graphAppearance.color(0)')=='#ff8844'
+  page.locator('#graph-input').fill('y=x^2\ny=sin(x)\ny=cos(x)')
+  page.locator('#graph-plot').click()
+  assert page.locator('#plot-series-colors input[type=color]').count()==3
+  colors=page.evaluate('[0,1,2].map(i=>MathStudio.graphAppearance.color(i))')
+  assert colors[0]=='#ff8844' and len(set(colors))==3,colors
+  page.locator('#plot-series-colors input[data-series="1"]').fill('#123abc')
+  assert page.evaluate('MathStudio.graphAppearance.color(1)')=='#123abc'
+  page.locator('#plot-palette').select_option('custom')
+  assert len(set(page.evaluate('[0,1,2].map(i=>MathStudio.graphAppearance.color(i))')))==3
   assert page.evaluate('MathStudio.graphAppearance.width()')==5
   assert page.evaluate('MathStudio.graphAppearance.dash()')==[12,8]
   with page.expect_download() as download:page.locator('#hub-export-project').click()

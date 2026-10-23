@@ -25,3 +25,8 @@ Under Calculator, choose **Number display**:
 - **Engineering** — exponent multiple of three, such as `123.456789e+6`.
 
 Calculation uses the same numeric engine; output formatting does not change the internal result. Significant-figure precision still controls rounding. Large standalone BIN/HEX integers remain exact conversion strings. Calculator number format is saved with the project as `calculator.format`.
+## Multiple equations and per-series colors
+
+**Primary color is always applied to the first graph**, regardless of the selected palette. For second and subsequent equations the selected palette supplies distinct colors. With **Custom color**, additional series receive distinct hues based on the primary color rather than all appearing identical.
+
+The **Individual graph colors** row appears automatically when there are functions in the Graph input. Pick a color for any equation independently; graph-specific overrides are saved in `graph.appearance.series` in project JSON. To return a series to the palette, select another palette or restore default project appearance. Background, line weight and line styles apply across the graph.

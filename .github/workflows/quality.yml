@@ -40,3 +40,5 @@ jobs:
         run: python tests/smoke_numerical_data.py
       - name: Context menus and programmer calculator smoke test
         run: python tests/smoke_context_actions.py
+      - name: Graph styles, table zoom and calculator notation
+        run: python tests/smoke_visual_options.py

@@ -263,6 +263,7 @@
     .programmer-tools{margin:9px 0;padding:7px 0;color:#5166a0}.programmer-tools>summary{cursor:pointer;font-size:12px;font-weight:700}.programmer-tools .calc-prog-buttons{display:flex;gap:5px;flex-wrap:wrap;padding:7px 0}
     .programmer-tools button{border:1px solid #d5dff0;border-radius:7px;background:#f7f9ff;color:#41528b;padding:5px 9px}
     </style>
+<style id="viz-controls-style">.graph-appearance{margin:14px 0;border:1px solid #dbe4f4;border-radius:11px;padding:12px 15px;background:#f8faff}.graph-appearance summary{cursor:pointer;font-weight:650;color:#374e81}.graph-style-options{display:flex;align-items:end;flex-wrap:wrap;gap:12px;margin:14px 0}.graph-style-options label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#536681}.graph-style-options select,.graph-style-options input{min-height:35px;padding:5px;border:1px solid #ccd8ee;border-radius:7px}.table-zoom-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:8px 0;color:#51627d;font-size:12px}.table-zoom-toolbar input{width:165px}.table-zoom-toolbar button{min-height:30px;padding:4px 9px}#table-zoom-content{zoom:1;min-width:max-content}</style>
 </head>
 <body>
 <div class="shell">
@@ -290,7 +291,7 @@
         <div class="calc-main">
           <label for="calc-input" class="calc-label">Calculate an expression</label>
           <div class="calc-expression-wrap"><input id="calc-input" spellcheck="false" autocomplete="off" placeholder="Try: 5! + sin(pi/2) or sqrt(-1)" /><button id="calc-clear" class="secondary" type="button" title="Clear calculator">C</button></div>
-          <div class="calc-quick-options"><label>Angle units <select id="calc-angle"><option value="rad">Radians</option><option value="deg">Degrees</option></select></label><label>Precision <select id="calc-precision"><option value="6">6 digits</option><option value="10">10 digits</option><option value="12" selected>12 digits</option><option value="15">15 digits</option></select></label><label>Input radix <select id="calc-radix" aria-label="Calculator input number base"><option value="dec">Decimal (10)</option><option value="bin">Binary (2)</option><option value="hex">Hexadecimal (16)</option></select></label><span class="calc-ans" id="calc-ans">Ans: —</span></div>
+          <div class="calc-quick-options"><label>Angle units <select id="calc-angle"><option value="rad">Radians</option><option value="deg">Degrees</option></select></label><label>Number display <select id="calc-number-format"><option value="auto">Auto</option><option value="fixed">Decimal</option><option value="scientific">Scientific (1.23e+6)</option><option value="engineering">Engineering (×10³)</option></select></label><label>Precision <select id="calc-precision"><option value="6">6 digits</option><option value="10">10 digits</option><option value="12" selected>12 digits</option><option value="15">15 digits</option></select></label><label>Input radix <select id="calc-radix" aria-label="Calculator input number base"><option value="dec">Decimal (10)</option><option value="bin">Binary (2)</option><option value="hex">Hexadecimal (16)</option></select></label><span class="calc-ans" id="calc-ans">Ans: —</span></div>
           <div class="calc-result" aria-live="polite"><div class="calc-result-label">RESULT</div><div id="calc-result-math" class="calc-result-math">0</div><div id="calc-result-plain" class="calc-result-plain">Enter a calculation or use the keypad</div><div id="calc-radix-result" class="calc-radix-result" aria-live="polite"></div></div>
           <div class="calc-buttons" id="calc-buttons" aria-label="Scientific calculator keypad"></div>
           <div class="calc-footer"><button class="primary" id="calc-execute" type="button">= Calculate <span>↵</span></button><button class="secondary" id="calc-use-editor" type="button">Send to equation editor</button><button class="secondary" id="calc-copy" type="button">Copy result</button><button class="secondary" id="hub-calc-result" type="button">↑ Use answer as working equation</button><button class="secondary" data-forward="calculator" data-destination="solver" type="button">Solve answer</button><button class="secondary" data-forward="calculator" data-destination="graph2d" type="button">Graph answer</button></div>
@@ -381,7 +382,15 @@ y = cos(x)</textarea>
         </details>
 
         <div class="graph-controls"><label>X min <input type="number" id="graph-xmin" value="-10" step="any"></label><label>X max <input type="number" id="graph-xmax" value="10" step="any"></label><label class="graph-y-control">Y min <input type="number" id="graph-ymin" value="-5" step="any"></label><label class="graph-y-control">Y max <input type="number" id="graph-ymax" value="5" step="any"></label><label class="graph-z-control" hidden>Z min <input type="number" id="graph-zmin" value="-8" step="any"></label><label class="graph-z-control" hidden>Z max <input type="number" id="graph-zmax" value="8" step="any"></label></div>
-        <div class="graph-actions"><button class="secondary" type="button" data-forward="graph" data-destination="editor">Send function to Editor</button><button class="secondary" type="button" data-forward="graph" data-destination="solver">Send function to Solver</button><button id="graph-plot" type="button" class="primary">↗ Plot functions</button><button id="graph-reset" class="secondary" type="button">Reset view</button><button id="graph-save" class="secondary" type="button">↓ Export PNG</button></div>
+        <details class="graph-appearance" id="graph-appearance"><summary>🎨 Appearance · colors and styles</summary><div class="graph-style-options">
+<label>Theme <select id="plot-palette"><option value="classic">Classic</option><option value="bright">Bright</option><option value="pastel">Pastel</option><option value="mono">Monochrome</option><option value="custom">Custom color</option></select></label>
+<label>Primary color <input id="plot-color" type="color" value="#536be8"></label>
+<label>Lines <select id="plot-line-style"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></label>
+<label>Line weight <select id="plot-line-width"><option value="1.5">Thin</option><option value="3" selected>Medium</option><option value="5">Thick</option></select></label>
+<label>Points <select id="plot-points"><option value="circle">Circle</option><option value="square">Square</option><option value="diamond">Diamond</option></select></label>
+<label>Background <input id="plot-background" type="color" value="#ffffff"></label>
+</div><p class="small-note">Styles apply to equation plots and table charts. Settings are saved in your project.</p></details>
+<div class="graph-actions"><button class="secondary" type="button" data-forward="graph" data-destination="editor">Send function to Editor</button><button class="secondary" type="button" data-forward="graph" data-destination="solver">Send function to Solver</button><button id="graph-plot" type="button" class="primary">↗ Plot functions</button><button id="graph-reset" class="secondary" type="button">Reset view</button><button id="graph-save" class="secondary" type="button">↓ Export PNG</button></div>
         <div class="graph-canvas-wrap"><canvas id="graph-canvas" width="1160" height="680" aria-label="Interactive mathematical graph" role="img"></canvas><div class="graph-legend" id="graph-legend"></div></div>
         <div id="graph-status" class="graph-status" role="status">Plot y=f(x) in 2D; plot z=f(x,y) alone or pair it with y=f(x) to highlight a curve in 3D. Supported: polynomials, rational functions, trig, logs, powers, abs, min/max, and if(condition, true, false).</div>
         <details class="graph-help"><summary>Supported functions and interactions</summary><p>2D: <code>y=x^2</code>, <code>y=1/(x-1)</code>, <code>y=sin(3x)</code>, <code>y=exp(-x^2)</code>, or <code>y=if(x&lt;0,-x,x)</code>. Separate curves by newline. 3D: <code>z=sin(sqrt(x^2+y^2))</code>, <code>z=x^2-y^2</code>, or the paired lines <code>y=x×x</code> and <code>z=sin(x×y)</code>. Paired equations draw the surface and highlight its constrained 3D curve <code>(x, x², sin(x³))</code>. A single <code>y=f(x)</code> is drawn as a curve on the z=0 plane. Rotate by dragging and zoom with the mouse wheel. Radian trig notation is used for graphs.</p></details>
@@ -2051,13 +2060,24 @@ def _ms_process(job_text):
       chip.title='Copy '+label+' value';chip.addEventListener('click',()=>{navigator.clipboard?.writeText(number).catch(()=>{});});output.append(chip);
     }
   }
+  function formatCalcNumber(z,digits){
+    const mode=document.getElementById('calc-number-format')?.value||'auto';
+    if(mode==='auto')return formatComplex(z,digits);
+    const unit=x=>{if(!Number.isFinite(x))return String(x);if(x===0)return '0';
+      if(mode==='fixed')return Number(x.toFixed(Math.min(14,digits))).toString();
+      const expo=mode==='engineering'?Math.floor(Math.log10(Math.abs(x))/3)*3:null;
+      if(mode==='engineering')return Number((x/Math.pow(10,expo)).toPrecision(digits)).toString()+'e'+(expo>=0?'+':'')+expo;
+      return x.toExponential(Math.max(0,digits-1));};
+    const a=Math.abs(z.re)<1e-12?0:z.re,b=Math.abs(z.im)<1e-12?0:z.im;
+    return b===0?unit(a):(a===0?'':unit(a)+(b<0?' - ':' + '))+unit(Math.abs(b))+'i';
+  }
   function executeCalc(){
     const src=calcin.value.trim();if(!src)return;
     try{
       const parsed=calculatorBaseInput(src),digits=Number($('calc-precision').value);
       const z=parsed.exact!==null?C(Number(parsed.exact)):numeric(parseRaw(parsed.expression),{...(window.MathStudio.extraMath?.variables||{}),Ans:ans},$('calc-angle').value);
       const integer=parsed.exact!==null?parsed.exact:(Math.abs(z.im)<1e-12&&Number.isSafeInteger(z.re)?BigInt(z.re):null);
-      const display=parsed.exact!==null?parsed.exact.toString(10):formatComplex(z,digits);
+      const display=parsed.exact!==null?parsed.exact.toString(10):formatCalcNumber(z,digits);
       const tooLarge=parsed.exact!==null&&(parsed.exact>BigInt(Number.MAX_SAFE_INTEGER)||parsed.exact<BigInt(Number.MIN_SAFE_INTEGER));
       ans=tooLarge?C(0):z;
       calcres.replaceChildren();
@@ -2101,7 +2121,7 @@ def _ms_process(job_text):
     const lines=$('graph-input').value.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
     if(!lines.length&&!window.MathStudio.graphData?.hasData())throw Error('Type a function or import a dataset to plot.');
     if(lines.length>8)throw Error('Plot a maximum of eight equations at a time.');
-    if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:svgColors[i%svgColors.length]}));
+    if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:plotColor(i)}));
     // In 3D, y=f(x) constrains a one-dimensional curve on each z=f(x,y) surface.
     // For example, y=x*x and z=sin(x*y) describe (x, x², sin(x³)).
     const constraints=lines.filter(line=>/^y\s*=/i.test(line));
@@ -2110,11 +2130,11 @@ def _ms_process(job_text):
     const yAst=yLine?parseRaw(graphSource(yLine)):null;
     if(yAst&&containsVariable(yAst,'y'))throw Error('The 3D constraint must be y=f(x), without y on the right-hand side.');
     const surfaces=lines.filter(line=>!/^y\s*=/i.test(line)).map((text,i)=>({
-      name:text,kind:'surface',ast:parseRaw(graphSource(text)),color:svgColors[i%svgColors.length]
+      name:text,kind:'surface',ast:parseRaw(graphSource(text)),color:plotColor(i)
     }));
     if(!yAst)return surfaces;
     const traces=surfaces.length?surfaces.map((f,i)=>({
-      name:yLine+' ∩ '+f.name,kind:'trace',yAst,zAst:f.ast,color:i===0?'#e74764':svgColors[(i+3)%svgColors.length]
+      name:yLine+' ∩ '+f.name,kind:'trace',yAst,zAst:f.ast,color:i===0?plotColor(0):plotColor(i+3)
     })):[{name:yLine+' (z=0)',kind:'trace',yAst,zAst:null,color:'#e74764'}];
     return [...surfaces,...traces];
   }
@@ -2135,7 +2155,16 @@ def _ms_process(job_text):
   function sampled(ast,x,y=0){try{const v=numeric(ast,{x:C(x),y:C(y)},'rad');return Math.abs(v.im)>1e-9?NaN:v.re;}catch{return NaN;}}
   function niceStep(span){const n=Math.pow(10,Math.floor(Math.log10(span/8))),u=span/8/n;return n*(u<1.5?1:u<3.5?2:u<7.5?5:10);}
   const w=1160,h=680;
-  function background(){ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);}
+  const styles={classic:['#536be8','#0c9ea6','#d46a7a','#d99d35','#765ab5','#2c9a69'],bright:['#ee394c','#006fe9','#00a870','#e48b00','#893ee2'],pastel:['#94a9f7','#81d5cc','#e9a9c0','#e8bd80'],mono:['#24375d','#576c94','#899bb2','#bec9d8']};
+  function plotColor(i){const mode=document.getElementById('plot-palette')?.value||'classic';return mode==='custom'?(document.getElementById('plot-color')?.value||'#536be8'):(styles[mode]||styles.classic)[i%(styles[mode]||styles.classic).length];}
+  function plotDash(){const style=document.getElementById('plot-line-style')?.value;return style==='dashed'?[12,8]:style==='dotted'?[2,7]:[];}
+  function plotWidth(){return Number(document.getElementById('plot-line-width')?.value||3);}
+  function rgba(hex,alpha){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${alpha})`;}
+  function getAppearance(){return {palette:$('plot-palette').value,color:$('plot-color').value,line:$('plot-line-style').value,width:$('plot-line-width').value,points:$('plot-points').value,background:$('plot-background').value};}
+  function setAppearance(v={}){for(const [key,id] of [['palette','plot-palette'],['color','plot-color'],['line','plot-line-style'],['width','plot-line-width'],['points','plot-points'],['background','plot-background']]){if(v[key]&&(($(id).tagName==='SELECT')&&[...$(id).options].some(o=>o.value===v[key])) || (['color','background'].includes(key)&&/^#[0-9a-f]{6}$/i.test(v[key]||'')))$(id).value=v[key];}}
+  window.MathStudio.graphAppearance={color:plotColor,dash:plotDash,width:plotWidth,state:getAppearance,restore:setAppearance};
+  for(const id of ['plot-palette','plot-color','plot-line-style','plot-line-width','plot-points','plot-background'])$(id).addEventListener('input',()=>{$('graph-plot').click();window.dispatchEvent(new Event('mathstudio:plot-style'));});
+  function background(){ctx.fillStyle=document.getElementById('plot-background')?.value||'#fff';ctx.fillRect(0,0,w,h);}
   function drawAxes2D(){
     const {xmin,xmax,ymin,ymax}=range;
     const sx=x=>(x-xmin)/(xmax-xmin)*w,sy=y=>h-(y-ymin)/(ymax-ymin)*h;
@@ -2151,7 +2180,7 @@ def _ms_process(job_text):
   function draw2D(){
     background();const {xmin,xmax,ymin,ymax}=range,{sx,sy}=drawAxes2D();
     for(const func of graphExpr){
-      ctx.strokeStyle=func.color;ctx.lineWidth=3;ctx.lineJoin='round';ctx.beginPath();let running=false,prevY=0;
+      ctx.strokeStyle=func.color;ctx.lineWidth=plotWidth();ctx.setLineDash(plotDash());ctx.lineJoin='round';ctx.beginPath();let running=false,prevY=0;
       for(let px=0;px<=w;px+=1){
         const x=xmin+px/w*(xmax-xmin),y=sampled(func.ast,x);
         const v=sy(y),finite=Number.isFinite(y)&&Number.isFinite(v)&&Math.abs(v)<1e6;
@@ -2160,7 +2189,7 @@ def _ms_process(job_text):
         if(!running||Math.abs(v-prevY)>h*.80){ctx.moveTo(px,v);}else ctx.lineTo(px,v);
         prevY=v;running=true;
       }
-      ctx.stroke();
+      ctx.stroke();ctx.setLineDash([]);
     }
     window.MathStudio.graphData?.draw(ctx,{mode:'2d',range,w,h});
   }
@@ -2208,11 +2237,11 @@ def _ms_process(job_text):
     }
     quads.sort((a,b)=>b.depth-a.depth);
     for(const q of quads){
-      const zt=(q.height-range.zmin)/(range.zmax-range.zmin),hue=(218+q.idx*59)%360;
-      ctx.fillStyle=`hsla(${hue+25*(1-zt)},70%,${38+zt*30}%,0.77)`;
-      ctx.strokeStyle=`hsla(${hue},75%,30%,0.27)`;ctx.lineWidth=.7;
+      const zt=(q.height-range.zmin)/(range.zmax-range.zmin);
+      ctx.fillStyle=rgba(plotColor(q.idx),0.32+zt*.48);
+      ctx.strokeStyle=rgba(plotColor(q.idx),0.50);ctx.lineWidth=Math.max(.35,plotWidth()*.25);ctx.setLineDash(plotDash());
       const [a,b,c,d]=q.corners;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.lineTo(d.x,d.y);ctx.closePath();ctx.fill();ctx.stroke();
-    }
+    }ctx.setLineDash([]);
     // Constrained curves are drawn after the translucent surface mesh so users
     // can see the intersection y=f(x), z=g(x,f(x)) without it disappearing.
     for(const func of graphExpr.filter(item=>item.kind==='trace')){
@@ -2233,7 +2262,7 @@ def _ms_process(job_text):
         ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
       };
       stroke('#ffffff',8);
-      stroke(func.color,5);
+      stroke(func.color,Math.max(2,plotWidth()+2));
     }
     window.MathStudio.graphData?.draw(ctx,{mode:'3d',range,w,h,persp});
     ctx.fillStyle='#71809d';ctx.font='13px Arial';ctx.fillText('Drag to rotate · Scroll to zoom · X / Y / Z ranges can be edited',18,h-17);
@@ -2330,10 +2359,11 @@ def _ms_process(job_text):
     currentMode:()=>activeMode,
     setCalculator:(raw,run=false)=>{calcin.value=String(raw);if(run)executeCalc();},
     getCalculator:()=>lastCalc?{...lastCalc}:null,
-    getCalculatorState:()=>({expression:calcin.value,result:lastCalc,angle:$('calc-angle').value,precision:$('calc-precision').value,radix:$('calc-radix').value,history:history.slice()}),
+    getCalculatorState:()=>({expression:calcin.value,result:lastCalc,angle:$('calc-angle').value,precision:$('calc-precision').value,radix:$('calc-radix').value,format:$('calc-number-format').value,history:history.slice()}),
     restoreCalculatorState:data=>{
       calcin.value=typeof data.expression==='string'?data.expression.slice(0,12000):'';
       if(['rad','deg'].includes(data.angle))$('calc-angle').value=data.angle;
+      if(['auto','fixed','scientific','engineering'].includes(data.format))$('calc-number-format').value=data.format;
       if(['dec','bin','hex'].includes(data.radix))$('calc-radix').value=data.radix;
       if(['6','10','12','15'].includes(String(data.precision)))$('calc-precision').value=String(data.precision);
       history=Array.isArray(data.history)?data.history.filter(h=>h&&typeof h.expr==='string'&&typeof h.result==='string').slice(0,40):[];
@@ -2356,7 +2386,7 @@ def _ms_process(job_text):
       $('graph-input').value=[...lines,added].join('\n');plot();
       if($('graph-status').classList.contains('error'))throw Error($('graph-status').textContent);
     },
-    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,dataset:window.MathStudio.graphData?.exportState()||null}),
+    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,dataset:window.MathStudio.graphData?.exportState()||null,appearance:getAppearance()}),
     restoreGraphState:data=>{
       if(!data||typeof data!=='object')return;
       if(['2d','3d'].includes(data.mode))switchGraph(data.mode);
@@ -2368,7 +2398,7 @@ def _ms_process(job_text):
       if(Number.isFinite(data.azimuth))azimuth=data.azimuth;
       if(Number.isFinite(data.elevation))elevation=data.elevation;
       if(Number.isFinite(data.zoom3d))zoom3d=data.zoom3d;
-      if(window.MathStudio.graphData)window.MathStudio.graphData.restoreState(data.dataset??null);
+      if(window.MathStudio.graphData)window.MathStudio.graphData.restoreState(data.dataset??null);setAppearance(data.appearance||{});
       plot();
     }
   };
@@ -2979,7 +3009,7 @@ def _ms_process(job_text):
       <label>Sort by<select id="dt-sortcol"></select></label><label>Direction<select id="dt-sortdir"><option value="asc">Ascending</option><option value="desc">Descending</option></select></label>
       <button id="dt-sort" class="secondary" type="button">Sort table</button><button id="dt-clear-filter" class="secondary" type="button">Clear filter</button></div>
     <p id="dt-status" class="graph-data-muted" role="status">Start editing cells or import data.</p>
-    <div class="dt-grid-scroll"><table class="dt-sheet" id="dt-sheet" aria-label="Editable spreadsheet"></table></div>
+    <div class="table-zoom-toolbar"><label for="table-zoom">Table zoom <output id="table-zoom-value">100%</output></label><button type="button" id="table-zoom-out" class="secondary" title="Zoom out">−</button><input id="table-zoom" type="range" min="50" max="200" value="100" step="10"><button type="button" id="table-zoom-in" class="secondary" title="Zoom in">＋</button><button type="button" class="secondary" id="table-zoom-reset">100%</button></div><div class="dt-grid-scroll"><div id="table-zoom-content"><table class="dt-sheet" id="dt-sheet" aria-label="Editable spreadsheet"></table></div></div>
     <p class="graph-data-muted">Select a cell to edit. Formulas begin with <code>=</code>; examples: <code>=A2*B2</code>, <code>=SUM(B2:B5)</code>, <code>=AVERAGE(A2:A10)</code>, <code>=IF(A2&gt;1,B2,0)</code>, <code>=Data2!A2</code>. Row 1 is the header.</p>
     <section class="dt-box"><h3>Database operations</h3><div class="data-toolbar">
       <label>Left table<select id="dt-left"></select></label><label>Right table<select id="dt-right"></select></label>
@@ -3146,7 +3176,7 @@ def _ms_process(job_text):
     if(!entries.length)throw Error('Select a numeric values column with nonempty category labels.');
     const canvas=$('dt-chart-canvas'),ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
     ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.fillStyle='#1d2a49';ctx.font='bold 25px Arial';ctx.fillText(t.name+' — '+(kind==='pie'?'Pie':'Bar')+' chart',45,45);
-    const colors=['#536be8','#0c9ea6','#d46a7a','#d99d35','#765ab5','#2c9a69','#b85f43','#4b80be'];
+    const colors=Array.from({length:24},(_,i)=>window.MathStudio.graphAppearance?.color(i)||'#536be8');
     if(kind==='bar'){const margin=90,max=Math.max(0,...entries.map(e=>e[1])),min=Math.min(0,...entries.map(e=>e[1]));const lo=Math.min(0,min),hi=Math.max(1,max),barW=(w-2*margin)/entries.length;
       ctx.strokeStyle='#90a1c6';ctx.beginPath();ctx.moveTo(margin,100);ctx.lineTo(margin,h-95);ctx.lineTo(w-margin,h-95);ctx.stroke();
       for(let i=0;i<entries.length;i++){const [name,v]=entries[i],x=margin+i*barW+barW*.13,bw=barW*.74;
@@ -3756,5 +3786,13 @@ const topics=$('help-topics');if(topics)topics.insertAdjacentHTML('beforeend',`<
   MS.contextActions={openAt:(target,x=40,y=40)=>open({target,clientX:x,clientY:y}),close,clipboard:()=>internalClipboard,pasteCells};
 })();
 </script>
+<script id="promath-visual-controls">(()=>{'use strict';
+const $=id=>document.getElementById(id);const slider=$('table-zoom');const field=$('table-zoom-value');const content=$('table-zoom-content');
+function apply(value){const v=Math.max(50,Math.min(200,Number(value)||100));slider.value=String(v);field.textContent=v+'%';content.style.zoom=String(v/100);try{localStorage.setItem('promath-table-zoom',String(v))}catch{}}
+slider.addEventListener('input',()=>apply(slider.value));$('table-zoom-in').addEventListener('click',()=>apply(Number(slider.value)+10));$('table-zoom-out').addEventListener('click',()=>apply(Number(slider.value)-10));$('table-zoom-reset').addEventListener('click',()=>apply(100));
+try{apply(localStorage.getItem('promath-table-zoom')||100)}catch{apply(100)}
+window.MathStudio.tableZoom={value:()=>Number(slider.value),set:apply};
+window.addEventListener('mathstudio:project-loaded',()=>{});
+})();</script>
 </body>
 </html>

@@ -20,11 +20,24 @@ def main():
   page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="orders")')
   page.locator('#dt-import').set_input_files({'name':'products.json','mimeType':'application/json','buffer':json.dumps([{'id':1,'name':'alpha','price':2},{'id':2,'name':'beta','price':5}]).encode()})
   page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="products")')
-  # Database actions have moved into the Combine submenu; verify the menu UX.\n  page.locator('#data-menu-navigation > details').nth(2).evaluate('(e)=>e.open=true')\n  page.locator('#dt-left').select_option(label='orders')
-  page.locator('#dt-right').select_option(label='products')
-  page.locator('#dt-op').select_option('left');page.locator('#dt-run').click()
+  # The Combine menu contains native selects. Set their values through DOM
+  # without relying on Chromium rendering of the OS-native dropdown popup.
+  menu=page.locator('#data-menu-navigation > details').nth(2)
+  menu.evaluate('(e)=>e.open=true')
+  assert menu.evaluate('(e)=>e.open')
+  page.evaluate("""() => {
+    const select=(id,label)=>{
+      const el=document.getElementById(id);
+      const option=[...el.options].find(o=>o.textContent.trim()===label);
+      if(!option)throw Error('Missing '+label+' in '+id);
+      el.value=option.value;
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+    };
+    select('dt-left','orders');select('dt-right','products');
+  }""")
+  page.evaluate("""() => {document.getElementById('dt-op').value='left';document.getElementById('dt-run').click()}""")
   assert len(page.evaluate('MathStudio.dataTables.tables.at(-1).rows'))==3
-  page.locator('#dt-op').select_option('unionall');page.locator('#dt-run').click()
+  page.evaluate("""() => {document.getElementById('dt-op').value='unionall';document.getElementById('dt-run').click()}""")
   assert page.evaluate('MathStudio.dataTables.tables.at(-1).rows.length')==5
   page.locator('[data-workspace="graph"]').click()
   page.locator('#dt-graph-table').select_option(label='orders')

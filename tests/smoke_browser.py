@@ -75,7 +75,7 @@ def main():
         pixels = page.evaluate("""() => {
             const c=document.querySelector('#graph-canvas'), data=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
             let total=0;
-            for(let i=0;i<data.length;i+=4) if(data[i]>170 && data[i+1]<150 && data[i+2]<170)total++;
+            for(let i=0;i<data.length;i+=4) if(data[i+2]>data[i]+50 && data[i+2]>data[i+1]+25 && data[i+2]>140)total++;
             return total;
         }""")
         assert pixels > 100, pixels

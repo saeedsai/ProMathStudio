@@ -188,6 +188,20 @@
     .calc-history-item:hover{background:#edf1ff}.calc-history-expr{display:block;color:#7b8797;font-size:11px;overflow-wrap:anywhere}.calc-history-val{font-size:15px;font-weight:650;color:#182342;overflow-wrap:anywhere}
     .calc-tip{border-top:1px solid var(--edge);margin-top:15px;padding-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
     .calc-tip strong{width:100%;font-size:12px}.calc-tip button{font-size:11px;border:1px solid #dce4f1;border-radius:7px;padding:5px 7px;background:#fff;color:#354971}
+
+    .graph-data-import{border:1px solid #d6deee;background:#f8faff;border-radius:12px;padding:15px;margin:14px 0 18px}
+    .graph-data-import>summary{cursor:pointer;font-size:14px;font-weight:750;color:#314a88}
+    .graph-data-grid{display:flex;flex-wrap:wrap;align-items:end;gap:11px;margin:14px 0 8px}
+    .graph-data-grid label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:650;color:#546681}
+    .graph-data-grid select{min-width:95px;max-width:220px;min-height:37px;border:1px solid #cbd5e8;border-radius:8px;padding:6px;background:#fff}
+    .graph-data-grid button{min-height:38px}.graph-data-grid input[type=file]{max-width:100%;font-size:12px}
+    .graph-data-muted{font-size:12px;line-height:1.6;color:#5d6e85;margin:8px 0}
+    .graph-data-status{font-size:12px;color:#576c86;margin:10px 0}.graph-data-status.error{color:#a52f44}
+    .graph-data-preview{max-height:180px;overflow:auto;margin-top:8px}
+    .graph-data-preview table{border-collapse:collapse;font-size:11px;min-width:300px;width:max-content;max-width:100%}
+    .graph-data-preview th,.graph-data-preview td{border:1px solid #dfe6f2;padding:5px 9px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+    .graph-data-preview th{background:#eaf0ff}
+    [hidden]{display:none!important}
     .graph-wrap{padding:22px}.graph-mode-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
     .graph-mode-switch{display:flex;gap:4px;background:#eff2f9;padding:4px;border-radius:9px}.graph-mode{font-size:13px;padding:9px 16px;background:transparent;color:#52617a;border:0;border-radius:7px;font-weight:700}
     .graph-mode.active{background:white;color:#324fbe;box-shadow:0 1px 5px #1b286020}
@@ -331,6 +345,25 @@
         <textarea id="graph-input" rows="4" spellcheck="false">y = sin(x)
 y = cos(x)</textarea>
         <div class="graph-examples" id="graph-examples"></div>
+        <details class="graph-data-import" id="graph-data-panel" open>
+          <summary>Import CSV / JSON data to graph</summary>
+          <p class="graph-data-muted">Import numeric rows from a CSV, TSV, or JSON file (up to 1 MB / 6,000 rows). Select which columns represent X, Y, and Z. Scatter, connected path and 3D grid options overlay your equations.</p>
+          <div class="graph-data-grid"><label>Choose data file <input type="file" id="graph-data-file" accept=".csv,.tsv,.json,text/csv,application/json"></label>
+            <button class="secondary small" id="graph-data-clear" type="button">Remove data</button>
+            <button class="secondary small" id="graph-data-fit" type="button">Fit axes to data</button>
+          </div>
+          <div id="graph-data-active" hidden><div class="graph-data-muted" id="graph-data-source" aria-live="polite">No file loaded.</div>
+            <div class="graph-data-grid">
+              <label for="graph-data-x">X column <select id="graph-data-x"></select></label>
+              <label for="graph-data-y">Y column <select id="graph-data-y"></select></label>
+              <label for="graph-data-z" id="graph-data-z-label" hidden>Z column <select id="graph-data-z"></select></label>
+              <label for="graph-data-style">Plot style <select id="graph-data-style"><option value="points">Scatter points</option><option value="line">Connected line + points</option><option value="grid">3D grid mesh (if gridded) + points</option></select></label>
+            </div>
+            <div class="graph-data-preview" id="graph-data-preview" aria-label="First five imported rows"></div>
+          </div>
+          <div id="graph-data-status" class="graph-data-status" role="status">No dataset loaded. Import CSV or JSON to add data to the graph.</div>
+        </details>
+
         <div class="graph-controls"><label>X min <input type="number" id="graph-xmin" value="-10" step="any"></label><label>X max <input type="number" id="graph-xmax" value="10" step="any"></label><label class="graph-y-control">Y min <input type="number" id="graph-ymin" value="-5" step="any"></label><label class="graph-y-control">Y max <input type="number" id="graph-ymax" value="5" step="any"></label><label class="graph-z-control" hidden>Z min <input type="number" id="graph-zmin" value="-8" step="any"></label><label class="graph-z-control" hidden>Z max <input type="number" id="graph-zmax" value="8" step="any"></label></div>
         <div class="graph-actions"><button class="secondary" type="button" data-forward="graph" data-destination="editor">Send function to Editor</button><button class="secondary" type="button" data-forward="graph" data-destination="solver">Send function to Solver</button><button id="graph-plot" type="button" class="primary">↗ Plot functions</button><button id="graph-reset" class="secondary" type="button">Reset view</button><button id="graph-save" class="secondary" type="button">↓ Export PNG</button></div>
         <div class="graph-canvas-wrap"><canvas id="graph-canvas" width="1160" height="680" aria-label="Interactive mathematical graph" role="img"></canvas><div class="graph-legend" id="graph-legend"></div></div>
@@ -1892,7 +1925,7 @@ def _ms_process(job_text):
   }
   function compileGraph(){
     const lines=$('graph-input').value.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
-    if(!lines.length)throw Error('Type at least one function to plot.');
+    if(!lines.length&&!window.MathStudio.graphData?.hasData())throw Error('Type a function or import a dataset to plot.');
     if(lines.length>8)throw Error('Plot a maximum of eight equations at a time.');
     if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:svgColors[i%svgColors.length]}));
     // In 3D, y=f(x) constrains a one-dimensional curve on each z=f(x,y) surface.
@@ -1955,6 +1988,7 @@ def _ms_process(job_text):
       }
       ctx.stroke();
     }
+    window.MathStudio.graphData?.draw(ctx,{mode:'2d',range,w,h});
   }
   function persp(x,y,z){
     const {xmin,xmax,ymin,ymax,zmin,zmax}=range;
@@ -2027,16 +2061,21 @@ def _ms_process(job_text):
       stroke('#ffffff',8);
       stroke(func.color,5);
     }
+    window.MathStudio.graphData?.draw(ctx,{mode:'3d',range,w,h,persp});
     ctx.fillStyle='#71809d';ctx.font='13px Arial';ctx.fillText('Drag to rotate · Scroll to zoom · X / Y / Z ranges can be edited',18,h-17);
   }
   function legend(){const frame=$('graph-legend');frame.replaceChildren();for(const [i,f] of graphExpr.entries()){
     const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=f.kind==='trace'?f.color:graphMode==='3d'?`hsl(${(218+i*59)%360} 70% 55%)`:f.color;
     const t=document.createElement('span');t.textContent=f.name;row.append(sw,t);frame.append(row);
-  }}
+  }
+    for(const item of window.MathStudio.graphData?.legend()||[]){
+      const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=item.color;const t=document.createElement('span');t.textContent=item.name;row.append(sw,t);frame.append(row);
+    }
+  }
   function drawGraph(){if(graphCanvas.width!==w||graphCanvas.height!==h){graphCanvas.width=w;graphCanvas.height=h}if(graphMode==='3d')draw3D();else draw2D();legend();}
   function plot(){
     try{updateRange();graphExpr=compileGraph();drawGraph();
-      let hasRealSamples=false,hasTraceSamples=false;
+      let hasRealSamples=!!window.MathStudio.graphData?.hasData(),hasTraceSamples=false;
       for(const func of graphExpr){
         for(let k=0;k<=96;k++){
           const x=range.xmin+(range.xmax-range.xmin)*k/96;
@@ -2052,7 +2091,8 @@ def _ms_process(job_text):
       const traces=graphExpr.filter(f=>f.kind==='trace').length;
       const surfaces=graphExpr.filter(f=>f.kind==='surface').length;
       const summary=graphMode==='3d'&&traces?`Displaying ${surfaces} surface(s) and ${traces} constrained 3D curve(s). ${hasTraceSamples?'The bright line follows y=f(x) on z=f(x,y).':'The curve is outside the current Y/Z range; adjust graph bounds.'} Drag to rotate.`:'Displaying '+graphExpr.length+' '+(graphExpr.length===1?'function':'functions')+' in '+(graphMode==='2d'?'2D':'3D')+'. '+(graphMode==='3d'?'Drag to rotate the surface; scroll to zoom.':'Drag to pan; scroll to zoom.');
-      graphMsg(hasRealSamples?summary:'No real-valued points in this view. A function may be complex or undefined here; adjust the domain or plot its original real-valued equation.',!hasRealSamples||traces>0&&!hasTraceSamples);
+      const added=window.MathStudio.graphData?.info();
+      graphMsg(hasRealSamples?(added?(graphExpr.length?summary+' ':'')+added+'. '+(graphMode==='3d'?'Drag to rotate.':'Drag to pan.') :summary):'No real-valued points in this view. A function may be complex or undefined here; adjust the domain or plot its original real-valued equation.',!hasRealSamples||traces>0&&!hasTraceSamples);
     }catch(e){graphMsg(e.message,true);}
   }
   function setRanges(r){for(const [key,value] of Object.entries(r))if($('graph-'+key))$('graph-'+key).value=value;range={...range,...r};}
@@ -2141,7 +2181,7 @@ def _ms_process(job_text):
       $('graph-input').value=[...lines,added].join('\n');plot();
       if($('graph-status').classList.contains('error'))throw Error($('graph-status').textContent);
     },
-    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d}),
+    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,dataset:window.MathStudio.graphData?.exportState()||null}),
     restoreGraphState:data=>{
       if(!data||typeof data!=='object')return;
       if(['2d','3d'].includes(data.mode))switchGraph(data.mode);
@@ -2153,6 +2193,7 @@ def _ms_process(job_text):
       if(Number.isFinite(data.azimuth))azimuth=data.azimuth;
       if(Number.isFinite(data.elevation))elevation=data.elevation;
       if(Number.isFinite(data.zoom3d))zoom3d=data.zoom3d;
+      if(window.MathStudio.graphData)window.MathStudio.graphData.restoreState(data.dataset??null);
       plot();
     }
   };
@@ -2450,6 +2491,266 @@ def _ms_process(job_text):
   window.MathStudio.bridge={transfer,select:current,state:()=>({...state}),export:projectData};
 })();
 
+</script>
+<script>
+/* Graph data import module. Plain JavaScript, no external packages or eval().
+   Keep embedded in index.html to preserve the single-file offline distribution. */
+(()=>{
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const fileInput=$('graph-data-file'),source=$('graph-data-source'),status=$('graph-data-status');
+  const selectors={x:$('graph-data-x'),y:$('graph-data-y'),z:$('graph-data-z')};
+  const style=$('graph-data-style'),preview=$('graph-data-preview');
+  const MAX_BYTES=1_000_000,MAX_ROWS=6000,MAX_COLS=32,MAX_CELL=8000;
+  let dataset=null;
+  let series=[];
+  const palette=['#e05663','#15a5ad','#735bd7','#d17b2d','#17a15a'];
+  const message=(text,error=false)=>{status.textContent=text;status.classList.toggle('error',error);};
+  const trim=s=>String(s??'').trim();
+  const finite=n=>Number.isFinite(n);
+  const cleanNumber=s=>{
+    if(typeof s==='number')return finite(s)?s:null;
+    if(typeof s!=='string'||!s.trim())return null;
+    const raw=s.trim();
+    if(!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw))return null;
+    const n=Number(raw);return finite(n)?n:null;
+  };
+  const isRecord=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
+  function csvRows(text){
+    text=text.replace(/^\uFEFF/,'');
+    // Sniff separator from the first non-quoted record, supports CSV/TSV/semicolon CSV.
+    const count={',':0,';':0,'\t':0};let quoted=false;
+    for(let i=0;i<Math.min(text.length,MAX_CELL);i++){
+      const ch=text[i];
+      if(ch==='"'){
+        if(quoted&&text[i+1]==='"'){i++;continue;}quoted=!quoted;
+      }else if(!quoted){if(ch==='\r'||ch==='\n')break;if(ch in count)count[ch]++;}
+    }
+    const delimiter=Object.keys(count).sort((a,b)=>count[b]-count[a])[0];
+    if(!count[delimiter])throw Error('CSV header must contain at least two columns.');
+    const rows=[],row=[];let field='',quotedCell=false,closed=false;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i];
+      if(ch==='"'){
+        if(quotedCell&&text[i+1]==='"'){field+='"';i++;}
+        else if(quotedCell){quotedCell=false;closed=true;}
+        else if(!field&&!closed)quotedCell=true;
+        else throw Error('Unexpected quote in CSV field.');
+      }else if(!quotedCell&&ch===delimiter){
+        row.push(field);field='';closed=false;
+      }else if(!quotedCell&&(ch==='\r'||ch==='\n')){
+        row.push(field);field='';closed=false;
+        if(row.some(x=>x.trim()!=='')){rows.push(row.slice());if(rows.length>MAX_ROWS+1)throw Error('File exceeds 6,000 data rows.');}
+        row.length=0;if(ch==='\r'&&text[i+1]==='\n')i++;
+      }else{
+        if(closed&&ch!==' '&&ch!=='\t')throw Error('Invalid characters after quoted CSV field.');
+        field+=ch;
+        if(field.length>MAX_CELL)throw Error('A CSV cell exceeds the maximum length.');
+      }
+    }
+    if(quotedCell)throw Error('CSV contains an unclosed quote.');
+    row.push(field);
+    if(row.some(x=>x.trim()!==''))rows.push(row);
+    if(rows.length<2)throw Error('CSV needs a header row and at least one data row.');
+    const headers=rows.shift().map(trim);
+    if(headers.length<2||headers.length>MAX_COLS)throw Error('CSV must contain 2–32 columns.');
+    if(headers.some(x=>!x))throw Error('CSV column names cannot be empty.');
+    for(const r of rows)if(r.length!==headers.length)throw Error('Inconsistent CSV column count.');
+    return {headers,rows};
+  }
+  function jsonRows(text){
+    const input=JSON.parse(text);
+    let raw=input;
+    if(isRecord(input)){
+      if(Array.isArray(input.data))raw=input.data;
+      else if(Array.isArray(input.points))raw=input.points;
+      else if(Array.isArray(input.rows)&&Array.isArray(input.columns)){
+        if(input.columns.every(s=>typeof s==='string'))return {headers:input.columns,rows:input.rows};
+        throw Error('JSON columns must be strings.');
+      }else{
+        const keys=Object.keys(input).filter(k=>Array.isArray(input[k]));
+        if(keys.length>=2&&keys.every(k=>input[k].length===input[keys[0]].length))
+          return {headers:keys,rows:input[keys[0]].map((_,i)=>keys.map(k=>input[k][i]))};
+        throw Error('JSON requires an array of rows/objects, {data:[...]}, {points:[...]}, {columns,rows}, or column arrays.');
+      }
+    }
+    if(!Array.isArray(raw)||!raw.length)throw Error('JSON needs a non-empty array of records or coordinate arrays.');
+    if(Array.isArray(raw[0])){
+      const n=raw[0].length;
+      if(n<2||n>MAX_COLS)throw Error('JSON coordinate arrays need 2–32 values per row.');
+      return {headers:['x','y','z',...Array.from({length:Math.max(0,n-3)},(_,i)=>'v'+(i+4))].slice(0,n),rows:raw};
+    }
+    if(!isRecord(raw[0]))throw Error('JSON rows must be objects or coordinate arrays.');
+    const keys=Object.keys(raw[0]);
+    if(keys.length<2||keys.length>MAX_COLS)throw Error('JSON must contain 2–32 columns.');
+    return {headers:keys,rows:raw.map(r=>{if(!isRecord(r))throw Error('Mixed JSON record types.');return keys.map(k=>r[k]);})};
+  }
+  function validateTable(table,name){
+    if(!table||!Array.isArray(table.headers)||!Array.isArray(table.rows))throw Error('Invalid tabular data.');
+    if(table.headers.length<2||table.headers.length>MAX_COLS||!table.headers.every(x=>typeof x==='string'&&x.length>0&&x.length<=100))throw Error('Invalid column names.');
+    if(!table.rows.length||table.rows.length>MAX_ROWS)throw Error('Data must have 1–6,000 rows.');
+    const rows=table.rows.map(r=>{
+      if(!Array.isArray(r)||r.length!==table.headers.length)throw Error('A row has an incorrect column count.');
+      return r.map(v=>{
+        if(v===null||typeof v==='number'||typeof v==='boolean')return v;
+        if(typeof v!=='string'||v.length>MAX_CELL)throw Error('Unsupported data cell value.');
+        return v;
+      });
+    });
+    return {name:String(name||'Imported data').slice(0,150),headers:table.headers.slice(),rows};
+  }
+  function setSelector(el,headers,defaultIndex){
+    el.replaceChildren();
+    for(const [i,h] of headers.entries()){
+      const opt=document.createElement('option');opt.value=String(i);opt.textContent=h;el.append(opt);
+    }
+    el.value=String(defaultIndex);
+  }
+  function findCol(headers,aliases,fallback){
+    const i=headers.findIndex(s=>aliases.includes(s.trim().toLowerCase()));return i>=0?i:fallback;
+  }
+  function updatePreview(){
+    preview.replaceChildren();if(!dataset)return;
+    const table=document.createElement('table'),head=document.createElement('thead'),tr=document.createElement('tr');
+    for(const h of dataset.headers){const th=document.createElement('th');th.textContent=h;tr.append(th);}head.append(tr);table.append(head);
+    const body=document.createElement('tbody');for(const row of dataset.rows.slice(0,5)){
+      const tr=document.createElement('tr');for(const cell of row){const td=document.createElement('td');td.textContent=cell===null?'':String(cell);tr.append(td);}body.append(tr);
+    }table.append(body);preview.append(table);
+  }
+  function hasData(){return !!dataset&&series.length>0;}
+  function getMode(){return window.MathStudio.advanced.currentGraphMode();}
+  function makeSeries(){
+    series=[];if(!dataset)return;
+    const xi=+selectors.x.value,yi=+selectors.y.value,zi=+selectors.z.value;
+    if(xi===yi|| (getMode()==='3d'&&(xi===zi||yi===zi)))throw Error('Select different columns for the X, Y, and Z axes.');
+    const points=[];let skipped=0;
+    for(const r of dataset.rows){
+      const x=cleanNumber(r[xi]),y=cleanNumber(r[yi]),z=getMode()==='3d'?cleanNumber(r[zi]):0;
+      if(x===null||y===null||z===null){skipped++;continue;}
+      points.push({x,y,z});
+    }
+    if(!points.length)throw Error('No valid numeric coordinate rows for the chosen axes.');
+    series=[{kind:'data',name:dataset.name+' ('+[dataset.headers[xi],dataset.headers[yi],...(getMode()==='3d'?[dataset.headers[zi]]:[])].join(', ')+')',color:palette[0],points,skipped}];
+    message(`${points.length} numeric row(s) ready, ${skipped} skipped. ${getMode()==='2d'?'2D':'3D'} ${style.value==='points'?'scatter':style.value==='grid'?'grid/point':'connected'} plot; click Fit to data to adjust bounds.`);
+  }
+  function loadTable(table,name){
+    const next=validateTable(table,name);
+    const old=dataset;
+    dataset=next;
+    const headers=next.headers;
+    setSelector(selectors.x,headers,findCol(headers,['x','time','t'],0));
+    setSelector(selectors.y,headers,findCol(headers,['y','value','measurement'],Math.min(1,headers.length-1)));
+    setSelector(selectors.z,headers,findCol(headers,['z','height','depth'],Math.min(2,headers.length-1)));
+    if(+selectors.x.value===+selectors.y.value)selectors.y.value=String((+selectors.x.value+1)%headers.length);
+    if(headers.length>=3&&[selectors.x.value,selectors.y.value].includes(selectors.z.value))selectors.z.value=String(headers.findIndex((_,i)=>![+selectors.x.value,+selectors.y.value].includes(i)));
+    $('graph-data-active').hidden=false;
+    source.textContent=`${dataset.name} · ${dataset.rows.length} rows · ${dataset.headers.length} columns`;
+    updatePreview();
+    try{makeSeries();}catch(e){dataset=old;throw e;}
+  }
+  function currentRange(){return window.MathStudio.advanced.getGraphState().bounds;}
+  function fit(){
+    if(!hasData())throw Error('Import data with numeric columns first.');
+    const pts=series[0].points,mode=getMode();
+    const bounds={...currentRange()};
+    for(const axis of mode==='3d'?['x','y','z']:['x','y']){
+      let min=Math.min(...pts.map(p=>p[axis])),max=Math.max(...pts.map(p=>p[axis]));
+      const pad=(max-min||Math.max(1,Math.abs(max)))*.08;
+      bounds[axis+'min']=min-pad;bounds[axis+'max']=max+pad;
+    }
+    for(const [key,val] of Object.entries(bounds))$("graph-"+key).value=String(+val.toPrecision(9));
+    $('graph-plot').click();
+  }
+  function draw2D(ctx,props,entry){
+    const {range,w,h}=props,{xmin,xmax,ymin,ymax}=range;
+    const sx=x=>(x-xmin)/(xmax-xmin)*w,sy=y=>h-(y-ymin)/(ymax-ymin)*h;
+    const pts=entry.points.filter(p=>p.x>=xmin&&p.x<=xmax&&p.y>=ymin&&p.y<=ymax);
+    if(style.value!=='points'){
+      ctx.save();ctx.strokeStyle=entry.color;ctx.lineWidth=2.5;ctx.beginPath();let prev=null;
+      for(const p of pts){if(!prev)ctx.moveTo(sx(p.x),sy(p.y));else ctx.lineTo(sx(p.x),sy(p.y));prev=p;}ctx.stroke();ctx.restore();
+    }
+    ctx.save();ctx.fillStyle=entry.color;
+    for(const p of pts){ctx.beginPath();ctx.arc(sx(p.x),sy(p.y),4.2,0,Math.PI*2);ctx.fill();}
+    ctx.restore();
+  }
+  function draw3D(ctx,props,entry){
+    const {range,persp}=props;
+    const pts=entry.points.filter(p=>p.x>=range.xmin&&p.x<=range.xmax&&p.y>=range.ymin&&p.y<=range.ymax&&p.z>=range.zmin&&p.z<=range.zmax);
+    // Grid coordinates may be unordered. Reconstruct an irregular rectangular mesh only
+    // when every x/y grid location has a numeric z (one point per pair).
+    if(style.value==='grid'){
+      const xs=[...new Set(pts.map(p=>p.x))].sort((a,b)=>a-b),ys=[...new Set(pts.map(p=>p.y))].sort((a,b)=>a-b);
+      if(xs.length>1&&ys.length>1&&xs.length*ys.length<=10000&&xs.length*ys.length===pts.length){
+        const map=new Map(pts.map(p=>[p.x+'|'+p.y,p]));
+        if(map.size===pts.length){
+          const quads=[];
+          for(let i=0;i<xs.length-1;i++)for(let j=0;j<ys.length-1;j++){
+            const q=[[xs[i],ys[j]],[xs[i+1],ys[j]],[xs[i+1],ys[j+1]],[xs[i],ys[j+1]]].map(([x,y])=>map.get(x+'|'+y));
+            if(q.some(x=>!x))continue;
+            const corners=q.map(p=>persp(p.x,p.y,p.z));quads.push({corners,depth:corners.reduce((n,p)=>n+p.depth,0)/4});
+          }
+          quads.sort((a,b)=>b.depth-a.depth);
+          ctx.save();ctx.fillStyle='rgba(224,86,99,.20)';ctx.strokeStyle='rgba(174,43,75,.48)';ctx.lineWidth=1.3;
+          for(const q of quads){ctx.beginPath();q.corners.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.stroke();}ctx.restore();
+        }
+      }
+    }
+    if(style.value==='line'){
+      ctx.save();ctx.strokeStyle=entry.color;ctx.lineWidth=2.4;ctx.beginPath();let started=false;
+      for(const p of pts){const projected=persp(p.x,p.y,p.z);if(!started)ctx.moveTo(projected.x,projected.y);else ctx.lineTo(projected.x,projected.y);started=true;}ctx.stroke();ctx.restore();
+    }
+    ctx.save();ctx.fillStyle=entry.color;ctx.strokeStyle='#fff';ctx.lineWidth=1.1;
+    for(const p of pts){const s=persp(p.x,p.y,p.z);ctx.beginPath();ctx.arc(s.x,s.y,4.3,0,2*Math.PI);ctx.fill();ctx.stroke();}ctx.restore();
+  }
+  function draw(ctx,props){
+    if(!hasData())return;
+    for(const entry of series)if(props.mode==='2d')draw2D(ctx,props,entry);else draw3D(ctx,props,entry);
+  }
+  function legend(){return hasData()?series.map(({name,color})=>({name,color})):[];}
+  function info(){return hasData()?`${series[0].points.length} imported data points from ${dataset.name}`:'';}
+  function exportState(){
+    if(!dataset)return null;
+    return {name:dataset.name,headers:dataset.headers,rows:dataset.rows,x:selectors.x.value,y:selectors.y.value,z:selectors.z.value,style:style.value};
+  }
+  function restoreState(state){
+    if(state===null||state===undefined){clear(false);return;}
+    if(!isRecord(state))throw Error('Invalid graph dataset.');
+    loadTable({headers:state.headers,rows:state.rows},state.name);
+    for(const key of ['x','y','z']){
+      const selected=Number(state[key]);if(Number.isInteger(selected)&&selected>=0&&selected<dataset.headers.length)selectors[key].value=String(selected);
+    }
+    if(['points','line','grid'].includes(state.style))style.value=state.style;
+    makeSeries();
+  }
+  function clear(redraw=true){
+    dataset=null;series=[];$('graph-data-active').hidden=true;source.textContent='No file loaded.';
+    preview.replaceChildren();fileInput.value='';message('No dataset loaded. Import CSV or JSON to add data to the graph.');
+    if(redraw)$('graph-plot').click();
+  }
+  async function importFile(file){
+    if(!file)return;
+    if(file.size>MAX_BYTES)throw Error('File exceeds the 1 MB limit.');
+    if(!/\.(csv|tsv|json)$/i.test(file.name))throw Error('Choose a .csv, .tsv or .json file.');
+    const content=await file.text();
+    const raw=/\.json$/i.test(file.name)?jsonRows(content):csvRows(content);
+    loadTable(raw,file.name);
+    $('graph-plot').click();
+  }
+  fileInput.addEventListener('change',async e=>{
+    try{await importFile(e.target.files?.[0]);}catch(error){message('Import failed: '+error.message,true);}finally{fileInput.value='';}
+  });
+  for(const el of [...Object.values(selectors),style])el.addEventListener('change',()=>{
+    try{makeSeries();$('graph-plot').click();}catch(e){message(e.message,true);}
+  });
+  $('graph-data-fit').addEventListener('click',()=>{try{fit();}catch(e){message(e.message,true);}});
+  $('graph-data-clear').addEventListener('click',()=>clear());
+  document.querySelectorAll('[data-graph-mode]').forEach(button=>button.addEventListener('click',()=>{
+    $('graph-data-z-label').hidden=getMode()!=='3d';
+    if(dataset){try{makeSeries();$('graph-plot').click();}catch(e){series=[];message(e.message,true);}}
+  }));
+  $('graph-data-z-label').hidden=getMode()!=='3d';
+  window.MathStudio.graphData={hasData,draw,legend,info,exportState,restoreState,refresh:()=>{if(dataset){makeSeries();}},parseCSV:csvRows,parseJSON:jsonRows,importFile,clear,getState:()=>dataset?{...exportState(),points:series[0]?.points.slice()}:null};
+})();
 </script>
 </body>
 </html>

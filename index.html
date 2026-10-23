@@ -2964,9 +2964,11 @@ def _ms_process(job_text):
     const points=next.rows.map(row=>({x:cleanNumber(row[xi]),y:cleanNumber(row[yi]),z:mode==='3d'?cleanNumber(row[zi]):0})).filter(p=>p.x!==null&&p.y!==null&&p.z!==null);
     if(!points.length)throw Error('No numeric rows in selected columns.');
     const entry={kind:'data',name:next.name+' ('+[next.headers[xi],next.headers[yi],...(mode==='3d'?[next.headers[zi]]:[])].join(', ')+')',color:palette[(extraSeries.length+1)%palette.length],points,skipped:next.rows.length-points.length,style:mapping.style||'points',origin:{table:{headers:next.headers,rows:next.rows},name:next.name,mapping:{...mapping,mode}}};
-    extraSeries.push(entry);
-    if(!dataset)loadTable(table,name,mapping);
-    else series=[series[0],...extraSeries];
+    if(!dataset){
+      loadTable(table,name,mapping);
+      style.value=mapping.style||'points';makeSeries();$('graph-plot').click();return series[0];
+    }
+    extraSeries.push(entry);series=[series[0],...extraSeries];
     $('graph-plot').click();return entry;
   }
   function clearExtra(){extraSeries=[];if(dataset)makeSeries();$('graph-plot').click();}

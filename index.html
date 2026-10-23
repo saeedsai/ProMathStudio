@@ -2971,7 +2971,7 @@ def _ms_process(job_text):
     for(const [key,val] of Object.entries(bounds))$("graph-"+key).value=String(+val.toPrecision(9));
     $('graph-plot').click();
   }
-  function seriesPaint(entry){return entry.color;}
+  function seriesPaint(entry){return entry===series[0]?(window.MathStudio.graphAppearance?.color(0)||entry.color):entry.color;}
   function drawDataMarker(ctx,x,y){
     const shape=document.getElementById('plot-points')?.value||'circle',r=4.2;
     ctx.beginPath();
@@ -3025,7 +3025,7 @@ def _ms_process(job_text):
     if(!hasData())return;
     for(const entry of series)if(props.mode==='2d')draw2D(ctx,props,entry);else draw3D(ctx,props,entry);
   }
-  function legend(){return hasData()?series.map(({name,color})=>({name,color})):[];}
+  function legend(){return hasData()?series.map((entry,i)=>({name:entry.name,color:seriesPaint(entry)})):[];}
   function info(){return hasData()?`${series[0].points.length} imported data points from ${dataset.name}`:'';}
   function exportState(){
     if(!dataset)return null;

@@ -1,0 +1,2 @@
+# Development-only dependency; app runtime is still standalone index.html.
+playwright>=1.54,<2

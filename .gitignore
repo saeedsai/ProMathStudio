@@ -1,0 +1,18 @@
+# Local development/test artifacts
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+node_modules/
+dist/
+build/
+*.py[cod]
+.DS_Store
+Thumbs.db
+playwright-report/
+test-results/
+*.log
+# User exports should not be committed
+MathStudio_Project*.json
+MathStudio_*_graph.png

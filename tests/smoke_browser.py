@@ -36,7 +36,7 @@ def main():
         page.set_viewport_size({'width': 1440, 'height': 960})
         page.locator('[data-workspace="editor"]').click()
         page.locator('#equation-input').fill('(x-1)^2')
-        assert page.locator('#preview math').count() > 0
+        assert page.locator('#preview math').count() > 0, errors
         page.locator('#add-btn').click()
         assert page.locator('#counter').inner_text() == '(1)'
 

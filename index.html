@@ -742,7 +742,7 @@ def _ms_process(job_text):
       }
       if(['(','[','{'].includes(t.value))return this.parseGroup();
       if(t.type==='word'){
-        this.take();if((functions.has(t.value)||['y','u','psi','phi','f','g','h','T','w'].includes(t.value))&&this.peek().value==='(')return this.parseCall(t.value);
+        this.take();if((functions.has(t.value)||customFunctions.some(f=>f.name===t.value)||['y','u','psi','phi','f','g','h','T','w'].includes(t.value))&&this.peek().value==='(')return this.parseCall(t.value);
         if(functions.has(t.value)&&['sqrt','sin','cos','tan','ln','log'].includes(t.value)&&this.starts(this.peek()))return {kind:'call',name:t.value,args:[this.expression(55)]};
         return {kind:'symbol',value:t.value};
       }

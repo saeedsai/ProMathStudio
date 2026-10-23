@@ -301,10 +301,10 @@
       <div class="cas-wrap">
         <p class="cas-intro">Expand, simplify, factor, differentiate, integrate, and solve equations, including complex solutions. The built-in solver works offline; the optional full SymPy engine runs locally in your browser after its initial online download.</p>
         <div class="cas-toolbar">
-          <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="numeric">Numerical roots (SymPy)</option></select></label>
+          <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="numeric">Numerical roots (SymPy)</option><optgroup label="Integral transforms · SymPy"><option value="laplace">Laplace transform ℒ</option><option value="inverse_laplace">Inverse Laplace ℒ⁻¹</option><option value="fourier">Fourier transform ℱ</option><option value="inverse_fourier">Inverse Fourier ℱ⁻¹</option></optgroup><optgroup label="Differential equations · SymPy"><option value="ode">Solve ODE (dsolve)</option><option value="pde">Solve PDE (pdsolve)</option></optgroup></select></label>
           <label class="cas-field cas-engine">Engine <select id="cas-engine"><option value="auto">Auto — offline → SymPy</option><option value="sympy">SymPy — full solver</option><option value="offline">Built-in — offline only</option></select></label>
           <label class="cas-field variable">Variable <input id="cas-variable" type="text" value="x" maxlength="24" spellcheck="false" aria-label="Symbolic variable" /></label>
-          <button type="button" class="primary" id="cas-run">▶ Execute</button>
+          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
         </div>
         <label class="cas-examples-label">Try a calculation
           <select id="cas-examples"><option value="">Choose an example…</option>
@@ -320,6 +320,12 @@
             <option value="x^9-x-1=0">Degree 9: exact RootOf solutions</option>
             <option value="x^9=1">All nine roots of unity</option>
             <option value="sin(x)=0">Trigonometric solution set</option>
+            <option value="exp(-2*t)" data-operation="laplace" data-variable="t">Laplace of e^(-2t)</option>
+            <option value="1/(s+2)" data-operation="inverse_laplace" data-variable="s" data-target="t">Inverse Laplace: 1/(s+2)</option>
+            <option value="exp(-x^2)" data-operation="fourier" data-variable="x" data-target="k">Fourier of Gaussian</option>
+            <option value="diff(y(t),t)+y(t)=0" data-operation="ode" data-variable="t">ODE y′+y=0</option>
+            <option value="diffn(y(t),t,2)+4*y(t)=0" data-operation="ode" data-variable="t">ODE oscillator</option>
+            <option value="pdiff(u(x,t),t)+pdiff(u(x,t),x)=0" data-operation="pde" data-variable="x">PDE transport equation</option>
           </select>
         </label>
         <p class="cas-engine-note"><strong>Auto:</strong> fast offline algebra first; advanced problems automatically switch to real Python/SymPy via Pyodide. First use needs internet to download the Python runtime and SymPy; computations stay on your device. No server or API key required.</p>
@@ -465,7 +471,7 @@ def _ms_process(job_text):
     varname = str(job.get('variable','x'))
     if not varname.isidentifier() or len(varname)>24 or varname in MS_CONST:
         raise MathStudioSympyError('Choose a valid symbolic variable such as x, t, or theta.')
-    if operation not in {'auto','solve','expand','simplify','factor','differentiate','integrate','numeric'}:
+    if operation not in {'auto','solve','expand','simplify','factor','differentiate','integrate','numeric','laplace','inverse_laplace','fourier','inverse_fourier','ode','pde'}:
         raise MathStudioSympyError('Unsupported symbolic operation.')
     variable = sp.Symbol(varname)
     pole_expressions = []
@@ -518,6 +524,10 @@ def _ms_process(job_text):
                 if not rows or len({len(r) for r in rows})>1:raise MathStudioSympyError('Matrix rows must have the same number of columns.')
                 m=sp.Matrix(rows)
                 return m.det() if name in {'det','vmatrix'} else m
+            if name in {'laplace','inverse_laplace','fourier','inverse_fourier'} and len(args)==3:
+                op={'laplace':sp.laplace_transform,'inverse_laplace':sp.inverse_laplace_transform,
+                    'fourier':sp.fourier_transform,'inverse_fourier':sp.inverse_fourier_transform}[name]
+                return op(*args, noconds=True) if name=='laplace' else op(*args)
             if name=='vector':return sp.Matrix(args)
             if name in {'diff','pdiff'} and len(args)==2:return sp.diff(args[0],args[1])
             if name=='diffn' and len(args)==3:return sp.diff(args[0],args[1],args[2])
@@ -537,7 +547,34 @@ def _ms_process(job_text):
     expression=build(ast)
     if operation=='auto':operation='solve' if isinstance(expression,sp.Equality) else 'expand'
     is_equation=isinstance(expression,sp.Equality)
-    if operation in {'solve','numeric'}:
+    if operation in {'ode','pde'}:
+        if not isinstance(expression,sp.Equality):
+            expression=sp.Eq(expression,0,evaluate=False)
+        try:
+            if operation=='ode':
+                derivs=list(expression.atoms(sp.Derivative))
+                dependent=[d.expr for d in derivs if isinstance(d.expr,sp.core.function.AppliedUndef)]
+                if not dependent: raise MathStudioSympyError('ODE requires a derivative of an unknown function such as y(t).')
+                solution=sp.dsolve(expression, dependent[0])
+                note='SymPy analytic ODE solution. Integration constants are arbitrary; initial conditions are not applied.'
+            else:
+                derivs=list(expression.atoms(sp.Derivative))
+                dependent=[d.expr for d in derivs if isinstance(d.expr,sp.core.function.AppliedUndef)]
+                if not dependent: raise MathStudioSympyError('PDE requires partial derivatives of an unknown function such as u(x,t).')
+                solution=sp.pdsolve(expression, dependent[0])
+                note='SymPy PDE solution for a supported class; arbitrary functions/constants may appear.'
+            outputs=solution if isinstance(solution,list) else [solution]
+        except (NotImplementedError,ValueError,TypeError) as ex:
+            raise MathStudioSympyError('SymPy cannot solve this '+operation.upper()+' in closed form: '+str(ex)[:220])
+    elif operation in {'laplace','inverse_laplace','fourier','inverse_fourier'}:
+        if is_equation:raise MathStudioSympyError('Choose an expression rather than an equality for a transform.')
+        target=sp.Symbol(str(job.get('target','s' if 'laplace' in operation else 'k')))
+        if operation=='laplace': outputs=[sp.laplace_transform(expression,variable,target,noconds=True)]
+        elif operation=='inverse_laplace':outputs=[sp.inverse_laplace_transform(expression,variable,target)]
+        elif operation=='fourier':outputs=[sp.fourier_transform(expression,variable,target)]
+        else:outputs=[sp.inverse_fourier_transform(expression,variable,target)]
+        note='SymPy '+operation.replace('_',' ')+' (Fourier uses exp(-2πikx) convention). Check convergence and assumptions.'
+    elif operation in {'solve','numeric'}:
         delta=(expression.lhs-expression.rhs) if is_equation else expression
         if isinstance(delta,sp.MatrixBase):raise MathStudioSympyError('Use a scalar equation to solve for a variable.')
         if not delta.has(variable):
@@ -686,7 +723,7 @@ def _ms_process(job_text):
       }
       if(['(','[','{'].includes(t.value))return this.parseGroup();
       if(t.type==='word'){
-        this.take();if(functions.has(t.value)&&this.peek().value==='(')return this.parseCall(t.value);
+        this.take();if((functions.has(t.value)||['y','u','psi','phi','f','g','h','T','w'].includes(t.value))&&this.peek().value==='(')return this.parseCall(t.value);
         if(functions.has(t.value)&&['sqrt','sin','cos','tan','ln','log'].includes(t.value)&&this.starts(this.peek()))return {kind:'call',name:t.value,args:[this.expression(55)]};
         return {kind:'symbol',value:t.value};
       }
@@ -903,6 +940,8 @@ def _ms_process(job_text):
     {category:'Sets & piecewise',title:'Vector perpendicular',code:'u perp v'}
   );
 
+  // Curated physics reference examples — notation only; units and model assumptions matter.
+  examples.push(...[{"category": "Physics · Mechanics", "title": "Linear momentum", "code": "p = m*v"}, {"category": "Physics · Mechanics", "title": "Impulse", "code": "J = F*Delta_t"}, {"category": "Physics · Mechanics", "title": "Newton gravitation", "code": "F = G*m_1*m_2/r^2"}, {"category": "Physics · Mechanics", "title": "Gravitational potential", "code": "U = -G*M*m/r"}, {"category": "Physics · Mechanics", "title": "Circular acceleration", "code": "a = v^2/r"}, {"category": "Physics · Mechanics", "title": "Centripetal force", "code": "F = m*v^2/r"}, {"category": "Physics · Mechanics", "title": "Hooke spring law", "code": "F = -k*x"}, {"category": "Physics · Mechanics", "title": "Elastic energy", "code": "U = k*x^2/2"}, {"category": "Physics · Mechanics", "title": "Work-energy theorem", "code": "W = Delta_K"}, {"category": "Physics · Mechanics", "title": "Mechanical power", "code": "P = F*v"}, {"category": "Physics · Mechanics", "title": "Torque magnitude", "code": "tau = r*F*sin(theta)"}, {"category": "Physics · Mechanics", "title": "Angular momentum", "code": "L = I*omega"}, {"category": "Physics · Mechanics", "title": "Rotational energy", "code": "K = I*omega^2/2"}, {"category": "Physics · Mechanics", "title": "Harmonic oscillator", "code": "diffn(x,t,2)+omega^2*x=0"}, {"category": "Physics · Mechanics", "title": "Damped oscillator", "code": "m*diffn(x,t,2)+b*diff(x,t)+k*x=0"}, {"category": "Physics · Mechanics", "title": "Ballistic range", "code": "R = v_0^2*sin(2*theta)/g"}, {"category": "Physics · Electromagnetism", "title": "Coulomb law", "code": "F = k_e*q_1*q_2/r^2"}, {"category": "Physics · Electromagnetism", "title": "Electric field", "code": "E = F/q"}, {"category": "Physics · Electromagnetism", "title": "Electric potential", "code": "V = U/q"}, {"category": "Physics · Electromagnetism", "title": "Gauss electric", "code": "divergence(E) = rho/epsilon_0"}, {"category": "Physics · Electromagnetism", "title": "Gauss magnetic", "code": "divergence(B) = 0"}, {"category": "Physics · Electromagnetism", "title": "Faraday induction", "code": "curl(E) = -pdiff(B,t)"}, {"category": "Physics · Electromagnetism", "title": "Ampere Maxwell", "code": "curl(B) = mu_0*J+mu_0*epsilon_0*pdiff(E,t)"}, {"category": "Physics · Electromagnetism", "title": "Lorentz force", "code": "F = q*(E+cross(v,B))"}, {"category": "Physics · Electromagnetism", "title": "Capacitor energy", "code": "U = C*V^2/2"}, {"category": "Physics · Electromagnetism", "title": "RC time constant", "code": "tau = R*C"}, {"category": "Physics · Electromagnetism", "title": "RL time constant", "code": "tau = L/R"}, {"category": "Physics · Electromagnetism", "title": "Inductor voltage", "code": "V = L*diff(I,t)"}, {"category": "Physics · Electromagnetism", "title": "Poynting vector", "code": "S = cross(E,B)/mu_0"}, {"category": "Physics · Electromagnetism", "title": "Electromagnetic wave speed", "code": "c = 1/sqrt(mu_0*epsilon_0)"}, {"category": "Physics · Thermodynamics", "title": "Ideal gas law", "code": "P*V=n*R*T"}, {"category": "Physics · Thermodynamics", "title": "First law thermodynamics", "code": "Delta_U=Q-W"}, {"category": "Physics · Thermodynamics", "title": "Enthalpy", "code": "H=U+P*V"}, {"category": "Physics · Thermodynamics", "title": "Heat capacity", "code": "Q=m*c*Delta_T"}, {"category": "Physics · Thermodynamics", "title": "Carnot efficiency", "code": "eta=1-T_c/T_h"}, {"category": "Physics · Thermodynamics", "title": "Entropy change", "code": "Delta_S=Q_rev/T"}, {"category": "Physics · Thermodynamics", "title": "Stefan-Boltzmann radiation", "code": "P=sigma*A*T^4"}, {"category": "Physics · Thermodynamics", "title": "Boltzmann entropy", "code": "S=k_B*ln(Omega)"}, {"category": "Physics · Thermodynamics", "title": "Clausius Clapeyron", "code": "diff(P,T)=L/(T*Delta_V)"}, {"category": "Physics · Thermodynamics", "title": "Adiabatic ideal gas", "code": "P*V^gamma=constant"}, {"category": "Physics · Waves & optics", "title": "Wave equation 1D", "code": "diffn(u(x,t),t,2)=c^2*diffn(u(x,t),x,2)"}, {"category": "Physics · Waves & optics", "title": "Wave number", "code": "k=2*pi/lambda"}, {"category": "Physics · Waves & optics", "title": "Angular frequency", "code": "omega=2*pi*f"}, {"category": "Physics · Waves & optics", "title": "Wave phase velocity", "code": "v=omega/k"}, {"category": "Physics · Waves & optics", "title": "Snell law", "code": "n_1*sin(theta_1)=n_2*sin(theta_2)"}, {"category": "Physics · Waves & optics", "title": "Thin lens law", "code": "1/f=1/d_o+1/d_i"}, {"category": "Physics · Waves & optics", "title": "Diffraction grating", "code": "d*sin(theta)=m*lambda"}, {"category": "Physics · Waves & optics", "title": "Double-slit interference", "code": "d*sin(theta)=m*lambda"}, {"category": "Physics · Waves & optics", "title": "Doppler effect", "code": "f_obs=f_source*(v+v_o)/(v-v_s)"}, {"category": "Physics · Waves & optics", "title": "Light intensity", "code": "I=P/A"}, {"category": "Physics · Quantum & relativity", "title": "Photon energy", "code": "E=h*f"}, {"category": "Physics · Quantum & relativity", "title": "De Broglie wavelength", "code": "lambda=h/p"}, {"category": "Physics · Quantum & relativity", "title": "Uncertainty principle", "code": "Delta_x*Delta_p>=hbar/2"}, {"category": "Physics · Quantum & relativity", "title": "Time-independent Schrodinger", "code": "-hbar^2/(2*m)*diffn(psi,x,2)+V*psi=E*psi"}, {"category": "Physics · Quantum & relativity", "title": "Time-dependent Schrodinger", "code": "ii*hbar*pdiff(psi,t)=H*psi"}, {"category": "Physics · Quantum & relativity", "title": "Time dilation", "code": "Delta_t=gamma*Delta_t_0"}, {"category": "Physics · Quantum & relativity", "title": "Lorentz factor", "code": "gamma=1/sqrt(1-v^2/c^2)"}, {"category": "Physics · Quantum & relativity", "title": "Relativistic momentum", "code": "p=gamma*m*v"}, {"category": "Physics · Quantum & relativity", "title": "Energy momentum relation", "code": "E^2=(p*c)^2+(m*c^2)^2"}, {"category": "Physics · Quantum & relativity", "title": "Mass-energy relation", "code": "E=m*c^2"}, {"category": "Physics · Quantum & relativity", "title": "Einstein photoelectric", "code": "K_max=h*f-phi"}, {"category": "Physics · Fluids & engineering", "title": "Bernoulli equation", "code": "P+rho*v^2/2+rho*g*h=constant"}, {"category": "Physics · Fluids & engineering", "title": "Reynolds number", "code": "Re=rho*v*D/mu"}, {"category": "Physics · Fluids & engineering", "title": "Continuity equation", "code": "A_1*v_1=A_2*v_2"}, {"category": "Physics · Fluids & engineering", "title": "Hydrostatic pressure", "code": "P=rho*g*h"}, {"category": "Physics · Fluids & engineering", "title": "Drag force", "code": "F_D=C_D*rho*v^2*A/2"}, {"category": "Physics · Fluids & engineering", "title": "Lift force", "code": "F_L=C_L*rho*v^2*A/2"}, {"category": "Physics · Fluids & engineering", "title": "Mach number", "code": "M=v/c"}, {"category": "Physics · Fluids & engineering", "title": "Dynamic pressure", "code": "q=rho*v^2/2"}, {"category": "Physics · Fluids & engineering", "title": "Fourier heat conduction", "code": "q=-k*grad(T)"}, {"category": "Physics · Fluids & engineering", "title": "Fick diffusion", "code": "J=-D*grad(c)"}, {"category": "Physics · Fluids & engineering", "title": "Diffusion equation", "code": "pdiff(c,t)=D*diffn(c,x,2)"}]);
   const input=document.getElementById('equation-input');
   const preview=document.getElementById('preview');
   const status=document.getElementById('status'),statusMessage=document.getElementById('status-message'),texPreview=document.getElementById('latex-preview'),pythonOutput=document.getElementById('python-output');
@@ -995,7 +1034,7 @@ def _ms_process(job_text):
     propto:['∝','\\propto'],perp:['⊥','\\perp'],parallel:['∥','\\parallel'],therefore:['∴','\\therefore'],
     oplus:['⊕','\\oplus'],otimes:['⊗','\\otimes'],cdot:['·','\\cdot'],times:['×','\\times'],degree:['°','^\\circ']
   });
-  const extraFunctions=['if','piecewise','log10','log2','sign','mod','atan2','round','sinc','factorial','array','matrix','pmatrix','bmatrix','vmatrix','det','cases','vector','binom','choose','diff','pdiff','diffn','grad','divergence','curl','laplacian','oint','iint','iiint','norm','dot','cross','transpose','conj','trace','rank','set','union','intersect','expect','variance','prob','cov','max','min','gcd','lcm','arg','sign','ln','log','exp','i','angle','underbrace','overbrace','tilde','underline','evaluate','bigcup','bigcap','floor','ceil','sech'];
+  const extraFunctions=['if','piecewise','log10','log2','sign','mod','atan2','round','sinc','factorial','array','matrix','pmatrix','bmatrix','vmatrix','det','cases','vector','binom','choose','diff','pdiff','diffn','grad','divergence','curl','laplacian','oint','iint','iiint','norm','dot','cross','transpose','conj','trace','rank','set','union','intersect','expect','variance','prob','cov','max','min','gcd','lcm','arg','sign','ln','log','exp','i','angle','underbrace','overbrace','tilde','underline','evaluate','bigcup','bigcap','floor','ceil','sech','laplace','inverse_laplace','fourier','inverse_fourier'];
   extraFunctions.forEach(x=>functions.add(x));
   const paletteGroups=[
     {name:'Calculator & constants',groups:[{name:'Fundamental constants',items:[['π','Pi ≈ 3.14159','pi'],['e','Euler number ≈ 2.71828','e'],['i','Imaginary unit','i'],['τ','Tau = 2π','tau'],['∞','Infinity','infty']]},{name:'Scientific operations',items:[['n!','Factorial','5!'],['sin⁻¹','Arc sine','asin(x)'],['cos⁻¹','Arc cosine','acos(x)'],['tan⁻¹','Arc tangent','atan(x)'],['ln','Natural logarithm','ln(x)'],['log₁₀','Logarithm base 10','log10(x)'],['eˣ','Exponential','exp(x)'],['√','Square root','sqrt(x)']] }]},
@@ -1015,6 +1054,10 @@ def _ms_process(job_text):
     {name:'Matrices & vectors',groups:[
       {name:'Matrices & arrays',items:[['[··]','2×2 array','array([a,b],[c,d])'],['[··]','Matrix','matrix([a,b],[c,d])'],['(··)','Parenthesized matrix','pmatrix([a,b],[c,d])'],['[A]','Bracketed matrix','bmatrix([1,2],[3,4])'],['|A|','Determinant','det([a,b],[c,d])'],['3×3','3×3 matrix','matrix([a,b,c],[d,e,f],[g,h,i])'],['{…','Piecewise','cases([x,x>=0],[-x,x<0])'],['(x y)','Column vector','vector(x,y,z)']]},
       {name:'Linear algebra',items:[['v⃗','Vector arrow','vec(v)'],['u·v','Dot product','dot(u,v)'],['u×v','Cross product','cross(u,v)'],['Aᵀ','Transpose','transpose(A)'],['A*','Conjugate','conj(z)'],['tr','Trace','trace(A)'],['rank','Rank','rank(A)'],['‖v‖','Vector norm','norm(v)']]}
+    ]},
+    {name:'Transforms & differential equations',groups:[
+      {name:'Laplace and Fourier',items:[['ℒ','Laplace transform','laplace(exp(-2*t),t,s)'],['ℒ⁻¹','Inverse Laplace','inverse_laplace(1/(s+2),s,t)'],['ℱ','Fourier transform','fourier(exp(-x^2),x,k)'],['ℱ⁻¹','Inverse Fourier','inverse_fourier(exp(-pi^2*k^2),k,x)']]},
+      {name:'Differential equations',items:[['ODE','First-order ODE','diff(y(t),t)+y(t)=0'],['ODE²','Harmonic oscillator','diffn(y(t),t,2)+4*y(t)=0'],['PDE','First-order PDE','pdiff(u(x,t),t)+pdiff(u(x,t),x)=0']]}
     ]},
     {name:'Sets, relations & logic',groups:[
       {name:'Comparison',items:[['≤','Less or equal','<='],['≥','Greater or equal','>='],['≠','Not equal','!='],['≈','Approximately','approx'],['≡','Equivalent','equiv'],['∝','Proportional','propto'],['→','Approaches','->'],['⇒','Implies','implies'],['⇔','If and only if','iff'],['⊥','Perpendicular','perp'],['∥','Parallel','parallel']]},
@@ -1066,6 +1109,11 @@ def _ms_process(job_text):
       }
       return mathMatrix(ast,n==='array'?null:n==='matrix'?'[':n==='pmatrix'?'(':n==='bmatrix'?'[':'|',n==='array'?null:n==='matrix'?']':n==='pmatrix'?')':n==='bmatrix'?']':'|');
     }
+    if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(n)){
+      const op=n==='laplace'?'ℒ':n==='inverse_laplace'?'ℒ':n==='fourier'?'ℱ':'ℱ';
+      const symbol=(n.startsWith('inverse_'))?node('msup',fn(op),r(mo('−'),atom('mn','1'))):fn(op);
+      return r(symbol,mo('{'),v(0),mo('}'),a.length>1?node('msub',mo(' '),r(v(1),mo('→'),v(2))):node('mspace'));
+    }
     if(n==='vector'){const rows={kind:'call',name:'pmatrix',args:a.map(x=>({kind:'array',items:[x]}))};return mathMatrix(rows,'(',')');}
     if(n==='binom'||n==='choose'){const f=node('mfrac',v(0),v(1));f.setAttribute('linethickness','0');return r(mo('('),f,mo(')'));}
     if(n==='diff'||n==='pdiff'||n==='diffn'){
@@ -1096,6 +1144,10 @@ def _ms_process(job_text):
       const rows=a.map(row=>(row.kind==='array'?row.items:[row]).map(latex).join(' & '));const cols=Math.max(1,...a.map(row=>row.kind==='array'?row.items.length:1));return '\\begin{'+env+'}'+(n==='array'?'{'+('c'.repeat(cols))+'}':'')+rows.join(' \\\\ ')+'\\end{'+env+'}';
     }
     if(n==='vector')return '\\begin{pmatrix}'+a.map(latex).join(' \\\\ ')+'\\end{pmatrix}';
+    if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(n)){
+      const mark=n.includes('laplace')?'L':'F',inverse=n.startsWith('inverse_')?'^{-1}':'';
+      return '\\mathcal{'+mark+'}'+inverse+'\\left\\{'+L(0)+'\\right\\}'+(a.length>=3?'_{'+L(1)+'\\to '+L(2)+'}':'');
+    }
     if(n==='binom'||n==='choose')return '\\binom{'+L(0)+'}{'+L(1)+'}';
     if(n==='diff'||n==='pdiff'||n==='diffn'){const d=n==='pdiff'?'\\partial':'\\mathrm{d}',power=n==='diffn'?'^{'+L(2)+'}':'';return '\\frac{'+d+power+'}{'+d+' '+L(1)+power+'}'+L(0);}
     if(n==='grad'||n==='divergence'||n==='curl'||n==='laplacian')return n==='laplacian'?'\\nabla^2 '+L(0):'\\nabla '+(n==='divergence'?'\\cdot ':n==='curl'?'\\times ':'')+L(0);
@@ -1134,6 +1186,10 @@ def _ms_process(job_text):
         const n=t.name,a=t.args,P=i=>py(a[i]||{kind:'missing'});
         if(['array','matrix','pmatrix','bmatrix','det','vmatrix'].includes(n)){const rows=a.map(r=>r.kind==='array'?r.items:[r]);const m='sp.Matrix(['+rows.map(x=>'['+x.map(py).join(', ')+']').join(', ')+'])';return (n==='det'||n==='vmatrix')?'('+m+').det()':m;}
         if(n==='vector')return 'sp.Matrix(['+a.map(py).join(', ')+'])';
+        if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(n)){
+          const op={laplace:'laplace_transform',inverse_laplace:'inverse_laplace_transform',fourier:'fourier_transform',inverse_fourier:'inverse_fourier_transform'}[n];
+          return 'sp.'+op+'('+a.map(py).join(', ')+(n==='laplace'?', noconds=True':'')+')';
+        }
         if(n==='diff'||n==='pdiff')return 'sp.diff('+P(0)+', '+P(1)+')';
         if(n==='diffn')return 'sp.diff('+P(0)+', ('+P(1)+', '+P(2)+'))';
         if(n==='int')return 'sp.integrate('+P(2)+', ('+P(3)+', '+P(0)+', '+P(1)+'))';
@@ -1569,7 +1625,7 @@ def _ms_process(job_text):
       const timer=setTimeout(()=>{
         stopSympyWorker('SymPy took too long or could not finish downloading. Please try a simpler expression and check internet access.');
       },120000);
-      sympyPending.set(id,{resolve,reject,timer});worker.postMessage({id,payload:{ast,operation,variable}});
+      sympyPending.set(id,{resolve,reject,timer});worker.postMessage({id,payload:{ast,operation,variable,target:document.getElementById('cas-target')?.value.trim()||'s'}});
     });
   }
   function sympyPythonCode(ast,operation,v){
@@ -1579,7 +1635,14 @@ def _ms_process(job_text):
       lines.push('polynomial = expr.lhs - expr.rhs if isinstance(expr, sp.Equality) else expr');
       if(operation==='numeric')lines.push('result = sp.Poly(polynomial, '+v+').nroots()');
       else lines.push('result = sp.solveset(polynomial, '+v+', domain=sp.S.Complexes)');
-    }else lines.push('result = '+({expand:'sp.expand',simplify:'sp.simplify',factor:'sp.factor',differentiate:'sp.diff',integrate:'sp.integrate'}[operation]||'sp.simplify')+'(expr'+(['differentiate','integrate'].includes(operation)?', '+v:'')+')');
+    }else if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(operation)){
+      const op={laplace:'laplace_transform',inverse_laplace:'inverse_laplace_transform',fourier:'fourier_transform',inverse_fourier:'inverse_fourier_transform'}[operation];
+      const target=document.getElementById('cas-target')?.value.trim()||(operation.includes('laplace')?'s':'k');
+      lines.push('result = sp.'+op+'(expr, '+v+', sp.Symbol('+JSON.stringify(target)+')'+(operation==='laplace'?', noconds=True':'')+')');
+    }else if(['ode','pde'].includes(operation)){
+      lines.push('equation = expr if isinstance(expr, sp.Equality) else sp.Eq(expr, 0)');
+      lines.push('result = sp.'+(operation==='ode'?'dsolve':'pdsolve')+'(equation)');
+    }else lines.push('result = '+({expand:'sp.expand' ,simplify:'sp.simplify',factor:'sp.factor',differentiate:'sp.diff',integrate:'sp.integrate'}[operation]||'sp.simplify')+'(expr'+(['differentiate','integrate'].includes(operation)?', '+v:'')+')');
     lines.push('print(sp.pretty(result))');return lines.join('\n');
   }
   function sympyToInput(plain){
@@ -1622,17 +1685,19 @@ def _ms_process(job_text):
     try{
       if(!/^[\p{L}][\p{L}0-9_]*$/u.test(v))throw new Error('Choose a valid variable name such as x, t or theta.');
       if(!raw)throw new Error('Type an equation first.');
+      if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)&&! /^[A-Za-z][A-Za-z0-9_]*$/.test(document.getElementById('cas-target').value.trim()))throw Error('Choose a valid transform output variable.');
       const parsed=evaluate(raw);
       if(parsed.incomplete)throw new Error('Finish typing the equation before solving.');
       let result=null,offlineError='';
       // Numerical roots are SymPy-only. In auto mode prefer fast/offline results,
       // and automatically retry with actual SymPy if the built-in CAS cannot solve.
-      if(engine!=='sympy'&&selected!=='numeric'){
+      if(engine!=='sympy'&&!['numeric','ode','pde','laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)){
         try{result=casRun(raw,selected,v);result.engine='Offline';}
         catch(e){offlineError=e.message;if(engine==='offline')throw e;}
       }
       if(!result){
         if(engine==='offline')throw new Error('Numeric roots require SymPy. Change Engine to Auto or SymPy.');
+        if(['ode','pde','laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)&&engine==='offline')throw Error('This operation requires SymPy. Select Auto or SymPy.');
         setCasLoading(offlineError?'Built-in solver reached its limit. Switching to SymPy…':'Starting the SymPy engine…');
         const payload=await sympyJob(parsed.ast,selected,v);
         if(requested!==casRequest||raw!==input.value.trim())return;
@@ -1666,7 +1731,19 @@ def _ms_process(job_text):
   });
   document.getElementById('cas-copy-tex').addEventListener('click',()=>{if(casLast)copyText(casLast.lines.map(x=>x.latex||x.tex).join('\n'));});
   document.getElementById('cas-copy-python').addEventListener('click',()=>copyText(casCode.textContent));
-  document.getElementById('cas-examples').addEventListener('change',e=>{if(!e.target.value)return;loadExample(e.target.value);casOperation.value='auto';casExecute();e.target.value='';});
+  document.getElementById('cas-examples').addEventListener('change',e=>{
+    if(!e.target.value)return;const opt=e.target.selectedOptions[0];
+    const operation=opt.dataset.operation||'auto',variable=opt.dataset.variable||'x',target=opt.dataset.target;
+    loadExample(e.target.value);casOperation.value=operation;casVariable.value=variable;
+    if(target)document.getElementById('cas-target').value=target;
+    updateTarget();casExecute();e.target.value='';
+  });
+  function updateTarget(){
+    const name=casOperation.value,t=document.getElementById('cas-target-wrap');
+    t.hidden=!['laplace','inverse_laplace','fourier','inverse_fourier'].includes(name);
+    if(!t.hidden)document.getElementById('cas-target').value= name==='inverse_laplace'?'t':name==='inverse_fourier'?'x':name==='laplace'?'s':'k';
+  }
+  casOperation.addEventListener('change',updateTarget);updateTarget();
   input.addEventListener('input',()=>{
     if(casLast){casMessage.className='cas-status';casMessage.textContent='Input changed — run again to update the calculation.';casLast=null;setCasButtons(false);}
     casRequest++;
@@ -2464,7 +2541,7 @@ def _ms_process(job_text):
     return {format:'mathstudio-project',version:1,date:new Date().toISOString(),working:state.active,origin:state.origin,
       recent:state.recent,notebook:engine.notebookBridge.list(),calculator:engine.advanced.getCalculatorState(),
       solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value},
-      graph:engine.advanced.getGraphState(),tables:window.MathStudio.dataTables?.exportState()||null};
+      graph:engine.advanced.getGraphState(),tables:window.MathStudio.dataTables?.exportState()||null,fit:window.MathStudio.curveFit?.exportState()||null};
   }
   $('hub-export-project').addEventListener('click',()=>{
     const blob=new Blob([JSON.stringify(projectData(),null,2)],{type:'application/json'});
@@ -2481,7 +2558,7 @@ def _ms_process(job_text):
       if(!confirm('Import this project? Existing saved notebook entries and calculator history will be replaced.'))return;
       engine.notebookBridge.replace(data.notebook);
       engine.advanced.restoreCalculatorState(data.calculator||{});
-      engine.advanced.restoreGraphState(data.graph||{});window.MathStudio.dataTables?.restoreState(data.tables||null);
+      engine.advanced.restoreGraphState(data.graph||{});window.MathStudio.dataTables?.restoreState(data.tables||null);window.MathStudio.curveFit?.restoreState(data.fit||null);
       if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';}
       state.recent=Array.isArray(data.recent)?data.recent.filter(r=>r&&typeof r.raw==='string').slice(0,14):[];
       state.calculator=engine.advanced.getCalculator();state.solver=null;
@@ -3002,6 +3079,159 @@ def _ms_process(job_text):
   $('dt-chart-download').onclick=()=>{const a=el('a',{href:$('dt-chart-canvas').toDataURL('image/png'),download:'ProMathStudio_chart.png'});document.body.append(a);a.click();a.remove();};
   window.MathStudio.dataTables={appendExpression:text=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Maximum 6,000 rows');const row=t.columns.map(()=>'' );row[0]=String(text).slice(0,8000);t.rows.push(row);render();save();return t;},get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows)};
   try{const stored=JSON.parse(localStorage.getItem('mathstudio-tables-v1')||'null');restoreState(stored);}catch{restoreState(null);}
+})();
+
+</script>
+<script id="promath-advanced-features">
+/* ProMathStudio advanced mathematics and progressive workspace interface.
+   No eval(), no external plotting service, no mutation of source table data. */
+(()=>{'use strict';
+const $=id=>document.getElementById(id), studio=window.MathStudio;
+if(!studio||!studio.dataTables) return;
+const graphic=$('dt-chart-status');
+const fitArea=document.createElement('section');fitArea.id='curve-fit-tools';fitArea.className='curve-fit-tools';
+fitArea.innerHTML=`<div class="fit-head"><strong>Curve fitting</strong><span>Fit selected numeric X / Y columns</span></div>
+<div class="data-toolbar"><label>Model<select id="fit-model"><option value="none">No fit</option><option value="linear">Linear y=a+bx</option><option value="poly">Polynomial</option><option value="exp">Exponential y=a exp(bx)</option><option value="log">Logarithmic y=a+b ln(x)</option><option value="power">Power y=a x^b</option><option value="gaussian">Gaussian bell curve</option></select></label>
+<label id="fit-degree-wrap" hidden>Polynomial degree<select id="fit-degree"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label>
+<button type="button" class="primary" id="fit-run">Fit and show on graph</button><button type="button" class="secondary" id="fit-clear">Clear fit curve</button></div>
+<div class="fit-result" id="fit-result" role="status">Select a numeric table and a fit model.</div>`;
+graphic.insertAdjacentElement('afterend',fitArea);
+$('fit-model').addEventListener('change',()=>{$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';});
+let currentFit=null,lastEquation='';
+function finite(v){const x=Number(v);return typeof v!=='boolean'&&v!==null&&String(v).trim()!==''&&Number.isFinite(x)?x:null;}
+function linearSolve(rows,ys){
+ const n=rows.length,m=rows[0].length;
+ if(n<m)throw Error('Not enough valid measurements for this polynomial degree.');
+ // Modified Gram-Schmidt least squares to avoid unstable normal equations.
+ const qs=[],rs=Array.from({length:m},()=>Array(m).fill(0));
+ for(let j=0;j<m;j++){
+  let v=rows.map(r=>r[j]);
+  for(let i=0;i<j;i++){const dot=qs[i].reduce((a,q,k)=>a+q*v[k],0);rs[i][j]=dot;v=v.map((value,k)=>value-dot*qs[i][k]);}
+  const length=Math.hypot(...v);if(length<1e-10)throw Error('This model is singular for the chosen X values. Try a lower degree or different data.');
+  rs[j][j]=length;qs[j]=v.map(a=>a/length);
+ }
+ const values=qs.map(q=>q.reduce((a,v,i)=>a+v*ys[i],0));
+ const coefficients=Array(m).fill(0);
+ for(let i=m-1;i>=0;i--){let c=values[i];for(let j=i+1;j<m;j++)c-=rs[i][j]*coefficients[j];coefficients[i]=c/rs[i][i];}
+ return coefficients;
+}
+function fmt(n){if(!Number.isFinite(n))throw Error('Numerical fitting was unstable.');if(Math.abs(n)<1e-12)return '0';let s=Number(n.toPrecision(10)).toString();if(/[eE]/.test(s))s=n.toFixed(Math.abs(n)<1?12:5).replace(/0+$/,'').replace(/\.$/,'');return s;}
+function analyze(points,model,degree=2){
+ const pairs=points.filter(([x,y])=>Number.isFinite(x)&&Number.isFinite(y));
+ if(pairs.length<2)throw Error('Select numeric X/Y columns with at least two valid rows.');
+ let selected=pairs;
+ if(['log','power'].includes(model))selected=selected.filter(([x])=>x>0);
+ if(['exp','power','gaussian'].includes(model))selected=selected.filter(([,y])=>y>0);
+ if(selected.length<2)throw Error('This model needs positive X/Y values.');
+ const xs=selected.map(p=>p[0]),ys=selected.map(p=>p[1]);
+ const xmean=xs.reduce((a,b)=>a+b,0)/xs.length;
+ const spread=Math.max(1e-12,...xs.map(x=>Math.abs(x-xmean)));
+ let rowValues,objective,formula,predict,coeffs;
+ if(model==='linear'||model==='poly'||model==='exp'||model==='gaussian'){
+  const n=model==='linear'||model==='exp'?1:model==='gaussian'?2:degree;
+  const powers=xs.map(x=>{const u=(x-xmean)/spread;return Array.from({length:n+1},(_,i)=>Math.pow(u,i));});
+  objective=(model==='exp'||model==='gaussian')?ys.map(Math.log):ys;
+  coeffs=linearSolve(powers,objective);
+  const u='((x-('+fmt(xmean)+'))/('+fmt(spread)+'))';
+  const poly=coeffs.map((c,i)=>'('+fmt(c)+')'+(i?'*('+u+')^'+i:'')).join('+');
+  if(model==='exp') {formula='exp('+poly+')';predict=x=>Math.exp(coeffs[0]+coeffs[1]*(x-xmean)/spread);}
+  else if(model==='gaussian'){
+   if(coeffs[2]>=-1e-10)throw Error('This dataset cannot be fitted to a bell-shaped Gaussian (non-negative curvature).');
+   formula='exp('+poly+')';predict=x=>Math.exp(coeffs.reduce((a,c,i)=>a+c*Math.pow((x-xmean)/spread,i),0));
+  }else{formula=poly;predict=x=>coeffs.reduce((a,c,i)=>a+c*Math.pow((x-xmean)/spread,i),0);}
+ }else{
+  const u=xs.map(x=>model==='log'?Math.log(x):Math.log(x));
+  objective=model==='power'?ys.map(Math.log):ys;
+  coeffs=linearSolve(u.map(x=>[1,x]),objective);
+  formula=model==='log'?'('+fmt(coeffs[0])+')+('+fmt(coeffs[1])+')*ln(x)':'exp('+fmt(coeffs[0])+')*x^('+fmt(coeffs[1])+')';
+  predict=x=>model==='log'?coeffs[0]+coeffs[1]*Math.log(x):Math.exp(coeffs[0])*Math.pow(x,coeffs[1]);
+ }
+ const mean=ys.reduce((a,b)=>a+b,0)/ys.length;let ss=0,total=0;
+ for(let i=0;i<ys.length;i++){const estimate=predict(xs[i]);if(!Number.isFinite(estimate))throw Error('Numerical overflow in fitted model.');ss+=(ys[i]-estimate)**2;total+=(ys[i]-mean)**2;}
+ const r2=total>0?1-ss/total:(ss<1e-15?1:0);
+ return {model,degree,formula,coefficients:coeffs,r2,rmse:Math.sqrt(ss/ys.length),used:ys.length,excluded:points.length-ys.length};
+}
+function fitTable(t,x,y,model,degree){const computed=studio.dataTables.calculate(t),pairs=computed.map(r=>[finite(r[x]),finite(r[y])]).filter(p=>p[0]!==null&&p[1]!==null);return analyze(pairs,model,degree);}
+function putFit(){try{
+ const model=$('fit-model').value;if(model==='none')throw Error('Select a fitting model.');
+ const kind=$('dt-chart-type').value;if(!['scatter','line'].includes(kind))throw Error('Fitting supports 2D scatter and line charts. Select one of those first.');
+ const table=studio.dataTables.tables.find(t=>t.id===$('dt-graph-table').value),xi=Number($('dt-graph-x').value),yi=Number($('dt-graph-y').value);
+ if(!table||xi===yi)throw Error('Choose a table with different X and Y columns.');
+ const fit=fitTable(table,xi,yi,model,Number($('fit-degree').value));
+ const graph=$('graph-input');
+ if(lastEquation){graph.value=graph.value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');}
+ lastEquation='y='+fit.formula;graph.value=[graph.value.trim(),lastEquation].filter(Boolean).join('\n');
+ studio.dataTables.plot(); // Ensures same measurements appear as dots as well as the fitted curve.
+ $('graph-input').value=[...new Set($('graph-input').value.split('\n').filter(Boolean).concat([lastEquation]))].join('\n');
+ $('graph-plot').click();
+ currentFit={...fit,table:table.id,x:xi,y:yi};
+ const out=$('fit-result');out.textContent='y = '+fit.formula+'  |  R² = '+fit.r2.toFixed(6)+'  |  RMSE = '+fit.rmse.toPrecision(5)+'  |  n = '+fit.used+(fit.excluded?' ('+fit.excluded+' excluded)':'');out.classList.remove('error');
+ }catch(err){$('fit-result').textContent=err.message;$('fit-result').classList.add('error');}
+}
+$('fit-run').addEventListener('click',putFit);
+$('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-result').textContent='Fit removed; data table unchanged.';});
+studio.curveFit={analyze,fitTable,get last(){return currentFit;},get active(){return !!currentFit;},exportState:()=>({model:$('fit-model').value,degree:$('fit-degree').value,lastEquation}),restoreState:s=>{if(!s)return;$('fit-model').value=s.model||'none';$('fit-degree').value=s.degree||'2';$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';lastEquation=String(s.lastEquation||'').slice(0,2000);}};
+// Floating/sliding library and contextual help. Keep underlying semantic form controls intact.
+const css=document.createElement('style');css.textContent=`
+  .shell{display:block!important}.shell main{max-width:1360px;margin:auto;padding-top:72px}
+  .shell aside{position:fixed!important;top:0;left:0;height:100vh!important;width:min(322px,92vw);transform:translateX(-105%);display:flex!important;z-index:115;padding:26px 20px;transition:transform .22s ease;overflow-y:auto;box-shadow:10px 0 35px #10172c22}
+  body.library-open .shell aside{transform:translateX(0)}
+  #ui-overlay{position:fixed;inset:0;background:#10172755;z-index:110;display:none}
+  body.library-open #ui-overlay{display:block}
+  #quick-menu{position:fixed;top:12px;right:16px;z-index:130;display:flex;gap:7px;padding:7px;background:#ffffffee;border:1px solid #dfe5f3;border-radius:12px;box-shadow:0 5px 25px #26345618;backdrop-filter:blur(10px)}
+  #quick-menu button{border:0;background:#eef2ff;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:750;color:#3b51ab}
+  #quick-menu button:hover{background:#dbe5ff}
+  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols{display:block!important}
+  #examples .examples{display:none}body.examples-open #examples .examples{display:grid}
+  #examples{min-height:65px;scroll-margin-top:76px}
+  body.examples-open #examples{position:fixed;right:0;top:65px;width:min(660px,95vw);height:calc(100vh - 75px);overflow:auto;padding:20px;background:#fff;border-radius:14px 0 0 14px;z-index:120;box-shadow:-10px 0 70px #071b3455;margin:0}
+  body.examples-open #examples .examples{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.examples-open #ui-overlay{display:block}
+  .fit-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#2c3860;margin:0 0 6px}
+  .fit-head span{font-size:11px;color:#73839b}.curve-fit-tools{border:1px solid #dce5f5;background:#f9fbff;border-radius:11px;padding:14px;margin:13px 0}
+  .fit-result{font:12px/1.6 Consolas,monospace;word-break:break-word;color:#285877;padding:8px}.fit-result.error{color:#b52e40}
+  #graph-controls-collapsible:not([open]) .graph-controls{display:none}
+  #graph-controls-collapsible>summary{padding:9px;color:#4560ac;cursor:pointer;font-weight:700;font-size:12px}
+  .ui-options[hidden]{display:none!important}.ui-options{position:fixed;right:14px;top:68px;z-index:120;background:#fff;border:1px solid #d9e2f5;padding:16px;border-radius:13px;box-shadow:0 15px 50px #111c3855;width:min(320px,92vw)}
+  .ui-options label{display:flex;align-items:center;gap:12px;padding:9px 2px;font-size:13px}
+  .ui-options h3{margin:0;font-size:16px}
+  body:not(.ui-history-on) .calc-history-wrap{display:none!important}
+  body:not(.ui-python-on) #python-output{display:none!important}
+  body:not(.ui-python-on) .python-wrap{display:none!important}
+  body:not(.ui-details-on) .cas-technical,body:not(.ui-details-on) .cas-intro{display:none}
+  .help-topic{border-top:1px solid #e1e7f0;padding:12px 0}.help-topic summary{font-weight:700;cursor:pointer;color:#354da1}
+  @media(max-width:760px){.shell main{padding-top:74px}#quick-menu{left:8px;right:8px;justify-content:space-evenly}#quick-menu button{padding:8px 7px;font-size:11px}body.examples-open #examples .examples{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){.shell aside{transition:none}}
+`;document.head.appendChild(css);
+const overlay=document.createElement('div');overlay.id='ui-overlay';overlay.setAttribute('aria-hidden','true');document.body.append(overlay);
+const quick=document.createElement('nav');quick.id='quick-menu';quick.setAttribute('aria-label','Quick navigation and help');
+quick.innerHTML=`<button id="quick-symbols" type="button" aria-label="Open math symbols menu">∑ Symbols</button><button id="quick-examples" type="button">★ Examples</button><button id="quick-options" type="button">⚙ Options</button><button id="quick-help" type="button">? Help</button>`;
+document.body.appendChild(quick);
+const options=document.createElement('section');options.className='ui-options';options.id='ui-options';options.hidden=true;options.innerHTML='<h3>Workspace display</h3><label><input type="checkbox" id="ui-history">Calculator history</label><label><input type="checkbox" id="ui-python">Show Python code</label><label><input type="checkbox" id="ui-details">Advanced explanations</label><button type="button" class="secondary" id="ui-close">Close</button>';
+document.body.appendChild(options);
+function closeMenus(){document.body.classList.remove('library-open','examples-open');options.hidden=true;}
+overlay.addEventListener('click',closeMenus);
+$('quick-symbols').addEventListener('click',()=>{const next=!document.body.classList.contains('library-open');closeMenus();document.body.classList.toggle('library-open',next);$('palette-search').focus();});
+$('quick-examples').addEventListener('click',()=>{const next=!document.body.classList.contains('examples-open');closeMenus();document.body.classList.toggle('examples-open',next);if(next)$('example-category').focus();});
+$('quick-options').addEventListener('click',()=>{const next=options.hidden;closeMenus();options.hidden=!next;});
+$('quick-help').addEventListener('click',()=>{closeMenus();$('help-dialog').showModal();});
+$('ui-close').addEventListener('click',closeMenus);
+for(const [box,cls] of [['ui-history','ui-history-on'],['ui-python','ui-python-on'],['ui-details','ui-details-on']])$(''+box).addEventListener('change',e=>document.body.classList.toggle(cls,e.target.checked));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenus();});
+for(const b of document.querySelectorAll('[data-workspace]'))b.addEventListener('click',()=>{closeMenus();document.body.classList.remove('ws-editor');document.body.classList.toggle('ws-editor',b.dataset.workspace==='editor');});
+document.body.classList.add('ws-editor');
+// Examples are in a contextual sliding drawer. Selecting one closes the drawer.
+$('examples-list').addEventListener('click',e=>{if(e.target.closest('button'))closeMenus();});
+// Compact advanced controls: hide axes settings until opened; preserve IDs.
+const controls=document.querySelector('#graph-panel .graph-controls');if(controls){const detail=document.createElement('details');detail.id='graph-controls-collapsible';detail.innerHTML='<summary>Axis ranges and advanced graph settings</summary>';controls.parentNode.insertBefore(detail,controls);detail.append(controls);}
+// Help menu: organized nested topics augment existing syntax guide.
+const helpBody=$('help-dialog').querySelector('.help-body');const guide=document.createElement('div');guide.id='help-topics';
+guide.innerHTML=`<details class="help-topic" open><summary>Start here · Five workspaces</summary><p><strong>Calculate</strong> for numeric input; <strong>Equation editor</strong> for live math and Word/LaTeX; <strong>Symbolic solver</strong> for transformations, ODE/PDE; <strong>Data tables</strong> for CSV/JSON and formulas; <strong>Graphs</strong> for functions, data and curve fitting. Use the Working equation panel at the bottom to send inputs between tools.</p></details>
+<details class="help-topic"><summary>Curve fitting from a data table</summary><p>Open Graphs, choose a numeric X/Y table and 2D scatter or line. Select a fitting model, then press Fit. The curve is added to the equation plot, with R², RMSE and sample size shown. Exponential/Gaussian require positive Y; logarithmic/power also require positive X. Fit statistics are descriptive, not proof of an underlying physical law.</p></details>
+<details class="help-topic"><summary>Laplace / Fourier transform</summary><p>Equation editor examples: <code>laplace(exp(-2*t),t,s)</code> and <code>fourier(exp(-x^2),x,k)</code>. In Solver, select Laplace/Fourier, enter the expression without the wrapper, and choose input and output variables. Fourier uses the SymPy <code>exp(-2πikx)</code> convention. Advanced transforms require SymPy and an initial internet connection.</p></details>
+<details class="help-topic"><summary>Solving ODEs and PDEs</summary><p>Example ODE: <code>diff(y(t),t)+y(t)=0</code> with variable t; choose Solve ODE. Example PDE: <code>pdiff(u(x,t),t)+pdiff(u(x,t),x)=0</code>; choose Solve PDE. SymPy only solves supported classes and may report an unsupported equation. Initial/boundary conditions are not handled by these controls.</p></details>
+<details class="help-topic"><summary>Physics reference equations</summary><p>In Equation Editor, open Examples, then select Physics · Mechanics, Electromagnetism, Thermodynamics, Waves & optics, Quantum & relativity, or Fluids & engineering. Reference equations use conventional notation; units and assumptions must be checked before applying them.</p></details>`;
+helpBody.prepend(guide);$('help-btn').textContent='? Help & guides';
 })();
 
 </script>

@@ -86,7 +86,30 @@ def main():
   page.locator('#cf-type').select_option('python')
   page.locator('#cf-body').fill('def pyfun(x): return math.sin(x) + x**2')
   page.locator('#cf-save').click()
-  assert abs(page.evaluate('MathStudio.customFunctions.evaluate("pyfun",[2])')-(4+__import__('math').sin(2)))<1e-8
+  assert any(f['name']=='pyfun' and f['type']=='python' for f in page.evaluate('MathStudio.customFunctions.list()')), page.locator('#cf-message').inner_text()
+  # Full Python code is saved as code; a mocked isolated worker exercises the
+  # asynchronous Calculator response without requiring the external CDN.
+  page.locator('#cf-name').fill('conditional')
+  page.locator('#cf-params').fill('x')
+  page.locator('#cf-type').select_option('python')
+  page.locator('#cf-body').fill('def conditional(x):\n    if x > 1:\n        return x**2\n    return 0')
+  page.locator('#cf-save').click()
+  assert any(f['name']=='conditional' and 'if x > 1' in f['source'] for f in page.evaluate('MathStudio.customFunctions.list()')),page.locator('#cf-message').inner_text()
+  page.evaluate("""() => {
+    window.__ActualWorker=window.Worker;
+    window.Worker=class {
+      constructor(url){this.url=url;}
+      postMessage(msg){window.__pythonCall=msg;Promise.resolve().then(()=>this.onmessage({data:{ok:true,value:msg.args[0]>1?msg.args[0]**2:0}}));}
+      terminate(){}
+    };
+  }""")
+  page.locator('[data-workspace="calculator"]').click()
+  page.locator('#calc-input').fill('conditional(3)')
+  page.locator('#calc-execute').click()
+  page.wait_for_function("document.querySelector('#calc-result-plain').textContent==='= 9'")
+  assert page.evaluate('__pythonCall.name')=='conditional'
+  assert 'if x > 1' in page.evaluate('__pythonCall.source')
+  page.evaluate('() => { window.Worker=window.__ActualWorker; }')
   # Overlay multiple column mappings and a second table without replacing existing data.
   page.evaluate("""() => {
     const plot=MathStudio.graphData;

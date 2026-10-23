@@ -109,7 +109,7 @@ def main():
   page.wait_for_function("document.querySelector('#calc-result-plain').textContent==='= 9'")
   assert page.evaluate('__pythonCall.name')=='conditional'
   assert 'if x > 1' in page.evaluate('__pythonCall.source')
-  page.evaluate('window.Worker=window.__ActualWorker')
+  page.evaluate('() => { window.Worker=window.__ActualWorker; }')
   # Overlay multiple column mappings and a second table without replacing existing data.
   page.evaluate("""() => {
     const plot=MathStudio.graphData;

@@ -3368,6 +3368,7 @@ const numerical={scalarRoots,systemRoots,poisson1D,heat1D,evaluate:val};M.numeri
 const style=el('style');style.textContent=`
 #numerical-panel{margin-top:18px;background:#f9fbff;border:1px solid #dce4f6;border-radius:12px;padding:15px}
 #numerical-panel .num-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:11px;margin:12px 0}
+#numerical-panel .num-fields label[hidden]{display:none!important}
 #numerical-panel label,#python-panel label,.dt-filter-advanced label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#566784}
 #numerical-panel input,#numerical-panel select,#python-panel textarea,.dt-filter-advanced input,.dt-filter-advanced select{padding:9px;border:1px solid #cdd8ec;border-radius:9px;color:#283752;background:white;width:100%}
 #num-output,#python-output-result{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#fff;border:1px solid #dce5f3;border-radius:10px;max-height:330px;overflow:auto;font:12px/1.6 Consolas,monospace}
@@ -3453,6 +3454,25 @@ const panel=el('section',{id:'numerical-panel'});if(M.advanced.currentMode()!=='
 <div class="num-fields"><label>Domain start${nInput('num-start',-10)}</label><label>Domain end${nInput('num-end',10)}</label><label>Spatial intervals${nInput('num-nx',40)}</label><label>Time steps${nInput('num-nt',200)}</label><label>Final time${nInput('num-time',0.1)}</label><label>Diffusivity α${nInput('num-alpha',0.1)}</label><label>Boundary u(start)${nInput('num-left',0)}</label><label>Boundary u(end)${nInput('num-right',0)}</label></div>
 <div class="data-toolbar"><button id="num-run" class="primary" type="button">Solve numerically</button><button id="num-to-table" class="secondary" type="button" disabled>Save output to Data Tables</button><button id="num-to-graph" class="secondary" type="button" disabled>Show numerical results in Graphs</button></div><pre id="num-output" role="status">Choose a method and enter conditions.</pre></details>`;
 $('symbolic-panel').after(panel);
+// Progressive disclosure: a selected numerical method reveals only its required inputs.
+const numMode=$('num-method'),defaults={scalar:'sin(x)-x/2=0',system:'x^2+y^2=5; x-y=1',poisson:'pi^2*sin(pi*x)',heat:'sin(pi*x)'};
+const visMap={scalar:['num-expression','num-variable','num-start','num-end'],system:['num-expression','num-variable','num-guess'],poisson:['num-expression','num-start','num-end','num-nx','num-left','num-right'],heat:['num-expression','num-start','num-end','num-nx','num-nt','num-time','num-alpha','num-left','num-right']};
+let lastMethod='scalar';
+function showMethod(){const mode=numMode.value;
+  const active=new Set(visMap[mode]||[]);
+  for(const id of ['num-expression','num-variable','num-guess','num-start','num-end','num-nx','num-nt','num-time','num-alpha','num-left','num-right']){
+    const label=$(id).closest('label');if(label)label.hidden=!active.has(id);
+  }
+  if(mode!==lastMethod){
+    if($('num-expression').value===defaults[lastMethod])$('num-expression').value=defaults[mode];
+    if(mode==='system'){$('num-variable').value='x,y';}
+    else if(mode!=='scalar'){$('num-start').value='0';$('num-end').value='1';$('num-variable').value='x';}
+    else $('num-variable').value='x';
+    lastMethod=mode;
+  }
+  const label=$('num-expression').closest('label');if(label)label.firstChild.textContent=mode==='scalar'?'Equation or residual':mode==='system'?'Equations (semicolon or new line)':mode==='poisson'?'Source function f(x)':'Initial profile u(x,0)';
+}
+numMode.addEventListener('change',showMethod);showMethod();
 const casToolbar=$('cas-run')?.parentElement;if(casToolbar){const open=el('button',{type:'button',class:'secondary',id:'num-open'},'Numerical methods / PDE');open.addEventListener('click',()=>{M.advanced.mode('solver');$('num-details').open=true;panel.scrollIntoView({block:'start',behavior:'smooth'});});casToolbar.append(open);}
 let lastNumeric=null;const failure=(e)=>{const node=$('num-output');node.textContent=e.message;node.classList.add('error');};
 function runNumerical(){try{
@@ -3480,7 +3500,7 @@ $('num-to-table').addEventListener('click',()=>{try{numericalTable();M.advanced.
 $('num-to-graph').addEventListener('click',()=>{try{const t=numericalTable();M.advanced.mode('graph');$('dt-graph-table').value=t.id;$('dt-graph-table').dispatchEvent(new Event('change',{bubbles:true}));$('dt-chart-type').value=t.columns.length===3?'grid3d':'line';$('dt-graph-x').value='0';$('dt-graph-y').value=t.columns.length===3?'1':'1';$('dt-graph-z').value='2';$('dt-plot-table').click();}catch(e){failure(e);}});
 // Python data-workbook execution, with explicit user action only and isolated Web Worker.
 const code=menus.pythonContent.querySelector('#python-panel');
-code.innerHTML=`<h3>Python for your tables</h3><p class="py-note">Optional Pyodide + pandas, initially downloaded via CDN. Code runs only when you click Run, inside a worker with no DOM access. Scripts may access the network; only execute your own code.</p>
+code.innerHTML=`<h3>Python for your tables</h3><p class="py-note">Optional Pyodide + pandas + SymPy, initially downloaded via CDN. Code runs only when you click Run, inside a worker with no DOM access. Scripts may access the network; only execute your own code.</p>
 <label>Script<textarea id="dt-python-code" spellcheck="false"># Each table is a pandas DataFrame keyed by name.\n# Set 'result' to a DataFrame or a dict of named DataFrames.\nprint(list(tables))\nresult = next(iter(tables.values())).describe(include='all').reset_index()</textarea></label>
 <div class="data-toolbar"><button class="primary" id="dt-python-run" type="button">▶ Run Python</button><button class="secondary" id="dt-python-stop" type="button">Stop</button><button class="secondary" id="dt-python-example" type="button">Example: groupby</button></div><pre id="python-output-result" role="status">Run to see standard output and import results into new tables.</pre>`;
 let pyWorker=null,pyUrl=null,pyBusy=false,pyTimeout=null,pyLast=null;
@@ -3490,13 +3510,14 @@ $('dt-python-example').addEventListener('click',()=>{$('dt-python-code').value=`
 const pyWorkerCode=`'use strict';
 const BASE='https://cdn.jsdelivr.net/pyodide/v0.29.1/full/';let ready=null;
 self.onmessage=async ({data})=>{try{
- if(!ready)ready=(async()=>{importScripts(BASE+'pyodide.js');const py=await loadPyodide({indexURL:BASE});await py.loadPackage('pandas');return py;})();
+ if(!ready)ready=(async()=>{importScripts(BASE+'pyodide.js');const py=await loadPyodide({indexURL:BASE});await py.loadPackage(['pandas','sympy']);return py;})();
  const py=await ready;
  py.globals.set('studio_input_json',JSON.stringify(data.workbook));
  py.globals.set('studio_user_code',data.code);
  const payload=await py.runPythonAsync(
    'import io, json, sys, traceback, contextlib\\n' +
    'import pandas as pd\\n' +
+   'import sympy as sp\\n' +
    'raw=json.loads(studio_input_json)\\n' +
    'tables={t["name"]:pd.DataFrame(t["rows"],columns=t["columns"]) for t in raw}\\n' +
    'for frame in tables.values():\\n' +
@@ -3508,7 +3529,7 @@ self.onmessage=async ({data})=>{try{
    'caught=None\\n' +
    'with contextlib.redirect_stdout(capture):\\n' +
    '    try:\\n' +
-   '        exec(compile(studio_user_code,"<User Python>","exec"), {"__builtins__":__builtins__,"pd":pd,"tables":tables}, result_env:={})\\n' +
+   '        exec(compile(studio_user_code,"<User Python>","exec"), {"__builtins__":__builtins__,"pd":pd,"sp":sp,"tables":tables}, result_env:={})\\n' +
    '    except Exception:\\n' +
    '        caught=traceback.format_exc()\\n' +
    'if caught:raise RuntimeError(caught)\\n' +

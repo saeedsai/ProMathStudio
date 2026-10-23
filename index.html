@@ -1102,11 +1102,12 @@ def _ms_process(job_text):
   const customGroup=paletteGroups[paletteGroups.length-1].groups[0];
   const saveCustom=()=>{customGroup.items=customFunctions.map(f=>[f.name,f.name+' ('+f.params.join(', ')+')',f.name+'('+f.params.join(',')+')']);try{localStorage.setItem('promath-custom-functions-v1',JSON.stringify(customFunctions));}catch{}document.getElementById('palette-search').dispatchEvent(new Event('input'));};
   const customPanel=document.createElement('details');customPanel.className='panel';customPanel.id='custom-function-panel';
-  customPanel.style.padding='14px';customPanel.innerHTML='<summary style="cursor:pointer;font-weight:700">Custom functions · Formula / Python</summary><p class="small-note">Use named functions in Calculator, Graph and numeric Data Tables formulas. Python mode supports a single <code>def name(x): return math.sin(x)</code> expression, not arbitrary Python statements.</p><div class="data-toolbar"><label>Name<input id="cf-name" placeholder="myfunc"></label><label>Arguments<input id="cf-params" value="x" placeholder="x,y"></label><label>Type<select id="cf-type"><option value="formula">Formula</option><option value="python">Python return expression</option></select></label></div><textarea id="cf-body" rows="3" style="width:100%" placeholder="sin(x)+x^2"></textarea><div class="data-toolbar"><button type="button" id="cf-save">Save function</button><button type="button" id="cf-delete">Delete named function</button></div><p id="cf-message" role="status"></p><div id="cf-list"></div>';
+  customPanel.style.padding='14px';customPanel.innerHTML='<summary style="cursor:pointer;font-weight:700">Custom functions · Formula / Python</summary><p class="small-note">Use named functions in Calculator, Graph and numeric Data Tables formulas. Python mode runs real multi-line Python in a separate Pyodide worker when called directly from Calculator. Initial use downloads Python; only execute code you trust. Formula functions also work in Graph and Data Tables.</p><div class="data-toolbar"><label>Name<input id="cf-name" placeholder="myfunc"></label><label>Arguments<input id="cf-params" value="x" placeholder="x,y"></label><label>Type<select id="cf-type"><option value="formula">Formula</option><option value="python">Python code (Pyodide)</option></select></label></div><textarea id="cf-body" rows="3" style="width:100%" placeholder="sin(x)+x^2"></textarea><div class="data-toolbar"><button type="button" id="cf-save">Save function</button><button type="button" id="cf-delete">Delete named function</button></div><p id="cf-message" role="status"></p><div id="cf-list"></div>';
   document.getElementById('connected-hub').after(customPanel);
   function refreshCustomList(){const el=document.getElementById('cf-list');el.replaceChildren();for(const item of customFunctions){const button=document.createElement('button');button.type='button';button.className='secondary small';button.textContent=item.name+'('+item.params.join(',')+')';button.addEventListener('click',()=>{document.getElementById('cf-name').value=item.name;document.getElementById('cf-params').value=item.params.join(',');document.getElementById('cf-type').value=item.type||'formula';document.getElementById('cf-body').value=item.source||item.expression;});el.append(button);}}
   function normalizeCustom(type,body,name,params){
     if(type==='formula')return body.trim();
+    if(type==='python'){if(body.length>12000)throw Error('Python code exceeds 12,000 characters.');if(!new RegExp('^def\\s+'+name+'\\s*\\(', 'm').test(body.trim()))throw Error('Define def '+name+'('+params.join(', ')+') in your Python code.');return '';}
     const raw=body.trim(),match=/^def\s+([A-Za-z][\w]*)\s*\(([^)]*)\)\s*:\s*(?:\n\s*)?return\s+([^\n]+)\s*$/m.exec(raw);
     let expression=raw;
     if(match){if(match[1]!==name||match[2].replace(/\s+/g,'')!==params.join(','))throw Error('Python def signature must match the function name and arguments.');expression=match[3];}
@@ -1118,7 +1119,7 @@ def _ms_process(job_text):
     try{const name=document.getElementById('cf-name').value.trim(),params=document.getElementById('cf-params').value.split(',').map(x=>x.trim()),type=document.getElementById('cf-type').value,source=document.getElementById('cf-body').value;
       if(!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)||params.length>6||params.some(p=>!/^[A-Za-z][A-Za-z0-9_]*$/.test(p))||new Set(params).size!==params.length)throw Error('Use a valid name and 1–6 distinct argument names.');
       if(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow'].includes(name.toLowerCase()))throw Error('This name is reserved.');
-      const expression=normalizeCustom(type,source,name,params);const parsed=evaluate(expression);if(parsed.incomplete)throw Error('Complete the function expression.');
+      const expression=normalizeCustom(type,source,name,params);if(type==='formula'){const parsed=evaluate(expression);if(parsed.incomplete)throw Error('Complete the function expression.');}
       const entry={name,params,expression,source,type};const index=customFunctions.findIndex(f=>f.name.toLowerCase()===name.toLowerCase());if(index>=0)customFunctions[index]=entry;else{if(customFunctions.length>=60)throw Error('Maximum 60 custom functions.');customFunctions.push(entry);}
       saveCustom();refreshCustomList();status.textContent='Saved '+name+'. Available under Symbols → Custom functions.';
     }catch(e){status.textContent=e.message;}
@@ -1919,6 +1920,7 @@ def _ms_process(job_text):
           if(ast.args.length!==custom.params.length)throw Error(custom.name+' requires '+custom.params.length+' arguments.');
           const args=ast.args.map(go),next={...env};
           custom.params.forEach((key,i)=>{next[key]=args[i];});
+          if(custom.type==='python')throw Error('Python functions run asynchronously. Enter '+custom.name+'(numbers) directly in Calculator.');
           v=numeric(parseRaw(custom.expression),next,angle,depth+1);break;
         }
         if(name==='if'||name==='piecewise'){
@@ -2121,9 +2123,63 @@ def _ms_process(job_text):
     const a=Math.abs(z.re)<1e-12?0:z.re,b=Math.abs(z.im)<1e-12?0:z.im;
     return b===0?unit(a):(a===0?'':unit(a)+(b<0?' - ':' + '))+unit(Math.abs(b))+'i';
   }
+  // Run user Python only in an isolated Pyodide worker. Python has normal runtime
+  // capabilities; users should run only trusted code. Never eval Python in the UI.
+  let customPyWorker=null,customPyUrl=null,customPyRequest=0;
+  const customPySource=`'use strict';
+const BASE='https://cdn.jsdelivr.net/pyodide/v0.29.1/full/';
+let ready;
+self.onmessage=async ({data})=>{
+  try{
+    if(!ready)ready=(async()=>{importScripts(BASE+'pyodide.js');return loadPyodide({indexURL:BASE});})();
+    const py=await ready;
+    py.globals.set('studio_source',data.source);
+    py.globals.set('studio_name',data.name);
+    py.globals.set('studio_args',data.args);
+    const raw=await py.runPythonAsync(
+      'import json, math\\n' +
+      'namespace={"math":math}\\n' +
+      'exec(compile(studio_source,"<custom function>","exec"),namespace)\\n' +
+      'fn=namespace[studio_name]\\n' +
+      'value=fn(*studio_args.to_py())\\n' +
+      'if not isinstance(value,(int,float)) or isinstance(value,bool) or not math.isfinite(value):raise ValueError("Python custom function must return a finite real number")\\n' +
+      'json.dumps(float(value))');
+    self.postMessage({ok:true,value:JSON.parse(raw)});
+  }catch(e){self.postMessage({ok:false,error:String(e.message||e)});}
+};`;
+  function runCustomPython(fn,args,request){
+    if(customPyWorker)customPyWorker.terminate();
+    if(customPyUrl)URL.revokeObjectURL(customPyUrl);
+    customPyUrl=URL.createObjectURL(new Blob([customPySource],{type:'text/javascript'}));
+    customPyWorker=new Worker(customPyUrl);
+    calcplain.textContent='Loading / running Python…';calcmsg.textContent='Python functions run in a worker. Initial use requires an internet connection.';
+    const timer=setTimeout(()=>{if(request!==customPyRequest)return;customPyWorker?.terminate();customPyWorker=null;calcplain.textContent='Python timed out (60 seconds).';calcmsg.textContent=calcplain.textContent;calcmsg.classList.add('error');},60000);
+    customPyWorker.onmessage=({data})=>{
+      clearTimeout(timer);if(request!==customPyRequest)return;
+      if(!data.ok){calcres.textContent='Error';calcplain.textContent=data.error;calcmsg.textContent=data.error;calcmsg.classList.add('error');return;}
+      const result=Number(data.value),display=formatCalcNumber(C(result),Number($('calc-precision').value));
+      ans=C(result);calcres.textContent=display;calcplain.textContent='= '+display;calcmsg.classList.remove('error');calcmsg.textContent='Calculated with Python (Pyodide).';
+      $('calc-ans').textContent='Ans: '+display;history.unshift({expr:calcin.value.trim(),result:display});history=history.slice(0,40);storeHistory();historyDraw();lastCalc={expression:calcin.value.trim(),result:display};
+      window.dispatchEvent(new CustomEvent('mathstudio:calculator-result',{detail:lastCalc}));
+    };
+    customPyWorker.onerror=()=>{clearTimeout(timer);if(request!==customPyRequest)return;calcres.textContent='Error';calcplain.textContent='Cannot load Python. Check network availability.';calcmsg.textContent=calcplain.textContent;calcmsg.classList.add('error');};
+    customPyWorker.postMessage({name:fn.name,source:fn.source,args});
+  }
   function executeCalc(){
     const src=calcin.value.trim();if(!src)return;
     try{
+      const pyCall=/^([A-Za-z][A-Za-z0-9_]*)\\s*\\((.*)\\)$/.exec(src);
+      const fn=pyCall&&window.MathStudio.customFunctions?.find(pyCall[1]);
+      if(fn?.type==='python'){
+        const args=pyCall[2].trim()?pyCall[2].split(',').map(value=>{
+          const z=numeric(parseRaw(value.trim()),{...(window.MathStudio.extraMath?.variables||{}),Ans:ans},$('calc-angle').value);
+          if(Math.abs(z.im)>1e-12)throw Error('Python custom function arguments must be real numbers.');
+          return z.re;
+        }):[];
+        if(args.length!==fn.params.length)throw Error(fn.name+' requires '+fn.params.length+' arguments.');
+        runCustomPython(fn,args,++customPyRequest);return;
+      }
+      ++customPyRequest; if(customPyWorker){customPyWorker.terminate();customPyWorker=null;}
       const parsed=calculatorBaseInput(src),digits=Number($('calc-precision').value);
       const z=parsed.exact!==null?C(Number(parsed.exact)):numeric(parseRaw(parsed.expression),{...(window.MathStudio.extraMath?.variables||{}),Ans:ans},$('calc-angle').value);
       const integer=parsed.exact!==null?parsed.exact:(Math.abs(z.im)<1e-12&&Number.isSafeInteger(z.re)?BigInt(z.re):null);

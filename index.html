@@ -1141,7 +1141,14 @@ def _ms_process(job_text):
           const grid=document.createElement('div');grid.className='palette-grid';
           for(const [glyph,label,code] of sub.items){const b=document.createElement('button');b.type='button';b.className='palette-button';b.title='Insert '+label+': '+code;
             const icon=document.createElement('span');icon.className='glyph';icon.textContent=glyph;const small=document.createElement('span');small.className='glyph-label';small.textContent=label;b.append(icon,small);
-            b.addEventListener('click',()=>{insertText(code);});grid.appendChild(b);found++;}
+            b.addEventListener('click',()=>{
+              const mode=document.querySelector('[data-workspace].active')?.dataset.workspace;
+              const input=mode==='calculator'?document.getElementById('calc-input'):mode==='graph'?document.getElementById('graph-input'):null;
+              if(input){
+                input.focus();const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
+                input.setRangeText(code,start,end,'end');input.dispatchEvent(new Event('input',{bubbles:true}));
+              }else insertText(code);
+            });grid.appendChild(b);found++;}
           inner.appendChild(grid);top.appendChild(inner);
         }nav.appendChild(top);
       }

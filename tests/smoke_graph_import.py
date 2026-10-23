@@ -51,6 +51,9 @@ def main():
         assert page.evaluate('MathStudio.graphData.getState().points.length')==9
         page.locator('#graph-data-file').set_input_files({
             'name':'bad.csv','mimeType':'text/csv','buffer':b'x,y\n0,1\n1\n'})
+        # FileReader is asynchronous; wait until its validation status is painted.
+        page.wait_for_function(
+            '() => document.querySelector("#graph-data-status").textContent.includes("Import failed")')
         assert 'Import failed' in page.locator('#graph-data-status').inner_text()
         assert errors==[],errors
         browser.close()

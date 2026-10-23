@@ -3416,7 +3416,7 @@ function simplifyTable(){const data=$('data-panel'),area=data.querySelector('.da
   const openPython=el('button',{class:'secondary',type:'button'},'Python');openPython.addEventListener('click',()=>{pythonMenu.open=true;closeOtherMenus(pythonMenu);});
   quick.append(add,showFilter,openPython);bar.append(quick);
   area.insertBefore(bar,area.querySelector('#dt-tabs'));
-  for(const m of nav.children)m.addEventListener('toggle',()=>{if(m.open)closeOtherMenus(m)});
+  for(const m of nav.children)m.querySelector('summary').addEventListener('click',()=>{if(!m.open)closeOtherMenus(m)});
   document.addEventListener('pointerdown',e=>{if(!bar.contains(e.target))for(const m of nav.children)m.open=false;});
   function closeOtherMenus(except){for(const m of nav.children)if(m!==except)m.open=false;}
   return {filterContent,pythonContent:pythonMenu.querySelector('.dt-action-content'),menus:nav};

@@ -2,7 +2,7 @@
 
 ## Open the application
 
-Open `index.html` directly, or use the GitHub Pages site after it is enabled. Use Chrome, Edge or Firefox with JavaScript. The application has four tabs and a connected **Working equation** area above the active tab.
+Open `index.html` directly, or use the GitHub Pages site after it is enabled. Use Chrome, Edge or Firefox with JavaScript. The application has four tabs and a connected **Working equation** panel at the bottom of each active workspace.
 
 ### 1 — Calculator
 

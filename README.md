@@ -70,3 +70,5 @@ Local notebook, calculator history and the working expression are saved in brows
 No open-source license has been selected for this repository. A public GitHub repository is **not automatically open source**; contributors should not assume reuse rights until the owner adds a license.
 
 **3D paired-equation example:** enter `Y=x×x` and `z=sin(x×y)` on separate lines to show the surface and its highlighted curve `(x,x²,sin(x³))`. See [Graphing](docs/GRAPHING.md).
+
+**Shared panel location:** The Connected Workspaces / Working equation panel is at the bottom of each workspace. Use its Send buttons to transfer math; the view scrolls to the destination tool.

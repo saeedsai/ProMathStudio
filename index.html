@@ -210,7 +210,7 @@
 
   
     /* Connected workspaces v5 */
-    .hub{background:linear-gradient(120deg,#ffffff,#f6f8ff);border:1px solid #cbd6f4;border-radius:16px;padding:19px 20px 16px;margin:0 0 20px;box-shadow:0 7px 26px #344ea012}
+    .hub{background:linear-gradient(120deg,#ffffff,#f6f8ff);border:1px solid #cbd6f4;border-radius:16px;padding:19px 20px 16px;margin:34px 0 0;box-shadow:0 7px 26px #344ea012;scroll-margin-top:20px}
     .hub-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
     .hub-eyebrow{display:block;font-size:10px;font-weight:800;color:#5c65c7;letter-spacing:1.4px;margin-bottom:5px}
     .hub-top h2{font-size:19px;letter-spacing:-.35px}
@@ -260,30 +260,6 @@
       <button type="button" class="workspace-tab" data-workspace="graph"><span class="ws-emoji">⌁</span> 2D &amp; 3D graphs</button>
     </div>
     <div class="workspace-subtitle" id="workspace-subtitle">Write, preview and export professional mathematical equations.</div>
-    <section class="hub" id="connected-hub" aria-label="Connected workspaces">
-      <div class="hub-top">
-        <div><span class="hub-eyebrow">CONNECTED WORKSPACES</span><h2>Working equation <span class="hub-live">Shared across all tools</span></h2></div>
-        <div class="hub-project-actions"><button type="button" id="hub-export-project" class="secondary small" title="Save all equations, calculator history and graph settings to one project">↓ Save project</button><button type="button" id="hub-import-project" class="secondary small" title="Open a saved Math Studio project">↑ Open project</button><input type="file" id="hub-project-file" accept=".json,application/json" hidden></div>
-      </div>
-      <div class="hub-inputs">
-        <label for="hub-source">Select an input, saved equation or result
-          <select id="hub-source" aria-label="Choose a saved equation, recent input or calculated result"></select>
-        </label>
-        <label for="hub-variable" class="hub-variable">Solve for <input id="hub-variable" aria-label="Variable for symbolic solver" value="x" maxlength="24" spellcheck="false"></label>
-      </div>
-      <div class="hub-input-row"><textarea id="hub-expression" rows="2" spellcheck="false" placeholder="Enter one equation or several lines, e.g. y=x*x and z=sin(x*y)" aria-label="Shared working math expression"></textarea><button type="button" id="hub-grab" class="secondary small" title="Capture input from the open workspace">↑ Use open input</button><button type="button" id="hub-clear" class="secondary small" title="Clear only the shared expression">Clear</button></div>
-      <div class="hub-preview" id="hub-preview" aria-live="polite">Write an equation or select a saved one.</div>
-      <div class="hub-actions" aria-label="Send this expression to any math workspace"><span class="hub-send-label">Send to</span>
-        <button class="hub-send" type="button" data-hub-to="editor">∑ Editor</button>
-        <button class="hub-send" type="button" data-hub-to="calculator">▦ Calculate</button>
-        <button class="hub-send" type="button" data-hub-to="solver">ƒ Solve</button>
-        <button class="hub-send" type="button" data-hub-to="graph2d">⌁ Graph 2D</button>
-        <button class="hub-send" type="button" data-hub-to="graph3d">◈ Graph 3D</button>
-        <button class="hub-send hub-save" type="button" data-hub-to="notebook">＋ Notebook</button>
-      </div>
-      <div class="hub-extra"><button type="button" class="secondary small" id="hub-add-to-graph">＋ Add to current graph (keep other curves)</button><span>Choose any saved equation or calculated answer and send it to another tool.</span></div>
-      <div class="hub-status" id="hub-status" role="status">Write once, then send your equation or any result between all four workspaces.</div>
-    </section>
     <header class="topbar"><div><div class="kicker">Creative workspace / Mathematics</div><h1>Your equations, beautifully written.</h1><p>Type familiar text notation and see professional math typesetting in real time. Press <kbd>Enter</kbd> to add your result to the notebook.</p></div><button type="button" class="subtle-button" id="help-btn">Syntax guide ↗</button></header>
     <section class="panel" id="calculator-panel" aria-label="Advanced calculator">
       <div class="panel-head"><div class="panel-title"><span class="step">01</span> Advanced calculator <span class="cas-label">real + complex</span></div><span class="small-note">Scientific notation · Trigonometry · Factorials</span></div>
@@ -366,6 +342,30 @@ y = cos(x)</textarea>
     <div class="notebook-head"><div><h2>My equations <span id="counter" style="color:#9ba6b8;font-size:15px;font-weight:500">(0)</span></h2><div class="notebook-sub">Saved automatically in this browser, and editable anytime.</div></div><div class="notebook-controls"><button class="subtle-button" id="export-all-word">↓ Notebook .docx</button><button class="subtle-button" id="export-btn">↓ Export .tex</button><button class="subtle-button" id="delete-all-btn">Clear notebook</button></div></div>
     <section class="notebook-panel" id="notebook" aria-label="Saved equations"><div class="eq-empty">No equations yet. Type above and press Enter to start your notebook.</div></section>
     <section class="example-section" id="examples"><div class="example-head"><h2>Try an example</h2><label class="sr-only" for="example-category">Select example category</label><select id="example-category" class="example-category" aria-label="Example category"></select></div><div class="examples" id="examples-list"></div></section>
+    <section class="hub" id="connected-hub" aria-label="Connected workspaces">
+      <div class="hub-top">
+        <div><span class="hub-eyebrow">CONNECTED WORKSPACES</span><h2>Working equation <span class="hub-live">Shared across all tools</span></h2></div>
+        <div class="hub-project-actions"><button type="button" id="hub-export-project" class="secondary small" title="Save all equations, calculator history and graph settings to one project">↓ Save project</button><button type="button" id="hub-import-project" class="secondary small" title="Open a saved Math Studio project">↑ Open project</button><input type="file" id="hub-project-file" accept=".json,application/json" hidden></div>
+      </div>
+      <div class="hub-inputs">
+        <label for="hub-source">Select an input, saved equation or result
+          <select id="hub-source" aria-label="Choose a saved equation, recent input or calculated result"></select>
+        </label>
+        <label for="hub-variable" class="hub-variable">Solve for <input id="hub-variable" aria-label="Variable for symbolic solver" value="x" maxlength="24" spellcheck="false"></label>
+      </div>
+      <div class="hub-input-row"><textarea id="hub-expression" rows="2" spellcheck="false" placeholder="Enter one equation or several lines, e.g. y=x*x and z=sin(x*y)" aria-label="Shared working math expression"></textarea><button type="button" id="hub-grab" class="secondary small" title="Capture input from the open workspace">↑ Use open input</button><button type="button" id="hub-clear" class="secondary small" title="Clear only the shared expression">Clear</button></div>
+      <div class="hub-preview" id="hub-preview" aria-live="polite">Write an equation or select a saved one.</div>
+      <div class="hub-actions" aria-label="Send this expression to any math workspace"><span class="hub-send-label">Send to</span>
+        <button class="hub-send" type="button" data-hub-to="editor">∑ Editor</button>
+        <button class="hub-send" type="button" data-hub-to="calculator">▦ Calculate</button>
+        <button class="hub-send" type="button" data-hub-to="solver">ƒ Solve</button>
+        <button class="hub-send" type="button" data-hub-to="graph2d">⌁ Graph 2D</button>
+        <button class="hub-send" type="button" data-hub-to="graph3d">◈ Graph 3D</button>
+        <button class="hub-send hub-save" type="button" data-hub-to="notebook">＋ Notebook</button>
+      </div>
+      <div class="hub-extra"><button type="button" class="secondary small" id="hub-add-to-graph">＋ Add to current graph (keep other curves)</button><span>Choose any saved equation or calculated answer and send it to another tool.</span></div>
+      <div class="hub-status" id="hub-status" role="status">Write once, then send your equation or any result between all four workspaces.</div>
+    </section>
   </main>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -2301,9 +2301,14 @@ def _ms_process(job_text):
       }
       else if(destination==='notebook'){
         engine.notebookBridge.add(value,meta);
+        engine.advanced.mode('editor');
         rebuildSources();message('Saved to your shared notebook. Use its Send menu to reopen in any workspace.');
       }
       else throw Error('Unknown workspace.');
+      // The connected hub is the page footer. After Send, reveal the destination
+      // above it rather than leaving the user at the bottom of the previous tab.
+      const focusIds={editor:'equation-input',solver:'symbolic-panel',calculator:'calculator-panel',graph2d:'graph-panel',graph3d:'graph-panel',notebook:'notebook'};
+      requestAnimationFrame(()=>$(focusIds[destination])?.scrollIntoView({behavior:'auto',block:'start'}));
       return true;
     }catch(e){message('Cannot send expression: '+e.message,true);return false;}
   }
@@ -2326,6 +2331,7 @@ def _ms_process(job_text):
       engine.advanced.appendGraph(formatted);
       current(value,'graph',{archive:true});engine.advanced.mode('graph');
       message('Added another function to the '+mode.toUpperCase()+' graph without removing existing curves.');
+      requestAnimationFrame(()=>$('graph-panel')?.scrollIntoView({behavior:'auto',block:'start'}));
     }catch(e){message(e.message,true);}
   });
   $('hub-clear').addEventListener('click',()=>{

@@ -29,6 +29,14 @@ class StaticChecks(unittest.TestCase):
             with self.subTest(element=identifier):
                 self.assertIn(f'id="{identifier}"', self.text)
 
+    def test_connected_hub_is_footer_after_workspace_content(self):
+        # Keep a single shared panel below every workspace, not a top toolbar.
+        self.assertEqual(self.text.count('id="connected-hub"'), 1)
+        self.assertGreater(self.text.index('id="connected-hub"'),
+                           self.text.index('id="examples-list"'))
+        self.assertLess(self.text.index('id="connected-hub"'),
+                        self.text.index('  </main>'))
+
     def test_routing_exists(self):
         for target in ['editor', 'calculator', 'solver', 'graph2d', 'graph3d', 'notebook']:
             self.assertIn(f'data-hub-to="{target}"', self.text)

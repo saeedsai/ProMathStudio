@@ -20,6 +20,21 @@ def main():
 
         assert page.locator('[data-workspace="editor"]').count() == 1
         assert page.locator('#connected-hub').is_visible()
+        # Connected Workspace is a single shared footer for every tab and screen size.
+        for width, height in [(1440, 960), (390, 844)]:
+            page.set_viewport_size({'width': width, 'height': height})
+            for mode, last in [('editor', '#examples'),
+                               ('calculator', '#calculator-panel'),
+                               ('solver', '#symbolic-panel'),
+                               ('graph', '#graph-panel')]:
+                page.locator(f'[data-workspace="{mode}"]').click()
+                panel = page.locator(last).bounding_box()
+                hub = page.locator('#connected-hub').bounding_box()
+                assert panel is not None and hub is not None, (mode, width)
+                assert hub['y'] >= panel['y'] + panel['height'] - 1, (mode, width, panel, hub)
+                assert page.locator('#connected-hub').count() == 1
+        page.set_viewport_size({'width': 1440, 'height': 960})
+        page.locator('[data-workspace="editor"]').click()
         page.locator('#equation-input').fill('(x-1)^2')
         assert page.locator('#preview math').count() > 0
         page.locator('#add-btn').click()

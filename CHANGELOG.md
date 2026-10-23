@@ -2,6 +2,13 @@
 
 Changes are documented in functional groups; historical version numbers are not reconstructed where no tagged release is available.
 
+## 2026-10-23 — Connected workspace footer layout
+
+- Moved the shared Working equation/Connected Workspaces panel from the top to the bottom of every workspace tab.
+- Kept exactly one shared panel and preserved expression state, project save/load, calculator, solver and graph routing.
+- Sending an equation to another tool now scrolls to the destination above the footer.
+- Added desktop/mobile layout regression tests.
+
 ## 2026-10-23 — 3D constrained-curve graphing
 
 - Plot `y=f(x)` together with `z=g(x,y)` as a highlighted 3D curve on the surface.

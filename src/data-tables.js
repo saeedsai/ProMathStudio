@@ -45,7 +45,7 @@
       <button id="dt-sort" class="secondary" type="button">Sort table</button><button id="dt-clear-filter" class="secondary" type="button">Clear filter</button></div>
     <p id="dt-status" class="graph-data-muted" role="status">Start editing cells or import data.</p>
     <div class="table-zoom-toolbar"><label for="table-zoom">Table zoom <output id="table-zoom-value">100%</output></label><button type="button" id="table-zoom-out" class="secondary" title="Zoom out">−</button><input id="table-zoom" type="range" min="50" max="200" value="100" step="10"><button type="button" id="table-zoom-in" class="secondary" title="Zoom in">＋</button><button type="button" class="secondary" id="table-zoom-reset">100%</button></div><div class="dt-grid-scroll"><div id="table-zoom-content"><table class="dt-sheet" id="dt-sheet" aria-label="Editable spreadsheet"></table></div></div>
-    <p class="graph-data-muted">Select a cell to edit. Formulas begin with <code>=</code>; examples: <code>=A2*B2</code>, <code>=SUM(B2:B5)</code>, <code>=AVERAGE(A2:A10)</code>, <code>=IF(A2&gt;1,B2,0)</code>, <code>=Data2!A2</code>. Row 1 is the header.</p>
+    <p class="graph-data-muted">Select a cell to edit. Formulas begin with <code>=</code>; examples: <code>=A1*B1</code>, <code>=SUM(B1:B4)</code>, <code>=AVERAGE(A1:A9)</code>, <code>=IF(A1&gt;1,B1,0)</code>, <code>=Data2!A1</code>. Row 1 is the first data row; column names are displayed separately.</p>
     <section class="dt-box"><h3>Database operations</h3><div class="data-toolbar">
       <label>Left table<select id="dt-left"></select></label><label>Right table<select id="dt-right"></select></label>
       <label>Operation<select id="dt-op"><option value="inner">INNER JOIN</option><option value="left">LEFT JOIN</option><option value="right">RIGHT JOIN</option><option value="full">FULL OUTER JOIN</option><option value="unionall">UNION ALL</option><option value="union">UNION DISTINCT</option><option value="intersect">INTERSECT</option><option value="except">EXCEPT</option></select></label>
@@ -104,7 +104,7 @@
     // Aggregations accept ranges or comma-separated arguments. Nested expressions are supported by the recursive evaluator.
     expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\s*\(([^()]*)\)/gi,(all,fn,body)=>{
       const nums=[];for(const arg of splitArgs(body)){const range=/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/i.exec(arg.trim());
-        if(range){const c0=colIndex(range[1]),r0=+range[2]-2,c1=colIndex(range[3]),r1=+range[4]-2;
+        if(range){const c0=colIndex(range[1]),r0=+range[2]-1,c1=colIndex(range[3]),r1=+range[4]-1;
           if((Math.abs(c1-c0)+1)*(Math.abs(r1-r0)+1)>6000)throw Error('#RANGE');
           for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(t,rr,cc,stack);if(v!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
         } else {const v=compute(arg,t,stack);if(Number.isFinite(Number(v)))nums.push(Number(v));}}
@@ -118,7 +118,7 @@
     let at=0;const peek=()=>tokens[at]?.type;
     function primary(){const tok=tokens[at++];if(!tok)throw Error('#FORMULA');if(tok.type==='num')return tok.v;
       if(tok.type==='cell'){let target=t,ref=tok.v;const bang=ref.lastIndexOf('!');if(bang>=0){target=getByName(ref.slice(0,bang).replace(/^'|'$/g,''));ref=ref.slice(bang+1);if(!target)throw Error('#SHEET');}
-        const m=/^([A-Za-z]+)(\d+)$/.exec(ref);if(!m)throw Error('#REF');return number(value(target,Number(m[2])-2,colIndex(m[1]),stack));}
+        const m=/^([A-Za-z]+)(\d+)$/.exec(ref);if(!m)throw Error('#REF');return number(value(target,Number(m[2])-1,colIndex(m[1]),stack));}
       if(tok.type==='('){const v=addition();if(peek()!==')')throw Error('#PAREN');at++;return v;}
       if(tok.type==='+'||tok.type==='-'){const v=primary();return tok.type==='-'?-v:v;}throw Error('#FORMULA');}
     function power(){let v=primary();if(peek()==='^'){at++;v=Math.pow(v,power());}return v;}
@@ -152,8 +152,8 @@
     for(let c=0;c<t.columns.length;c++){const th=el('th');const input=el('input',{'aria-label':'Column '+colLetter(c),value:t.columns[c]});input.value=t.columns[c];input.addEventListener('change',()=>{t.columns[c]=input.value.slice(0,80)||colLetter(c);save();render();});th.append(input);hr.append(th);}head.append(hr);grid.append(head);
     const body=el('tbody');const q=$('dt-filter').value.trim().toLowerCase(),rows=evaluated(t),show=[];
     for(let r=0;r<t.rows.length;r++)if(!q||rows[r].some(v=>String(v).toLowerCase().includes(q)))show.push(r);
-    for(const r of show.slice(0,MAX_DISPLAY)){const tr=el('tr');tr.append(el('th',{class:'dt-rownum'},r+2));for(let c=0;c<t.columns.length;c++){
-      const td=el('td');const val=rows[r][c],input=el('input',{'aria-label':colLetter(c)+(r+2),'data-row':r,'data-col':c});
+    for(const r of show.slice(0,MAX_DISPLAY)){const tr=el('tr');tr.append(el('th',{class:'dt-rownum'},r+1));for(let c=0;c<t.columns.length;c++){
+      const td=el('td');const val=rows[r][c],input=el('input',{'aria-label':colLetter(c)+(r+1),'data-row':r,'data-col':c});
       input.value=String(val??'');if(String(val).startsWith('#'))input.classList.add('dt-error');
       input.addEventListener('focus',()=>{focusedCell={id:t.id,r,c};input.value=t.rows[r][c];input.select();});
       input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();input.blur();}});
@@ -171,7 +171,7 @@
   $('dt-add-col').addEventListener('click',()=>safeAction(()=>{const t=active();if(t.columns.length>=MAX_COLUMNS)throw Error('Limit 32 columns');t.columns.push(colLetter(t.columns.length));t.rows.forEach(r=>r.push(''));render();save();}));
   $('dt-remove-row').addEventListener('click',()=>safeAction(()=>{const t=active();t.rows.pop();render();save();}));
   $('dt-remove-col').addEventListener('click',()=>safeAction(()=>{const t=active();if(t.columns.length<=1)throw Error('A table needs one column.');t.columns.pop();t.rows.forEach(r=>r.pop());render();save();}));
-  $('dt-to-working').addEventListener('click',()=>safeAction(()=>{const t=active(),cell=focusedCell?.id===t.id?focusedCell:{r:0,c:0};const val=String(value(t,cell.r,cell.c)||'');window.MathStudio.bridge.select(val,'data tables',{archive:true});notify('Sent cell '+colLetter(cell.c)+(cell.r+2)+' to the shared Working equation.');}));
+  $('dt-to-working').addEventListener('click',()=>safeAction(()=>{const t=active(),cell=focusedCell?.id===t.id?focusedCell:{r:0,c:0};const val=String(value(t,cell.r,cell.c)||'');window.MathStudio.bridge.select(val,'data tables',{archive:true});notify('Sent cell '+colLetter(cell.c)+(cell.r+1)+' to the shared Working equation.');}));
   $('dt-filter').addEventListener('input',render);$('dt-clear-filter').addEventListener('click',()=>{$('dt-filter').value='';render();});
   $('dt-sort').addEventListener('click',()=>safeAction(()=>{const t=active(),c=Number($('dt-sortcol').value),v=evaluated(t),dir=$('dt-sortdir').value==='desc'?-1:1;t.rows=t.rows.map((row,i)=>({row,i})).sort((a,b)=>dir*String(v[a.i][c]).localeCompare(String(v[b.i][c]),undefined,{numeric:true})).map(x=>x.row);render();save();}));
   for(const id of ['dt-left','dt-right'])$(id).addEventListener('change',refreshMenus);

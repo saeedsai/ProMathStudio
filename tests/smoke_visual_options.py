@@ -41,11 +41,16 @@ def main():
   assert page.evaluate('MathStudio.graphAppearance.color(1)')=='#123abc'
   page.locator('#plot-palette').select_option('custom')
   assert len(set(page.evaluate('[0,1,2].map(i=>MathStudio.graphAppearance.color(i))')))==3
+  page.locator('#plot-series-colors select[aria-label="Line style for y=sin(x)"]').select_option('dotted')
+  page.locator('#plot-series-colors select[aria-label="Line weight for y=cos(x)"]').select_option('1.5')
+  assert page.evaluate('MathStudio.graphAppearance.state().seriesStyles["1"].line')=='dotted'
+  assert page.evaluate('MathStudio.graphAppearance.state().seriesStyles["2"].width')=='1.5'
   assert page.evaluate('MathStudio.graphAppearance.width()')==5
   assert page.evaluate('MathStudio.graphAppearance.dash()')==[12,8]
   with page.expect_download() as download:page.locator('#hub-export-project').click()
   project=json.loads(Path(download.value.path()).read_text())
-  assert project['graph']['appearance']['palette']=='bright'
+  assert project['graph']['appearance']['palette']=='custom'
+  assert project['graph']['appearance']['seriesStyles']['1']['line']=='dotted'
   assert project['calculator']['format']=='auto'
   page.locator('[data-workspace="data"]').click()
   page.locator('#table-zoom-in').click()

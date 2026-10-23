@@ -32,6 +32,8 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Browser smoke tests
         run: python tests/smoke_browser.py
+      - name: CSV/JSON graph import smoke test
+        run: python tests/smoke_graph_import.py
 
   deploy:
     name: Publish static Math Studio

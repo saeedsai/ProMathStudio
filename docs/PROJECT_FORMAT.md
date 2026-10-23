@@ -52,3 +52,13 @@ Select **Save project** to download `MathStudio_Project.json`. Current format id
 Project files are saved on the user's device through browser downloads. The app has no login, cloud project synchronization or server storage. SymPy library files load from a CDN, while math computations execute locally.
 
 [Architecture](ARCHITECTURE.md) · [Backup troubleshooting](TROUBLESHOOTING.md)
+
+## Graph datasets in project backup
+
+Version 1 projects now optionally include `graph.dataset`:
+
+```json
+{"name":"samples.csv","headers":["x","y","z"],"rows":[[0,1,2],[1,2,3]],"x":"0","y":"1","z":"2","style":"points"}
+```
+
+Graph state remains backward compatible: a missing dataset imports as no plotted data. **Save project** retains imported rows and mappings. See [Data import](DATA_IMPORT.md).

@@ -64,3 +64,7 @@ The graph draws the full **surface** `z=sin(x*y)` and highlights its
 - The right side of `y=f(x)` must not depend on `y`.
 - Use the shared **Working equation** multiline field to send both lines to Graph 3D.
 - If the curve lies outside the selected Y or Z bounds, widen the ranges.
+
+## Import external data
+
+Import CSV, TSV or JSON tables into 2D and 3D graphs without a server. You can map columns to X/Y/Z, overlay measurement points on equation plots, connect points in file order, or draw complete rectangular 3D grid meshes. Click **Fit axes to data** to adjust bounds. Imported rows are included in the project backup. See [Data import](DATA_IMPORT.md).

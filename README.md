@@ -72,3 +72,7 @@ No open-source license has been selected for this repository. A public GitHub re
 **3D paired-equation example:** enter `Y=x×x` and `z=sin(x×y)` on separate lines to show the surface and its highlighted curve `(x,x²,sin(x³))`. See [Graphing](docs/GRAPHING.md).
 
 **Shared panel location:** The Connected Workspaces / Working equation panel is at the bottom of each workspace. Use its Send buttons to transfer math; the view scrolls to the destination tool.
+
+### Plot imported CSV / JSON datasets
+
+Under **2D & 3D Graphs → Import CSV / JSON data to graph**, upload local data, select X/Y/Z columns, plot points/lines or a rectangular 3D grid, and **Fit axes to data**. Imported datasets overlay equations and are included in the project JSON backup. See [Data import](docs/DATA_IMPORT.md) and the [sample files](examples/).

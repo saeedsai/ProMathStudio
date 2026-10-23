@@ -2,6 +2,13 @@
 
 Changes are documented in functional groups; historical version numbers are not reconstructed where no tagged release is available.
 
+## 2026-10-23 — CSV and JSON imports for graphing
+
+- Import local CSV, TSV and JSON numeric tables into the 2D and 3D Graph workspace.
+- Added X/Y/Z mapping, row preview, scatter/connected-line style, complete-grid mesh overlay and Fit axes to data.
+- Data overlays equation curves/surfaces and is preserved in exported project JSON.
+- Added sample datasets, data import documentation and CI browser smoke coverage.
+
 ## 2026-10-23 — Connected workspace footer layout
 
 - Moved the shared Working equation/Connected Workspaces panel from the top to the bottom of every workspace tab.

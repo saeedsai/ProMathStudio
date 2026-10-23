@@ -41,3 +41,7 @@ The Playwright smoke suite exercises the equation editor, notebook, offline Expa
 Static checks and browser smoke must pass for a code update; verify high-risk math operations separately. GitHub Actions is a signal, not proof of all correctness. Document any known failure in `docs/FEATURES_AND_LIMITATIONS.md` or `CHANGELOG.md` rather than claiming an unsupported capability.
 
 [Development](DEVELOPMENT.md)
+
+## CSV/JSON imported-data smoke tests
+
+After Playwright is installed, run `python tests/smoke_graph_import.py`. The test covers CSV quoted cells, numeric coordinate parsing, 2D/3D selection, X/Y/Z plotting, grid style, fit axes, export/import of project JSON and validation errors. The CI and Pages workflows run this before deployment.

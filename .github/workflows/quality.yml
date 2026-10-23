@@ -30,3 +30,5 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Browser smoke tests (local functions, no SymPy CDN)
         run: python tests/smoke_browser.py
+      - name: CSV/JSON graph import smoke test
+        run: python tests/smoke_graph_import.py

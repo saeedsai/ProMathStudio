@@ -44,7 +44,7 @@
       <label>Sort by<select id="dt-sortcol"></select></label><label>Direction<select id="dt-sortdir"><option value="asc">Ascending</option><option value="desc">Descending</option></select></label>
       <button id="dt-sort" class="secondary" type="button">Sort table</button><button id="dt-clear-filter" class="secondary" type="button">Clear filter</button></div>
     <p id="dt-status" class="graph-data-muted" role="status">Start editing cells or import data.</p>
-    <div class="dt-grid-scroll"><table class="dt-sheet" id="dt-sheet" aria-label="Editable spreadsheet"></table></div>
+    <div class="table-zoom-toolbar"><label for="table-zoom">Table zoom <output id="table-zoom-value">100%</output></label><button type="button" id="table-zoom-out" class="secondary" title="Zoom out">−</button><input id="table-zoom" type="range" min="50" max="200" value="100" step="10"><button type="button" id="table-zoom-in" class="secondary" title="Zoom in">＋</button><button type="button" class="secondary" id="table-zoom-reset">100%</button></div><div class="dt-grid-scroll"><div id="table-zoom-content"><table class="dt-sheet" id="dt-sheet" aria-label="Editable spreadsheet"></table></div></div>
     <p class="graph-data-muted">Select a cell to edit. Formulas begin with <code>=</code>; examples: <code>=A2*B2</code>, <code>=SUM(B2:B5)</code>, <code>=AVERAGE(A2:A10)</code>, <code>=IF(A2&gt;1,B2,0)</code>, <code>=Data2!A2</code>. Row 1 is the header.</p>
     <section class="dt-box"><h3>Database operations</h3><div class="data-toolbar">
       <label>Left table<select id="dt-left"></select></label><label>Right table<select id="dt-right"></select></label>
@@ -211,7 +211,7 @@
     if(!entries.length)throw Error('Select a numeric values column with nonempty category labels.');
     const canvas=$('dt-chart-canvas'),ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
     ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.fillStyle='#1d2a49';ctx.font='bold 25px Arial';ctx.fillText(t.name+' — '+(kind==='pie'?'Pie':'Bar')+' chart',45,45);
-    const colors=['#536be8','#0c9ea6','#d46a7a','#d99d35','#765ab5','#2c9a69','#b85f43','#4b80be'];
+    const colors=Array.from({length:24},(_,i)=>window.MathStudio.graphAppearance?.color(i)||'#536be8');
     if(kind==='bar'){const margin=90,max=Math.max(0,...entries.map(e=>e[1])),min=Math.min(0,...entries.map(e=>e[1]));const lo=Math.min(0,min),hi=Math.max(1,max),barW=(w-2*margin)/entries.length;
       ctx.strokeStyle='#90a1c6';ctx.beginPath();ctx.moveTo(margin,100);ctx.lineTo(margin,h-95);ctx.lineTo(w-margin,h-95);ctx.stroke();
       for(let i=0;i<entries.length;i++){const [name,v]=entries[i],x=margin+i*barW+barW*.13,bw=barW*.74;

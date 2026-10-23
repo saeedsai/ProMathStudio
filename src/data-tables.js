@@ -37,7 +37,7 @@
     <div class="data-inner"><div class="data-toolbar">
       <button id="dt-new" class="primary" type="button">＋ New table</button><button id="dt-copy" class="secondary" type="button">Duplicate</button>
       <button id="dt-rename" class="secondary" type="button">Rename</button><button id="dt-remove" class="secondary" type="button">Delete table</button>
-      <button id="dt-add-row" class="secondary" type="button">＋ Row</button><button id="dt-add-col" class="secondary" type="button">＋ Column</button>
+      <button id="dt-add-row" class="secondary" type="button">＋ Row</button><button id="dt-add-col" class="secondary" type="button">＋ Column</button><button id="dt-to-working" class="secondary" type="button">↑ Cell to Working equation</button>
       <button id="dt-remove-row" class="secondary" type="button">− Last row</button><button id="dt-remove-col" class="secondary" type="button">− Last column</button>
     </div><nav class="dt-tabs" id="dt-tabs" aria-label="Open tables"></nav>
     <div class="data-toolbar"><label>Filter rows<input type="search" id="dt-filter" placeholder="Search all columns"></label>
@@ -73,7 +73,7 @@
   about.style.padding='16px 22px';about.innerHTML='<summary style="cursor:pointer;font-weight:750">About ProMathStudio · Contact · License</summary><p>Created by <strong>Saeed Mohammad Salehi</strong>. Contact: <a href="mailto:Saeedmsalehi1990@gmail.com">Saeedmsalehi1990@gmail.com</a>.</p><p>© 2026 Saeed Mohammad Salehi. MIT License: <a href="https://github.com/saeedsai/ProMathStudio/blob/main/LICENSE">View license</a>.</p>';
   $('connected-hub').after(about);
 
-  let tables=[],selected=null,serial=1,chartSelection=null;
+  let tables=[],selected=null,serial=1,chartSelection=null,focusedCell=null;
   const active=()=>tables.find(t=>t.id===selected)||tables[0];
   const notify=(msg,error=false)=>{const n=$('dt-status');n.textContent=msg;n.style.color=error?'#ad3248':'#576c86';};
   const makeTable=(name='Table',columns=['A','B','C'],rows=[['','',''],['','',''],['','','']])=>{
@@ -81,7 +81,7 @@
     const unique=uniqueName(name);const table={id:'sheet-'+(serial++),name:unique,columns:columns.map(String),rows:rows.map(r=>columns.map((_,i)=>r[i]===undefined?'':String(r[i])))};
     validate(table);tables.push(table);selected=table.id;render();save();return table;
   };
-  const uniqueName=(n)=>{let base=String(n||'Table').replace(/[^a-zA-Z0-9_ ]/g,'_').trim().slice(0,44)||'Table';let title=base,number=2;while(tables.some(t=>t.name.toLowerCase()===title.toLowerCase()))title=base+'_'+number++;return title;};
+  const uniqueName=(n,excludeId=null)=>{let base=String(n||'Table').replace(/[^a-zA-Z0-9_ ]/g,'_').trim().slice(0,44)||'Table';let title=base,number=2;while(tables.some(t=>t.id!==excludeId&&t.name.toLowerCase()===title.toLowerCase()))title=base+'_'+number++;return title;};
   const validate=t=>{if(!t||!Array.isArray(t.columns)||!Array.isArray(t.rows)||!t.columns.length||t.columns.length>MAX_COLUMNS||t.rows.length>MAX_ROWS)throw Error('Table exceeds 32 columns or 6,000 rows.');for(const row of t.rows)if(!Array.isArray(row)||row.length!==t.columns.length)throw Error('Inconsistent data row width.');};
   const getByName=name=>tables.find(t=>t.name.toLowerCase()===String(name).toLowerCase());
   const value=(t,r,c,stack=new Set())=>{
@@ -127,7 +127,7 @@
     const result=addition();if(at!==tokens.length||!Number.isFinite(result))throw Error('#VALUE');return Number(result.toPrecision(13));
   }
   const evaluated=t=>t.rows.map((row,r)=>row.map((_,c)=>{try{return value(t,r,c);}catch(e){return e.message.startsWith('#')?e.message:'#ERR';}}));
-  function save(){try{localStorage.setItem('mathstudio-tables-v1',JSON.stringify(exportState()));}catch{notify('Browser storage is full. Export the project JSON to keep this workbook.',true);}}
+  function save(){try{localStorage.setItem('mathstudio-tables-v1',JSON.stringify(exportState()));}catch{notify('Browser storage is unavailable or full; export the project JSON to keep this workbook.',true);}}
   function exportState(){return {version:1,selected,tables:deep(tables)};}
   function restoreState(state){
     if(!state||!Array.isArray(state.tables)){tables=[];selected=null;makeTable('Data1',['x','y','z'],[['0','0','0'],['1','1','1'],['2','4','8']]);return;}
@@ -155,7 +155,7 @@
     for(const r of show.slice(0,MAX_DISPLAY)){const tr=el('tr');tr.append(el('th',{class:'dt-rownum'},r+2));for(let c=0;c<t.columns.length;c++){
       const td=el('td');const val=rows[r][c],input=el('input',{'aria-label':colLetter(c)+(r+2),'data-row':r,'data-col':c});
       input.value=String(val??'');if(String(val).startsWith('#'))input.classList.add('dt-error');
-      input.addEventListener('focus',()=>{input.value=t.rows[r][c];input.select();});
+      input.addEventListener('focus',()=>{focusedCell={id:t.id,r,c};input.value=t.rows[r][c];input.select();});
       input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();input.blur();}});
       input.addEventListener('change',()=>{t.rows[r][c]=input.value.slice(0,8000);save();});
       input.addEventListener('blur',()=>{t.rows[r][c]=input.value.slice(0,8000);save();requestAnimationFrame(render);});td.append(input);tr.append(td);
@@ -165,12 +165,13 @@
   const safeAction=fn=>{try{fn();}catch(error){notify(error.message,true);}};
   $('dt-new').addEventListener('click',()=>safeAction(()=>makeTable('Data'+(tables.length+1),['A','B','C'],[['','',''],['','',''],['','','']])));
   $('dt-copy').addEventListener('click',()=>safeAction(()=>{const t=active();makeTable(t.name+'_copy',t.columns,t.rows);}));
-  $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, underscores):',t.name);if(name===null)return;t.name=uniqueName(name);save();render();}));
+  $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, underscores):',t.name);if(name===null)return;t.name=uniqueName(name,t.id);save();render();}));
   $('dt-remove').addEventListener('click',()=>safeAction(()=>{if(tables.length===1)throw Error('Keep at least one table.');if(!confirm('Delete selected table?'))return;tables=tables.filter(t=>t.id!==selected);selected=tables[0].id;render();save();}));
   $('dt-add-row').addEventListener('click',()=>safeAction(()=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Limit 6,000 rows');t.rows.push(t.columns.map(()=>''));render();save();}));
   $('dt-add-col').addEventListener('click',()=>safeAction(()=>{const t=active();if(t.columns.length>=MAX_COLUMNS)throw Error('Limit 32 columns');t.columns.push(colLetter(t.columns.length));t.rows.forEach(r=>r.push(''));render();save();}));
   $('dt-remove-row').addEventListener('click',()=>safeAction(()=>{const t=active();t.rows.pop();render();save();}));
   $('dt-remove-col').addEventListener('click',()=>safeAction(()=>{const t=active();if(t.columns.length<=1)throw Error('A table needs one column.');t.columns.pop();t.rows.forEach(r=>r.pop());render();save();}));
+  $('dt-to-working').addEventListener('click',()=>safeAction(()=>{const t=active(),cell=focusedCell?.id===t.id?focusedCell:{r:0,c:0};const val=String(value(t,cell.r,cell.c)||'');window.MathStudio.bridge.select(val,'data tables',{archive:true});notify('Sent cell '+colLetter(cell.c)+(cell.r+2)+' to the shared Working equation.');}));
   $('dt-filter').addEventListener('input',render);$('dt-clear-filter').addEventListener('click',()=>{$('dt-filter').value='';render();});
   $('dt-sort').addEventListener('click',()=>safeAction(()=>{const t=active(),c=Number($('dt-sortcol').value),v=evaluated(t),dir=$('dt-sortdir').value==='desc'?-1:1;t.rows=t.rows.map((row,i)=>({row,i})).sort((a,b)=>dir*String(v[a.i][c]).localeCompare(String(v[b.i][c]),undefined,{numeric:true})).map(x=>x.row);render();save();}));
   for(const id of ['dt-left','dt-right'])$(id).addEventListener('change',refreshMenus);
@@ -238,6 +239,6 @@
   $('dt-send-graph').addEventListener('click',()=>safeAction(()=>{$('dt-graph-table').value=active().id;chartColumns();sendToGraph();}));
   // Export PNG via the canvas data URL; handle binary bytes without string-encoding conversion.
   $('dt-chart-download').onclick=()=>{const a=el('a',{href:$('dt-chart-canvas').toDataURL('image/png'),download:'ProMathStudio_chart.png'});document.body.append(a);a.click();a.remove();};
-  window.MathStudio.dataTables={get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows)};
+  window.MathStudio.dataTables={appendExpression:text=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Maximum 6,000 rows');const row=t.columns.map(()=>'' );row[0]=String(text).slice(0,8000);t.rows.push(row);render();save();return t;},get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows)};
   try{const stored=JSON.parse(localStorage.getItem('mathstudio-tables-v1')||'null');restoreState(stored);}catch{restoreState(null);}
 })();

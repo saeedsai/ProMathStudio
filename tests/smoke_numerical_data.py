@@ -29,7 +29,7 @@ def run():
         assert abs(mid[2]-math.exp(-.1*math.pi**2*.1))<.002,mid
         assert abs(heat['cfl']-.08)<1e-6
         assert page.evaluate("()=>{try{MathStudio.numerical.heat1D({nx:100,nt:1,alpha:1,endTime:1});return false;}catch(e){return /Unstable/.test(e.message)}}")
-        for expr,expected in [('diff(sin(x),x,0)',1),('int(x^2,x,0,3)',9),('sum(k^2,k,1,10)',385),('prod(k,k,1,5)',120)]:
+        for expr,expected in [('diff(sin(x),x,0)',1),('int(x^2,x,0,3)',9),('int(0,3,x^2,x)',9),('sum(k^2,k,1,10)',385),('sum(k=1,10,k^2)',385),('prod(k,k,1,5)',120),('prod(k=1,5,k)',120)]:
             actual=page.evaluate('(s)=>MathStudio.advanced.numeric(s).re',expr)
             assert abs(actual-expected)<1e-6,(expr,actual,expected)
         page.locator('[data-workspace="calculator"]').click()
@@ -79,6 +79,7 @@ def run():
         }''',worker_src)
         compile(py_code,'embedded-data-worker.py','exec')
         assert 'pd.to_numeric' in py_code
+        assert 'import sympy as sp' in py_code
         page.locator('#dt-python-stop').click()
         page.set_viewport_size({'width':390,'height':844})
         assert page.locator('#dt-sheet').is_visible()

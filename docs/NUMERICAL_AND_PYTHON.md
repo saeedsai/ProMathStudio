@@ -85,3 +85,7 @@ A second example is available from **Example: groupby**. Python execution does *
 The native JS evaluator and numerical solvers do not use arbitrary JavaScript `eval()` or dynamic Function execution. The explicitly requested Python editor runs code in a worker on the user's own computer; code from unknown sources can be dangerous even in a worker. Imported CSV/JSON is interpreted as data, not Python code. The on-device browser workspaces do not have a server database.
 
 Browser regressions cover nonlinear roots, local equation systems, heat/Poisson reference cases, CFL rejection, numerical calculus, menu/filter behavior, and Python worker script construction. **Live CDN loading and full pandas execution require online browser validation.**
+
+### Native Equation Editor syntax in the calculator
+
+Both calculator-style and Equation Editor-style forms are accepted. For example, `int(x^2,x,0,3)` and `int(0,3,x^2,x)` both evaluate to 9. `sum(k^2,k,1,10)` and `sum(k=1,10,k^2)` both evaluate to 385. The same applies to `prod`. The Python workspace also exposes `sp` for SymPy, loaded alongside pandas; `result` must still be a pandas DataFrame or a dictionary of DataFrames.

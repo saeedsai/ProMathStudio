@@ -1852,16 +1852,24 @@ def _ms_process(job_text):
         // Use the same mathematical grammar in the calculator, graphs, and editor.
         // Numeric calculus evaluates the AST with a temporary bound integration variable.
         if(['diff','pdiff','int','integral','sum','prod'].includes(name)){
-          if(ast.args.length<(name==='diff'||name==='pdiff'?3:4))
-            throw Error(name+' needs (expression, variable, '+(name==='diff'?'point':'lower, upper')+').');
-          const id=ast.args[1];if(id.kind!=='symbol')throw Error('The second argument must be a variable name.');
+          // Equation Editor forms: int(lower,upper,expr,x), sum(k=lower,upper,expr).
+          // Calculator forms: int(expr,x,lower,upper), sum(expr,k,lower,upper).
+          const integralEditor=['int','integral'].includes(name)&&ast.args.length===4&&ast.args[3]?.kind==='symbol'&&ast.args[1]?.kind!=='symbol';
+          const boundSum=['sum','prod'].includes(name)&&ast.args.length===3&&ast.args[0]?.kind==='binary'&&ast.args[0].op==='=';
+          const node=integralEditor?ast.args[2]:boundSum?ast.args[2]:ast.args[0];
+          const id=integralEditor?ast.args[3]:boundSum?ast.args[0].left:ast.args[1];
+          if(id?.kind!=='symbol')throw Error('Specify the numeric operation variable (e.g. x).');
           const label=id.value;
-          const evalAt=x=>{const next={...env,[label]:C(x)};return numeric(ast.args[0],next,angle,depth+1);};
+          const evalAt=x=>{const next={...env,[label]:C(x)};return numeric(node,next,angle,depth+1);};
           if(name==='diff'||name==='pdiff'){
-            const x=scalar(go(ast.args[2])),h=1e-5*Math.max(1,Math.abs(x));
-            v=div(sub(evalAt(x+h),evalAt(x-h)),C(2*h));break;
+            if(ast.args.length<2||ast.args.length>3)throw Error('Use diff(expr,x,point) or diff(expr,x) after assigning x.');
+            const at=ast.args.length===3?scalar(go(ast.args[2])):env[label]?.re??env[label];
+            const x=Number(at);if(!Number.isFinite(x))throw Error('Set a numeric derivative point or assign '+label+' in Calculator.');
+            const h=1e-5*Math.max(1,Math.abs(x));v=div(sub(evalAt(x+h),evalAt(x-h)),C(2*h));break;
           }
-          const low=scalar(go(ast.args[2])),high=scalar(go(ast.args[3]));
+          if((!integralEditor&&!boundSum&&ast.args.length!==4)||(boundSum&&ast.args.length!==3))throw Error(name+' needs an expression, variable and bounds.');
+          const low=scalar(go(integralEditor?ast.args[0]:boundSum?ast.args[0].right:ast.args[2]));
+          const high=scalar(go(integralEditor?ast.args[1]:boundSum?ast.args[1]:ast.args[3]));
           if(!Number.isFinite(low)||!Number.isFinite(high)||Math.abs(high-low)>1e7)throw Error('Integration bounds are invalid.');
           if(name==='sum'||name==='prod'){
             if(!Number.isInteger(low)||!Number.isInteger(high)||Math.abs(high-low)>10000)throw Error('Use integer bounds spanning at most 10,000 terms.');

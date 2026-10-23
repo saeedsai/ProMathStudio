@@ -2135,13 +2135,13 @@ self.onmessage=async ({data})=>{
     const py=await ready;
     py.globals.set('studio_source',data.source);
     py.globals.set('studio_name',data.name);
-    py.globals.set('studio_args',data.args);
+    py.globals.set('studio_args_json',JSON.stringify(data.args));
     const raw=await py.runPythonAsync(
       'import json, math\\n' +
       'namespace={"math":math}\\n' +
       'exec(compile(studio_source,"<custom function>","exec"),namespace)\\n' +
       'fn=namespace[studio_name]\\n' +
-      'value=fn(*studio_args.to_py())\\n' +
+      'value=fn(*json.loads(studio_args_json))\\n' +
       'if not isinstance(value,(int,float)) or isinstance(value,bool) or not math.isfinite(value):raise ValueError("Python custom function must return a finite real number")\\n' +
       'json.dumps(float(value))');
     self.postMessage({ok:true,value:JSON.parse(raw)});

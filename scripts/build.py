@@ -7,6 +7,6 @@ for tag,source in [('mathstudio-data-tables','src/data-tables.js'),('promath-adv
     start=f'<script id="{tag}">\n'
     i=text.index(start)+len(start)
     end=text.index('</script>',i)
-    text=text[:i]+(root/source).read_text(encoding='utf-8').rstrip('\n')+'\n'+text[end:]
+    text=text[:i]+(root/source).read_text(encoding='utf-8').rstrip('\n')+'\n\n'+text[end:]
 index.write_text(text,encoding='utf-8')
 print('Rebuilt standalone index.html')

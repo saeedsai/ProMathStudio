@@ -18,27 +18,7 @@ A plain cell is text or a number. A formula begins with `=`. The column headers 
 =Revenue!B1*1.2
 ```
 
-The expression evaluator implements arithmetic `+ - * / ^`, parentheses, cell references (including `SheetName!A2`), aggregate functions SUM, AVERAGE/AVG, MIN, MAX, COUNT and IF conditions. Cyclic references display `#CYCLE`. Formula calculation is **not JavaScript eval**, and pasted source code cannot execute. Insert/delete row and column actions (toolbar or cell context menu) rewrite references in every workbook sheet, including `Sheet!A1`, `'Sheet Name'!A1`, and `$A$1` anchors, to keep pointing to the original cell. A deleted referenced cell yields `#REF!` rather than silently reading a different cell. `$` markers are accepted and retained in cell/range formulas; they do not prevent structural shifts. Ranges touching a deleted endpoint yield `#REF!` (no automatic range shrinking). Sorting preserves original cell identities in same-sheet and quoted/unquoted cross-sheet references (including `# Data Tables workspace
-
-ProMathStudio provides an in-browser spreadsheet-style workbook. Open **Data tables** in the top workspace menu. Existing calculator, equation editor, solver, graphs, notebook and connected workspace remain available.
-
-## Workbooks
-
-Each project can hold up to **20 tables**, with up to **6,000 rows** and **32 columns** per table. Switch between tables using their tabs; add, duplicate, rename or delete a sheet. Edit any header or cell. The top filter searches computed values, and sorting can sort by a selected column. The editor renders the first 150 matching rows for performance (all rows are stored, processed and exported).
-
-A plain cell is text or a number. A formula begins with `=`. The column headers appear above the numbered data rows. **Row 1 is the first data row**, so `A1` is the first data cell. Formula examples:
-
-```
-=A1*B1
-=SUM(A1:A4)
-=AVERAGE(B1:B5)
-=COUNT(A1:A99)
-=MIN(A1:A9)+MAX(B1:B9)
-=IF(A1>2,B1,0)
-=Revenue!B1*1.2
-```
-
-The expression evaluator implements arithmetic `+ - * / ^`, parentheses, cell references (including `SheetName!A2`), aggregate functions SUM, AVERAGE/AVG, MIN, MAX, COUNT and IF conditions. Cyclic references display `#CYCLE`. Formula calculation is **not JavaScript eval**, and pasted source code cannot execute. Insert/delete row and column actions (toolbar or cell context menu) rewrite references in every workbook sheet, including `Sheet!A1`, `'Sheet Name'!A1`, and `$A$1` anchors, to keep pointing to the original cell. A deleted referenced cell yields `#REF!` rather than silently reading a different cell. `$` markers are accepted and retained in cell/range formulas; they do not prevent structural shifts. Ranges touching a deleted endpoint yield `#REF!` (no automatic range shrinking).  anchors). It rewrites a range only when its original rows remain contiguous; otherwise the sort is rejected atomically, with no workbook changes. Equal-key rows retain their order. Cross-sheet aggregate ranges and full Excel semantics remain unsupported. The current engine does not implement Excel's full formula language, date functions or array-spill functions. Use distinct table names for cross-sheet references.
+The expression evaluator implements arithmetic `+ - * / ^`, parentheses, cell references (including `SheetName!A2`), aggregate functions SUM, AVERAGE/AVG, MIN, MAX, COUNT and IF conditions. Cyclic references display `#CYCLE`. Formula calculation is **not JavaScript eval**, and pasted source code cannot execute. Insert/delete row and column actions (toolbar or cell context menu) rewrite references in every workbook sheet, including `Sheet!A1`, `'Sheet Name'!A1`, and `$A$1` anchors, to keep pointing to the original cell. A deleted referenced cell yields `#REF!` rather than silently reading a different cell. `$` markers are accepted and retained in cell/range formulas; they do not prevent structural shifts. Ranges touching a deleted endpoint yield `#REF!` (no automatic range shrinking). Stable row sorting preserves cell identities for single-cell references across sheets, including quoted sheet names and `$` anchors. A same-sheet aggregate range is remapped only when its referenced rows remain contiguous; otherwise the sort is rejected atomically without changing any workbook cells. Cross-sheet aggregate ranges are not yet remapped. Equal-key rows retain their original order. The current engine does not implement Excel's full formula language, date functions or array-spill functions. Use distinct table names for cross-sheet references.
 
 ## Relational operations
 

@@ -1,7 +1,7 @@
-## 2026-10-26 — Thin QR decomposition (PR #19 merged; main Quality pending)
+## 2026-10-26 — Thin QR decomposition (PR #19 released; exact-main Quality and Pages green)
 
 - Added offline 2×2, 3×2 and 3×3 real economy QR with reorthogonalization, rank refusal, reconstruction/orthogonality diagnostics and Q/R editor transfer.
-- Added a dedicated Playwright numerical regression and required Quality gate. Dev Quality 40400347060 and PR Quality 40400623469 passed; PR #19 merged to main a97f5f41, Pages 40401065476 succeeded. **Main Quality 40401065297 pending; hosted interactive smoke unavailable.**
+- Added a dedicated Playwright numerical regression and required Quality gate. Dev Quality 40400347060 and PR Quality 40400623469 passed; PR #19 merged to main a97f5f41, Pages 40401065476 succeeded. **Main Quality 40401065297 passed all 27 steps and Pages 40401065476 succeeded on a97f5f41.** Hosted interactive smoke unavailable.
 
 ## 2026-10-26 — Pivoted small-matrix LU decomposition (PR #18 released; exact-main Quality and Pages green)
 

@@ -1,3 +1,9 @@
+## 2026-10-26 — Spreadsheet structural reference integrity (dev candidate)
+
+- Insert/delete rows or columns through the toolbar or context menu now rewrite local and cross-sheet A1-style formula references, preserving `$` anchors and explicit `#REF!` for deleted cells.
+- Fixed context-menu first-row off-by-one index; extended the safe numeric formula evaluator to accept anchored cells/ranges and propagate deleted-reference errors.
+- Added focused Playwright structural/reference/persistence regression to required Quality CI. Sorting formula-linked sheets and automatic range shrinking remain separate gaps; release requires verified CI, PR and Pages deployment.
+
 ## 2026-10-26 — Python custom function composition in Calculator (PR #10 release)
 
 - Resolve nested Python custom-function AST calls asynchronously via the existing isolated Pyodide worker, then evaluate surrounding arithmetic using the safe Calculator numeric AST.

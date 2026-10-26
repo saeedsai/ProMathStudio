@@ -91,6 +91,44 @@
     if(stack.has(key))throw Error('#CYCLE');if(stack.size>180)throw Error('#DEPTH');
     const next=new Set(stack);next.add(key);return formula(raw.slice(1),t,next);
   };
+  // Structural edits preserve the referenced cell identity, including $-anchored
+  // addresses. References to a deleted cell become an explicit #REF! error.
+  // Sorting/reordering remains a separate, not-yet-supported reference operation.
+  const referencePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)/g;
+  function shiftReferences(edited,axis,index,delta){
+    for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
+      const raw=String(row[c]);if(!raw.startsWith('='))continue;
+      row[c]=raw.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
+        // Never rewrite a substring of an identifier, decimal literal or name.
+        if(offset&&/[A-Za-z0-9_.$]/.test(whole[offset-1]))return match;
+        const after=whole[offset+match.length];
+        if(after&&/[A-Za-z0-9_.$]/.test(after))return match;
+        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        if(name.toLowerCase()!==edited.name.toLowerCase())return match;
+        const position=axis==='row'?Number(digits)-1:colIndex(letters);
+        if(delta<0&&position===index)return '#REF!';
+        const moved=position>=index+(delta<0?1:0)?position+delta:position;
+        if(moved===position)return match;
+        return (prefix||'')+colAnchor+(axis==='column'?colLetter(moved):letters)+rowAnchor+(axis==='row'?moved+1:digits);
+      });
+    }
+  }
+  function structuralEdit(axis,index,delta,values){
+    const t=active(),size=axis==='row'?t.rows.length:t.columns.length,limit=axis==='row'?MAX_ROWS:MAX_COLUMNS;
+    if(!Number.isInteger(index)||index<0||index>size||(delta<0&&index===size))throw Error('Invalid '+axis+' position.');
+    if(delta>0&&size>=limit)throw Error('Maximum '+limit+' '+(axis==='row'?'rows':'columns')+'.');
+    if(delta<0&&axis==='column'&&size<=1)throw Error('A table needs one column.');
+    if(axis==='row'&&delta>0&&values&&values.length!==t.columns.length)throw Error('Row width mismatch.');
+    shiftReferences(t,axis,index,delta);
+    if(axis==='row'){
+      if(delta>0)t.rows.splice(index,0,values?values.map(v=>String(v).slice(0,8000)):t.columns.map(()=>''));
+      else t.rows.splice(index,1);
+    }else{
+      if(delta>0){t.columns.splice(index,0,'Column'+(size+1));t.rows.forEach(r=>r.splice(index,0,''));}
+      else{t.columns.splice(index,1);t.rows.forEach(r=>r.splice(index,1));}
+    }
+    render();save();
+  }
   const number=v=>{if(v===null||v==='')return 0;const n=Number(v);if(!Number.isFinite(n))throw Error('Not numeric: '+v);return n;};
   const splitArgs=str=>{const out=[];let depth=0,start=0;for(let i=0;i<str.length;i++){if(str[i]==='(')depth++;else if(str[i]===')')depth--;else if(str[i]===','&&depth===0){out.push(str.slice(start,i));start=i+1;}}out.push(str.slice(start));return out;};
   function formula(expr,t,stack){
@@ -100,6 +138,7 @@
     return compute(expr,t,stack);
   }
   function compute(expr,t,stack){
+    if(String(expr).includes('#REF!'))throw Error('#REF!');
     expr=String(expr).replace(/\b([A-Za-z][A-Za-z0-9_]*)\(([^()]*)\)/g,(all,name,body)=>{
       const fn=window.MathStudio.customFunctions?.list().find(f=>f.name.toLowerCase()===name.toLowerCase());
       if(!fn)return all;
@@ -109,8 +148,8 @@
     expr=String(expr).replace(/\bIF\(([^()]*)\)/gi,(all,body)=>'('+number(formula('IF('+body+')',t,stack))+')');
     // Aggregations accept ranges or comma-separated arguments. Nested expressions are supported by the recursive evaluator.
     expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\s*\(([^()]*)\)/gi,(all,fn,body)=>{
-      const nums=[];for(const arg of splitArgs(body)){const range=/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/i.exec(arg.trim());
-        if(range){const c0=colIndex(range[1]),r0=+range[2]-1,c1=colIndex(range[3]),r1=+range[4]-1;
+      const nums=[];for(const arg of splitArgs(body)){const range=/^(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
+        if(range){const c0=colIndex(range[2]),r0=+range[4]-1,c1=colIndex(range[6]),r1=+range[8]-1;
           if((Math.abs(c1-c0)+1)*(Math.abs(r1-r0)+1)>6000)throw Error('#RANGE');
           for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(t,rr,cc,stack);if(v!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
         } else {const v=compute(arg,t,stack);if(Number.isFinite(Number(v)))nums.push(Number(v));}}
@@ -118,13 +157,13 @@
       return '('+(Number.isFinite(x)?x:0)+')';
     });
     // Limited token grammar intentionally avoids eval()/Function() and script execution.
-    const src=expr.trim();const rx=/\s*(?:((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)![A-Za-z]+\d+|[A-Za-z]+\d+)|((?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)|([()+\-*/^]))/giy;
+    const src=expr.trim();const rx=/\s*(?:((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!\$?[A-Za-z]+\$?\d+|\$?[A-Za-z]+\$?\d+)|((?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)|([()+\-*/^]))/giy;
     const tokens=[];let pos=0;
     while(pos<src.length){rx.lastIndex=pos;const m=rx.exec(src);if(!m||m.index!==pos)throw Error('#FORMULA');tokens.push(m[1]?{type:'cell',v:m[1]}:m[2]?{type:'num',v:Number(m[2])}:{type:m[3]});pos=rx.lastIndex;if(tokens.length>400)throw Error('#LIMIT');}
     let at=0;const peek=()=>tokens[at]?.type;
     function primary(){const tok=tokens[at++];if(!tok)throw Error('#FORMULA');if(tok.type==='num')return tok.v;
       if(tok.type==='cell'){let target=t,ref=tok.v;const bang=ref.lastIndexOf('!');if(bang>=0){target=getByName(ref.slice(0,bang).replace(/^'|'$/g,''));ref=ref.slice(bang+1);if(!target)throw Error('#SHEET');}
-        const m=/^([A-Za-z]+)(\d+)$/.exec(ref);if(!m)throw Error('#REF');return number(value(target,Number(m[2])-1,colIndex(m[1]),stack));}
+        const m=/^(\$?)([A-Za-z]+)(\$?)(\d+)$/.exec(ref);if(!m)throw Error('#REF');return number(value(target,Number(m[4])-1,colIndex(m[2]),stack));}
       if(tok.type==='('){const v=addition();if(peek()!==')')throw Error('#PAREN');at++;return v;}
       if(tok.type==='+'||tok.type==='-'){const v=primary();return tok.type==='-'?-v:v;}throw Error('#FORMULA');}
     function power(){let v=primary();if(peek()==='^'){at++;v=Math.pow(v,power());}return v;}
@@ -173,10 +212,10 @@
   $('dt-copy').addEventListener('click',()=>safeAction(()=>{const t=active();makeTable(t.name+'_copy',t.columns,t.rows);}));
   $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, underscores):',t.name);if(name===null)return;t.name=uniqueName(name,t.id);save();render();}));
   $('dt-remove').addEventListener('click',()=>safeAction(()=>{if(tables.length===1)throw Error('Keep at least one table.');if(!confirm('Delete selected table?'))return;tables=tables.filter(t=>t.id!==selected);selected=tables[0].id;render();save();}));
-  $('dt-add-row').addEventListener('click',()=>safeAction(()=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Limit 6,000 rows');t.rows.push(t.columns.map(()=>''));render();save();}));
-  $('dt-add-col').addEventListener('click',()=>safeAction(()=>{const t=active();if(t.columns.length>=MAX_COLUMNS)throw Error('Limit 32 columns');t.columns.push(colLetter(t.columns.length));t.rows.forEach(r=>r.push(''));render();save();}));
-  $('dt-remove-row').addEventListener('click',()=>safeAction(()=>{const t=active();t.rows.pop();render();save();}));
-  $('dt-remove-col').addEventListener('click',()=>safeAction(()=>{const t=active();if(t.columns.length<=1)throw Error('A table needs one column.');t.columns.pop();t.rows.forEach(r=>r.pop());render();save();}));
+  $('dt-add-row').addEventListener('click',()=>safeAction(()=>structuralEdit('row',active().rows.length,1)));
+  $('dt-add-col').addEventListener('click',()=>safeAction(()=>structuralEdit('column',active().columns.length,1)));
+  $('dt-remove-row').addEventListener('click',()=>safeAction(()=>{if(active().rows.length)structuralEdit('row',active().rows.length-1,-1);}));
+  $('dt-remove-col').addEventListener('click',()=>safeAction(()=>structuralEdit('column',active().columns.length-1,-1)));
   $('dt-to-working').addEventListener('click',()=>safeAction(()=>{const t=active(),cell=focusedCell?.id===t.id?focusedCell:{r:0,c:0};const val=String(value(t,cell.r,cell.c)||'');window.MathStudio.bridge.select(val,'data tables',{archive:true});notify('Sent cell '+colLetter(cell.c)+(cell.r+1)+' to the shared Working equation.');}));
   $('dt-filter').addEventListener('input',render);$('dt-clear-filter').addEventListener('click',()=>{$('dt-filter').value='';render();});
   $('dt-sort').addEventListener('click',()=>safeAction(()=>{const t=active(),c=Number($('dt-sortcol').value),v=evaluated(t),dir=$('dt-sortdir').value==='desc'?-1:1;t.rows=t.rows.map((row,i)=>({row,i})).sort((a,b)=>dir*String(v[a.i][c]).localeCompare(String(v[b.i][c]),undefined,{numeric:true})).map(x=>x.row);render();save();}));
@@ -257,7 +296,7 @@
   $('dt-send-graph').addEventListener('click',()=>safeAction(()=>{$('dt-graph-table').value=active().id;chartColumns();sendToGraph();}));
   // Export PNG via the canvas data URL; handle binary bytes without string-encoding conversion.
   $('dt-chart-download').onclick=()=>{const a=el('a',{href:$('dt-chart-canvas').toDataURL('image/png'),download:'ProMathStudio_chart.png'});document.body.append(a);a.click();a.remove();};
-  window.MathStudio.dataTables={appendExpression:text=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Maximum 6,000 rows');const row=t.columns.map(()=>'' );row[0]=String(text).slice(0,8000);t.rows.push(row);render();save();return t;},get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows),refresh:()=>{render();save()}};
+  window.MathStudio.dataTables={appendExpression:text=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Maximum 6,000 rows');const row=t.columns.map(()=>'' );row[0]=String(text).slice(0,8000);t.rows.push(row);render();save();return t;},get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows),insertRow:(i,v)=>structuralEdit('row',i,1,v),deleteRow:i=>structuralEdit('row',i,-1),insertColumn:i=>structuralEdit('column',i,1),deleteColumn:i=>structuralEdit('column',i,-1),refresh:()=>{render();save()}};
   try{const stored=JSON.parse(localStorage.getItem('mathstudio-tables-v1')||'null');restoreState(stored);}catch{restoreState(null);}
 })();
 

@@ -4315,6 +4315,62 @@ function rref(A){
  }
  return {matrix:rows,rank,tolerance};
 }
+/* Scaled partial-pivot solve for a square real A and vector b; no input mutation. */
+function solve(A,b){
+ A=validate(A);requireSquare(A);
+ const n=A.length,tolerance=1e-12;
+ if(!Array.isArray(b)||b.length!==n)throw Error('Right-hand side b must contain '+n+' values.');
+ const rhs=b.map((entry,i)=>{
+  if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in b row '+(i+1)+'.');
+  const value=Number(entry);
+  if(!Number.isFinite(value)||Math.abs(value)>MAX_ENTRY)throw Error('Right-hand side b must contain finite numbers with magnitude at most 1e12.');
+  return value;
+ });
+ const rows=A.map((row,i)=>row.concat(rhs[i]));
+ const scales=A.map(row=>Math.max(...row.map(Math.abs)));
+ const rhsScales=scales.map((scale,i)=>Math.max(scale,Math.abs(rhs[i])));
+ let rank=0;
+ for(let col=0;col<n&&rank<n;col++){
+  let pivot=rank,best=0;
+  for(let r=rank;r<n;r++){
+   const score=scales[r]?Math.abs(rows[r][col])/scales[r]:0;
+   if(score>best){best=score;pivot=r;}
+  }
+  if(best<=tolerance)continue;
+  if(pivot!==rank){
+   [rows[pivot],rows[rank]]=[rows[rank],rows[pivot]];
+   [scales[pivot],scales[rank]]=[scales[rank],scales[pivot]];
+   [rhsScales[pivot],rhsScales[rank]]=[rhsScales[rank],rhsScales[pivot]];
+  }
+  for(let r=rank+1;r<n;r++){
+   const factor=rows[r][col]/rows[rank][col];
+   for(let c=col+1;c<=n;c++)rows[r][c]-=factor*rows[rank][c];
+   rows[r][col]=0;
+  }
+  rank++;
+ }
+ if(rank<n){
+  const inconsistent=rows.slice(rank).some((row,i)=>Math.abs(row[n])>tolerance*Math.max(rhsScales[rank+i],Number.MIN_VALUE));
+  throw Error(inconsistent?'Inconsistent system: no solution.':'Singular or nearly singular system: no unique solution.');
+ }
+ const solution=Array(n).fill(0);
+ for(let i=n-1;i>=0;i--){
+  let value=rows[i][n];
+  for(let j=i+1;j<n;j++)value-=rows[i][j]*solution[j];
+  solution[i]=value/rows[i][i];
+  if(!Number.isFinite(solution[i]))throw Error('Solution exceeded finite floating-point range.');
+ }
+ let residual=0;
+ for(let i=0;i<n;i++){
+  const actual=A[i].reduce((sum,a,j)=>sum+a*solution[j],0);
+  const denominator=Math.abs(rhs[i])+A[i].reduce((sum,a,j)=>sum+Math.abs(a)*Math.abs(solution[j]),0);
+  const error=Math.abs(actual-rhs[i])/Math.max(denominator,Number.MIN_VALUE);
+  if(!Number.isFinite(error))throw Error('Solution residual exceeded finite floating-point range.');
+  residual=Math.max(residual,error);
+ }
+ if(residual>1e-8)throw Error('Solution failed its numerical residual check.');
+ return {solution,residual,rank:n};
+}
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
 const subtract=(A,B)=>binary(A,B,'subtract');
@@ -4364,6 +4420,8 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
+ '<p class="small-note">Right-hand side b (for A·x=b)</p>'+
+ '<div id="mat-rhs-grid" class="matrix-grid" aria-label="Right-hand side b entries"></div>'+
  '<p class="small-note">Matrix B (for addition, subtraction and multiplication)</p>'+
  '<div class="matrix-controls"><label>B rows <select id="mat-b-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>B columns <select id="mat-b-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
@@ -4374,6 +4432,7 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-add" class="secondary">A + B</button>'+
  '<button type="button" id="mat-subtract" class="secondary">A − B</button>'+
  '<button type="button" id="mat-multiply" class="secondary">A × B</button>'+
+ '<button type="button" id="mat-solve" class="secondary">Solve A·x=b</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
  '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
@@ -4385,7 +4444,7 @@ const style=el('style',{},'.matrix-tools{border-top:1px solid #dfe5f0;padding:13
  '#mat-result{background:#f7f9ff;border:1px solid #dfe5f0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:8px}'+
  '#mat-result.error{color:#af2842;background:#fff5f5}');
 document.head.append(style);
-const grid=document.getElementById('mat-grid'),gridB=document.getElementById('mat-b-grid'),output=document.getElementById('mat-result'),send=document.getElementById('mat-send');
+const grid=document.getElementById('mat-grid'),gridB=document.getElementById('mat-b-grid'),rhsGrid=document.getElementById('mat-rhs-grid'),output=document.getElementById('mat-result'),send=document.getElementById('mat-send');
 let last=null;
 function rebuild(){
  const old=[...grid.querySelectorAll('input')].map(input=>({r:Number(input.dataset.row),c:Number(input.dataset.col),value:input.value}));
@@ -4409,6 +4468,17 @@ function rebuildSecond(){
  }
  invalidate();
 }
+function rebuildRhs(){
+ const old=[...rhsGrid.querySelectorAll('input')].map(input=>input.value);
+ const rows=Number(document.getElementById('mat-rows').value);
+ rhsGrid.style.gridTemplateColumns='minmax(0, 1fr)';rhsGrid.replaceChildren();
+ for(let r=0;r<rows;r++){
+  const cell=el('input',{type:'number',step:'any','aria-label':'Right-hand side b row '+(r+1)});
+  cell.value=old[r]===undefined?'0':old[r];cell.addEventListener('input',invalidate);rhsGrid.append(cell);
+ }
+ invalidate();
+}
+function readRhs(){return [...rhsGrid.querySelectorAll('input')].map(input=>input.value);}
 function invalidate(){last=null;send.disabled=true;output.classList.remove('error');output.textContent='Enter matrix values and choose an operation.';}
 function read(){
  const rows=Number(document.getElementById('mat-rows').value),cols=Number(document.getElementById('mat-cols').value);
@@ -4423,25 +4493,25 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
-  const display=operation==='rref'?value.matrix:value;
+  const display=operation==='rref'?value.matrix:operation==='solve'?value.solution.map(x=>[x]):value;
   output.textContent=operation+':\n'+(typeof display==='number'?format(display):display.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n'))+
-   (operation==='rref'?'\nRank: '+value.rank:'');
+   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):'');
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
-for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',rebuild);
+for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',()=>{rebuild();rebuildRhs();});
 for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
- try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.value),{source:'matrix calculator'});}
+ try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.operation==='solve'?last.value.solution.map(x=>[x]):last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
-rebuild();rebuildSecond();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,notation,read,readSecond,calculate};
+rebuild();rebuildSecond();rebuildRhs();
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,notation,read,readSecond,readRhs,calculate};
 })();
 </script>
 <script id="promath-ode-tools">

@@ -49,6 +49,43 @@ def main():
         assert page.locator('#cas-system-fields').is_visible()
         assert 'x = 2x + 2z' in page.locator('#cas-system-input').input_value()
         assert page.locator('#cas-system-vars').input_value()=='x,y,z'
+        # P0-SYMBOLIC-SYSTEMS: nonlinear symbolic polynomial systems, preserving
+        # the existing general linear/free-parameter solver and safe failures.
+        nonlinear_equations=['x^2+y^2=5','x-y=1']
+        nonlinear_asts=[page.evaluate('(src)=>MathStudio.parse(src).ast',q) for q in nonlinear_equations]
+        nonlinear=json.loads(context['_ms_system'](json.dumps({
+            'equations':nonlinear_asts,'unknowns':['x','y'],'method':'auto'})))
+        assert len(nonlinear['items'])==2,nonlinear
+        assert {item['plain'] for item in nonlinear['items']}=={
+            'Eq((x, y), (-1, -2))','Eq((x, y), (2, 1))'},nonlinear
+        assert 'Nonlinear polynomial' in nonlinear['note'],nonlinear
+        explicit=json.loads(context['_ms_system'](json.dumps({
+            'equations':nonlinear_asts,'unknowns':['x','y'],'method':'nonlinear'})))
+        assert explicit['items']==nonlinear['items']
+        try:
+            context['_ms_system'](json.dumps({
+                'equations':nonlinear_asts,'unknowns':['x','y'],'method':'linear'}))
+            assert False,'Nonlinear equations cannot be silently accepted as linear'
+        except ValueError as exc:
+            assert 'nonlinear' in str(exc).lower(),exc
+        inconsistent_asts=[page.evaluate('(src)=>MathStudio.parse(src).ast',q)
+                           for q in ['x^2=1','x^2=4']]
+        inconsistent=json.loads(context['_ms_system'](json.dumps({
+            'equations':inconsistent_asts,'unknowns':['x'],'method':'auto'})))
+        assert 'No solution' in inconsistent['note'],inconsistent
+        high_degree=[page.evaluate('(src)=>MathStudio.parse(src).ast','x^5=1')]
+        try:
+            context['_ms_system'](json.dumps({'equations':high_degree,'unknowns':['x']}))
+            assert False,'Large-degree nonlinear inputs must be bounded'
+        except ValueError as exc:
+            assert 'degree-4' in str(exc),exc
+        # Changing the system method in the UI must affect the submitted job.
+        assert page.locator('#cas-system-method').input_value()=='auto'
+        page.locator('#cas-system-method').select_option('linear')
+        assert page.locator('#cas-system-method').input_value()=='linear'
+        page.locator('#cas-system-method').select_option('nonlinear')
+        assert page.locator('#cas-system-method').input_value()=='nonlinear'
+        page.locator('#cas-system-method').select_option('auto')
         fits={
             'linear':[[x,3+2*x] for x in range(5)],
             'poly':[[x,2*x*x+3*x+1] for x in range(-3,4)],

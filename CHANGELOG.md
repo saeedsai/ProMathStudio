@@ -1,7 +1,7 @@
-## 2026-10-26 — Matrix A/B arithmetic (dev candidate)
+## 2026-10-26 — Matrix A/B arithmetic (PR #14 release)
 
 - Added independently sized second matrix grid, offline real addition/subtraction/multiplication, dimension checks and finite validation.
-- Both grids invalidate stale results; output transfers to Equation Editor. New focused browser regression and required Quality CI step. PR/main/Pages release pending.
+- Both grids invalidate stale results; output transfers to Equation Editor. New focused browser regression and required Quality CI step. Dev Quality 40359705677, PR Quality 40361385356, main Quality 40361638533 and Pages 40361638361 passed; hosted interactive smoke remains unverified.
 
 ## 2026-10-26 — Bounded symbolic limits (dev candidate)
 

@@ -1,3 +1,11 @@
+## 2026-10-26 — Hourly development automation and delivery controls
+
+- Added persistent `AGENTS.md` contract and living five-feature plan for autonomous hourly work toward the 26-Oct feature/gap inventory.
+- Established `dev` as the sole new-development branch; `main` receives only validated promotions through pull requests.
+- Changed full Quality Actions to run on pushes to both `dev` and `main`, and on pull requests to `main`.
+- Added conservative main-only Actions cleanup for obsolete legacy branches after verifying branch commits are already on main, the branch is unprotected, and there is no open PR; failures preserve branches instead of losing unique work.
+- Added tests validating the CI and branch-hygiene delivery contract. Branch protection still requires GitHub administration privileges for enforcement.
+
 ## 2026-10-23 — Context menus, Calculator BIN/HEX, and symbol routing
 
 - Added contextual commands across five workspaces and their editable surfaces, with keyboard and touch access.

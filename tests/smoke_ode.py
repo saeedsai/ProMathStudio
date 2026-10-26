@@ -76,7 +76,8 @@ def main():
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-run").click()
         page.locator("#ode-to-graph").click()
-        assert page.locator("#dt-graph-chart").is_visible()
+        assert page.locator("#graph-panel .graph-canvas-wrap").is_visible()
+        assert "Plotted" in page.locator("#dt-chart-status").inner_text()
         assert page.evaluate("MathStudio.graphData.getState().points.length") == 21
 
         page.locator('[data-workspace="solver"]').click()

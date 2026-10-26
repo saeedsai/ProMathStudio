@@ -13,6 +13,6 @@ class DataTablesStaticTests(unittest.TestCase):
   matrix=(ROOT/'src/matrix-tools.js').read_text(encoding='utf-8').rstrip('\n')
   self.assertIn('<script id="promath-matrix-tools">',html)
   self.assertIn(matrix,html)
-  self.assertIn('id=\'mat-grid\'',matrix)
+  self.assertIn('id="mat-grid"',matrix)
   self.assertIn('Saeedmsalehi1990@gmail.com',html)
   self.assertIn('MIT License',(ROOT/'LICENSE').read_text())

@@ -48,6 +48,21 @@ def main():
             rows:[['2','first'],['1','low'],['2','second']]}]})""")
         page.evaluate("MathStudio.dataTables.sortRows(0,'asc')")
         assert page.evaluate("MathStudio.dataTables.active.rows.map(r => r[1])") == ["low","first","second"]
+        # A qualified aggregate range must be remapped as a unit or rejected.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',
+            tables:[{id:'sheet-1',name:'Data1',columns:['A'],rows:[['20'],['5'],['10']]},
+                    {id:'sheet-2',name:'Other',columns:['A'],rows:[
+                      ["=SUM('Data1'!A1:A3)"]]}]})""")
+        page.evaluate("MathStudio.dataTables.sortRows(0,'asc')")
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0][0]") == 35
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',
+            tables:[{id:'sheet-1',name:'Data1',columns:['A'],rows:[['20'],['5'],['10']]},
+                    {id:'sheet-2',name:'Other',columns:['A'],rows:[
+                      ["=SUM('Data1'!A1:A2)"]]}]})""")
+        before = page.evaluate("MathStudio.dataTables.exportState()")
+        assert page.evaluate("""() => {try{MathStudio.dataTables.sortRows(0,'asc');return false;}
+            catch(e){return /noncontiguous/.test(e.message);}}""")
+        assert page.evaluate("MathStudio.dataTables.exportState()") == before
         assert not errors,errors
         browser.close()
     print("PASS stable sort, cross-sheet references, ranges, rollback and persistence")

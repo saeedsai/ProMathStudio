@@ -1,12 +1,12 @@
-## 2026-10-26 — Pivoted small-matrix LU decomposition (PR #18 merged; main Quality pending)
+## 2026-10-26 — Pivoted small-matrix LU decomposition (PR #18 released; exact-main Quality and Pages green)
 
 - Added real 2×2/3×3 full-rank P·A=L·U decomposition with scaled row pivoting, permutation tracking, singular/near-singular refusal and row-relative reconstruction residual.
-- Calculator shows P, L, U and transfers the chosen factor to Equation Editor. Added dedicated browser/numerical regression, bundle assertions, mandatory Quality workflow gate and documentation. Exact dev Quality 40391371254 and PR Quality 40391373319 passed; PR #18 merged to main a03e02de. Pages 40391704935 succeeded; main Quality 40391704792 pending at checkpoint, live interactive smoke unavailable.
+- Calculator shows P, L, U and transfers the chosen factor to Equation Editor. Added dedicated browser/numerical regression, bundle assertions, mandatory Quality workflow gate and documentation. Exact dev Quality 40391371254 and PR Quality 40391373319 passed; PR #18 merged to main a03e02de. Pages 40391704935 succeeded; main Quality 40391737573 passed all 26 steps and Pages 40391704935 succeeded for exact main; duplicate main run 40391704792 still pending, live interactive smoke unavailable.
 
 ## 2026-10-26 — Spreadsheet range deletion integrity (PR #18 merged; main Quality pending)
 
 - Row/column deletion shrinks surviving same-sheet and cross-sheet aggregate ranges, preserving absolute anchors; fully removed ranges produce #REF! while scalar references retain existing behavior.
-- Qualified SUM/AVG/MIN/MAX/COUNT ranges now evaluate. Cross-sheet ranges also participate safely in stable sorting, with atomic rejection if their rows would become noncontiguous. Added focused browser regressions, updated structural expectations and mandatory Quality gate. Candidate dev/PR Quality green; merged PR #18 and Pages deployment succeeded; main Quality still pending.
+- Qualified SUM/AVG/MIN/MAX/COUNT ranges now evaluate. Cross-sheet ranges also participate safely in stable sorting, with atomic rejection if their rows would become noncontiguous. Added focused browser regressions, updated structural expectations and mandatory Quality gate. Candidate dev/PR Quality green; merged PR #18 and Pages deployment succeeded; main Quality 40391737573 passed; duplicate main run 40391704792 pending.
 
 ## 2026-10-26 — Spreadsheet row sorting with reference integrity (dev candidate)
 

@@ -134,6 +134,48 @@ function solve(A,b){
  if(residual>1e-8)throw Error('Solution failed its numerical residual check.');
  return {solution,residual,rank:n};
 }
+/* Doolittle P*A=L*U with scaled partial row pivoting and row-relative
+   reconstruction verification; no input mutation or external dependencies. */
+function lu(A){
+ A=validate(A);requireSquare(A);
+ const n=A.length,tolerance=1e-12,U=A.map(row=>row.slice());
+ const L=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>Number(i===j)));
+ const permutation=Array.from({length:n},(_,i)=>i);
+ const scales=A.map(row=>Math.max(...row.map(Math.abs)));
+ for(let k=0;k<n;k++){
+  let pivot=k,best=0;
+  for(let r=k;r<n;r++){
+   const score=scales[r]?Math.abs(U[r][k])/scales[r]:0;
+   if(score>best){best=score;pivot=r;}
+  }
+  if(best<=tolerance)throw Error('Singular or nearly singular matrix: LU requires full rank.');
+  if(pivot!==k){
+   [U[k],U[pivot]]=[U[pivot],U[k]];
+   [scales[k],scales[pivot]]=[scales[pivot],scales[k]];
+   [permutation[k],permutation[pivot]]=[permutation[pivot],permutation[k]];
+   for(let j=0;j<k;j++)[L[k][j],L[pivot][j]]=[L[pivot][j],L[k][j]];
+  }
+  for(let r=k+1;r<n;r++){
+   const factor=U[r][k]/U[k][k];
+   L[r][k]=factor;U[r][k]=0;
+   for(let c=k+1;c<n;c++)U[r][c]-=factor*U[k][c];
+  }
+ }
+ if([...L.flat(),...U.flat()].some(x=>!Number.isFinite(x)))throw Error('LU exceeded finite floating-point range.');
+ const P=permutation.map(index=>Array.from({length:n},(_,j)=>Number(index===j)));
+ let residual=0;
+ for(let i=0;i<n;i++){
+  const row=A[permutation[i]],scale=Math.max(Number.MIN_VALUE,...row.map(Math.abs));
+  for(let j=0;j<n;j++){
+   const reconstructed=L[i].reduce((sum,x,k)=>sum+x*U[k][j],0);
+   const error=Math.abs(reconstructed-row[j])/scale;
+   if(!Number.isFinite(error))throw Error('LU reconstruction exceeded finite floating-point range.');
+   residual=Math.max(residual,error);
+  }
+ }
+ if(residual>1e-8)throw Error('LU decomposition failed its numerical reconstruction check.');
+ return {P,L,U,permutation,residual};
+}
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
 const subtract=(A,B)=>binary(A,B,'subtract');
@@ -179,7 +221,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -196,8 +238,10 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-subtract" class="secondary">A − B</button>'+
  '<button type="button" id="mat-multiply" class="secondary">A × B</button>'+
  '<button type="button" id="mat-solve" class="secondary">Solve A·x=b</button>'+
+ '<button type="button" id="mat-lu" class="secondary">LU (P·A=L·U)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
+ '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+
  '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
  '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
 panel.append(area);
@@ -256,23 +300,26 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:operation==='solve'?value.solution.map(x=>[x]):value;
-  output.textContent=operation+':\n'+(typeof display==='number'?format(display):display.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n'))+
+  const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
+  output.textContent=operation==='lu'?
+   'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):
+   operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
    (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):'');
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
 for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',()=>{rebuild();rebuildRhs();});
 for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
- try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.operation==='solve'?last.value.solution.map(x=>[x]):last.value),{source:'matrix calculator'});}
+ try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.operation==='solve'?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,notation,read,readSecond,readRhs,calculate};
 })();

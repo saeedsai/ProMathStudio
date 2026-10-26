@@ -1,3 +1,8 @@
+## 2026-10-26 — Pivoted small-matrix LU decomposition (dev candidate)
+
+- Added real 2×2/3×3 full-rank P·A=L·U decomposition with scaled row pivoting, permutation tracking, singular/near-singular refusal and row-relative reconstruction residual.
+- Calculator shows P, L, U and transfers the chosen factor to Equation Editor. Added dedicated browser/numerical regression, bundle assertions, mandatory Quality workflow gate and documentation. Exact dev/PR/main/Pages verification pending.
+
 ## 2026-10-26 — Spreadsheet range deletion integrity (dev candidate)
 
 - Row/column deletion shrinks surviving same-sheet and cross-sheet aggregate ranges, preserving absolute anchors; fully removed ranges produce #REF! while scalar references retain existing behavior.

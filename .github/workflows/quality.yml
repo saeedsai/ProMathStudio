@@ -39,6 +39,8 @@ jobs:
         run: python tests/smoke_sheet_references.py
       - name: Spreadsheet sort and reference regression
         run: python tests/smoke_sheet_sort_references.py
+      - name: Spreadsheet range deletion regression
+        run: python tests/smoke_sheet_range_delete.py
       - name: Advanced math + UI regression
         run: python tests/smoke_advanced_math.py
       - name: Symbolic limit reference and UI regression
@@ -57,6 +59,8 @@ jobs:
         run: python tests/smoke_matrix_rref.py
       - name: Matrix Ax=b linear-system regression
         run: python tests/smoke_matrix_solve.py
+      - name: Matrix pivoted LU decomposition regression
+        run: python tests/smoke_matrix_lu.py
       - name: Python custom function composition regression
         run: python tests/smoke_python_compose.py
       - name: RK4 initial-value solver numeric and UI regression

@@ -1,3 +1,13 @@
+## 2026-10-26 — Pivoted small-matrix LU decomposition (dev candidate)
+
+- Added real 2×2/3×3 full-rank P·A=L·U decomposition with scaled row pivoting, permutation tracking, singular/near-singular refusal and row-relative reconstruction residual.
+- Calculator shows P, L, U and transfers the chosen factor to Equation Editor. Added dedicated browser/numerical regression, bundle assertions, mandatory Quality workflow gate and documentation. Exact dev/PR/main/Pages verification pending.
+
+## 2026-10-26 — Spreadsheet range deletion integrity (dev candidate)
+
+- Row/column deletion shrinks surviving same-sheet and cross-sheet aggregate ranges, preserving absolute anchors; fully removed ranges produce #REF! while scalar references retain existing behavior.
+- Qualified SUM/AVG/MIN/MAX/COUNT ranges now evaluate. Cross-sheet ranges also participate safely in stable sorting, with atomic rejection if their rows would become noncontiguous. Added focused browser regressions, updated structural expectations and mandatory Quality gate. CI/PR/Pages pending.
+
 ## 2026-10-26 — Spreadsheet row sorting with reference integrity (dev candidate)
 
 - Stable sorting remaps same-sheet and cross-sheet formulas, including anchored references; contiguous ranges retain their referenced cells and noncontiguous ranges abort without mutation.

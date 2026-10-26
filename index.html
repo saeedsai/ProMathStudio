@@ -3442,14 +3442,34 @@ self.onmessage=async ({data})=>{
   // Structural edits preserve the referenced cell identity, including $-anchored
   // addresses. References to a deleted cell become an explicit #REF! error.
   const referencePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)/g;
+  // Protect complete aggregate ranges before scalar reference rewriting.
+  // Deleting inside a range shrinks its surviving rectangle; an empty range is #REF!.
+  const structuralRangePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
   function shiftReferences(edited,axis,index,delta){
+    const coord=ref=>{const m=/^(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)$/.exec(ref);
+      return axis==='row'?Number(m[4])-1:colIndex(m[2]);};
+    const at=(ref,pos)=>axis==='row'?ref.replace(/[1-9]\d*$/,String(pos+1))
+      :ref.replace(/^(\$?)[A-Za-z]{1,3}(?=\$?[1-9]\d*$)/,(_,anchor)=>anchor+colLetter(pos));
     for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
       const raw=String(row[c]);if(!raw.startsWith('='))continue;
-      row[c]=raw.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
-        // Never rewrite a substring of an identifier, decimal literal or name.
+      const ranges=[];
+      let next=raw.replace(structuralRangePattern,(match,prefix,left,right,offset,whole)=>{
+        if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
+        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        let mapped=match;
+        if(name.toLowerCase()===edited.name.toLowerCase()){
+          const a=coord(left),b=coord(right),lo=Math.min(a,b),hi=Math.max(a,b);
+          if(delta>0)mapped=(prefix||'')+at(left,a>=index?a+delta:a)+':'+at(right,b>=index?b+delta:b);
+          else{const lower=lo-(index<lo?1:0),upper=hi-(index<=hi?1:0);
+            mapped=upper<lower?'#REF!':(prefix||'')+
+              at(left,a<=b?lower:upper)+':'+at(right,a<=b?upper:lower);}
+        }
+        // Also protect foreign-sheet ranges: their second endpoint inherits the prefix.
+        const token='\uE000'+ranges.length+'\uE001';ranges.push(mapped);return token;
+      });
+      next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
         if(offset&&/[A-Za-z0-9_.$]/.test(whole[offset-1]))return match;
-        const after=whole[offset+match.length];
-        if(after&&/[A-Za-z0-9_.$]/.test(after))return match;
+        const after=whole[offset+match.length];if(after&&/[A-Za-z0-9_.$]/.test(after))return match;
         const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
         if(name.toLowerCase()!==edited.name.toLowerCase())return match;
         const position=axis==='row'?Number(digits)-1:colIndex(letters);
@@ -3458,6 +3478,7 @@ self.onmessage=async ({data})=>{
         if(moved===position)return match;
         return (prefix||'')+colAnchor+(axis==='column'?colLetter(moved):letters)+rowAnchor+(axis==='row'?moved+1:digits);
       });
+      row[c]=next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]);
     }
   }
   // Stable full-row sort preserves referenced cell identity in all sheets.
@@ -3473,21 +3494,26 @@ self.onmessage=async ({data})=>{
     });
     if(order.every((entry,i)=>entry.i===i))return;
     const newRow=Array(t.rows.length);order.forEach((entry,i)=>{newRow[entry.i]=i;});
-    const rangePattern=/(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
+    const rangePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
     const rowOf=ref=>Number(/[1-9]\d*$/.exec(ref)[0])-1;
     const rewrite=(raw,sheet)=>{
       if(!String(raw).startsWith('='))return raw;
       const ranges=[];
-      let next=String(raw).replace(rangePattern,(match,left,right,offset,whole)=>{
+      let next=String(raw).replace(rangePattern,(match,prefix,left,right,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
-        if(sheet.id!==t.id)return match;
-        const lo=Math.min(rowOf(left),rowOf(right)),hi=Math.max(rowOf(left),rowOf(right));
-        if(hi>=newRow.length)throw Error('Cannot sort: formula range '+match+' exceeds the table.');
-        const positions=[];for(let i=lo;i<=hi;i++)positions.push(newRow[i]);
-        const lower=Math.min(...positions),upper=Math.max(...positions);
-        if(upper-lower+1!==positions.length)throw Error('Cannot sort: formula range '+match+' would split into noncontiguous rows.');
-        const forward=rowOf(left)<=rowOf(right);
-        const mapped=left.replace(/[1-9]\d*$/,String((forward?lower:upper)+1))+':'+right.replace(/[1-9]\d*$/,String((forward?upper:lower)+1));
+        const target=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        let mapped=match;
+        if(target.toLowerCase()===t.name.toLowerCase()){
+          const lo=Math.min(rowOf(left),rowOf(right)),hi=Math.max(rowOf(left),rowOf(right));
+          if(hi>=newRow.length)throw Error('Cannot sort: formula range '+match+' exceeds the table.');
+          const positions=[];for(let i=lo;i<=hi;i++)positions.push(newRow[i]);
+          const lower=Math.min(...positions),upper=Math.max(...positions);
+          if(upper-lower+1!==positions.length)throw Error('Cannot sort: formula range '+match+' would split into noncontiguous rows.');
+          const forward=rowOf(left)<=rowOf(right);
+          mapped=(prefix||'')+left.replace(/[1-9]\d*$/,String((forward?lower:upper)+1))+':'+
+            right.replace(/[1-9]\d*$/,String((forward?upper:lower)+1));
+        }
+        // Always shield both endpoints from the scalar reference rewrite.
         const token='\uE000'+ranges.length+'\uE001';ranges.push(mapped);return token;
       });
       next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
@@ -3538,10 +3564,12 @@ self.onmessage=async ({data})=>{
     expr=String(expr).replace(/\bIF\(([^()]*)\)/gi,(all,body)=>'('+number(formula('IF('+body+')',t,stack))+')');
     // Aggregations accept ranges or comma-separated arguments. Nested expressions are supported by the recursive evaluator.
     expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\s*\(([^()]*)\)/gi,(all,fn,body)=>{
-      const nums=[];for(const arg of splitArgs(body)){const range=/^(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
-        if(range){const c0=colIndex(range[2]),r0=+range[4]-1,c1=colIndex(range[6]),r1=+range[8]-1;
+      const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
+        if(range){const target=range[1]?getByName(range[1].slice(0,-1).replace(/^'|'$/g,'')):t;
+          if(!target)throw Error('#SHEET');
+          const c0=colIndex(range[3]),r0=+range[5]-1,c1=colIndex(range[7]),r1=+range[9]-1;
           if((Math.abs(c1-c0)+1)*(Math.abs(r1-r0)+1)>6000)throw Error('#RANGE');
-          for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(t,rr,cc,stack);if(v!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
+          for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(target,rr,cc,stack);if(v!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
         } else {const v=compute(arg,t,stack);if(Number.isFinite(Number(v)))nums.push(Number(v));}}
       const upper=fn.toUpperCase();const x=upper==='SUM'?nums.reduce((a,b)=>a+b,0):upper==='COUNT'?nums.length:upper==='AVERAGE'||upper==='AVG'?(nums.reduce((a,b)=>a+b,0)/(nums.length||1)):upper==='MIN'?Math.min(...nums):Math.max(...nums);
       return '('+(Number.isFinite(x)?x:0)+')';
@@ -4413,6 +4441,48 @@ function solve(A,b){
  if(residual>1e-8)throw Error('Solution failed its numerical residual check.');
  return {solution,residual,rank:n};
 }
+/* Doolittle P*A=L*U with scaled partial row pivoting and row-relative
+   reconstruction verification; no input mutation or external dependencies. */
+function lu(A){
+ A=validate(A);requireSquare(A);
+ const n=A.length,tolerance=1e-12,U=A.map(row=>row.slice());
+ const L=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>Number(i===j)));
+ const permutation=Array.from({length:n},(_,i)=>i);
+ const scales=A.map(row=>Math.max(...row.map(Math.abs)));
+ for(let k=0;k<n;k++){
+  let pivot=k,best=0;
+  for(let r=k;r<n;r++){
+   const score=scales[r]?Math.abs(U[r][k])/scales[r]:0;
+   if(score>best){best=score;pivot=r;}
+  }
+  if(best<=tolerance)throw Error('Singular or nearly singular matrix: LU requires full rank.');
+  if(pivot!==k){
+   [U[k],U[pivot]]=[U[pivot],U[k]];
+   [scales[k],scales[pivot]]=[scales[pivot],scales[k]];
+   [permutation[k],permutation[pivot]]=[permutation[pivot],permutation[k]];
+   for(let j=0;j<k;j++)[L[k][j],L[pivot][j]]=[L[pivot][j],L[k][j]];
+  }
+  for(let r=k+1;r<n;r++){
+   const factor=U[r][k]/U[k][k];
+   L[r][k]=factor;U[r][k]=0;
+   for(let c=k+1;c<n;c++)U[r][c]-=factor*U[k][c];
+  }
+ }
+ if([...L.flat(),...U.flat()].some(x=>!Number.isFinite(x)))throw Error('LU exceeded finite floating-point range.');
+ const P=permutation.map(index=>Array.from({length:n},(_,j)=>Number(index===j)));
+ let residual=0;
+ for(let i=0;i<n;i++){
+  const row=A[permutation[i]],scale=Math.max(Number.MIN_VALUE,...row.map(Math.abs));
+  for(let j=0;j<n;j++){
+   const reconstructed=L[i].reduce((sum,x,k)=>sum+x*U[k][j],0);
+   const error=Math.abs(reconstructed-row[j])/scale;
+   if(!Number.isFinite(error))throw Error('LU reconstruction exceeded finite floating-point range.');
+   residual=Math.max(residual,error);
+  }
+ }
+ if(residual>1e-8)throw Error('LU decomposition failed its numerical reconstruction check.');
+ return {P,L,U,permutation,residual};
+}
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
 const subtract=(A,B)=>binary(A,B,'subtract');
@@ -4458,7 +4528,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -4475,8 +4545,10 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-subtract" class="secondary">A − B</button>'+
  '<button type="button" id="mat-multiply" class="secondary">A × B</button>'+
  '<button type="button" id="mat-solve" class="secondary">Solve A·x=b</button>'+
+ '<button type="button" id="mat-lu" class="secondary">LU (P·A=L·U)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
+ '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+
  '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
  '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
 panel.append(area);
@@ -4535,25 +4607,28 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:operation==='solve'?value.solution.map(x=>[x]):value;
-  output.textContent=operation+':\n'+(typeof display==='number'?format(display):display.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n'))+
+  const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
+  output.textContent=operation==='lu'?
+   'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):
+   operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
    (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):'');
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
 for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',()=>{rebuild();rebuildRhs();});
 for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
- try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.operation==='solve'?last.value.solution.map(x=>[x]):last.value),{source:'matrix calculator'});}
+ try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.operation==='solve'?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,notation,read,readSecond,readRhs,calculate};
 })();
 </script>
 <script id="promath-ode-tools">

@@ -35,11 +35,11 @@ def main():
         assert page.evaluate("MathStudio.dataTables.calculate()[0][3]") == 5
         assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0][0]") == 4
         page.evaluate("MathStudio.dataTables.deleteRow(0)")
-        assert page.evaluate("MathStudio.dataTables.tables[0].rows[1][3]") == "=SUM(#REF!:A2)"
-        assert page.evaluate("MathStudio.dataTables.calculate()[1][3]") == "#REF!"
+        assert page.evaluate("MathStudio.dataTables.tables[0].rows[1][3]") == "=SUM($A$1:A2)"
+        assert page.evaluate("MathStudio.dataTables.calculate()[1][3]") == 4
         assert page.evaluate("MathStudio.dataTables.tables[1].rows[0][0]") == "=Data1!$A$2"
         page.evaluate("MathStudio.dataTables.deleteColumn(0)")
-        assert page.evaluate("MathStudio.dataTables.tables[0].rows[1][2]") == "=SUM(#REF!:#REF!)"
+        assert page.evaluate("MathStudio.dataTables.tables[0].rows[1][2]") == "=SUM(#REF!)"
         assert page.evaluate("MathStudio.dataTables.calculate()[1][2]") == "#REF!"
         assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0][0]") == "#REF!"
         saved = page.evaluate("MathStudio.dataTables.exportState()")

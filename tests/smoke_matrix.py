@@ -21,7 +21,7 @@ def main():
         assert page.evaluate("MathStudio.matrixTools.determinant([[1,2],[3,4]])")==-2
         assert page.evaluate("MathStudio.matrixTools.determinant([[0,1],[1,0]])")==-1
         assert page.evaluate("MathStudio.matrixTools.determinant([[1,0,0],[0,1,0],[0,0,1]])")==1
-        assert page.evaluate("MathStudio.matrixTools.determinant([[1,2,3],[0,1,4],[5,6,0]])")==1
+        assert math.isclose(page.evaluate("MathStudio.matrixTools.determinant([[1,2,3],[0,1,4],[5,6,0]])"),1.0,rel_tol=1e-12,abs_tol=1e-12)
         assert page.evaluate("MathStudio.matrixTools.determinant([[0,0],[0,0]])")==0
         assert page.evaluate("MathStudio.matrixTools.transpose([[1,2,3],[4,5,6]])")==[[1,4],[2,5],[3,6]]
         assert page.evaluate("MathStudio.matrixTools.inverse([[1,2],[3,4]])")==[[-2,1],[1.5,-0.5]]

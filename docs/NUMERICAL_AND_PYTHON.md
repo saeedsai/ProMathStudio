@@ -18,6 +18,18 @@ Guesses:   1,1
 
 A damped Newton method with a numerical Jacobian seeks a local solution. It reports iterations, the residual norm and convergence status. If the Jacobian is singular, choose a different initial guess. **Convergence does not guarantee that the solution is unique.**
 
+## First-order initial-value ODE (offline RK4)
+
+Open **Symbolic Solver → Numerical methods / PDE → First-order ODE initial-value problem · RK4**. Enter a real-valued derivative **dy/dt = f(t,y)** using the same safe Calculator expression syntax. Specify initial time t₀, final time t₁, initial value y(t₀), and a fixed number of time steps (4–1000). Example:
+
+- Derivative: y
+- Initial time: 0; end time: 1; initial value: 1; steps: 40
+- Reference: y(1) = exp(1) ≈ 2.718281828; reduce step size and compare results to check convergence.
+
+The native classical fourth-order Runge–Kutta method computes a table of **t, y** values. **Save output to Data Tables** preserves a new table, while **Plot y(t) in Graphs** imports it and opens a 2D line chart. The derivative may depend on both t and y, e.g. t+y. All calculations run locally without Pyodide or a network connection.
+
+**Scope and limitations:** This is a scalar first-order *forward* IVP solver only (t₁ > t₀), with real finite values and a magnitude safety bound of 1e12. It uses fixed steps; it has no adaptive error estimator, stiffness handling, event detection, systems of ODEs, BVP, DAE or discontinuity detection. Large or rapidly varying derivatives may require more steps, and numerical results are approximations rather than proofs. Errors reject non-finite derivatives/states and invalid inputs instead of silently exporting invalid tables. See the dedicated Playwright RK4 reference and integration regression in tests/smoke_ode.py.
+
 ## One-dimensional Poisson equation
 
 Select **1D Poisson**, where the implemented convention is:

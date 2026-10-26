@@ -318,7 +318,7 @@
           <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
         </div>
         <div id="cas-system-fields" hidden style="padding:12px;border:1px solid #d7deec;border-radius:10px;margin:12px 0"><label for="cas-system-input">Equations (one per line)</label><textarea id="cas-system-input" rows="4" style="width:100%;display:block" spellcheck="false">x = 2x + 2z
-y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separated)</label><input id="cas-system-vars" value="x,y,z" aria-label="System unknowns"/><p class="small-note">Press Execute. Free parameters are shown in the solution. SymPy required.</p></div>
+y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separated)</label><input id="cas-system-vars" value="x,y,z" aria-label="System unknowns"/><label for="cas-system-method">Method</label><select id="cas-system-method" aria-label="System solving method"><option value="auto">Auto (linear first, nonlinear if needed)</option><option value="linear">Linear only</option><option value="nonlinear">Nonlinear polynomial</option></select><p class="small-note">Auto preserves fast linear solutions and solves supported nonlinear polynomial systems with up to 3 unknowns. Solutions may be real or complex. SymPy required.</p></div>
         <label class="cas-examples-label">Try a calculation
           <select id="cas-examples"><option value="">Choose an example…</option>
             <option value="(x-1)^2">Expand: (x−1)²</option>
@@ -695,13 +695,46 @@ def _ms_system(job_text):
     for row in rows:
         expr=build(row)
         expressions.append(expr.lhs-expr.rhs if isinstance(expr,sp.Equality) else expr)
-    result=sp.linsolve(expressions,[sp.Symbol(n) for n in names])
-    if result==sp.EmptySet:
-        outputs=[sp.EmptySet]
-        note='No solution: inconsistent equations.'
+    variables=[sp.Symbol(n) for n in names]
+    method=job.get('method','auto')
+    if method not in ('auto','linear','nonlinear'):
+        raise ValueError('Unknown system-solving method.')
+    from sympy.solvers.solveset import NonlinearError
+    try:
+        sp.linear_eq_to_matrix(expressions,variables)
+        is_linear=True
+    except NonlinearError:
+        is_linear=False
+    if method=='linear' and not is_linear:
+        raise ValueError('This system is nonlinear. Select Auto or Nonlinear polynomial.')
+    if is_linear:
+        result=sp.linsolve(expressions,variables)
+        if result==sp.EmptySet:
+            outputs=[sp.EmptySet]
+            note='No solution: inconsistent linear equations.'
+        else:
+            outputs=[sp.Eq(sp.Symbol(n),v,evaluate=False) for sol in result for n,v in zip(names,sol)]
+            note='General linear solution; remaining symbols are free parameters.'
     else:
-        outputs=[sp.Eq(sp.Symbol(n),v,evaluate=False) for sol in result for n,v in zip(names,sol)]
-        note='General solution; remaining symbols are free parameters.'
+        if len(names)>3 or len(rows)>6:
+            raise ValueError('Nonlinear symbolic systems are limited to 3 unknowns and 6 equations.')
+        try:
+            polys=[sp.Poly(expr,*variables) for expr in expressions]
+        except (sp.PolynomialError,ValueError,TypeError):
+            raise ValueError('Only polynomial nonlinear systems are supported by this operation. Use Numerical methods for other systems.')
+        if any(poly.total_degree()>4 or len(poly.terms())>80 for poly in polys):
+            raise ValueError('Nonlinear polynomial system exceeds the degree-4 / 80-terms safety limit.')
+        result=sp.nonlinsolve(expressions,variables)
+        if result==sp.EmptySet:
+            outputs=[sp.EmptySet]
+            note='No solution for this nonlinear polynomial system.'
+        elif not isinstance(result,sp.FiniteSet):
+            outputs=[result]
+            note='Symbolic nonlinear solution set. Check conditions and domain assumptions.'
+        else:
+            if len(result)>MS_MAX_RESULTS:raise ValueError('Too many solution tuples for display.')
+            outputs=[sp.Eq(sp.Tuple(*variables),sp.Tuple(*sol),evaluate=False) for sol in result]
+            note='Nonlinear polynomial solution tuples (including complex solutions when applicable). Check real/domain constraints separately.'
     items=[{'plain':str(v),'latex':sp.latex(v),'mathml':html.unescape(sp.printing.mathml(v,printer='presentation')),'approx':''} for v in outputs[:MS_MAX_RESULTS]]
     return json.dumps({'items':items,'note':note,'operation':'system','engine':'SymPy','version':sp.__version__},ensure_ascii=False)
 
@@ -1812,7 +1845,8 @@ def _ms_system(job_text):
         if(!unknowns.length||unknowns.length>10||new Set(unknowns).size!==unknowns.length||unknowns.some(v=>!/^[A-Za-z][A-Za-z0-9_]*$/.test(v)))throw Error('Enter 1–10 distinct unknown names.');
         const equations=values.map(value=>{const parsed=evaluate(value);if(parsed.incomplete)throw Error('Incomplete equation: '+value);return parsed.ast;});
         setCasLoading('Solving equation system with SymPy…');
-        const payload=await sympyJob(null,'system',unknowns[0],{equations,unknowns});
+        const method=document.getElementById('cas-system-method').value;
+        const payload=await sympyJob(null,'system',unknowns[0],{equations,unknowns,method});
         if(requested!==casRequest)return;
         showCasResult({engine:'SymPy',operation:'system',raw:values.join('; '),variable:unknowns.join(','),lines:payload.items.map(item=>({...item,raw:values.join('; ')})),note:payload.note+' · SymPy '+payload.version,python:'# Solve the system using SymPy linsolve'});
         return;

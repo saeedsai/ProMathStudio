@@ -1,0 +1,54 @@
+name: Clean merged obsolete branches
+
+# Runs only from trusted main; never on pull_request, so unreviewed source
+# cannot acquire the contents:write token needed for branch deletion.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: promath-branch-hygiene
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Keep dev and main; prune merged legacy refs only
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Delete only fully merged, unprotected, unreferenced branches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const branches = await github.paginate(github.rest.repos.listBranches, {owner, repo, per_page:100});
+            const prs = await github.paginate(github.rest.pulls.list, {owner, repo, state:'open', per_page:100});
+            const inOpenPR = new Set(prs.filter(p=>p.head.repo?.full_name === `${owner}/${repo}`).map(p=>p.head.ref));
+            const allowed = new Set(['main','dev']);
+            core.info('Allowed persistent branches: main and dev');
+            for (const branch of branches) {
+              if (allowed.has(branch.name) || branch.protected || inOpenPR.has(branch.name)) {
+                core.info('Preserving '+branch.name+' (allowed/protected/open PR)');
+                continue;
+              }
+              try {
+                // base=old branch, head=main. "ahead" means main contains
+                // every commit from old branch; "diverged" must NOT be pruned.
+                const comparison = await github.rest.repos.compareCommits({
+                  owner, repo, base:branch.name, head:'main'
+                });
+                if (!['ahead','identical'].includes(comparison.data.status)) {
+                  core.warning('Preserving unmerged branch '+branch.name+': '+comparison.data.status);
+                  continue;
+                }
+                await github.rest.git.deleteRef({owner, repo, ref:'heads/'+branch.name});
+                core.info('Deleted fully merged obsolete ref: '+branch.name);
+              } catch (error) {
+                core.warning('Could not safely clean '+branch.name+': '+error.message);
+              }
+            }

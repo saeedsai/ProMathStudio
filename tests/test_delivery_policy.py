@@ -43,5 +43,14 @@ class DeliveryPolicyTests(unittest.TestCase):
         self.assertIn("['ahead','identical']", workflow)
         self.assertIn("deleteRef", workflow)
 
+    def test_data_tables_guide_has_single_structure_and_current_sort_contract(self):
+        guide = (ROOT / "docs/DATA_TABLES.md").read_text(encoding="utf-8")
+        self.assertEqual(guide.count("# Data Tables workspace"), 1)
+        for heading in ("## Workbooks", "## Relational operations",
+                        "## Import and export", "## Persistence and privacy"):
+            self.assertEqual(guide.count(heading), 1, heading)
+        self.assertIn("sort is rejected atomically", guide)
+        self.assertNotIn("Sorting/reordering rows with formulas is **not** yet reference-safe", guide)
+
 if __name__ == "__main__":
     unittest.main()

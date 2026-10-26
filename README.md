@@ -11,6 +11,8 @@ The application runs from a single, readable `index.html`. A web server and buil
 - **Try it:** in Equation editor enter `(x-1)^2`, then send it to Symbolic solver and choose **Expand**.
 - **Move math between tools:** edit the **Working equation** field or select a saved/recent expression, then choose **Send to → Editor / Calculate / Solve / Graph 2D / Graph 3D / Notebook**.
 
+Calculator matrix tools now include bounded real 2×2/3×3 `Ax=b` solving with a separate right-hand-side vector, pivoting, singularity diagnostics and numerical residual checks. See [Matrix calculator](docs/MATRIX_CALCULATOR.md).
+
 ## What it does
 
 | Workspace | Functions |

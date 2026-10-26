@@ -53,6 +53,8 @@ jobs:
         run: python tests/smoke_matrix_arithmetic.py
       - name: Matrix RREF and rank regression
         run: python tests/smoke_matrix_rref.py
+      - name: Matrix Ax=b linear-system regression
+        run: python tests/smoke_matrix_solve.py
       - name: Python custom function composition regression
         run: python tests/smoke_python_compose.py
       - name: RK4 initial-value solver numeric and UI regression

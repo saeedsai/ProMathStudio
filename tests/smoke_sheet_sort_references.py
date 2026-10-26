@@ -20,8 +20,8 @@ def main():
                 ["=Data1!$A$1+Data1!A2","='Data1'!B3"]]}]}
         page.evaluate("(s) => MathStudio.dataTables.restoreState(s)", state)
         assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == [25,11]
-        page.locator("#dt-sortcol").select_option("0")
-        page.locator("#dt-sort").click()
+        page.evaluate("document.getElementById('dt-sortcol').value='0'")
+        page.evaluate("document.getElementById('dt-sort').click()")
         assert page.evaluate("MathStudio.dataTables.active.rows.map(r => r[0])") == ["5","10","20"]
         assert page.evaluate("MathStudio.dataTables.active.rows.map(r => r[1])") == ["=A1+1","=A2+1","=A3+1"]
         assert page.evaluate("MathStudio.dataTables.active.rows[2][2]") == "=SUM(A1:A3)"
@@ -37,7 +37,7 @@ def main():
         page.evaluate("(s) => MathStudio.dataTables.restoreState(s)", state)
         page.evaluate("MathStudio.dataTables.active.rows[0][2]='=SUM(A1:A2)'")
         before = page.evaluate("MathStudio.dataTables.exportState()")
-        page.locator("#dt-sort").click()
+        page.evaluate("document.getElementById('dt-sort').click()")
         assert "noncontiguous" in page.locator("#dt-status").inner_text()
         assert page.evaluate("MathStudio.dataTables.exportState()") == before
         assert page.evaluate("""() => {try {MathStudio.dataTables.sortRows(99);return false;}

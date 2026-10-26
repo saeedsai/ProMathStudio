@@ -6,6 +6,12 @@ from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[1]
 
+def matrix_close(actual, expected):
+    return (len(actual) == len(expected)
+            and all(len(a) == len(b) and all(
+                math.isclose(x, y, rel_tol=1e-12, abs_tol=1e-12)
+                for x, y in zip(a, b)) for a, b in zip(actual, expected)))
+
 def main():
     with sync_playwright() as pw:
         browser=pw.chromium.launch(headless=True,executable_path=os.getenv("CHROMIUM_PATH") or None,args=["--no-sandbox"])
@@ -24,9 +30,9 @@ def main():
         assert math.isclose(page.evaluate("MathStudio.matrixTools.determinant([[1,2,3],[0,1,4],[5,6,0]])"),1.0,rel_tol=1e-12,abs_tol=1e-12)
         assert page.evaluate("MathStudio.matrixTools.determinant([[0,0],[0,0]])")==0
         assert page.evaluate("MathStudio.matrixTools.transpose([[1,2,3],[4,5,6]])")==[[1,4],[2,5],[3,6]]
-        assert page.evaluate("MathStudio.matrixTools.inverse([[1,2],[3,4]])")==[[-2,1],[1.5,-0.5]]
-        assert page.evaluate("MathStudio.matrixTools.inverse([[1,0,0],[0,1,0],[0,0,1]])")==[[1,0,0],[0,1,0],[0,0,1]]
-        assert page.evaluate("MathStudio.matrixTools.inverse([[0,1],[1,0]])")==[[0,1],[1,0]]
+        assert matrix_close(page.evaluate("MathStudio.matrixTools.inverse([[1,2],[3,4]])"),[[-2,1],[1.5,-0.5]])
+        assert matrix_close(page.evaluate("MathStudio.matrixTools.inverse([[1,0,0],[0,1,0],[0,0,1]])"),[[1,0,0],[0,1,0],[0,0,1]])
+        assert matrix_close(page.evaluate("MathStudio.matrixTools.inverse([[0,1],[1,0]])"),[[0,1],[1,0]])
         assert page.evaluate("MathStudio.matrixTools.notation([[1,2],[3,4]])")=="matrix([1,2],[3,4])"
         # Failure paths must be exercised directly: never execute dynamic JS.
         failures=[

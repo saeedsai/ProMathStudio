@@ -71,7 +71,7 @@ def main():
         page.wait_for_timeout(400)
         assert page.locator("#calc-result-plain").inner_text()=="= 4","Stale worker must not overwrite newer result"
         assert page.evaluate("__terminated")>=1
-        page.evaluate("window.Worker=window.__RealWorker")
+        page.evaluate("() => { window.Worker=window.__RealWorker; }")
         assert not errors,errors
         browser.close()
     print("PASS: Python custom functions in calculator AST, nested/lazy calls, errors and cancellation")

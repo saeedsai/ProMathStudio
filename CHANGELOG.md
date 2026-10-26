@@ -1,3 +1,9 @@
+## 2026-10-26 — Bounded symbolic limits (dev candidate)
+
+- Added a SymPy Limit operation with approach-point and left/right/both direction controls, project settings and a `sin(x)/x` sample.
+- Reuses safe AST worker; validates real constant points, rejects free parameters and complex/equality/matrix inputs, and reports nonexistent or oscillatory limits.
+- Added a focused reference/UI regression and required Quality CI gate. PR, main CI and Pages verification pending.
+
 ## 2026-10-26 — Spreadsheet structural reference integrity (dev candidate)
 
 - Insert/delete rows or columns through the toolbar or context menu now rewrite local and cross-sheet A1-style formula references, preserving `$` anchors and explicit `#REF!` for deleted cells.

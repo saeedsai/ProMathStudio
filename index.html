@@ -312,11 +312,13 @@
       <div class="cas-wrap">
         <p class="cas-intro">Expand, simplify, factor, differentiate, integrate, and solve equations, including complex solutions. The built-in solver works offline; the optional full SymPy engine runs locally in your browser after its initial online download.</p>
         <div class="cas-toolbar">
-          <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="numeric">Numerical roots (SymPy)</option><optgroup label="Integral transforms · SymPy"><option value="laplace">Laplace transform ℒ</option><option value="inverse_laplace">Inverse Laplace ℒ⁻¹</option><option value="fourier">Fourier transform ℱ</option><option value="inverse_fourier">Inverse Fourier ℱ⁻¹</option></optgroup><optgroup label="Differential equations · SymPy"><option value="ode">Solve ODE (dsolve)</option><option value="pde">Solve PDE (pdsolve)</option></optgroup></select></label>
+          <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="system">Solve system of equations</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="numeric">Numerical roots (SymPy)</option><optgroup label="Integral transforms · SymPy"><option value="laplace">Laplace transform ℒ</option><option value="inverse_laplace">Inverse Laplace ℒ⁻¹</option><option value="fourier">Fourier transform ℱ</option><option value="inverse_fourier">Inverse Fourier ℱ⁻¹</option></optgroup><optgroup label="Differential equations · SymPy"><option value="ode">Solve ODE (dsolve)</option><option value="pde">Solve PDE (pdsolve)</option></optgroup></select></label>
           <label class="cas-field cas-engine">Engine <select id="cas-engine"><option value="auto">Auto — offline → SymPy</option><option value="sympy">SymPy — full solver</option><option value="offline">Built-in — offline only</option></select></label>
           <label class="cas-field variable">Variable <input id="cas-variable" type="text" value="x" maxlength="24" spellcheck="false" aria-label="Symbolic variable" /></label>
           <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
         </div>
+        <div id="cas-system-fields" hidden style="padding:12px;border:1px solid #d7deec;border-radius:10px;margin:12px 0"><label for="cas-system-input">Equations (one per line)</label><textarea id="cas-system-input" rows="4" style="width:100%;display:block" spellcheck="false">x = 2x + 2z
+y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separated)</label><input id="cas-system-vars" value="x,y,z" aria-label="System unknowns"/><p class="small-note">Press Execute. Free parameters are shown in the solution. SymPy required.</p></div>
         <label class="cas-examples-label">Try a calculation
           <select id="cas-examples"><option value="">Choose an example…</option>
             <option value="(x-1)^2">Expand: (x−1)²</option>
@@ -655,6 +657,53 @@ def _ms_process(job_text):
             'approx':(str(sp.N(r.rhs,10)) if isinstance(r,sp.Equality) and r.rhs.is_number else ''),
         })
     return json.dumps({'items':result,'note':note,'operation':operation,'engine':'SymPy','version':sp.__version__},ensure_ascii=False)
+
+def _ms_system(job_text):
+    job=json.loads(job_text)
+    rows=job.get('equations',[])
+    names=job.get('unknowns',[])
+    if not isinstance(rows,list) or not 1<=len(rows)<=12:raise ValueError('Enter 1–12 equations.')
+    if not isinstance(names,list) or not 1<=len(names)<=10 or len(set(names))!=len(names):raise ValueError('Enter 1–10 unique unknowns.')
+    if any(not isinstance(n,str) or not n.isidentifier() or n in MS_CONST or len(n)>24 for n in names):raise ValueError('Invalid unknown variable.')
+    count=[0]
+    def build(node):
+        count[0]+=1
+        if count[0]>MS_MAX_NODES:raise ValueError('System too complex.')
+        if not isinstance(node,dict):raise ValueError('Invalid equation.')
+        kind=node.get('kind')
+        if kind=='number':return sp.Rational(str(node['value']))
+        if kind=='symbol':
+            name=str(node['value'])
+            return MS_CONST[name] if name in MS_CONST else sp.Symbol(name)
+        if kind=='group':return build(node['value'])
+        if kind=='unary':
+            v=build(node['value'])
+            if node['op']=='+':return v
+            if node['op']=='-':return -v
+        if kind=='binary':
+            a=build(node['left']);b=build(node['right']);op=node['op']
+            if op=='+':return a+b
+            if op=='-':return a-b
+            if op=='*':return a*b
+            if op=='/':return a/b
+            if op=='^':return a**b
+            if op in ('=','=='):return sp.Eq(a,b,evaluate=False)
+        if kind=='call' and node.get('name') in MS_FUNCS and len(node.get('args',[]))<=8:
+            return MS_FUNCS[node['name']](*[build(a) for a in node['args']])
+        raise ValueError('Unsupported expression in equation system.')
+    expressions=[]
+    for row in rows:
+        expr=build(row)
+        expressions.append(expr.lhs-expr.rhs if isinstance(expr,sp.Equality) else expr)
+    result=sp.linsolve(expressions,[sp.Symbol(n) for n in names])
+    if result==sp.EmptySet:
+        outputs=[sp.EmptySet]
+        note='No solution: inconsistent equations.'
+    else:
+        outputs=[sp.Eq(sp.Symbol(n),v,evaluate=False) for sol in result for n,v in zip(names,sol)]
+        note='General solution; remaining symbols are free parameters.'
+    items=[{'plain':str(v),'latex':sp.latex(v),'mathml':html.unescape(sp.printing.mathml(v,printer='presentation')),'approx':''} for v in outputs[:MS_MAX_RESULTS]]
+    return json.dumps({'items':items,'note':note,'operation':'system','engine':'SymPy','version':sp.__version__},ensure_ascii=False)
 
 </script>
 <script>
@@ -1668,7 +1717,7 @@ def _ms_process(job_text):
           const engine=await init();
           self.postMessage({type:'progress',id,message:'SymPy is solving your equation…'});
           engine.globals.set('mathstudio_job_json',JSON.stringify(payload));
-          const output=engine.runPython('_ms_process(mathstudio_job_json)');
+          const output=engine.runPython(payload.operation==='system'?'_ms_system(mathstudio_job_json)':'_ms_process(mathstudio_job_json)');
           self.postMessage({type:'result',id,data:JSON.parse(output)});
         }catch(e){self.postMessage({type:'error',id,message:String(e?.message||e)});}
       };`;
@@ -1689,13 +1738,13 @@ def _ms_process(job_text):
     sympyWorker.onerror=e=>stopSympyWorker('Cannot start the SymPy worker. Please allow browser scripts and an internet connection for the initial download.');
     return sympyWorker;
   }
-  function sympyJob(ast,operation,variable){
+  function sympyJob(ast,operation,variable,extra={}){
     const worker=ensureSympyWorker(),id=++sympyWorkerSeq;
     return new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>{
         stopSympyWorker('SymPy took too long or could not finish downloading. Please try a simpler expression and check internet access.');
       },120000);
-      sympyPending.set(id,{resolve,reject,timer});worker.postMessage({id,payload:{ast,operation,variable,target:document.getElementById('cas-target')?.value.trim()||'s'}});
+      sympyPending.set(id,{resolve,reject,timer});worker.postMessage({id,payload:{ast,operation,variable,target:document.getElementById('cas-target')?.value.trim()||'s',...extra}});
     });
   }
   function sympyPythonCode(ast,operation,v){
@@ -1745,6 +1794,7 @@ def _ms_process(job_text):
     casCode.textContent=result.python;setCasButtons(true);
     document.getElementById('cas-result-count').textContent=result.lines.length+(result.lines.length===1?' result':' results')+(result.engine==='SymPy'?' · SymPy':' · built-in');
   }
+  casOperation.addEventListener('change',()=>{document.getElementById('cas-system-fields').hidden=casOperation.value!=='system';});
   async function casExecute(){
     if(casBusy)return;
     const raw=input.value.trim(),v=casVariable.value.trim()||'x',selected=casOperation.value,engine=casEngine.value;
@@ -1754,6 +1804,19 @@ def _ms_process(job_text):
     casLast=null;casOut.replaceChildren();setCasButtons(false);
     try{
       if(!/^[\p{L}][\p{L}0-9_]*$/u.test(v))throw new Error('Choose a valid variable name such as x, t or theta.');
+      if(selected==='system'){
+        if(engine==='offline')throw Error('Systems require SymPy. Choose Auto or SymPy.');
+        const values=document.getElementById('cas-system-input').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+        const unknowns=document.getElementById('cas-system-vars').value.split(',').map(x=>x.trim()).filter(Boolean);
+        if(values.length<1||values.length>12)throw Error('Enter 1–12 equations.');
+        if(!unknowns.length||unknowns.length>10||new Set(unknowns).size!==unknowns.length||unknowns.some(v=>!/^[A-Za-z][A-Za-z0-9_]*$/.test(v)))throw Error('Enter 1–10 distinct unknown names.');
+        const equations=values.map(value=>{const parsed=evaluate(value);if(parsed.incomplete)throw Error('Incomplete equation: '+value);return parsed.ast;});
+        setCasLoading('Solving equation system with SymPy…');
+        const payload=await sympyJob(null,'system',unknowns[0],{equations,unknowns});
+        if(requested!==casRequest)return;
+        showCasResult({engine:'SymPy',operation:'system',raw:values.join('; '),variable:unknowns.join(','),lines:payload.items.map(item=>({...item,raw:values.join('; ')})),note:payload.note+' · SymPy '+payload.version,python:'# Solve the system using SymPy linsolve'});
+        return;
+      }
       if(!raw)throw new Error('Type an equation first.');
       if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)&&! /^[A-Za-z][A-Za-z0-9_]*$/.test(document.getElementById('cas-target').value.trim()))throw Error('Choose a valid transform output variable.');
       const parsed=evaluate(raw);

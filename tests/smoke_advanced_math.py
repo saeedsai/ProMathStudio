@@ -33,6 +33,22 @@ def main():
             ast=page.evaluate('(x)=>MathStudio.parse(x).ast',expr)
             result=json.loads(context['_ms_process'](json.dumps({'ast':ast,'operation':op,'variable':var,'target':target})))
             assert result['items'] and expected in result['items'][0]['plain'],(op,result)
+        # Solve several symbolic equations together without writing Python in the UI.
+        equations=['x = 2x + 2z','y = x - z']
+        asts=[page.evaluate('(src)=>MathStudio.parse(src).ast',expr) for expr in equations]
+        solved=json.loads(context['_ms_system'](json.dumps({'equations':asts,'unknowns':['x','y','z']})))
+        assert solved['operation']=='system'
+        assert len(solved['items'])==3
+        assert '-2*z' in solved['items'][0]['plain'],solved
+        assert '-3*z' in solved['items'][1]['plain'],solved
+        impossible=[page.evaluate('(src)=>MathStudio.parse(src).ast',expr) for expr in ['x=1','x=2']]
+        empty=json.loads(context['_ms_system'](json.dumps({'equations':impossible,'unknowns':['x']})))
+        assert 'No solution' in empty['note'],empty
+        page.locator('[data-workspace="solver"]').click()
+        page.locator('#cas-operation').select_option('system')
+        assert page.locator('#cas-system-fields').is_visible()
+        assert 'x = 2x + 2z' in page.locator('#cas-system-input').input_value()
+        assert page.locator('#cas-system-vars').input_value()=='x,y,z'
         fits={
             'linear':[[x,3+2*x] for x in range(5)],
             'poly':[[x,2*x*x+3*x+1] for x in range(-3,4)],

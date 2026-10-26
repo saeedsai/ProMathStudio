@@ -1,6 +1,6 @@
 # Matrix calculator (bounded native functionality)
 
-ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, or **LU (P·A=L·U)**. Binary operations use independently sized Matrix B.
+ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, **LU (P·A=L·U)**, or **QR (A=Q·R)**. Binary operations use independently sized Matrix B.
 
 ## Operations and examples
 
@@ -29,6 +29,10 @@ The **RREF (A)** action computes reduced row-echelon form and displays the numer
 
 **LU (P·A=L·U)** decomposes a full-rank real 2×2 or 3×3 Matrix A using Doolittle elimination and scaled partial row pivoting. P is the permutation matrix (P·A reorders A's rows), L has unit diagonal and is lower triangular, and U is upper triangular. The result shows all three factors and a row-relative reconstruction residual; the **LU factor for editor** selector lets you transfer L, U, or P individually to Equation Editor. Example: A=`[[0,1],[1,0]]` produces P=`[[0,1],[1,0]]`, L=I, U=I. Singular and nearly singular inputs (relative pivot tolerance `1e-12`) are rejected rather than returning misleading factors. The implementation does not compute a condition number, complex LU, or arbitrary matrix sizes. Test: `tests/smoke_matrix_lu.py`.
 
+## Thin QR decomposition (bounded real matrices)
+
+**QR (A=Q·R)** computes an economy-size decomposition of full-column-rank real 2×2, 3×2 and 3×3 matrices. Reorthogonalized modified Gram–Schmidt returns Q with orthonormal columns and upper-triangular R, along with reconstruction and orthogonality residuals. The QR factor selector transfers Q or R to Equation Editor. Wide 2×3 matrices and dependent/nearly dependent columns (relative tolerance 1e-12) are rejected. This is not pivoted QR, general-dimensional QR or least squares. Test: `tests/smoke_matrix_qr.py`.
+
 ## Scope, precision and safeguards
 
 - Real numbers only, dimension 2×2, 2×3, 3×2 or 3×3. No complex matrices, vectors, general sparse matrices or arbitrary large matrix dimensions.
@@ -41,4 +45,4 @@ The **RREF (A)** action computes reduced row-echelon form and displays the numer
 
 ## Next enhancements
 
-General-dimension arrays, least-squares/underdetermined systems, eigenvalues, SVD, QR and sparse solvers remain distinct planned gaps in the frozen [feature inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md). Do not count them as finished solely because matrix notation already exists in Equation Editor.
+General-dimension arrays, least-squares/underdetermined systems, eigenvalues, SVD, pivoted/general-dimensional QR and sparse solvers remain distinct planned gaps in the frozen [feature inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md). Do not count them as finished solely because matrix notation already exists in Equation Editor.

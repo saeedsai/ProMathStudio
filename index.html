@@ -4483,6 +4483,44 @@ function lu(A){
  if(residual>1e-8)throw Error('LU decomposition failed its numerical reconstruction check.');
  return {P,L,U,permutation,residual};
 }
+/* Reorthogonalized modified Gram-Schmidt economy QR for 2<=n<=m<=3. */
+function qr(A){
+ A=validate(A);
+ const m=A.length,n=A[0].length,tolerance=1e-12;
+ if(m<n)throw Error('QR requires Matrix A rows to be at least its columns.');
+ const Q=Array.from({length:m},()=>Array(n).fill(0));
+ const R=Array.from({length:n},()=>Array(n).fill(0));
+ for(let j=0;j<n;j++){
+  const v=A.map(row=>row[j]),columnNorm=Math.hypot(...v);
+  if(!Number.isFinite(columnNorm)||columnNorm===0)
+   throw Error('Rank-deficient matrix: QR requires independent columns.');
+  for(let pass=0;pass<2;pass++)for(let k=0;k<j;k++){
+   let projection=0;
+   for(let i=0;i<m;i++)projection+=Q[i][k]*v[i];
+   R[k][j]+=projection;
+   for(let i=0;i<m;i++)v[i]-=projection*Q[i][k];
+  }
+  const norm=Math.hypot(...v);
+  if(!Number.isFinite(norm)||norm<=tolerance*columnNorm)
+   throw Error('Rank-deficient or nearly rank-deficient matrix: QR requires independent columns.');
+  R[j][j]=norm;
+  for(let i=0;i<m;i++)Q[i][j]=v[i]/norm;
+ }
+ const magnitude=Math.max(Number.MIN_VALUE,Math.hypot(...A.flat()));
+ let residual=0,orthogonality=0;
+ for(let i=0;i<m;i++)for(let j=0;j<n;j++){
+  let reconstructed=0;
+  for(let k=0;k<n;k++)reconstructed+=Q[i][k]*R[k][j];
+  residual=Math.max(residual,Math.abs(reconstructed-A[i][j])/magnitude);
+ }
+ for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+  let dot=0;for(let k=0;k<m;k++)dot+=Q[k][i]*Q[k][j];
+  orthogonality=Math.max(orthogonality,Math.abs(dot-Number(i===j)));
+ }
+ if(!Number.isFinite(residual)||!Number.isFinite(orthogonality)||residual>1e-8||orthogonality>1e-8)
+  throw Error('QR decomposition failed its numerical reconstruction or orthogonality check.');
+ return {Q,R,residual,orthogonality};
+}
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
 const subtract=(A,B)=>binary(A,B,'subtract');
@@ -4528,7 +4566,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -4545,10 +4583,12 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-subtract" class="secondary">A − B</button>'+
  '<button type="button" id="mat-multiply" class="secondary">A × B</button>'+
  '<button type="button" id="mat-solve" class="secondary">Solve A·x=b</button>'+
- '<button type="button" id="mat-lu" class="secondary">LU (P·A=L·U)</button>'+
+ '<button type="button" id="mat-lu" class="secondary">LU (P·A=L·U)</button>'+ 
+ '<button type="button" id="mat-qr" class="secondary">QR (A=Q·R)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
- '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+
+ '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+ 
+ '<label>QR factor for editor <select id="mat-qr-factor"><option value="Q">Q</option><option value="R">R</option></select></label>'+
  '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
  '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
 panel.append(area);
@@ -4607,28 +4647,28 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:operation==='solve'?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
   output.textContent=operation==='lu'?
-   'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):
+   'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?\n   'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
    (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):'');
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu'],['mat-qr','qr']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
 for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',()=>{rebuild();rebuildRhs();});
 for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
- try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.operation==='solve'?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.value),{source:'matrix calculator'});}
+ try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.operation==='solve'?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.operation==='qr'?last.value[document.getElementById('mat-qr-factor').value]:last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,notation,read,readSecond,readRhs,calculate};
 })();
 </script>
 <script id="promath-ode-tools">

@@ -14,8 +14,8 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 
 | Order | ID | Next bounded implementation | User acceptance / regression requirements | Status |
 |---:|---|---|---|---|
-| 1 | P0-XLSX-ROUNDTRIP | Bounded offline two-sheet XLSX import/export with formulas. | Numeric/text/blank/formula round-trip, quoted sheet names, malformed archives, browser regression. | TODO |
-| 2 | P0-MATRIX-QR | Bounded full-rank real QR decomposition, 3×2 and square. | QᵀQ≈I, Q·R≈A, rank-deficient refusal, UI/editor, browser regression. | TODO |
+| 1 | P0-XLSX-ROUNDTRIP | Offline bounded two-sheet XLSX import/export with formulas. | Numeric/text/blank/formula round-trip, quoted sheet names, malformed archives, browser regression. | TODO |
+| 2 | P0-MATRIX-QR | Verify and release thin full-rank QR candidate. | QᵀQ≈I, Q·R≈A, rank-deficient refusal, UI/editor, browser regression. | DEV IMPLEMENTED — CI PENDING |
 | 3 | P0-PROJECT-SCHEMA | Transactional project schema migration and import validation. | Older versions, corrupt/oversize rollback, save/reload, browser regression. | TODO |
 | 4 | P0-SYMBOLIC-ASSUMPTIONS | Bounded explicit real/positive/integer symbolic assumptions. | Domain-sensitive SymPy results, contradictory assumptions, persisted settings, worker regression. | TODO |
 | 5 | P0-PRECISION | Scoped variable-precision numeric evaluation separate from double precision. | 30+ digits reference cases, precision controls, invalid/overflow cases and browser regression. | TODO |
@@ -144,3 +144,6 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 
 
 **2026-10-26 21:1x Europe/Stockholm — PR #18 exact-main Quality closeout.** A second [main Quality run 40391737573](https://github.com/saeedsai/ProMathStudio/actions/runs/40391737573) completed **successfully** for `main=a03e02de04f0ccd89e08b66ce627c3642f47d8b2` with all 26 steps green, including the focused spreadsheet range and matrix LU browser tests. [Pages deployment 40391704935](https://github.com/saeedsai/ProMathStudio/actions/runs/40391704935) succeeded on that same SHA; therefore the two bounded features are **RELEASED with workflow-verified deployment**, though independently interactive hosted Pages behavior remains unverified (`DisabledError`). Another duplicate main Quality run 40391704792 was still pending; do not silently disregard a later failure. `dev` contains post-merge documentation checkpoint, and its own latest CI must be checked separately. Branch protection is still absent; no safe stale files found. Next five are recorded above.
+
+
+**2026-10-26 21:54 Europe/Stockholm — P0-MATRIX-QR development checkpoint.** Read AGENTS, inventory, plan, branch heads and CI before editing. Baseline dev `d6cd0590e25aba237bfb7379547a1861a00ee152` (Quality 40392345764 passed), main `a03e02de04f0ccd89e08b66ce627c3642f47d8b2` (Quality 40391737573, Pages 40391704935 passed). No open PRs; only dev/main. XLSX remains higher priority but requires bounded ZIP/XML parsing and hostile-archive validation; selected deliverable thin QR increment rather than rushing XLSX. Added source/bundle, numerical/browser regression, Quality gate, documentation and changelog. **Release gated by exact-head CI, PR, main Quality and Pages verification.** Branch protection absent; hosted interactive smoke unverified. Next five: P0-XLSX-ROUNDTRIP, P0-MATRIX-QR, P0-PROJECT-SCHEMA, P0-SYMBOLIC-ASSUMPTIONS, P0-PRECISION.

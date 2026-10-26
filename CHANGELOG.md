@@ -1,3 +1,8 @@
+## 2026-10-26 — Thin QR decomposition (dev candidate; release gated)
+
+- Added offline 2×2, 3×2 and 3×3 real economy QR with reorthogonalization, rank refusal, reconstruction/orthogonality diagnostics and Q/R editor transfer.
+- Added a dedicated Playwright numerical regression and required Quality gate. **Not released until exact-head dev/PR/main CI and Pages are verified.**
+
 ## 2026-10-26 — Pivoted small-matrix LU decomposition (PR #18 released; exact-main Quality and Pages green)
 
 - Added real 2×2/3×3 full-rank P·A=L·U decomposition with scaled row pivoting, permutation tracking, singular/near-singular refusal and row-relative reconstruction residual.

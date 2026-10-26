@@ -1,3 +1,8 @@
+## 2026-10-26 — Spreadsheet range deletion integrity (dev candidate)
+
+- Row/column deletion shrinks surviving same-sheet and cross-sheet aggregate ranges, preserving absolute anchors; fully removed ranges produce #REF! while scalar references retain existing behavior.
+- Qualified SUM/AVG/MIN/MAX/COUNT ranges now evaluate. Added focused browser regression, updated structural expectations and mandatory Quality gate. CI/PR/Pages pending.
+
 ## 2026-10-26 — Spreadsheet row sorting with reference integrity (dev candidate)
 
 - Stable sorting remaps same-sheet and cross-sheet formulas, including anchored references; contiguous ranges retain their referenced cells and noncontiguous ranges abort without mutation.

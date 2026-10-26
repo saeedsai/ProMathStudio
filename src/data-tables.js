@@ -94,14 +94,34 @@
   // Structural edits preserve the referenced cell identity, including $-anchored
   // addresses. References to a deleted cell become an explicit #REF! error.
   const referencePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)/g;
+  // Protect complete aggregate ranges before scalar reference rewriting.
+  // Deleting inside a range shrinks its surviving rectangle; an empty range is #REF!.
+  const structuralRangePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
   function shiftReferences(edited,axis,index,delta){
+    const coord=ref=>{const m=/^(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)$/.exec(ref);
+      return axis==='row'?Number(m[4])-1:colIndex(m[2]);};
+    const at=(ref,pos)=>axis==='row'?ref.replace(/[1-9]\d*$/,String(pos+1))
+      :ref.replace(/^(\$?)[A-Za-z]{1,3}(?=\$?[1-9]\d*$)/,(_,anchor)=>anchor+colLetter(pos));
     for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
       const raw=String(row[c]);if(!raw.startsWith('='))continue;
-      row[c]=raw.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
-        // Never rewrite a substring of an identifier, decimal literal or name.
+      const ranges=[];
+      let next=raw.replace(structuralRangePattern,(match,prefix,left,right,offset,whole)=>{
+        if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
+        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        let mapped=match;
+        if(name.toLowerCase()===edited.name.toLowerCase()){
+          const a=coord(left),b=coord(right),lo=Math.min(a,b),hi=Math.max(a,b);
+          if(delta>0)mapped=(prefix||'')+at(left,a>=index?a+delta:a)+':'+at(right,b>=index?b+delta:b);
+          else{const lower=lo-(index<lo?1:0),upper=hi-(index<=hi?1:0);
+            mapped=upper<lower?'#REF!':(prefix||'')+
+              at(left,a<=b?lower:upper)+':'+at(right,a<=b?upper:lower);}
+        }
+        // Also protect foreign-sheet ranges: their second endpoint inherits the prefix.
+        const token='\uE000'+ranges.length+'\uE001';ranges.push(mapped);return token;
+      });
+      next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
         if(offset&&/[A-Za-z0-9_.$]/.test(whole[offset-1]))return match;
-        const after=whole[offset+match.length];
-        if(after&&/[A-Za-z0-9_.$]/.test(after))return match;
+        const after=whole[offset+match.length];if(after&&/[A-Za-z0-9_.$]/.test(after))return match;
         const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
         if(name.toLowerCase()!==edited.name.toLowerCase())return match;
         const position=axis==='row'?Number(digits)-1:colIndex(letters);
@@ -110,6 +130,7 @@
         if(moved===position)return match;
         return (prefix||'')+colAnchor+(axis==='column'?colLetter(moved):letters)+rowAnchor+(axis==='row'?moved+1:digits);
       });
+      row[c]=next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]);
     }
   }
   // Stable full-row sort preserves referenced cell identity in all sheets.
@@ -190,10 +211,12 @@
     expr=String(expr).replace(/\bIF\(([^()]*)\)/gi,(all,body)=>'('+number(formula('IF('+body+')',t,stack))+')');
     // Aggregations accept ranges or comma-separated arguments. Nested expressions are supported by the recursive evaluator.
     expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\s*\(([^()]*)\)/gi,(all,fn,body)=>{
-      const nums=[];for(const arg of splitArgs(body)){const range=/^(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
-        if(range){const c0=colIndex(range[2]),r0=+range[4]-1,c1=colIndex(range[6]),r1=+range[8]-1;
+      const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
+        if(range){const target=range[1]?getByName(range[1].slice(0,-1).replace(/^'|'$/g,'')):t;
+          if(!target)throw Error('#SHEET');
+          const c0=colIndex(range[3]),r0=+range[5]-1,c1=colIndex(range[7]),r1=+range[9]-1;
           if((Math.abs(c1-c0)+1)*(Math.abs(r1-r0)+1)>6000)throw Error('#RANGE');
-          for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(t,rr,cc,stack);if(v!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
+          for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(target,rr,cc,stack);if(v!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
         } else {const v=compute(arg,t,stack);if(Number.isFinite(Number(v)))nums.push(Number(v));}}
       const upper=fn.toUpperCase();const x=upper==='SUM'?nums.reduce((a,b)=>a+b,0):upper==='COUNT'?nums.length:upper==='AVERAGE'||upper==='AVG'?(nums.reduce((a,b)=>a+b,0)/(nums.length||1)):upper==='MIN'?Math.min(...nums):Math.max(...nums);
       return '('+(Number.isFinite(x)?x:0)+')';

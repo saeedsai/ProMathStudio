@@ -1,3 +1,9 @@
+## 2026-10-26 — Python custom function composition in Calculator (dev increment)
+
+- Resolve nested Python custom-function AST calls asynchronously via the existing isolated Pyodide worker, then evaluate surrounding arithmetic using the safe Calculator numeric AST.
+- Preserve direct calls, short-circuit conditional branches, finite real argument/result validation, a 16-call limit, 60-second per-call timeout, and stale-worker cancellation.
+- Added focused Playwright worker-mock regression and required CI step; actual Pyodide CDN execution remains unverified until online QA. Release pending exact-head CI, PR and Pages verification.
+
 ## 2026-10-26 — First-order RK4 ODE (development increment)
 
 - Added a bounded, offline fourth-order Runge–Kutta initial-value solver for scalar real y'=f(t,y), with fixed interval, initial value, 4–1000 steps, finite-value guards and clear error handling.

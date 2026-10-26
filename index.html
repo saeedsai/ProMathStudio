@@ -1184,7 +1184,7 @@ def _ms_system(job_text):
   const customGroup=paletteGroups[paletteGroups.length-1].groups[0];
   const saveCustom=()=>{customGroup.items=customFunctions.map(f=>[f.name,f.name+' ('+f.params.join(', ')+')',f.name+'('+f.params.join(',')+')']);try{localStorage.setItem('promath-custom-functions-v1',JSON.stringify(customFunctions));}catch{}document.getElementById('palette-search').dispatchEvent(new Event('input'));};
   const customPanel=document.createElement('details');customPanel.className='panel';customPanel.id='custom-function-panel';
-  customPanel.style.padding='14px';customPanel.innerHTML='<summary style="cursor:pointer;font-weight:700">Custom functions · Formula / Python</summary><p class="small-note">Use named functions in Calculator, Graph and numeric Data Tables formulas. Python mode runs real multi-line Python in a separate Pyodide worker when called directly from Calculator. Initial use downloads Python; only execute code you trust. Formula functions also work in Graph and Data Tables.</p><div class="data-toolbar"><label>Name<input id="cf-name" placeholder="myfunc"></label><label>Arguments<input id="cf-params" value="x" placeholder="x,y"></label><label>Type<select id="cf-type"><option value="formula">Formula</option><option value="python">Python code (Pyodide)</option></select></label></div><textarea id="cf-body" rows="3" style="width:100%" placeholder="sin(x)+x^2"></textarea><div class="data-toolbar"><button type="button" id="cf-save">Save function</button><button type="button" id="cf-delete">Delete named function</button></div><p id="cf-message" role="status"></p><div id="cf-list"></div>';
+  customPanel.style.padding='14px';customPanel.innerHTML='<summary style="cursor:pointer;font-weight:700">Custom functions · Formula / Python</summary><p class="small-note">Use named functions in Calculator, Graph and numeric Data Tables formulas. Python mode runs real multi-line Python in a separate Pyodide worker from Calculator, including nested calls in numeric expressions. Initial use downloads Python; only execute code you trust. Formula functions also work in Graph and Data Tables.</p><div class="data-toolbar"><label>Name<input id="cf-name" placeholder="myfunc"></label><label>Arguments<input id="cf-params" value="x" placeholder="x,y"></label><label>Type<select id="cf-type"><option value="formula">Formula</option><option value="python">Python code (Pyodide)</option></select></label></div><textarea id="cf-body" rows="3" style="width:100%" placeholder="sin(x)+x^2"></textarea><div class="data-toolbar"><button type="button" id="cf-save">Save function</button><button type="button" id="cf-delete">Delete named function</button></div><p id="cf-message" role="status"></p><div id="cf-list"></div>';
   document.getElementById('connected-hub').after(customPanel);
   function refreshCustomList(){const el=document.getElementById('cf-list');el.replaceChildren();for(const item of customFunctions){const button=document.createElement('button');button.type='button';button.className='secondary small';button.textContent=item.name+'('+item.params.join(',')+')';button.addEventListener('click',()=>{document.getElementById('cf-name').value=item.name;document.getElementById('cf-params').value=item.params.join(',');document.getElementById('cf-type').value=item.type||'formula';document.getElementById('cf-body').value=item.source||item.expression;});el.append(button);}}
   function normalizeCustom(type,body,name,params){
@@ -2220,9 +2220,9 @@ def _ms_system(job_text):
     const a=Math.abs(z.re)<1e-12?0:z.re,b=Math.abs(z.im)<1e-12?0:z.im;
     return b===0?unit(a):(a===0?'':unit(a)+(b<0?' - ':' + '))+unit(Math.abs(b))+'i';
   }
-  // Run user Python only in an isolated Pyodide worker. Python has normal runtime
-  // capabilities; users should run only trusted code. Never eval Python in the UI.
-  let customPyWorker=null,customPyUrl=null,customPyRequest=0;
+  // User-authored Python stays inside the existing isolated Pyodide worker.
+  // Only numeric AST arguments/results cross the worker boundary; no JS eval.
+  let customPyWorker=null,customPyUrl=null,customPyRequest=0,customPyReject=null;
   const customPySource=`'use strict';
 const BASE='https://cdn.jsdelivr.net/pyodide/v0.29.1/full/';
 let ready;
@@ -2244,54 +2244,122 @@ self.onmessage=async ({data})=>{
     self.postMessage({ok:true,value:JSON.parse(raw)});
   }catch(e){self.postMessage({ok:false,error:String(e.message||e)});}
 };`;
-  function runCustomPython(fn,args,request){
-    if(customPyWorker)customPyWorker.terminate();
-    if(customPyUrl)URL.revokeObjectURL(customPyUrl);
-    customPyUrl=URL.createObjectURL(new Blob([customPySource],{type:'text/javascript'}));
-    customPyWorker=new Worker(customPyUrl);
-    calcplain.textContent='Loading / running Python…';calcmsg.textContent='Python functions run in a worker. Initial use requires an internet connection.';
-    const timer=setTimeout(()=>{if(request!==customPyRequest)return;customPyWorker?.terminate();customPyWorker=null;calcplain.textContent='Python timed out (60 seconds).';calcmsg.textContent=calcplain.textContent;calcmsg.classList.add('error');},60000);
-    customPyWorker.onmessage=({data})=>{
-      clearTimeout(timer);if(request!==customPyRequest)return;
-      if(!data.ok){calcres.textContent='Error';calcplain.textContent=data.error;calcmsg.textContent=data.error;calcmsg.classList.add('error');return;}
-      const result=Number(data.value),display=formatCalcNumber(C(result),Number($('calc-precision').value));
-      ans=C(result);calcres.textContent=display;calcplain.textContent='= '+display;calcmsg.classList.remove('error');calcmsg.textContent='Calculated with Python (Pyodide).';
-      $('calc-ans').textContent='Ans: '+display;history.unshift({expr:calcin.value.trim(),result:display});history=history.slice(0,40);storeHistory();historyDraw();lastCalc={expression:calcin.value.trim(),result:display};
-      window.dispatchEvent(new CustomEvent('mathstudio:calculator-result',{detail:lastCalc}));
-    };
-    customPyWorker.onerror=()=>{clearTimeout(timer);if(request!==customPyRequest)return;calcres.textContent='Error';calcplain.textContent='Cannot load Python. Check network availability.';calcmsg.textContent=calcplain.textContent;calcmsg.classList.add('error');};
-    customPyWorker.postMessage({name:fn.name,source:fn.source,args});
+  function cancelCustomPython(){
+    if(customPyReject){const reject=customPyReject;customPyReject=null;reject(Error('Python calculation cancelled.'));}
+    if(customPyWorker){customPyWorker.terminate();customPyWorker=null;}
+    if(customPyUrl){URL.revokeObjectURL(customPyUrl);customPyUrl=null;}
+  }
+  function callCustomPython(fn,args,request){
+    return new Promise((resolve,reject)=>{
+      if(request!==customPyRequest){reject(Error('Python calculation cancelled.'));return;}
+      cancelCustomPython();
+      customPyUrl=URL.createObjectURL(new Blob([customPySource],{type:'text/javascript'}));
+      customPyWorker=new Worker(customPyUrl);
+      let finished=false;
+      const timer=setTimeout(()=>finish(Error('Python timed out (60 seconds).')),60000);
+      function finish(error,value){
+        if(finished)return;finished=true;clearTimeout(timer);
+        if(customPyReject===reject)customPyReject=null;
+        if(customPyWorker){customPyWorker.terminate();customPyWorker=null;}
+        if(customPyUrl){URL.revokeObjectURL(customPyUrl);customPyUrl=null;}
+        if(request!==customPyRequest){reject(Error('Python calculation cancelled.'));return;}
+        if(error)reject(error);else resolve(value);
+      }
+      customPyReject=reject;
+      customPyWorker.onmessage=({data})=>{
+        if(!data?.ok){finish(Error(String(data?.error||'Python worker failed.')));return;}
+        if(typeof data.value!=='number'||!Number.isFinite(data.value)){
+          finish(Error('Python custom function must return a finite real number.'));return;
+        }
+        finish(null,data.value);
+      };
+      customPyWorker.onerror=()=>finish(Error('Cannot load Python. Check network availability.'));
+      customPyWorker.postMessage({name:fn.name,source:fn.source,args});
+    });
+  }
+  function containsPythonCall(node){
+    if(!node||typeof node!=='object')return false;
+    if(node.kind==='call')return window.MathStudio.customFunctions?.find(node.name)?.type==='python'||
+      node.args.some(containsPythonCall);
+    if(node.kind==='binary')return containsPythonCall(node.left)||containsPythonCall(node.right);
+    if(['group','unary','postfix'].includes(node.kind))return containsPythonCall(node.value);
+    return false;
+  }
+  // Resolve only explicitly named Python calls. All remaining expression math
+  // continues through the existing safe numeric AST evaluator.
+  async function resolvePythonCalls(node,env,angle,request,state,depth=0){
+    if(request!==customPyRequest)throw Error('Python calculation cancelled.');
+    if(depth>60)throw Error('Python expression nesting exceeds 60 levels.');
+    if(!node||typeof node!=='object')return node;
+    const visit=child=>resolvePythonCalls(child,env,angle,request,state,depth+1);
+    if(node.kind==='call'){
+      const name=node.name.toLowerCase();
+      if((name==='if'||name==='piecewise')&&node.args.length===3){
+        const condition=await visit(node.args[0]);
+        const value=numeric(condition,env,angle);
+        return visit(node.args[(Math.abs(value.re)>1e-14||Math.abs(value.im)>1e-14)?1:2]);
+      }
+      const args=[];for(const arg of node.args)args.push(await visit(arg));
+      const fn=window.MathStudio.customFunctions?.find(node.name);
+      if(fn?.type!=='python')return {...node,args};
+      if(args.length!==fn.params.length)throw Error(fn.name+' requires '+fn.params.length+' arguments.');
+      if(++state.calls>16)throw Error('At most 16 Python function calls per Calculator expression.');
+      const values=args.map(arg=>{
+        const z=numeric(arg,env,angle);
+        if(Math.abs(z.im)>1e-12||!Number.isFinite(z.re))
+          throw Error('Python custom function arguments must be finite real numbers.');
+        return z.re;
+      });
+      const result=await callCustomPython(fn,values,request);
+      return {kind:'number',value:String(result)};
+    }
+    if(node.kind==='binary'){
+      const left=await visit(node.left);
+      if(['land','∧','lor','∨'].includes(node.op)){
+        const z=numeric(left,env,angle),truth=Math.abs(z.re)>1e-14||Math.abs(z.im)>1e-14;
+        if((['land','∧'].includes(node.op)&&!truth)||(['lor','∨'].includes(node.op)&&truth))
+          return {kind:'number',value:truth?'1':'0'};
+      }
+      return {...node,left,right:await visit(node.right)};
+    }
+    if(['group','unary','postfix'].includes(node.kind))return {...node,value:await visit(node.value)};
+    return node;
+  }
+  function showCalculatorError(error){
+    showCalculatorBase(null);lastCalc=null;calcres.textContent='Error';
+    calcplain.textContent=error.message;calcmsg.classList.add('error');calcmsg.textContent=error.message;
+  }
+  function finishCalculator(src,parsed,z){
+    const digits=Number($('calc-precision').value);
+    const integer=parsed.exact!==null?parsed.exact:(Math.abs(z.im)<1e-12&&Number.isSafeInteger(z.re)?BigInt(z.re):null);
+    const display=parsed.exact!==null?parsed.exact.toString(10):formatCalcNumber(z,digits);
+    const tooLarge=parsed.exact!==null&&(parsed.exact>BigInt(Number.MAX_SAFE_INTEGER)||parsed.exact<BigInt(Number.MIN_SAFE_INTEGER));
+    ans=tooLarge?C(0):z;
+    calcres.replaceChildren();
+    try{calcres.appendChild(studio.render(studio.parse(display.replace(/\s/g,'')).ast));}catch{calcres.textContent=display;}
+    calcplain.textContent='= '+display;showCalculatorBase(integer);
+    $('calc-ans').textContent='Ans: '+display;
+    calcmsg.classList.remove('error');calcmsg.textContent=tooLarge?'Exact integer conversion shown; this literal is larger than 53 bits, so Ans cannot be reused for precise arithmetic.':'Calculated in '+($('calc-angle').value==='deg'?'degree':'radian')+' mode.';
+    history.unshift({expr:src,result:display});history=history.slice(0,40);storeHistory();historyDraw();
+    lastCalc={expression:src,result:display};
+    window.dispatchEvent(new CustomEvent('mathstudio:calculator-result',{detail:lastCalc}));
   }
   function executeCalc(){
     const src=calcin.value.trim();if(!src)return;
+    const request=++customPyRequest;cancelCustomPython();
     try{
-      const pyCall=/^([A-Za-z][A-Za-z0-9_]*)\s*\((.*)\)$/.exec(src);
-      const fn=pyCall&&window.MathStudio.customFunctions?.find(pyCall[1]);
-      if(fn?.type==='python'){
-        const args=pyCall[2].trim()?pyCall[2].split(',').map(value=>{
-          const z=numeric(parseRaw(value.trim()),{...(window.MathStudio.extraMath?.variables||{}),Ans:ans},$('calc-angle').value);
-          if(Math.abs(z.im)>1e-12)throw Error('Python custom function arguments must be real numbers.');
-          return z.re;
-        }):[];
-        if(args.length!==fn.params.length)throw Error(fn.name+' requires '+fn.params.length+' arguments.');
-        runCustomPython(fn,args,++customPyRequest);return;
-      }
-      ++customPyRequest; if(customPyWorker){customPyWorker.terminate();customPyWorker=null;}
-      const parsed=calculatorBaseInput(src),digits=Number($('calc-precision').value);
-      const z=parsed.exact!==null?C(Number(parsed.exact)):numeric(parseRaw(parsed.expression),{...(window.MathStudio.extraMath?.variables||{}),Ans:ans},$('calc-angle').value);
-      const integer=parsed.exact!==null?parsed.exact:(Math.abs(z.im)<1e-12&&Number.isSafeInteger(z.re)?BigInt(z.re):null);
-      const display=parsed.exact!==null?parsed.exact.toString(10):formatCalcNumber(z,digits);
-      const tooLarge=parsed.exact!==null&&(parsed.exact>BigInt(Number.MAX_SAFE_INTEGER)||parsed.exact<BigInt(Number.MIN_SAFE_INTEGER));
-      ans=tooLarge?C(0):z;
-      calcres.replaceChildren();
-      try{calcres.appendChild(studio.render(studio.parse(display.replace(/\s/g,'')).ast));}catch{calcres.textContent=display;}
-      calcplain.textContent='= '+display;showCalculatorBase(integer);
-      $('calc-ans').textContent='Ans: '+display;
-      calcmsg.classList.remove('error');calcmsg.textContent=tooLarge?'Exact integer conversion shown; this literal is larger than 53 bits, so Ans cannot be reused for precise arithmetic.':'Calculated in '+($('calc-angle').value==='deg'?'degree':'radian')+' mode. Inverse trigonometric results follow the selected angle units.';
-      history.unshift({expr:src,result:display});history=history.slice(0,40);storeHistory();historyDraw();
-      lastCalc={expression:src,result:display};
-      window.dispatchEvent(new CustomEvent('mathstudio:calculator-result',{detail:lastCalc}));
-    }catch(e){showCalculatorBase(null);lastCalc=null;calcres.textContent='Error';calcplain.textContent=e.message;calcmsg.classList.add('error');calcmsg.textContent=e.message;}
+      const parsed=calculatorBaseInput(src);
+      if(parsed.exact!==null){finishCalculator(src,parsed,C(Number(parsed.exact)));return;}
+      const ast=parseRaw(parsed.expression),env={...(window.MathStudio.extraMath?.variables||{}),Ans:ans},angle=$('calc-angle').value;
+      if(!containsPythonCall(ast)){finishCalculator(src,parsed,numeric(ast,env,angle));return;}
+      calcplain.textContent='Loading / running Python…';
+      calcmsg.classList.remove('error');calcmsg.textContent='Python functions run in a worker. Initial use requires an internet connection.';
+      resolvePythonCalls(ast,env,angle,request,{calls:0}).then(resolved=>{
+        if(request!==customPyRequest)return;
+        try{finishCalculator(src,parsed,numeric(resolved,env,angle));}
+        catch(error){showCalculatorError(error);}
+      }).catch(error=>{if(request===customPyRequest)showCalculatorError(error);});
+    }catch(error){showCalculatorError(error);}
   }
   $('calc-execute').addEventListener('click',executeCalc);
   calcin.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();executeCalc();}});

@@ -101,3 +101,7 @@ Browser regressions cover nonlinear roots, local equation systems, heat/Poisson 
 ### Native Equation Editor syntax in the calculator
 
 Both calculator-style and Equation Editor-style forms are accepted. For example, `int(x^2,x,0,3)` and `int(0,3,x^2,x)` both evaluate to 9. `sum(k^2,k,1,10)` and `sum(k=1,10,k^2)` both evaluate to 385. The same applies to `prod`. The Python workspace also exposes `sp` for SymPy, loaded alongside pandas; `result` must still be a pandas DataFrame or a dictionary of DataFrames.
+
+## Composing Python custom functions in Calculator (bounded)
+
+Save a Python function under **Custom functions · Formula / Python**, e.g. `def myfun(x): return x*x`. Calculator accepts `2*myfun(3)+1` (19), `myfun(myfun(2)+1)` (25), and `if(1,myfun(3),myfun(100))` (9, without running the unused branch). Nested Python calls execute sequentially in an isolated Pyodide Web Worker; numeric AST operators remain in the native safe evaluator, never JavaScript eval. Arguments/results must be finite real numbers, calls are capped at 16 per expression, each worker call times out after 60 seconds, and a newer Calculator execution cancels any pending worker result. This is **not** Python support in Graphs, Data Tables, or formula-defined custom-function bodies; first-use CDN execution requires online QA. The focused Playwright regression mocks the worker transport and does not prove actual Pyodide downloads.

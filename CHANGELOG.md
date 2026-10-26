@@ -1,18 +1,18 @@
-## 2026-10-26 — Bounded QR least-squares 3×2 solver (dev candidate; release gated)
+## 2026-10-27 — Bounded QR least-squares 3×2 solver (PR #21 released; exact-main Quality and Pages green)
 
 - Added offline full-column-rank 3×2 real least squares using existing QR, residual and orthogonality diagnostics, RHS grid, and Equation Editor transfer.
-- Added focused reference/negative/UI Playwright regression, required CI step and standalone bundle assertion. Release requires exact dev/PR/main CI and Pages confirmation.
+- Added focused reference/negative/UI Playwright regression, required CI step and standalone bundle assertion. Exact dev Quality [40416944333](https://github.com/saeedsai/ProMathStudio/actions/runs/40416944333), PR Quality [40417169197](https://github.com/saeedsai/ProMathStudio/actions/runs/40417169197), main Quality [40418521710](https://github.com/saeedsai/ProMathStudio/actions/runs/40418521710) and Pages [40418521555](https://github.com/saeedsai/ProMathStudio/actions/runs/40418521555) passed. PR #21 merged to main `17f19af1a1a6179859a31163f3fbaf0855865471`. Independent hosted interactive smoke unavailable.
 
 ## 2026-10-26 — Project schema v2 release closeout
 
 - PR #20 main `c32d486287ec2d6c13a872261fff83f94976ab7b` [Quality 40409820911](https://github.com/saeedsai/ProMathStudio/actions/runs/40409820911) and [Pages 40409819690](https://github.com/saeedsai/ProMathStudio/actions/runs/40409819690) succeeded. Bounded project-schema v2 is RELEASED with workflow-verified deployment; hosted interactive smoke remains unverified.
 
-## 2026-10-26 — Project schema v2 and import rollback (dev implementation; release pending)
+## 2026-10-26 — Project schema v2 and import rollback (PR #20 released)
 
 - Export version-2 JSON project backups; accept and migrate legacy version-1 backups without dropping supported data.
 - Validate notebook, history, custom functions, graph datasets and table dimensions before confirmation or mutation; reject future versions and malformed/oversize files.
 - Snapshot current project and reapply it on a restore-stage failure; this is best-effort and cannot guarantee recovery from storage failures. Add dedicated browser rollback and migration regression to required Quality CI.
-- **Not released until exact-head dev/PR/main Quality and GitHub Pages verification.**
+- **Released:** dev/PR Quality, main Quality 40409820911 and Pages 40409819690 passed on main `c32d486287ec2d6c13a872261fff83f94976ab7b`.
 
 ## 2026-10-26 — Thin QR decomposition (PR #19 released; exact-main Quality and Pages green)
 

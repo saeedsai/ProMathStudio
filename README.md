@@ -47,7 +47,7 @@ The current implementation has limits: it is not an arbitrary Python interpreter
 - [Word, LaTeX and other exports](docs/EXPORTS.md) · [Architecture](docs/ARCHITECTURE.md)
 - [Development](docs/DEVELOPMENT.md) · [Testing](docs/TESTING.md)
 - [GitHub Pages deployment](docs/DEPLOYMENT.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md)
+- [Full feature inventory and MATLAB/other-tool gap analysis (26 Oct 2026)](docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md) — each feature classified complete/partial and missing capabilities prioritized.\n- [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## Run the checks

@@ -40,19 +40,19 @@ def main():
 
         # Reject invalid intervals, invalid work limits and singular/non-real values.
         invalid = [
-            "{expression:'y',t0:1,t1:1,y0:1,steps:20}",
-            "{expression:'y',t0:1,t1:0,y0:1,steps:20}",
-            "{expression:'y',t0:0,t1:1,y0:1,steps:3}",
-            "{expression:'y',t0:0,t1:1,y0:1,steps:1001}",
-            "{expression:'y',t0:0,t1:1,y0:1,steps:2.5}",
-            "{expression:'y',t0:0,t1:1,y0:'',steps:20}",
-            "{expression:'sqrt(-1)',t0:0,t1:1,y0:1,steps:20}",
-            "{expression:'1/0',t0:0,t1:1,y0:1,steps:20}",
-            "{expression:'',t0:0,t1:1,y0:1,steps:20}",
+            {"expression": "y", "t0": 1, "t1": 1, "y0": 1, "steps": 20},
+            {"expression": "y", "t0": 1, "t1": 0, "y0": 1, "steps": 20},
+            {"expression": "y", "t0": 0, "t1": 1, "y0": 1, "steps": 3},
+            {"expression": "y", "t0": 0, "t1": 1, "y0": 1, "steps": 1001},
+            {"expression": "y", "t0": 0, "t1": 1, "y0": 1, "steps": 2.5},
+            {"expression": "y", "t0": 0, "t1": 1, "y0": "", "steps": 20},
+            {"expression": "sqrt(-1)", "t0": 0, "t1": 1, "y0": 1, "steps": 20},
+            {"expression": "1/0", "t0": 0, "t1": 1, "y0": 1, "steps": 20},
+            {"expression": "", "t0": 0, "t1": 1, "y0": 1, "steps": 20},
         ]
         for options in invalid:
-            assert page.evaluate("""source => {
-              try { MathStudio.odeTools.solve((new Function('return ('+source+')'))()); return false; }
+            assert page.evaluate("""opts => {
+              try { MathStudio.odeTools.solve(opts); return false; }
               catch(e) { return !!e.message; }
             }""", options), options
 

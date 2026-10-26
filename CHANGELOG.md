@@ -1,3 +1,10 @@
+## 2026-10-26 — Nonlinear symbolic equation systems (dev milestone)
+
+- Added **Auto / Linear only / Nonlinear polynomial** modes to the simultaneous equation UI.
+- Auto preserves SymPy exact linear/free-parameter systems; polynomial nonlinear systems of bounded degree and dimension are solved via `nonlinsolve`, including multiple real or complex solution tuples.
+- Added explicit bounded-input and unsupported-expression errors with regression coverage for signed solutions, contradictory systems, the linear path, and degree limits.
+- Tracked under P0-SYMBOLIC-SYSTEMS. Release status requires green exact-head CI plus dev-to-main PR and Pages validation.
+
 ## 2026-10-26 — Hourly development automation and delivery controls
 
 - Added persistent `AGENTS.md` contract and living five-feature plan for autonomous hourly work toward the 26-Oct feature/gap inventory.

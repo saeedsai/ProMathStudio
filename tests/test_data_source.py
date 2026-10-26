@@ -14,6 +14,8 @@ class DataTablesStaticTests(unittest.TestCase):
   self.assertIn('<script id="promath-matrix-tools">',html)
   self.assertIn(matrix,html)
   self.assertIn('id="mat-grid"',matrix)
+  self.assertIn('id="mat-b-grid"',matrix)
+  self.assertIn('M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply',matrix)
   ode=(ROOT/'src/ode-tools.js').read_text(encoding='utf-8').rstrip('\n')
   self.assertIn('<script id="promath-ode-tools">',html)
   self.assertIn(ode,html)

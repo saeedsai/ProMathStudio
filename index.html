@@ -4258,6 +4258,27 @@ function validate(A){
 }
 const requireSquare=A=>{if(A.length!==A[0].length)throw Error('This operation requires a square matrix.');};
 const transpose=A=>{A=validate(A);return A[0].map((_,j)=>A.map(row=>row[j]));};
+function binary(A,B,operation){
+ A=validate(A);B=validate(B);
+ const rows=A.length,cols=A[0].length;
+ if(operation==='multiply'){
+  if(cols!==B.length)throw Error('Multiplication requires Matrix A columns to equal Matrix B rows.');
+  return Array.from({length:rows},(_,r)=>Array.from({length:B[0].length},(_,c)=>{
+   const value=A[r].reduce((sum,entry,k)=>sum+entry*B[k][c],0);
+   if(!Number.isFinite(value))throw Error('Result exceeded finite floating-point range.');
+   return value;
+  }));
+ }
+ if(rows!==B.length||cols!==B[0].length)throw Error('Addition and subtraction require the same matrix dimensions.');
+ return A.map((row,r)=>row.map((entry,c)=>{
+  const value=operation==='add'?entry+B[r][c]:entry-B[r][c];
+  if(!Number.isFinite(value))throw Error('Result exceeded finite floating-point range.');
+  return value;
+ }));
+}
+const add=(A,B)=>binary(A,B,'add');
+const subtract=(A,B)=>binary(A,B,'subtract');
+const multiply=(A,B)=>binary(A,B,'multiply');
 function determinant(A){
  A=validate(A);requireSquare(A);const n=A.length;
  let rows=A.map(row=>row.slice()),sign=1,result=1;
@@ -4299,13 +4320,20 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices. Determinant and inverse need a square matrix; transpose works for 2×3 and 3×2. Arithmetic uses approximately 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose and binary arithmetic support rectangular shapes. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
- '<div id="mat-grid" class="matrix-grid" aria-label="Matrix entries"></div>'+
+ '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
+ '<p class="small-note">Matrix B (for addition, subtraction and multiplication)</p>'+
+ '<div class="matrix-controls"><label>B rows <select id="mat-b-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
+ '<label>B columns <select id="mat-b-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
+ '<div id="mat-b-grid" class="matrix-grid" aria-label="Matrix B entries"></div>'+
  '<div class="matrix-actions"><button type="button" id="mat-det" class="secondary">Determinant</button>'+
  '<button type="button" id="mat-transpose" class="secondary">Transpose</button>'+
  '<button type="button" id="mat-inverse" class="secondary">Inverse</button>'+
+ '<button type="button" id="mat-add" class="secondary">A + B</button>'+
+ '<button type="button" id="mat-subtract" class="secondary">A − B</button>'+
+ '<button type="button" id="mat-multiply" class="secondary">A × B</button>'+
  '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
  '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
 panel.append(area);
@@ -4315,7 +4343,7 @@ const style=el('style',{},'.matrix-tools{border-top:1px solid #dfe5f0;padding:13
  '#mat-result{background:#f7f9ff;border:1px solid #dfe5f0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:8px}'+
  '#mat-result.error{color:#af2842;background:#fff5f5}');
 document.head.append(style);
-const grid=document.getElementById('mat-grid'),output=document.getElementById('mat-result'),send=document.getElementById('mat-send');
+const grid=document.getElementById('mat-grid'),gridB=document.getElementById('mat-b-grid'),output=document.getElementById('mat-result'),send=document.getElementById('mat-send');
 let last=null;
 function rebuild(){
  const old=[...grid.querySelectorAll('input')].map(input=>({r:Number(input.dataset.row),c:Number(input.dataset.col),value:input.value}));
@@ -4328,29 +4356,48 @@ function rebuild(){
  }
  invalidate();
 }
+function rebuildSecond(){
+ const old=[...gridB.querySelectorAll('input')].map(input=>({r:Number(input.dataset.row),c:Number(input.dataset.col),value:input.value}));
+ const rows=Number(document.getElementById('mat-b-rows').value),cols=Number(document.getElementById('mat-b-cols').value);
+ gridB.style.gridTemplateColumns='repeat('+cols+', minmax(0, 1fr))';gridB.replaceChildren();
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+  const value=old.find(x=>x.r===r&&x.c===c)?.value;
+  const cell=el('input',{type:'number',step:'any','data-row':String(r),'data-col':String(c),'aria-label':'Matrix B row '+(r+1)+' column '+(c+1)});
+  cell.value=value===undefined?(r===c?'1':'0'):value;cell.addEventListener('input',invalidate);gridB.append(cell);
+ }
+ invalidate();
+}
 function invalidate(){last=null;send.disabled=true;output.classList.remove('error');output.textContent='Enter matrix values and choose an operation.';}
 function read(){
  const rows=Number(document.getElementById('mat-rows').value),cols=Number(document.getElementById('mat-cols').value);
  return validate(Array.from({length:rows},(_,r)=>Array.from({length:cols},(_,c)=>grid.querySelector('[data-row="'+r+'"][data-col="'+c+'"]').value)));
 }
+function readSecond(){
+ const rows=Number(document.getElementById('mat-b-rows').value),cols=Number(document.getElementById('mat-b-cols').value);
+ return validate(Array.from({length:rows},(_,r)=>Array.from({length:cols},(_,c)=>gridB.querySelector('[data-row="'+r+'"][data-col="'+c+'"]').value)));
+}
 function calculate(operation){
  try{
-  const A=read(),value=operation==='determinant'?determinant(A):operation==='transpose'?transpose(A):inverse(A);
+  const A=read(),value=operation==='determinant'?determinant(A):
+   operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
+   operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
+   multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   output.textContent=operation+':\n'+(typeof value==='number'?format(value):value.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n'));
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
 for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',rebuild);
+for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
  try{M.bridge.transfer('editor',notation(last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
-rebuild();
-M.matrixTools={validate,determinant,transpose,inverse,notation,read,calculate};
+rebuild();rebuildSecond();
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,notation,read,readSecond,calculate};
 })();
 </script>
 <script id="promath-ode-tools">

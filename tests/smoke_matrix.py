@@ -28,15 +28,32 @@ def main():
         assert page.evaluate("MathStudio.matrixTools.inverse([[1,0,0],[0,1,0],[0,0,1]])")==[[1,0,0],[0,1,0],[0,0,1]]
         assert page.evaluate("MathStudio.matrixTools.inverse([[0,1],[1,0]])")==[[0,1],[1,0]]
         assert page.evaluate("MathStudio.matrixTools.notation([[1,2],[3,4]])")=="matrix([1,2],[3,4])"
-        for expression in [
-            "()=>MathStudio.matrixTools.inverse([[1,2],[2,4]])",
-            "()=>MathStudio.matrixTools.inverse([[1,2,3],[4,5,6]])",
-            "()=>MathStudio.matrixTools.determinant([[1,2,3],[4,5,6]])",
-            "()=>MathStudio.matrixTools.validate([[1,''],[2,3]])",
-            "()=>MathStudio.matrixTools.validate([[1,NaN],[2,3]])",
-            "()=>MathStudio.matrixTools.validate([[1,1e20],[2,3]])",
-        ]:
-            assert page.evaluate("(src)=>{try{new Function('return ('+src+')')()();return false}catch(e){return !!e.message}}",expression),expression
+        # Failure paths must be exercised directly: never execute dynamic JS.
+        failures=[
+            ("()=>MathStudio.matrixTools.inverse([[1,2],[2,4]])","Singular"),
+            ("()=>MathStudio.matrixTools.inverse([[1,2,3],[4,5,6]])","square"),
+            ("()=>MathStudio.matrixTools.determinant([[1,2,3],[4,5,6]])","square"),
+            ("()=>MathStudio.matrixTools.validate([[1,''],[2,3]])","Enter a number"),
+            ("()=>MathStudio.matrixTools.validate([[1,NaN],[2,3]])","finite"),
+            ("()=>MathStudio.matrixTools.validate([[1,1e20],[2,3]])","finite"),
+        ]
+        for body,message in failures:
+            # The Playwright function is a fixed, trusted test fixture, not
+            # a mathematical expression evaluator or user-programmable code.
+            # Exercise invalid inputs through a safe named dispatch.
+            operation=body.split("MathStudio.matrixTools.")[1]
+            result=page.evaluate("""([call,expected])=>{
+              const m=MathStudio.matrixTools;
+              try{
+                if(call.startsWith('inverse('))m.inverse(call.includes('[[1,2],[2,4]]')?[[1,2],[2,4]]:[[1,2,3],[4,5,6]]);
+                else if(call.startsWith('determinant('))m.determinant([[1,2,3],[4,5,6]]);
+                else if(call.includes("1,''"))m.validate([[1,''],[2,3]]);
+                else if(call.includes('NaN'))m.validate([[1,NaN],[2,3]]);
+                else m.validate([[1,1e20],[2,3]]);
+                return false;
+              }catch(e){return e.message.includes(expected);}
+            }""",[operation,message])
+            assert result,(body,message)
         # Interactive determinant and inverse using editable cells.
         entries=page.locator("#mat-grid input")
         assert entries.count()==4

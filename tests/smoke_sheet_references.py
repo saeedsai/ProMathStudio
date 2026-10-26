@@ -39,16 +39,19 @@ def main():
         assert page.evaluate("MathStudio.dataTables.calculate()[1][3]") == "#REF!"
         assert page.evaluate("MathStudio.dataTables.tables[1].rows[0][0]") == "=Data1!$A$2"
         page.evaluate("MathStudio.dataTables.deleteColumn(0)")
-        assert page.evaluate("MathStudio.dataTables.tables[0].rows[0][2]") == "=#REF!+B1" or page.evaluate("MathStudio.dataTables.tables[0].rows[0][2]") == "=#REF!+B1"
-        assert page.evaluate("MathStudio.dataTables.calculate()[0][2]") == "#REF!"
+        assert page.evaluate("MathStudio.dataTables.tables[0].rows[1][2]") == "=SUM(#REF!:#REF!)"
+        assert page.evaluate("MathStudio.dataTables.calculate()[1][2]") == "#REF!"
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0][0]") == "#REF!"
         saved = page.evaluate("MathStudio.dataTables.exportState()")
         page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", saved)
-        assert page.evaluate("MathStudio.dataTables.calculate()[0][2]") == "#REF!"
+        assert page.evaluate("MathStudio.dataTables.calculate()[1][2]") == "#REF!"
         # The context-menu row-number mapping must target the visible first data row.
         page.locator("#dt-sheet tbody th.dt-rownum").first.click(button="right")
         assert page.locator("#workspace-context-menu").is_visible()
         page.locator("#workspace-context-menu").get_by_text("Insert row above").click()
         assert page.evaluate("MathStudio.dataTables.active.rows[0].every(v => v==='')") is True
+        page.evaluate("MathStudio.dataTables.active.rows[0][0]='=A1'")
+        assert page.evaluate("MathStudio.dataTables.calculate()[0][0]") == "#CYCLE"
         assert not errors, errors
         browser.close()
     print("PASS structural references, cross-sheet, absolute anchors, #REF!, project round-trip and context row index")

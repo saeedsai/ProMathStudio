@@ -1,7 +1,12 @@
-## 2026-10-26 — Small real linear systems Ax=b (dev candidate)
+## 2026-10-26 — Spreadsheet row sorting with reference integrity (dev candidate)
+
+- Stable sorting remaps same-sheet and cross-sheet formulas, including anchored references; contiguous ranges retain their referenced cells and noncontiguous ranges abort without mutation.
+- Added `tests/smoke_sheet_sort_references.py`, required CI step and docs. Await exact-head Quality, PR, main and Pages verification.
+
+## 2026-10-26 — Small real linear systems Ax=b (PR #16 released)
 
 - Added offline 2×2/3×3 square Ax=b solver with scaled partial pivoting, nonunique/inconsistent diagnostics and row-relative backward residual validation. RHS grid, solve action, stale-result invalidation and Equation Editor column-vector transfer included.
-- Added `tests/smoke_matrix_solve.py` browser/reference regression, required Quality CI step and static bundle assertion. Exact dev CI, PR, main Quality and Pages release validation pending.
+- Added `tests/smoke_matrix_solve.py` browser/reference regression, required Quality CI step and static bundle assertion. Dev Quality 40373781557, PR Quality 40374084354, main Quality 40374484994 and Pages 40374485244 passed for the verified release. Hosted interactive smoke remains unverified.
 
 ## 2026-10-26 — Bounded matrix RREF and rank (PR #15 release)
 

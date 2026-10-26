@@ -93,7 +93,6 @@
   };
   // Structural edits preserve the referenced cell identity, including $-anchored
   // addresses. References to a deleted cell become an explicit #REF! error.
-  // Sorting/reordering remains a separate, not-yet-supported reference operation.
   const referencePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)/g;
   function shiftReferences(edited,axis,index,delta){
     for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
@@ -112,6 +111,49 @@
         return (prefix||'')+colAnchor+(axis==='column'?colLetter(moved):letters)+rowAnchor+(axis==='row'?moved+1:digits);
       });
     }
+  }
+  // Stable full-row sort preserves referenced cell identity in all sheets.
+  // Unsafe noncontiguous ranges abort before any workbook mutation.
+  function sortRows(column,direction='asc'){
+    const t=active();
+    if(!Number.isInteger(column)||column<0||column>=t.columns.length)throw Error('Invalid sort column.');
+    if(direction!=='asc'&&direction!=='desc')throw Error('Invalid sort direction.');
+    const values=evaluated(t),sign=direction==='desc'?-1:1;
+    const order=t.rows.map((row,i)=>({row,i})).sort((a,b)=>{
+      const cmp=String(values[a.i][column]).localeCompare(String(values[b.i][column]),undefined,{numeric:true});
+      return sign*cmp||a.i-b.i;
+    });
+    if(order.every((entry,i)=>entry.i===i))return;
+    const newRow=Array(t.rows.length);order.forEach((entry,i)=>{newRow[entry.i]=i;});
+    const rangePattern=/(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
+    const rowOf=ref=>Number(/[1-9]\d*$/.exec(ref)[0])-1;
+    const rewrite=(raw,sheet)=>{
+      if(!String(raw).startsWith('='))return raw;
+      const ranges=[];
+      let next=String(raw).replace(rangePattern,(match,left,right,offset,whole)=>{
+        if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
+        if(sheet.id!==t.id)return match;
+        const lo=Math.min(rowOf(left),rowOf(right)),hi=Math.max(rowOf(left),rowOf(right));
+        if(hi>=newRow.length)throw Error('Cannot sort: formula range '+match+' exceeds the table.');
+        const positions=[];for(let i=lo;i<=hi;i++)positions.push(newRow[i]);
+        const lower=Math.min(...positions),upper=Math.max(...positions);
+        if(upper-lower+1!==positions.length)throw Error('Cannot sort: formula range '+match+' would split into noncontiguous rows.');
+        const forward=rowOf(left)<=rowOf(right);
+        const mapped=left.replace(/[1-9]\d*$/,String((forward?lower:upper)+1))+':'+right.replace(/[1-9]\d*$/,String((forward?upper:lower)+1));
+        const token='\uE000'+ranges.length+'\uE001';ranges.push(mapped);return token;
+      });
+      next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
+        if((offset&&/[A-Za-z0-9_.$']/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
+        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        if(name.toLowerCase()!==t.name.toLowerCase())return match;
+        const old=Number(digits)-1;if(old>=newRow.length)return match;
+        return (prefix||'')+colAnchor+letters+rowAnchor+(newRow[old]+1);
+      });
+      return next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]);
+    };
+    const rewritten=tables.map(sheet=>sheet.rows.map(row=>row.map(cell=>rewrite(cell,sheet))));
+    for(let i=0;i<tables.length;i++)tables[i].rows=tables[i].id===t.id?order.map(entry=>rewritten[i][entry.i]):rewritten[i];
+    focusedCell=null;render();save();
   }
   function structuralEdit(axis,index,delta,values){
     const t=active(),size=axis==='row'?t.rows.length:t.columns.length,limit=axis==='row'?MAX_ROWS:MAX_COLUMNS;
@@ -218,7 +260,7 @@
   $('dt-remove-col').addEventListener('click',()=>safeAction(()=>structuralEdit('column',active().columns.length-1,-1)));
   $('dt-to-working').addEventListener('click',()=>safeAction(()=>{const t=active(),cell=focusedCell?.id===t.id?focusedCell:{r:0,c:0};const val=String(value(t,cell.r,cell.c)||'');window.MathStudio.bridge.select(val,'data tables',{archive:true});notify('Sent cell '+colLetter(cell.c)+(cell.r+1)+' to the shared Working equation.');}));
   $('dt-filter').addEventListener('input',render);$('dt-clear-filter').addEventListener('click',()=>{$('dt-filter').value='';render();});
-  $('dt-sort').addEventListener('click',()=>safeAction(()=>{const t=active(),c=Number($('dt-sortcol').value),v=evaluated(t),dir=$('dt-sortdir').value==='desc'?-1:1;t.rows=t.rows.map((row,i)=>({row,i})).sort((a,b)=>dir*String(v[a.i][c]).localeCompare(String(v[b.i][c]),undefined,{numeric:true})).map(x=>x.row);render();save();}));
+  $('dt-sort').addEventListener('click',()=>safeAction(()=>sortRows(Number($('dt-sortcol').value),$('dt-sortdir').value)));
   for(const id of ['dt-left','dt-right'])$(id).addEventListener('change',refreshMenus);
   function operation(type,l,r,lkey=0,rkey=0){const A=evaluated(l),B=evaluated(r),isJoin=['inner','left','right','full'].includes(type);
     if(isJoin){const headers=l.columns.concat(r.columns.map(h=>l.columns.includes(h)?r.name+'_'+h:h));const out=[];
@@ -296,7 +338,7 @@
   $('dt-send-graph').addEventListener('click',()=>safeAction(()=>{$('dt-graph-table').value=active().id;chartColumns();sendToGraph();}));
   // Export PNG via the canvas data URL; handle binary bytes without string-encoding conversion.
   $('dt-chart-download').onclick=()=>{const a=el('a',{href:$('dt-chart-canvas').toDataURL('image/png'),download:'ProMathStudio_chart.png'});document.body.append(a);a.click();a.remove();};
-  window.MathStudio.dataTables={appendExpression:text=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Maximum 6,000 rows');const row=t.columns.map(()=>'' );row[0]=String(text).slice(0,8000);t.rows.push(row);render();save();return t;},get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows),insertRow:(i,v)=>structuralEdit('row',i,1,v),deleteRow:i=>structuralEdit('row',i,-1),insertColumn:i=>structuralEdit('column',i,1),deleteColumn:i=>structuralEdit('column',i,-1),refresh:()=>{render();save()}};
+  window.MathStudio.dataTables={appendExpression:text=>{const t=active();if(t.rows.length>=MAX_ROWS)throw Error('Maximum 6,000 rows');const row=t.columns.map(()=>'' );row[0]=String(text).slice(0,8000);t.rows.push(row);render();save();return t;},get tables(){return tables;},get active(){return active();},exportState,restoreState,formula:(expr,sheet)=>formula(expr,getByName(sheet)||active(),new Set()),operation,plot:sendToGraph,create:makeTable,calculate:table=>evaluated(table||active()),importData:(table,name)=>makeTable(name,table.headers,table.rows),insertRow:(i,v)=>structuralEdit('row',i,1,v),deleteRow:i=>structuralEdit('row',i,-1),insertColumn:i=>structuralEdit('column',i,1),deleteColumn:i=>structuralEdit('column',i,-1),sortRows,refresh:()=>{render();save()}};
   try{const stored=JSON.parse(localStorage.getItem('mathstudio-tables-v1')||'null');restoreState(stored);}catch{restoreState(null);}
 })();
 

@@ -699,12 +699,11 @@ def _ms_system(job_text):
     method=job.get('method','auto')
     if method not in ('auto','linear','nonlinear'):
         raise ValueError('Unknown system-solving method.')
+    from sympy.solvers.solveset import NonlinearError
     try:
         sp.linear_eq_to_matrix(expressions,variables)
         is_linear=True
-    except sp.polys.solvers.PolyNonlinearError:
-        is_linear=False
-    except sp.NonlinearError:
+    except NonlinearError:
         is_linear=False
     if method=='linear' and not is_linear:
         raise ValueError('This system is nonlinear. Select Auto or Nonlinear polynomial.')

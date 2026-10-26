@@ -4089,5 +4089,224 @@ try{apply(localStorage.getItem('promath-table-zoom')||100)}catch{apply(100)}
 window.MathStudio.tableZoom={value:()=>Number(slider.value),set:apply};
 window.addEventListener('mathstudio:project-loaded',()=>{});
 })();</script>
+<script id="promath-matrix-tools">
+/* ProMathStudio small-matrix calculator: deterministic 2x2/3x3 real arithmetic.
+   No eval, external dependencies, stateful workers or mutation of other tools. */
+(()=>{'use strict';
+const M=window.MathStudio, panel=document.getElementById('calculator-panel');
+if(!M||!panel)return;
+const el=(tag,attrs={},label)=>{const node=document.createElement(tag);
+ for(const [key,value] of Object.entries(attrs))node.setAttribute(key,value);
+ if(label!==undefined)node.textContent=String(label);return node;};
+const limit=3,MAX_ENTRY=1e12;
+function validate(A){
+ if(!Array.isArray(A)||A.length<2||A.length>limit)throw Error('Matrix must have 2 or 3 rows.');
+ const columns=Array.isArray(A[0])?A[0].length:0;
+ if(columns<2||columns>limit||A.some(row=>!Array.isArray(row)||row.length!==columns))
+  throw Error('Matrix must be rectangular with 2 or 3 columns.');
+ return A.map((row,r)=>row.map((entry,c)=>{
+  if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in row '+(r+1)+', column '+(c+1)+'.');
+  const value=Number(entry);
+  if(!Number.isFinite(value)||Math.abs(value)>MAX_ENTRY)throw Error('Matrix entries must be finite numbers with magnitude at most 1e12.');
+  return value;
+ }));
+}
+const requireSquare=A=>{if(A.length!==A[0].length)throw Error('This operation requires a square matrix.');};
+const transpose=A=>{A=validate(A);return A[0].map((_,j)=>A.map(row=>row[j]));};
+function determinant(A){
+ A=validate(A);requireSquare(A);const n=A.length;
+ let rows=A.map(row=>row.slice()),sign=1,result=1;
+ for(let col=0;col<n;col++){
+  let pivot=col;for(let r=col+1;r<n;r++)if(Math.abs(rows[r][col])>Math.abs(rows[pivot][col]))pivot=r;
+  if(rows[pivot][col]===0)return 0;
+  if(pivot!==col){[rows[pivot],rows[col]]=[rows[col],rows[pivot]];sign=-sign;}
+  const p=rows[col][col];result*=p;
+  for(let r=col+1;r<n;r++){const factor=rows[r][col]/p;
+   for(let c=col+1;c<n;c++)rows[r][c]-=factor*rows[col][c];rows[r][col]=0;
+  }
+ }
+ return sign*result;
+}
+function inverse(A){
+ A=validate(A);requireSquare(A);const n=A.length;
+ const maximum=Math.max(...A.flat().map(Math.abs));if(maximum===0)throw Error('Singular matrix: inverse does not exist.');
+ const tolerance=1e-12*maximum;
+ const B=A.map((row,i)=>row.concat(Array.from({length:n},(_,j)=>Number(i===j))));
+ for(let col=0;col<n;col++){
+  let pivot=col;for(let r=col+1;r<n;r++)if(Math.abs(B[r][col])>Math.abs(B[pivot][col]))pivot=r;
+  if(Math.abs(B[pivot][col])<=tolerance)throw Error('Singular or nearly singular matrix: inverse is not reliable.');
+  if(pivot!==col)[B[pivot],B[col]]=[B[col],B[pivot]];
+  const scale=B[col][col];for(let j=0;j<2*n;j++)B[col][j]/=scale;
+  for(let r=0;r<n;r++){if(r===col)continue;const factor=B[r][col];
+   for(let j=0;j<2*n;j++)B[r][j]-=factor*B[col][j];
+  }
+ }
+ const result=B.map(row=>row.slice(n));
+ const residual=Math.max(...A.map((row,i)=>row.map((_,j)=>Math.abs(row.reduce((sum,x,k)=>sum+x*result[k][j],0)-(i===j?1:0)))).flat());
+ if(!Number.isFinite(residual)||residual>1e-7)throw Error('Matrix inversion failed its numerical residual check.');
+ return result;
+}
+function format(x){
+ if(!Number.isFinite(x))throw Error('Result exceeded finite floating-point range.');
+ if(Math.abs(x)<1e-13)return '0';
+ return Number(x.toPrecision(12)).toString();
+}
+function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
+const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
+area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
+ '<p class="small-note">Real-number matrices. Determinant and inverse need a square matrix; transpose works for 2×3 and 3×2. Arithmetic uses approximately 12 significant digits.</p>'+
+ '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
+ '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
+ '<div id="mat-grid" class="matrix-grid" aria-label="Matrix entries"></div>'+
+ '<div class="matrix-actions"><button type="button" id="mat-det" class="secondary">Determinant</button>'+
+ '<button type="button" id="mat-transpose" class="secondary">Transpose</button>'+
+ '<button type="button" id="mat-inverse" class="secondary">Inverse</button>'+
+ '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
+ '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
+panel.append(area);
+const style=el('style',{},'.matrix-tools{border-top:1px solid #dfe5f0;padding:13px 20px 16px}.matrix-tools summary{cursor:pointer;font-weight:700;color:#304cbb}'+
+ '.matrix-controls,.matrix-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.matrix-controls label{display:grid;gap:3px;font-size:13px}'+
+ '.matrix-grid{display:grid;gap:7px;max-width:340px}.matrix-grid input{min-width:0;width:100%;padding:9px;border:1px solid #cdd8ec;border-radius:6px;text-align:center}'+
+ '#mat-result{background:#f7f9ff;border:1px solid #dfe5f0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:8px}'+
+ '#mat-result.error{color:#af2842;background:#fff5f5}');
+document.head.append(style);
+const grid=document.getElementById('mat-grid'),output=document.getElementById('mat-result'),send=document.getElementById('mat-send');
+let last=null;
+function rebuild(){
+ const old=[...grid.querySelectorAll('input')].map(input=>({r:Number(input.dataset.row),c:Number(input.dataset.col),value:input.value}));
+ const rows=Number(document.getElementById('mat-rows').value),cols=Number(document.getElementById('mat-cols').value);
+ grid.style.gridTemplateColumns='repeat('+cols+', minmax(0, 1fr))';grid.replaceChildren();
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+  const value=old.find(x=>x.r===r&&x.c===c)?.value;
+  const cell=el('input',{type:'number',step:'any','data-row':String(r),'data-col':String(c),'aria-label':'Matrix row '+(r+1)+' column '+(c+1)});
+  cell.value=value===undefined?(r===c?'1':'0'):value;cell.addEventListener('input',invalidate);grid.append(cell);
+ }
+ invalidate();
+}
+function invalidate(){last=null;send.disabled=true;output.classList.remove('error');output.textContent='Enter matrix values and choose an operation.';}
+function read(){
+ const rows=Number(document.getElementById('mat-rows').value),cols=Number(document.getElementById('mat-cols').value);
+ return validate(Array.from({length:rows},(_,r)=>Array.from({length:cols},(_,c)=>grid.querySelector('[data-row="'+r+'"][data-col="'+c+'"]').value)));
+}
+function calculate(operation){
+ try{
+  const A=read(),value=operation==='determinant'?determinant(A):operation==='transpose'?transpose(A):inverse(A);
+  last={operation,value};output.classList.remove('error');
+  output.textContent=operation+':\n'+(typeof value==='number'?format(value):value.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n'));
+  send.disabled=false;return last;
+ }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
+}
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse']])
+ document.getElementById(id).addEventListener('click',()=>calculate(op));
+for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',rebuild);
+send.addEventListener('click',()=>{
+ if(!last)return;
+ try{M.bridge.transfer('editor',notation(last.value),{source:'matrix calculator'});}
+ catch(error){output.classList.add('error');output.textContent=error.message;}
+});
+rebuild();
+M.matrixTools={validate,determinant,transpose,inverse,notation,read,calculate};
+})();
+</script>
+<script id="promath-ode-tools">
+/* ProMathStudio: bounded, offline scalar first-order IVP solver (classical RK4).
+   Uses the existing safe numeric AST evaluator, not eval or user code. */
+(()=>{'use strict';
+const M=window.MathStudio, panel=document.getElementById('numerical-panel');
+if(!M?.numerical?.evaluate||!M?.dataTables||!panel)return;
+const $=id=>document.getElementById(id), MAX=1e12;
+function finite(value,label){
+ if(value===null||value===undefined||String(value).trim()==='')throw Error(label+' is required.');
+ const n=Number(value);
+ if(!Number.isFinite(n)||Math.abs(n)>MAX)throw Error(label+' must be finite with magnitude at most 1e12.');
+ return n;
+}
+function bounded(value,label){
+ if(!Number.isFinite(value)||Math.abs(value)>MAX)throw Error(label+' became non-finite or exceeded magnitude 1e12; shorten the interval or change the initial value.');
+ return value;
+}
+function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
+ expression=String(expression).trim();
+ if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
+ t0=finite(t0,'Initial time');t1=finite(t1,'End time');y0=finite(y0,'Initial y');
+ if(!(t1>t0))throw Error('End time must be greater than initial time (forward integration only).');
+ steps=finite(steps,'Time steps');
+ if(!Number.isInteger(steps)||steps<4||steps>1000)throw Error('Time steps must be an integer from 4 to 1000.');
+ const h=(t1-t0)/steps;
+ if(!Number.isFinite(h)||h<=0)throw Error('Invalid integration step size.');
+ const f=(t,y)=>bounded(M.numerical.evaluate(expression,{t:bounded(t,'Time'),y:bounded(y,'State')}),'Derivative');
+ let y=y0;const rows=[];
+ for(let i=0;i<=steps;i++){
+  const t=bounded(i===steps?t1:t0+i*h,'Time');
+  rows.push([t,y]);
+  if(i===steps)break;
+  const k1=f(t,y);
+  const k2=f(t+h/2,y+h*k1/2);
+  const k3=f(t+h/2,y+h*k2/2);
+  const k4=f(t+h,y+h*k3);
+  y=bounded(y+(h/6)*(k1+2*k2+2*k3+k4),'State');
+ }
+ return {type:'ode-rk4',columns:['t','y'],rows,steps,h,
+  method:'Classical fourth-order Runge–Kutta (RK4)',
+  note:'Scalar first-order y\u2032=f(t,y), y(t0)=y0; fixed steps, forward only. Accuracy depends on smoothness and step size. Not an adaptive/stiff ODE solver.'};
+}
+const area=document.createElement('details');area.id='ode-details';
+area.innerHTML='<summary>First-order ODE initial-value problem · RK4</summary>'+
+ '<p class="graph-data-muted">Solve dy/dt = f(t,y) from an initial value. Example: f(t,y)=y, y(0)=1 gives y(1)≈e. Real finite solutions only; decrease the step size to check convergence.</p>'+
+ '<div class="num-fields"><label>Derivative f(t,y)<input id="ode-expression" value="y" spellcheck="false"></label>'+
+ '<label>Initial time t₀<input id="ode-start" type="number" step="any" value="0"></label>'+
+ '<label>End time t₁<input id="ode-end" type="number" step="any" value="1"></label>'+
+ '<label>Initial y(t₀)<input id="ode-initial" type="number" step="any" value="1"></label>'+
+ '<label>Time steps (4–1000)<input id="ode-steps" type="number" min="4" max="1000" step="1" value="40"></label></div>'+
+ '<div class="data-toolbar"><button id="ode-run" type="button" class="primary">Solve IVP (RK4)</button>'+
+ '<button id="ode-to-table" type="button" class="secondary" disabled>Save output to Data Tables</button>'+
+ '<button id="ode-to-graph" type="button" class="secondary" disabled>Plot y(t) in Graphs</button></div>'+
+ '<pre id="ode-output" role="status" aria-live="polite">Enter the derivative and initial conditions.</pre>';
+panel.append(area);
+const style=document.createElement('style');
+style.textContent='#ode-details{border-top:1px solid #dce4f6;margin-top:15px;padding-top:13px}'+
+ '#ode-details summary{cursor:pointer;color:#3c50ae;font-weight:750}'+
+ '#ode-output{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#fff;border:1px solid #dce5f3;border-radius:10px}'+
+ '#ode-output.error{color:#a82241;background:#fff2f4}';
+document.head.append(style);
+let last=null;
+function invalidate(){
+ last=null;$('ode-to-table').disabled=true;$('ode-to-graph').disabled=true;
+ $('ode-output').classList.remove('error');$('ode-output').textContent='Enter the derivative and initial conditions.';
+}
+for(const input of area.querySelectorAll('input')){input.addEventListener('input',invalidate);input.addEventListener('change',invalidate);}
+function run(){
+ try{
+  last=solve({expression:$('ode-expression').value,t0:$('ode-start').value,
+   t1:$('ode-end').value,y0:$('ode-initial').value,steps:$('ode-steps').value});
+  $('ode-output').classList.remove('error');
+  const end=last.rows[last.rows.length-1];
+  $('ode-output').textContent=last.method+'\n'+last.rows.length+' output rows; Δt='+last.h.toPrecision(8)+
+   '\ny('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+'\n'+last.note;
+  $('ode-to-table').disabled=false;$('ode-to-graph').disabled=false;
+ }catch(error){
+  last=null;$('ode-to-table').disabled=true;$('ode-to-graph').disabled=true;
+  $('ode-output').classList.add('error');$('ode-output').textContent=error.message;
+ }
+}
+$('ode-run').addEventListener('click',run);
+function importRows(){
+ if(!last)throw Error('Solve an initial-value problem first.');
+ return M.dataTables.importData({headers:last.columns,rows:last.rows},'ODE_RK4');
+}
+function fail(error){$('ode-output').classList.add('error');$('ode-output').textContent=error.message;}
+$('ode-to-table').addEventListener('click',()=>{try{importRows();M.advanced.mode('data');}catch(e){fail(e);}});
+$('ode-to-graph').addEventListener('click',()=>{
+ try{
+  const table=importRows();M.advanced.mode('graph');
+  $('dt-graph-table').value=table.id;
+  $('dt-graph-table').dispatchEvent(new Event('change',{bubbles:true}));
+  $('dt-chart-type').value='line';$('dt-graph-x').value='0';$('dt-graph-y').value='1';
+  $('dt-plot-table').click();
+ }catch(e){fail(e);}
+});
+M.odeTools={solve,run};
+})();
+</script>
 </body>
 </html>

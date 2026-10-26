@@ -43,3 +43,7 @@ jobs:
         run: python tests/smoke_context_actions.py
       - name: Graph styles, table zoom and calculator notation
         run: python tests/smoke_visual_options.py
+      - name: Matrix calculator numeric and UI regression
+        run: python tests/smoke_matrix.py
+      - name: RK4 initial-value solver numeric and UI regression
+        run: python tests/smoke_ode.py

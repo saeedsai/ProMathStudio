@@ -1,3 +1,10 @@
+## 2026-10-26 — Project schema v2 and import rollback (dev implementation; release pending)
+
+- Export version-2 JSON project backups; accept and migrate legacy version-1 backups without dropping supported data.
+- Validate notebook, history, custom functions, graph datasets and table dimensions before confirmation or mutation; reject future versions and malformed/oversize files.
+- Snapshot current project and reapply it on a restore-stage failure; this is best-effort and cannot guarantee recovery from storage failures. Add dedicated browser rollback and migration regression to required Quality CI.
+- **Not released until exact-head dev/PR/main Quality and GitHub Pages verification.**
+
 ## 2026-10-26 — Thin QR decomposition (PR #19 released; exact-main Quality and Pages green)
 
 - Added offline 2×2, 3×2 and 3×3 real economy QR with reorthogonalization, rank refusal, reconstruction/orthogonality diagnostics and Q/R editor transfer.

@@ -13,6 +13,8 @@ The application runs from a single, readable `index.html`. A web server and buil
 
 Calculator matrix tools now include bounded real 2×2/3×3 `Ax=b` solving with a separate right-hand-side vector, pivoting, singularity diagnostics and numerical residual checks. See [Matrix calculator](docs/MATRIX_CALCULATOR.md).
 
+Project JSON backups now use schema version 2. Legacy version-1 projects remain importable with preflight validation and best-effort restore rollback; see [Project format](docs/PROJECT_FORMAT.md). This change is pending CI and release verification.
+
 ## What it does
 
 | Workspace | Functions |

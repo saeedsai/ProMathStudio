@@ -19,12 +19,12 @@ Use project export for a portable backup. Private/incognito browsing, storage se
 
 ## JSON backup format
 
-Select **Save project** to download `MathStudio_Project.json`. Current format identity and version:
+Select **Save project** to download `MathStudio_Project.json`. Current export format identity and version (version 2):
 
 ```json
 {
   "format": "mathstudio-project",
-  "version": 1,
+  "version": 2,
   "date": "2026-10-23T00:00:00.000Z",
   "working": "x^2=1",
   "origin": "solver",
@@ -45,7 +45,7 @@ Select **Save project** to download `MathStudio_Project.json`. Current format id
 
 ## Restoring projects
 
-**Open project** reads a JSON file of at most **2 MB**, checks its format/version and notebook array, then requests confirmation. Import **replaces** current saved notebook, calculator history and graph settings; save your existing project first. The importer accepts format version 1 only. Invalid or corrupted input is rejected with a message.
+**Open project** reads a JSON file of at most **2 MB**, checks its format/version and notebook array, then requests confirmation. Import **replaces** current saved notebook, calculator history and graph settings; save your existing project first. The importer accepts legacy version 1 backups and version 2 backups, migrating version 1 to version 2 in memory without dropping supported workbook, formula, graph or notebook fields. New exports use version 2. Before confirmation, it validates notebook entries, calculator history, custom functions, graph datasets, table dimensions and cell sizes; unsupported versions, malformed structures and files larger than 2 MB are refused without changing the project. A restore-stage exception triggers a best-effort rollback to the previous in-memory project. Browser storage quota errors or a second failure during rollback cannot be guaranteed recoverable; save an independent backup before importing.
 
 ## Privacy and synchronization
 

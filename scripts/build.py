@@ -12,6 +12,7 @@ modules = [
     ("promath-context-actions", "src/context-actions.js"),
     ("promath-matrix-tools", "src/matrix-tools.js"),
     ("promath-ode-tools", "src/ode-tools.js"),
+    ("promath-project-schema", "src/project-schema.js"),
 ]
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'

@@ -78,7 +78,7 @@ def main():
         assert payload['direction'] == '+-', payload
         assert payload['pointAst']['kind'] == 'number', payload
         page.wait_for_function("() => document.getElementById('cas-python').textContent.includes('sp.limit(')")
-        exported = page.locator('#cas-python').inner_text()
+        exported = page.locator('#cas-python').text_content()  # hidden inside collapsed <details>
         assert 'sp.limit(expr, x, 0, dir="+-")' in exported, exported
         assert 'Two-sided limit' in page.locator('#cas-status').inner_text()
         page.locator('#cas-engine').select_option('offline')

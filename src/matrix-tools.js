@@ -239,8 +239,10 @@ function leastSquares(A,b){
  const residual=Math.hypot(...errors);
  const aNorm=Math.hypot(...A.flat()),xNorm=Math.hypot(...solution),bNorm=Math.hypot(...rhs);
  const relativeResidual=residual/Math.max(Number.MIN_VALUE,bNorm+aNorm*xNorm);
+ // When the fit is already at rounding-error scale, normalizing by its
+ // vanishing residual magnifies cancellation and gives a false rejection.
  let normalResidual=0;
- for(let j=0;j<n;j++){
+ if(relativeResidual>1e-12)for(let j=0;j<n;j++){
   let dot=0;
   for(let i=0;i<m;i++)dot+=A[i][j]*errors[i];
   normalResidual=Math.max(normalResidual,Math.abs(dot)/Math.max(Number.MIN_VALUE,aNorm*residual));

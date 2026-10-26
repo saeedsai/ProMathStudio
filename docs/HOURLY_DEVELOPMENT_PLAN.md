@@ -34,8 +34,8 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 - [x] Inspect current main, source inventory, tests, existing CI and Pages automation (2026-10-26).
 - [x] Create `dev` from latest validated `main` before development work.
 - [x] Commit durable root `AGENTS.md` and initialize this plan.
-- [ ] Ensure Quality checks run on `dev` and `main` pushes and PRs, with all existing regressions.
-- [ ] Add automated, **merged-only/no-open-PR** cleanup of legacy branches, if permitted; retain unique/unmerged commits and `dev`/`main`.
+- [x] Ensure Quality checks run on `dev` and `main` pushes and PRs, with all existing regressions.
+- [x] Add automated, **merged-only/no-open-PR** cleanup of legacy branches after main updates; check actual action permissions/results after merge.
 - [ ] Require release PR with green SHA-specific checks and verified Pages after every merge; configure branch protection in repo Settings if permissions permit.
 - [ ] Verify branch-cleanup outcome and both refs survive promotions. Existing extra refs at initialization: `feature/custom-functions-multi-data-series`, `feature/per-function-graph-styles`, `feature/real-python-custom-functions`, `feature/ui-equation-systems`, `fix/conditional-custom-function-parser`, `fix/conditional-parser`. No open PRs at initial inspection.
 
@@ -56,3 +56,5 @@ Next five feature IDs in order:
 ## Execution record
 
 **2026-10-26 initialization (setup session)** — Inspected existing `main` `4cbb99e215b4e6071633866261244feaceecc09c`, green quality and Pages deploy. Added `dev` and permanent instructions. GitHub Pages publishing is main-branch-based, while `.github/workflows/pages.yml` is optional manual deployment. Establishing workflow checks and merged-only branch cleanup is the initial reliability deliverable. See subsequent commits and CI logs for verified outcomes; the run remains IN PROGRESS until those checks finish.
+
+**2026-10-26 CI/CD implementation** — Established `AGENTS.md`, this living plan, enabled push checks for `dev`, added conservative merged-only branch-hygiene workflow (runs only from trusted main), and new `tests/test_delivery_policy.py` regression. Hourly ChatGPT task enabled. **Release remains pending successful dev+PR CI and verified main Pages deployment**; do not claim leftover legacy branches removed until hygiene run confirms.

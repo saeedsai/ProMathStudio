@@ -23,6 +23,8 @@ class DataTablesStaticTests(unittest.TestCase):
   self.assertIn('function qr(A)',matrix)
   self.assertIn('id="mat-qr"',matrix)
   self.assertIn('id="mat-qr-factor"',matrix)
+  self.assertIn('function leastSquares(A,b)',matrix)
+  self.assertIn('id="mat-least-squares"',matrix)
   self.assertIn('M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply',matrix)
   ode=(ROOT/'src/ode-tools.js').read_text(encoding='utf-8').rstrip('\n')
   self.assertIn('<script id="promath-ode-tools">',html)

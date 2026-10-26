@@ -214,6 +214,44 @@ function qr(A){
   throw Error('QR decomposition failed its numerical reconstruction or orthogonality check.');
  return {Q,R,residual,orthogonality};
 }
+/* Bounded full-rank tall 3x2 least squares via existing QR; no normal-equation solve. */
+function leastSquares(A,b){
+ A=validate(A);
+ const m=A.length,n=A[0].length;
+ if(m<=n)throw Error('Least squares requires a tall matrix (3 rows, 2 columns).');
+ if(!Array.isArray(b)||b.length!==m)throw Error('Right-hand side b must contain '+m+' values.');
+ const rhs=b.map((entry,i)=>{
+  if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in b row '+(i+1)+'.');
+  const value=Number(entry);
+  if(!Number.isFinite(value)||Math.abs(value)>MAX_ENTRY)throw Error('Right-hand side b must contain finite numbers with magnitude at most 1e12.');
+  return value;
+ });
+ const {Q,R}=qr(A);
+ const projected=Array.from({length:n},(_,j)=>Q.reduce((sum,row,i)=>sum+row[j]*rhs[i],0));
+ const solution=Array(n).fill(0);
+ for(let i=n-1;i>=0;i--){
+  let value=projected[i];
+  for(let j=i+1;j<n;j++)value-=R[i][j]*solution[j];
+  solution[i]=value/R[i][i];
+  if(!Number.isFinite(solution[i]))throw Error('Least-squares solution exceeded finite floating-point range.');
+ }
+ const errors=A.map((row,i)=>row.reduce((sum,entry,j)=>sum+entry*solution[j],0)-rhs[i]);
+ const residual=Math.hypot(...errors);
+ const aNorm=Math.hypot(...A.flat()),xNorm=Math.hypot(...solution),bNorm=Math.hypot(...rhs);
+ const relativeResidual=residual/Math.max(Number.MIN_VALUE,bNorm+aNorm*xNorm);
+ // When the fit is already at rounding-error scale, normalizing by its
+ // vanishing residual magnifies cancellation and gives a false rejection.
+ let normalResidual=0;
+ if(relativeResidual>1e-12)for(let j=0;j<n;j++){
+  let dot=0;
+  for(let i=0;i<m;i++)dot+=A[i][j]*errors[i];
+  normalResidual=Math.max(normalResidual,Math.abs(dot)/Math.max(Number.MIN_VALUE,aNorm*residual));
+ }
+ if(![residual,relativeResidual,normalResidual].every(Number.isFinite))
+  throw Error('Least-squares residual exceeded finite floating-point range.');
+ if(normalResidual>1e-8)throw Error('Least-squares solution failed its orthogonality check.');
+ return {solution,residual,relativeResidual,normalResidual,rank:n};
+}
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
 const subtract=(A,B)=>binary(A,B,'subtract');
@@ -259,11 +297,11 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
- '<p class="small-note">Right-hand side b (for A·x=b)</p>'+
+ '<p class="small-note">Right-hand side b (for A·x=b or least squares)</p>'+
  '<div id="mat-rhs-grid" class="matrix-grid" aria-label="Right-hand side b entries"></div>'+
  '<p class="small-note">Matrix B (for addition, subtraction and multiplication)</p>'+
  '<div class="matrix-controls"><label>B rows <select id="mat-b-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
@@ -278,6 +316,7 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-solve" class="secondary">Solve A·x=b</button>'+
  '<button type="button" id="mat-lu" class="secondary">LU (P·A=L·U)</button>'+ 
  '<button type="button" id="mat-qr" class="secondary">QR (A=Q·R)</button>'+
+ '<button type="button" id="mat-least-squares" class="secondary">Least squares (A·x≈b)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
  '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+ 
@@ -340,27 +379,27 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
-  const display=operation==='rref'?value.matrix:operation==='solve'?value.solution.map(x=>[x]):value;
+  const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares')?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
   output.textContent=operation==='lu'?
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
    'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
-   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):'');
+   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):'');
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu'],['mat-qr','qr']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu'],['mat-qr','qr'],['mat-least-squares','leastSquares']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
 for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',()=>{rebuild();rebuildRhs();});
 for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
- try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.operation==='solve'?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.operation==='qr'?last.value[document.getElementById('mat-qr-factor').value]:last.value),{source:'matrix calculator'});}
+ try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:(last.operation==='solve'||last.operation==='leastSquares')?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.operation==='qr'?last.value[document.getElementById('mat-qr-factor').value]:last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,notation,read,readSecond,readRhs,calculate};
 })();

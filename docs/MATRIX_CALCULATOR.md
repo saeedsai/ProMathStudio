@@ -1,6 +1,6 @@
 # Matrix calculator (bounded native functionality)
 
-ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, **LU (P·A=L·U)**, or **QR (A=Q·R)**. Binary operations use independently sized Matrix B.
+ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, **LU (P·A=L·U)**, **QR (A=Q·R)**, or **Least squares (A·x≈b)**. Binary operations use independently sized Matrix B.
 
 ## Operations and examples
 
@@ -32,6 +32,10 @@ The **RREF (A)** action computes reduced row-echelon form and displays the numer
 ## Thin QR decomposition (bounded real matrices)
 
 **QR (A=Q·R)** computes an economy-size decomposition of full-column-rank real 2×2, 3×2 and 3×3 matrices. Reorthogonalized modified Gram–Schmidt returns Q with orthonormal columns and upper-triangular R, along with reconstruction and orthogonality residuals. The QR factor selector transfers Q or R to Equation Editor. Wide 2×3 matrices and dependent/nearly dependent columns (relative tolerance 1e-12) are rejected. This is not pivoted QR, general-dimensional QR or least squares. Test: `tests/smoke_matrix_qr.py`.
+
+## Least squares for tall real systems (bounded 3×2)
+
+**Least squares (A·x≈b)** computes the unique minimum-residual solution of a full-column-rank 3×2 real system, using thin QR and triangular back substitution (not normal equations). Enter three values in the right-hand-side b grid. For A=`[[1,0],[0,1],[1,1]]` and b=`[1,2,4]`, the solution is x=`[4/3,7/3]`, with Euclidean residual norm `sqrt(1/3)`. An exactly consistent b=`[2,-1,1]` gives x=`[2,-1]` and zero residual. The output includes residual norm, relative residual and normalized Aᵀ(Ax−b) orthogonality; the solution transfers to Equation Editor as a column vector. Rank-deficient or nearly dependent matrices, square/wide shapes, and missing/nonfinite b are rejected. This is not a general rectangular, weighted or robust least-squares solver. Test: `tests/smoke_matrix_least_squares.py`.
 
 ## Scope, precision and safeguards
 

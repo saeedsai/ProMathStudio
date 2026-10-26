@@ -1,3 +1,9 @@
+## 2026-10-26 — First-order RK4 ODE (development increment)
+
+- Added a bounded, offline fourth-order Runge–Kutta initial-value solver for scalar real y'=f(t,y), with fixed interval, initial value, 4–1000 steps, finite-value guards and clear error handling.
+- Added UI under Numerical methods, Data Tables output and 2D graph routing, deterministic standalone bundle integration, structural source consistency and focused Playwright reference/error/round-trip tests.
+- This does **not** implement adaptive/stiff methods, vector systems, events or general ODE/PDE solving. Release pending exact-head full CI, verified dev-to-main PR and Pages deployment.
+
 ## 2026-10-26 — Small-matrix calculator (development increment)
 
 - Added editable 2×2, 2×3, 3×2 and 3×3 real matrix grid under Calculator, with determinants and inverse on square matrices and transpose on any supported grid.

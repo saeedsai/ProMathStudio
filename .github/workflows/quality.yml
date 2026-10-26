@@ -31,6 +31,8 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Browser smoke tests (local functions, no SymPy CDN)
         run: python tests/smoke_browser.py
+      - name: Project migration and rollback browser regression
+        run: python tests/smoke_project_schema.py
       - name: CSV/JSON graph import smoke test
         run: python tests/smoke_graph_import.py
       - name: Spreadsheet and chart regression

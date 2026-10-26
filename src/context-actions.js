@@ -13,10 +13,10 @@
   const active=()=>MS.dataTables?.active;
   const update=()=>MS.dataTables?.refresh?.();
   const validate=(t,rows=t.rows.length,cols=t.columns.length)=>{if(rows>6000||cols>32)throw Error('The workbook supports up to 6,000 rows and 32 columns.');};
-  function rowInsert(index,values){const t=active();validate(t,t.rows.length+1);t.rows.splice(index,0,values?values.map(x=>String(x).slice(0,8000)):t.columns.map(()=>''));update();}
-  function rowDelete(index){const t=active();if(!t.rows[index])throw Error('Row not found.');if(!confirm('Delete row '+(index+2)+'? This cannot be undone.'))return;t.rows.splice(index,1);update();}
-  function colInsert(index){const t=active();validate(t,t.rows.length,t.columns.length+1);t.columns.splice(index,0,'Column'+(t.columns.length+1));t.rows.forEach(row=>row.splice(index,0,''));update();}
-  function colDelete(index){const t=active();if(t.columns.length<=1)throw Error('Keep at least one column.');if(!confirm('Delete column '+t.columns[index]+'? This cannot be undone.'))return;t.columns.splice(index,1);t.rows.forEach(row=>row.splice(index,1));update();}
+  function rowInsert(index,values){MS.dataTables.insertRow(index,values);}
+  function rowDelete(index){const t=active();if(!t.rows[index])throw Error('Row not found.');if(!confirm('Delete row '+(index+1)+'? This cannot be undone.'))return;MS.dataTables.deleteRow(index);}
+  function colInsert(index){MS.dataTables.insertColumn(index);}
+  function colDelete(index){const t=active();if(t.columns.length<=1)throw Error('Keep at least one column.');if(!confirm('Delete column '+t.columns[index]+'? This cannot be undone.'))return;MS.dataTables.deleteColumn(index);}
   const validCoord=(r,c)=>{const t=active();if(!t||r<0||c<0||r>=t.rows.length||c>=t.columns.length)throw Error('Selected table cell is unavailable.');return t;};
   const setCell=(r,c,v)=>{const t=validCoord(r,c);t.rows[r][c]=String(v??'').slice(0,8000);update();};
   const csvEscape=v=>String(v??'').includes('\t')||String(v).includes('\n')?'"'+String(v).replace(/"/g,'""')+'"':String(v??'');
@@ -71,7 +71,7 @@
     const tab=target.closest('#dt-tabs .dt-tab');if(tab){const tabs=[...$('dt-tabs').children],index=tabs.indexOf(tab);if(index>=0)return {area:'table',kind:'tab',tabIndex:index,target};}
     if(target.closest('#dt-sheet')){const colHead=target.closest('thead th');if(colHead){const col=colHead.cellIndex-1;if(col>=0)return {area:'table',kind:'column',col,target};return {area:'table',kind:'general',target};}
       const cell=target.closest('tbody td'),rowHead=target.closest('tbody th');if(cell){const input=cell.querySelector('input');return {area:'table',kind:'cell',row:Number(input.dataset.row),col:Number(input.dataset.col),target};}
-      if(rowHead){const row=Number(rowHead.textContent)-2;return {area:'table',kind:'row',row,target};}return {area:'table',kind:'general',target};}
+      if(rowHead){const row=Number(rowHead.textContent)-1;return {area:'table',kind:'row',row,target};}return {area:'table',kind:'general',target};}
     if(target.closest('#data-panel'))return {area:'table',kind:'general',target};
     if(target.closest('#calc-input')||target.closest('#calc-result-math')||target.closest('#calc-result-plain')||target.closest('#calc-buttons'))return {area:'calc',target};
     if(target.closest('#equation-input'))return {area:document.querySelector('[data-workspace="solver"].active')?'solver':'editor',target};
@@ -106,6 +106,6 @@
   $('calc-buttons').before(controls);const wrapper=controls.querySelector('div');
   for(const [label,value] of [['0b','0b'],['0x','0x'],['AND','band(, )'],['OR','bor(, )'],['XOR','bxor(, )'],['NOT','bnot('],['<<','shl(, )'],['>>','shr(, )']]){const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.title='Insert '+value;btn.addEventListener('click',()=>insert($('calc-input'),value));wrapper.append(btn);}
   // Append to existing help page, retaining previous topical help.
-  const topics=$('help-topics');if(topics){const detail=document.createElement('details');detail.className='help-topic';detail.innerHTML='<summary>Right-click actions and binary/hexadecimal calculator</summary><p>Right-click a table cell, row number, column header or table tab for Copy, Paste, Insert, Delete, Sort and Filter. Right-click expressions in Calculator, Editor, Solver or Graph for relevant commands. On mobile, long-press a cell. Shift+F10 opens a menu from the keyboard. Destructive actions require confirmation. Table edits retain existing literal formulas; row/column insertions do not automatically rewrite references.</p><p>Calculator accepts <code>0b1010</code> and <code>0xFF</code>, DEC/BIN/HEX input modes, and bitwise functions <code>band</code>, <code>bor</code>, <code>bxor</code>, <code>bnot</code>, <code>shl</code>, <code>shr</code>. Scientific expressions use decimal unless base mode is active. Binary/hex arithmetic is limited to exact 53-bit integers, while standalone integer literal conversion supports BigInt.</p>';topics.append(detail);}
+  const topics=$('help-topics');if(topics){const detail=document.createElement('details');detail.className='help-topic';detail.innerHTML='<summary>Right-click actions and binary/hexadecimal calculator</summary><p>Right-click a table cell, row number, column header or table tab for Copy, Paste, Insert, Delete, Sort and Filter. Right-click expressions in Calculator, Editor, Solver or Graph for relevant commands. On mobile, long-press a cell. Shift+F10 opens a menu from the keyboard. Destructive actions require confirmation. Row/column insertions and deletions update local and cross-sheet cell references; deleted targets display #REF!. Sorting with formulas remains limited.</p><p>Calculator accepts <code>0b1010</code> and <code>0xFF</code>, DEC/BIN/HEX input modes, and bitwise functions <code>band</code>, <code>bor</code>, <code>bxor</code>, <code>bnot</code>, <code>shl</code>, <code>shr</code>. Scientific expressions use decimal unless base mode is active. Binary/hex arithmetic is limited to exact 53-bit integers, while standalone integer literal conversion supports BigInt.</p>';topics.append(detail);}
   MS.contextActions={openAt:(target,x=40,y=40)=>open({target,clientX:x,clientY:y}),close,clipboard:()=>internalClipboard,pasteCells};
 })();

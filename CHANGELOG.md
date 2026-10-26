@@ -1,3 +1,8 @@
+## 2026-10-26 — Bounded matrix RREF and rank (dev candidate)
+
+- Added offline scaled-pivot RREF and numerical rank for 2×2 to 3×3/rectangular real matrices, row-relative `1e-12` threshold, and Calculator UI/editor handoff.
+- Added reference/near-singular/scale-disparity/invalid/UI Playwright regression and required Quality CI step. Release requires verified exact-head CI, PR merge, main CI and Pages deployment.
+
 ## 2026-10-26 — Matrix A/B arithmetic (PR #14 release)
 
 - Added independently sized second matrix grid, offline real addition/subtraction/multiplication, dimension checks and finite validation.

@@ -39,6 +39,46 @@ function binary(A,B,operation){
   return value;
  }));
 }
+/* Scaled partial pivoting: each original row supplies its own reference scale.
+   This avoids discarding a small but independent row beside a large one. */
+function rref(A){
+ A=validate(A);
+ const rows=A.map(row=>row.slice()),n=rows.length,cols=rows[0].length;
+ const scales=rows.map(row=>Math.max(...row.map(Math.abs)));
+ const tolerance=1e-12;
+ let rank=0;
+ for(let col=0;col<cols&&rank<n;col++){
+  let pivot=rank,best=0;
+  for(let r=rank;r<n;r++){
+   const score=scales[r]?Math.abs(rows[r][col])/scales[r]:0;
+   if(score>best){best=score;pivot=r;}
+  }
+  if(best<=tolerance){
+   for(let r=rank;r<n;r++)if(Math.abs(rows[r][col])<=tolerance*scales[r])rows[r][col]=0;
+   continue;
+  }
+  if(pivot!==rank){
+   [rows[pivot],rows[rank]]=[rows[rank],rows[pivot]];
+   [scales[pivot],scales[rank]]=[scales[rank],scales[pivot]];
+  }
+  const value=rows[rank][col];
+  for(let c=0;c<cols;c++)rows[rank][c]/=value;
+  rows[rank][col]=1;
+  for(let r=0;r<n;r++){
+   if(r===rank)continue;
+   const factor=rows[r][col];
+   for(let c=0;c<cols;c++)if(c!==col)rows[r][c]-=factor*rows[rank][c];
+   rows[r][col]=0;
+  }
+  rank++;
+ }
+ for(const row of rows)for(let c=0;c<cols;c++){
+  if(!Number.isFinite(row[c]))throw Error('RREF exceeded finite floating-point range.');
+  if(Object.is(row[c],-0))row[c]=0;
+ }
+ return {matrix:rows,rank,tolerance};
+}
+const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
 const subtract=(A,B)=>binary(A,B,'subtract');
 const multiply=(A,B)=>binary(A,B,'multiply');
@@ -83,7 +123,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose and binary arithmetic support rectangular shapes. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -97,6 +137,8 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-add" class="secondary">A + B</button>'+
  '<button type="button" id="mat-subtract" class="secondary">A − B</button>'+
  '<button type="button" id="mat-multiply" class="secondary">A × B</button>'+
+ '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
+ '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
  '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
  '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
 panel.append(area);
@@ -144,21 +186,23 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
-  output.textContent=operation+':\n'+(typeof value==='number'?format(value):value.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n'));
+  const display=operation==='rref'?value.matrix:value;
+  output.textContent=operation+':\n'+(typeof display==='number'?format(display):display.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n'))+
+   (operation==='rref'?'\nRank: '+value.rank:'');
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
 for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',rebuild);
 for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
- try{M.bridge.transfer('editor',notation(last.value),{source:'matrix calculator'});}
+ try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,notation,read,readSecond,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,notation,read,readSecond,calculate};
 })();

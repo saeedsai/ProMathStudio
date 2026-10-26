@@ -31,6 +31,18 @@ The browser loads Pyodide from `https://cdn.jsdelivr.net/pyodide/v0.29.1/full/` 
 
 Mathematical result types vary. A general trigonometric equation may yield a set/family, a difficult polynomial may give root objects, and some operations are unsupported. Complex approximations can be routed to Calculator; symbolic RootOf is not directly a numeric calculator input.
 
+## Simultaneous symbolic systems (linear and bounded nonlinear)
+
+Choose **Symbolic Solver → Operation → Solve system of equations**. Enter one equation per line, choose comma-separated unknowns, and select **Method**:
+
+- **Auto** (default): classify the equations using SymPy's linear-equation test. Use `linsolve` for linear systems and `nonlinsolve` for supported polynomial nonlinear systems.
+- **Linear only**: solve linear equations and report an error for nonlinear input.
+- **Nonlinear polynomial**: allows the bounded nonlinear solver when necessary; linear input still uses the exact linear path.
+
+Example nonlinear input: `x^2+y^2=5` and `x-y=1`, unknowns `x,y`. The real solutions are `(-1,-2)` and `(2,1)`; output shows paired solution tuples. Linear underdetermined example: `x=2x+2z`, `y=x-z`, unknowns `x,y,z` produces `x=-2z, y=-3z` with free parameter `z`.
+
+Safety and scope: max **12 linear equations and 10 linear unknowns**; nonlinear max **6 equations and 3 unknowns**; the nonlinear operation accepts only polynomial expressions of total degree at most 4 and at most 80 polynomial terms per equation. It can return complex solutions; a result is not implicitly restricted to reals. Some large or difficult polynomial systems may still exhaust the SymPy worker time limit; the feature is not a general symbolic `Reduce` / Gröbner / nonlinear transcendental solver. Symbolic expressions are parsed from safe math AST, not arbitrary Python code. Initial SymPy download requires internet. Numerical nonlinear systems (2–3 variables, local Newton method) are separate under Numerical methods.
+
 ## Python code panel
 
 The editor and symbolic solver provide Python/SymPy code corresponding to the selected expression/operation. This is an **export artifact** for use in your own Python environment and not evidence that arbitrary Python statements are executed in the app.

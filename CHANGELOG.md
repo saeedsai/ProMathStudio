@@ -1,3 +1,12 @@
+## 2026-10-26 — Bounded QR least-squares 3×2 solver (dev candidate; release gated)
+
+- Added offline full-column-rank 3×2 real least squares using existing QR, residual and orthogonality diagnostics, RHS grid, and Equation Editor transfer.
+- Added focused reference/negative/UI Playwright regression, required CI step and standalone bundle assertion. Release requires exact dev/PR/main CI and Pages confirmation.
+
+## 2026-10-26 — Project schema v2 release closeout
+
+- PR #20 main `c32d486287ec2d6c13a872261fff83f94976ab7b` [Quality 40409820911](https://github.com/saeedsai/ProMathStudio/actions/runs/40409820911) and [Pages 40409819690](https://github.com/saeedsai/ProMathStudio/actions/runs/40409819690) succeeded. Bounded project-schema v2 is RELEASED with workflow-verified deployment; hosted interactive smoke remains unverified.
+
 ## 2026-10-26 — Project schema v2 and import rollback (dev implementation; release pending)
 
 - Export version-2 JSON project backups; accept and migrate legacy version-1 backups without dropping supported data.

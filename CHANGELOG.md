@@ -1,3 +1,10 @@
+## 2026-10-26 — Small-matrix calculator (development increment)
+
+- Added editable 2×2, 2×3, 3×2 and 3×3 real matrix grid under Calculator, with determinants and inverse on square matrices and transpose on any supported grid.
+- Partial-pivoting elimination, Gauss–Jordan inversion, scaled singularity threshold, finite-value validation and inverse residual verification, with ability to transfer results to Equation Editor notation.
+- New standalone `src/matrix-tools.js` included in `index.html` via `scripts/build.py`, structural bundle test, dedicated Playwright matrix regression in required CI; described limits in `docs/MATRIX_CALCULATOR.md`.
+- Does **not** include arbitrary-dimensional matrix algebra, multiplication, eigen/SVD or complex matrices. Do not mark released until required green PR/main CI and Pages deploy evidence.
+
 ## 2026-10-26 — Nonlinear symbolic equation systems (dev milestone)
 
 - Added **Auto / Linear only / Nonlinear polynomial** modes to the simultaneous equation UI.

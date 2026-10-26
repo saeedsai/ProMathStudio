@@ -17,7 +17,7 @@ The application runs from a single, readable `index.html`. A web server and buil
 |---|---|
 | Advanced calculator | Real and complex arithmetic; factorials; trigonometry and inverse trig; degrees/radians; constants e, pi and i; history |
 | Equation editor | Plain-text math to live MathML; symbol library; LaTeX and executable Python/SymPy equivalents; Word .docx; notebook |
-| Symbolic solver | Expand, simplify, factor, solve, differentiate, integrate; offline polynomial/rational engine; optional SymPy exact and numerical results |
+| Symbolic solver | Expand, simplify, factor, solve, differentiate, integrate, bounded real-variable limits; offline polynomial/rational engine; optional SymPy exact and numerical results |
 | Graph generator | Multiple `y=f(x)` curves and `z=f(x,y)` surfaces, adjustable bounds, zoom/pan/rotation, PNG export |
 | Connected hub | Working expression, result routing, recent inputs, notebook, JSON backup/restore |
 

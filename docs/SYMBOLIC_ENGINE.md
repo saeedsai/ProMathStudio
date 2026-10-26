@@ -20,6 +20,7 @@ The browser loads Pyodide from `https://cdn.jsdelivr.net/pyodide/v0.29.1/full/` 
 | Differentiate | Symbolic derivative with respect to selected variable |
 | Integrate | Symbolic antiderivative with respect to selected variable |
 | Numerical roots | Approximate roots via SymPy when supported |
+| Limit (SymPy) | One-sided, two-sided, and infinite real-variable limits |
 
 ## Examples
 
@@ -42,6 +43,12 @@ Choose **Symbolic Solver → Operation → Solve system of equations**. Enter on
 Example nonlinear input: `x^2+y^2=5` and `x-y=1`, unknowns `x,y`. The real solutions are `(-1,-2)` and `(2,1)`; output shows paired solution tuples. Linear underdetermined example: `x=2x+2z`, `y=x-z`, unknowns `x,y,z` produces `x=-2z, y=-3z` with free parameter `z`.
 
 Safety and scope: max **12 linear equations and 10 linear unknowns**; nonlinear max **6 equations and 3 unknowns**; the nonlinear operation accepts only polynomial expressions of total degree at most 4 and at most 80 polynomial terms per equation. It can return complex solutions; a result is not implicitly restricted to reals. Some large or difficult polynomial systems may still exhaust the SymPy worker time limit; the feature is not a general symbolic `Reduce` / Gröbner / nonlinear transcendental solver. Symbolic expressions are parsed from safe math AST, not arbitrary Python code. Initial SymPy download requires internet. Numerical nonlinear systems (2–3 variables, local Newton method) are separate under Numerical methods.
+
+## Symbolic limits (bounded real-variable scope)
+
+Choose **Symbolic Solver → Operation → Limit (SymPy)**, select the variable, enter a scalar expression and an **Approach point** (e.g. `0`, `pi/2`, `oo`, `-oo`). Select **Both sides**, **From left**, or **From right**. Example: `sin(x)/x` at `0` from both sides yields `1`; `1/x` at `0` yields `-oo` from the left and `oo` from the right. The two-sided limit of `1/x` at `0` does not exist; `1/x` at `oo` yields `0`.
+
+Only scalar expressions in the selected real variable and real constant approach points are supported; symbolic parameters, complex approach points, matrices, equalities, oscillatory/nonexistent limits, and unsupported SymPy forms receive explicit errors. SymPy/Pyodide downloads are required on first use. Generated Python uses `sp.limit(..., dir=...)`.
 
 ## Python code panel
 

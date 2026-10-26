@@ -312,10 +312,10 @@
       <div class="cas-wrap">
         <p class="cas-intro">Expand, simplify, factor, differentiate, integrate, and solve equations, including complex solutions. The built-in solver works offline; the optional full SymPy engine runs locally in your browser after its initial online download.</p>
         <div class="cas-toolbar">
-          <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="system">Solve system of equations</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="numeric">Numerical roots (SymPy)</option><optgroup label="Integral transforms · SymPy"><option value="laplace">Laplace transform ℒ</option><option value="inverse_laplace">Inverse Laplace ℒ⁻¹</option><option value="fourier">Fourier transform ℱ</option><option value="inverse_fourier">Inverse Fourier ℱ⁻¹</option></optgroup><optgroup label="Differential equations · SymPy"><option value="ode">Solve ODE (dsolve)</option><option value="pde">Solve PDE (pdsolve)</option></optgroup></select></label>
+          <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="system">Solve system of equations</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="limit">Limit (SymPy)</option><option value="numeric">Numerical roots (SymPy)</option><optgroup label="Integral transforms · SymPy"><option value="laplace">Laplace transform ℒ</option><option value="inverse_laplace">Inverse Laplace ℒ⁻¹</option><option value="fourier">Fourier transform ℱ</option><option value="inverse_fourier">Inverse Fourier ℱ⁻¹</option></optgroup><optgroup label="Differential equations · SymPy"><option value="ode">Solve ODE (dsolve)</option><option value="pde">Solve PDE (pdsolve)</option></optgroup></select></label>
           <label class="cas-field cas-engine">Engine <select id="cas-engine"><option value="auto">Auto — offline → SymPy</option><option value="sympy">SymPy — full solver</option><option value="offline">Built-in — offline only</option></select></label>
           <label class="cas-field variable">Variable <input id="cas-variable" type="text" value="x" maxlength="24" spellcheck="false" aria-label="Symbolic variable" /></label>
-          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
+          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><label class="cas-field" id="cas-limit-point-wrap" hidden>Approach point <input id="cas-limit-point" type="text" value="0" maxlength="80" spellcheck="false" aria-label="Limit approach point"/></label><label class="cas-field" id="cas-limit-direction-wrap" hidden>Direction <select id="cas-limit-direction" aria-label="Limit direction"><option value="+-">Both sides</option><option value="-">From left (−)</option><option value="+">From right (+)</option></select></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
         </div>
         <div id="cas-system-fields" hidden style="padding:12px;border:1px solid #d7deec;border-radius:10px;margin:12px 0"><label for="cas-system-input">Equations (one per line)</label><textarea id="cas-system-input" rows="4" style="width:100%;display:block" spellcheck="false">x = 2x + 2z
 y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separated)</label><input id="cas-system-vars" value="x,y,z" aria-label="System unknowns"/><label for="cas-system-method">Method</label><select id="cas-system-method" aria-label="System solving method"><option value="auto">Auto (linear first, nonlinear if needed)</option><option value="linear">Linear only</option><option value="nonlinear">Nonlinear polynomial</option></select><p class="small-note">Auto preserves fast linear solutions and solves supported nonlinear polynomial systems with up to 3 unknowns. Solutions may be real or complex. SymPy required.</p></div>
@@ -332,7 +332,7 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
             <option value="x^2+2=0">Solve complex radicals</option>
             <option value="x^9-x-1=0">Degree 9: exact RootOf solutions</option>
             <option value="x^9=1">All nine roots of unity</option>
-            <option value="sin(x)=0">Trigonometric solution set</option>
+            <option value="sin(x)=0">Trigonometric solution set</option><option value="sin(x)/x" data-operation="limit" data-variable="x" data-point="0">Limit: sin(x)/x at 0</option>
             <option value="exp(-2*t)" data-operation="laplace" data-variable="t">Laplace of e^(-2t)</option>
             <option value="1/(s+2)" data-operation="inverse_laplace" data-variable="s" data-target="t">Inverse Laplace: 1/(s+2)</option>
             <option value="exp(-x^2)" data-operation="fourier" data-variable="x" data-target="k">Fourier of Gaussian</option>
@@ -492,7 +492,7 @@ def _ms_process(job_text):
     varname = str(job.get('variable','x'))
     if not varname.isidentifier() or len(varname)>24 or varname in MS_CONST:
         raise MathStudioSympyError('Choose a valid symbolic variable such as x, t, or theta.')
-    if operation not in {'auto','solve','expand','simplify','factor','differentiate','integrate','numeric','laplace','inverse_laplace','fourier','inverse_fourier','ode','pde'}:
+    if operation not in {'auto','solve','expand','simplify','factor','differentiate','integrate','limit','numeric','laplace','inverse_laplace','fourier','inverse_fourier','ode','pde'}:
         raise MathStudioSympyError('Unsupported symbolic operation.')
     variable = sp.Symbol(varname)
     pole_expressions = []
@@ -587,6 +587,30 @@ def _ms_process(job_text):
             outputs=solution if isinstance(solution,list) else [solution]
         except (NotImplementedError,ValueError,TypeError) as ex:
             raise MathStudioSympyError('SymPy cannot solve this '+operation.upper()+' in closed form: '+str(ex)[:220])
+    elif operation=='limit':
+        if is_equation or isinstance(expression,sp.MatrixBase):
+            raise MathStudioSympyError('Limits require a scalar expression, not an equation or matrix.')
+        if expression.free_symbols - {variable}:
+            raise MathStudioSympyError('Limits with free parameters are not yet supported; use one real variable.')
+        direction=job.get('direction','+-')
+        if direction not in {'+-','+','-'}:
+            raise MathStudioSympyError('Choose both sides, left, or right for the limit direction.')
+        point_ast=job.get('pointAst')
+        if not isinstance(point_ast,dict):
+            raise MathStudioSympyError('Enter a valid limit approach point.')
+        point=build(point_ast)
+        if not isinstance(point,sp.Expr) or point.free_symbols or (
+                point not in (sp.oo,-sp.oo) and (point.is_real is not True or point.is_finite is not True)):
+            raise MathStudioSympyError('Limit approach point must be a real constant or +oo/-oo.')
+        try:
+            value=sp.limit(expression,variable,point,dir=direction)
+        except (ValueError,NotImplementedError,TypeError,RecursionError) as ex:
+            raise MathStudioSympyError('Limit does not exist or is unsupported: '+str(ex)[:180])
+        if isinstance(value,(sp.Limit,sp.AccumBounds)) or value.has(sp.nan,sp.zoo):
+            raise MathStudioSympyError('Limit does not exist or is not determined for the selected direction.')
+        outputs=[value]
+        note=({'+' :'Right-hand','-':'Left-hand','+-':'Two-sided'}[direction]
+              +' real-variable limit as '+str(variable)+' approaches '+str(point)+'.')
     elif operation in {'laplace','inverse_laplace','fourier','inverse_fourier'}:
         if is_equation:raise MathStudioSympyError('Choose an expression rather than an equality for a transform.')
         target=sp.Symbol(str(job.get('target','s' if 'laplace' in operation else 'k')))
@@ -1314,7 +1338,7 @@ def _ms_system(job_text):
   }
   const pythonKeywords=new Set(['False','None','True','and','as','assert','async','await','break','class','continue','def','del','elif','else','except','finally','for','from','global','if','import','in','is','lambda','nonlocal','not','or','pass','raise','return','try','while','with','yield','match','case']);
   const pythonFuncs={sin:'sin',cos:'cos',tan:'tan',cot:'cot',sec:'sec',csc:'csc',asin:'asin',acos:'acos',atan:'atan',arcsin:'asin',arccos:'acos',arctan:'atan',sinh:'sinh',cosh:'cosh',tanh:'tanh',sqrt:'sqrt',ln:'log',log:'log',exp:'exp',abs:'Abs',floor:'floor',ceil:'ceiling',max:'Max',min:'Min',gcd:'gcd',lcm:'lcm',conj:'conjugate',trace:'trace',sign:'sign',factorial:'factorial',log10:'log',log2:'log'};
-  const pythonConstants={e:'sp.E',i:'sp.I',I:'sp.I',E:'sp.E',tau:'(2*sp.pi)',π:'sp.pi',τ:'(2*sp.pi)',pi:'sp.pi',infty:'sp.oo',infinity:'sp.oo',emptyset:'sp.EmptySet',degree:'sp.pi/180',aleph:'sp.Symbol("ℵ")',ii:'sp.I'};
+  const pythonConstants={e:'sp.E',i:'sp.I',I:'sp.I',E:'sp.E',tau:'(2*sp.pi)',π:'sp.pi',τ:'(2*sp.pi)',pi:'sp.pi',infty:'sp.oo',infinity:'sp.oo',oo:'sp.oo',emptyset:'sp.EmptySet',degree:'sp.pi/180',aleph:'sp.Symbol("ℵ")',ii:'sp.I'};
   function pythonDocument(ast){
     const vars=new Set();
     const reserved=new Set([...Object.keys(pythonConstants),...symbolOperators]);
@@ -1780,13 +1804,16 @@ def _ms_system(job_text):
       sympyPending.set(id,{resolve,reject,timer});worker.postMessage({id,payload:{ast,operation,variable,target:document.getElementById('cas-target')?.value.trim()||'s',...extra}});
     });
   }
-  function sympyPythonCode(ast,operation,v){
+  function sympyPythonCode(ast,operation,v,extra={}){
     const main=pythonDocument(ast).replace(/\nprint\(sp\.pretty\(expr\)\)\s*$/,'');
     const lines=[main,''];
     if(['solve','numeric'].includes(operation)){
       lines.push('polynomial = expr.lhs - expr.rhs if isinstance(expr, sp.Equality) else expr');
       if(operation==='numeric')lines.push('result = sp.Poly(polynomial, '+v+').nroots()');
       else lines.push('result = sp.solveset(polynomial, '+v+', domain=sp.S.Complexes)');
+    }else if(operation==='limit'){
+      const pointLine=pythonDocument(extra.pointAst).split('\n').find(line=>line.startsWith('expr = '));
+      lines.push('result = sp.limit(expr, '+v+', '+pointLine.slice(7)+', dir='+JSON.stringify(extra.direction)+')');
     }else if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(operation)){
       const op={laplace:'laplace_transform',inverse_laplace:'inverse_laplace_transform',fourier:'fourier_transform',inverse_fourier:'inverse_fourier_transform'}[operation];
       const target=document.getElementById('cas-target')?.value.trim()||(operation.includes('laplace')?'s':'k');
@@ -1855,23 +1882,30 @@ def _ms_system(job_text):
       if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)&&! /^[A-Za-z][A-Za-z0-9_]*$/.test(document.getElementById('cas-target').value.trim()))throw Error('Choose a valid transform output variable.');
       const parsed=evaluate(raw);
       if(parsed.incomplete)throw new Error('Finish typing the equation before solving.');
+      let sympyExtra={};
+      if(selected==='limit'){
+        const pointRaw=document.getElementById('cas-limit-point').value.trim();
+        if(!pointRaw)throw Error('Enter a limit approach point (e.g. 0, pi, oo or -oo).');
+        const pointParsed=evaluate(pointRaw);
+        if(pointParsed.incomplete)throw Error('Finish typing the limit approach point.');
+        sympyExtra={pointAst:pointParsed.ast,direction:document.getElementById('cas-limit-direction').value};
+      }
       let result=null,offlineError='';
       // Numerical roots are SymPy-only. In auto mode prefer fast/offline results,
       // and automatically retry with actual SymPy if the built-in CAS cannot solve.
-      if(engine!=='sympy'&&!['numeric','ode','pde','laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)){
+      if(engine!=='sympy'&&!['limit','numeric','ode','pde','laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)){
         try{result=casRun(raw,selected,v);result.engine='Offline';}
         catch(e){offlineError=e.message;if(engine==='offline')throw e;}
       }
       if(!result){
-        if(engine==='offline')throw new Error('Numeric roots require SymPy. Change Engine to Auto or SymPy.');
-        if(['ode','pde','laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)&&engine==='offline')throw Error('This operation requires SymPy. Select Auto or SymPy.');
+        if(engine==='offline')throw new Error('This operation requires SymPy. Change Engine to Auto or SymPy.');
         setCasLoading(offlineError?'Built-in solver reached its limit. Switching to SymPy…':'Starting the SymPy engine…');
-        const payload=await sympyJob(parsed.ast,selected,v);
+        const payload=await sympyJob(parsed.ast,selected,v,sympyExtra);
         if(requested!==casRequest||raw!==input.value.trim())return;
         result={engine:'SymPy',operation:payload.operation,raw,variable:v,
           lines:payload.items.map(item=>({...item,raw})),
           note:payload.note+' · Python/SymPy '+payload.version+' runs in this browser.',
-          python:sympyPythonCode(parsed.ast,payload.operation,v)};
+          python:sympyPythonCode(parsed.ast,payload.operation,v,sympyExtra)};
       }
       if(requested===casRequest)showCasResult(result);
     }catch(e){
@@ -1903,11 +1937,14 @@ def _ms_system(job_text):
     const operation=opt.dataset.operation||'auto',variable=opt.dataset.variable||'x',target=opt.dataset.target;
     loadExample(e.target.value);casOperation.value=operation;casVariable.value=variable;
     if(target)document.getElementById('cas-target').value=target;
+    if(opt.dataset.point)document.getElementById('cas-limit-point').value=opt.dataset.point;
     updateTarget();casExecute();e.target.value='';
   });
   function updateTarget(){
     const name=casOperation.value,t=document.getElementById('cas-target-wrap');
     t.hidden=!['laplace','inverse_laplace','fourier','inverse_fourier'].includes(name);
+    document.getElementById('cas-limit-point-wrap').hidden=name!=='limit';
+    document.getElementById('cas-limit-direction-wrap').hidden=name!=='limit';
     if(!t.hidden)document.getElementById('cas-target').value= name==='inverse_laplace'?'t':name==='inverse_fourier'?'x':name==='laplace'?'s':'k';
   }
   casOperation.addEventListener('change',updateTarget);updateTarget();
@@ -1915,7 +1952,8 @@ def _ms_system(job_text):
     if(casLast){casMessage.className='cas-status';casMessage.textContent='Input changed — run again to update the calculation.';casLast=null;setCasButtons(false);}
     casRequest++;
   });
-  for(const field of [casOperation,casVariable,casEngine])field.addEventListener('change',()=>{if(casLast)clearCas();});
+  for(const field of [casOperation,casVariable,casEngine,document.getElementById('cas-limit-direction')])field.addEventListener('change',()=>{casRequest++;if(casLast)clearCas();});
+  document.getElementById('cas-limit-point').addEventListener('input',()=>{casRequest++;if(casLast)clearCas();});
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();casExecute();}},true);
   window.MathStudio.symbolic=casRun;
   window.MathStudio.solveWithSymPy=async raw=>{
@@ -2986,7 +3024,7 @@ self.onmessage=async ({data})=>{
   function projectData(){
     return {format:'mathstudio-project',version:1,date:new Date().toISOString(),working:state.active,origin:state.origin,
       recent:state.recent,notebook:engine.notebookBridge.list(),calculator:engine.advanced.getCalculatorState(),
-      solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value},
+      solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value,limitPoint:$('cas-limit-point').value,limitDirection:$('cas-limit-direction').value},
       graph:engine.advanced.getGraphState(),customFunctions:window.MathStudio.customFunctions?.list()||[],tables:window.MathStudio.dataTables?.exportState()||null,fit:window.MathStudio.curveFit?.exportState()||null};
   }
   $('hub-export-project').addEventListener('click',()=>{
@@ -3005,7 +3043,7 @@ self.onmessage=async ({data})=>{
       engine.notebookBridge.replace(data.notebook);
       engine.advanced.restoreCalculatorState(data.calculator||{});
       window.MathStudio.customFunctions?.restore(data.customFunctions||[]);engine.advanced.restoreGraphState(data.graph||{});window.MathStudio.dataTables?.restoreState(data.tables||null);window.MathStudio.curveFit?.restoreState(data.fit||null);
-      if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';}
+      if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';$('cas-limit-point').value=data.solver.limitPoint||'0';$('cas-limit-direction').value=['+-','+','-'].includes(data.solver.limitDirection)?data.solver.limitDirection:'+-';$('cas-operation').dispatchEvent(new Event('change'));}
       state.recent=Array.isArray(data.recent)?data.recent.filter(r=>r&&typeof r.raw==='string').slice(0,14):[];
       state.calculator=engine.advanced.getCalculator();state.solver=null;
       if(typeof data.working==='string'&&data.working.trim())current(data.working,data.origin||'project');

@@ -48,7 +48,10 @@ The current implementation has limits: it is not an arbitrary Python interpreter
 - [Development](docs/DEVELOPMENT.md) · [Testing](docs/TESTING.md)
 - [GitHub Pages deployment](docs/DEPLOYMENT.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Full feature inventory and MATLAB/other-tool gap analysis (26 Oct 2026)](docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md)
-- [Small matrix calculator: determinant, inverse, transpose (2×2 / 3×3)](docs/MATRIX_CALCULATOR.md) — each feature classified complete/partial and missing capabilities prioritized.\n- [Hourly development agent operating rules](AGENTS.md) · [Living hourly feature plan + next five](docs/HOURLY_DEVELOPMENT_PLAN.md)\n- [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md)
+- [Small matrix calculator: determinant, inverse, transpose (2×2 / 3×3)](docs/MATRIX_CALCULATOR.md)
+- [Numerical solvers, offline RK4 initial-value ODE and Python](docs/NUMERICAL_AND_PYTHON.md)
+- [Hourly development agent operating rules](AGENTS.md) · [Living hourly feature plan + next five](docs/HOURLY_DEVELOPMENT_PLAN.md)
+- [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## Run the checks

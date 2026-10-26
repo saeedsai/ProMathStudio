@@ -14,11 +14,11 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 
 | Order | ID | Next bounded implementation | User acceptance / regression requirements | Status |
 |---:|---|---|---|---|
-| 1 | P0-MATRIX-ARITH | Add real 2×2/2×3/3×2/3×3 matrix addition, subtraction and multiplication with a second input grid. | Reference products, noncommutativity, identity, shape mismatch, nonfinite and UI/editor transfer. | TODO |
-| 2 | P0-MATRIX-RREF | Implement bounded real RREF and rank with partial pivoting and stated tolerance. | Full/rank-deficient, rectangular, zero and near-singular matrices, nonfinite rejection. | TODO |
-| 3 | P0-MATRIX-AX-B | Solve small real `Ax=b` systems with pivoting, residual and singular diagnostics. | Known 2×2/3×3 solutions, inconsistent/singular cases, scale-sensitive residual, editor transfer. | TODO |
-| 4 | P0-SHEET-SORT-REFERENCE | Preserve workbook references when sorting rows (separate from insert/delete). | Sort with formulas and cross-sheet references, verify numeric outputs and save/reload; prevent silent retargeting. | TODO |
-| 5 | P0-XLSX-ROUNDTRIP | Add bounded XLSX import/export for two-sheet numeric, text and formula workbooks. | Two-sheet formulas, quoted sheet names, blank cells, invalid files and browser round-trip. | TODO |
+| 1 | P0-MATRIX-RREF | Implement bounded real RREF and rank with partial pivoting and stated tolerance. | Full/rank-deficient, rectangular, zero and near-singular matrices, nonfinite rejection. | TODO |
+| 2 | P0-MATRIX-AX-B | Solve small real `Ax=b` systems with pivoting, residual and singular diagnostics. | Known 2×2/3×3 solutions, inconsistent/singular cases, scale-sensitive residual, editor transfer. | TODO |
+| 3 | P0-SHEET-SORT-REFERENCE | Preserve workbook references when sorting rows (separate from insert/delete). | Sort with formulas and cross-sheet references, verify numeric outputs and save/reload; prevent silent retargeting. | TODO |
+| 4 | P0-XLSX-ROUNDTRIP | Add bounded XLSX import/export for two-sheet numeric, text and formula workbooks. | Two-sheet formulas, quoted sheet names, blank cells, invalid files and browser round-trip. | TODO |
+| 5 | P0-SHEET-RANGE-DELETE | Adjust surviving range boundaries when deleting referenced rows/columns; retain explicit errors for fully removed ranges. | SUM ranges shrink correctly, whole-range removal gives #REF!, cross-sheet and project reload regressions. | TODO |
 
 **Always choose critical correctness/security regressions before planned features.** The next-five list is a moving queue, not a guarantee that each feature takes exactly one hour. As an item is released, select the next P0 from the frozen audit; then systematically work through P1/P2/P3 and the 95 partially complete items. Do not abandon the ledger because of an unsuccessful run.
 
@@ -101,3 +101,6 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 
 
 **2026-10-26 16:5x Europe/Stockholm — P0-SYMBOLIC-LIMITS dev checkpoint.** Started `dev=fc31eced37666293c15c6459dac022ed8fd0b415`, `main=704d771c63c062c585f148a4630f8d27b66f3714`, two unprotected branches, no open PR. Pages 40352395077 passed; main Quality 40352397284 and dev Quality 40352932150 were in progress at discovery. Added bounded real-variable limits, worker validation, project persistence, UI controls, Python export and focused `tests/smoke_symbolic_limits.py` with CI gate. Status **DEV IMPLEMENTED / CI PENDING** until exact-head Quality, PR, main Quality and Pages pass. No obsolete tracked files identified. Branch protection needs admin. Next five: P0-MATRIX-ARITH, P0-MATRIX-RREF, P0-MATRIX-AX-B, P0-SHEET-SORT-REFERENCE, P0-XLSX-ROUNDTRIP.
+
+
+**2026-10-26 17:27 Europe/Stockholm — P0-MATRIX-ARITH checkpoint.** Read operating contract, frozen audit, plan and CI. Starting dev `f151e1b089e31bbe98fb4c58933a60951e7851d6` was behind main `784800f1baef9b429b5d044bd85c00f62eb31c87`; fast-forwarded dev without force. Main Quality 40357711290 and Pages 40357711613 succeeded. Added real matrix A/B arithmetic and independent B grid, focused `tests/smoke_matrix_arithmetic.py`, static consistency assertion, Quality workflow gate, docs, changelog and README. **DEV IMPLEMENTED / exact new-head CI, PR, Pages pending**; amend this entry with SHA/check results when verified. No proven obsolete tracked files removed; only dev/main, both unprotected. Next five: P0-MATRIX-RREF, P0-MATRIX-AX-B, P0-SHEET-SORT-REFERENCE, P0-XLSX-ROUNDTRIP, P0-SHEET-RANGE-DELETE.

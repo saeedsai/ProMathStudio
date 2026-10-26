@@ -1,3 +1,8 @@
+## 2026-10-26 — Matrix A/B arithmetic (dev candidate)
+
+- Added independently sized second matrix grid, offline real addition/subtraction/multiplication, dimension checks and finite validation.
+- Both grids invalidate stale results; output transfers to Equation Editor. New focused browser regression and required Quality CI step. PR/main/Pages release pending.
+
 ## 2026-10-26 — Bounded symbolic limits (dev candidate)
 
 - Added a SymPy Limit operation with approach-point and left/right/both direction controls, project settings and a `sin(x)/x` sample.

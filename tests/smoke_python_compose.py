@@ -46,7 +46,7 @@ def main():
         def check(expression,expected):
             page.locator("#calc-input").fill(expression)
             page.locator("#calc-execute").click()
-            page.wait_for_function("expected => document.querySelector('#calc-result-plain').textContent === '= '+expected",str(expected))
+            page.wait_for_function("expected => document.querySelector('#calc-result-plain').textContent === '= '+expected",arg=str(expected))
         check("pyfun(3)",9)                 # existing direct-call compatibility
         check("2*pyfun(3)+1",19)           # composed arithmetic
         check("pyfun(pyfun(2)+1)",25)     # nested async calls

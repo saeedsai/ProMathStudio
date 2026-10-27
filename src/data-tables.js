@@ -248,7 +248,7 @@
       }
       if(end<0)throw Error('#IF');
       const result=formula(expr.slice(match.index,end+1),t,stack);
-      expr=expr.slice(0,match.index)+'('+number(result)+')'+expr.slice(end+1);
+      expr=expr.slice(0,match.index)+String(number(result))+expr.slice(end+1);
       if(++count>40)throw Error('#LIMIT');
     }
     return expr;

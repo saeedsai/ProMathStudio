@@ -1,3 +1,7 @@
+## Unreleased — high-precision scientific output display (2026-10-27)
+
+- Added optional scientific-notation display for high-precision decimal and expression results, preserving full decimal output, exactness and offline BigInt calculations. Toggling refreshes previous results; numerical reference and browser UI tests extend the existing mandatory Quality suite. Full CI/Pages verification pending.
+
 ## Unreleased — correct exact-division check for long decimal outputs (2026-10-27)
 
 - Fixed false input-limit rejection when two valid ≤300-digit operands yield an exact quotient longer than 300 digits (up to the 800-character output cap). Internal exactness validation now uses an 800-digit result limit; user input remains limited to 300 digits. Added focused browser/reference regression and mandatory CI step. Production release still pending verified checks.

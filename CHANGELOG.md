@@ -1,3 +1,7 @@
+## Unreleased — periodic Hann window for FFT (2026-10-27)
+
+- Added an optional periodic Hann analysis window to the offline real FFT, coherent-gain-corrected one-sided amplitude, original/windowed sample metadata, UI selection and stale-export invalidation. Preserved rectangular default. Added numerical reference, negative and browser UI/table regression in mandatory Quality; source/standalone synchronization verified. Dev candidate only until exact-head CI/PR/main/Pages gates pass.
+
 ## Unreleased — bounded real symmetric matrix eigenanalysis (2026-10-27)
 
 - Added offline 2×2/3×3 Jacobi eigenvalues and orthonormal eigenvectors in the Matrix calculator, sorted spectrum, editor handoff and residual diagnostics. Added dedicated positive/negative/reference browser regression to mandatory Quality, plus documentation. Isolated JavaScript numerical references passed; exact-head full CI and Pages still pending.

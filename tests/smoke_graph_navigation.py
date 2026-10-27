@@ -18,6 +18,8 @@ def main():
         page.locator('#graph-plot').click()
         page.get_by_role('button',name='Axes & grid').click()
         assert page.locator('#ui-graph-axes').evaluate('(e)=>e.open')
+        assert page.locator('#graph-controls-collapsible').evaluate('(e)=>e.open')
+        assert page.locator('#graph-xmin').is_visible()
         page.locator('#graph-xmin').fill('-8')
         page.locator('#graph-xmax').fill('8')
         page.locator('#graph-ymin').fill('-4')

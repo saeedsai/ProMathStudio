@@ -1,3 +1,9 @@
+## 2026-10-27 — Bounded adaptive Simpson quadrature (DEV IMPLEMENTED; release QA pending)
+
+- Added offline finite-interval adaptive Simpson integration with tolerance and evaluation budget controls, local error estimate, bounded subdivision and non-finite rejection. Existing fixed-step Calculator integration and numerical methods are preserved.
+- Added focused Playwright reference/negative/budget/UI regression `tests/smoke_quadrature_adaptive.py` to mandatory Quality CI; production release requires exact dev/PR/main green checks and Pages verification. This is **not yet released**.
+- Scope excludes certified global error bounds, singular/improper, highly oscillatory and multidimensional integrals.
+
 ## 2026-10-27 — Coupled two-state RK4 IVP (PR #23 released; exact main Quality and Pages green)
 
 - Added bounded offline two-state first-order RK4 with derivative expressions for y and z, separate initial conditions, safe numeric AST evaluation and finite-state checks. Data Tables receives t/y/z; Graphs plots y(t).

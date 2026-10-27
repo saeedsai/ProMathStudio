@@ -51,6 +51,8 @@ jobs:
         run: python tests/smoke_symbolic_limits.py
       - name: Numerical solver, filtering and Python worker smoke
         run: python tests/smoke_numerical_data.py
+      - name: Adaptive Simpson quadrature numeric and UI regression
+        run: python tests/smoke_quadrature_adaptive.py
       - name: Context menus and programmer calculator smoke test
         run: python tests/smoke_context_actions.py
       - name: Graph styles, table zoom and calculator notation

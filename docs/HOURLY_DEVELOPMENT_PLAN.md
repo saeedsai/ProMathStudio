@@ -10,17 +10,17 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed each scheduled run)
+## Next five features (refreshed 2026-10-27 03:xx Europe/Stockholm)
 
 | Order | ID | Next bounded implementation | User acceptance / regression requirements | Status |
 |---:|---|---|---|---|
-| 1 | P0-XLSX-ROUNDTRIP | Secure offline two-sheet XLSX import/export with bounded ZIP/XML parser and archive validation. | Numbers/text/blanks/formulas, quoted sheet names, corrupt ZIP, oversized and zip-bomb rejection, browser round-trip. | TODO |
-| 2 | P0-SYMBOLIC-ASSUMPTIONS | Add explicit real/positive/integer symbolic assumptions with domain-aware worker calls. | sqrt(x²) under positive/real assumptions, contradictory input rejection, persistence and worker regression. | TODO |
-| 3 | P0-PRECISION | Add bounded variable-precision evaluation distinct from binary64 Calculator mode. | 30+ significant-digit reference, precision controls, invalid inputs and overflow tests. | TODO |
-| 4 | P0-SYMBOLIC-ODE-IC | Apply initial conditions to supported SymPy analytical ODE solutions. | y'=y with y(0)=1; inconsistent/unsupported conditions, worker and UI regression. | TODO |
-| 5 | P0-QUADRATURE-ADAPTIVE | Add bounded adaptive Simpson quadrature for smooth real functions. | sin(x) on [0,π], x² on [0,1], tolerance refinement, invalid bounds and evaluation budget. | TODO |
+| 1 | P0-QUADRATURE-ADAPTIVE | Complete release QA of bounded offline adaptive Simpson integration. | sin integral = 2, polynomial 1/3, error/tolerance/budget rejection, UI, exact-head dev/PR/main Quality and Pages. | DEV IMPLEMENTED; CI PENDING |
+| 2 | P0-XLSX-ROUNDTRIP | Secure offline two-sheet XLSX import/export with bounded ZIP/XML parser. | Numbers/text/blanks/formulas, quoted sheet names, corrupt ZIP, oversized and zip-bomb rejection, browser round-trip. | TODO; larger security-sensitive scope |
+| 3 | P0-SYMBOLIC-ASSUMPTIONS | Add explicit real/positive/integer assumptions with domain-aware worker calls. | sqrt(x²) under positive/real assumptions, contradictions, persistence and worker regression. | TODO |
+| 4 | P0-PRECISION | Bounded variable-precision evaluation distinct from binary64 Calculator mode. | 30+ significant-digit reference, precision controls, invalid inputs and overflow tests. | TODO |
+| 5 | P0-SYMBOLIC-ODE-IC | Apply initial conditions to supported SymPy analytical ODE solutions. | y'=y with y(0)=1; inconsistent/unsupported conditions, worker and UI regression. | TODO |
 
-**Always choose critical correctness/security regressions before planned features.** The next-five list is a moving queue, not a guarantee that each feature takes exactly one hour. As an item is released, select the next P0 from the frozen audit; then systematically work through P1/P2/P3 and the 95 partially complete items. Do not abandon the ledger because of an unsuccessful run.
+**Prioritization note:** XLSX remains P0 but needs a secure archive parser, so this run took the independently feasible bounded adaptive quadrature gap (frozen inventory P1) rather than rush unsafe ZIP handling. Never mark quadrature released before exact-head CI, PR and Pages gates.
 
 ## Higher-level release sequence
 
@@ -186,3 +186,5 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 
 
 **2026-10-27 03:xx Europe/Stockholm — P0-ODE-SYSTEMS verified release closeout.** The initial feature candidate `7cbf984d7569b1bf4e184bbf01f4d9695458fd5a` failed Quality because the new browser regression expected a `headers` property on a saved table; corrected the assertion to the real `columns` property on dev `e7aafa877b578414b55c544793df47caff5ac77b`. Isolated JS syntax and oscillator/driven/negative numerical checks passed. Exact candidate [dev Quality 40435790677](https://github.com/saeedsai/ProMathStudio/actions/runs/40435790677) and [PR #23 Quality 40436030986](https://github.com/saeedsai/ProMathStudio/actions/runs/40436030986) passed the complete structural and browser suite, including the new `smoke_ode_system.py`. Inspected the seven-file dev/main diff; [PR #23](https://github.com/saeedsai/ProMathStudio/pull/23) merged normally with guarded exact head into main `e87099356b4ae9b650106650f6a40ba2897c3028`. [Main Quality 40436220425](https://github.com/saeedsai/ProMathStudio/actions/runs/40436220425), [Pages deployment 40436220120](https://github.com/saeedsai/ProMathStudio/actions/runs/40436220120), and [merged-branch cleanup 40436220459](https://github.com/saeedsai/ProMathStudio/actions/runs/40436220459) succeeded for exact main. Dev fast-forwarded non-force to merged main before this documentation checkpoint. **P0-ODE-SYSTEMS RELEASED for two-state RK4 bounded scope; hosted live browser interaction unavailable (Pages fetch blocked).** Both refs still unprotected, and no tracked obsolete artifacts proven safe to delete. Next five: P0-XLSX-ROUNDTRIP, P0-SYMBOLIC-ASSUMPTIONS, P0-PRECISION, P0-SYMBOLIC-ODE-IC, P0-QUADRATURE-ADAPTIVE.
+
+**2026-10-27 03:xx Europe/Stockholm — P0-QUADRATURE-ADAPTIVE (run 11):** Read root contract, frozen audit, plan and latest CI. Starting dev `3b92e2210c89ddcf11590ee4a28a4112742d1593` (green Quality 40436500068), main `e87099356b4ae9b650106650f6a40ba2897c3028` (green Quality 40436220425, Pages 40436220120); dev one documentation commit ahead. Implemented bounded adaptive Simpson on dev with new Playwright reference/negative/budget/UI regression and required CI, synchronized standalone HTML, docs and changelog. Exact new dev SHA and CI status must be verified after commit. No direct main push, branch deletion, or unverified release. Next five: QUADRATURE-ADAPTIVE, XLSX-ROUNDTRIP, SYMBOLIC-ASSUMPTIONS, PRECISION, SYMBOLIC-ODE-IC.

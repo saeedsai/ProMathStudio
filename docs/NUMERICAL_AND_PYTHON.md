@@ -40,6 +40,12 @@ In the same **First-order ODE initial-value problem** panel, choose **Adaptive R
 
 Example: dy/dt=y, t0=0, t1=1, y0=1, tolerance 1e-9 approximates e. Tighter tolerance normally increases the number of accepted steps and improves the reference result, but is not a global error guarantee. Both Data Tables and Graphs handoffs work with the variable-step output. Failed attempts, invalid tolerances, non-finite values and step-size underflow produce errors instead of partial exports. **Scope:** real scalar forward IVPs only; no stiff ODE guarantee, event handling, systems, backward integration or globally certified accuracy. RK4 remains the default and its fixed-step behavior is unchanged. See tests/smoke_ode_adaptive.py.
 
+## Adaptive Simpson quadrature (offline, bounded)
+
+In **Symbolic Solver → Numerical methods / PDE**, choose **Adaptive Simpson integral** and enter a real-valued integrand in `x`, finite start/end bounds (end greater than start), tolerance from 1e-12 to 1e-2, and maximum function evaluations from 16 to 20,000. For example, `sin(x)` on `[0, pi]` approximates 2; `x^2` on `[0,1]` approximates 1/3. The method recursively compares one Simpson panel with two half panels and reports an error estimate, evaluation count and refinement count. It uses the same safe native mathematical evaluator as the Calculator, and runs offline.
+
+**Limitations:** Smooth real finite-interval functions only; the error estimate is heuristic, not a certified global bound. Discontinuities, singularities, and rapidly oscillatory integrands can be missed or fail. Exceeding evaluation/depth budgets, invalid bounds, non-real values, or non-finite results fails without exporting partial data. The integral is a scalar result, so table/graph export is disabled for this method. Fixed-step Calculator `int(...)` is unchanged. See `tests/smoke_quadrature_adaptive.py`.
+
 ## One-dimensional Poisson equation
 
 Select **1D Poisson**, where the implemented convention is:

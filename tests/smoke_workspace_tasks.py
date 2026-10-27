@@ -25,7 +25,7 @@ def main():
   page.get_by_role('button',name='History',exact=True).click()
   assert page.locator('#ui-calc-history').evaluate('(e)=>e.open')
   page.locator('[data-workspace="solver"]').click()
-  page.get_by_role('button',name='Numerical methods').click()
+  page.get_by_role('button',name='Numerical methods',exact=True).click()
   assert page.locator('#num-details').evaluate('(e)=>e.open')
   assert page.locator('#symbolic-panel .cas-wrap').is_hidden()
   page.get_by_role('button',name='Symbolic solve').click()

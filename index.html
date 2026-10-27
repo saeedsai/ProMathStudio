@@ -361,7 +361,7 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
     <section class="panel" id="graph-panel" aria-label="2D and 3D function graphs">
       <div class="panel-head"><div class="panel-title"><span class="step">01</span> Interactive graphing <span class="cas-label">Canvas 2D / 3D</span></div><span class="small-note">Drag to move or rotate · Scroll to zoom</span></div>
       <div class="graph-wrap">
-        <div class="graph-mode-row"><div class="graph-mode-switch" role="group" aria-label="Graph dimensions"><button class="graph-mode active" type="button" data-graph-mode="2d">2D · y = f(x)</button><button class="graph-mode" type="button" data-graph-mode="3d">3D · z=f(x,y), y=f(x)</button></div><button class="secondary small" type="button" id="graph-import">Use current equation</button></div>
+        <div class="graph-mode-row"><div class="graph-mode-switch" role="group" aria-label="Graph dimensions"><button class="graph-mode active" type="button" data-graph-mode="2d">2D · y = f(x)</button><button class="graph-mode" type="button" data-graph-mode="3d">3D · z=f(x,y), y=f(x)</button></div><button class="secondary small" type="button" id="graph-show-axes">Axes &amp; grid</button><button class="secondary small" type="button" id="graph-pan-toggle" aria-pressed="false" hidden>Pan 3D: off</button><button class="secondary small" type="button" id="graph-import">Use current equation</button></div>
         <label for="graph-input" class="graph-input-label">Functions <span id="graph-hint">One y=f(x) per line. Compare several functions.</span></label>
         <textarea id="graph-input" rows="4" spellcheck="false">y = sin(x)
 y = cos(x)</textarea>
@@ -385,7 +385,7 @@ y = cos(x)</textarea>
           <div id="graph-data-status" class="graph-data-status" role="status">No dataset loaded. Import CSV or JSON to add data to the graph.</div>
         </details>
 
-        <div class="graph-controls"><label>X min <input type="number" id="graph-xmin" value="-10" step="any"></label><label>X max <input type="number" id="graph-xmax" value="10" step="any"></label><label class="graph-y-control">Y min <input type="number" id="graph-ymin" value="-5" step="any"></label><label class="graph-y-control">Y max <input type="number" id="graph-ymax" value="5" step="any"></label><label class="graph-z-control" hidden>Z min <input type="number" id="graph-zmin" value="-8" step="any"></label><label class="graph-z-control" hidden>Z max <input type="number" id="graph-zmax" value="8" step="any"></label></div>
+        <div class="graph-controls"><label>X min <input type="number" id="graph-xmin" value="-10" step="any"></label><label>X max <input type="number" id="graph-xmax" value="10" step="any"></label><label class="graph-y-control">Y min <input type="number" id="graph-ymin" value="-5" step="any"></label><label class="graph-y-control">Y max <input type="number" id="graph-ymax" value="5" step="any"></label><label class="graph-z-control" hidden>Z min <input type="number" id="graph-zmin" value="-8" step="any"></label><label class="graph-z-control" hidden>Z max <input type="number" id="graph-zmax" value="8" step="any"></label><label>Grid spacing <input id="graph-grid-step" type="number" min="0.000000001" step="any" placeholder="Auto" aria-label="Grid spacing (blank for auto)"></label></div>
         <details class="graph-appearance" id="graph-appearance"><summary>🎨 Appearance · colors and styles</summary><div class="graph-style-options">
 <label>Theme <select id="plot-palette"><option value="classic">Classic</option><option value="bright">Bright</option><option value="pastel">Pastel</option><option value="mono">Monochrome</option><option value="custom">Custom color</option></select></label>
 <label>Primary color <input id="plot-color" type="color" value="#536be8"></label><div id="plot-series-colors" class="plot-series-colors" aria-label="Individual graph colors"></div>
@@ -397,7 +397,7 @@ y = cos(x)</textarea>
 <div class="graph-actions"><button class="secondary" type="button" data-forward="graph" data-destination="editor">Send function to Editor</button><button class="secondary" type="button" data-forward="graph" data-destination="solver">Send function to Solver</button><button id="graph-plot" type="button" class="primary">↗ Plot functions</button><button id="graph-reset" class="secondary" type="button">Reset view</button><button id="graph-save" class="secondary" type="button">↓ Export PNG</button></div>
         <div class="graph-canvas-wrap"><canvas id="graph-canvas" width="1160" height="680" aria-label="Interactive mathematical graph" role="img"></canvas><div class="graph-legend" id="graph-legend"></div></div>
         <div id="graph-status" class="graph-status" role="status">Plot y=f(x) in 2D; plot z=f(x,y) alone or pair it with y=f(x) to highlight a curve in 3D. Supported: polynomials, rational functions, trig, logs, powers, abs, min/max, and if(condition, true, false).</div>
-        <details class="graph-help"><summary>Supported functions and interactions</summary><p>2D: <code>y=x^2</code>, <code>y=1/(x-1)</code>, <code>y=sin(3x)</code>, <code>y=exp(-x^2)</code>, or <code>y=if(x&lt;0,-x,x)</code>. Separate curves by newline. 3D: <code>z=sin(sqrt(x^2+y^2))</code>, <code>z=x^2-y^2</code>, or the paired lines <code>y=x×x</code> and <code>z=sin(x×y)</code>. Paired equations draw the surface and highlight its constrained 3D curve <code>(x, x², sin(x³))</code>. A single <code>y=f(x)</code> is drawn as a curve on the z=0 plane. Rotate by dragging and zoom with the mouse wheel. Radian trig notation is used for graphs.</p></details>
+        <details class="graph-help"><summary>Supported functions and interactions</summary><p>2D: <code>y=x^2</code>, <code>y=1/(x-1)</code>, <code>y=sin(3x)</code>, <code>y=exp(-x^2)</code>, or <code>y=if(x&lt;0,-x,x)</code>. Separate curves by newline. 3D: <code>z=sin(sqrt(x^2+y^2))</code>, <code>z=x^2-y^2</code>, or the paired lines <code>y=x×x</code> and <code>z=sin(x×y)</code>. Paired equations draw the surface and highlight its constrained 3D curve <code>(x, x², sin(x³))</code>. A single <code>y=f(x)</code> is drawn as a curve on the z=0 plane. Rotate by dragging, use Pan 3D or Shift + drag to move the view, and scroll to zoom toward the pointer. Click Axes &amp; grid to set X/Y/Z bounds and grid spacing. Multiple surfaces can be entered on separate lines as z=..., z2=... and z3=.... Radian trig notation is used for graphs.</p></details>
       </div>
     </section>
     <div class="tip" id="grouping-tip"><span aria-hidden="true">✦</span><div><strong>Fractions and parentheses:</strong> For a denominator of <em>x − 1</em>, type <code>x/(x-1)</code>. For an exponent of −½, type <code>^(-1/2)</code> or <code>^-1/2</code>. This prevents ambiguous grouping.</div></div>
@@ -2445,7 +2445,8 @@ self.onmessage=async ({data})=>{
   window.MathStudio.calculatorActions={insert:insertCalc,run:executeCalc,base:calculatorBaseInput};
 
   // Function plotting (safe AST evaluator shared with calculator; no eval() or arbitrary code).
-  let graphMode='2d',graphExpr=[],azimuth=-.72,elevation=.46,zoom3d=1;
+  let graphMode='2d',graphExpr=[],azimuth=-.72,elevation=.46,zoom3d=1,panX3d=0,panY3d=0,pan3dEnabled=false;
+  const graphDrafts={'2d':null,'3d':null},graphViews={'2d':null,'3d':null};
   const graphCanvas=$('graph-canvas'),ctx=graphCanvas.getContext('2d',{alpha:false});
   const graphDef2={xmin:-10,xmax:10,ymin:-5,ymax:5},graphDef3={xmin:-6,xmax:6,ymin:-6,ymax:6,zmin:-8,zmax:8};
   let range={...graphDef2},drag=null;
@@ -2453,16 +2454,26 @@ self.onmessage=async ({data})=>{
   function updateRange(){
     const r={};for(const k of paramIds){const n=Number($('graph-'+k).value);if(!Number.isFinite(n))throw Error('Please enter finite graph bounds.');r[k]=n;}
     if(r.xmin>=r.xmax||r.ymin>=r.ymax||(graphMode==='3d'&&r.zmin>=r.zmax))throw Error('The minimum bounds must be less than maximum bounds.');
+    const grid=$('graph-grid-step').value.trim();
+    if(grid && (!Number.isFinite(Number(grid))||Number(grid)<=0))throw Error('Grid spacing must be a positive finite number, or blank for automatic spacing.');
+    if(grid&&Math.max(r.xmax-r.xmin,r.ymax-r.ymin,...(graphMode==='3d'?[r.zmax-r.zmin]:[]))/Number(grid)>80)throw Error('Grid spacing is too small for the visible range (more than 80 intervals).');
     range=r;
+  }
+  function gridSpacing(span){return Number($('graph-grid-step').value)||niceStep(span);}
+  function axisTicks(min,max){
+    const step=gridSpacing(max-min),out=[];
+    if(!Number.isFinite(step)||step<=0)return out;
+    for(let i=0,v=Math.ceil(min/step)*step;i<=80&&v<=max+step*1e-9;i++,v=Math.ceil(min/step)*step+i*step)if(v>=min-step*1e-9)out.push(v);
+    return out;
   }
   const graphMsg=(message,error=false)=>{const el=$('graph-status');el.textContent=message;el.classList.toggle('error',error);};
   function graphSource(line){
     let raw=line.trim();
-    raw=raw.replace(/^y(?:\d+)?\s*=/i,'').replace(/^z\s*=/i,'').replace(/^[A-Za-z]\s*\(\s*x\s*(?:,\s*y\s*)?\)\s*=/i,'');
+    raw=raw.replace(/^y(?:\d+)?\s*=/i,'').replace(/^z(?:\d+)?\s*=/i,'').replace(/^[A-Za-z]\s*\(\s*x\s*(?:,\s*y\s*)?\)\s*=/i,'');
     return raw.trim();
   }
   function compileGraph(){
-    const lines=$('graph-input').value.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
+    const lines=$('graph-input').value.replace(/\\\s*\n/g,'\n').split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
     if(!lines.length&&!window.MathStudio.graphData?.hasData())throw Error('Type a function or import a dataset to plot.');
     if(lines.length>8)throw Error('Plot a maximum of eight equations at a time.');
     if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:plotColor(i),seriesIndex:i}));
@@ -2561,7 +2572,7 @@ self.onmessage=async ({data})=>{
     const {xmin,xmax,ymin,ymax}=range;
     const sx=x=>(x-xmin)/(xmax-xmin)*w,sy=y=>h-(y-ymin)/(ymax-ymin)*h;
     ctx.lineWidth=1;ctx.strokeStyle='#e8ecf6';ctx.fillStyle='#8b96ad';ctx.font='15px Arial';
-    let tx=niceStep(xmax-xmin),ty=niceStep(ymax-ymin);
+    let tx=gridSpacing(xmax-xmin),ty=gridSpacing(ymax-ymin);
     for(let x=Math.ceil(xmin/tx)*tx,k=0;x<=xmax&&k++<100;x+=tx){const px=sx(x);ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,h);ctx.stroke();ctx.fillText(formatScalar(x,5),px+5,Math.max(17,Math.min(h-7,sy(0)+17)));}
     for(let y=Math.ceil(ymin/ty)*ty,k=0;y<=ymax&&k++<100;y+=ty){const py=sy(y);ctx.beginPath();ctx.moveTo(0,py);ctx.lineTo(w,py);ctx.stroke();ctx.fillText(formatScalar(y,5),Math.max(6,Math.min(w-70,sx(0)+8)),py-7);}
     ctx.strokeStyle='#7387ad';ctx.lineWidth=1.6;
@@ -2591,7 +2602,7 @@ self.onmessage=async ({data})=>{
     const ca=Math.cos(azimuth),sa=Math.sin(azimuth),ce=Math.cos(elevation),se=Math.sin(elevation);
     const a=xx*ca-yy*sa,b=xx*sa+yy*ca,bd=b*ce-zz*se,zp=b*se+zz*ce;
     const perspective=3.6/(3.6+bd*.36);
-    return {x:w/2+a*w*.23*zoom3d*perspective,y:h/2-zp*h*.32*zoom3d*perspective,depth:bd};
+    return {x:w/2+panX3d+a*w*.23*zoom3d*perspective,y:h/2+panY3d-zp*h*.32*zoom3d*perspective,depth:bd};
   }
   function draw3D(){
     background();
@@ -2604,10 +2615,29 @@ self.onmessage=async ({data})=>{
     for(const y of [range.ymin,range.ymax])for(const z of [range.zmin,range.zmax])lines.push([persp(range.xmin,y,z),persp(range.xmax,y,z)]);
     ctx.lineWidth=1.1;ctx.strokeStyle='#d3dceb';
     for(const [a,b] of lines){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
-    const origin=persp(0,0,0);
-    for(const [loc,label,c] of [[persp(range.xmax,0,0),'X','#b84949'],[persp(0,range.ymax,0),'Y','#247a50'],[persp(0,0,range.zmax),'Z','#3757bd']]){
-      if(!Number.isFinite(loc.x))continue;ctx.strokeStyle=c;ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(origin.x,origin.y);ctx.lineTo(loc.x,loc.y);ctx.stroke();ctx.fillStyle=c;ctx.font='bold 20px Arial';ctx.fillText(label,loc.x+7,loc.y-7);
+    // Mark X, Y and Z with numeric tick labels. Keep axes on the bounding-box edges
+    // so they remain valid even when zero lies outside the visible domain.
+    const axes=[
+      ['X','x',range.xmin,range.xmax,v=>persp(v,range.ymin,range.zmin),'#b84949'],
+      ['Y','y',range.ymin,range.ymax,v=>persp(range.xmin,v,range.zmin),'#247a50'],
+      ['Z','z',range.zmin,range.zmax,v=>persp(range.xmin,range.ymin,v),'#3757bd']
+    ];
+    ctx.textAlign='left';
+    for(const [label,axis,min,max,project,color] of axes){
+      const a=project(min),b=project(max);
+      ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      ctx.fillStyle=color;ctx.font='bold 17px Arial';ctx.fillText(label,b.x+9,b.y-8);
+      ctx.font='12px Arial';
+      for(const value of axisTicks(min,max)){
+        const p=project(value);
+        ctx.beginPath();ctx.moveTo(p.x-3,p.y-3);ctx.lineTo(p.x+3,p.y+3);ctx.stroke();
+        ctx.fillText(formatScalar(value,4),p.x+6,p.y+16);
+      }
     }
+    // Ground-plane grid uses the same user-specified spacing as the numeric labels.
+    ctx.strokeStyle='#e1e6f0';ctx.lineWidth=.8;
+    for(const x of axisTicks(range.xmin,range.xmax)){const a=persp(x,range.ymin,range.zmin),b=persp(x,range.ymax,range.zmin);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+    for(const y of axisTicks(range.ymin,range.ymax)){const a=persp(range.xmin,y,range.zmin),b=persp(range.xmax,y,range.zmin);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
     const N=38,quads=[];
     for(const [idx,func] of graphExpr.entries()){
       if(func.kind==='trace')continue;
@@ -2657,7 +2687,7 @@ self.onmessage=async ({data})=>{
       ctx.setLineDash(seriesDash(func.seriesIndex));stroke(func.color,Math.max(2,seriesWidth(func.seriesIndex)+2));ctx.setLineDash([]);
     }
     window.MathStudio.graphData?.draw(ctx,{mode:'3d',range,w,h,persp});
-    ctx.fillStyle='#71809d';ctx.font='13px Arial';ctx.fillText('Drag to rotate · Scroll to zoom · X / Y / Z ranges can be edited',18,h-17);
+    ctx.fillStyle='#71809d';ctx.font='13px Arial';ctx.fillText('Drag to rotate · Shift-drag / Pan 3D to move · Scroll to zoom at pointer · Axes & grid',18,h-17);
   }
   function legend(){const frame=$('graph-legend');frame.replaceChildren();for(const [i,f] of graphExpr.entries()){
     const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=f.kind==='trace'?f.color:f.color;
@@ -2692,21 +2722,35 @@ self.onmessage=async ({data})=>{
   }
   function setRanges(r){for(const [key,value] of Object.entries(r))if($('graph-'+key))$('graph-'+key).value=value;range={...range,...r};}
   function switchGraph(mode){
-    graphMode=mode;
+    if(mode!==graphMode){
+      graphDrafts[graphMode]=$('graph-input').value;
+      graphViews[graphMode]={...range};
+      graphMode=mode;
+      setRanges(graphViews[mode]||(mode==='2d'?graphDef2:graphDef3));
+      $('graph-input').value=graphDrafts[mode]??(mode==='2d'?'y = sin(x)\ny = cos(x)':'z = sin(sqrt(x^2+y^2))');
+    }
     for(const b of document.querySelectorAll('[data-graph-mode]'))b.classList.toggle('active',b.dataset.graphMode===mode);
-    $('graph-hint').textContent=mode==='2d'?'One y=f(x) per line. Compare several functions.':'One z=f(x,y) per line. You can also pair y=f(x) with z=f(x,y) to draw a 3D curve on the surface.';
+    $('graph-hint').textContent=mode==='2d'?'One y=f(x) per line. Compare several functions.':'One z=f(x,y), z2=f(x,y), etc. per line. You may also add a y=f(x) trace.';
     for(const el of document.querySelectorAll('.graph-z-control'))el.hidden=mode!=='3d';
+    $('graph-pan-toggle').hidden=mode!=='3d';
     for(const el of document.querySelectorAll('.graph-y-control'))el.querySelector('input').disabled=false;
-    setRanges(mode==='2d'?graphDef2:graphDef3);
-    azimuth=-.72;elevation=.46;zoom3d=1;
-    $('graph-input').value=mode==='2d'?'y = sin(x)\ny = cos(x)':'z = sin(sqrt(x^2+y^2))';
     fillGraphExamples();plot();
   }
   const examples2=[['Sine & cosine','y=sin(x)\ny=cos(x)'],['Parabola','y=x^2-2*x-3'],['Rational','y=1/(x-1)'],['Exponential','y=exp(-x^2/4)'],['Piecewise','y=if(x<0,-x,x)'],['Inverse trig','y=asin(x)']];
   const examples3=[['Radial ripple','z=sin(sqrt(x^2+y^2))'],['Saddle','z=(x^2-y^2)/6'],['Gaussian peak','z=6*exp(-(x^2+y^2)/8)'],['Wave surface','z=sin(x)*cos(y)'],['Curve on surface','y=x×x\nz=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),sin(x)*cos(y))']];
   function fillGraphExamples(){const frame=$('graph-examples');frame.replaceChildren();for(const [name,code] of graphMode==='2d'?examples2:examples3){const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',()=>{$('graph-input').value=code;plot();});frame.append(b)}}
   $('graph-plot').addEventListener('click',plot);
-  $('graph-reset').addEventListener('click',()=>{setRanges(graphMode==='2d'?graphDef2:graphDef3);azimuth=-.72;elevation=.46;zoom3d=1;plot();});
+  $('graph-reset').addEventListener('click',()=>{setRanges(graphMode==='2d'?graphDef2:graphDef3);azimuth=-.72;elevation=.46;zoom3d=1;panX3d=0;panY3d=0;plot();});
+  $('graph-show-axes').addEventListener('click',()=>{
+    const d=$('ui-graph-axes')||$('graph-controls-collapsible');if(d)d.open=true;
+    $('graph-xmin').focus();
+  });
+  $('graph-pan-toggle').addEventListener('click',()=>{
+    pan3dEnabled=!pan3dEnabled;
+    $('graph-pan-toggle').setAttribute('aria-pressed',String(pan3dEnabled));
+    $('graph-pan-toggle').textContent='Pan 3D: '+(pan3dEnabled?'on':'off');
+  });
+  $('graph-grid-step').addEventListener('change',plot);
   $('graph-import').addEventListener('click',()=>{const raw=$('equation-input').value.trim();if(!raw){graphMsg('Write an equation in the Equation editor first.',true);return;}
     if(graphMode==='2d')$('graph-input').value=/^[a-z]\s*\(/i.test(raw)?raw:'y='+raw;
     else $('graph-input').value=/^\s*[yz]\s*=/i.test(raw)?raw:'z='+raw;
@@ -2715,11 +2759,12 @@ self.onmessage=async ({data})=>{
   $('graph-save').addEventListener('click',()=>{drawGraph();const a=document.createElement('a');a.href=graphCanvas.toDataURL('image/png');a.download='MathStudio_'+graphMode+'_graph.png';document.body.append(a);a.click();a.remove();graphMsg('Graph exported as a PNG image.');});
   for(const b of document.querySelectorAll('[data-graph-mode]'))b.addEventListener('click',()=>switchGraph(b.dataset.graphMode));
   for(const k of paramIds)$('graph-'+k).addEventListener('change',plot);
-  graphCanvas.addEventListener('pointerdown',e=>{graphCanvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,range:{...range},azi:azimuth,ele:elevation};graphCanvas.style.cursor='grabbing';});
+  graphCanvas.addEventListener('contextmenu',e=>e.preventDefault());
+  graphCanvas.addEventListener('pointerdown',e=>{graphCanvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,range:{...range},azi:azimuth,ele:elevation,panX:panX3d,panY:panY3d,pan:graphMode==='3d'&&(pan3dEnabled||e.shiftKey||e.button===2)};graphCanvas.style.cursor='grabbing';});
   graphCanvas.addEventListener('pointermove',e=>{
     if(!drag)return;
     const rect=graphCanvas.getBoundingClientRect(),dx=(e.clientX-drag.x)/rect.width,dy=(e.clientY-drag.y)/rect.height;
-    if(graphMode==='3d'){azimuth=drag.azi+dx*5;elevation=Math.max(-1.38,Math.min(1.38,drag.ele-dy*3.7));}
+    if(graphMode==='3d'){if(drag.pan){panX3d=drag.panX+dx*w;panY3d=drag.panY+dy*h;}else{azimuth=drag.azi+dx*5;elevation=Math.max(-1.38,Math.min(1.38,drag.ele-dy*3.7));}}
     else{
       const sx=drag.range.xmax-drag.range.xmin,sy=drag.range.ymax-drag.range.ymin;
       range.xmin=drag.range.xmin-dx*sx;range.xmax=drag.range.xmax-dx*sx;
@@ -2731,7 +2776,13 @@ self.onmessage=async ({data})=>{
   graphCanvas.addEventListener('pointerup',pointerStop);graphCanvas.addEventListener('pointercancel',pointerStop);
   graphCanvas.addEventListener('wheel',e=>{
     e.preventDefault();const factor=e.deltaY>0?1.12:1/1.12;
-    if(graphMode==='3d')zoom3d=Math.max(.25,Math.min(5,zoom3d/factor));
+    if(graphMode==='3d'){
+      const rect=graphCanvas.getBoundingClientRect(),mouseX=(e.clientX-rect.left)/rect.width*w,mouseY=(e.clientY-rect.top)/rect.height*h;
+      const previous=zoom3d;zoom3d=Math.max(.25,Math.min(5,zoom3d/factor));
+      const ratio=zoom3d/previous;
+      panX3d=mouseX-w/2-(mouseX-w/2-panX3d)*ratio;
+      panY3d=mouseY-h/2-(mouseY-h/2-panY3d)*ratio;
+    }
     else{
       const rect=graphCanvas.getBoundingClientRect(),px=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width)),py=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));
       const cx=range.xmin+(range.xmax-range.xmin)*px,cy=range.ymax-(range.ymax-range.ymin)*py;
@@ -2778,7 +2829,7 @@ self.onmessage=async ({data})=>{
       $('graph-input').value=[...lines,added].join('\n');plot();
       if($('graph-status').classList.contains('error'))throw Error($('graph-status').textContent);
     },
-    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,dataset:window.MathStudio.graphData?.exportState()||null,appearance:getAppearance()}),
+    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,panX3d,panY3d,dataset:window.MathStudio.graphData?.exportState()||null,appearance:getAppearance()}),
     restoreGraphState:data=>{
       if(!data||typeof data!=='object')return;
       if(['2d','3d'].includes(data.mode))switchGraph(data.mode);
@@ -2789,7 +2840,9 @@ self.onmessage=async ({data})=>{
       }
       if(Number.isFinite(data.azimuth))azimuth=data.azimuth;
       if(Number.isFinite(data.elevation))elevation=data.elevation;
-      if(Number.isFinite(data.zoom3d))zoom3d=data.zoom3d;
+      if(Number.isFinite(data.zoom3d))zoom3d=Math.max(.25,Math.min(5,data.zoom3d));
+      if(Number.isFinite(data.panX3d))panX3d=Math.max(-5000,Math.min(5000,data.panX3d));
+      if(Number.isFinite(data.panY3d))panY3d=Math.max(-5000,Math.min(5000,data.panY3d));
       if(window.MathStudio.graphData)window.MathStudio.graphData.restoreState(data.dataset??null);setAppearance(data.appearance||{});
       plot();
     }

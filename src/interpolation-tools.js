@@ -26,6 +26,9 @@ function interpolate({points,queries}={}){
   let lo=0,hi=samples.length-1;
   while(hi-lo>1){const mid=Math.floor((lo+hi)/2);if(samples[mid][0]<=x)lo=mid;else hi=mid;}
   const [x0,y0]=samples[lo],[x1,y1]=samples[hi];
+  // Return exact sample values at knots; subtraction can lose small endpoint values.
+  if(x===x0)return [x,y0];
+  if(x===x1)return [x,y1];
   const fraction=(x-x0)/(x1-x0);
   const y=number(y0+(y1-y0)*fraction,'Interpolated y');
   return [x,y];

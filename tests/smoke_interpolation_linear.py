@@ -20,6 +20,11 @@ def main():
         })""")
         assert result["rows"] == [[0,1],[0.5,2],[1,3],[1.5,4],[2,5]], result
         assert result["domain"] == [0,2]
+        # Exact knots must retain the supplied value even with severe cancellation.
+        knot = page.evaluate("""() => MathStudio.interpolationTools.interpolate({
+            points:[[0,1e12],[1,0.000001]],queries:[0,1]
+        })""")
+        assert knot["rows"] == [[0,1e12],[1,1e-6]], knot
         for invalid in [
             {"points":[[0,0]],"queries":[0]},
             {"points":[[0,0],[0,1]],"queries":[0]},
@@ -36,9 +41,10 @@ def main():
                 catch(e){return !!e.message;}
             }""", invalid), invalid
         assert page.evaluate("""() => {
-            try {MathStudio.interpolationTools.parsePairs('0,1,2\n1,2');return false;}
+            try {MathStudio.interpolationTools.parsePairs('0,1,2\\n1,2');return false;}
             catch(e){return /exactly/.test(e.message);}
         }""")
+        assert page.evaluate("""() => MathStudio.interpolationTools.parsePairs('0,0\\n1,1')""") == [["0","0"],["1","1"]]
         page.locator('[data-workspace="solver"]').click()
         page.locator("#interp-details").evaluate("(e) => e.open=true")
         page.locator("#interp-run").click()

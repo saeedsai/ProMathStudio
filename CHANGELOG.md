@@ -1,6 +1,7 @@
 ## 2026-10-27 — Bounded offline 1D linear interpolation (implemented on dev; release pending)
 
 - Added a native piecewise-linear interpolator with strict sorted sample validation, finite-domain checks, active Data Tables x/y loading, and Data Tables/Graphs handoff.
+- Fixed exact-knot precision loss for sample values with very different magnitudes and repaired an embedded-JavaScript newline escaping failure in the browser regression. Added exact-knot and parser regression coverage.
 - Added focused Playwright regression `tests/smoke_interpolation_linear.py` to mandatory Quality CI and synchronized the standalone HTML build. Requires exact dev/PR/main CI and Pages verification before RELEASED status.
 - Scope excludes extrapolation, cubic/spline interpolation, multidimensional interpolation and uncertainty estimates.
 

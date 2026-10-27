@@ -127,3 +127,8 @@ Both calculator-style and Equation Editor-style forms are accepted. For example,
 ## Composing Python custom functions in Calculator (bounded)
 
 Save a Python function under **Custom functions · Formula / Python**, e.g. `def myfun(x): return x*x`. Calculator accepts `2*myfun(3)+1` (19), `myfun(myfun(2)+1)` (25), and `if(1,myfun(3),myfun(100))` (9, without running the unused branch). Nested Python calls execute sequentially in an isolated Pyodide Web Worker; numeric AST operators remain in the native safe evaluator, never JavaScript eval. Arguments/results must be finite real numbers, calls are capped at 16 per expression, each worker call times out after 60 seconds, and a newer Calculator execution cancels any pending worker result. This is **not** Python support in Graphs, Data Tables, or formula-defined custom-function bodies; first-use CDN execution requires online QA. The focused Playwright regression mocks the worker transport and does not prove actual Pyodide downloads.
+
+
+### Linear interpolation numerical precision
+
+The bounded 1D piecewise-linear interpolator preserves exact supplied sample values when a query matches a sample x coordinate, even if neighboring y values differ greatly in magnitude. Between knots it uses ordinary binary64 linear interpolation; it does not extrapolate or guarantee exact decimal arithmetic.

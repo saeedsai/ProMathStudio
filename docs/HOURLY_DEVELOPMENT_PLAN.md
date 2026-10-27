@@ -10,7 +10,17 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-27 after fitting diagnostics implementation)
+## Next five features (refreshed 2026-10-27 for graph usability fixes)
+
+| Order | ID | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | UI-GRAPH-AXES-3D-NAV | User-set X/Y/Z limits and grid step; numeric 3D axis ticks; z/z2/z3 surfaces; 3D pan and pointer zoom; preserve 2D/3D drafts and table actions; browser regression, exact dev/PR/main/Pages verification. | DEV IMPLEMENTED — CI and promotion pending |
+| 2 | P1-FITTING-DIAGNOSTICS | Correct residual/MAE/SSE and CSV export; exact CI and PR release gate. | DEV IMPLEMENTED — awaiting exact-head CI evidence |
+| 3 | P0-PRECISION | 30+ digit references, bounded precision control and invalid inputs. | TODO |
+| 4 | P0-SYMBOLIC-ODE-IC | y'=y with y(0)=1, inconsistent initial conditions and worker/UI regression. | TODO |
+| 5 | P1-FFT-1D | Frequency peaks, inverse round-trip and graph/table integration. | TODO |
+
+### Previous five priorities (fitting diagnostics checkpoint)
 
 | Order | ID | Acceptance tests | Status |
 |---:|---|---|---|
@@ -281,3 +291,6 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 **2026-10-27 14:xx CET — follow-up correctness checkpoint.** Added invalidation of residual downloads on model/degree/table/axis/chart changes (`8c342381126133e79b24ae4ca7cfcc7fd5a39d76`), strengthened regression (`ecbf59a8fca9f1f5ec005c66e73792802ee4a7aa`), counted excluded nonnumeric rows in fit diagnostics (`d91d7cacb05974a33173b6a46cd3abca12395072`), and asserted the excluded count (`2d2235d75a47a76794e1ae5b8cb80068c8aa9c6f`). Full local browser execution unavailable because repository files cannot be cloned in this runtime (DNS error). Connector exposes no push-triggered Quality run for the exact dev head; do not open release PR or claim green/deployed without that evidence. Existing main Quality 40502871511 and Pages 40502870819 still queued at last check. Keep `dev` progress and continue on next run. Next five unchanged.
 
 **2026-10-27 14:xx CET — isolated source math QA.** Executed the exact `linearSolve`/`fmt`/`analyze` functions extracted from the current `dev` standalone HTML in an isolated V8 runtime: exact linear, quadratic and exponential fits yielded R²=1 and near-zero MAE; non-perfect data yielded finite positive MAE/SSE; invalid, insufficient and singular inputs rejected; omitted row counted correctly. This does not substitute for browser Playwright or full CI. Current development code checkpoint `f667027f101089e9e224c5dff7b1dd6f3e796a55`; new documentation commit follows. Main remains `ce459eb89eb8f24de1956efac4d908c414cd23c1`. Main Quality 40502871511 and Pages 40502870819 remain queued. No promotion without exact green checks.
+
+
+**2026-10-27 — graph usability development checkpoint.** User reports hidden axes/grid controls, no numeric X/Y/Z ticks in 3D, inability to pan or zoom toward pointer, rejection of z2/z3-labeled surfaces and overwritten functions after plot/table/mode actions. Implemented graph UX corrections on dev, new focused browser regression tests/smoke_graph_navigation.py, mandatory Quality step, user guide and changelog. Exact CI, PR, main and Pages gates **pending**, do not claim released. Continue parallel fitting diagnostics verification, then precision, ODE IC and FFT.

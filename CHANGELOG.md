@@ -1,9 +1,15 @@
-## 2026-10-27 — Shape-preserving cubic interpolation (P1-NUMERIC-INTERPOLATION-PCHIP; dev candidate)
+## 2026-10-27 — Bounded barycentric polynomial interpolation (dev implementation; release pending)
+
+- Added offline global polynomial interpolation for 2–16 nodes, normalized barycentric weights, exact-knot preservation, conditioning guards and 1,000 in-domain queries; linear/PCHIP modes remain unchanged.
+- Added polynomial method selection, Data Tables and Graphs handoff, numerical and browser regression tests, mandatory CI step, standalone HTML synchronization and mathematical limitations documentation.
+- Release status: **DEV IMPLEMENTED**, pending exact dev/PR/main Quality and Pages verification; no deployment claim yet.
+
+## 2026-10-27 — Shape-preserving cubic interpolation (PR #26 released; exact main Quality and Pages green)
 
 - Added bounded offline PCHIP with monotone cubic Hermite slopes, exact-knot preservation, two-point linear fallback, method selector and Data Tables/Graphs export; linear mode remains default.
 - Added tests/smoke_interpolation_pchip.py reference, monotonicity, invalid-input, stale-export and browser regression as mandatory Quality step; synchronized standalone index.html.
 - Repaired existing linear browser regression's signature assertion to reflect the added optional method while retaining the linear-default and source-bundle assertions. Initial dev Quality 40453273799 failed at this outdated assertion; rerun exact-head checks after this repair.
-- Release gate pending: exact dev Quality, PR checks, main Quality and Pages deployment must be verified before marking RELEASED. Hosted interactive Pages smoke remains a separate limitation.
+- P1-NUMERIC-INTERPOLATION-PCHIP RELEASED via PR #26: exact dev Quality 40453415941 and PR Quality 40453668805 passed 35 steps each, including both interpolation regressions. Merged normally to main 35fe1443933b24edfd5c2c89ff2549b98667bcbb; main Quality 40454600848, Pages 40454600491 and branch cleanup 40454600839 succeeded. Initial dev CI 40453273799 failed on an outdated test source signature and was repaired without dropping behavioral assertions. Hosted interactive Pages smoke remains unavailable (site fetch inaccessible).
 
 ## 2026-10-27 — Bounded offline 1D linear interpolation (PR #25 released; main Quality and Pages green)
 

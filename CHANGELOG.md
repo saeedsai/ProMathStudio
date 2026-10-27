@@ -1,3 +1,8 @@
+## Unreleased — bounded high-precision decimal arithmetic (2026-10-27)
+
+- Added Calculator → High precision task with exact BigInt decimal addition, subtraction and multiplication, plus 16–80 significant-digit half-even division, bounded 300-digit operands and explicit errors.
+- Added mandatory offline Playwright reference/negative/UI regression; synchronized modular and standalone builds. Standard Calculator binary64 behavior remains unchanged. Full precision roadmap remains partial until broader expression and mathematical function support and verified release.
+
 ## 2026-10-27 — Graph axes, multi-surface plots and camera controls (dev candidate)
 
 - Direct Axes & grid access for editable X/Y/Z bounds, optional uniform spacing and labeled numeric 3D axes.

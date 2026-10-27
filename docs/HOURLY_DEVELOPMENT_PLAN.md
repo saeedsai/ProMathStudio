@@ -10,15 +10,15 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-27 for graph usability fixes)
+## Next five features (refreshed 2026-10-27: precision increment, CI backlog)
 
 | Order | ID | Acceptance tests | Status |
 |---:|---|---|---|
-| 1 | UI-GRAPH-AXES-3D-NAV | User-set X/Y/Z limits and grid step; numeric 3D axis ticks; z/z2/z3 surfaces; 3D pan and pointer zoom; preserve 2D/3D drafts and table actions; browser regression, exact dev/PR/main/Pages verification. | DEV IMPLEMENTED — CI and promotion pending |
-| 2 | P1-FITTING-DIAGNOSTICS | Correct residual/MAE/SSE and CSV export; exact CI and PR release gate. | DEV IMPLEMENTED — awaiting exact-head CI evidence |
-| 3 | P0-PRECISION | 30+ digit references, bounded precision control and invalid inputs. | TODO |
-| 4 | P0-SYMBOLIC-ODE-IC | y'=y with y(0)=1, inconsistent initial conditions and worker/UI regression. | TODO |
-| 5 | P1-FFT-1D | Frequency peaks, inverse round-trip and graph/table integration. | TODO |
+| 1 | UI-GRAPH-AXES-3D-NAV | Numeric ticks, 3D surfaces, pointer pan/zoom, draft retention; exact CI/PR/Pages. | DEV IMPLEMENTED — CI queued |
+| 2 | P1-FITTING-DIAGNOSTICS | Residual references, CSV export, stale-state browser test; exact CI/PR/Pages. | DEV IMPLEMENTED — CI queued |
+| 3 | P0-PRECISION | Exact decimal +/−/×, 40-digit division, invalid/zero cases, task-first UI; extend later to expressions and transcendental functions. | DEV IMPLEMENTED — release gates pending; partial scope |
+| 4 | P0-SYMBOLIC-ODE-IC | y'=y, y(0)=1 and inconsistent conditions; worker/UI regression. | TODO |
+| 5 | P1-FFT-1D | Sinusoid/DC peaks, inverse round-trip, invalid lengths, table/graph handoff. | TODO |
 
 ### Previous five priorities (fitting diagnostics checkpoint)
 
@@ -294,3 +294,11 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 
 
 **2026-10-27 — graph usability development checkpoint.** User reports hidden axes/grid controls, no numeric X/Y/Z ticks in 3D, inability to pan or zoom toward pointer, rejection of z2/z3-labeled surfaces and overwritten functions after plot/table/mode actions. Implemented graph UX corrections on dev, new focused browser regression tests/smoke_graph_navigation.py, mandatory Quality step, user guide and changelog. Exact CI, PR, main and Pages gates **pending**, do not claim released. Continue parallel fitting diagnostics verification, then precision, ODE IC and FFT.
+
+
+### 2026-10-27 15:xx CET — P0-PRECISION bounded first increment
+
+- Starting dev 4ceb25039a57abe0ed2ce10f463989f27c783266; main remained ce459eb89eb8f24de1956efac4d908c414cd23c1 at discovery. Root AGENTS, living plan, frozen audit and latest queued CI were reviewed. No open PR.
+- Implemented offline BigInt exact-decimal +, −, × and 16–80 significant-digit half-even rounded division in Calculator → High precision, bounded to 300 digits/operand. No eval, CDN or mutation of standard Calculator; no claims of arbitrary-precision transcendental or symbolic operations.
+- Added browser/reference/negative regression tests/smoke_precision.py, mandatory Quality step, synchronized standalone HTML, guide and changelog. Local isolated Node numerical and Chromium UI smoke passed; full repository browser/structural suite and exact-head CI await GitHub Actions.
+- Do not promote queued graph, fitting or precision increments until exact dev/PR checks pass. Main Quality 40502871511 and Pages 40502870819 still queued at discovery. Branch protection remains disabled. Next five as above.

@@ -156,3 +156,10 @@ This method assumes the function is continuous and **unimodal** on the chosen in
 ## Bracketed root refinement (offline Brent-Dekker)
 
 Choose **Symbolic Solver → Numerical methods → Bracketed root**. Enter a real residual `f(x)`, two finite bounds with opposite signs, tolerance (1e-12–1e-2) and iteration limit (8–2000). `x^3-x-2` on `[1,2]` returns approximately `1.5213797068`. The method combines safeguarded bisection, secant and inverse-quadratic interpolation, reports residual/iterations, and exports one Data Table row. Changing input disables stale export. It requires continuity, does not enumerate all roots or certify uniqueness, and rejects non-finite evaluations, same-sign brackets and budget exhaustion. See `tests/smoke_root_brent.py`.
+
+
+## High-precision decimal arithmetic (bounded first increment)
+
+In **Calculator → High precision**, enter two plain decimal operands and select addition, subtraction, multiplication or division. This offline BigInt implementation computes +, − and × exactly for up to 300 decimal digits per operand, while division rounds to a selectable **16–80 significant digits** using round-half-to-even. For example, 0.1 + 0.2 gives exactly 0.3; 1 ÷ 3 at 40 digits gives 0. followed by 40 threes. The standard Calculator still uses its existing binary64 numeric parser and is not silently changed.
+
+**Scope:** Only two-operand plain decimal arithmetic is implemented; scientific notation, compound expressions, powers, complex numbers, transcendental functions, significant-digit rounding for +/−/× and arbitrary precision across other workspaces are **not yet supported**. Invalid operands, overlong input, invalid precision and division by zero fail explicitly. See tests/smoke_precision.py.

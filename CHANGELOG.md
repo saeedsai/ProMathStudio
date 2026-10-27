@@ -1,3 +1,8 @@
+## 2026-10-27 — Curve-fit residual diagnostics (dev candidate)
+
+- Added R²/RMSE/MAE/SSE and per-point measured/predicted/residual diagnostics for bounded 2D curve fits. Download a safe numeric CSV without modifying source tables. Disable export before a valid fit, after clearing, or after failed refit.
+- Added `tests/smoke_fit_diagnostics.py` numerical/reference, invalid-input and Playwright CSV download coverage; mandatory Quality step. Release requires exact dev/PR/main Quality and Pages verification.
+
 ## 2026-10-27 — XLSX formula token boundary correction (PR #31 released)
 
 - **UI-TASK-RESTORE (dev candidate):** Remember the last selected task independently for each of the five workspaces during the current page session; preserve the correct active button, description and form when returning. Adds a focused desktop/mobile browser regression and mandatory Quality gate. No localStorage/project schema change.

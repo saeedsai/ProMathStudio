@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id);
 if(!$('calculator-panel')||!$('graph-panel')||!$('data-panel'))return;
 const css=document.createElement('style');
-css.textContent=\`
+css.textContent=`
 #workspace-task-guide{background:#fff;border:1px solid #dce4f2;border-radius:14px;padding:15px 17px;margin:12px 0 20px;box-shadow:0 4px 18px #1c30570c}
 #workspace-task-guide .task-heading{font-size:13px;font-weight:790;color:#243552;margin-bottom:9px}
 #workspace-task-guide .task-choices{display:flex;flex-wrap:wrap;gap:8px}
@@ -20,7 +20,7 @@ css.textContent=\`
 #ui-editor-python .python-wrap{margin-top:9px}
 #workspace-task-guide button:focus-visible,.task-disclosure>summary:focus-visible{outline:3px solid #93a5ed;outline-offset:2px}
 @media(max-width:700px){#workspace-task-guide{padding:12px}#workspace-task-guide .task-choice{flex:1 1 calc(50% - 8px)}.task-disclosure{padding:0 9px}}
-\`;
+`;
 document.head.append(css);
 function wrap(id,title,node){
  if(!node||!node.parentNode)throw Error('Missing workspace form for '+id);
@@ -35,7 +35,7 @@ wrap('ui-graph-axes','Axes and numeric ranges',$('graph-panel').querySelector('.
 wrap('ui-graph-table','Plot a Data Table',$('graph-panel').querySelector('.dt-graph-tools'));
 wrap('ui-editor-python','Generated Python / SymPy code',$('python-output').closest('.python-wrap'));
 const tasks={
- calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-details'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],
+ calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-tools'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],
  editor:[['basic','Write equation','Write an expression and see its live preview.'],['examples','Try examples','Select an example to insert.','#examples'],['notebook','My equations','Reopen saved equations.','#notebook'],['python','Python code','Show the generated SymPy code.','#ui-editor-python']],
  solver:[['basic','Symbolic solve','Choose an algebra or calculus operation.'],['numerical','Numerical methods','Roots, integrals, systems and PDEs.','#num-details'],['ode','ODE initial values','Solve initial-value differential equations.','#ode-details'],['assumptions','Assumptions','Configure variable restrictions.','#ui-solver-assumptions']],
  graph:[['basic','Plot functions','Enter functions and plot in 2D or 3D.'],['table','Plot table data','Select data, axes and chart type.','#ui-graph-table'],['axes','Axis limits','Adjust visible coordinate ranges.','#ui-graph-axes'],['appearance','Appearance','Choose colors and line styles.','#graph-appearance']],

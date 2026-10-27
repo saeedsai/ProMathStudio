@@ -59,6 +59,8 @@ jobs:
         run: python tests/smoke_interpolation_pchip.py
       - name: Barycentric polynomial interpolation reference and browser regression
         run: python tests/smoke_interpolation_barycentric.py
+      - name: Golden-section scalar minimization reference and browser regression
+        run: python tests/smoke_minimize_golden.py
       - name: Context menus and programmer calculator smoke test
         run: python tests/smoke_context_actions.py
       - name: Graph styles, table zoom and calculator notation

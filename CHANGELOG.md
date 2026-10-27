@@ -1,3 +1,9 @@
+## 2026-10-27 — Bounded offline 1D golden-section minimization (dev implementation; release pending)
+
+- Added a finite-interval, unimodal scalar minimizer with safe numeric expression evaluation, endpoint comparison, tie/flat handling, configurable tolerance and bounded iteration budget.
+- Added Solver numerical UI, stale-export invalidation, Data Tables result handoff, new Playwright numerical/UI regression and mandatory Quality gate. Kept standalone index synchronized with `src/minimize-tools.js`.
+- Local isolated Node references and stub-browser UI passed; full exact-head dev Quality, PR/main Quality and Pages verification remain release gates.
+
 ## 2026-10-27 — Bounded barycentric polynomial interpolation (PR #27 released; exact main Quality and Pages green)
 
 - Added offline global polynomial interpolation for 2–16 nodes, normalized barycentric weights, exact-knot preservation, conditioning guards and 1,000 in-domain queries; linear/PCHIP modes remain unchanged.

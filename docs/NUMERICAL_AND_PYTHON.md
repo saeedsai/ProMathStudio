@@ -146,3 +146,9 @@ Save a Python function under **Custom functions · Formula / Python**, e.g. `def
 ### Linear interpolation numerical precision
 
 The bounded 1D piecewise-linear interpolator preserves exact supplied sample values when a query matches a sample x coordinate, even if neighboring y values differ greatly in magnitude. Between knots it uses ordinary binary64 linear interpolation; it does not extrapolate or guarantee exact decimal arithmetic.
+
+## Bounded 1D minimization (offline golden-section)
+
+In **Symbolic Solver → Numerical methods → 1D minimization**, enter a finite real objective `f(x)`, lower/upper bounds, tolerance (1e-10 to 1e-2) and maximum iterations (8–2000). The objective uses the safe Calculator numerical parser; no JavaScript `eval` or network service. Example: `(x-2)^2+1` on `[0,4]` returns approximately `x=2`, `f(x)=1`. A one-row result can be saved to Data Tables. Changing inputs invalidates the prior export.
+
+This method assumes the function is continuous and **unimodal** on the chosen interval. It considers both endpoints, preserves a centered solution for constant objectives, rejects non-finite objectives and fails explicitly if the iteration budget is exhausted. It does **not** certify a global minimum for multimodal or discontinuous functions, support constraints/multivariate objectives, or provide derivatives. See `tests/smoke_minimize_golden.py`.

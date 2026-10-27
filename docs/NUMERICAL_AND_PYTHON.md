@@ -46,6 +46,12 @@ In **Symbolic Solver → Numerical methods / PDE**, choose **Adaptive Simpson in
 
 **Limitations:** Smooth real finite-interval functions only; the error estimate is heuristic, not a certified global bound. Discontinuities, singularities, and rapidly oscillatory integrands can be missed or fail. Exceeding evaluation/depth budgets, invalid bounds, non-real values, or non-finite results fails without exporting partial data. The integral is a scalar result, so table/graph export is disabled for this method. Fixed-step Calculator `int(...)` is unchanged. See `tests/smoke_quadrature_adaptive.py`.
 
+## One-dimensional piecewise-linear interpolation (offline)
+
+Open **Symbolic Solver → Numerical methods → 1D linear interpolation**. Enter 2–200 sorted, strictly increasing x/y sample pairs, one pair per line, and 1–1,000 query x values. You can load the first two columns of the active Data Table using **Load active table x/y**. The solver returns linearly interpolated real y values, sorted by query x, and can save them to Data Tables or plot them as a 2D line in Graphs.
+
+Example: samples `0,1`, `1,3`, `2,5` and queries `0,0.5,1,1.5,2` yield y values `1,2,3,4,5`. Duplicate/unsorted x values, malformed pairs, non-finite or overly large numbers and out-of-domain queries fail without exporting stale results. **No extrapolation**, cubic spline, multidimensional interpolation or uncertainty estimates are provided. See `tests/smoke_interpolation_linear.py`.
+
 ## One-dimensional Poisson equation
 
 Select **1D Poisson**, where the implemented convention is:

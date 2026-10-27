@@ -1,3 +1,9 @@
+## 2026-10-27 — Bounded offline 1D linear interpolation (implemented on dev; release pending)
+
+- Added a native piecewise-linear interpolator with strict sorted sample validation, finite-domain checks, active Data Tables x/y loading, and Data Tables/Graphs handoff.
+- Added focused Playwright regression `tests/smoke_interpolation_linear.py` to mandatory Quality CI and synchronized the standalone HTML build. Requires exact dev/PR/main CI and Pages verification before RELEASED status.
+- Scope excludes extrapolation, cubic/spline interpolation, multidimensional interpolation and uncertainty estimates.
+
 ## 2026-10-27 — Bounded adaptive Simpson quadrature (PR #24 released; main Quality and Pages green)
 
 - Added offline finite-interval adaptive Simpson integration with tolerance and evaluation budget controls, local error estimate, bounded subdivision and non-finite rejection. Existing fixed-step Calculator integration and numerical methods are preserved.

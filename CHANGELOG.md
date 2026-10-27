@@ -1,3 +1,8 @@
+## 2026-10-27 — Bounded offline two-sheet XLSX export (dev implementation; release pending)
+
+- Added dependency-free OpenXML/ZIP STORE export of one or two Data Tables sheets with numbers, text, blanks, formulas, quoted sheet references and header-row reference translation. Enforced size, name, XML control-character and row/column limits.
+- Added `src/xlsx-tools.js`, synchronized standalone HTML, `tests/smoke_xlsx_export.py`, mandatory Quality step and Data Tables documentation. Import and secure transactional round-trip remain pending. Exact-head CI, PR, main Quality and Pages must be verified before release.
+
 ## 2026-10-27 — Brent-Dekker bracketed root refinement (PR #29 released; exact main Quality and Pages green)
 
 - Added bounded offline real root refinement with residual validation, strict input limits, browser UI and one-row Data Tables export; previous root search remains intact.

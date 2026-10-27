@@ -32,6 +32,15 @@ def main():
         page.locator('#graph-input').fill(surfaces)
         page.locator('#graph-plot').click()
         assert page.locator('#graph-legend .graph-legend-line').count()==3
+        labels=page.evaluate("""() => {
+          const canvas=document.getElementById('graph-canvas'),ctx=canvas.getContext('2d');
+          const original=ctx.fillText,names=[];
+          ctx.fillText=function(value,...args){names.push(String(value));return original.call(this,value,...args);};
+          document.getElementById('graph-plot').click();
+          ctx.fillText=original;return names;
+        }""")
+        assert all(axis in labels for axis in ['X','Y','Z']),labels
+        assert any(label in labels for label in ['-6','-4','-2','0','2','4','6']),labels
         assert 'Displaying 3 functions' in page.locator('#graph-status').inner_text()
         assert not page.locator('#graph-status').evaluate('(e)=>e.classList.contains("error")')
         # A second request to select the current mode must never replace typed equations.

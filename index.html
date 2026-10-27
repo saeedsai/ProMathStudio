@@ -3994,7 +3994,7 @@ function analyze(points,model,degree=2){
  const r2=total>0?1-ss/total:(ss<1e-15?1:0);
  return {model,degree,formula,coefficients:coeffs,r2,rmse:Math.sqrt(ss/ys.length),mae:absoluteError/ys.length,sse:ss,residuals,used:ys.length,excluded:points.length-ys.length};
 }
-function fitTable(t,x,y,model,degree){const computed=studio.dataTables.calculate(t),pairs=computed.map(r=>[finite(r[x]),finite(r[y])]).filter(p=>p[0]!==null&&p[1]!==null);return analyze(pairs,model,degree);}
+function fitTable(t,x,y,model,degree){const computed=studio.dataTables.calculate(t),pairs=computed.map(r=>[finite(r[x]),finite(r[y])]);return analyze(pairs,model,degree);}
 function putFit(){try{
  const model=$('fit-model').value;if(model==='none')throw Error('Select a fitting model.');
  const kind=$('dt-chart-type').value;if(!['scatter','line'].includes(kind))throw Error('Fitting supports 2D scatter and line charts. Select one of those first.');

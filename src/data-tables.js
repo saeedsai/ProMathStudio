@@ -220,9 +220,19 @@
   }
   function formula(expr,t,stack){
     expr=String(expr).trim();if(expr.length>500)throw Error('#LIMIT');
-    const ifMatch=/^IF\s*\((.*)\)$/i.exec(expr);
-    if(ifMatch){
-      const args=splitArgs(ifMatch[1]);
+    // A whole-expression IF must close at the matching parenthesis, not the
+    // last ')' of an adjacent expression such as IF(...)+IF(...).
+    const ifStart=/^IF\s*\(/i.exec(expr);
+    let close=-1;
+    if(ifStart){
+      let depth=0;
+      for(let i=ifStart[0].length-1;i<expr.length;i++){
+        if(expr[i]==='(')depth++;
+        else if(expr[i]===')'&&--depth===0){close=i;break;}
+      }
+    }
+    if(ifStart&&close===expr.length-1){
+      const args=splitArgs(expr.slice(ifStart[0].length,close));
       if(args.length!==3||args.some(arg=>!arg.trim()))throw Error('#IF');
       const m=ifComparison(args[0]);
       const test=m?(()=>{

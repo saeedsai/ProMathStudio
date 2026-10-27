@@ -1,3 +1,7 @@
+## Unreleased — FFT inverse regression field-name correction (2026-10-27)
+
+- Repaired `smoke_fft.py` to read inverse FFT `{re,im}` objects rather than spectrum `{real,imag}` fields; added an explicit recovered-real/windowed-sample equality check at 1e-10. This addresses real CI failure after 47 successful checks, without changing production FFT math. Full exact-head QA remains mandatory.
+
 ## Unreleased — isolate precision UI smoke from task navigator (2026-10-27)
 
 - Precision browser regressions open the actual native disclosure summary, assert expansion, and preserve numerical/invalid-input/mobile coverage; task-first workspace regression now separately asserts High precision task navigation. This responds to real CI selector timeouts while retaining UI coverage. Exact-head full CI remains required.

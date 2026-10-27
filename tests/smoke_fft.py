@@ -29,7 +29,8 @@ def main():
   near(cases['large']['spectrum'][17]['amplitude'],1)
   near(cases['large']['spectrum'][3]['amplitude'],0.25)
   assert cases['large']['maxError']<1e-11
-  assert all(abs(p['imag'])<1e-10 for p in cases['large']['recovered'])
+  assert all(abs(p['im'])<1e-10 for p in cases['large']['recovered'])
+  assert all(abs(p['re']-cases['large']['windowedSamples'][i])<1e-10 for i,p in enumerate(cases['large']['recovered']))
   result=page.evaluate("""() => {
    const f=MathStudio.fftTools,signal=[1,2,3,4],copy=signal.slice();
    const back=f.fft(f.fft(signal),true);

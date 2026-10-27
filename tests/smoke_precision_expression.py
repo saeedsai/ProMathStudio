@@ -28,6 +28,10 @@ def main():
         for expr, expected, precision in cases:
             actual = page.evaluate('a => MathStudio.precisionTools.evaluateExpression(a.expr,a.precision).result', {'expr': expr, 'precision': precision})
             assert actual == expected, (expr, actual, expected)
+        # Adjacent numeric tokens separated by whitespace must not concatenate silently.
+        for expr in ['1 2', '1 .2', '0 .1', '. 5', '12 . 3', '1\t2']:
+            assert page.evaluate('x => {try{MathStudio.precisionTools.evaluateExpression(x);return false;}catch(e){return !!e.message;}}', expr), expr
+        assert page.evaluate('() => MathStudio.precisionTools.evaluateExpression("1 + 2").result') == '3'
         for expr in ['', '1e3', '1/0', '2(3)', '(1+2', '1+)', '1**2', 'foo', '9'*301,
                      '1+'*80+'1', '('*17+'1'+')'*17]:
             assert page.evaluate('x => {try{MathStudio.precisionTools.evaluateExpression(x);return false;}catch(e){return !!e.message;}}', expr), expr

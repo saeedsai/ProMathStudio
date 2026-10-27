@@ -1,3 +1,7 @@
+## Unreleased — correct exact-division check for long decimal outputs (2026-10-27)
+
+- Fixed false input-limit rejection when two valid ≤300-digit operands yield an exact quotient longer than 300 digits (up to the 800-character output cap). Internal exactness validation now uses an 800-digit result limit; user input remains limited to 300 digits. Added focused browser/reference regression and mandatory CI step. Production release still pending verified checks.
+
 ## Unreleased — bounded high-precision integer powers (2026-10-27)
 
 - Added exact integer `^` powers (0–20) to offline decimal expressions, right-associative chains, ordinary unary precedence and rejection of `0^0`/negative, fractional or out-of-range exponents. Browser regression covers positive and invalid cases; full CI, PR and Pages remain pending.

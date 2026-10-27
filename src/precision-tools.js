@@ -63,8 +63,12 @@ function evaluateExpression(raw,precision=40){
  if(!Number.isInteger(p)||p<16||p>80)throw Error('Precision must be an integer from 16 to 80 significant digits.');
  const input=String(raw??'').trim();
  if(!input||input.length>1200)throw Error('Expression must contain 1–1200 characters.');
- const tokens=input.match(/(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/]/g);
- if(!tokens||tokens.join('')!==input.replace(/\s+/g,''))throw Error('Unsupported expression token.');
+ const tokens=[];let cursor=0;
+ for(const match of input.matchAll(/(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/]/g)){
+  if(input.slice(cursor,match.index).trim())throw Error('Unsupported expression token.');
+  tokens.push(match[0]);cursor=match.index+match[0].length;
+ }
+ if(!tokens.length||input.slice(cursor).trim())throw Error('Unsupported expression token.');
  if(tokens.length>120)throw Error('Expression exceeds the 120-token limit.');
  let pos=0,depth=0,operations=0,rounded=false;
  const apply=(a,b,op)=>{

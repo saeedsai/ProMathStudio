@@ -1,3 +1,7 @@
+## Unreleased — bounded real symmetric matrix eigenanalysis (2026-10-27)
+
+- Added offline 2×2/3×3 Jacobi eigenvalues and orthonormal eigenvectors in the Matrix calculator, sorted spectrum, editor handoff and residual diagnostics. Added dedicated positive/negative/reference browser regression to mandatory Quality, plus documentation. Isolated JavaScript numerical references passed; exact-head full CI and Pages still pending.
+
 ## Unreleased — FFT frequency metadata and graph regression repair (2026-10-27)
 
 - Added binWidthHz and nyquistHz API/UI metrics with focused browser reference, invalid rate and stale UI checks. Repaired Hz graph regression to access point objects (`.x`, `.y`), matching the actual Graphs API, without weakening expected values. Quality and Pages release still pending.

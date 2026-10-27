@@ -110,6 +110,8 @@ jobs:
         run: python tests/smoke_matrix_qr.py
       - name: Matrix least-squares numeric and UI regression
         run: python tests/smoke_matrix_least_squares.py
+      - name: Symmetric 2x2/3x3 matrix eigenanalysis reference and UI regression
+        run: python tests/smoke_matrix_eigen.py
       - name: Offline radix-2 FFT numerical, UI, table and graph regression
         run: python tests/smoke_fft.py
       - name: FFT physical-frequency Hz and sample-rate UI regression

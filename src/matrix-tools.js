@@ -289,6 +289,64 @@ function inverse(A){
  if(!Number.isFinite(residual)||residual>1e-7)throw Error('Matrix inversion failed its numerical residual check.');
  return result;
 }
+/* Jacobi rotations for bounded real symmetric 2x2/3x3 matrices. Columns of
+   vectors are orthonormal eigenvectors; eigenvalues are descending. */
+function eigenSymmetric(A){
+ A=validate(A);requireSquare(A);
+ const n=A.length,scale=Math.max(...A.flat().map(Math.abs));
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)
+  if(Math.abs(A[i][j]-A[j][i])>1e-12*scale)
+   throw Error('Eigenanalysis requires a real symmetric matrix.');
+ const B=A.map(row=>row.map(x=>scale?x/scale:0));
+ const V=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>Number(i===j)));
+ let iterations=0;
+ for(;iterations<64;iterations++){
+  let p=0,q=1,off=Math.abs(B[0][1]);
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)
+   if(Math.abs(B[i][j])>off){p=i;q=j;off=Math.abs(B[i][j]);}
+  if(off<=1e-14)break;
+  const apq=B[p][q],tau=(B[q][q]-B[p][p])/(2*apq);
+  const t=(tau<0?-1:1)/(Math.abs(tau)+Math.hypot(1,tau));
+  const c=1/Math.hypot(1,t),s=t*c;
+  const app=B[p][p],aqq=B[q][q];
+  B[p][p]=app-t*apq;B[q][q]=aqq+t*apq;B[p][q]=0;B[q][p]=0;
+  for(let k=0;k<n;k++)if(k!==p&&k!==q){
+   const bkp=B[k][p],bkq=B[k][q];
+   B[k][p]=B[p][k]=c*bkp-s*bkq;
+   B[k][q]=B[q][k]=s*bkp+c*bkq;
+  }
+  for(let k=0;k<n;k++){
+   const vkp=V[k][p],vkq=V[k][q];
+   V[k][p]=c*vkp-s*vkq;V[k][q]=s*vkp+c*vkq;
+  }
+ }
+ if(iterations===64)throw Error('Symmetric eigenanalysis did not converge.');
+ const order=Array.from({length:n},(_,i)=>i).sort((i,j)=>B[j][j]-B[i][i]||i-j);
+ const values=order.map(i=>B[i][i]*scale);
+ const vectors=V.map(row=>order.map(i=>row[i]));
+ for(let j=0;j<n;j++){
+  let pivot=0;
+  for(let i=1;i<n;i++)if(Math.abs(vectors[i][j])>Math.abs(vectors[pivot][j]))pivot=i;
+  if(vectors[pivot][j]<0)for(let i=0;i<n;i++)vectors[i][j]=-vectors[i][j];
+ }
+ let residual=0,reconstructionResidual=0,orthogonality=0;
+ const denom=Math.max(scale,Number.MIN_VALUE);
+ for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+  let av=0,reconstruction=0,vtv=0;
+  for(let k=0;k<n;k++){
+   av+=A[i][k]*vectors[k][j];
+   reconstruction+=vectors[i][k]*values[k]*vectors[j][k];
+   vtv+=vectors[k][i]*vectors[k][j];
+  }
+  residual=Math.max(residual,Math.abs(av-values[j]*vectors[i][j])/denom);
+  reconstructionResidual=Math.max(reconstructionResidual,Math.abs(reconstruction-A[i][j])/denom);
+  orthogonality=Math.max(orthogonality,Math.abs(vtv-Number(i===j)));
+ }
+ if(![...values,...vectors.flat(),residual,reconstructionResidual,orthogonality].every(Number.isFinite)
+  ||residual>1e-8||reconstructionResidual>1e-8||orthogonality>1e-8)
+  throw Error('Symmetric eigenanalysis failed numerical residual or orthogonality checks.');
+ return {values,vectors,residual,reconstructionResidual,orthogonality,iterations};
+}
 function format(x){
  if(!Number.isFinite(x))throw Error('Result exceeded finite floating-point range.');
  if(Math.abs(x)<1e-13)return '0';
@@ -297,7 +355,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires a real symmetric square 2×2/3×3 A and reports sorted real eigenvalues and orthonormal eigenvectors. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -317,10 +375,12 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-lu" class="secondary">LU (P·A=L·U)</button>'+ 
  '<button type="button" id="mat-qr" class="secondary">QR (A=Q·R)</button>'+
  '<button type="button" id="mat-least-squares" class="secondary">Least squares (A·x≈b)</button>'+
+ '<button type="button" id="mat-eigen" class="secondary">Eigen (symmetric A)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
  '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+ 
  '<label>QR factor for editor <select id="mat-qr-factor"><option value="Q">Q</option><option value="R">R</option></select></label>'+
+ '<label>Eigen output for editor <select id="mat-eigen-factor"><option value="vectors">Eigenvectors</option><option value="values">Eigenvalues</option></select></label>'+
  '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
  '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
 panel.append(area);
@@ -379,11 +439,13 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='eigen'?eigenSymmetric(A):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares')?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
-  output.textContent=operation==='lu'?
+  output.textContent=operation==='eigen'?
+   'eigen: symmetric A = V·diag(λ)·Vᵀ\nEigenvalues (descending): '+value.values.map(format).join(', ')+'\nEigenvectors (columns of V):\n'+rowsText(value.vectors)+'\nRelative residual: '+format(value.residual)+'\nReconstruction residual: '+format(value.reconstructionResidual)+'\nOrthogonality residual: '+format(value.orthogonality):
+   operation==='lu'?
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
    'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
@@ -391,15 +453,15 @@ function calculate(operation){
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu'],['mat-qr','qr'],['mat-least-squares','leastSquares']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu'],['mat-qr','qr'],['mat-least-squares','leastSquares'],['mat-eigen','eigen']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
 for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',()=>{rebuild();rebuildRhs();});
 for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
- try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:(last.operation==='solve'||last.operation==='leastSquares')?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.operation==='qr'?last.value[document.getElementById('mat-qr-factor').value]:last.value),{source:'matrix calculator'});}
+ try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:(last.operation==='solve'||last.operation==='leastSquares')?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.operation==='qr'?last.value[document.getElementById('mat-qr-factor').value]:last.operation==='eigen'?(document.getElementById('mat-eigen-factor').value==='values'?last.value.values.map(x=>[x]):last.value.vectors):last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,notation,read,readSecond,readRhs,calculate};
 })();

@@ -2742,7 +2742,7 @@ self.onmessage=async ({data})=>{
   $('graph-plot').addEventListener('click',plot);
   $('graph-reset').addEventListener('click',()=>{setRanges(graphMode==='2d'?graphDef2:graphDef3);azimuth=-.72;elevation=.46;zoom3d=1;panX3d=0;panY3d=0;plot();});
   $('graph-show-axes').addEventListener('click',()=>{
-    const d=$('ui-graph-axes')||$('graph-controls-collapsible');if(d)d.open=true;
+    for(const id of ['graph-controls-collapsible','ui-graph-axes']){const panel=$(id);if(panel)panel.open=true;}
     $('graph-xmin').focus();
   });
   $('graph-pan-toggle').addEventListener('click',()=>{
@@ -6002,6 +6002,7 @@ function selectTask(key,scroll=false){
  if(dest?.tagName==='DETAILS'){
    if(dest.parentElement?.id==='data-menu-navigation')for(const d of dest.parentElement.children)if(d!==dest)d.open=false;
    dest.open=true;
+   for(let ancestor=dest.parentElement;ancestor;ancestor=ancestor.parentElement)if(ancestor.tagName==='DETAILS')ancestor.open=true;
  }
  if(activeMode==='solver')$('symbolic-panel').querySelector('.cas-wrap').hidden=['numerical','ode'].includes(task[0]);
  if(scroll&&dest){dest.scrollIntoView({block:'nearest',behavior:'smooth'});if(dest.tagName==='DETAILS')dest.querySelector('summary')?.focus({preventScroll:true});}

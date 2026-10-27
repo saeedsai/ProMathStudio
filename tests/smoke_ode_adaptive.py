@@ -68,6 +68,7 @@ def main():
         panel = page.locator("#ode-details")
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-method").select_option("rk45")
+        assert page.locator("#ode-run").inner_text() == "Solve IVP"
         page.locator("#ode-tolerance").fill("0.000000001")
         page.locator("#ode-run").click()
         output = page.locator("#ode-output").inner_text()

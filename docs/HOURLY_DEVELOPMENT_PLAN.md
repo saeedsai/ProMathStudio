@@ -14,7 +14,7 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 
 | Order | ID | Acceptance tests | Status |
 |---:|---|---|---|
-| 1 | P1-FITTING-DIAGNOSTICS | Numerical residual/MAE/SSE references, invalid/singular input rejection, CSV download and stale-state browser regression; exact dev/PR/main/Pages gates. | DEV IMPLEMENTED — CI / promotion pending |
+| 1 | P1-FITTING-DIAGNOSTICS | Numerical residual/MAE/SSE references, invalid/singular input rejection, CSV download and stale-state browser regression; exact dev/PR/main/Pages gates. | DEV IMPLEMENTED — exact-head CI status unavailable; no promotion |
 | 2 | P0-PRECISION | 30+ significant-digit reference arithmetic, bounded controls, invalid/overflow tests. | TODO |
 | 3 | P0-SYMBOLIC-ODE-IC | y'=y with y(0)=1, inconsistent conditions and worker/UI regression. | TODO |
 | 4 | P1-FFT-1D | DC/sinusoid references, inverse round-trip, invalid length and graph/table export. | TODO |
@@ -277,3 +277,5 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 - Chose bounded P1-FITTING-DIAGNOSTICS while P0 precision/ODE remain larger work items. Added per-point residuals, MAE/SSE, finite overflow guard, and download-only numeric CSV; preserves existing fitting models and graph export. Added dedicated browser/reference/negative regression and mandatory Quality step; updated guide and changelog.
 - Source commits `b7240454bad22738244157d62ddeb6df9733f508`, `951a07a55ba92abdded3638c193345e2916f3663`, CI `c98a8bafae766dd31110a9aa90629d98c57eec05`. Exact final dev CI and PR/main/Pages gates pending; do not claim released. Prior PR #33 main Quality 40502871511 and Pages 40502870819 were queued at inspection; hosted site fetch returned DisabledError.
 - Next five: P1-FITTING-DIAGNOSTICS QA/release, P0-PRECISION, P0-SYMBOLIC-ODE-IC, P1-FFT-1D, P1-MATRIX-EIGEN. No proven obsolete tracked files or branches to remove; branch protection not verified/enforced.
+
+**2026-10-27 14:xx CET — follow-up correctness checkpoint.** Added invalidation of residual downloads on model/degree/table/axis/chart changes (`8c342381126133e79b24ae4ca7cfcc7fd5a39d76`), strengthened regression (`ecbf59a8fca9f1f5ec005c66e73792802ee4a7aa`), counted excluded nonnumeric rows in fit diagnostics (`d91d7cacb05974a33173b6a46cd3abca12395072`), and asserted the excluded count (`2d2235d75a47a76794e1ae5b8cb80068c8aa9c6f`). Full local browser execution unavailable because repository files cannot be cloned in this runtime (DNS error). Connector exposes no push-triggered Quality run for the exact dev head; do not open release PR or claim green/deployed without that evidence. Existing main Quality 40502871511 and Pages 40502870819 still queued at last check. Keep `dev` progress and continue on next run. Next five unchanged.

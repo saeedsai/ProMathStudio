@@ -10,6 +10,8 @@ Open **Calculator**, type an expression and press **Calculate** or Enter. Suppor
 
 For exact decimal workflows, choose **High precision** in Calculator. The two-operand form supports exact +, − and × and 16–80 significant-digit division. The separate **Decimal expression** box supports +, −, ×, ÷, unary signs and parentheses, for example `(0.1+0.2)*3`; it evaluates division at the chosen precision with half-even rounding after each division step. It is offline, limited to 300-digit decimal operands (computed results may be longer, up to the 800-character output cap), 120 tokens and 16 nesting levels, and supports exact `^` powers with nonnegative integer exponents 0–20 (for example `2^3^2 = 512`, `-2^2 = -4`); it rejects `0^0` and does not support negative/fractional powers, scientific notation or transcendental functions.
 
+Select **Also show scientific notation** to display an additional `e`-notation representation of the exact or rounded decimal result without changing its value; toggling updates the most recent results immediately. For example `123456789.25` also displays `1.2345678925e+8`. Scientific notation is output-only; input exponent syntax remains unsupported.
+
 Only scalar expressions with numeric input can be calculated. For an equation involving unknowns, send it to Symbolic solver instead.
 
 ### 2 — Equation editor

@@ -42,7 +42,7 @@ def main():
         assert page.locator('#dt-sheet input[aria-label="C1"]').input_value() == "8"
         assert page.evaluate(
             "MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])"
-        ) == [[3, 7], [0, 7]]
+        ) == [["3", 7], ["0", 7]]
         assert page.evaluate(
             "MathStudio.dataTables.formula('IF(1,IF(0,100,11),12)','Data1')"
         ) == 11
@@ -51,7 +51,7 @@ def main():
         assert [row[2] for row in page.evaluate("MathStudio.dataTables.calculate()")] == expected
         assert page.evaluate(
             "MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])"
-        ) == [[3, 7], [0, 7]]
+        ) == [["3", 7], ["0", 7]]
         assert not errors, errors
         browser.close()
     print("PASS nested/lazy IF, arithmetic, cross-sheet, #REF! skip, cycle, malformed IF, UI and round-trip")

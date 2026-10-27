@@ -4012,6 +4012,9 @@ function putFit(){try{
  }catch(err){currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent=err.message;$('fit-result').classList.add('error');}
 }
 $('fit-run').addEventListener('click',putFit);
+for(const id of ['fit-model','fit-degree','dt-graph-table','dt-graph-x','dt-graph-y','dt-chart-type']){
+ $(id).addEventListener('change',()=>{currentFit=null;$('fit-export').disabled=true;});
+}
 $('fit-export').addEventListener('click',()=>{
  if(!currentFit||!currentFit.residuals.length)return;
  const csv=['x,y,predicted,residual',...currentFit.residuals.map(row=>row.map(value=>String(value)).join(','))].join('\r\n')+'\r\n';

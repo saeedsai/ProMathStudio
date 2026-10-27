@@ -4,11 +4,11 @@ const M=window.MathStudio, panel=document.getElementById('calculator-panel');
 if(!M||!panel)return;
 const $=id=>document.getElementById(id);
 const MAX_DIGITS=300;
-function parseDecimal(raw,label){
+function parseDecimal(raw,label,maxDigits=MAX_DIGITS){
  const s=String(raw??'').trim();
  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(s))throw Error(label+' must be a plain finite decimal (no exponent or expression).');
  const digits=s.replace(/^[+-]/,'').replace('.','');
- if(digits.length>MAX_DIGITS)throw Error(label+' exceeds the 300-digit input limit.');
+ if(digits.length>maxDigits)throw Error(label+' exceeds the '+maxDigits+'-digit limit.');
  const dot=s.indexOf('.');
  return {n:BigInt(s.replace('.','')),scale:dot<0?0:s.length-dot-1};
 }
@@ -40,7 +40,7 @@ function divide(a,b,precision){
  return formatDecimal(sign*roundQuotient(num,den*pow10(-shift))*pow10(-shift),0);
 }
 function isExactDivision(a,b,result){
- const r=parseDecimal(result,'Division result');
+ const r=parseDecimal(result,'Division result',800);
  return a.n*pow10(b.scale+r.scale)===r.n*b.n*pow10(a.scale);
 }
 function calculate({a,b,operation='add',precision=40}={}){

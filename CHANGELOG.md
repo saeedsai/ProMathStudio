@@ -1,8 +1,14 @@
-## 2026-10-27 — Bounded barycentric polynomial interpolation (dev implementation; release pending)
+## 2026-10-27 — Bounded offline 1D golden-section minimization (dev implementation; release pending)
+
+- Added a finite-interval, unimodal scalar minimizer with safe numeric expression evaluation, endpoint comparison, tie/flat handling, configurable tolerance and bounded iteration budget.
+- Added Solver numerical UI, stale-export invalidation, Data Tables result handoff, new Playwright numerical/UI regression and mandatory Quality gate. Kept standalone index synchronized with `src/minimize-tools.js`.
+- Local isolated Node references and stub-browser UI passed; full exact-head dev Quality, PR/main Quality and Pages verification remain release gates.
+
+## 2026-10-27 — Bounded barycentric polynomial interpolation (PR #27 released; exact main Quality and Pages green)
 
 - Added offline global polynomial interpolation for 2–16 nodes, normalized barycentric weights, exact-knot preservation, conditioning guards and 1,000 in-domain queries; linear/PCHIP modes remain unchanged.
 - Added polynomial method selection, Data Tables and Graphs handoff, numerical and browser regression tests, mandatory CI step, standalone HTML synchronization and mathematical limitations documentation.
-- Release status: **DEV IMPLEMENTED**, pending exact dev/PR/main Quality and Pages verification; no deployment claim yet.
+- **RELEASED via PR #27:** exact dev Quality 40458678021 and PR Quality 40458884668 passed 36 steps each; merged main 47acdcb4079c5f113d0b8abc3bf8b9ea0f12e512. Main Quality 40459125293, Pages 40459124441 and cleanup 40459125216 succeeded. Hosted interactive Pages smoke unavailable (DisabledError); this does not certify live-browser behavior.
 
 ## 2026-10-27 — Shape-preserving cubic interpolation (PR #26 released; exact main Quality and Pages green)
 

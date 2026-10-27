@@ -37,7 +37,7 @@ def main():
             '1' + '0' * 300)
         page.locator('[data-workspace="calculator"]').click()
         assert page.locator('[data-workspace="calculator"].active').count() == 1
-        page.locator('#workspace-task-guide .task-choice[data-task="precision"]').click()
+        page.locator('#precision-details > summary').click()
         assert page.locator('#precision-details').evaluate('(e) => e.open')
         page.locator('#precision-a').fill(a)
         page.locator('#precision-b').fill(b)

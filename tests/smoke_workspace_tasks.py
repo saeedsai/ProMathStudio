@@ -17,6 +17,8 @@ def main():
   assert page.locator('#preview math').count()>0
   page.locator('[data-workspace="calculator"]').click()
   assert not page.locator('#ui-calc-settings').evaluate('(e)=>e.open')
+  page.get_by_role('button',name='High precision',exact=True).click()
+  assert page.locator('#precision-details').evaluate('(e)=>e.open')
   page.get_by_role('button',name='Number settings').click()
   assert page.locator('#ui-calc-settings').evaluate('(e)=>e.open')
   page.locator('#calc-number-format').select_option('scientific')

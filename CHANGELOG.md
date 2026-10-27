@@ -1,3 +1,7 @@
+## Unreleased — isolate precision UI smoke from task navigator (2026-10-27)
+
+- Precision browser regressions open the actual native disclosure summary, assert expansion, and preserve numerical/invalid-input/mobile coverage; task-first workspace regression now separately asserts High precision task navigation. This responds to real CI selector timeouts while retaining UI coverage. Exact-head full CI remains required.
+
 ## Unreleased — bounded real 2×2 SVD (2026-10-27)
 
 - Added scaled one-sided Jacobi SVD for real 2×2 matrices, nonnegative descending singular values, orthonormal U/V, numerical rank and reconstruction diagnostics, factor transfer to Equation Editor. Handles singular, zero and large-scale-separation matrices without an AᵀA eigenvalue cancellation. Added numerical/reference/negative/UI regression to mandatory Quality. Exact-source V8 reference checks passed; full CI and Pages pending.

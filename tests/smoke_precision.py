@@ -23,6 +23,9 @@ def main():
    ({'a':'-2','b':'4','operation':'divide','precision':40},'-0.5'),
    ({'a':'0.00001','b':'3','operation':'divide','precision':16},'0.000003333333333333333'),
    ({'a':'5','b':'2','operation':'divide','precision':16},'2.5'),
+   ({'a':'1.2345678901234565','b':'1','operation':'divide','precision':16},'1.234567890123456'),
+   ({'a':'1.2345678901234575','b':'1','operation':'divide','precision':16},'1.234567890123458'),
+   ({'a':'-1.2345678901234575','b':'1','operation':'divide','precision':16},'-1.234567890123458'),
    ({'a':'1','b':'2','operation':'subtract'},'-1'),
    ({'a':'0','b':'3','operation':'divide'},'0'),
   ]

@@ -130,7 +130,8 @@ for(const id of ['precision-a','precision-b','precision-digits'])$(id).addEventL
 $('precision-op').addEventListener('change',invalidate);
 $('precision-run').addEventListener('click',()=>{
  try{const r=calculate({a:$('precision-a').value,b:$('precision-b').value,operation:$('precision-op').value,precision:$('precision-digits').value});
-  $('precision-output').classList.remove('error');$('precision-output').textContent=r.result+'\n'+(r.exact?'Exact decimal result':'Rounded to '+r.precision+' significant digits (half-even)');
+  $('precision-output').classList.remove('error');$('precision-output').textContent=r.result+'
+'+(r.exact?'Exact decimal result':'Rounded to '+r.precision+' significant digits (half-even)');
  }catch(e){$('precision-output').classList.add('error');$('precision-output').textContent=e.message;}
 });
 
@@ -142,11 +143,15 @@ $('precision-digits').addEventListener('input',()=>{
  $('precision-expression-output').textContent='Precision changed. Evaluate again.';
  $('precision-expression-output').classList.remove('error');
 });
+$('precision-expression').addEventListener('keydown',event=>{
+ if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();$('precision-expression-run').click();}
+});
 $('precision-expression-run').addEventListener('click',()=>{
  try{
   const r=evaluateExpression($('precision-expression').value,$('precision-digits').value);
   $('precision-expression-output').classList.remove('error');
-  $('precision-expression-output').textContent=r.result+'\n'+(r.exact?'Exact decimal expression':'Division steps rounded to '+r.precision+' significant digits (half-even)');
+  $('precision-expression-output').textContent=r.result+'
+'+(r.exact?'Exact decimal expression':'Division steps rounded to '+r.precision+' significant digits (half-even)');
  }catch(e){$('precision-expression-output').classList.add('error');$('precision-expression-output').textContent=e.message;}
 });
 

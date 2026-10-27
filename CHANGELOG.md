@@ -323,3 +323,5 @@ Changes are documented in functional groups; historical version numbers are not 
 ## Known limitations
 
 See `docs/FEATURES_AND_LIMITATIONS.md`. In particular, the built-in offline solver is not a complete CAS; SymPy download and hosted deployment must be validated in the target browser/environment.
+
+- Corrected standalone Calculator task selector to expose the existing High precision form; added exact bundled/source static regression to prevent future task-menu drift. Requires exact CI and Pages verification before release.

@@ -41,3 +41,12 @@ class DataTablesStaticTests(unittest.TestCase):
   self.assertIn('window.MathStudio.projectSchema = {migrate}',project)
   self.assertIn('Saeedmsalehi1990@gmail.com',html)
   self.assertIn('MIT License',(ROOT/'LICENSE').read_text())
+
+ def test_workspace_tasks_module_matches_standalone_bundle(self):
+  html=(ROOT/'index.html').read_text(encoding='utf-8')
+  source=(ROOT/'src/workspace-tasks.js').read_text(encoding='utf-8').rstrip('\n')
+  marker='<script id="promath-workspace-tasks">\n'
+  self.assertIn(marker,html)
+  embedded=html.split(marker,1)[1].split('</script>',1)[0].rstrip('\n')
+  self.assertEqual(embedded,source,'Rebuild index.html with python scripts/build.py when task UI changes')
+  self.assertIn("['precision','High precision'",source)

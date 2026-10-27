@@ -117,7 +117,7 @@ function build({tables=M.dataTables.tables.slice(0,2)}={}){
 }
 const area=document.createElement('details');area.id='xlsx-export-details';
 area.innerHTML='<summary>Excel XLSX export · offline</summary>'+
- '<p>Export one or two selected Data Tables sheets (up to 1,000 data rows per sheet) with text, numbers and formulas. Import is not yet supported.</p>'+
+ '<p>Export one or two selected Data Tables sheets (up to 1,000 data rows per sheet) with text, numbers and formulas. For bounded offline import, open Excel XLSX import below.</p>'+
  '<div class="data-toolbar"><label>First sheet<select id="xlsx-first"></select></label>'+
  '<label>Second sheet (optional)<select id="xlsx-second"></select></label>'+
  '<button id="xlsx-export" type="button" class="secondary">Download XLSX</button></div>'+

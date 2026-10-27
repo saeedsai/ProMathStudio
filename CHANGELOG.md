@@ -1,3 +1,8 @@
+## 2026-10-27 — Bounded offline XLSX import and transactional round-trip (dev candidate; release pending)
+
+- Added ZIP central/local-header, CRC and decompressed-size validation; supports stored/DEFLATE workbooks with one or two sheets, shared/inline strings, numeric values, formulas and Excel header-row reference translation. Rejects external links, unsafe paths, malformed XML, oversized/duplicate entries and unsupported workbook parts.
+- Added replacement confirmation and rollback-safe Data Tables import UI, new `src/xlsx-import.js`, synchronized standalone HTML, `tests/smoke_xlsx_import.py`, mandatory Quality step and documentation. Full dev/PR/main CI and Pages deployment must pass before this increment is marked RELEASED.
+
 ## 2026-10-27 — Bounded offline two-sheet XLSX export (PR #30 released; main Quality and Pages green)
 
 - Added dependency-free OpenXML/ZIP STORE export of one or two Data Tables sheets with numbers, text, blanks, formulas, quoted sheet references and header-row reference translation. Enforced size, name, XML control-character and row/column limits.

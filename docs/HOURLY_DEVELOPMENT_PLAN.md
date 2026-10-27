@@ -15,7 +15,7 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 | Order | ID | Next increment / acceptance tests | Status |
 |---:|---|---|---|
 | 1 | UI-GRAPH-AXES-3D-NAV / P1-FITTING-DIAGNOSTICS | Preserve 2D/3D graph and residual diagnostics in PR #34; exact dev and PR Quality, main Quality and Pages verification. | DEV IMPLEMENTED — GitHub Actions queued |
-| 2 | P0-PRECISION-EXPR | Decimal expression precedence, parentheses, 40-digit thirds, 16-digit half-even ties, invalid/oversized operands, mobile UI; CI/PR/Pages. | DEV IMPLEMENTED — CI pending |
+| 2 | P0-PRECISION-EXPR | Decimal precedence, 40-digit thirds, correct exact-versus-rounded division indicators, invalid/oversized operands, mobile UI; CI/PR/Pages. | DEV IMPLEMENTED — CI pending |
 | 3 | P0-SYMBOLIC-ODE-IC | SymPy y'=y with y(0)=1; inconsistent/unsupported conditions and worker/browser regressions. | TODO |
 | 4 | P1-FFT-1D | Offline DC/sinusoid peaks, inverse round-trip, invalid length and table/graph handoff. | TODO |
 | 5 | P1-MATRIX-EIGEN | Bounded symmetric 2×2/3×3 eigenvalues/eigenvectors, repeated eigenvalue, nonsymmetric rejection and residual checks. | TODO |
@@ -315,3 +315,5 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 - Next five: UI-GRAPH-AXES-3D-NAV/P1-FITTING-DIAGNOSTICS release, P0-PRECISION-EXPR QA, P0-SYMBOLIC-ODE-IC, P1-FFT-1D, P1-MATRIX-EIGEN. No stale tracked files proven safe to remove; protection still unconfirmed.
 
 **2026-10-27 15:59 CET — exact commit and CI follow-up.** Source/test/docs bundle committed atomically at `f1d6d113a51a92eb1febde7ec3995a70c80d019e` (7 changed files). GitHub push Quality [40526516237](https://github.com/saeedsai/ProMathStudio/actions/runs/40526516237) and PR #34 Quality [40526526435](https://github.com/saeedsai/ProMathStudio/actions/runs/40526526435) are queued, not failed; 32 repository runs queued, none in progress. `main=ce459eb89eb8f24de1956efac4d908c414cd23c1`. Local isolated Node numerical/parser checks passed; full Playwright/structural CI pending. PR #34 remains open; no merge or Pages claim. This documentation follow-up creates a new dev head and must itself pass fresh exact-head CI before promotion.
+
+**2026-10-27 — queued-CI continuation: P0-PRECISION-EXPR exactness indicator correction.** Fixed a correctness bug where all division steps were labeled rounded, even when the bounded output represented the exact quotient (e.g. 1/8). Added exact-rational cross-product verification and regression tests for exact 1/8, inexact 1/3, compound exact and compound rounded expressions. Updated modular and bundled implementation together. Exact-head CI/PR checks still required; no merge or release claim. Next five: graph/fitting release; precision QA; symbolic ODE IC; offline FFT; symmetric eigenanalysis.

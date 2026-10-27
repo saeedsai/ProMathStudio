@@ -57,6 +57,7 @@ function selectTask(key,scroll=false){
  if(dest?.tagName==='DETAILS'){
    if(dest.parentElement?.id==='data-menu-navigation')for(const d of dest.parentElement.children)if(d!==dest)d.open=false;
    dest.open=true;
+   for(let ancestor=dest.parentElement;ancestor;ancestor=ancestor.parentElement)if(ancestor.tagName==='DETAILS')ancestor.open=true;
  }
  if(activeMode==='solver')$('symbolic-panel').querySelector('.cas-wrap').hidden=['numerical','ode'].includes(task[0]);
  if(scroll&&dest){dest.scrollIntoView({block:'nearest',behavior:'smooth'});if(dest.tagName==='DETAILS')dest.querySelector('summary')?.focus({preventScroll:true});}

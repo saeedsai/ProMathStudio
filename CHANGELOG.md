@@ -1,7 +1,7 @@
-## 2026-10-27 — Coupled two-state RK4 IVP (development candidate; release gated)
+## 2026-10-27 — Coupled two-state RK4 IVP (PR #23 released; exact main Quality and Pages green)
 
 - Added bounded offline two-state first-order RK4 with derivative expressions for y and z, separate initial conditions, safe numeric AST evaluation and finite-state checks. Data Tables receives t/y/z; Graphs plots y(t).
-- Added harmonic-oscillator and driven-system numerical references, fourth-order refinement, invalid-input and browser export regression in `tests/smoke_ode_system.py`, registered as a required Quality step. This entry does not claim CI, PR or Pages success before independent verification.
+- Added harmonic-oscillator and driven-system numerical references, fourth-order refinement, invalid-input and browser export regression in `tests/smoke_ode_system.py`, registered as a required Quality step. Exact dev Quality 40435790677, PR Quality 40436030986, main Quality 40436220425 and Pages deployment 40436220120 succeeded for PR #23 (main e87099356b4ae9b650106650f6a40ba2897c3028); hosted interactive smoke remains unverified.
 - Scope excludes stiff, backward, adaptive vector, higher-dimensional and certified-global-error ODE systems.
 
 ## 2026-10-27 — Adaptive scalar ODE RK45 (PR #22 released; main Quality and Pages green)

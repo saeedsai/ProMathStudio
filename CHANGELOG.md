@@ -1,3 +1,7 @@
+## Unreleased — strict decimal expression token boundaries (2026-10-27)
+
+- Fixed high-precision expression parsing so whitespace cannot concatenate separate numeric literals (`1 2`, `1 .2`) into a different number. Legitimate spaces between operators and parentheses remain supported. Added focused browser regression cases; full CI and deployment pending.
+
 ## Unreleased — high-precision expression keyboard workflow (2026-10-27)
 
 - Added Ctrl+Enter / Cmd+Enter to evaluate the high-precision expression from the editor, with dedicated Playwright regression; no change to decimal computation or graph rendering. Pending CI and deployment.

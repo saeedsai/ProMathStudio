@@ -10,6 +10,11 @@ on:
 permissions:
   contents: read
 
+# New commits supersede earlier jobs; PR and dev pushes retain independent full QA gates.
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     name: Static and browser regression checks

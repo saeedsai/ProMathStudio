@@ -1,3 +1,8 @@
+## Unreleased — graph pan CI regression: viewport-relative pointer targeting (2026-10-27)
+
+- Corrected 3D navigation's Playwright regression to click Pan first, scroll the canvas into view, recompute its bounding box and verify pointer hit-testing before dragging. Earlier real CI failures at PR runs 40522983794 and 40526526435 had panning stuck at (0, 0), consistent with stale screen coordinates after scrolling. The assertion remains strict about actual pan X/Y and zoom; this is a test repair, not an assertion bypass.
+- Added GitHub Actions concurrency grouping by event and branch/PR to cancel superseded checks without disabling required full QA. All current dev and PR head checks must still pass before promotion.
+
 ## Unreleased — high-precision scientific output display (2026-10-27)
 
 - Added optional scientific-notation display for high-precision decimal and expression results, preserving full decimal output, exactness and offline BigInt calculations. Toggling refreshes previous results; numerical reference and browser UI tests extend the existing mandatory Quality suite. Full CI/Pages verification pending.

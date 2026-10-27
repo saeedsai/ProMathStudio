@@ -48,10 +48,16 @@ def main():
         # A second request to select the current mode must never replace typed equations.
         page.evaluate("MathStudio.advanced.plot3D()")
         assert page.locator('#graph-input').input_value()==surfaces
-        rect=page.locator('#graph-canvas').bounding_box()
+        # The Pan button can scroll the document: derive viewport coordinates only AFTER clicking it.
+        page.get_by_role('button',name='Pan 3D: off').click()
+        assert page.locator('#graph-pan-toggle').get_attribute('aria-pressed') == 'true'
+        canvas=page.locator('#graph-canvas')
+        canvas.scroll_into_view_if_needed()
+        rect=canvas.bounding_box()
+        assert rect and rect['width']>100 and rect['height']>100, rect
         x=rect['x']+rect['width']*.45
         y=rect['y']+rect['height']*.50
-        page.get_by_role('button',name='Pan 3D: off').click()
+        assert page.evaluate('p => document.elementFromPoint(p.x,p.y)?.id === "graph-canvas"', {'x': x,'y': y}), rect
         page.mouse.move(x,y)
         page.mouse.down()
         page.mouse.move(x+65,y+35,steps=5)

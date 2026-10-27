@@ -31,6 +31,10 @@ def main():
         for expr in ['', '1e3', '1/0', '2(3)', '(1+2', '1+)', '1**2', 'foo', '9'*301,
                      '1+'*80+'1', '('*17+'1'+')'*17]:
             assert page.evaluate('x => {try{MathStudio.precisionTools.evaluateExpression(x);return false;}catch(e){return !!e.message;}}', expr), expr
+        assert page.evaluate('() => MathStudio.precisionTools.calculate({a:"1",b:"8",operation:"divide"}).exact') is True
+        assert page.evaluate('() => MathStudio.precisionTools.calculate({a:"1",b:"3",operation:"divide"}).exact') is False
+        assert page.evaluate('() => MathStudio.precisionTools.evaluateExpression("1/8+1/8").exact') is True
+        assert page.evaluate('() => MathStudio.precisionTools.evaluateExpression("1/8+1/3").exact') is False
         assert page.evaluate('() => MathStudio.precisionTools.evaluateExpression("1/3").exact') is False
         assert page.evaluate('() => MathStudio.precisionTools.evaluateExpression("1/8+1/8").operations') == 3
         page.locator('[data-workspace="calculator"]').click()

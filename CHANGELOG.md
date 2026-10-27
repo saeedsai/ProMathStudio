@@ -1,3 +1,90 @@
+## Unreleased — FFT inverse regression field-name correction (2026-10-27)
+
+- Repaired `smoke_fft.py` to read inverse FFT `{re,im}` objects rather than spectrum `{real,imag}` fields; added an explicit recovered-real/windowed-sample equality check at 1e-10. This addresses real CI failure after 47 successful checks, without changing production FFT math. Full exact-head QA remains mandatory.
+
+## Unreleased — isolate precision UI smoke from task navigator (2026-10-27)
+
+- Precision browser regressions open the actual native disclosure summary, assert expansion, and preserve numerical/invalid-input/mobile coverage; task-first workspace regression now separately asserts High precision task navigation. This responds to real CI selector timeouts while retaining UI coverage. Exact-head full CI remains required.
+
+## Unreleased — bounded real 2×2 SVD (2026-10-27)
+
+- Added scaled one-sided Jacobi SVD for real 2×2 matrices, nonnegative descending singular values, orthonormal U/V, numerical rank and reconstruction diagnostics, factor transfer to Equation Editor. Handles singular, zero and large-scale-separation matrices without an AᵀA eigenvalue cancellation. Added numerical/reference/negative/UI regression to mandatory Quality. Exact-source V8 reference checks passed; full CI and Pages pending.
+
+## Unreleased — periodic Hann window for FFT (2026-10-27)
+
+- Added an optional periodic Hann analysis window to the offline real FFT, coherent-gain-corrected one-sided amplitude, original/windowed sample metadata, UI selection and stale-export invalidation. Preserved rectangular default. Added numerical reference, negative and browser UI/table regression in mandatory Quality; source/standalone synchronization verified. Dev candidate only until exact-head CI/PR/main/Pages gates pass.
+
+## Unreleased — bounded real symmetric matrix eigenanalysis (2026-10-27)
+
+- Added offline 2×2/3×3 Jacobi eigenvalues and orthonormal eigenvectors in the Matrix calculator, sorted spectrum, editor handoff and residual diagnostics. Added dedicated positive/negative/reference browser regression to mandatory Quality, plus documentation. Isolated JavaScript numerical references passed; exact-head full CI and Pages still pending.
+
+## Unreleased — FFT frequency metadata and graph regression repair (2026-10-27)
+
+- Added binWidthHz and nyquistHz API/UI metrics with focused browser reference, invalid rate and stale UI checks. Repaired Hz graph regression to access point objects (`.x`, `.y`), matching the actual Graphs API, without weakening expected values. Quality and Pages release still pending.
+
+## Unreleased — FFT sample-rate frequency in Hz (2026-10-27)
+
+- Added validated FFT sample-rate control, frequency_Hz spectrum columns and physical-frequency graph axis. Added dedicated Playwright tests for Hz references, bad sample rates, UI state and table/graph handoff. Exact-head CI and Pages verification pending.
+
+## Unreleased — offline real-signal FFT (2026-10-27)
+
+- Added bounded offline 4–256-sample radix-2 FFT, one-sided amplitude spectrum, inverse round-trip check, Data Tables/Graphs handoff, dedicated browser/reference regression and structural CI checks. Local isolated Chromium harness passed; full repository Quality and Pages remain pending.
+
+## Unreleased — symbolic first-order ODE initial conditions (2026-10-27)
+
+- Added optional one/two first-order SymPy ODE initial values: `diff(y(t),t)=y(t)` with `y(0)=1` → `y(t)=exp(t)`. Reject invalid functions/points/values, duplicate times, and contradictory overdetermined conditions.
+- Added worker payload, generated Python, project export/import validation, documentation and direct embedded-SymPy/browser regression. Dev only until CI/PR/main/Pages gates pass.
+
+## Unreleased — graph pan CI regression: viewport-relative pointer targeting (2026-10-27)
+
+- Corrected 3D navigation's Playwright regression to click Pan first, scroll the canvas into view, recompute its bounding box and verify pointer hit-testing before dragging. Earlier real CI failures at PR runs 40522983794 and 40526526435 had panning stuck at (0, 0), consistent with stale screen coordinates after scrolling. The assertion remains strict about actual pan X/Y and zoom; this is a test repair, not an assertion bypass.
+- Added GitHub Actions concurrency grouping by event and branch/PR to cancel superseded checks without disabling required full QA. All current dev and PR head checks must still pass before promotion.
+
+## Unreleased — high-precision scientific output display (2026-10-27)
+
+- Added optional scientific-notation display for high-precision decimal and expression results, preserving full decimal output, exactness and offline BigInt calculations. Toggling refreshes previous results; numerical reference and browser UI tests extend the existing mandatory Quality suite. Full CI/Pages verification pending.
+
+## Unreleased — correct exact-division check for long decimal outputs (2026-10-27)
+
+- Fixed false input-limit rejection when two valid ≤300-digit operands yield an exact quotient longer than 300 digits (up to the 800-character output cap). Internal exactness validation now uses an 800-digit result limit; user input remains limited to 300 digits. Added focused browser/reference regression and mandatory CI step. Production release still pending verified checks.
+
+## Unreleased — bounded high-precision integer powers (2026-10-27)
+
+- Added exact integer `^` powers (0–20) to offline decimal expressions, right-associative chains, ordinary unary precedence and rejection of `0^0`/negative, fractional or out-of-range exponents. Browser regression covers positive and invalid cases; full CI, PR and Pages remain pending.
+
+## Unreleased — strict decimal expression token boundaries (2026-10-27)
+
+- Fixed high-precision expression parsing so whitespace cannot concatenate separate numeric literals (`1 2`, `1 .2`) into a different number. Legitimate spaces between operators and parentheses remain supported. Added focused browser regression cases; full CI and deployment pending.
+
+## Unreleased — high-precision expression keyboard workflow (2026-10-27)
+
+- Added Ctrl+Enter / Cmd+Enter to evaluate the high-precision expression from the editor, with dedicated Playwright regression; no change to decimal computation or graph rendering. Pending CI and deployment.
+
+## Unreleased — exactness indicators for high-precision decimal division (2026-10-27)
+
+- Corrected decimal division metadata and expression status: exact terminating quotients (such as `1/8`) are reported exact, whereas rounded quotients (such as `1/3`) remain explicitly marked rounded. Verified through bounded integer cross-products; added focused browser regression cases and preserved all 2D/3D graph work. Pending full CI and Pages release.
+
+## Unreleased — bounded high-precision expression evaluation (2026-10-27)
+
+- Added offline Calculator → High precision decimal expressions with parentheses, unary signs and operator precedence, reusing exact BigInt decimal arithmetic and 16–80 digit half-even division at each division step. Bounded 120 tokens, 16 nested levels, 300-digit operands; rejects invalid tokens, implicit multiplication and division by zero without dynamic evaluation.
+- Added focused Playwright numeric, negative, boundary, stale-result and mobile UI regression to mandatory Quality. Kept the modular source and standalone HTML synchronized; existing graph, fitting and ordinary Calculator behavior unchanged.
+
+## Unreleased — bounded high-precision decimal arithmetic (2026-10-27)
+
+- Added Calculator → High precision task with exact BigInt decimal addition, subtraction and multiplication, plus 16–80 significant-digit half-even division, bounded 300-digit operands and explicit errors.
+- Added mandatory offline Playwright reference/negative/UI regression; synchronized modular and standalone builds. Standard Calculator binary64 behavior remains unchanged. Full precision roadmap remains partial until broader expression and mathematical function support and verified release.
+
+## 2026-10-27 — Graph axes, multi-surface plots and camera controls (dev candidate)
+
+- Direct Axes & grid access for editable X/Y/Z bounds, optional uniform spacing and labeled numeric 3D axes.
+- Support z/z2/z3 3D surface definitions on separate lines. Preserve user-written 2D and 3D expressions and ranges when switching graph modes, plotting tables or resetting the view.
+- Pan using Pan 3D, Shift/right-drag, scroll zoom toward pointer, preserve camera offset in project state. Add mandatory browser regression; release gates pending.
+
+## 2026-10-27 — Curve-fit residual diagnostics (dev candidate)
+
+- Added R²/RMSE/MAE/SSE and per-point measured/predicted/residual diagnostics for bounded 2D curve fits. Download a safe numeric CSV without modifying source tables. Disable export before a valid fit, after clearing, or after failed refit.
+- Added `tests/smoke_fit_diagnostics.py` numerical/reference, invalid-input and Playwright CSV download coverage; mandatory Quality step. Release requires exact dev/PR/main Quality and Pages verification.
+
 ## 2026-10-27 — XLSX formula token boundary correction (PR #31 released)
 
 - **UI-TASK-RESTORE (dev candidate):** Remember the last selected task independently for each of the five workspaces during the current page session; preserve the correct active button, description and form when returning. Adds a focused desktop/mobile browser regression and mandatory Quality gate. No localStorage/project schema change.
@@ -240,3 +327,5 @@ Changes are documented in functional groups; historical version numbers are not 
 ## Known limitations
 
 See `docs/FEATURES_AND_LIMITATIONS.md`. In particular, the built-in offline solver is not a complete CAS; SymPy download and hosted deployment must be validated in the target browser/environment.
+
+- Corrected standalone Calculator task selector to expose the existing High precision form; added exact bundled/source static regression to prevent future task-menu drift. Requires exact CI and Pages verification before release.

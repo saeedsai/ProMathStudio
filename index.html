@@ -315,7 +315,7 @@
           <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="system">Solve system of equations</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="limit">Limit (SymPy)</option><option value="numeric">Numerical roots (SymPy)</option><optgroup label="Integral transforms · SymPy"><option value="laplace">Laplace transform ℒ</option><option value="inverse_laplace">Inverse Laplace ℒ⁻¹</option><option value="fourier">Fourier transform ℱ</option><option value="inverse_fourier">Inverse Fourier ℱ⁻¹</option></optgroup><optgroup label="Differential equations · SymPy"><option value="ode">Solve ODE (dsolve)</option><option value="pde">Solve PDE (pdsolve)</option></optgroup></select></label>
           <label class="cas-field cas-engine">Engine <select id="cas-engine"><option value="auto">Auto — offline → SymPy</option><option value="sympy">SymPy — full solver</option><option value="offline">Built-in — offline only</option></select></label>
           <label class="cas-field variable">Variable <input id="cas-variable" type="text" value="x" maxlength="24" spellcheck="false" aria-label="Symbolic variable" /></label>
-          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><label class="cas-field" id="cas-limit-point-wrap" hidden>Approach point <input id="cas-limit-point" type="text" value="0" maxlength="80" spellcheck="false" aria-label="Limit approach point"/></label><label class="cas-field" id="cas-limit-direction-wrap" hidden>Direction <select id="cas-limit-direction" aria-label="Limit direction"><option value="+-">Both sides</option><option value="-">From left (−)</option><option value="+">From right (+)</option></select></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
+          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><label class="cas-field" id="cas-limit-point-wrap" hidden>Approach point <input id="cas-limit-point" type="text" value="0" maxlength="80" spellcheck="false" aria-label="Limit approach point"/></label><label class="cas-field" id="cas-limit-direction-wrap" hidden>Direction <select id="cas-limit-direction" aria-label="Limit direction"><option value="+-">Both sides</option><option value="-">From left (−)</option><option value="+">From right (+)</option></select></label><label class="cas-field" id="cas-ode-ic-wrap" hidden>Initial condition(s) <input id="cas-ode-ic" type="text" maxlength="160" placeholder="y(0)=1; y(1)=e" aria-label="ODE initial conditions" spellcheck="false"/><span class="small-note">Optional; one or two conditions separated by semicolon.</span></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
         </div>
         <fieldset id="cas-assumptions" style="margin:8px 0 12px;border:1px solid #d7deec;border-radius:10px;padding:8px 12px"><legend>Selected variable assumptions (SymPy)</legend><label><input type="checkbox" id="cas-assume-real"> Real</label> <label><input type="checkbox" id="cas-assume-positive"> Positive</label> <label><input type="checkbox" id="cas-assume-negative"> Negative</label> <label><input type="checkbox" id="cas-assume-integer"> Integer</label><span class="small-note"> Sign implies real. Positive and negative conflict. Leave all unchecked for complex domain.</span></fieldset>
         <div id="cas-system-fields" hidden style="padding:12px;border:1px solid #d7deec;border-radius:10px;margin:12px 0"><label for="cas-system-input">Equations (one per line)</label><textarea id="cas-system-input" rows="4" style="width:100%;display:block" spellcheck="false">x = 2x + 2z
@@ -361,7 +361,7 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
     <section class="panel" id="graph-panel" aria-label="2D and 3D function graphs">
       <div class="panel-head"><div class="panel-title"><span class="step">01</span> Interactive graphing <span class="cas-label">Canvas 2D / 3D</span></div><span class="small-note">Drag to move or rotate · Scroll to zoom</span></div>
       <div class="graph-wrap">
-        <div class="graph-mode-row"><div class="graph-mode-switch" role="group" aria-label="Graph dimensions"><button class="graph-mode active" type="button" data-graph-mode="2d">2D · y = f(x)</button><button class="graph-mode" type="button" data-graph-mode="3d">3D · z=f(x,y), y=f(x)</button></div><button class="secondary small" type="button" id="graph-import">Use current equation</button></div>
+        <div class="graph-mode-row"><div class="graph-mode-switch" role="group" aria-label="Graph dimensions"><button class="graph-mode active" type="button" data-graph-mode="2d">2D · y = f(x)</button><button class="graph-mode" type="button" data-graph-mode="3d">3D · z=f(x,y), y=f(x)</button></div><button class="secondary small" type="button" id="graph-show-axes">Axes &amp; grid</button><button class="secondary small" type="button" id="graph-pan-toggle" aria-pressed="false" hidden>Pan 3D: off</button><button class="secondary small" type="button" id="graph-import">Use current equation</button></div>
         <label for="graph-input" class="graph-input-label">Functions <span id="graph-hint">One y=f(x) per line. Compare several functions.</span></label>
         <textarea id="graph-input" rows="4" spellcheck="false">y = sin(x)
 y = cos(x)</textarea>
@@ -385,7 +385,7 @@ y = cos(x)</textarea>
           <div id="graph-data-status" class="graph-data-status" role="status">No dataset loaded. Import CSV or JSON to add data to the graph.</div>
         </details>
 
-        <div class="graph-controls"><label>X min <input type="number" id="graph-xmin" value="-10" step="any"></label><label>X max <input type="number" id="graph-xmax" value="10" step="any"></label><label class="graph-y-control">Y min <input type="number" id="graph-ymin" value="-5" step="any"></label><label class="graph-y-control">Y max <input type="number" id="graph-ymax" value="5" step="any"></label><label class="graph-z-control" hidden>Z min <input type="number" id="graph-zmin" value="-8" step="any"></label><label class="graph-z-control" hidden>Z max <input type="number" id="graph-zmax" value="8" step="any"></label></div>
+        <div class="graph-controls"><label>X min <input type="number" id="graph-xmin" value="-10" step="any"></label><label>X max <input type="number" id="graph-xmax" value="10" step="any"></label><label class="graph-y-control">Y min <input type="number" id="graph-ymin" value="-5" step="any"></label><label class="graph-y-control">Y max <input type="number" id="graph-ymax" value="5" step="any"></label><label class="graph-z-control" hidden>Z min <input type="number" id="graph-zmin" value="-8" step="any"></label><label class="graph-z-control" hidden>Z max <input type="number" id="graph-zmax" value="8" step="any"></label><label>Grid spacing <input id="graph-grid-step" type="number" min="0.000000001" step="any" placeholder="Auto" aria-label="Grid spacing (blank for auto)"></label></div>
         <details class="graph-appearance" id="graph-appearance"><summary>🎨 Appearance · colors and styles</summary><div class="graph-style-options">
 <label>Theme <select id="plot-palette"><option value="classic">Classic</option><option value="bright">Bright</option><option value="pastel">Pastel</option><option value="mono">Monochrome</option><option value="custom">Custom color</option></select></label>
 <label>Primary color <input id="plot-color" type="color" value="#536be8"></label><div id="plot-series-colors" class="plot-series-colors" aria-label="Individual graph colors"></div>
@@ -397,7 +397,7 @@ y = cos(x)</textarea>
 <div class="graph-actions"><button class="secondary" type="button" data-forward="graph" data-destination="editor">Send function to Editor</button><button class="secondary" type="button" data-forward="graph" data-destination="solver">Send function to Solver</button><button id="graph-plot" type="button" class="primary">↗ Plot functions</button><button id="graph-reset" class="secondary" type="button">Reset view</button><button id="graph-save" class="secondary" type="button">↓ Export PNG</button></div>
         <div class="graph-canvas-wrap"><canvas id="graph-canvas" width="1160" height="680" aria-label="Interactive mathematical graph" role="img"></canvas><div class="graph-legend" id="graph-legend"></div></div>
         <div id="graph-status" class="graph-status" role="status">Plot y=f(x) in 2D; plot z=f(x,y) alone or pair it with y=f(x) to highlight a curve in 3D. Supported: polynomials, rational functions, trig, logs, powers, abs, min/max, and if(condition, true, false).</div>
-        <details class="graph-help"><summary>Supported functions and interactions</summary><p>2D: <code>y=x^2</code>, <code>y=1/(x-1)</code>, <code>y=sin(3x)</code>, <code>y=exp(-x^2)</code>, or <code>y=if(x&lt;0,-x,x)</code>. Separate curves by newline. 3D: <code>z=sin(sqrt(x^2+y^2))</code>, <code>z=x^2-y^2</code>, or the paired lines <code>y=x×x</code> and <code>z=sin(x×y)</code>. Paired equations draw the surface and highlight its constrained 3D curve <code>(x, x², sin(x³))</code>. A single <code>y=f(x)</code> is drawn as a curve on the z=0 plane. Rotate by dragging and zoom with the mouse wheel. Radian trig notation is used for graphs.</p></details>
+        <details class="graph-help"><summary>Supported functions and interactions</summary><p>2D: <code>y=x^2</code>, <code>y=1/(x-1)</code>, <code>y=sin(3x)</code>, <code>y=exp(-x^2)</code>, or <code>y=if(x&lt;0,-x,x)</code>. Separate curves by newline. 3D: <code>z=sin(sqrt(x^2+y^2))</code>, <code>z=x^2-y^2</code>, or the paired lines <code>y=x×x</code> and <code>z=sin(x×y)</code>. Paired equations draw the surface and highlight its constrained 3D curve <code>(x, x², sin(x³))</code>. A single <code>y=f(x)</code> is drawn as a curve on the z=0 plane. Rotate by dragging, use Pan 3D or Shift + drag to move the view, and scroll to zoom toward the pointer. Click Axes &amp; grid to set X/Y/Z bounds and grid spacing. Multiple surfaces can be entered on separate lines as z=..., z2=... and z3=.... Radian trig notation is used for graphs.</p></details>
       </div>
     </section>
     <div class="tip" id="grouping-tip"><span aria-hidden="true">✦</span><div><strong>Fractions and parentheses:</strong> For a denominator of <em>x − 1</em>, type <code>x/(x-1)</code>. For an exponent of −½, type <code>^(-1/2)</code> or <code>^-1/2</code>. This prevents ambiguous grouping.</div></div>
@@ -577,6 +577,11 @@ def _ms_process(job_text):
     expression=build(ast)
     if operation=='auto':operation='solve' if isinstance(expression,sp.Equality) else 'expand'
     is_equation=isinstance(expression,sp.Equality)
+    ics_asts=job.get('icsAsts',[])
+    if not isinstance(ics_asts,list) or len(ics_asts)>2:
+        raise MathStudioSympyError('Provide at most two ODE initial conditions.')
+    if operation!='ode' and ics_asts:
+        raise MathStudioSympyError('Initial conditions apply only to the ODE operation.')
     if operation in {'ode','pde'}:
         if not isinstance(expression,sp.Equality):
             expression=sp.Eq(expression,0,evaluate=False)
@@ -585,8 +590,29 @@ def _ms_process(job_text):
                 derivs=list(expression.atoms(sp.Derivative))
                 dependent=[d.expr for d in derivs if isinstance(d.expr,sp.core.function.AppliedUndef)]
                 if not dependent: raise MathStudioSympyError('ODE requires a derivative of an unknown function such as y(t).')
-                solution=sp.dsolve(expression, dependent[0])
-                note='SymPy analytic ODE solution. Integration constants are arbitrary; initial conditions are not applied.'
+                conditions={}
+                if ics_asts:
+                    func=dependent[0]
+                    if len(set(dependent))!=1 or len(func.args)!=1 or not func.args[0].is_Symbol or len(derivs)!=1 or derivs[0].expr!=func or derivs[0].variables!=(func.args[0],):
+                        raise MathStudioSympyError('Initial conditions currently support only one first-order ODE in y(t).')
+                    for condition_ast in ics_asts:
+                        if not isinstance(condition_ast,dict):
+                            raise MathStudioSympyError('Invalid initial condition structure.')
+                        ic=build(condition_ast)
+                        if not isinstance(ic,sp.Equality) or not isinstance(ic.lhs,sp.core.function.AppliedUndef) or ic.lhs.func!=func.func or len(ic.lhs.args)!=1:
+                            raise MathStudioSympyError('Use an initial condition of the form y(0)=1 for the ODE dependent function.')
+                        point=ic.lhs.args[0]
+                        value=ic.rhs
+                        if point.free_symbols or point.is_real is not True or point.is_finite is not True:
+                            raise MathStudioSympyError('Initial-condition time must be a finite real constant.')
+                        if not isinstance(value,sp.Expr) or value.free_symbols or value.is_real is not True or value.is_finite is not True:
+                            raise MathStudioSympyError('Initial-condition value must be a finite real constant.')
+                        if ic.lhs in conditions:
+                            raise MathStudioSympyError('Duplicate initial-condition time; provide distinct points.')
+                        conditions[ic.lhs]=value
+                solution=sp.dsolve(expression, dependent[0],ics=conditions) if conditions else sp.dsolve(expression, dependent[0])
+                note=('SymPy analytic ODE solution with '+str(len(conditions))+' initial condition(s) applied.' if conditions
+                      else 'SymPy analytic ODE solution. Integration constants are arbitrary; initial conditions are not applied.')
             else:
                 derivs=list(expression.atoms(sp.Derivative))
                 dependent=[d.expr for d in derivs if isinstance(d.expr,sp.core.function.AppliedUndef)]
@@ -1849,7 +1875,11 @@ def _ms_system(job_text):
       lines.push('result = sp.'+op+'(expr, '+v+', sp.Symbol('+JSON.stringify(target)+')'+(operation==='laplace'?', noconds=True':'')+')');
     }else if(['ode','pde'].includes(operation)){
       lines.push('equation = expr if isinstance(expr, sp.Equality) else sp.Eq(expr, 0)');
-      lines.push('result = sp.'+(operation==='ode'?'dsolve':'pdsolve')+'(equation)');
+      if(operation==='ode'&&extra.icsAsts?.length){
+        const conditions=extra.icsAsts.map(ic=>pythonDocument(ic).split('\n').find(line=>line.startsWith('expr = ')).slice(7));
+        lines.push('initial_conditions = ['+conditions.join(', ')+']');
+        lines.push('result = sp.dsolve(equation, ics={c.lhs: c.rhs for c in initial_conditions})');
+      }else lines.push('result = sp.'+(operation==='ode'?'dsolve':'pdsolve')+'(equation)');
     }else lines.push('result = '+({expand:'sp.expand' ,simplify:'sp.simplify',factor:'sp.factor',differentiate:'sp.diff',integrate:'sp.integrate'}[operation]||'sp.simplify')+'(expr'+(['differentiate','integrate'].includes(operation)?', '+v:'')+')');
     lines.push('print(sp.pretty(result))');return lines.join('\n');
   }
@@ -1918,6 +1948,16 @@ def _ms_system(job_text):
       const parsed=evaluate(raw);
       if(parsed.incomplete)throw new Error('Finish typing the equation before solving.');
       let sympyExtra={assumptions};
+      if(selected==='ode'){
+        const rawConditions=document.getElementById('cas-ode-ic').value.trim();
+        if(rawConditions){
+          if(rawConditions.length>160)throw Error('Initial conditions exceed 160 characters.');
+          const parts=rawConditions.split(';').map(x=>x.trim());
+          if(parts.length>2||parts.some(x=>!x))throw Error('Enter one or two initial conditions separated by semicolon.');
+          const icsAsts=parts.map(x=>{const ic=evaluate(x);if(ic.incomplete)throw Error('Complete each initial condition.');return ic.ast;});
+          sympyExtra={...sympyExtra,icsAsts};
+        }
+      }
       if(selected==='limit'){
         const pointRaw=document.getElementById('cas-limit-point').value.trim();
         if(!pointRaw)throw Error('Enter a limit approach point (e.g. 0, pi, oo or -oo).');
@@ -1980,6 +2020,7 @@ def _ms_system(job_text):
     t.hidden=!['laplace','inverse_laplace','fourier','inverse_fourier'].includes(name);
     document.getElementById('cas-limit-point-wrap').hidden=name!=='limit';
     document.getElementById('cas-limit-direction-wrap').hidden=name!=='limit';
+    document.getElementById('cas-ode-ic-wrap').hidden=name!=='ode';
     if(!t.hidden)document.getElementById('cas-target').value= name==='inverse_laplace'?'t':name==='inverse_fourier'?'x':name==='laplace'?'s':'k';
   }
   casOperation.addEventListener('change',updateTarget);updateTarget();
@@ -1989,6 +2030,7 @@ def _ms_system(job_text):
   });
   for(const field of [casOperation,casVariable,casEngine,document.getElementById('cas-limit-direction'),...assumptionKeys.map(k=>document.getElementById('cas-assume-'+k))])field.addEventListener('change',()=>{casRequest++;if(casLast)clearCas();});
   document.getElementById('cas-limit-point').addEventListener('input',()=>{casRequest++;if(casLast)clearCas();});
+  document.getElementById('cas-ode-ic').addEventListener('input',()=>{casRequest++;if(casLast)clearCas();});
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();casExecute();}},true);
   window.MathStudio.symbolic=casRun;
   window.MathStudio.solveWithSymPy=async raw=>{
@@ -2445,7 +2487,8 @@ self.onmessage=async ({data})=>{
   window.MathStudio.calculatorActions={insert:insertCalc,run:executeCalc,base:calculatorBaseInput};
 
   // Function plotting (safe AST evaluator shared with calculator; no eval() or arbitrary code).
-  let graphMode='2d',graphExpr=[],azimuth=-.72,elevation=.46,zoom3d=1;
+  let graphMode='2d',graphExpr=[],azimuth=-.72,elevation=.46,zoom3d=1,panX3d=0,panY3d=0,pan3dEnabled=false;
+  const graphDrafts={'2d':null,'3d':null},graphViews={'2d':null,'3d':null};
   const graphCanvas=$('graph-canvas'),ctx=graphCanvas.getContext('2d',{alpha:false});
   const graphDef2={xmin:-10,xmax:10,ymin:-5,ymax:5},graphDef3={xmin:-6,xmax:6,ymin:-6,ymax:6,zmin:-8,zmax:8};
   let range={...graphDef2},drag=null;
@@ -2453,16 +2496,26 @@ self.onmessage=async ({data})=>{
   function updateRange(){
     const r={};for(const k of paramIds){const n=Number($('graph-'+k).value);if(!Number.isFinite(n))throw Error('Please enter finite graph bounds.');r[k]=n;}
     if(r.xmin>=r.xmax||r.ymin>=r.ymax||(graphMode==='3d'&&r.zmin>=r.zmax))throw Error('The minimum bounds must be less than maximum bounds.');
+    const grid=$('graph-grid-step').value.trim();
+    if(grid && (!Number.isFinite(Number(grid))||Number(grid)<=0))throw Error('Grid spacing must be a positive finite number, or blank for automatic spacing.');
+    if(grid&&Math.max(r.xmax-r.xmin,r.ymax-r.ymin,...(graphMode==='3d'?[r.zmax-r.zmin]:[]))/Number(grid)>80)throw Error('Grid spacing is too small for the visible range (more than 80 intervals).');
     range=r;
+  }
+  function gridSpacing(span){return Number($('graph-grid-step').value)||niceStep(span);}
+  function axisTicks(min,max){
+    const step=gridSpacing(max-min),out=[];
+    if(!Number.isFinite(step)||step<=0)return out;
+    for(let i=0,v=Math.ceil(min/step)*step;i<=80&&v<=max+step*1e-9;i++,v=Math.ceil(min/step)*step+i*step)if(v>=min-step*1e-9)out.push(v);
+    return out;
   }
   const graphMsg=(message,error=false)=>{const el=$('graph-status');el.textContent=message;el.classList.toggle('error',error);};
   function graphSource(line){
     let raw=line.trim();
-    raw=raw.replace(/^y(?:\d+)?\s*=/i,'').replace(/^z\s*=/i,'').replace(/^[A-Za-z]\s*\(\s*x\s*(?:,\s*y\s*)?\)\s*=/i,'');
+    raw=raw.replace(/^y(?:\d+)?\s*=/i,'').replace(/^z(?:\d+)?\s*=/i,'').replace(/^[A-Za-z]\s*\(\s*x\s*(?:,\s*y\s*)?\)\s*=/i,'');
     return raw.trim();
   }
   function compileGraph(){
-    const lines=$('graph-input').value.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
+    const lines=$('graph-input').value.replace(/\\\s*\n/g,'\n').split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
     if(!lines.length&&!window.MathStudio.graphData?.hasData())throw Error('Type a function or import a dataset to plot.');
     if(lines.length>8)throw Error('Plot a maximum of eight equations at a time.');
     if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:plotColor(i),seriesIndex:i}));
@@ -2561,7 +2614,7 @@ self.onmessage=async ({data})=>{
     const {xmin,xmax,ymin,ymax}=range;
     const sx=x=>(x-xmin)/(xmax-xmin)*w,sy=y=>h-(y-ymin)/(ymax-ymin)*h;
     ctx.lineWidth=1;ctx.strokeStyle='#e8ecf6';ctx.fillStyle='#8b96ad';ctx.font='15px Arial';
-    let tx=niceStep(xmax-xmin),ty=niceStep(ymax-ymin);
+    let tx=gridSpacing(xmax-xmin),ty=gridSpacing(ymax-ymin);
     for(let x=Math.ceil(xmin/tx)*tx,k=0;x<=xmax&&k++<100;x+=tx){const px=sx(x);ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,h);ctx.stroke();ctx.fillText(formatScalar(x,5),px+5,Math.max(17,Math.min(h-7,sy(0)+17)));}
     for(let y=Math.ceil(ymin/ty)*ty,k=0;y<=ymax&&k++<100;y+=ty){const py=sy(y);ctx.beginPath();ctx.moveTo(0,py);ctx.lineTo(w,py);ctx.stroke();ctx.fillText(formatScalar(y,5),Math.max(6,Math.min(w-70,sx(0)+8)),py-7);}
     ctx.strokeStyle='#7387ad';ctx.lineWidth=1.6;
@@ -2591,7 +2644,7 @@ self.onmessage=async ({data})=>{
     const ca=Math.cos(azimuth),sa=Math.sin(azimuth),ce=Math.cos(elevation),se=Math.sin(elevation);
     const a=xx*ca-yy*sa,b=xx*sa+yy*ca,bd=b*ce-zz*se,zp=b*se+zz*ce;
     const perspective=3.6/(3.6+bd*.36);
-    return {x:w/2+a*w*.23*zoom3d*perspective,y:h/2-zp*h*.32*zoom3d*perspective,depth:bd};
+    return {x:w/2+panX3d+a*w*.23*zoom3d*perspective,y:h/2+panY3d-zp*h*.32*zoom3d*perspective,depth:bd};
   }
   function draw3D(){
     background();
@@ -2604,10 +2657,29 @@ self.onmessage=async ({data})=>{
     for(const y of [range.ymin,range.ymax])for(const z of [range.zmin,range.zmax])lines.push([persp(range.xmin,y,z),persp(range.xmax,y,z)]);
     ctx.lineWidth=1.1;ctx.strokeStyle='#d3dceb';
     for(const [a,b] of lines){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
-    const origin=persp(0,0,0);
-    for(const [loc,label,c] of [[persp(range.xmax,0,0),'X','#b84949'],[persp(0,range.ymax,0),'Y','#247a50'],[persp(0,0,range.zmax),'Z','#3757bd']]){
-      if(!Number.isFinite(loc.x))continue;ctx.strokeStyle=c;ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(origin.x,origin.y);ctx.lineTo(loc.x,loc.y);ctx.stroke();ctx.fillStyle=c;ctx.font='bold 20px Arial';ctx.fillText(label,loc.x+7,loc.y-7);
+    // Mark X, Y and Z with numeric tick labels. Keep axes on the bounding-box edges
+    // so they remain valid even when zero lies outside the visible domain.
+    const axes=[
+      ['X','x',range.xmin,range.xmax,v=>persp(v,range.ymin,range.zmin),'#b84949'],
+      ['Y','y',range.ymin,range.ymax,v=>persp(range.xmin,v,range.zmin),'#247a50'],
+      ['Z','z',range.zmin,range.zmax,v=>persp(range.xmin,range.ymin,v),'#3757bd']
+    ];
+    ctx.textAlign='left';
+    for(const [label,axis,min,max,project,color] of axes){
+      const a=project(min),b=project(max);
+      ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      ctx.fillStyle=color;ctx.font='bold 17px Arial';ctx.fillText(label,b.x+9,b.y-8);
+      ctx.font='12px Arial';
+      for(const value of axisTicks(min,max)){
+        const p=project(value);
+        ctx.beginPath();ctx.moveTo(p.x-3,p.y-3);ctx.lineTo(p.x+3,p.y+3);ctx.stroke();
+        ctx.fillText(formatScalar(value,4),p.x+6,p.y+16);
+      }
     }
+    // Ground-plane grid uses the same user-specified spacing as the numeric labels.
+    ctx.strokeStyle='#e1e6f0';ctx.lineWidth=.8;
+    for(const x of axisTicks(range.xmin,range.xmax)){const a=persp(x,range.ymin,range.zmin),b=persp(x,range.ymax,range.zmin);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+    for(const y of axisTicks(range.ymin,range.ymax)){const a=persp(range.xmin,y,range.zmin),b=persp(range.xmax,y,range.zmin);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
     const N=38,quads=[];
     for(const [idx,func] of graphExpr.entries()){
       if(func.kind==='trace')continue;
@@ -2657,7 +2729,7 @@ self.onmessage=async ({data})=>{
       ctx.setLineDash(seriesDash(func.seriesIndex));stroke(func.color,Math.max(2,seriesWidth(func.seriesIndex)+2));ctx.setLineDash([]);
     }
     window.MathStudio.graphData?.draw(ctx,{mode:'3d',range,w,h,persp});
-    ctx.fillStyle='#71809d';ctx.font='13px Arial';ctx.fillText('Drag to rotate · Scroll to zoom · X / Y / Z ranges can be edited',18,h-17);
+    ctx.fillStyle='#71809d';ctx.font='13px Arial';ctx.fillText('Drag to rotate · Shift-drag / Pan 3D to move · Scroll to zoom at pointer · Axes & grid',18,h-17);
   }
   function legend(){const frame=$('graph-legend');frame.replaceChildren();for(const [i,f] of graphExpr.entries()){
     const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=f.kind==='trace'?f.color:f.color;
@@ -2692,21 +2764,35 @@ self.onmessage=async ({data})=>{
   }
   function setRanges(r){for(const [key,value] of Object.entries(r))if($('graph-'+key))$('graph-'+key).value=value;range={...range,...r};}
   function switchGraph(mode){
-    graphMode=mode;
+    if(mode!==graphMode){
+      graphDrafts[graphMode]=$('graph-input').value;
+      graphViews[graphMode]={...range};
+      graphMode=mode;
+      setRanges(graphViews[mode]||(mode==='2d'?graphDef2:graphDef3));
+      $('graph-input').value=graphDrafts[mode]??(mode==='2d'?'y = sin(x)\ny = cos(x)':'z = sin(sqrt(x^2+y^2))');
+    }
     for(const b of document.querySelectorAll('[data-graph-mode]'))b.classList.toggle('active',b.dataset.graphMode===mode);
-    $('graph-hint').textContent=mode==='2d'?'One y=f(x) per line. Compare several functions.':'One z=f(x,y) per line. You can also pair y=f(x) with z=f(x,y) to draw a 3D curve on the surface.';
+    $('graph-hint').textContent=mode==='2d'?'One y=f(x) per line. Compare several functions.':'One z=f(x,y), z2=f(x,y), etc. per line. You may also add a y=f(x) trace.';
     for(const el of document.querySelectorAll('.graph-z-control'))el.hidden=mode!=='3d';
+    $('graph-pan-toggle').hidden=mode!=='3d';
     for(const el of document.querySelectorAll('.graph-y-control'))el.querySelector('input').disabled=false;
-    setRanges(mode==='2d'?graphDef2:graphDef3);
-    azimuth=-.72;elevation=.46;zoom3d=1;
-    $('graph-input').value=mode==='2d'?'y = sin(x)\ny = cos(x)':'z = sin(sqrt(x^2+y^2))';
     fillGraphExamples();plot();
   }
   const examples2=[['Sine & cosine','y=sin(x)\ny=cos(x)'],['Parabola','y=x^2-2*x-3'],['Rational','y=1/(x-1)'],['Exponential','y=exp(-x^2/4)'],['Piecewise','y=if(x<0,-x,x)'],['Inverse trig','y=asin(x)']];
   const examples3=[['Radial ripple','z=sin(sqrt(x^2+y^2))'],['Saddle','z=(x^2-y^2)/6'],['Gaussian peak','z=6*exp(-(x^2+y^2)/8)'],['Wave surface','z=sin(x)*cos(y)'],['Curve on surface','y=x×x\nz=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),sin(x)*cos(y))']];
   function fillGraphExamples(){const frame=$('graph-examples');frame.replaceChildren();for(const [name,code] of graphMode==='2d'?examples2:examples3){const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',()=>{$('graph-input').value=code;plot();});frame.append(b)}}
   $('graph-plot').addEventListener('click',plot);
-  $('graph-reset').addEventListener('click',()=>{setRanges(graphMode==='2d'?graphDef2:graphDef3);azimuth=-.72;elevation=.46;zoom3d=1;plot();});
+  $('graph-reset').addEventListener('click',()=>{setRanges(graphMode==='2d'?graphDef2:graphDef3);azimuth=-.72;elevation=.46;zoom3d=1;panX3d=0;panY3d=0;plot();});
+  $('graph-show-axes').addEventListener('click',()=>{
+    for(const id of ['graph-controls-collapsible','ui-graph-axes']){const panel=$(id);if(panel)panel.open=true;}
+    $('graph-xmin').focus();
+  });
+  $('graph-pan-toggle').addEventListener('click',()=>{
+    pan3dEnabled=!pan3dEnabled;
+    $('graph-pan-toggle').setAttribute('aria-pressed',String(pan3dEnabled));
+    $('graph-pan-toggle').textContent='Pan 3D: '+(pan3dEnabled?'on':'off');
+  });
+  $('graph-grid-step').addEventListener('change',plot);
   $('graph-import').addEventListener('click',()=>{const raw=$('equation-input').value.trim();if(!raw){graphMsg('Write an equation in the Equation editor first.',true);return;}
     if(graphMode==='2d')$('graph-input').value=/^[a-z]\s*\(/i.test(raw)?raw:'y='+raw;
     else $('graph-input').value=/^\s*[yz]\s*=/i.test(raw)?raw:'z='+raw;
@@ -2715,11 +2801,12 @@ self.onmessage=async ({data})=>{
   $('graph-save').addEventListener('click',()=>{drawGraph();const a=document.createElement('a');a.href=graphCanvas.toDataURL('image/png');a.download='MathStudio_'+graphMode+'_graph.png';document.body.append(a);a.click();a.remove();graphMsg('Graph exported as a PNG image.');});
   for(const b of document.querySelectorAll('[data-graph-mode]'))b.addEventListener('click',()=>switchGraph(b.dataset.graphMode));
   for(const k of paramIds)$('graph-'+k).addEventListener('change',plot);
-  graphCanvas.addEventListener('pointerdown',e=>{graphCanvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,range:{...range},azi:azimuth,ele:elevation};graphCanvas.style.cursor='grabbing';});
+  graphCanvas.addEventListener('contextmenu',e=>e.preventDefault());
+  graphCanvas.addEventListener('pointerdown',e=>{graphCanvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,range:{...range},azi:azimuth,ele:elevation,panX:panX3d,panY:panY3d,pan:graphMode==='3d'&&(pan3dEnabled||e.shiftKey||e.button===2)};graphCanvas.style.cursor='grabbing';});
   graphCanvas.addEventListener('pointermove',e=>{
     if(!drag)return;
     const rect=graphCanvas.getBoundingClientRect(),dx=(e.clientX-drag.x)/rect.width,dy=(e.clientY-drag.y)/rect.height;
-    if(graphMode==='3d'){azimuth=drag.azi+dx*5;elevation=Math.max(-1.38,Math.min(1.38,drag.ele-dy*3.7));}
+    if(graphMode==='3d'){if(drag.pan){panX3d=drag.panX+dx*w;panY3d=drag.panY+dy*h;}else{azimuth=drag.azi+dx*5;elevation=Math.max(-1.38,Math.min(1.38,drag.ele-dy*3.7));}}
     else{
       const sx=drag.range.xmax-drag.range.xmin,sy=drag.range.ymax-drag.range.ymin;
       range.xmin=drag.range.xmin-dx*sx;range.xmax=drag.range.xmax-dx*sx;
@@ -2731,7 +2818,13 @@ self.onmessage=async ({data})=>{
   graphCanvas.addEventListener('pointerup',pointerStop);graphCanvas.addEventListener('pointercancel',pointerStop);
   graphCanvas.addEventListener('wheel',e=>{
     e.preventDefault();const factor=e.deltaY>0?1.12:1/1.12;
-    if(graphMode==='3d')zoom3d=Math.max(.25,Math.min(5,zoom3d/factor));
+    if(graphMode==='3d'){
+      const rect=graphCanvas.getBoundingClientRect(),mouseX=(e.clientX-rect.left)/rect.width*w,mouseY=(e.clientY-rect.top)/rect.height*h;
+      const previous=zoom3d;zoom3d=Math.max(.25,Math.min(5,zoom3d/factor));
+      const ratio=zoom3d/previous;
+      panX3d=mouseX-w/2-(mouseX-w/2-panX3d)*ratio;
+      panY3d=mouseY-h/2-(mouseY-h/2-panY3d)*ratio;
+    }
     else{
       const rect=graphCanvas.getBoundingClientRect(),px=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width)),py=Math.max(0,Math.min(1,(e.clientY-rect.top)/rect.height));
       const cx=range.xmin+(range.xmax-range.xmin)*px,cy=range.ymax-(range.ymax-range.ymin)*py;
@@ -2778,7 +2871,7 @@ self.onmessage=async ({data})=>{
       $('graph-input').value=[...lines,added].join('\n');plot();
       if($('graph-status').classList.contains('error'))throw Error($('graph-status').textContent);
     },
-    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,dataset:window.MathStudio.graphData?.exportState()||null,appearance:getAppearance()}),
+    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,panX3d,panY3d,dataset:window.MathStudio.graphData?.exportState()||null,appearance:getAppearance()}),
     restoreGraphState:data=>{
       if(!data||typeof data!=='object')return;
       if(['2d','3d'].includes(data.mode))switchGraph(data.mode);
@@ -2789,7 +2882,9 @@ self.onmessage=async ({data})=>{
       }
       if(Number.isFinite(data.azimuth))azimuth=data.azimuth;
       if(Number.isFinite(data.elevation))elevation=data.elevation;
-      if(Number.isFinite(data.zoom3d))zoom3d=data.zoom3d;
+      if(Number.isFinite(data.zoom3d))zoom3d=Math.max(.25,Math.min(5,data.zoom3d));
+      if(Number.isFinite(data.panX3d))panX3d=Math.max(-5000,Math.min(5000,data.panX3d));
+      if(Number.isFinite(data.panY3d))panY3d=Math.max(-5000,Math.min(5000,data.panY3d));
       if(window.MathStudio.graphData)window.MathStudio.graphData.restoreState(data.dataset??null);setAppearance(data.appearance||{});
       plot();
     }
@@ -2842,6 +2937,7 @@ self.onmessage=async ({data})=>{
     }
     if (data.solver) for (const key of ['expression', 'variable', 'operation', 'engine', 'limitPoint', 'limitDirection'])
       if (data.solver[key] !== undefined) short(data.solver[key], 12000, 'solver ' + key);
+    if (data.solver?.odeInitialCondition !== undefined) short(data.solver.odeInitialCondition, 160, 'ODE initial condition');
     if (data.solver?.assumptions !== undefined) {
       const flags=data.solver.assumptions;
       if (!record(flags) || Object.keys(flags).some(k=>!['real','positive','negative','integer'].includes(k)||typeof flags[k]!=='boolean') ||
@@ -3153,7 +3249,7 @@ self.onmessage=async ({data})=>{
   function projectData(){
     return {format:'mathstudio-project',version:2,date:new Date().toISOString(),working:state.active,origin:state.origin,
       recent:state.recent,notebook:engine.notebookBridge.list(),calculator:engine.advanced.getCalculatorState(),
-      solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value,limitPoint:$('cas-limit-point').value,limitDirection:$('cas-limit-direction').value,assumptions:Object.fromEntries(['real','positive','negative','integer'].map(k=>[k,$('cas-assume-'+k).checked]))},
+      solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value,limitPoint:$('cas-limit-point').value,limitDirection:$('cas-limit-direction').value,odeInitialCondition:$('cas-ode-ic').value,assumptions:Object.fromEntries(['real','positive','negative','integer'].map(k=>[k,$('cas-assume-'+k).checked]))},
       graph:engine.advanced.getGraphState(),customFunctions:window.MathStudio.customFunctions?.list()||[],tables:window.MathStudio.dataTables?.exportState()||null,fit:window.MathStudio.curveFit?.exportState()||null};
   }
   $('hub-export-project').addEventListener('click',()=>{
@@ -3169,7 +3265,7 @@ self.onmessage=async ({data})=>{
     engine.advanced.restoreGraphState(data.graph||{});
     window.MathStudio.dataTables?.restoreState(data.tables||null);
     window.MathStudio.curveFit?.restoreState(data.fit||null);
-    if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';$('cas-limit-point').value=data.solver.limitPoint||'0';$('cas-limit-direction').value=['+-','+','-'].includes(data.solver.limitDirection)?data.solver.limitDirection:'+-';for(const k of ['real','positive','negative','integer'])$('cas-assume-'+k).checked=data.solver.assumptions?.[k]===true;$('cas-operation').dispatchEvent(new Event('change'));}
+    if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';$('cas-limit-point').value=data.solver.limitPoint||'0';$('cas-ode-ic').value=data.solver.odeInitialCondition||'';$('cas-limit-direction').value=['+-','+','-'].includes(data.solver.limitDirection)?data.solver.limitDirection:'+-';for(const k of ['real','positive','negative','integer'])$('cas-assume-'+k).checked=data.solver.assumptions?.[k]===true;$('cas-operation').dispatchEvent(new Event('change'));}
     state.recent=Array.isArray(data.recent)?data.recent.filter(r=>r&&typeof r.raw==='string').slice(0,14):[];
     state.calculator=engine.advanced.getCalculator();state.solver=null;
     if(typeof data.working==='string'&&data.working.trim())current(data.working,data.origin||'project');
@@ -3929,7 +4025,7 @@ const fitArea=document.createElement('section');fitArea.id='curve-fit-tools';fit
 fitArea.innerHTML=`<div class="fit-head"><strong>Curve fitting</strong><span>Fit selected numeric X / Y columns</span></div>
 <div class="data-toolbar"><label>Model<select id="fit-model"><option value="none">No fit</option><option value="linear">Linear y=a+bx</option><option value="poly">Polynomial</option><option value="exp">Exponential y=a exp(bx)</option><option value="log">Logarithmic y=a+b ln(x)</option><option value="power">Power y=a x^b</option><option value="gaussian">Gaussian bell curve</option></select></label>
 <label id="fit-degree-wrap" hidden>Polynomial degree<select id="fit-degree"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label>
-<button type="button" class="primary" id="fit-run">Fit and show on graph</button><button type="button" class="secondary" id="fit-clear">Clear fit curve</button></div>
+<button type="button" class="primary" id="fit-run">Fit and show on graph</button><button type="button" class="secondary" id="fit-export" disabled>Export residuals CSV</button><button type="button" class="secondary" id="fit-clear">Clear fit curve</button></div>
 <div class="fit-result" id="fit-result" role="status">Select a numeric table and a fit model.</div>`;
 graphic.insertAdjacentElement('afterend',fitArea);
 $('fit-model').addEventListener('change',()=>{$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';});
@@ -3982,12 +4078,19 @@ function analyze(points,model,degree=2){
   formula=model==='log'?'('+fmt(coeffs[0])+')+('+fmt(coeffs[1])+')*ln(x)':'exp('+fmt(coeffs[0])+')*x^('+fmt(coeffs[1])+')';
   predict=x=>model==='log'?coeffs[0]+coeffs[1]*Math.log(x):Math.exp(coeffs[0])*Math.pow(x,coeffs[1]);
  }
- const mean=ys.reduce((a,b)=>a+b,0)/ys.length;let ss=0,total=0;
- for(let i=0;i<ys.length;i++){const estimate=predict(xs[i]);if(!Number.isFinite(estimate))throw Error('Numerical overflow in fitted model.');ss+=(ys[i]-estimate)**2;total+=(ys[i]-mean)**2;}
+ const mean=ys.reduce((a,b)=>a+b,0)/ys.length;let ss=0,total=0,absoluteError=0;
+ const residuals=[];
+ for(let i=0;i<ys.length;i++){
+  const estimate=predict(xs[i]);if(!Number.isFinite(estimate))throw Error('Numerical overflow in fitted model.');
+  const residual=ys[i]-estimate;if(!Number.isFinite(residual))throw Error('Numerical overflow in fitting residual.');
+  ss+=residual**2;total+=(ys[i]-mean)**2;absoluteError+=Math.abs(residual);
+  residuals.push([xs[i],ys[i],estimate,residual]);
+ }
+ if(!Number.isFinite(ss)||!Number.isFinite(total)||!Number.isFinite(absoluteError))throw Error('Numerical overflow in fitting diagnostics.');
  const r2=total>0?1-ss/total:(ss<1e-15?1:0);
- return {model,degree,formula,coefficients:coeffs,r2,rmse:Math.sqrt(ss/ys.length),used:ys.length,excluded:points.length-ys.length};
+ return {model,degree,formula,coefficients:coeffs,r2,rmse:Math.sqrt(ss/ys.length),mae:absoluteError/ys.length,sse:ss,residuals,used:ys.length,excluded:points.length-ys.length};
 }
-function fitTable(t,x,y,model,degree){const computed=studio.dataTables.calculate(t),pairs=computed.map(r=>[finite(r[x]),finite(r[y])]).filter(p=>p[0]!==null&&p[1]!==null);return analyze(pairs,model,degree);}
+function fitTable(t,x,y,model,degree){const computed=studio.dataTables.calculate(t),pairs=computed.map(r=>[finite(r[x]),finite(r[y])]);return analyze(pairs,model,degree);}
 function putFit(){try{
  const model=$('fit-model').value;if(model==='none')throw Error('Select a fitting model.');
  const kind=$('dt-chart-type').value;if(!['scatter','line'].includes(kind))throw Error('Fitting supports 2D scatter and line charts. Select one of those first.');
@@ -4000,12 +4103,21 @@ function putFit(){try{
  studio.dataTables.plot(); // Ensures same measurements appear as dots as well as the fitted curve.
  $('graph-input').value=[...new Set($('graph-input').value.split('\n').filter(Boolean).concat([lastEquation]))].join('\n');
  $('graph-plot').click();
- currentFit={...fit,table:table.id,x:xi,y:yi};
- const out=$('fit-result');out.textContent='y = '+fit.formula+'  |  R² = '+fit.r2.toFixed(6)+'  |  RMSE = '+fit.rmse.toPrecision(5)+'  |  n = '+fit.used+(fit.excluded?' ('+fit.excluded+' excluded)':'');out.classList.remove('error');
- }catch(err){$('fit-result').textContent=err.message;$('fit-result').classList.add('error');}
+ currentFit={...fit,table:table.id,x:xi,y:yi};$('fit-export').disabled=false;
+ const out=$('fit-result');out.textContent='y = '+fit.formula+'  |  R² = '+fit.r2.toFixed(6)+'  |  RMSE = '+fit.rmse.toPrecision(5)+'  |  MAE = '+fit.mae.toPrecision(5)+'  |  n = '+fit.used+(fit.excluded?' ('+fit.excluded+' excluded)':'');out.classList.remove('error');
+ }catch(err){currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent=err.message;$('fit-result').classList.add('error');}
 }
 $('fit-run').addEventListener('click',putFit);
-$('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-result').textContent='Fit removed; data table unchanged.';});
+for(const id of ['fit-model','fit-degree','dt-graph-table','dt-graph-x','dt-graph-y','dt-chart-type']){
+ $(id).addEventListener('change',()=>{currentFit=null;$('fit-export').disabled=true;});
+}
+$('fit-export').addEventListener('click',()=>{
+ if(!currentFit||!currentFit.residuals.length)return;
+ const csv=['x,y,predicted,residual',...currentFit.residuals.map(row=>row.map(value=>String(value)).join(','))].join('\r\n')+'\r\n';
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ const link=document.createElement('a');link.href=url;link.download='ProMathStudio_fit_residuals.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+$('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent='Fit removed; data table unchanged.';});
 studio.curveFit={analyze,fitTable,get last(){return currentFit;},get active(){return !!currentFit;},exportState:()=>({model:$('fit-model').value,degree:$('fit-degree').value,lastEquation}),restoreState:s=>{if(!s)return;$('fit-model').value=s.model||'none';$('fit-degree').value=s.degree||'2';$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';lastEquation=String(s.lastEquation||'').slice(0,2000);}};
 // Floating/sliding library and contextual help. Keep underlying semantic form controls intact.
 const css=document.createElement('style');css.textContent=`
@@ -5033,6 +5145,105 @@ function inverse(A){
  if(!Number.isFinite(residual)||residual>1e-7)throw Error('Matrix inversion failed its numerical residual check.');
  return result;
 }
+/* Jacobi rotations for bounded real symmetric 2x2/3x3 matrices. Columns of
+   vectors are orthonormal eigenvectors; eigenvalues are descending. */
+function eigenSymmetric(A){
+ A=validate(A);requireSquare(A);
+ const n=A.length,scale=Math.max(...A.flat().map(Math.abs));
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)
+  if(Math.abs(A[i][j]-A[j][i])>1e-12*scale)
+   throw Error('Eigenanalysis requires a real symmetric matrix.');
+ const B=A.map(row=>row.map(x=>scale?x/scale:0));
+ const V=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>Number(i===j)));
+ let iterations=0;
+ for(;iterations<64;iterations++){
+  let p=0,q=1,off=Math.abs(B[0][1]);
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)
+   if(Math.abs(B[i][j])>off){p=i;q=j;off=Math.abs(B[i][j]);}
+  if(off<=1e-14)break;
+  const apq=B[p][q],tau=(B[q][q]-B[p][p])/(2*apq);
+  const t=(tau<0?-1:1)/(Math.abs(tau)+Math.hypot(1,tau));
+  const c=1/Math.hypot(1,t),s=t*c;
+  const app=B[p][p],aqq=B[q][q];
+  B[p][p]=app-t*apq;B[q][q]=aqq+t*apq;B[p][q]=0;B[q][p]=0;
+  for(let k=0;k<n;k++)if(k!==p&&k!==q){
+   const bkp=B[k][p],bkq=B[k][q];
+   B[k][p]=B[p][k]=c*bkp-s*bkq;
+   B[k][q]=B[q][k]=s*bkp+c*bkq;
+  }
+  for(let k=0;k<n;k++){
+   const vkp=V[k][p],vkq=V[k][q];
+   V[k][p]=c*vkp-s*vkq;V[k][q]=s*vkp+c*vkq;
+  }
+ }
+ if(iterations===64)throw Error('Symmetric eigenanalysis did not converge.');
+ const order=Array.from({length:n},(_,i)=>i).sort((i,j)=>B[j][j]-B[i][i]||i-j);
+ const values=order.map(i=>B[i][i]*scale);
+ const vectors=V.map(row=>order.map(i=>row[i]));
+ for(let j=0;j<n;j++){
+  let pivot=0;
+  for(let i=1;i<n;i++)if(Math.abs(vectors[i][j])>Math.abs(vectors[pivot][j]))pivot=i;
+  if(vectors[pivot][j]<0)for(let i=0;i<n;i++)vectors[i][j]=-vectors[i][j];
+ }
+ let residual=0,reconstructionResidual=0,orthogonality=0;
+ const denom=Math.max(scale,Number.MIN_VALUE);
+ for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+  let av=0,reconstruction=0,vtv=0;
+  for(let k=0;k<n;k++){
+   av+=A[i][k]*vectors[k][j];
+   reconstruction+=vectors[i][k]*values[k]*vectors[j][k];
+   vtv+=vectors[k][i]*vectors[k][j];
+  }
+  residual=Math.max(residual,Math.abs(av-values[j]*vectors[i][j])/denom);
+  reconstructionResidual=Math.max(reconstructionResidual,Math.abs(reconstruction-A[i][j])/denom);
+  orthogonality=Math.max(orthogonality,Math.abs(vtv-Number(i===j)));
+ }
+ if(![...values,...vectors.flat(),residual,reconstructionResidual,orthogonality].every(Number.isFinite)
+  ||residual>1e-8||reconstructionResidual>1e-8||orthogonality>1e-8)
+  throw Error('Symmetric eigenanalysis failed numerical residual or orthogonality checks.');
+ return {values,vectors,residual,reconstructionResidual,orthogonality,iterations};
+}
+/* Scaled one-sided Jacobi SVD for real 2×2 matrices. The small singular
+   value uses the determinant to avoid cancellation in AᵀA near rank loss. */
+function svd2x2(A){
+ A=validate(A);
+ if(A.length!==2||A[0].length!==2)throw Error('SVD requires a 2×2 real matrix.');
+ const scale=Math.max(...A.flat().map(Math.abs));
+ if(scale===0)return {U:[[1,0],[0,1]],S:[0,0],V:[[1,0],[0,1]],rank:0,conditionNumber:null,residual:0,orthogonalityU:0,orthogonalityV:0};
+ const [[a,b],[c,d]]=A.map(row=>row.map(x=>x/scale));
+ const g00=a*a+c*c,g11=b*b+d*d,g01=a*b+c*d;
+ let co=1,si=0;
+ if(g01!==0){
+  const tau=(g11-g00)/(2*g01);
+  const t=(tau<0?-1:1)/(Math.abs(tau)+Math.hypot(1,tau));
+  co=1/Math.hypot(1,t);si=t*co;
+ }
+ let V=[[co,si],[-si,co]];
+ let b0=[a*co-b*si,c*co-d*si],b1=[a*si+b*co,c*si+d*co];
+ let s0=Math.hypot(...b0),s1=Math.hypot(...b1);
+ if(s1>s0){[s0,s1]=[s1,s0];[b0,b1]=[b1,b0];V=V.map(row=>[row[1],row[0]]);}
+ const det=a*d-b*c;
+ const sSmall=Math.abs(det)/s0;
+ const U0=b0.map(x=>x/s0);
+ const detV=V[0][0]*V[1][1]-V[0][1]*V[1][0];
+ const sign=det===0?1:(det*detV<0?-1:1);
+ const U=[[U0[0],-sign*U0[1]],[U0[1],sign*U0[0]]];
+ const S=[s0*scale,sSmall*scale];
+ const rank=S[1]>1e-12*S[0]?2:1;
+ let residual=0,orthogonalityU=0,orthogonalityV=0;
+ for(let i=0;i<2;i++)for(let j=0;j<2;j++){
+  const reconstructed=U[i][0]*S[0]*V[j][0]+U[i][1]*S[1]*V[j][1];
+  residual=Math.max(residual,Math.abs(reconstructed-A[i][j])/scale);
+  let dotU=0,dotV=0;
+  for(let k=0;k<2;k++){dotU+=U[k][i]*U[k][j];dotV+=V[k][i]*V[k][j];}
+  orthogonalityU=Math.max(orthogonalityU,Math.abs(dotU-Number(i===j)));
+  orthogonalityV=Math.max(orthogonalityV,Math.abs(dotV-Number(i===j)));
+ }
+ if(![...S,...U.flat(),...V.flat(),residual,orthogonalityU,orthogonalityV].every(Number.isFinite)||residual>1e-8||orthogonalityU>1e-8||orthogonalityV>1e-8)
+  throw Error('SVD failed numerical reconstruction or orthogonality checks.');
+ const ratio=S[1]>0?S[0]/S[1]:Infinity;
+ return {U,S,V,rank,conditionNumber:Number.isFinite(ratio)?ratio:null,residual,orthogonalityU,orthogonalityV};
+}
 function format(x){
  if(!Number.isFinite(x))throw Error('Result exceeded finite floating-point range.');
  if(Math.abs(x)<1e-13)return '0';
@@ -5041,7 +5252,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD supports real 2×2 A (including singular/zero matrices), reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -5061,10 +5272,14 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-lu" class="secondary">LU (P·A=L·U)</button>'+ 
  '<button type="button" id="mat-qr" class="secondary">QR (A=Q·R)</button>'+
  '<button type="button" id="mat-least-squares" class="secondary">Least squares (A·x≈b)</button>'+
+ '<button type="button" id="mat-eigen" class="secondary">Eigen (symmetric A)</button>'+ 
+ '<button type="button" id="mat-svd" class="secondary">SVD (2×2 A)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
  '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+ 
  '<label>QR factor for editor <select id="mat-qr-factor"><option value="Q">Q</option><option value="R">R</option></select></label>'+
+ '<label>Eigen output for editor <select id="mat-eigen-factor"><option value="vectors">Eigenvectors</option><option value="values">Eigenvalues</option></select></label>'+ 
+ '<label>SVD factor for editor <select id="mat-svd-factor"><option value="U">U</option><option value="S">Singular values</option><option value="V">V</option></select></label>'+
  '<button type="button" id="mat-send" class="secondary" disabled>Send result to Equation Editor</button></div>'+
  '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
 panel.append(area);
@@ -5123,11 +5338,15 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?svd2x2(A):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares')?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
-  output.textContent=operation==='lu'?
+  output.textContent=operation==='svd'?
+   'svd: A = U·diag(σ)·Vᵀ\nSingular values (descending): '+value.S.map(format).join(', ')+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===null?'undefined / outside finite range':format(value.conditionNumber))+'\nU:\n'+rowsText(value.U)+'\nV:\n'+rowsText(value.V)+'\nRelative reconstruction residual: '+format(value.residual)+'\nU orthogonality residual: '+format(value.orthogonalityU)+'\nV orthogonality residual: '+format(value.orthogonalityV):
+   operation==='eigen'?
+   'eigen: symmetric A = V·diag(λ)·Vᵀ\nEigenvalues (descending): '+value.values.map(format).join(', ')+'\nEigenvectors (columns of V):\n'+rowsText(value.vectors)+'\nRelative residual: '+format(value.residual)+'\nReconstruction residual: '+format(value.reconstructionResidual)+'\nOrthogonality residual: '+format(value.orthogonality):
+   operation==='lu'?
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
    'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
@@ -5135,17 +5354,17 @@ function calculate(operation){
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
-for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu'],['mat-qr','qr'],['mat-least-squares','leastSquares']])
+for(const [id,op] of [['mat-det','determinant'],['mat-transpose','transpose'],['mat-inverse','inverse'],['mat-add','add'],['mat-subtract','subtract'],['mat-multiply','multiply'],['mat-rref','rref'],['mat-rank','rank'],['mat-solve','solve'],['mat-lu','lu'],['mat-qr','qr'],['mat-least-squares','leastSquares'],['mat-eigen','eigen'],['mat-svd','svd']])
  document.getElementById(id).addEventListener('click',()=>calculate(op));
 for(const id of ['mat-rows','mat-cols'])document.getElementById(id).addEventListener('change',()=>{rebuild();rebuildRhs();});
 for(const id of ['mat-b-rows','mat-b-cols'])document.getElementById(id).addEventListener('change',rebuildSecond);
 send.addEventListener('click',()=>{
  if(!last)return;
- try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:(last.operation==='solve'||last.operation==='leastSquares')?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.operation==='qr'?last.value[document.getElementById('mat-qr-factor').value]:last.value),{source:'matrix calculator'});}
+ try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:(last.operation==='solve'||last.operation==='leastSquares')?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.operation==='qr'?last.value[document.getElementById('mat-qr-factor').value]:last.operation==='eigen'?(document.getElementById('mat-eigen-factor').value==='values'?last.value.values.map(x=>[x]):last.value.vectors):last.operation==='svd'?(document.getElementById('mat-svd-factor').value==='S'?last.value.S.map(x=>[x]):last.value[document.getElementById('mat-svd-factor').value]):last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,notation,read,readSecond,readRhs,calculate};
 })();
 </script>
 <script id="promath-ode-tools">
@@ -5345,6 +5564,125 @@ $('ode-to-graph').addEventListener('click',()=>{
 });
 M.odeTools={solve,solveAdaptive,solveSystem,run};
 })();
+</script>
+<script id="promath-fft-tools">
+/* ProMathStudio: offline radix-2 FFT for uniformly sampled real signals. No eval or network. */
+(()=>{'use strict';
+const M=window.MathStudio,panel=document.getElementById('numerical-panel');
+if(!M?.dataTables||!M?.advanced||!panel)return;
+const $=id=>document.getElementById(id),MAX=1e9;
+function fft(values,inverse=false){
+ if(!Array.isArray(values)||values.length<4||values.length>256||(values.length&(values.length-1)))
+  throw Error('FFT length must be a power of two from 4 to 256.');
+ const n=values.length;
+ const a=values.map(v=>{
+  const re=typeof v==='number'?v:v?.re,im=typeof v==='number'?0:v?.im;
+  if(typeof re!=='number'||typeof im!=='number'||!Number.isFinite(re)||!Number.isFinite(im)||Math.abs(re)>MAX||Math.abs(im)>MAX)
+   throw Error('FFT samples must be finite numbers with magnitude at most 1e9.');
+  return {re,im};
+ });
+ for(let i=1,j=0;i<n;i++){
+  let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;
+  if(i<j)[a[i],a[j]]=[a[j],a[i]];
+ }
+ for(let size=2;size<=n;size*=2){
+  const angle=(inverse?2:-2)*Math.PI/size,wr=Math.cos(angle),wi=Math.sin(angle);
+  for(let start=0;start<n;start+=size){
+   let ur=1,ui=0;
+   for(let k=0;k<size/2;k++){
+    const p=a[start+k],q=a[start+k+size/2];
+    const tr=ur*q.re-ui*q.im,ti=ur*q.im+ui*q.re;
+    a[start+k]={re:p.re+tr,im:p.im+ti};
+    a[start+k+size/2]={re:p.re-tr,im:p.im-ti};
+    const nextR=ur*wr-ui*wi;ui=ur*wi+ui*wr;ur=nextR;
+   }
+  }
+ }
+ if(inverse)for(const v of a){v.re/=n;v.im/=n;}
+ if(a.some(v=>!Number.isFinite(v.re)||!Number.isFinite(v.im)))throw Error('FFT result exceeded finite range.');
+ return a;
+}
+function parse(text){
+ if(typeof text!=='string'||text.length>5000)throw Error('Enter at most 5,000 characters of real samples.');
+ const tokens=text.trim().split(/[\s,;]+/);
+ if(tokens.some(t=>!t||!/^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?$/i.test(t)))
+  throw Error('Enter real numeric samples separated by commas or whitespace.');
+ const values=tokens.map(Number);
+ fft(values);
+ return values;
+}
+function analyze(samples,sampleRate=1,windowType='rectangular'){
+ if(typeof sampleRate!=='number'&&(typeof sampleRate!=='string'||!sampleRate.trim()))throw Error('Sample rate must be a positive numeric value in Hz.');
+ const rate=Number(sampleRate);
+ if(!Number.isFinite(rate)||rate<=0||rate>1e12)throw Error('Sample rate must be positive and at most 1e12 Hz.');
+ const values=Array.isArray(samples)?samples:parse(samples);
+ if(!values.every(v=>typeof v==='number'&&Number.isFinite(v)&&Math.abs(v)<=MAX))
+  throw Error('FFT analysis requires real finite samples with magnitude at most 1e9.');
+ if(windowType!=='rectangular'&&windowType!=='hann')throw Error('Window must be rectangular or Hann.');
+ // Periodic Hann uses N in the cosine denominator for DFT analysis.
+ // Coherent-gain correction restores bin-centred amplitudes; it does not
+ // eliminate leakage or correct arbitrary off-bin frequency amplitudes.
+ const n=values.length;
+ const weights=values.map((_,i)=>windowType==='hann'?0.5-0.5*Math.cos(2*Math.PI*i/n):1);
+ const coherentGain=weights.reduce((sum,w)=>sum+w,0)/n;
+ const windowedSamples=values.map((v,i)=>v*weights[i]);
+ const transformed=fft(windowedSamples),recovered=fft(transformed,true);
+ const maxError=Math.max(...recovered.map((v,i)=>Math.hypot(v.re-windowedSamples[i],v.im)));
+ const scale=Math.max(1,...windowedSamples.map(Math.abs));
+ if(!Number.isFinite(maxError)||maxError>1e-8*scale)throw Error('Inverse FFT round-trip residual is too large.');
+ const spectrum=transformed.slice(0,n/2+1).map((z,k)=>({
+  bin:k,frequencyHz:k*rate/n,amplitude:Math.hypot(z.re,z.im)*(k===0||k===n/2?1:2)/(n*coherentGain),
+  phase:Math.atan2(z.im,z.re),real:z.re,imag:z.im
+ }));
+ return {samples:values.slice(),windowedSamples,window:windowType,coherentGain,sampleRate:rate,binWidthHz:rate/n,nyquistHz:rate/2,transformed,recovered,spectrum,maxError};
+}
+const area=document.createElement('details');area.id='fft-details';
+area.innerHTML='<summary>Signal spectrum · offline FFT (4–256 samples)</summary>'+
+ '<p class="graph-data-muted">Enter a uniformly sampled real signal (power-of-two length). One-sided amplitude includes the correct DC/Nyquist scaling. Bin k means k cycles per sample window, not Hz unless you know the sample rate.</p>'+
+ '<label for="fft-rate">Sampling rate (Hz)<input id="fft-rate" type="number" min="0.000001" step="any" value="8"></label>'+ 
+ '<label for="fft-window">Window <select id="fft-window"><option value="rectangular">Rectangular (none)</option><option value="hann">Hann (periodic)</option></select></label>'+ 
+ '<label for="fft-samples">Real samples (comma/space separated)</label>'+
+ '<textarea id="fft-samples" rows="3" spellcheck="false">0, 1, 0, -1, 0, 1, 0, -1</textarea>'+
+ '<div class="data-toolbar"><button type="button" id="fft-run" class="primary">Analyze FFT</button>'+
+ '<button type="button" id="fft-to-table" class="secondary" disabled>Save spectrum to Data Tables</button>'+
+ '<button type="button" id="fft-to-graph" class="secondary" disabled>Plot amplitude in Graphs</button></div>'+
+ '<pre id="fft-output" role="status" aria-live="polite">Analyze samples to view the frequency bins.</pre>';
+panel.append(area);
+const style=document.createElement('style');
+style.textContent='#fft-details{border-top:1px solid #dce4f6;margin-top:15px;padding-top:13px}#fft-details summary{cursor:pointer;color:#3c50ae;font-weight:750}#fft-rate,#fft-window{display:block;width:180px;max-width:100%;margin:5px 0 12px;padding:7px;border:1px solid #cdd8ec;border-radius:7px}#fft-samples{display:block;width:100%;min-height:65px;max-width:900px;margin-top:6px}#fft-output{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:white;border:1px solid #dce5f3;border-radius:10px}#fft-output.error{color:#a82241;background:#fff2f4}';
+document.head.append(style);
+let last=null;
+function invalidate(){last=null;$('fft-to-table').disabled=true;$('fft-to-graph').disabled=true;$('fft-output').classList.remove('error');$('fft-output').textContent='Analyze samples to view the frequency bins.';}
+$('fft-samples').addEventListener('input',invalidate);
+$('fft-rate').addEventListener('input',invalidate);
+$('fft-window').addEventListener('change',invalidate);
+$('fft-run').addEventListener('click',()=>{
+ try{
+  last=analyze($('fft-samples').value,$('fft-rate').value,$('fft-window').value);
+  $('fft-output').classList.remove('error');
+  const top=last.spectrum.slice().sort((a,b)=>b.amplitude-a.amplitude)[0];
+  $('fft-output').textContent='FFT: '+last.samples.length+' real samples; '+last.spectrum.length+' nonnegative-frequency bins.\nPeak bin '+top.bin+' ('+top.frequencyHz+' Hz), amplitude '+top.amplitude.toPrecision(10)+'\nWindow '+last.window+' · coherent gain '+last.coherentGain.toPrecision(6)+'.\nInverse round-trip max error: '+last.maxError.toExponential(3)+'\nBin width '+last.binWidthHz+' Hz · Nyquist '+last.nyquistHz+' Hz.'+'\nOne-sided amplitude spectrum; frequency Hz = bin × sample rate / N.';
+  $('fft-to-table').disabled=false;$('fft-to-graph').disabled=false;
+ }catch(e){invalidate();$('fft-output').classList.add('error');$('fft-output').textContent=e.message;}
+});
+function importSpectrum(){
+ if(!last)throw Error('Analyze a valid signal first.');
+ return M.dataTables.importData({headers:['bin','frequency_Hz','amplitude','phase_rad','real','imag'],rows:last.spectrum.map(p=>[p.bin,p.frequencyHz,p.amplitude,p.phase,p.real,p.imag])},'FFT_Spectrum');
+}
+function fail(e){$('fft-output').classList.add('error');$('fft-output').textContent=e.message;}
+$('fft-to-table').addEventListener('click',()=>{try{importSpectrum();M.advanced.mode('data');}catch(e){fail(e);}});
+$('fft-to-graph').addEventListener('click',()=>{
+ try{
+  const table=importSpectrum();M.advanced.mode('graph');
+  $('dt-graph-table').value=table.id;
+  $('dt-graph-table').dispatchEvent(new Event('change',{bubbles:true}));
+  $('dt-chart-type').value='line';$('dt-graph-x').value='1';$('dt-graph-y').value='2';
+  $('dt-plot-table').click();
+ }catch(e){fail(e);}
+});
+M.fftTools={fft,parse,analyze};
+})();
+
 </script>
 <script id="promath-minimize-tools">
 /* ProMathStudio: bounded offline scalar golden-section minimization (unimodal functions). */
@@ -5873,6 +6211,207 @@ $('xlsx-import').addEventListener('click',async()=>{
 M.xlsxImport={parse,load,fromExcel};
 })();
 </script>
+<script id="promath-precision-tools">
+/* ProMathStudio: bounded exact-decimal calculator and rounded division (offline BigInt). */
+(()=>{'use strict';
+const M=window.MathStudio, panel=document.getElementById('calculator-panel');
+if(!M||!panel)return;
+const $=id=>document.getElementById(id);
+const MAX_DIGITS=300;
+function parseDecimal(raw,label,maxDigits=MAX_DIGITS){
+ const s=String(raw??'').trim();
+ if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(s))throw Error(label+' must be a plain finite decimal (no exponent or expression).');
+ const digits=s.replace(/^[+-]/,'').replace('.','');
+ if(digits.length>maxDigits)throw Error(label+' exceeds the '+maxDigits+'-digit limit.');
+ const dot=s.indexOf('.');
+ return {n:BigInt(s.replace('.','')),scale:dot<0?0:s.length-dot-1};
+}
+function pow10(n){if(!Number.isInteger(n)||n<0||n>700)throw Error('Decimal scale exceeds the supported range.');return 10n**BigInt(n);}
+function formatDecimal(n,scale){
+ const negative=n<0n;let digits=(negative?-n:n).toString();
+ if(scale>0){digits=digits.padStart(scale+1,'0');digits=digits.slice(0,-scale)+'.'+digits.slice(-scale);digits=digits.replace(/\.?0+$/,'');}
+ const output=(negative&&n!==0n?'-':'')+digits;
+ if(output.length>800)throw Error('Decimal result exceeds the output limit.');
+ return output;
+}
+function roundQuotient(num,den){
+ const q=num/den,r=num%den;
+ const twice=r*2n;
+ return q+(twice>den||(twice===den&&q%2n===1n)?1n:0n);
+}
+function divide(a,b,precision){
+ if(b.n===0n)throw Error('Division by zero.');
+ if(a.n===0n)return '0';
+ const sign=(a.n<0n)!==(b.n<0n)?-1n:1n;
+ const num=(a.n<0n?-a.n:a.n)*pow10(b.scale);
+ const den=(b.n<0n?-b.n:b.n)*pow10(a.scale);
+ let order=num.toString().length-den.toString().length;
+ if(order>=0){if(num<den*pow10(order))order--;}
+ else if(num*pow10(-order)<den)order--;
+ const shift=precision-1-order;
+ if(Math.abs(shift)>700)throw Error('Division precision exceeds the supported scale.');
+ if(shift>=0)return formatDecimal(sign*roundQuotient(num*pow10(shift),den),shift);
+ return formatDecimal(sign*roundQuotient(num,den*pow10(-shift))*pow10(-shift),0);
+}
+function isExactDivision(a,b,result){
+ const r=parseDecimal(result,'Division result',800);
+ return a.n*pow10(b.scale+r.scale)===r.n*b.n*pow10(a.scale);
+}
+function calculate({a,b,operation='add',precision=40}={}){
+ const p=Number(precision);
+ if(!Number.isInteger(p)||p<16||p>80)throw Error('Precision must be an integer from 16 to 80 significant digits.');
+ if(!['add','subtract','multiply','divide'].includes(operation))throw Error('Unsupported decimal operation.');
+ const x=parseDecimal(a,'First operand'),y=parseDecimal(b,'Second operand');
+ let result;
+ if(operation==='divide')result=divide(x,y,p);
+ else if(operation==='multiply')result=formatDecimal(x.n*y.n,x.scale+y.scale);
+ else{
+  const scale=Math.max(x.scale,y.scale),left=x.n*pow10(scale-x.scale),right=y.n*pow10(scale-y.scale);
+  result=formatDecimal(operation==='add'?left+right:left-right,scale);
+ }
+ return {result,exact:operation!=='divide'||isExactDivision(x,y,result),precision:p,operation};
+}
+
+function evaluateExpression(raw,precision=40){
+ const p=Number(precision);
+ if(!Number.isInteger(p)||p<16||p>80)throw Error('Precision must be an integer from 16 to 80 significant digits.');
+ const input=String(raw??'').trim();
+ if(!input||input.length>1200)throw Error('Expression must contain 1–1200 characters.');
+ const tokens=[];let cursor=0;
+ for(const match of input.matchAll(/(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/^]/g)){
+  if(input.slice(cursor,match.index).trim())throw Error('Unsupported expression token.');
+  tokens.push(match[0]);cursor=match.index+match[0].length;
+ }
+ if(!tokens.length||input.slice(cursor).trim())throw Error('Unsupported expression token.');
+ if(tokens.length>120)throw Error('Expression exceeds the 120-token limit.');
+ let pos=0,depth=0,operations=0,rounded=false;
+ const apply=(a,b,op)=>{
+  if(++operations>100)throw Error('Expression exceeds the 100-operation limit.');
+  const outcome=calculate({a,b,operation:({'+':'add','-':'subtract','*':'multiply','/':'divide'})[op],precision:p});
+  if(!outcome.exact)rounded=true;
+  return outcome.result;
+ };
+ const atom=()=>{
+  let value;
+  if(tokens[pos]==='('){pos++;if(++depth>16)throw Error('Expression exceeds the 16-level nesting limit.');value=expression();if(tokens[pos]!==')')throw Error('Missing closing parenthesis.');pos++;depth--;}
+  else {
+   const token=tokens[pos];
+   if(!token||!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(token))throw Error('Expected a decimal operand.');
+   const parsed=parseDecimal(token,'Expression operand');
+   value=formatDecimal(parsed.n,parsed.scale);pos++;
+  }
+  return value;
+ };
+ const power=()=>{
+  const base=atom();
+  if(tokens[pos]!=='^')return base;
+  pos++;
+  const rawExponent=power(); // right-associative: 2^3^2 = 2^(3^2)
+  if(!/^\d+$/.test(rawExponent))throw Error('Exponent must be a nonnegative integer.');
+  const exponent=Number(rawExponent);
+  if(!Number.isSafeInteger(exponent)||exponent>20)throw Error('Exponent must be an integer from 0 to 20.');
+  if(base==='0'&&exponent===0)throw Error('0^0 is undefined.');
+  let result='1';
+  for(let i=0;i<exponent;i++)result=apply(result,base,'*');
+  return result;
+ };
+ const factor=()=>{
+  let sign=1;
+  while(tokens[pos]==='+'||tokens[pos]==='-'){if(tokens[pos]==='-')sign=-sign;pos++;}
+  const value=power();
+  return sign<0?apply('0',value,'-'):value;
+ };
+ const term=()=>{let value=factor();while(tokens[pos]==='*'||tokens[pos]==='/'){const op=tokens[pos++];value=apply(value,factor(),op);}return value;};
+ const expression=()=>{let value=term();while(tokens[pos]==='+'||tokens[pos]==='-'){const op=tokens[pos++];value=apply(value,term(),op);}return value;};
+ const result=expression();if(pos!==tokens.length)throw Error('Unexpected token or missing operator.');
+ return {result,precision:p,exact:!rounded,operations};
+}
+
+function toScientificDecimal(raw){
+ const value=String(raw);
+ if(!/^-?(?:\d+(?:\.\d+)?|\.\d+)$/.test(value))throw Error('Scientific formatting requires a decimal result.');
+ const negative=value.startsWith('-'),unsigned=negative?value.slice(1):value;
+ const dot=unsigned.indexOf('.'),integer=dot<0?unsigned:unsigned.slice(0,dot),fraction=dot<0?'':unsigned.slice(dot+1);
+ const digits=integer+fraction,first=digits.search(/[1-9]/);
+ if(first<0)return '0e+0';
+ const exponent=integer.length-first-1,significant=digits.slice(first).replace(/0+$/,'');
+ return (negative?'-':'')+significant[0]+(significant.length>1?'.'+significant.slice(1):'')+'e'+(exponent>=0?'+':'')+exponent;
+}
+
+const area=document.createElement('details');area.id='precision-details';
+area.innerHTML='<summary>High-precision decimal arithmetic · offline</summary>'+
+ '<p class="small-note">Exact decimal +, − and ×; division rounded to 16–80 significant digits (ties to even). Plain decimal operands only, up to 300 digits each. Separate from the standard binary64 Calculator.</p>'+
+ '<div class="precision-fields"><label>First decimal<input id="precision-a" type="text" spellcheck="false" value="1"></label>'+
+ '<label>Operation<select id="precision-op"><option value="add">Add (+)</option><option value="subtract">Subtract (−)</option><option value="multiply">Multiply (×)</option><option value="divide">Divide (÷)</option></select></label>'+
+ '<label>Second decimal<input id="precision-b" type="text" spellcheck="false" value="3"></label>'+
+ '<label>Division significant digits<input id="precision-digits" type="number" min="16" max="80" step="1" value="40"></label></div>'+
+ '<div class="data-toolbar"><button id="precision-run" class="primary" type="button">Calculate decimal</button></div>'+
+ '<pre id="precision-output" role="status" aria-live="polite">Enter two decimal numbers.</pre>';
+panel.append(area);
+
+const expressionBox=document.createElement('section');expressionBox.className='precision-expression';
+expressionBox.innerHTML='<label for="precision-expression">Decimal expression (+, −, ×, ÷, ^ integer powers, parentheses)</label>'+
+ '<textarea id="precision-expression" rows="2" spellcheck="false" placeholder="(0.1 + 0.2) * 3"></textarea>'+
+ '<div class="data-toolbar"><button id="precision-expression-run" type="button">Evaluate expression</button></div>'+
+ '<pre id="precision-expression-output" role="status" aria-live="polite">Enter a decimal expression.</pre>';
+area.append(expressionBox);
+const scientificLabel=document.createElement('label');scientificLabel.className='precision-scientific-option';
+scientificLabel.innerHTML='<input id="precision-scientific" type="checkbox"> Also show scientific notation';
+area.append(scientificLabel);
+
+const style=document.createElement('style');style.textContent=
+ '#precision-details{margin:16px 22px 22px;padding:14px;border:1px solid #dce4f6;border-radius:12px;background:#fbfcff}'+
+ '#precision-details summary{cursor:pointer;font-weight:750;color:#3c50ae}'+
+ '.precision-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}'+
+ '.precision-fields label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#566784;font-weight:700}'+
+ '.precision-fields input,.precision-fields select{min-width:0;width:100%;border:1px solid #cdd8ec;border-radius:8px;padding:9px;background:white}'+
+ '#precision-output{white-space:pre-wrap;overflow-wrap:anywhere;background:white;border:1px solid #dce5f3;border-radius:9px;padding:12px;max-height:250px;overflow:auto}'+
+ '#precision-output.error{color:#a82241;background:#fff2f4}'+
+ '.precision-expression{margin-top:16px;padding-top:12px;border-top:1px solid #dce5f3}'+
+ '.precision-expression label{display:block;font-size:12px;font-weight:700;color:#566784;margin-bottom:6px}'+
+ '.precision-scientific-option{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#566784;margin:12px 0}'+
+ '.precision-expression textarea{display:block;width:100%;min-height:62px;border:1px solid #cdd8ec;border-radius:8px;padding:9px;font:inherit}'+
+ '#precision-expression-output{white-space:pre-wrap;overflow-wrap:anywhere;background:white;border:1px solid #dce5f3;border-radius:9px;padding:12px}'+
+ '#precision-expression-output.error{color:#a82241;background:#fff2f4}'+
+ '@media(max-width:600px){.precision-fields{grid-template-columns:1fr}#precision-details{margin:12px}}';
+document.head.append(style);
+function invalidate(){lastPair=null;$('precision-output').textContent='Inputs changed. Calculate again.';$('precision-output').classList.remove('error');}
+for(const id of ['precision-a','precision-b','precision-digits'])$(id).addEventListener('input',invalidate);
+$('precision-op').addEventListener('change',invalidate);
+let lastPair=null,lastExpression=null;
+function displayValue(value){return value+($('precision-scientific').checked?'\nScientific: '+toScientificDecimal(value):'');}
+function renderPair(r){$('precision-output').classList.remove('error');$('precision-output').textContent=displayValue(r.result)+'\n'+(r.exact?'Exact decimal result':'Rounded to '+r.precision+' significant digits (half-even)');}
+function renderExpression(r){$('precision-expression-output').classList.remove('error');$('precision-expression-output').textContent=displayValue(r.result)+'\n'+(r.exact?'Exact decimal expression':'Division steps rounded to '+r.precision+' significant digits (half-even)');}
+$('precision-scientific').addEventListener('change',()=>{if(lastPair)renderPair(lastPair);if(lastExpression)renderExpression(lastExpression);});
+$('precision-run').addEventListener('click',()=>{
+ try{const r=calculate({a:$('precision-a').value,b:$('precision-b').value,operation:$('precision-op').value,precision:$('precision-digits').value});
+  lastPair=r;renderPair(r);
+ }catch(e){lastPair=null;$('precision-output').classList.add('error');$('precision-output').textContent=e.message;}
+});
+
+$('precision-expression').addEventListener('input',()=>{
+ lastExpression=null;
+ $('precision-expression-output').textContent='Expression changed. Evaluate again.';
+ $('precision-expression-output').classList.remove('error');
+});
+$('precision-digits').addEventListener('input',()=>{
+ lastExpression=null;
+ $('precision-expression-output').textContent='Precision changed. Evaluate again.';
+ $('precision-expression-output').classList.remove('error');
+});
+$('precision-expression').addEventListener('keydown',event=>{
+ if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();$('precision-expression-run').click();}
+});
+$('precision-expression-run').addEventListener('click',()=>{
+ try{
+  const r=evaluateExpression($('precision-expression').value,$('precision-digits').value);
+  lastExpression=r;renderExpression(r);
+ }catch(e){lastExpression=null;$('precision-expression-output').classList.add('error');$('precision-expression-output').textContent=e.message;}
+});
+
+M.precisionTools={calculate,evaluateExpression,toScientificDecimal};
+})();
+</script>
 <script id="promath-workspace-tasks">
 /* Task-first progressive disclosure while preserving existing computation modules. */
 (()=>{'use strict';
@@ -5911,7 +6450,7 @@ wrap('ui-graph-axes','Axes and numeric ranges',$('graph-panel').querySelector('.
 wrap('ui-graph-table','Plot a Data Table',$('graph-panel').querySelector('.dt-graph-tools'));
 wrap('ui-editor-python','Generated Python / SymPy code',$('python-output').closest('.python-wrap'));
 const tasks={
- calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-tools'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],
+ calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-tools'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['precision','High precision','Exact decimals and 16–80 digit division.','#precision-details'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],
  editor:[['basic','Write equation','Write an expression and see its live preview.'],['examples','Try examples','Select an example to insert.','#examples'],['notebook','My equations','Reopen saved equations.','#notebook'],['python','Python code','Show the generated SymPy code.','#ui-editor-python']],
  solver:[['basic','Symbolic solve','Choose an algebra or calculus operation.'],['numerical','Numerical methods','Roots, integrals, systems and PDEs.','#num-details'],['ode','ODE initial values','Solve initial-value differential equations.','#ode-details'],['assumptions','Assumptions','Configure variable restrictions.','#ui-solver-assumptions']],
  graph:[['basic','Plot functions','Enter functions and plot in 2D or 3D.'],['table','Plot table data','Select data, axes and chart type.','#ui-graph-table'],['axes','Axis limits','Adjust visible coordinate ranges.','#ui-graph-axes'],['appearance','Appearance','Choose colors and line styles.','#graph-appearance']],
@@ -5933,6 +6472,7 @@ function selectTask(key,scroll=false){
  if(dest?.tagName==='DETAILS'){
    if(dest.parentElement?.id==='data-menu-navigation')for(const d of dest.parentElement.children)if(d!==dest)d.open=false;
    dest.open=true;
+   for(let ancestor=dest.parentElement;ancestor;ancestor=ancestor.parentElement)if(ancestor.tagName==='DETAILS')ancestor.open=true;
  }
  if(activeMode==='solver')$('symbolic-panel').querySelector('.cas-wrap').hidden=['numerical','ode'].includes(task[0]);
  if(scroll&&dest){dest.scrollIntoView({block:'nearest',behavior:'smooth'});if(dest.tagName==='DETAILS')dest.querySelector('summary')?.focus({preventScroll:true});}

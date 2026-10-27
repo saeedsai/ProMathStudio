@@ -35,7 +35,7 @@ wrap('ui-graph-axes','Axes and numeric ranges',$('graph-panel').querySelector('.
 wrap('ui-graph-table','Plot a Data Table',$('graph-panel').querySelector('.dt-graph-tools'));
 wrap('ui-editor-python','Generated Python / SymPy code',$('python-output').closest('.python-wrap'));
 const tasks={
- calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-tools'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],
+ calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-tools'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['precision','High precision','Exact decimals and 16–80 digit division.','#precision-details'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],
  editor:[['basic','Write equation','Write an expression and see its live preview.'],['examples','Try examples','Select an example to insert.','#examples'],['notebook','My equations','Reopen saved equations.','#notebook'],['python','Python code','Show the generated SymPy code.','#ui-editor-python']],
  solver:[['basic','Symbolic solve','Choose an algebra or calculus operation.'],['numerical','Numerical methods','Roots, integrals, systems and PDEs.','#num-details'],['ode','ODE initial values','Solve initial-value differential equations.','#ode-details'],['assumptions','Assumptions','Configure variable restrictions.','#ui-solver-assumptions']],
  graph:[['basic','Plot functions','Enter functions and plot in 2D or 3D.'],['table','Plot table data','Select data, axes and chart type.','#ui-graph-table'],['axes','Axis limits','Adjust visible coordinate ranges.','#ui-graph-axes'],['appearance','Appearance','Choose colors and line styles.','#graph-appearance']],
@@ -57,6 +57,7 @@ function selectTask(key,scroll=false){
  if(dest?.tagName==='DETAILS'){
    if(dest.parentElement?.id==='data-menu-navigation')for(const d of dest.parentElement.children)if(d!==dest)d.open=false;
    dest.open=true;
+   for(let ancestor=dest.parentElement;ancestor;ancestor=ancestor.parentElement)if(ancestor.tagName==='DETAILS')ancestor.open=true;
  }
  if(activeMode==='solver')$('symbolic-panel').querySelector('.cas-wrap').hidden=['numerical','ode'].includes(task[0]);
  if(scroll&&dest){dest.scrollIntoView({block:'nearest',behavior:'smooth'});if(dest.tagName==='DETAILS')dest.querySelector('summary')?.focus({preventScroll:true});}

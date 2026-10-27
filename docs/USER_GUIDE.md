@@ -8,6 +8,10 @@ Open `index.html` directly, or use the GitHub Pages site after it is enabled. Us
 
 Open **Calculator**, type an expression and press **Calculate** or Enter. Supported examples: `5!+3^2`, `asin(0.5)`, `sqrt(-1)`, `ln(e^2)`. Change angle units from **Radians** to **Degrees** when needed. Adjust precision from the adjacent menu. Use **Ans** to refer to the prior calculated value. Reopen a history entry by clicking it. Complex values display using `i`.
 
+For exact decimal workflows, choose **High precision** in Calculator. The two-operand form supports exact +, − and × and 16–80 significant-digit division. The separate **Decimal expression** box supports +, −, ×, ÷, unary signs and parentheses, for example `(0.1+0.2)*3`; it evaluates division at the chosen precision with half-even rounding after each division step. It is offline, limited to 300-digit decimal operands (computed results may be longer, up to the 800-character output cap), 120 tokens and 16 nesting levels, and supports exact `^` powers with nonnegative integer exponents 0–20 (for example `2^3^2 = 512`, `-2^2 = -4`); it rejects `0^0` and does not support negative/fractional powers, scientific notation or transcendental functions.
+
+Select **Also show scientific notation** to display an additional `e`-notation representation of the exact or rounded decimal result without changing its value; toggling updates the most recent results immediately. For example `123456789.25` also displays `1.2345678925e+8`. Scientific notation is output-only; input exponent syntax remains unsupported.
+
 Only scalar expressions with numeric input can be calculated. For an equation involving unknowns, send it to Symbolic solver instead.
 
 ### 2 — Equation editor
@@ -29,6 +33,10 @@ Use **Send to → Solve** from the connected bar or open **Symbolic solver** and
 ### 4 — Graph generator
 
 Open **2D & 3D graphs**. Choose 2D for one or multiple lines such as `y=sin(x)` and `y=cos(x)`; choose 3D for `z=x^2-y^2`. Click **Plot functions** after editing functions. Set axis ranges, pan/rotate with the pointer, zoom with the wheel, reset the view, or **Export PNG**. Trig graph inputs always use radians.
+
+### Curve-fit diagnostics and residual export
+
+In **Graphs → Plot table data**, choose a numeric X/Y table, select a 2D scatter or line chart and a fitting model, then select **Fit and show on graph**. The result reports R², RMSE, MAE and the number of included measurements. Select **Export residuals CSV** to download the included points as `x,y,predicted,residual` (residual = measured y − predicted y). This export does not modify the source table. The button is disabled until a fit succeeds, and is disabled again after clearing the fit or a failed refit. The statistics describe the selected model and data, not a guarantee of statistical significance or global optimality. Invalid or out-of-domain points are excluded as described by the fit count.
 
 ### 5 — Connected workflow
 
@@ -63,3 +71,8 @@ In **Data Tables**, keep the sheet visible and open Table, Filter, Combine, File
 ## Right-click / long-press actions and numeric bases
 
 Right-click or long-press a table cell, row number, header, table tab, Calculator, Editor, Solver or Graph to open item-specific actions. Use Shift+F10 on a focused control and Escape to close. Calculator has DEC/BIN/HEX modes plus mixed `0x`/`0b` expressions; the Symbols drawer is available in Calculator and inserts into its expression window. For precise limits and details see [Context menus and number bases](CONTEXT_MENUS.md).
+
+
+### Interactive graph axes and 3D navigation
+
+Choose **Graphs → Plot functions** and click **Axes & grid** next to the 2D/3D switch. You can set X/Y/Z minimum and maximum, plus a shared grid spacing (blank means automatic). In 3D numeric ticks appear on each axis. Enter multiple surfaces on separate lines, e.g. `z=sin(sqrt(x^2+y^2))`, `z2=x^2`, `z3=y^2`. Drag to rotate; choose **Pan 3D** to move the view or hold Shift while dragging. Mouse wheel zooms toward the pointer. **Reset view** preserves entered functions. Switching between 2D and 3D remembers separate function drafts and bounds during the current session.

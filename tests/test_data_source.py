@@ -30,9 +30,23 @@ class DataTablesStaticTests(unittest.TestCase):
   self.assertIn('<script id="promath-ode-tools">',html)
   self.assertIn(ode,html)
   self.assertIn('id="ode-run"',ode)
+  fft=(ROOT/'src/fft-tools.js').read_text(encoding='utf-8').rstrip('\n')
+  self.assertIn('<script id="promath-fft-tools">',html)
+  self.assertIn(fft,html)
+  self.assertIn('id="fft-run"',fft)
+  self.assertIn('M.fftTools={fft,parse,analyze}',fft)
   project=(ROOT/'src/project-schema.js').read_text(encoding='utf-8').rstrip('\n')
   self.assertIn('<script id="promath-project-schema">',html)
   self.assertIn(project,html)
   self.assertIn('window.MathStudio.projectSchema = {migrate}',project)
   self.assertIn('Saeedmsalehi1990@gmail.com',html)
   self.assertIn('MIT License',(ROOT/'LICENSE').read_text())
+
+ def test_workspace_tasks_module_matches_standalone_bundle(self):
+  html=(ROOT/'index.html').read_text(encoding='utf-8')
+  source=(ROOT/'src/workspace-tasks.js').read_text(encoding='utf-8').rstrip('\n')
+  marker='<script id="promath-workspace-tasks">\n'
+  self.assertIn(marker,html)
+  embedded=html.split(marker,1)[1].split('</script>',1)[0].rstrip('\n')
+  self.assertEqual(embedded,source,'Rebuild index.html with python scripts/build.py when task UI changes')
+  self.assertIn("['precision','High precision'",source)

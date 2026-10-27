@@ -54,6 +54,7 @@ The current implementation has limits: it is not an arbitrary Python interpreter
 - [Full feature inventory and MATLAB/other-tool gap analysis (26 Oct 2026)](docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md)
 - [Small matrix calculator: determinant, inverse, transpose and A/B arithmetic (2–3 rows/columns)](docs/MATRIX_CALCULATOR.md)
 - [Numerical solvers, offline RK4 initial-value ODE and Python](docs/NUMERICAL_AND_PYTHON.md)
+- [Offline FFT for real signals (development candidate)](docs/FFT.md)
 - [Hourly development agent operating rules](AGENTS.md) · [Living hourly feature plan + next five](docs/HOURLY_DEVELOPMENT_PLAN.md)
 - [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)

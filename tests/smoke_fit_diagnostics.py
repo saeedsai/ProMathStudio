@@ -26,6 +26,8 @@ def main():
             assert x == expected_x and y == expected_y
             assert math.isclose(predicted, expected_y, abs_tol=1e-10)
             assert math.isclose(residual, y-predicted, abs_tol=1e-12)
+        omitted = page.evaluate("(points) => MathStudio.curveFit.analyze(points, 'linear')", points + [[None, 9]])
+        assert omitted["used"] == 5 and omitted["excluded"] == 1, omitted
         noisy = page.evaluate("(points) => MathStudio.curveFit.analyze(points, 'linear')",
                               [[0,0],[1,2],[2,3],[3,5]])
         assert noisy["sse"] > 0 and noisy["mae"] > 0 and noisy["r2"] < 1

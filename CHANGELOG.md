@@ -1,3 +1,8 @@
+## 2026-10-27 — XLSX formula token boundary correction (dev; CI/release pending)
+
+- Corrected XLSX import/export row-reference rewriting to preserve numeric function names such as LOG10/ATAN2, scientific notation (1E3), longer identifiers and quoted literals, while continuing to shift real cell and quoted-sheet references.
+- Added a dedicated browser regression `tests/smoke_xlsx_formula_tokens.py` and mandatory Quality step; synchronized both modules with the standalone HTML bundle. Exact-head CI and production deployment are not yet verified.
+
 ## 2026-10-27 — Bounded offline XLSX import and transactional round-trip (dev candidate; release pending)
 
 - Added ZIP central/local-header, CRC and decompressed-size validation; supports stored/DEFLATE workbooks with one or two sheets, shared/inline strings, numeric values, formulas and Excel header-row reference translation. Rejects external links, unsafe paths, malformed XML, oversized/duplicate entries and unsupported workbook parts.

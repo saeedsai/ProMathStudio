@@ -789,17 +789,12 @@ def _ms_system(job_text):
   'use strict';
   // Self-contained mathematical parser and native MathML renderer. No CDN, network, or library required.
   const NS='http://www.w3.org/1998/Math/MathML';
-  const greek={alpha:['α','\\alpha'],beta:['β','\\beta'],gamma:['γ','\\gamma'],delta:['δ','\\delta'],epsilon:['ε','\\epsilon'],varepsilon:['ϵ','\\varepsilon'],zeta:['ζ','\\zeta'],eta:['η','\\eta'],theta:['θ','\\theta'],vartheta:['ϑ','\\vartheta'],iota:['ι','\\iota'],kappa:['κ','\\kappa'],lambda:['λ','\\lambda'],mu:['μ','\\mu'],nu:['ν','\
-u'],xi:['ξ','\\xi'],omicron:['ο','o'],pi:['π','\\pi'],rho:['ρ','\\rho'],sigma:['σ','\\sigma'],tau:['τ','\\tau'],upsilon:['υ','\\upsilon'],phi:['φ','\\phi'],varphi:['ϕ','\\varphi'],chi:['χ','\\chi'],psi:['ψ','\\psi'],omega:['ω','\\omega'],Gamma:['Γ','\\Gamma'],Delta:['Δ','\\Delta'],Theta:['Θ','\\Theta'],Lambda:['Λ','\\Lambda'],Xi:['Ξ','\\Xi'],Pi:['Π','\\Pi'],Sigma:['Σ','\\Sigma'],Phi:['Φ','\\Phi'],Psi:['Ψ','\\Psi'],Omega:['Ω','\\Omega'],infty:['∞','\\infty'],infinity:['∞','\\infty'],partial:['∂','\\partial'],nabla:['∇','\
-abla'],pm:['±','\\pm'],mp:['∓','\\mp']};
+  const greek={alpha:['α','\\alpha'],beta:['β','\\beta'],gamma:['γ','\\gamma'],delta:['δ','\\delta'],epsilon:['ε','\\epsilon'],varepsilon:['ϵ','\\varepsilon'],zeta:['ζ','\\zeta'],eta:['η','\\eta'],theta:['θ','\\theta'],vartheta:['ϑ','\\vartheta'],iota:['ι','\\iota'],kappa:['κ','\\kappa'],lambda:['λ','\\lambda'],mu:['μ','\\mu'],nu:['ν','\\nu'],xi:['ξ','\\xi'],omicron:['ο','o'],pi:['π','\\pi'],rho:['ρ','\\rho'],sigma:['σ','\\sigma'],tau:['τ','\\tau'],upsilon:['υ','\\upsilon'],phi:['φ','\\phi'],varphi:['ϕ','\\varphi'],chi:['χ','\\chi'],psi:['ψ','\\psi'],omega:['ω','\\omega'],Gamma:['Γ','\\Gamma'],Delta:['Δ','\\Delta'],Theta:['Θ','\\Theta'],Lambda:['Λ','\\Lambda'],Xi:['Ξ','\\Xi'],Pi:['Π','\\Pi'],Sigma:['Σ','\\Sigma'],Phi:['Φ','\\Phi'],Psi:['Ψ','\\Psi'],Omega:['Ω','\\Omega'],infty:['∞','\\infty'],infinity:['∞','\\infty'],partial:['∂','\\partial'],nabla:['∇','\\nabla'],pm:['±','\\pm'],mp:['∓','\\mp']};
   const symbolOperators=new Set(['forall','exists','nexists','cup','cap','subset','subseteq','supset','supseteq','land','lor','neg','iff','implies','approx','equiv','propto','perp','parallel','therefore','oplus','otimes','cdot','times']);
   const functions=new Set(['if','piecewise','sqrt','root','abs','frac','sin','cos','tan','cot','sec','csc','arcsin','arccos','arctan','asin','acos','atan','ln','log','exp','sinh','cosh','tanh','floor','ceil','sum','prod','int','lim','vec','hat','bar','overline']);
   const customFunctions=[];
   try{const saved=JSON.parse(localStorage.getItem('promath-custom-functions-v1')||'[]');if(Array.isArray(saved))for(const item of saved.slice(0,60))if(item&&/^[A-Za-z][A-Za-z0-9_]*$/.test(item.name)&&Array.isArray(item.params)&&typeof item.expression==='string')customFunctions.push(item);}catch{}
-  const texOperators={'subset':'\\subset','subseteq':'\\subseteq','supset':'\\supset','supseteq':'\\supseteq','approx':'\\approx','equiv':'\\equiv','propto':'\\propto','perp':'\\perp','parallel':'\\parallel','implies':'\\Rightarrow','iff':'\\Leftrightarrow','in':'\\in','cup':'\\cup','cap':'\\cap','land':'\\land','lor':'\\lor','=':'=', '==':'=', '<':'<','>':'>','<=':'\\leq','>=':'\\geq','!=':'\
-eq','->':'\\to','=>':'\\Rightarrow','±':'\\pm','∓':'\\mp','≈':'\\approx','≠':'\
-eq','≤':'\\leq','≥':'\\geq','→':'\\to','∈':'\\in','∉':'\
-otin'};
+  const texOperators={'subset':'\\subset','subseteq':'\\subseteq','supset':'\\supset','supseteq':'\\supseteq','approx':'\\approx','equiv':'\\equiv','propto':'\\propto','perp':'\\perp','parallel':'\\parallel','implies':'\\Rightarrow','iff':'\\Leftrightarrow','in':'\\in','cup':'\\cup','cap':'\\cap','land':'\\land','lor':'\\lor','=':'=', '==':'=', '<':'<','>':'>','<=':'\\leq','>=':'\\geq','!=':'\\neq','->':'\\to','=>':'\\Rightarrow','±':'\\pm','∓':'\\mp','≈':'\\approx','≠':'\\neq','≤':'\\leq','≥':'\\geq','→':'\\to','∈':'\\in','∉':'\\notin'};
   const visualOperators={'subset':'⊂','subseteq':'⊆','supset':'⊃','supseteq':'⊇','approx':'≈','equiv':'≡','propto':'∝','perp':'⊥','parallel':'∥','implies':'⇒','iff':'⇔','in':'∈','cup':'∪','cap':'∩','land':'∧','lor':'∨','==':'=', '<=':'≤','>=':'≥','!=':'≠','->':'→','=>':'⇒','*':'×','±':'±','∓':'∓','≈':'≈'};
   const relationOps=new Set(['=','==','<','>','<=','>=','!=','->','=>','≈','≠','≤','≥','→','∈','∉','subset','subseteq','supset','supseteq','approx','equiv','propto','perp','parallel','implies','iff','in','cup','cap','land','lor','⊂','⊆','⊃','⊇','∪','∩','∧','∨','⊥','∥','≡','∼','∝']);
   const expressionStarts=new Set(['(','[','{','|','√']);
@@ -1164,19 +1159,8 @@ otin'};
   function loadExample(raw){editId=null;btnAdd.innerHTML='＋ Add equation <span aria-hidden="true">↵</span>';cancelEdit.hidden=true;input.value=raw;refresh();renderNotebook();input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}
   function exportLatex(){
     if(!equations.length){showToast('Add an equation before exporting');return;}
-    const body=equations.map(q=>'\\[
-'+(q.sympy?q.sympy.latex:latex(evaluate(q.raw).ast))+'
-\\]').join('
-
-');
-    const content='\\documentclass[12pt]{article}
-\\usepackage{amsmath,amssymb}
-\\begin{document}
-
-'+body+'
-
-\\end{document}
-';
+    const body=equations.map(q=>'\\[\n'+(q.sympy?q.sympy.latex:latex(evaluate(q.raw).ast))+'\n\\]').join('\n\n');
+    const content='\\documentclass[12pt]{article}\n\\usepackage{amsmath,amssymb}\n\\begin{document}\n\n'+body+'\n\n\\end{document}\n';
     const blob=new Blob([content],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='math-studio-equations.tex';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('LaTeX notebook exported');
   }
   input.addEventListener('input',refresh);
@@ -1201,11 +1185,9 @@ otin'};
     Alpha:['Α','A'],Beta:['Β','B'],Epsilon:['Ε','E'],Zeta:['Ζ','Z'],Eta:['Η','H'],Iota:['Ι','I'],Kappa:['Κ','K'],Mu:['Μ','M'],Nu:['Ν','N'],Omicron:['Ο','O'],Rho:['Ρ','P'],Tau:['Τ','T'],Upsilon:['Υ','\\Upsilon'],Chi:['Χ','X'],
     ii:['ⅈ','\\mathrm{i}'],varsigma:['ς','\\varsigma'],varrho:['ϱ','\\varrho'],varpi:['ϖ','\\varpi'],digamma:['ϝ','\\digamma'],
     aleph:['ℵ','\\aleph'],hbar:['ℏ','\\hbar'],ell:['ℓ','\\ell'],Re:['ℜ','\\Re'],Im:['ℑ','\\Im'],
-    emptyset:['∅','\\emptyset'],forall:['∀','\\forall'],exists:['∃','\\exists'],nexists:['∄','\
-exists'],
+    emptyset:['∅','\\emptyset'],forall:['∀','\\forall'],exists:['∃','\\exists'],nexists:['∄','\\nexists'],
     subset:['⊂','\\subset'],subseteq:['⊆','\\subseteq'],supset:['⊃','\\supset'],supseteq:['⊇','\\supseteq'],
-    cup:['∪','\\cup'],cap:['∩','\\cap'],setminus:['∖','\\setminus'],land:['∧','\\land'],lor:['∨','\\lor'],neg:['¬','\
-eg'],
+    cup:['∪','\\cup'],cap:['∩','\\cap'],setminus:['∖','\\setminus'],land:['∧','\\land'],lor:['∨','\\lor'],neg:['¬','\\neg'],
     iff:['⇔','\\Leftrightarrow'],implies:['⇒','\\Rightarrow'],approx:['≈','\\approx'],equiv:['≡','\\equiv'],
     propto:['∝','\\propto'],perp:['⊥','\\perp'],parallel:['∥','\\parallel'],therefore:['∴','\\therefore'],
     oplus:['⊕','\\oplus'],otimes:['⊗','\\otimes'],cdot:['·','\\cdot'],times:['×','\\times'],degree:['°','^\\circ']
@@ -1254,9 +1236,7 @@ eg'],
   function normalizeCustom(type,body,name,params){
     if(type==='formula')return body.trim();
     if(type==='python'){if(body.length>12000)throw Error('Python code exceeds 12,000 characters.');if(!new RegExp('^def\\s+'+name+'\\s*\\(', 'm').test(body.trim()))throw Error('Define def '+name+'('+params.join(', ')+') in your Python code.');return '';}
-    const raw=body.trim(),match=/^def\s+([A-Za-z][\w]*)\s*\(([^)]*)\)\s*:\s*(?:
-\s*)?return\s+([^
-]+)\s*$/m.exec(raw);
+    const raw=body.trim(),match=/^def\s+([A-Za-z][\w]*)\s*\(([^)]*)\)\s*:\s*(?:\n\s*)?return\s+([^\n]+)\s*$/m.exec(raw);
     let expression=raw;
     if(match){if(match[1]!==name||match[2].replace(/\s+/g,'')!==params.join(','))throw Error('Python def signature must match the function name and arguments.');expression=match[3];}
     if(/\b(import|exec|eval|lambda|for|while|class|open|__|await|yield)\b|\[|\]|\{|\}/.test(expression))throw Error('Only safe numeric Python return expressions are supported.');
@@ -1363,9 +1343,7 @@ eg'],
     }
     if(n==='binom'||n==='choose')return '\\binom{'+L(0)+'}{'+L(1)+'}';
     if(n==='diff'||n==='pdiff'||n==='diffn'){const d=n==='pdiff'?'\\partial':'\\mathrm{d}',power=n==='diffn'?'^{'+L(2)+'}':'';return '\\frac{'+d+power+'}{'+d+' '+L(1)+power+'}'+L(0);}
-    if(n==='grad'||n==='divergence'||n==='curl'||n==='laplacian')return n==='laplacian'?'\
-abla^2 '+L(0):'\
-abla '+(n==='divergence'?'\\cdot ':n==='curl'?'\\times ':'')+L(0);
+    if(n==='grad'||n==='divergence'||n==='curl'||n==='laplacian')return n==='laplacian'?'\\nabla^2 '+L(0):'\\nabla '+(n==='divergence'?'\\cdot ':n==='curl'?'\\times ':'')+L(0);
     if(['oint','iint','iiint'].includes(n))return '\\'+n+'_{'+L(0)+'} '+L(1)+a.slice(2).map(v=>'\\,\\mathrm{d}'+latex(v)).join('');
     if(n==='norm')return '\\left\\lVert '+L(0)+'\\right\\rVert';
     if(n==='dot'||n==='cross')return L(0)+(n==='dot'?' \\cdot ':' \\times ')+L(1);
@@ -1439,8 +1417,7 @@ abla '+(n==='divergence'?'\\cdot ':n==='curl'?'\\times ':'')+L(0);
     const identifiers=[...vars].filter(x=>/^[A-Za-z_][A-Za-z0-9_]*$/.test(x)&&x!=='sp').sort();
     for(const v of identifiers)lines.push((pythonKeywords.has(v)?v+'_':v)+' = sp.Symbol('+JSON.stringify(v)+')');
     lines.push('', 'expr = '+py(ast),'print(sp.pretty(expr))');
-    return lines.join('
-');
+    return lines.join('\n');
   }
   // Word clipboard. Rich HTML includes actual MathML, and an image-copy option can be added later.
   async function copyWord(){
@@ -1769,10 +1746,7 @@ abla '+(n==='divergence'?'\\cdot ':n==='curl'?'\\times ':'')+L(0);
         pyCall='sp.diff(expr, '+v+')';
       }else{lines=[resultLine(pToString(polyIntegral(p),v)+' + C')];note='Indefinite polynomial integral; C is the constant of integration';pyCall='sp.integrate(expr, '+v+') + sp.Symbol("C")';}
     }else casError('Unknown symbolic operation: '+action);
-    const py=pythonDocument(ast).replace(/
-print\(sp\.pretty\(expr\)\)\s*$/,'')+'
-result = '+pyCall+'
-print(sp.pretty(result))';
+    const py=pythonDocument(ast).replace(/\nprint\(sp\.pretty\(expr\)\)\s*$/,'')+'\nresult = '+pyCall+'\nprint(sp.pretty(result))';
     return {operation:action,lines,note,python:py,raw,variable:v};
   }
   // Interactive symbolic execution: exact built-in kernel + actual SymPy in Pyodide.
@@ -1854,8 +1828,7 @@ print(sp.pretty(result))';
   }
   function sympyPythonCode(ast,operation,v,extra={}){
     const flags=extra.assumptions||{},active=['real','positive','negative','integer'].filter(k=>flags[k]);
-    let main=pythonDocument(ast).replace(/
-print\(sp\.pretty\(expr\)\)\s*$/,'');
+    let main=pythonDocument(ast).replace(/\nprint\(sp\.pretty\(expr\)\)\s*$/,'');
     if(active.length)main=main.replace(v+' = sp.Symbol('+JSON.stringify(v)+')',v+' = sp.Symbol('+JSON.stringify(v)+', '+active.map(k=>k+'=True').join(', ')+')');
     const lines=[main,''];
     if(['solve','numeric'].includes(operation)){
@@ -1868,8 +1841,7 @@ print\(sp\.pretty\(expr\)\)\s*$/,'');
         lines.push('result = sp.solveset(polynomial, '+v+', domain='+domain+')');
       }
     }else if(operation==='limit'){
-      const pointLine=pythonDocument(extra.pointAst).split('
-').find(line=>line.startsWith('expr = '));
+      const pointLine=pythonDocument(extra.pointAst).split('\n').find(line=>line.startsWith('expr = '));
       lines.push('result = sp.limit(expr, '+v+', '+pointLine.slice(7)+', dir='+JSON.stringify(extra.direction)+')');
     }else if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(operation)){
       const op={laplace:'laplace_transform',inverse_laplace:'inverse_laplace_transform',fourier:'fourier_transform',inverse_fourier:'inverse_fourier_transform'}[operation];
@@ -1879,8 +1851,7 @@ print\(sp\.pretty\(expr\)\)\s*$/,'');
       lines.push('equation = expr if isinstance(expr, sp.Equality) else sp.Eq(expr, 0)');
       lines.push('result = sp.'+(operation==='ode'?'dsolve':'pdsolve')+'(equation)');
     }else lines.push('result = '+({expand:'sp.expand' ,simplify:'sp.simplify',factor:'sp.factor',differentiate:'sp.diff',integrate:'sp.integrate'}[operation]||'sp.simplify')+'(expr'+(['differentiate','integrate'].includes(operation)?', '+v:'')+')');
-    lines.push('print(sp.pretty(result))');return lines.join('
-');
+    lines.push('print(sp.pretty(result))');return lines.join('\n');
   }
   function sympyToInput(plain){
     let text=String(plain||'').trim();if(!text)return '';
@@ -1930,8 +1901,7 @@ print\(sp\.pretty\(expr\)\)\s*$/,'');
       if(selected==='system'){
         if(restricted)throw Error('Assumptions are not supported for equation systems yet.');
         if(engine==='offline')throw Error('Systems require SymPy. Choose Auto or SymPy.');
-        const values=document.getElementById('cas-system-input').value.split(/\r?
-/).map(x=>x.trim()).filter(Boolean);
+        const values=document.getElementById('cas-system-input').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
         const unknowns=document.getElementById('cas-system-vars').value.split(',').map(x=>x.trim()).filter(Boolean);
         if(values.length<1||values.length>12)throw Error('Enter 1–12 equations.');
         if(!unknowns.length||unknowns.length>10||new Set(unknowns).size!==unknowns.length||unknowns.some(v=>!/^[A-Za-z][A-Za-z0-9_]*$/.test(v)))throw Error('Enter 1–10 distinct unknown names.');
@@ -1995,8 +1965,7 @@ print\(sp\.pretty\(expr\)\)\s*$/,'');
   document.getElementById('cas-word').addEventListener('click',()=>{
     if(casLast)exportWord(casLast.lines.map(x=>x.mathml?{kind:'sympy',...x}:x.ast));
   });
-  document.getElementById('cas-copy-tex').addEventListener('click',()=>{if(casLast)copyText(casLast.lines.map(x=>x.latex||x.tex).join('
-'));});
+  document.getElementById('cas-copy-tex').addEventListener('click',()=>{if(casLast)copyText(casLast.lines.map(x=>x.latex||x.tex).join('\n'));});
   document.getElementById('cas-copy-python').addEventListener('click',()=>copyText(casCode.textContent));
   document.getElementById('cas-examples').addEventListener('change',e=>{
     if(!e.target.value)return;const opt=e.target.selectedOptions[0];
@@ -2338,18 +2307,12 @@ self.onmessage=async ({data})=>{
     py.globals.set('studio_name',data.name);
     py.globals.set('studio_args_json',JSON.stringify(data.args));
     const raw=await py.runPythonAsync(
-      'import json, math\
-' +
-      'namespace={"math":math}\
-' +
-      'exec(compile(studio_source,"<custom function>","exec"),namespace)\
-' +
-      'fn=namespace[studio_name]\
-' +
-      'value=fn(*json.loads(studio_args_json))\
-' +
-      'if not isinstance(value,(int,float)) or isinstance(value,bool) or not math.isfinite(value):raise ValueError("Python custom function must return a finite real number")\
-' +
+      'import json, math\\n' +
+      'namespace={"math":math}\\n' +
+      'exec(compile(studio_source,"<custom function>","exec"),namespace)\\n' +
+      'fn=namespace[studio_name]\\n' +
+      'value=fn(*json.loads(studio_args_json))\\n' +
+      'if not isinstance(value,(int,float)) or isinstance(value,bool) or not math.isfinite(value):raise ValueError("Python custom function must return a finite real number")\\n' +
       'json.dumps(float(value))');
     self.postMessage({ok:true,value:JSON.parse(raw)});
   }catch(e){self.postMessage({ok:false,error:String(e.message||e)});}
@@ -2510,10 +2473,7 @@ self.onmessage=async ({data})=>{
     return raw.trim();
   }
   function compileGraph(){
-    const lines=$('graph-input').value.replace(/\\\s*
-/g,'
-').split(/[
-;]+/).map(x=>x.trim()).filter(Boolean);
+    const lines=$('graph-input').value.replace(/\\\s*\n/g,'\n').split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
     if(!lines.length&&!window.MathStudio.graphData?.hasData())throw Error('Type a function or import a dataset to plot.');
     if(lines.length>8)throw Error('Plot a maximum of eight equations at a time.');
     if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:plotColor(i),seriesIndex:i}));
@@ -2577,8 +2537,7 @@ self.onmessage=async ({data})=>{
   }
   function updateSeriesColorInputs(){
     const parent=$('plot-series-colors');if(!parent)return;
-    const names=$('graph-input').value.split(/[
-;]+/).map(x=>x.trim()).filter(Boolean).slice(0,8);
+    const names=$('graph-input').value.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean).slice(0,8);
     const signature=names.join('\u0001');
     if(parent.dataset.signature===signature){for(const input of parent.querySelectorAll('input[type=color]'))if(!individualColors[+input.dataset.series])input.value=plotColor(+input.dataset.series);return;}
     parent.dataset.signature=signature;parent.replaceChildren();
@@ -2768,8 +2727,7 @@ self.onmessage=async ({data})=>{
       graphViews[graphMode]={...range};
       graphMode=mode;
       setRanges(graphViews[mode]||(mode==='2d'?graphDef2:graphDef3));
-      $('graph-input').value=graphDrafts[mode]??(mode==='2d'?'y = sin(x)
-y = cos(x)':'z = sin(sqrt(x^2+y^2))');
+      $('graph-input').value=graphDrafts[mode]??(mode==='2d'?'y = sin(x)\ny = cos(x)':'z = sin(sqrt(x^2+y^2))');
     }
     for(const b of document.querySelectorAll('[data-graph-mode]'))b.classList.toggle('active',b.dataset.graphMode===mode);
     $('graph-hint').textContent=mode==='2d'?'One y=f(x) per line. Compare several functions.':'One z=f(x,y), z2=f(x,y), etc. per line. You may also add a y=f(x) trace.';
@@ -2778,10 +2736,8 @@ y = cos(x)':'z = sin(sqrt(x^2+y^2))');
     for(const el of document.querySelectorAll('.graph-y-control'))el.querySelector('input').disabled=false;
     fillGraphExamples();plot();
   }
-  const examples2=[['Sine & cosine','y=sin(x)
-y=cos(x)'],['Parabola','y=x^2-2*x-3'],['Rational','y=1/(x-1)'],['Exponential','y=exp(-x^2/4)'],['Piecewise','y=if(x<0,-x,x)'],['Inverse trig','y=asin(x)']];
-  const examples3=[['Radial ripple','z=sin(sqrt(x^2+y^2))'],['Saddle','z=(x^2-y^2)/6'],['Gaussian peak','z=6*exp(-(x^2+y^2)/8)'],['Wave surface','z=sin(x)*cos(y)'],['Curve on surface','y=x×x
-z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),sin(x)*cos(y))']];
+  const examples2=[['Sine & cosine','y=sin(x)\ny=cos(x)'],['Parabola','y=x^2-2*x-3'],['Rational','y=1/(x-1)'],['Exponential','y=exp(-x^2/4)'],['Piecewise','y=if(x<0,-x,x)'],['Inverse trig','y=asin(x)']];
+  const examples3=[['Radial ripple','z=sin(sqrt(x^2+y^2))'],['Saddle','z=(x^2-y^2)/6'],['Gaussian peak','z=6*exp(-(x^2+y^2)/8)'],['Wave surface','z=sin(x)*cos(y)'],['Curve on surface','y=x×x\nz=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),sin(x)*cos(y))']];
   function fillGraphExamples(){const frame=$('graph-examples');frame.replaceChildren();for(const [name,code] of graphMode==='2d'?examples2:examples3){const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',()=>{$('graph-input').value=code;plot();});frame.append(b)}}
   $('graph-plot').addEventListener('click',plot);
   $('graph-reset').addEventListener('click',()=>{setRanges(graphMode==='2d'?graphDef2:graphDef3);azimuth=-.72;elevation=.46;zoom3d=1;panX3d=0;panY3d=0;plot();});
@@ -2866,13 +2822,11 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
     },
     currentGraphMode:()=>graphMode,
     appendGraph:raw=>{
-      const lines=$('graph-input').value.trim().split(/[
-;]+/).map(x=>x.trim()).filter(Boolean);
+      const lines=$('graph-input').value.trim().split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
       const added=String(raw).trim();if(!added)throw Error('No function to add.');
       if(lines.includes(added))throw Error('This function is already plotted.');
       if(lines.length>=8)throw Error('A graph can display up to eight functions.');
-      $('graph-input').value=[...lines,added].join('
-');plot();
+      $('graph-input').value=[...lines,added].join('\n');plot();
       if($('graph-status').classList.contains('error'))throw Error($('graph-status').textContent);
     },
     getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,panX3d,panY3d,dataset:window.MathStudio.graphData?.exportState()||null,appearance:getAppearance()}),
@@ -3039,8 +2993,7 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
   }
   function getCandidates(){
     const a=[{id:'active',raw:state.active,label:'Current · '+(names[state.origin]||state.origin)}];
-    const graphLines=$('graph-input').value.split(/[
-;]+/).map(x=>x.trim()).filter(Boolean);
+    const graphLines=$('graph-input').value.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
     graphLines.slice(0,8).forEach((raw,i)=>a.push({id:'graph-line:'+i,raw,label:'Graph function '+(i+1)+' · '+raw.slice(0,40)}));
     if(state.calculator?.result)a.push({id:'calc-result',raw:state.calculator.result,label:'Calculator result · '+state.calculator.result.slice(0,43)});
     if(state.calculator?.expression)a.push({id:'calc-input',raw:state.calculator.expression,label:'Calculator expression · '+state.calculator.expression.slice(0,43)});
@@ -3075,12 +3028,10 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
     // Keep related assignments together when transferring a 3D equation system.
     // A line break is meaningful: y=f(x) constrains the z=g(x,y) surface.
     if(is3){
-      const equations=raw.split(/[
-;]+/).map(x=>x.trim()).filter(Boolean);
+      const equations=raw.split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
       if(equations.length>1){
         if(!equations.every(x=>/^[yz]\s*=/i.test(x)))throw Error('For paired 3D functions use lines y=f(x) and z=g(x,y).');
-        return equations.join('
-');
+        return equations.join('\n');
       }
       if(/^y\s*=/i.test(raw))return raw;
     }
@@ -3178,8 +3129,7 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
   function pickExpression(){
     const mode=engine.advanced.currentMode();
     if(mode==='calculator')return $('calc-input').value;
-    if(mode==='graph')return $('graph-input').value.split(/[
-;]+/).find(s=>s.trim())||'';
+    if(mode==='graph')return $('graph-input').value.split(/[\n;]+/).find(s=>s.trim())||'';
     return $('equation-input').value;
   }
   $('hub-grab').addEventListener('click',()=>{
@@ -3192,8 +3142,7 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
     $(id).addEventListener('input',()=>{
       const text=$(id).value;
       if(!text.trim())return;
-      current(origin==='graph'?text.split(/[
-;]+/)[0]:text,origin);
+      current(origin==='graph'?text.split(/[\n;]+/)[0]:text,origin);
     });
   }
   window.addEventListener('mathstudio:calculator-result',e=>{
@@ -3251,8 +3200,7 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
   });
   for(const b of document.querySelectorAll('[data-forward]'))b.addEventListener('click',()=>{
     const from=b.dataset.forward;
-    const expr=from==='calculator'?(engine.advanced.getCalculator()?.result||$('calc-input').value):from==='solver'?(engine.solverBridge.get()?.raw||$('equation-input').value):from==='graph'?( $('graph-input').value.trim().split(/[
-;]+/)[0]||''):$('equation-input').value;
+    const expr=from==='calculator'?(engine.advanced.getCalculator()?.result||$('calc-input').value):from==='solver'?(engine.solverBridge.get()?.raw||$('equation-input').value):from==='graph'?( $('graph-input').value.trim().split(/[\n;]+/)[0]||''):$('equation-input').value;
     transfer(b.dataset.destination,expr,{source:from,run:b.dataset.destination==='calculator'});
   });
   function projectData(){
@@ -3336,8 +3284,7 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
       const ch=text[i];
       if(ch==='"'){
         if(quoted&&text[i+1]==='"'){i++;continue;}quoted=!quoted;
-      }else if(!quoted){if(ch==='\r'||ch==='
-')break;if(ch in count)count[ch]++;}
+      }else if(!quoted){if(ch==='\r'||ch==='\n')break;if(ch in count)count[ch]++;}
     }
     const delimiter=Object.keys(count).sort((a,b)=>count[b]-count[a])[0];
     if(!count[delimiter])throw Error('CSV header must contain at least two columns.');
@@ -3351,12 +3298,10 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
         else throw Error('Unexpected quote in CSV field.');
       }else if(!quotedCell&&ch===delimiter){
         row.push(field);field='';closed=false;
-      }else if(!quotedCell&&(ch==='\r'||ch==='
-')){
+      }else if(!quotedCell&&(ch==='\r'||ch==='\n')){
         row.push(field);field='';closed=false;
         if(row.some(x=>x.trim()!=='')){rows.push(row.slice());if(rows.length>MAX_ROWS+1)throw Error('File exceeds 6,000 data rows.');}
-        row.length=0;if(ch==='\r'&&text[i+1]==='
-')i++;
+        row.length=0;if(ch==='\r'&&text[i+1]==='\n')i++;
       }else{
         if(closed&&ch!==' '&&ch!=='\t')throw Error('Invalid characters after quoted CSV field.');
         field+=ch;
@@ -3603,8 +3548,7 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
   const MAX_ROWS = 6000, MAX_COLUMNS = 32, MAX_BYTES = 1000000, MAX_DISPLAY = 150;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const el = (tag, attrs, text) => { const e=document.createElement(tag); for(const [k,v] of Object.entries(attrs||{})){if(k==='class')e.className=v;else e.setAttribute(k,v);}if(text!==undefined)e.textContent=String(text);return e;};
-  const csvCell = value => {const s=String(value??'');return /[",
-\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  const csvCell = value => {const s=String(value??'');return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
   const deep = value => JSON.parse(JSON.stringify(value));
   const colLetter = idx => {let a=''; for(let i=idx+1;i;i=Math.floor((i-1)/26))a=String.fromCharCode(65+(i-1)%26)+a; return a;};
   const colIndex = s => {let n=0;for(const c of s.toUpperCase())n=n*26+c.charCodeAt(0)-64;return n-1;};
@@ -3961,9 +3905,7 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
     if(out.length>MAX_ROWS)throw Error('Result exceeds 6,000 rows.');return {headers:l.columns.slice(),rows:out};}
   $('dt-run').addEventListener('click',()=>safeAction(()=>{const l=tables.find(t=>t.id===$('dt-left').value),r=tables.find(t=>t.id===$('dt-right').value);if(!l||!r)throw Error('Select two tables.');const mode=$('dt-op').value,result=operation(mode,l,r,Number($('dt-left-key').value),Number($('dt-right-key').value));const resultTable=makeTable(l.name+'_'+mode+'_'+r.name,result.headers,result.rows);notify('Created '+resultTable.name+' with '+result.rows.length+' rows.');}));
   const download=(filename,contents,mime)=>{const url=URL.createObjectURL(new Blob([contents],{type:mime}));const a=el('a',{href:url,download:filename});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);};
-  $('dt-export-csv').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=[t.columns,...evaluated(t)];download(t.name+'.csv',rows.map(row=>row.map(csvCell).join(',')).join('\r
-')+'\r
-','text/csv;charset=utf-8');}));
+  $('dt-export-csv').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=[t.columns,...evaluated(t)];download(t.name+'.csv',rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}));
   $('dt-export-json').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=evaluated(t);download(t.name+'.json',JSON.stringify(rows.map(row=>Object.fromEntries(t.columns.map((h,i)=>[h,row[i]]))),null,2),'application/json');}));
   $('dt-import').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{
     if(file.size>MAX_BYTES)throw Error('Import file exceeds 1 MB.');if(!/\.(csv|tsv|json)$/i.test(file.name))throw Error('Choose CSV, TSV or JSON.');
@@ -4005,8 +3947,7 @@ z=sin(x×y)'],['Cone','z=sqrt(x^2+y^2)'],['Piecewise','z=if(x<0,-sin(x)*cos(y),s
     const chart=window.MathStudio.graphData;chart.loadTable({headers:t.columns,rows:evaluated(t)},t.name,{x,y,z});
     $('graph-data-x').value=String(x);$('graph-data-y').value=String(y);$('graph-data-z').value=String(z);
     $('graph-data-style').value=kind==='line'?'line':kind==='grid3d'?'grid':'points';chart.refresh();
-    const input=$('graph-input');if(input.value.trim()==='y = sin(x)
-y = cos(x)')input.value='';
+    const input=$('graph-input');if(input.value.trim()==='y = sin(x)\ny = cos(x)')input.value='';
     $('graph-plot').click();$('dt-chart-status').textContent='Plotted '+t.name+' as '+kind+'. Equation plots can also be added.';
   }
   $('dt-plot-table').addEventListener('click',()=>safeAction(sendToGraph));
@@ -4114,15 +4055,10 @@ function putFit(){try{
  if(!table||xi===yi)throw Error('Choose a table with different X and Y columns.');
  const fit=fitTable(table,xi,yi,model,Number($('fit-degree').value));
  const graph=$('graph-input');
- if(lastEquation){graph.value=graph.value.split('
-').filter(x=>x.trim()!==lastEquation).join('
-');}
- lastEquation='y='+fit.formula;graph.value=[graph.value.trim(),lastEquation].filter(Boolean).join('
-');
+ if(lastEquation){graph.value=graph.value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');}
+ lastEquation='y='+fit.formula;graph.value=[graph.value.trim(),lastEquation].filter(Boolean).join('\n');
  studio.dataTables.plot(); // Ensures same measurements appear as dots as well as the fitted curve.
- $('graph-input').value=[...new Set($('graph-input').value.split('
-').filter(Boolean).concat([lastEquation]))].join('
-');
+ $('graph-input').value=[...new Set($('graph-input').value.split('\n').filter(Boolean).concat([lastEquation]))].join('\n');
  $('graph-plot').click();
  currentFit={...fit,table:table.id,x:xi,y:yi};$('fit-export').disabled=false;
  const out=$('fit-result');out.textContent='y = '+fit.formula+'  |  R² = '+fit.r2.toFixed(6)+'  |  RMSE = '+fit.rmse.toPrecision(5)+'  |  MAE = '+fit.mae.toPrecision(5)+'  |  n = '+fit.used+(fit.excluded?' ('+fit.excluded+' excluded)':'');out.classList.remove('error');
@@ -4134,15 +4070,11 @@ for(const id of ['fit-model','fit-degree','dt-graph-table','dt-graph-x','dt-grap
 }
 $('fit-export').addEventListener('click',()=>{
  if(!currentFit||!currentFit.residuals.length)return;
- const csv=['x,y,predicted,residual',...currentFit.residuals.map(row=>row.map(value=>String(value)).join(','))].join('\r
-')+'\r
-';
+ const csv=['x,y,predicted,residual',...currentFit.residuals.map(row=>row.map(value=>String(value)).join(','))].join('\r\n')+'\r\n';
  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
  const link=document.createElement('a');link.href=url;link.download='ProMathStudio_fit_residuals.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
-$('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('
-').filter(x=>x.trim()!==lastEquation).join('
-');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent='Fit removed; data table unchanged.';});
+$('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent='Fit removed; data table unchanged.';});
 studio.curveFit={analyze,fitTable,get last(){return currentFit;},get active(){return !!currentFit;},exportState:()=>({model:$('fit-model').value,degree:$('fit-degree').value,lastEquation}),restoreState:s=>{if(!s)return;$('fit-model').value=s.model||'none';$('fit-degree').value=s.degree||'2';$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';lastEquation=String(s.lastEquation||'').slice(0,2000);}};
 // Floating/sliding library and contextual help. Keep underlying semantic form controls intact.
 const css=document.createElement('style');css.textContent=`
@@ -4265,8 +4197,7 @@ function gaussian(A,b){const n=b.length,rows=A.map((r,i)=>[...r,b[i]]);for(let c
   for(let i=col+1;i<n;i++){const fac=rows[i][col]/rows[col][col];for(let j=col;j<=n;j++)rows[i][j]-=fac*rows[col][j];}
 }const x=Array(n).fill(0);for(let i=n-1;i>=0;i--){let v=rows[i][n];for(let j=i+1;j<n;j++)v-=rows[i][j]*x[j];x[i]=v/rows[i][i];}return x;}
 function systemRoots(expressions,variables,initial,{tolerance=1e-9,maxIterations=65}={}){
-  const exprs=String(expressions).split(/[;
-]+/).map(x=>x.trim()).filter(Boolean),vars=String(variables).split(',').map(x=>x.trim()).filter(Boolean);
+  const exprs=String(expressions).split(/[;\n]+/).map(x=>x.trim()).filter(Boolean),vars=String(variables).split(',').map(x=>x.trim()).filter(Boolean);
   if(vars.length<2||vars.length>3||new Set(vars).size!==vars.length||exprs.length!==vars.length)throw Error('Enter 2–3 equations and the same number of distinct variables.');
   if(vars.some(v=>!/^[A-Za-z][A-Za-z0-9_]*$/.test(v)))throw Error('Invalid variable name.');
   let x=Array.isArray(initial)?initial.map(Number):String(initial).split(',').map(Number);
@@ -4427,8 +4358,7 @@ const calc=document.querySelector('#calculator-panel .calc-main');const bindings
 bindings.innerHTML='<summary style="cursor:pointer;color:#4865ab;font-weight:700">Variable assignments &amp; advanced numeric math</summary><p id="numeric-calculus-guide">Use the Equation Editor functions directly. Examples: <code>diff(sin(x),x,pi/3)</code>, <code>int(x^2,x,0,3)</code>, <code>sum(k^2,k,1,10)</code>, or <code>prod(k,k,1,5)</code>. Assign variables with one name=value per line.</p><label style="display:block">Variables<textarea id="calc-variables" rows="3" placeholder="x=2&#10;y=3" style="width:100%;border:1px solid #cfdaee;border-radius:9px;padding:10px"></textarea></label><button type="button" class="secondary" id="calc-variable-apply">Apply variables</button><p id="calc-variables-status" class="graph-data-muted"></p>';
 calc.querySelector('.calc-result').before(bindings);const variables={};
 M.extraMath={variables};
-$('calc-variable-apply').addEventListener('click',()=>{try{for(const key of Object.keys(variables))delete variables[key];for(const line of $('calc-variables').value.split(/[;
-]+/)){
+$('calc-variable-apply').addEventListener('click',()=>{try{for(const key of Object.keys(variables))delete variables[key];for(const line of $('calc-variables').value.split(/[;\n]+/)){
   if(!line.trim())continue;const m=/^\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/.exec(line);if(!m)throw Error('Use one variable=value per line.');
   if(['Ans','pi','e','i','tau'].includes(m[1]))throw Error('Reserved mathematical constant: '+m[1]);
   variables[m[1]]=val(m[2],variables);
@@ -4474,21 +4404,10 @@ function runNumerical(){try{
   else if(mode==='quadrature')result=adaptiveSimpson({expression:expr,a,b,tolerance:$('num-tolerance').value,maxEvaluations:$('num-budget').value});
   else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
   lastNumeric=result;$('num-output').classList.remove('error');
-  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):'(none detected)'}
-${result.note}`:
-    result.type==='quadrature'?`${result.method}
-Integral: ${result.value.toPrecision(13)}
-Estimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}
-${result.note}`:
-    result.type==='system'?`Converged: ${result.converged}
-${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('
-')}
-Residual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}
-${result.note}`:
-      `${result.method}
-${result.rows.length} output rows
-${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'
-':''}${result.note}`;
+  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):'(none detected)'}\n${result.note}`:
+    result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
+    result.type==='system'?`Converged: ${result.converged}\n${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('\n')}\nResidual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}\n${result.note}`:
+      `${result.method}\n${result.rows.length} output rows\n${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'\n':''}${result.note}`;
   $('num-to-table').disabled=result.type==='quadrature';$('num-to-graph').disabled=!['poisson','heat'].includes(result.type);
 }catch(err){lastNumeric=null;$('num-to-table').disabled=$('num-to-graph').disabled=true;failure(err);}}
 $('num-run').addEventListener('click',runNumerical);
@@ -4503,23 +4422,12 @@ $('num-to-graph').addEventListener('click',()=>{try{const t=numericalTable();M.a
 // Python data-workbook execution, with explicit user action only and isolated Web Worker.
 const code=menus.pythonContent.querySelector('#python-panel');
 code.innerHTML=`<h3>Python for your tables</h3><p class="py-note">Optional Pyodide + pandas + SymPy, initially downloaded via CDN. Code runs only when you click Run, inside a worker with no DOM access. Scripts may access the network; only execute your own code.</p>
-<label>Script<textarea id="dt-python-code" spellcheck="false"># Each table is a pandas DataFrame keyed by name.
-# Set 'result' to a DataFrame or a dict of named DataFrames.
-print(list(tables))
-result = next(iter(tables.values())).describe(include='all').reset_index()</textarea></label>
+<label>Script<textarea id="dt-python-code" spellcheck="false"># Each table is a pandas DataFrame keyed by name.\n# Set 'result' to a DataFrame or a dict of named DataFrames.\nprint(list(tables))\nresult = next(iter(tables.values())).describe(include='all').reset_index()</textarea></label>
 <div class="data-toolbar"><button class="primary" id="dt-python-run" type="button">▶ Run Python</button><button class="secondary" id="dt-python-stop" type="button">Stop</button><button class="secondary" id="dt-python-example" type="button">Example: groupby</button></div><pre id="python-output-result" role="status">Run to see standard output and import results into new tables.</pre>`;
 let pyWorker=null,pyUrl=null,pyBusy=false,pyTimeout=null,pyLast=null;
 function stopPy(){if(pyWorker)pyWorker.terminate();pyWorker=null;if(pyUrl)URL.revokeObjectURL(pyUrl);pyUrl=null;clearTimeout(pyTimeout);pyBusy=false;$('dt-python-run').disabled=false;}
 $('dt-python-stop').addEventListener('click',()=>{stopPy();$('python-output-result').textContent='Python execution stopped. No results were imported.';});
-$('dt-python-example').addEventListener('click',()=>{$('dt-python-code').value=`import pandas as pd
-name, df = next(iter(tables.items()))
-print('Input:', name, len(df), 'rows')
-# Pick a category and numeric value column from your own table.
-if len(df.columns) >= 2:
-    df[df.columns[1]] = pd.to_numeric(df.iloc[:,1],errors='coerce')
-    result = df.groupby(df.columns[0], dropna=False)[df.columns[1]].sum().reset_index()
-else:
-    result = df.copy()`;});
+$('dt-python-example').addEventListener('click',()=>{$('dt-python-code').value=`import pandas as pd\nname, df = next(iter(tables.items()))\nprint('Input:', name, len(df), 'rows')\n# Pick a category and numeric value column from your own table.\nif len(df.columns) >= 2:\n    df[df.columns[1]] = pd.to_numeric(df.iloc[:,1],errors='coerce')\n    result = df.groupby(df.columns[0], dropna=False)[df.columns[1]].sum().reset_index()\nelse:\n    result = df.copy()`;});
 const pyWorkerCode=`'use strict';
 const BASE='https://cdn.jsdelivr.net/pyodide/v0.29.1/full/';let ready=null;
 self.onmessage=async ({data})=>{try{
@@ -4528,62 +4436,34 @@ self.onmessage=async ({data})=>{try{
  py.globals.set('studio_input_json',JSON.stringify(data.workbook));
  py.globals.set('studio_user_code',data.code);
  const payload=await py.runPythonAsync(
-   'import io, json, sys, traceback, contextlib\
-' +
-   'import pandas as pd\
-' +
-   'import sympy as sp\
-' +
-   'raw=json.loads(studio_input_json)\
-' +
-   'tables={t["name"]:pd.DataFrame(t["rows"],columns=t["columns"]) for t in raw}\
-' +
-   'for frame in tables.values():\
-' +
-   '    for col in frame.columns:\
-' +
-   '        nums=pd.to_numeric(frame[col],errors="coerce")\
-' +
-   '        if len(frame)>0 and nums.notna().all():frame[col]=nums\
-' +
-   'result=None\
-' +
-   'capture=io.StringIO()\
-' +
-   'caught=None\
-' +
-   'with contextlib.redirect_stdout(capture):\
-' +
-   '    try:\
-' +
-   '        exec(compile(studio_user_code,"<User Python>","exec"), {"__builtins__":__builtins__,"pd":pd,"sp":sp,"tables":tables}, result_env:={})\
-' +
-   '    except Exception:\
-' +
-   '        caught=traceback.format_exc()\
-' +
-   'if caught:raise RuntimeError(caught)\
-' +
-   'res=result_env.get("result")\
-' +
-   'if isinstance(res,pd.DataFrame):res={"PythonResult":res}\
-' +
-   'elif res is None:res={}\
-' +
-   'if not isinstance(res,dict):raise ValueError("result must be a DataFrame or dict of DataFrames")\
-' +
-   'output=[]\
-' +
-   'for name,df in res.items():\
-' +
-   '    if not isinstance(df,pd.DataFrame):raise ValueError("Every result must be a pandas DataFrame")\
-' +
-   '    if len(df)>6000 or len(df.columns)>32:raise ValueError("Result exceeds 6,000 rows or 32 columns")\
-' +
-   '    clean=df.astype(object).where(pd.notnull(df),None)\
-' +
-   '    output.append({"name":str(name)[:44],"columns":[str(c) for c in df.columns],"rows":clean.values.tolist()})\
-' +
+   'import io, json, sys, traceback, contextlib\\n' +
+   'import pandas as pd\\n' +
+   'import sympy as sp\\n' +
+   'raw=json.loads(studio_input_json)\\n' +
+   'tables={t["name"]:pd.DataFrame(t["rows"],columns=t["columns"]) for t in raw}\\n' +
+   'for frame in tables.values():\\n' +
+   '    for col in frame.columns:\\n' +
+   '        nums=pd.to_numeric(frame[col],errors="coerce")\\n' +
+   '        if len(frame)>0 and nums.notna().all():frame[col]=nums\\n' +
+   'result=None\\n' +
+   'capture=io.StringIO()\\n' +
+   'caught=None\\n' +
+   'with contextlib.redirect_stdout(capture):\\n' +
+   '    try:\\n' +
+   '        exec(compile(studio_user_code,"<User Python>","exec"), {"__builtins__":__builtins__,"pd":pd,"sp":sp,"tables":tables}, result_env:={})\\n' +
+   '    except Exception:\\n' +
+   '        caught=traceback.format_exc()\\n' +
+   'if caught:raise RuntimeError(caught)\\n' +
+   'res=result_env.get("result")\\n' +
+   'if isinstance(res,pd.DataFrame):res={"PythonResult":res}\\n' +
+   'elif res is None:res={}\\n' +
+   'if not isinstance(res,dict):raise ValueError("result must be a DataFrame or dict of DataFrames")\\n' +
+   'output=[]\\n' +
+   'for name,df in res.items():\\n' +
+   '    if not isinstance(df,pd.DataFrame):raise ValueError("Every result must be a pandas DataFrame")\\n' +
+   '    if len(df)>6000 or len(df.columns)>32:raise ValueError("Result exceeds 6,000 rows or 32 columns")\\n' +
+   '    clean=df.astype(object).where(pd.notnull(df),None)\\n' +
+   '    output.append({"name":str(name)[:44],"columns":[str(c) for c in df.columns],"rows":clean.values.tolist()})\\n' +
    'json.dumps({"stdout":capture.getvalue()[:12000],"tables":output},default=str)');
  self.postMessage({ok:true,payload:JSON.parse(payload)});
 }catch(e){self.postMessage({ok:false,error:String(e.message||e)});}};`;
@@ -4596,13 +4476,10 @@ $('dt-python-run').addEventListener('click',()=>{if(pyBusy)return;try{
  const status=$('python-output-result');status.classList.remove('error');status.textContent='Loading Python/pandas (internet required on first use)…';
  pyWorker.onmessage=({data})=>{
    if(!data.ok){status.textContent=data.error;status.classList.add('error');stopPy();return;}
-   const output=data.payload;status.textContent=String(output.stdout||'')+'
-';
+   const output=data.payload;status.textContent=String(output.stdout||'')+'\n';
    try{for(const t of output.tables||[])M.dataTables.importData({headers:t.columns,rows:t.rows},t.name);
-     status.textContent+='
-Imported '+(output.tables||[]).length+' result table(s).';}
-   catch(e){status.textContent+='
-Result import failed: '+e.message;status.classList.add('error');}
+     status.textContent+='\nImported '+(output.tables||[]).length+' result table(s).';}
+   catch(e){status.textContent+='\nResult import failed: '+e.message;status.classList.add('error');}
    stopPy();
  };
  pyWorker.onerror=e=>{status.textContent='Python worker could not start. Check your connection or CDN access.';status.classList.add('error');stopPy();};
@@ -4727,8 +4604,7 @@ function interpolate({points,queries,method='linear'}={}){
 function parsePairs(text){
  text=String(text);
  if(text.length>16000)throw Error('Sample text is too long.');
- const lines=text.split(/\r?
-/).map(s=>s.trim()).filter(Boolean);
+ const lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
  if(lines.length<2||lines.length>MAX_POINTS)throw Error('Enter 2–200 sample lines, each x,y.');
  return lines.map((line,i)=>{
   const parts=line.split(/[,;\t ]+/).filter(Boolean);
@@ -4747,9 +4623,7 @@ const area=document.createElement('details');area.id='interp-details';
 area.innerHTML='<summary>1D interpolation · Linear / PCHIP / Polynomial · Data Tables / Graphs</summary>'+
  '<p class="graph-data-muted">Enter sorted sample pairs (x,y), one per line, or load the first two columns of the active Data Table. Query values must be inside the sample domain.</p>'+
  '<div class="data-toolbar"><label>Interpolation method <select id="interp-method"><option value="linear">Linear</option><option value="pchip">Shape-preserving cubic (PCHIP)</option><option value="barycentric">Polynomial (barycentric, 2–16 points)</option></select></label></div>'+ 
- '<div class="interp-fields"><label>Sample pairs (x,y)<textarea id="interp-samples" rows="5" spellcheck="false">0,0
-1,2
-2,4</textarea></label>'+
+ '<div class="interp-fields"><label>Sample pairs (x,y)<textarea id="interp-samples" rows="5" spellcheck="false">0,0\n1,2\n2,4</textarea></label>'+
  '<label>Query x values (comma, space or newline separated)<textarea id="interp-queries" rows="5" spellcheck="false">0,0.5,1,1.5,2</textarea></label></div>'+
  '<div class="data-toolbar"><button id="interp-from-table" class="secondary" type="button">Load active table x/y</button>'+
  '<button id="interp-run" class="primary" type="button">Interpolate</button>'+
@@ -4784,8 +4658,7 @@ $('interp-from-table').addEventListener('click',()=>{
   const rows=M.dataTables.calculate(t).filter(r=>r.some(v=>String(v??'').trim()));
   if(rows.length<2||rows.length>MAX_POINTS)throw Error('Active table must have 2–200 nonblank rows.');
   const pairs=rows.map(r=>[number(r[0],'Table x'),number(r[1],'Table y')]);
-  $('interp-samples').value=pairs.map(p=>p.join(',')).join('
-');
+  $('interp-samples').value=pairs.map(p=>p.join(',')).join('\n');
   invalidate();$('interp-output').textContent='Loaded '+pairs.length+' sample pairs from '+t.name+'.';
  }catch(e){fail(e);}
 });
@@ -4793,14 +4666,9 @@ $('interp-run').addEventListener('click',()=>{
  try{
   last=interpolate({points:parsePairs($('interp-samples').value),queries:parseQueries($('interp-queries').value),method:$('interp-method').value});
   $('interp-output').classList.remove('error');
-  $('interp-output').textContent=last.method+'
-'+last.rows.length+' query results; domain ['+last.domain.join(', ')+']
-'+
-   last.rows.slice(0,12).map(r=>r[0]+' → '+r[1]).join('
-')+
-   (last.rows.length>12?'
-… '+(last.rows.length-12)+' more':'')+'
-'+last.note;
+  $('interp-output').textContent=last.method+'\n'+last.rows.length+' query results; domain ['+last.domain.join(', ')+']\n'+
+   last.rows.slice(0,12).map(r=>r[0]+' → '+r[1]).join('\n')+
+   (last.rows.length>12?'\n… '+(last.rows.length-12)+' more':'')+'\n'+last.note;
   $('interp-to-table').disabled=$('interp-to-graph').disabled=false;
  }catch(e){fail(e);}
 });
@@ -4843,12 +4711,8 @@ M.interpolationTools={interpolate,parsePairs,parseQueries};
   function colDelete(index){const t=active();if(t.columns.length<=1)throw Error('Keep at least one column.');if(!confirm('Delete column '+t.columns[index]+'? This cannot be undone.'))return;MS.dataTables.deleteColumn(index);}
   const validCoord=(r,c)=>{const t=active();if(!t||r<0||c<0||r>=t.rows.length||c>=t.columns.length)throw Error('Selected table cell is unavailable.');return t;};
   const setCell=(r,c,v)=>{const t=validCoord(r,c);t.rows[r][c]=String(v??'').slice(0,8000);update();};
-  const csvEscape=v=>String(v??'').includes('\t')||String(v).includes('
-')?'"'+String(v).replace(/"/g,'""')+'"':String(v??'');
-  function parseClipboard(content){return String(content).replace(/\r
-/g,'
-').split('
-').filter((s,i,arr)=>i<arr.length-1||s!=='').map(line=>line.split('\t'));}
+  const csvEscape=v=>String(v??'').includes('\t')||String(v).includes('\n')?'"'+String(v).replace(/"/g,'""')+'"':String(v??'');
+  function parseClipboard(content){return String(content).replace(/\r\n/g,'\n').split('\n').filter((s,i,arr)=>i<arr.length-1||s!=='').map(line=>line.split('\t'));}
   const pasteCells=async(r,c)=>{const text=await paste();if(!text){status('Clipboard is empty.');return;}const t=active(),rows=parseClipboard(text);if(!rows.length)return;const maxWidth=Math.max(...rows.map(x=>x.length)),maxRows=r+rows.length,maxCols=c+maxWidth;validate(t,maxRows,maxCols);
     while(t.rows.length<maxRows)t.rows.push(t.columns.map(()=>''));while(t.columns.length<maxCols){t.columns.push('Column'+(t.columns.length+1));t.rows.forEach(x=>x.push(''));}
     rows.forEach((row,ri)=>row.forEach((v,ci)=>{t.rows[r+ri][c+ci]=String(v).slice(0,8000);}));update();status('Pasted '+rows.length+' row(s) into table.');};
@@ -4866,8 +4730,7 @@ M.interpolationTools={interpolate,parsePairs,parseQueries};
       }else if(kind==='row'){
         items.push(item('Copy row (tab-separated)',()=>copy(t.rows[r].map(csvEscape).join('\t'))),item('Paste row',()=>pasteCells(r,0)),item('Insert row above',()=>rowInsert(r)),item('Insert row below',()=>rowInsert(r+1)),item('Duplicate row',()=>rowInsert(r+1,t.rows[r].slice())),item('Delete row',()=>rowDelete(r),{danger:true}));
       }else if(kind==='column'){
-        items.push(item('Rename column',()=>{const name=prompt('Column header',t.columns[c]);if(name!==null){t.columns[c]=String(name).slice(0,80)||t.columns[c];update();}}),item('Copy column',()=>copy([t.columns[c],...t.rows.map(row=>row[c])].map(csvEscape).join('
-'))),item('Filter by column…',()=>{$('dt-filter-column').value=String(c);const details=$('data-menu-navigation')?.querySelectorAll('details')[1];if(details)details.open=true;}),item('Sort ascending',()=>{$('dt-sortcol').value=String(c);$('dt-sortdir').value='asc';$('dt-sort').click();}),item('Sort descending',()=>{$('dt-sortcol').value=String(c);$('dt-sortdir').value='desc';$('dt-sort').click();}),item('Insert column left',()=>colInsert(c)),item('Insert column right',()=>colInsert(c+1)),item('Delete column',()=>colDelete(c),{danger:true}));
+        items.push(item('Rename column',()=>{const name=prompt('Column header',t.columns[c]);if(name!==null){t.columns[c]=String(name).slice(0,80)||t.columns[c];update();}}),item('Copy column',()=>copy([t.columns[c],...t.rows.map(row=>row[c])].map(csvEscape).join('\n'))),item('Filter by column…',()=>{$('dt-filter-column').value=String(c);const details=$('data-menu-navigation')?.querySelectorAll('details')[1];if(details)details.open=true;}),item('Sort ascending',()=>{$('dt-sortcol').value=String(c);$('dt-sortdir').value='asc';$('dt-sort').click();}),item('Sort descending',()=>{$('dt-sortcol').value=String(c);$('dt-sortdir').value='desc';$('dt-sort').click();}),item('Insert column left',()=>colInsert(c)),item('Insert column right',()=>colInsert(c+1)),item('Delete column',()=>colDelete(c),{danger:true}));
       }else if(kind==='tab'){
         items.push(item('Rename table',()=>{$('dt-rename').click();}),item('Duplicate table',()=>{$('dt-copy').click();}),item('Export CSV',()=>{$('dt-export-csv').click();}),item('Export JSON',()=>{$('dt-export-json').click();}),item('Delete table',()=>{$('dt-remove').click();},{danger:true}));
       }else {
@@ -5332,32 +5195,12 @@ function calculate(operation){
    operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares')?value.solution.map(x=>[x]):value;
-  const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('
-');
+  const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
   output.textContent=operation==='lu'?
-   'lu: P·A = L·U
-P:
-'+rowsText(value.P)+'
-L:
-'+rowsText(value.L)+'
-U:
-'+rowsText(value.U)+'
-Relative reconstruction residual: '+format(value.residual):operation==='qr'?
-   'qr: A = Q·R
-Q:
-'+rowsText(value.Q)+'
-R:
-'+rowsText(value.R)+'
-Relative reconstruction residual: '+format(value.residual)+'
-Orthogonality residual: '+format(value.orthogonality):
-   operation+':
-'+(typeof display==='number'?format(display):rowsText(display))+
-   (operation==='rref'?'
-Rank: '+value.rank:operation==='solve'?'
-Relative residual: '+format(value.residual):operation==='leastSquares'?'
-Residual norm: '+format(value.residual)+'
-Relative residual: '+format(value.relativeResidual)+'
-Normal-equation orthogonality: '+format(value.normalResidual):'');
+   'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
+   'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
+   operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
+   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):'');
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
@@ -5545,11 +5388,8 @@ function run(){
    ', tolerance '+last.tolerance:'Δt='+last.h.toPrecision(8);
   const endState='y('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+
    (last.type==='ode-rk4-system'?', z ≈ '+end[2].toPrecision(12):'');
-  $('ode-output').textContent=last.method+'
-'+last.rows.length+' output rows; '+detail+
-   '
-'+endState+'
-'+last.note;
+  $('ode-output').textContent=last.method+'\n'+last.rows.length+' output rows; '+detail+
+   '\n'+endState+'\n'+last.note;
   $('ode-to-table').disabled=false;$('ode-to-graph').disabled=false;
  }catch(error){
   last=null;$('ode-to-table').disabled=true;$('ode-to-graph').disabled=true;
@@ -5652,13 +5492,9 @@ $('minimize-run').addEventListener('click',()=>{
   last=minimize({expression:$('minimize-expression').value,lo:$('minimize-lo').value,hi:$('minimize-hi').value,
    tolerance:$('minimize-tolerance').value,maxIterations:$('minimize-iterations').value});
   $('minimize-output').classList.remove('error');
-  $('minimize-output').textContent=last.method+'
-x ≈ '+last.x.toPrecision(12)+
-   '
-f(x) ≈ '+last.value.toPrecision(12)+'
-Iterations: '+last.iterations+
-   '; evaluations: '+last.evaluations+'
-'+last.note;
+  $('minimize-output').textContent=last.method+'\nx ≈ '+last.x.toPrecision(12)+
+   '\nf(x) ≈ '+last.value.toPrecision(12)+'\nIterations: '+last.iterations+
+   '; evaluations: '+last.evaluations+'\n'+last.note;
   $('minimize-to-table').disabled=false;
  }catch(e){invalidate();$('minimize-output').classList.add('error');$('minimize-output').textContent=e.message;}
 });
@@ -5727,11 +5563,7 @@ const invalidate=()=>{last=null;$('brent-to-table').disabled=true;$('brent-outpu
 for(const input of area.querySelectorAll('input')){input.addEventListener('input',invalidate);input.addEventListener('change',invalidate);}
 $('brent-run').addEventListener('click',()=>{
  try{last=refine({expression:$('brent-expression').value,lo:$('brent-lo').value,hi:$('brent-hi').value,tolerance:$('brent-tolerance').value,maxIterations:$('brent-iterations').value});
- $('brent-output').classList.remove('error');$('brent-output').textContent=last.method+'
-x = '+last.x.toPrecision(12)+'
-Residual = '+last.residual.toExponential(3)+'
-Iterations: '+last.iterations+'; evaluations: '+last.evaluations+'
-'+last.note;$('brent-to-table').disabled=false;
+ $('brent-output').classList.remove('error');$('brent-output').textContent=last.method+'\nx = '+last.x.toPrecision(12)+'\nResidual = '+last.residual.toExponential(3)+'\nIterations: '+last.iterations+'; evaluations: '+last.evaluations+'\n'+last.note;$('brent-to-table').disabled=false;
  }catch(err){invalidate();$('brent-output').classList.add('error');$('brent-output').textContent=err.message;}
 });
 $('brent-to-table').addEventListener('click',()=>{try{if(!last)throw Error('Refine a root first.');M.dataTables.importData({headers:['x','residual'],rows:[[last.x,last.residual]]},'Numerical_Root_Brent');M.advanced.mode('data');}catch(err){$('brent-output').textContent=err.message;}});
@@ -6243,8 +6075,7 @@ for(const id of ['precision-a','precision-b','precision-digits'])$(id).addEventL
 $('precision-op').addEventListener('change',invalidate);
 $('precision-run').addEventListener('click',()=>{
  try{const r=calculate({a:$('precision-a').value,b:$('precision-b').value,operation:$('precision-op').value,precision:$('precision-digits').value});
-  $('precision-output').classList.remove('error');$('precision-output').textContent=r.result+'
-'+(r.exact?'Exact decimal result':'Rounded to '+r.precision+' significant digits (half-even)');
+  $('precision-output').classList.remove('error');$('precision-output').textContent=r.result+'\n'+(r.exact?'Exact decimal result':'Rounded to '+r.precision+' significant digits (half-even)');
  }catch(e){$('precision-output').classList.add('error');$('precision-output').textContent=e.message;}
 });
 
@@ -6263,8 +6094,7 @@ $('precision-expression-run').addEventListener('click',()=>{
  try{
   const r=evaluateExpression($('precision-expression').value,$('precision-digits').value);
   $('precision-expression-output').classList.remove('error');
-  $('precision-expression-output').textContent=r.result+'
-'+(r.exact?'Exact decimal expression':'Division steps rounded to '+r.precision+' significant digits (half-even)');
+  $('precision-expression-output').textContent=r.result+'\n'+(r.exact?'Exact decimal expression':'Division steps rounded to '+r.precision+' significant digits (half-even)');
  }catch(e){$('precision-expression-output').classList.add('error');$('precision-expression-output').textContent=e.message;}
 });
 

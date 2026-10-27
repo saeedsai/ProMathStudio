@@ -10,15 +10,15 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-27: precision increment, CI backlog)
+## Next five features (refreshed 2026-10-27: precision expressions and PR #34 queue)
 
-| Order | ID | Acceptance tests | Status |
+| Order | ID | Next increment / acceptance tests | Status |
 |---:|---|---|---|
-| 1 | UI-GRAPH-AXES-3D-NAV | Numeric ticks, 3D surfaces, pointer pan/zoom, draft retention; exact CI/PR/Pages. | DEV IMPLEMENTED — CI queued |
-| 2 | P1-FITTING-DIAGNOSTICS | Residual references, CSV export, stale-state browser test; exact CI/PR/Pages. | DEV IMPLEMENTED — CI queued |
-| 3 | P0-PRECISION | Exact decimal +/−/×, 40-digit division, invalid/zero cases, task-first UI; extend later to expressions and transcendental functions. | DEV IMPLEMENTED — release gates pending; partial scope |
-| 4 | P0-SYMBOLIC-ODE-IC | y'=y, y(0)=1 and inconsistent conditions; worker/UI regression. | TODO |
-| 5 | P1-FFT-1D | Sinusoid/DC peaks, inverse round-trip, invalid lengths, table/graph handoff. | TODO |
+| 1 | UI-GRAPH-AXES-3D-NAV / P1-FITTING-DIAGNOSTICS | Preserve 2D/3D graph and residual diagnostics in PR #34; exact dev and PR Quality, main Quality and Pages verification. | DEV IMPLEMENTED — GitHub Actions queued |
+| 2 | P0-PRECISION-EXPR | Decimal expression precedence, parentheses, 40-digit thirds, 16-digit half-even ties, invalid/oversized operands, mobile UI; CI/PR/Pages. | DEV IMPLEMENTED — CI pending |
+| 3 | P0-SYMBOLIC-ODE-IC | SymPy y'=y with y(0)=1; inconsistent/unsupported conditions and worker/browser regressions. | TODO |
+| 4 | P1-FFT-1D | Offline DC/sinusoid peaks, inverse round-trip, invalid length and table/graph handoff. | TODO |
+| 5 | P1-MATRIX-EIGEN | Bounded symmetric 2×2/3×3 eigenvalues/eigenvectors, repeated eigenvalue, nonsymmetric rejection and residual checks. | TODO |
 
 ### Previous five priorities (fitting diagnostics checkpoint)
 
@@ -304,3 +304,12 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 - Do not promote queued graph, fitting or precision increments until exact dev/PR checks pass. Main Quality 40502871511 and Pages 40502870819 still queued at discovery. Branch protection remains disabled. Next five as above.
 
 - Follow-up test commit d844df3ecda787c82e49aaa4e3099aa0024bfd8e adds explicit 16-digit half-even ties (positive/negative). Exact CI run 40516761190 queued at verification; no PR/main release.
+
+
+### 2026-10-27 15:56 CET — P0-PRECISION-EXPR bounded increment
+
+- Read AGENTS.md, frozen audit and living plan, inspected main/dev ancestry and PR #34. Before: dev 34dc315bf26ac0d3b570e3aa7f70ca0b85fbc205, main ce459eb89eb8f24de1956efac4d908c414cd23c1; 25 dev-only commits and 12 changed files. No branch divergence.
+- Quality push 40516811655 and PR 40522983794 both queued without job execution/logs; this is an Actions scheduling blocker, not evidence of a failing assertion. No CI bypass, no merge, no new branches.
+- Added bounded offline decimal expression parser, operator precedence, parentheses and unary signs using existing exact decimal arithmetic. Division is half-even rounded per step, not an exact rational-expression engine. New dedicated Playwright regression tests reference results, 16-digit ties, errors, 300-digit bound, 16-level depth, stale state and mobile UI. Mandatory workflow step, guide, changelog and standalone sync updated.
+- Local isolated Node reference/negative tests passed for parser algorithm; Python test syntax compiled. Full repository browser/structural suite unavailable because GitHub clone DNS resolution fails in container; exact new commit CI and PR/main/Pages remain unverified. Preserve all other-agent graph work.
+- Next five: UI-GRAPH-AXES-3D-NAV/P1-FITTING-DIAGNOSTICS release, P0-PRECISION-EXPR QA, P0-SYMBOLIC-ODE-IC, P1-FFT-1D, P1-MATRIX-EIGEN. No stale tracked files proven safe to remove; protection still unconfirmed.

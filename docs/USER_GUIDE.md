@@ -8,6 +8,8 @@ Open `index.html` directly, or use the GitHub Pages site after it is enabled. Us
 
 Open **Calculator**, type an expression and press **Calculate** or Enter. Supported examples: `5!+3^2`, `asin(0.5)`, `sqrt(-1)`, `ln(e^2)`. Change angle units from **Radians** to **Degrees** when needed. Adjust precision from the adjacent menu. Use **Ans** to refer to the prior calculated value. Reopen a history entry by clicking it. Complex values display using `i`.
 
+For exact decimal workflows, choose **High precision** in Calculator. The two-operand form supports exact +, − and × and 16–80 significant-digit division. The separate **Decimal expression** box supports +, −, ×, ÷, unary signs and parentheses, for example `(0.1+0.2)*3`; it evaluates division at the chosen precision with half-even rounding after each division step. It is offline, limited to 300-digit decimal operands, 120 tokens and 16 nesting levels, and does not support powers, scientific notation or transcendental functions.
+
 Only scalar expressions with numeric input can be calculated. For an equation involving unknowns, send it to Symbolic solver instead.
 
 ### 2 — Equation editor

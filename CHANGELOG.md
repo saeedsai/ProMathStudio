@@ -1,3 +1,8 @@
+## Unreleased — bounded high-precision expression evaluation (2026-10-27)
+
+- Added offline Calculator → High precision decimal expressions with parentheses, unary signs and operator precedence, reusing exact BigInt decimal arithmetic and 16–80 digit half-even division at each division step. Bounded 120 tokens, 16 nested levels, 300-digit operands; rejects invalid tokens, implicit multiplication and division by zero without dynamic evaluation.
+- Added focused Playwright numeric, negative, boundary, stale-result and mobile UI regression to mandatory Quality. Kept the modular source and standalone HTML synchronized; existing graph, fitting and ordinary Calculator behavior unchanged.
+
 ## Unreleased — bounded high-precision decimal arithmetic (2026-10-27)
 
 - Added Calculator → High precision task with exact BigInt decimal addition, subtraction and multiplication, plus 16–80 significant-digit half-even division, bounded 300-digit operands and explicit errors.

@@ -16,6 +16,7 @@ modules = [
     ("promath-minimize-tools", "src/minimize-tools.js"),
     ("promath-brent-tools", "src/brent-tools.js"),
     ("promath-xlsx-tools", "src/xlsx-tools.js"),
+    ("promath-xlsx-import", "src/xlsx-import.js"),
     ("promath-project-schema", "src/project-schema.js"),
 ]
 for tag, source in modules:

@@ -1,7 +1,17 @@
-## 2026-10-27 — Bounded offline two-sheet XLSX export (dev implementation; release pending)
+## 2026-10-27 — XLSX formula token boundary correction (dev; CI/release pending)
+
+- Corrected XLSX import/export row-reference rewriting to preserve numeric function names such as LOG10/ATAN2, scientific notation (1E3), longer identifiers and quoted literals, while continuing to shift real cell and quoted-sheet references.
+- Added a dedicated browser regression `tests/smoke_xlsx_formula_tokens.py` and mandatory Quality step; synchronized both modules with the standalone HTML bundle. Exact-head CI and production deployment are not yet verified.
+
+## 2026-10-27 — Bounded offline XLSX import and transactional round-trip (dev candidate; release pending)
+
+- Added ZIP central/local-header, CRC and decompressed-size validation; supports stored/DEFLATE workbooks with one or two sheets, shared/inline strings, numeric values, formulas and Excel header-row reference translation. Rejects external links, unsafe paths, malformed XML, oversized/duplicate entries and unsupported workbook parts.
+- Added replacement confirmation and rollback-safe Data Tables import UI, new `src/xlsx-import.js`, synchronized standalone HTML, `tests/smoke_xlsx_import.py`, mandatory Quality step and documentation. Full dev/PR/main CI and Pages deployment must pass before this increment is marked RELEASED.
+
+## 2026-10-27 — Bounded offline two-sheet XLSX export (PR #30 released; main Quality and Pages green)
 
 - Added dependency-free OpenXML/ZIP STORE export of one or two Data Tables sheets with numbers, text, blanks, formulas, quoted sheet references and header-row reference translation. Enforced size, name, XML control-character and row/column limits.
-- Added `src/xlsx-tools.js`, synchronized standalone HTML, `tests/smoke_xlsx_export.py`, mandatory Quality step and Data Tables documentation. Import and secure transactional round-trip remain pending. Exact-head CI, PR, main Quality and Pages must be verified before release.
+- Added `src/xlsx-tools.js`, synchronized standalone HTML, `tests/smoke_xlsx_export.py`, mandatory Quality step and Data Tables documentation. Exact dev Quality 40477182475, PR #30 Quality 40477470396, main Quality 40477823491, Pages 40477822871 and branch cleanup 40477823537 all succeeded for main `83e52f0a4c46cca13d9a03ad38801599a830762a`. Import and secure transactional round-trip remain pending; hosted interactive Pages verification unavailable.
 
 ## 2026-10-27 — Brent-Dekker bracketed root refinement (PR #29 released; exact main Quality and Pages green)
 

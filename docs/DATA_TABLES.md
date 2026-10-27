@@ -36,6 +36,13 @@ Every operation produces a **new table**, leaving the originals intact. The 6,00
 
 Use Data Tables → **Import CSV / TSV / JSON**. The importer accepts headed CSV/TSV files and several JSON tabular layouts. Maximum source file size **1 MB**. Export the active sheet as CSV or JSON. Both exports use **calculated values**; for formulas and sheet links, save the **MathStudio project JSON** using the Connected Workspaces panel at the bottom. An advanced import preview and X/Y/Z mapping control also lives inside Data Tables, not Graphs.
 
+
+### XLSX import and export (bounded offline scope)
+
+**Export XLSX** downloads one or two selected sheets. **Import XLSX** accepts a workbook with one or two sheets, up to 1,000 data rows and 32 columns each. Import replaces the current Data Tables workbook **only after confirmation**. Save your existing project JSON first if you want to retain it. The importer validates ZIP central/local records, CRC-32, expanded sizes (12 MB aggregate, 5 MB per part), duplicate/path-traversal entries, workbook relationships, sheet names, and XML before modifying any table. It accepts stored and DEFLATE-compressed ZIP entries in browsers supporting the native \`DecompressionStream('deflate-raw')\` API; no network service is used. Errors leave the current tables unchanged.
+
+The first Excel row contains column headers, so an XLSX formula reference \`A2\` maps to ProMathStudio's data cell \`A1\`; references to the Excel header row are rejected. Numeric/text cells, inline/shared strings, sparse rows, ordinary formulas and quoted sheet references are supported. Import **does not execute** formulas or macros. External workbook links, drawings, pivot tables, complex worksheet relationships, advanced formula types, unsupported XML/ZIP features and workbooks with more than two sheets are rejected rather than silently discarded. Importing a formula does not guarantee that the Data Tables expression evaluator can calculate every Excel function. Excel formatting is not imported.
+
 ## Graphs and charts
 
 Use **Show in graphs** or open Graphs and choose a table, X/category column, Y/value column, optional Z column, and a chart type:

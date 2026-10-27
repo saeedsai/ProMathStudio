@@ -14,7 +14,7 @@ function column(index){let s='';for(let n=index+1;n;n=Math.floor((n-1)/26))s=Str
 function formulaToExcel(formula){
  // Data Tables row 1 is the first DATA row; XLSX row 1 holds column headers.
  // Do not rewrite cell-like tokens inside Excel double-quoted string literals.
- return String(formula).replace(/("(?:[^"]|"")*")|((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_.]*)!)?(\$?[A-Za-z]{1,3})(\$?)([1-9]\d*)/g,
+ return String(formula).replace(/(?<![A-Za-z0-9_.])("(?:[^"]|"")*")|(?<![A-Za-z0-9_.])((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_.]*)!)?(\$?[A-Za-z]{1,3})(\$?)([1-9]\d*)(?![A-Za-z0-9_.(])/g,
   (whole,literal,sheet,col,anchor,row)=>{
    if(literal)return literal;
    const shifted=Number(row)+1;
@@ -117,7 +117,7 @@ function build({tables=M.dataTables.tables.slice(0,2)}={}){
 }
 const area=document.createElement('details');area.id='xlsx-export-details';
 area.innerHTML='<summary>Excel XLSX export · offline</summary>'+
- '<p>Export one or two selected Data Tables sheets (up to 1,000 data rows per sheet) with text, numbers and formulas. Import is not yet supported.</p>'+
+ '<p>Export one or two selected Data Tables sheets (up to 1,000 data rows per sheet) with text, numbers and formulas. For bounded offline import, open Excel XLSX import below.</p>'+
  '<div class="data-toolbar"><label>First sheet<select id="xlsx-first"></select></label>'+
  '<label>Second sheet (optional)<select id="xlsx-second"></select></label>'+
  '<button id="xlsx-export" type="button" class="secondary">Download XLSX</button></div>'+

@@ -68,6 +68,10 @@ function selectMode(m){
  selectTask('basic');
 }
 selectMode(mode());
+document.addEventListener('click',event=>{
+ const id=event.target?.closest('button')?.id;
+ if(['ode-to-graph','num-to-graph','dt-send-graph'].includes(id))$('ui-graph-table').open=true;
+},true);
 new MutationObserver(()=>{const next=mode();if(next!==activeMode)selectMode(next);}).observe(document.querySelector('.workspace-bar'),{attributes:true,attributeFilter:['class'],subtree:true});
 window.MathStudio.workspaceTasks={select:selectTask,current:()=>activeMode};
 })();

@@ -1,7 +1,12 @@
-## 2026-10-27 — Brent-Dekker bracketed root refinement (dev candidate)
+## 2026-10-27 — Bounded offline two-sheet XLSX export (dev implementation; release pending)
+
+- Added dependency-free OpenXML/ZIP STORE export of one or two Data Tables sheets with numbers, text, blanks, formulas, quoted sheet references and header-row reference translation. Enforced size, name, XML control-character and row/column limits.
+- Added `src/xlsx-tools.js`, synchronized standalone HTML, `tests/smoke_xlsx_export.py`, mandatory Quality step and Data Tables documentation. Import and secure transactional round-trip remain pending. Exact-head CI, PR, main Quality and Pages must be verified before release.
+
+## 2026-10-27 — Brent-Dekker bracketed root refinement (PR #29 released; exact main Quality and Pages green)
 
 - Added bounded offline real root refinement with residual validation, strict input limits, browser UI and one-row Data Tables export; previous root search remains intact.
-- Added `tests/smoke_root_brent.py` to mandatory Quality; synchronized `src/brent-tools.js` and standalone `index.html`. Local JS numerical reference checks passed; exact CI and release verification pending.
+- Added `tests/smoke_root_brent.py` to mandatory Quality; synchronized `src/brent-tools.js` and standalone `index.html`. Local JS numerical reference checks passed; exact dev Quality 40470847711, PR #29 Quality 40471141184, and main Quality 40472294062 passed all 38 steps; Pages 40472293001 and branch cleanup 40472294108 succeeded for main `ebd8932e19cae5168742cd8412207277e04121d5`. Hosted interactive Pages smoke was unavailable (`DisabledError`).
 
 ## 2026-10-27 — Bounded offline 1D golden-section minimization (PR #28 released; main Quality and Pages green)
 

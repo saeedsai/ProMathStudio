@@ -4955,14 +4955,52 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   note:'Scalar first-order y\u2032=f(t,y), forward only. Local error controlled; not stiff, vector-valued or globally error-certified.'};
 }
 
+
+function solveSystem({expression='z',expressionZ='-y',t0=0,t1=1,y0=0,z0=1,steps=80}={}){
+ expression=String(expression).trim();expressionZ=String(expressionZ).trim();
+ if(!expression||!expressionZ||expression.length>1000||expressionZ.length>1000)
+  throw Error('Enter both dy/dt and dz/dt expressions (1–1,000 characters each).');
+ t0=finite(t0,'Initial time');t1=finite(t1,'End time');
+ y0=finite(y0,'Initial y');z0=finite(z0,'Initial z');
+ if(!(t1>t0))throw Error('End time must be greater than initial time (forward integration only).');
+ steps=finite(steps,'Time steps');
+ if(!Number.isInteger(steps)||steps<4||steps>1000)throw Error('Time steps must be an integer from 4 to 1000.');
+ const h=(t1-t0)/steps;
+ if(!Number.isFinite(h)||h<=0)throw Error('Invalid integration step size.');
+ const f=(t,y,z)=>{
+  const variables={t:bounded(t,'Time'),y:bounded(y,'State y'),z:bounded(z,'State z')};
+  return [
+   bounded(M.numerical.evaluate(expression,variables),'Derivative dy/dt'),
+   bounded(M.numerical.evaluate(expressionZ,variables),'Derivative dz/dt')
+  ];
+ };
+ let y=y0,z=z0;const rows=[];
+ for(let i=0;i<=steps;i++){
+  const t=bounded(i===steps?t1:t0+i*h,'Time');
+  rows.push([t,y,z]);
+  if(i===steps)break;
+  const k1=f(t,y,z);
+  const k2=f(t+h/2,y+h*k1[0]/2,z+h*k1[1]/2);
+  const k3=f(t+h/2,y+h*k2[0]/2,z+h*k2[1]/2);
+  const k4=f(t+h,y+h*k3[0],z+h*k3[1]);
+  y=bounded(y+h*(k1[0]+2*k2[0]+2*k3[0]+k4[0])/6,'State y');
+  z=bounded(z+h*(k1[1]+2*k2[1]+2*k3[1]+k4[1])/6,'State z');
+ }
+ return {type:'ode-rk4-system',columns:['t','y','z'],rows,steps,h,
+  method:'Coupled two-state classical Runge–Kutta (RK4)',
+  note:'Two real first-order equations y\u2032=f(t,y,z), z\u2032=g(t,y,z); fixed-step forward IVP only. Not adaptive, stiff or error-certified.'};
+}
+
 const area=document.createElement('details');area.id='ode-details';
-area.innerHTML='<summary>First-order ODE initial-value problem · RK4 / RK45</summary>'+
- '<p class="graph-data-muted">Solve dy/dt = f(t,y) from an initial value. RK4 uses fixed steps; RK45 adapts its step size to a local error tolerance. Example: f(t,y)=y, y(0)=1 gives y(1)≈e.</p>'+
- '<div class="num-fields"><label>Method<select id="ode-method"><option value="rk4">Fixed-step RK4</option><option value="rk45">Adaptive RK45</option></select></label>'+ 
- '<label>Derivative f(t,y)<input id="ode-expression" value="y" spellcheck="false"></label>'+
+area.innerHTML='<summary>ODE initial-value problem · scalar RK4 / RK45 or coupled RK4</summary>'+
+ '<p class="graph-data-muted">Solve scalar dy/dt=f(t,y), or two coupled equations dy/dt=f(t,y,z), dz/dt=g(t,y,z). RK4 uses fixed steps; scalar RK45 adapts its step size. Example: dy/dt=z, dz/dt=-y, y(0)=0, z(0)=1.</p>'+
+ '<div class="num-fields"><label>Method<select id="ode-method"><option value="rk4">Fixed-step RK4</option><option value="rk45">Adaptive RK45</option><option value="rk4-system">Coupled two-state RK4</option></select></label>'+ 
+ '<label>Derivative dy/dt<input id="ode-expression" value="y" spellcheck="false"></label>'+ 
+ '<label id="ode-system-derivative-label" hidden>Derivative dz/dt<input id="ode-system-derivative" value="-y" spellcheck="false"></label>'+
  '<label>Initial time t₀<input id="ode-start" type="number" step="any" value="0"></label>'+
  '<label>End time t₁<input id="ode-end" type="number" step="any" value="1"></label>'+
- '<label>Initial y(t₀)<input id="ode-initial" type="number" step="any" value="1"></label>'+
+ '<label>Initial y(t₀)<input id="ode-initial" type="number" step="any" value="1"></label>'+ 
+ '<label id="ode-system-initial-label" hidden>Initial z(t₀)<input id="ode-system-initial" type="number" step="any" value="1"></label>'+
  '<label>RK4 steps (4–1000)<input id="ode-steps" type="number" min="4" max="1000" step="1" value="40"></label>'+ 
  '<label>RK45 tolerance (1e-12–1e-2)<input id="ode-tolerance" type="number" step="any" value="0.0000001"></label>'+ 
  '<label>RK45 max attempts (4–10000)<input id="ode-max-steps" type="number" min="4" max="10000" step="1" value="1000"></label></div>'+
@@ -4982,19 +5020,29 @@ function invalidate(){
  last=null;$('ode-to-table').disabled=true;$('ode-to-graph').disabled=true;
  $('ode-output').classList.remove('error');$('ode-output').textContent='Enter the derivative and initial conditions.';
 }
+function updateSystemFields(){
+ const system=$('ode-method').value==='rk4-system';
+ $('ode-system-derivative-label').hidden=!system;
+ $('ode-system-initial-label').hidden=!system;
+}
 for(const input of area.querySelectorAll('input,select')){input.addEventListener('input',invalidate);input.addEventListener('change',invalidate);}
+$('ode-method').addEventListener('change',updateSystemFields);updateSystemFields();
 function run(){
  try{
-  const adaptive=$('ode-method').value==='rk45';
-  last=(adaptive?solveAdaptive:solve)({expression:$('ode-expression').value,t0:$('ode-start').value,
-   t1:$('ode-end').value,y0:$('ode-initial').value,steps:$('ode-steps').value,
+  const mode=$('ode-method').value;
+  const solver=mode==='rk45'?solveAdaptive:mode==='rk4-system'?solveSystem:solve;
+  last=solver({expression:$('ode-expression').value,expressionZ:$('ode-system-derivative').value,
+   t0:$('ode-start').value,t1:$('ode-end').value,y0:$('ode-initial').value,
+   z0:$('ode-system-initial').value,steps:$('ode-steps').value,
    tolerance:$('ode-tolerance').value,maxSteps:$('ode-max-steps').value});
   $('ode-output').classList.remove('error');
   const end=last.rows[last.rows.length-1];
   const detail=last.type==='ode-rk45'?'accepted '+last.steps+', rejected '+last.rejected+
    ', tolerance '+last.tolerance:'Δt='+last.h.toPrecision(8);
+  const endState='y('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+
+   (last.type==='ode-rk4-system'?', z ≈ '+end[2].toPrecision(12):'');
   $('ode-output').textContent=last.method+'\n'+last.rows.length+' output rows; '+detail+
-   '\ny('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+'\n'+last.note;
+   '\n'+endState+'\n'+last.note;
   $('ode-to-table').disabled=false;$('ode-to-graph').disabled=false;
  }catch(error){
   last=null;$('ode-to-table').disabled=true;$('ode-to-graph').disabled=true;
@@ -5004,7 +5052,7 @@ function run(){
 $('ode-run').addEventListener('click',run);
 function importRows(){
  if(!last)throw Error('Solve an initial-value problem first.');
- return M.dataTables.importData({headers:last.columns,rows:last.rows},last.type==='ode-rk45'?'ODE_RK45':'ODE_RK4');
+ return M.dataTables.importData({headers:last.columns,rows:last.rows},last.type==='ode-rk45'?'ODE_RK45':last.type==='ode-rk4-system'?'ODE_RK4_SYSTEM':'ODE_RK4');
 }
 function fail(error){$('ode-output').classList.add('error');$('ode-output').textContent=error.message;}
 $('ode-to-table').addEventListener('click',()=>{try{importRows();M.advanced.mode('data');}catch(e){fail(e);}});
@@ -5017,7 +5065,7 @@ $('ode-to-graph').addEventListener('click',()=>{
   $('dt-plot-table').click();
  }catch(e){fail(e);}
 });
-M.odeTools={solve,solveAdaptive,run};
+M.odeTools={solve,solveAdaptive,solveSystem,run};
 })();
 </script>
 </body>

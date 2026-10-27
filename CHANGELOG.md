@@ -1,3 +1,7 @@
+## Unreleased — offline real-signal FFT (2026-10-27)
+
+- Added bounded offline 4–256-sample radix-2 FFT, one-sided amplitude spectrum, inverse round-trip check, Data Tables/Graphs handoff, dedicated browser/reference regression and structural CI checks. Local isolated Chromium harness passed; full repository Quality and Pages remain pending.
+
 ## Unreleased — symbolic first-order ODE initial conditions (2026-10-27)
 
 - Added optional one/two first-order SymPy ODE initial values: `diff(y(t),t)=y(t)` with `y(0)=1` → `y(t)=exp(t)`. Reject invalid functions/points/values, duplicate times, and contradictory overdetermined conditions.

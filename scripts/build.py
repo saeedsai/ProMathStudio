@@ -14,6 +14,7 @@ modules = [
     ("promath-matrix-tools", "src/matrix-tools.js"),
     ("promath-ode-tools", "src/ode-tools.js"),
     ("promath-minimize-tools", "src/minimize-tools.js"),
+    ("promath-fft-tools", "src/fft-tools.js"),
     ("promath-brent-tools", "src/brent-tools.js"),
     ("promath-xlsx-tools", "src/xlsx-tools.js"),
     ("promath-xlsx-import", "src/xlsx-import.js"),

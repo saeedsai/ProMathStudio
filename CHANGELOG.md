@@ -1,3 +1,7 @@
+## Unreleased — bounded high-precision integer powers (2026-10-27)
+
+- Added exact integer `^` powers (0–20) to offline decimal expressions, right-associative chains, ordinary unary precedence and rejection of `0^0`/negative, fractional or out-of-range exponents. Browser regression covers positive and invalid cases; full CI, PR and Pages remain pending.
+
 ## Unreleased — strict decimal expression token boundaries (2026-10-27)
 
 - Fixed high-precision expression parsing so whitespace cannot concatenate separate numeric literals (`1 2`, `1 .2`) into a different number. Legitimate spaces between operators and parentheses remain supported. Added focused browser regression cases; full CI and deployment pending.

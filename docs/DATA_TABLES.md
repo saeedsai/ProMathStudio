@@ -17,6 +17,7 @@ A plain cell is text or a number. A formula begins with `=`. The column headers 
 =IF(A1>2,B1,0)
 =IF(A1>0,IF(B1>3,B1,0),0)
 =SUM(IF(A1>0,2,0),IF(A1<0,9,3))
+=IF(A1>0,2,3)+IF(B1>0,4,5)
 =Revenue!B1*1.2
 ```
 

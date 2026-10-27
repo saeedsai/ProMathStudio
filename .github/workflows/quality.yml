@@ -114,6 +114,8 @@ jobs:
         run: python tests/smoke_fft.py
       - name: FFT physical-frequency Hz and sample-rate UI regression
         run: python tests/smoke_fft_sample_rate.py
+      - name: FFT frequency resolution, Nyquist and validation regression
+        run: python tests/smoke_fft_frequency_metadata.py
       - name: Python custom function composition regression
         run: python tests/smoke_python_compose.py
       - name: RK4 initial-value solver numeric and UI regression

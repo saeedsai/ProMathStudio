@@ -1,3 +1,7 @@
+## Unreleased — FFT frequency metadata and graph regression repair (2026-10-27)
+
+- Added binWidthHz and nyquistHz API/UI metrics with focused browser reference, invalid rate and stale UI checks. Repaired Hz graph regression to access point objects (`.x`, `.y`), matching the actual Graphs API, without weakening expected values. Quality and Pages release still pending.
+
 ## Unreleased — FFT sample-rate frequency in Hz (2026-10-27)
 
 - Added validated FFT sample-rate control, frequency_Hz spectrum columns and physical-frequency graph axis. Added dedicated Playwright tests for Hz references, bad sample rates, UI state and table/graph handoff. Exact-head CI and Pages verification pending.

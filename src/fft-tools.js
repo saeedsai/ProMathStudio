@@ -44,6 +44,7 @@ function parse(text){
  return values;
 }
 function analyze(samples,sampleRate=1){
+ if(typeof sampleRate!=='number'&&(typeof sampleRate!=='string'||!sampleRate.trim()))throw Error('Sample rate must be a positive numeric value in Hz.');
  const rate=Number(sampleRate);
  if(!Number.isFinite(rate)||rate<=0||rate>1e12)throw Error('Sample rate must be positive and at most 1e12 Hz.');
  const values=Array.isArray(samples)?samples:parse(samples);
@@ -56,7 +57,7 @@ function analyze(samples,sampleRate=1){
   bin:k,frequencyHz:k*rate/n,amplitude:Math.hypot(z.re,z.im)*(k===0||k===n/2?1:2)/n,
   phase:Math.atan2(z.im,z.re),real:z.re,imag:z.im
  }));
- return {samples:values.slice(),sampleRate:rate,transformed,recovered,spectrum,maxError};
+ return {samples:values.slice(),sampleRate:rate,binWidthHz:rate/n,nyquistHz:rate/2,transformed,recovered,spectrum,maxError};
 }
 const area=document.createElement('details');area.id='fft-details';
 area.innerHTML='<summary>Signal spectrum · offline FFT (4–256 samples)</summary>'+
@@ -81,7 +82,7 @@ $('fft-run').addEventListener('click',()=>{
   last=analyze($('fft-samples').value,$('fft-rate').value);
   $('fft-output').classList.remove('error');
   const top=last.spectrum.slice().sort((a,b)=>b.amplitude-a.amplitude)[0];
-  $('fft-output').textContent='FFT: '+last.samples.length+' real samples; '+last.spectrum.length+' nonnegative-frequency bins.\nPeak bin '+top.bin+' ('+top.frequencyHz+' Hz), amplitude '+top.amplitude.toPrecision(10)+'\nInverse round-trip max error: '+last.maxError.toExponential(3)+'\nOne-sided amplitude spectrum; frequency Hz = bin × sample rate / N.';
+  $('fft-output').textContent='FFT: '+last.samples.length+' real samples; '+last.spectrum.length+' nonnegative-frequency bins.\nPeak bin '+top.bin+' ('+top.frequencyHz+' Hz), amplitude '+top.amplitude.toPrecision(10)+'\nInverse round-trip max error: '+last.maxError.toExponential(3)+'\nBin width '+last.binWidthHz+' Hz · Nyquist '+last.nyquistHz+' Hz.'+'\nOne-sided amplitude spectrum; frequency Hz = bin × sample rate / N.';
   $('fft-to-table').disabled=false;$('fft-to-graph').disabled=false;
  }catch(e){invalidate();$('fft-output').classList.add('error');$('fft-output').textContent=e.message;}
 });

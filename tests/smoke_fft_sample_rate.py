@@ -27,7 +27,7 @@ def main():
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-to-graph').click()
   pts=page.evaluate('MathStudio.graphData.getState().points')
-  assert abs(pts[2][0]-2)<1e-12 and abs(pts[2][1]-1)<1e-12,pts[2]
+  assert abs(pts[2]['x']-2)<1e-12 and abs(pts[2]['y']-1)<1e-12,pts[2]
   page.locator('[data-workspace="solver"]').click()
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-rate').fill('16')

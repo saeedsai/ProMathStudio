@@ -52,6 +52,14 @@ Open **Symbolic Solver → Numerical methods → 1D linear interpolation**. Ente
 
 Example: samples `0,1`, `1,3`, `2,5` and queries `0,0.5,1,1.5,2` yield y values `1,2,3,4,5`. Duplicate/unsorted x values, malformed pairs, non-finite or overly large numbers and out-of-domain queries fail without exporting stale results. **No extrapolation**, cubic spline, multidimensional interpolation or uncertainty estimates are provided. See `tests/smoke_interpolation_linear.py`.
 
+## Shape-preserving cubic PCHIP interpolation (offline)
+
+In Symbolic Solver → Numerical methods → 1D interpolation, select Shape-preserving cubic (PCHIP). Enter 2–200 strictly increasing sample pairs and 1–1,000 in-domain query x values. The piecewise cubic Hermite interpolant uses weighted harmonic-mean interior slopes and limited endpoint slopes; flat intervals remain flat. It is continuous with a continuous first derivative at interior knots and preserves monotonicity within each sample interval, subject to floating-point rounding. Exact knot values are returned without cancellation. Two samples reduce to a straight line.
+
+Example: samples (0,0), (1,1), (2,1), (3,2), queries 0.5, 1.5, 2.5 stay within each local y interval without overshoot. Save to Data Tables and Plot in Graphs export the selected method. Switching methods or editing inputs invalidates stale export results. Duplicate/unsorted samples, non-finite slopes, out-of-domain queries and unsupported methods are rejected.
+
+PCHIP is not a natural cubic spline, globally twice differentiable, a multidimensional interpolator or a statistical uncertainty estimate. No extrapolation is performed. See tests/smoke_interpolation_pchip.py.
+
 ## One-dimensional Poisson equation
 
 Select **1D Poisson**, where the implemented convention is:

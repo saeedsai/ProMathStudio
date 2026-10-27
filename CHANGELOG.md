@@ -1,12 +1,12 @@
-## 2026-10-27 — XLSX formula token boundary correction (dev; CI/release pending)
+## 2026-10-27 — XLSX formula token boundary correction (PR #31 released)
 
 - Corrected XLSX import/export row-reference rewriting to preserve numeric function names such as LOG10/ATAN2, scientific notation (1E3), longer identifiers and quoted literals, while continuing to shift real cell and quoted-sheet references.
-- Added a dedicated browser regression `tests/smoke_xlsx_formula_tokens.py` and mandatory Quality step; synchronized both modules with the standalone HTML bundle. Exact-head CI and production deployment are not yet verified.
+- Added a dedicated browser regression `tests/smoke_xlsx_formula_tokens.py` and mandatory Quality step; synchronized both modules with the standalone HTML bundle. Exact dev Quality 40486708265, PR #31 Quality 40488048299 and main Quality 40488465426 passed all 41 steps; Pages 40488463589 succeeded for main 6e50b82b203d9233a2fcacd6c4dd829e2eb59a3c.
 
-## 2026-10-27 — Bounded offline XLSX import and transactional round-trip (dev candidate; release pending)
+## 2026-10-27 — Bounded offline XLSX import and transactional round-trip (PR #31 released)
 
 - Added ZIP central/local-header, CRC and decompressed-size validation; supports stored/DEFLATE workbooks with one or two sheets, shared/inline strings, numeric values, formulas and Excel header-row reference translation. Rejects external links, unsafe paths, malformed XML, oversized/duplicate entries and unsupported workbook parts.
-- Added replacement confirmation and rollback-safe Data Tables import UI, new `src/xlsx-import.js`, synchronized standalone HTML, `tests/smoke_xlsx_import.py`, mandatory Quality step and documentation. Full dev/PR/main CI and Pages deployment must pass before this increment is marked RELEASED.
+- Added replacement confirmation and rollback-safe Data Tables import UI, new `src/xlsx-import.js`, synchronized standalone HTML, `tests/smoke_xlsx_import.py`, mandatory Quality step and documentation. Released via PR #31 with exact-head dev, PR and main Quality passing 41 steps, and Pages/branch cleanup succeeded; independent interactive hosted Pages smoke remains unavailable.
 
 ## 2026-10-27 — Bounded offline two-sheet XLSX export (PR #30 released; main Quality and Pages green)
 

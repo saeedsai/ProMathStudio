@@ -28,6 +28,12 @@ def main():
         for expr, expected, precision in cases:
             actual = page.evaluate('a => MathStudio.precisionTools.evaluateExpression(a.expr,a.precision).result', {'expr': expr, 'precision': precision})
             assert actual == expected, (expr, actual, expected)
+        # Scientific notation preserves the original decimal and exactness metadata.
+        for decimal,expected in [('0','0e+0'),('123456789.25','1.2345678925e+8'),
+                                 ('-0.00000120','-1.2e-6'),('0.00001','1e-5'),
+                                 ('1000','1e+3'),('-0','0e+0')]:
+            assert page.evaluate('x => MathStudio.precisionTools.toScientificDecimal(x)',decimal)==expected,(decimal,expected)
+        assert page.evaluate('() => {try{MathStudio.precisionTools.toScientificDecimal("1e3");return false;}catch(e){return true;}}')
         # Bounded exact powers: right associativity and standard unary precedence.
         for expr, expected in [('2^3', '8'), ('(1.2)^3', '1.728'),
                                ('2^3^2', '512'), ('-2^2', '-4'),
@@ -56,6 +62,10 @@ def main():
         page.locator('#precision-expression').fill('(0.1+0.2)*3')
         page.locator('#precision-expression-run').click()
         assert '0.9' in page.locator('#precision-expression-output').inner_text()
+        page.locator('#precision-scientific').check()
+        assert 'Scientific: 9e-1' in page.locator('#precision-expression-output').inner_text()
+        page.locator('#precision-scientific').uncheck()
+        assert 'Scientific:' not in page.locator('#precision-expression-output').inner_text()
         page.locator('#precision-expression').fill('2*(3+4)')
         page.locator('#precision-expression').press('Control+Enter')
         assert '14' in page.locator('#precision-expression-output').inner_text()

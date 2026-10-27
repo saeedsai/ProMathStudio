@@ -18,6 +18,12 @@ Guesses:   1,1
 
 A damped Newton method with a numerical Jacobian seeks a local solution. It reports iterations, the residual norm and convergence status. If the Jacobian is singular, choose a different initial guess. **Convergence does not guarantee that the solution is unique.**
 
+## Symbolic ODE initial conditions (SymPy)
+
+Choose **Symbolic Solver → Solve ODE (dsolve)**. Enter `diff(y(t),t)=y(t)` in the editor and optional **Initial condition(s)** `y(0)=1`. The result is `y(t)=exp(t)`. A second condition separated by a semicolon is allowed: `y(0)=1; y(1)=e` is consistent, while `y(0)=1; y(1)=2` is rejected. Leave the field blank for arbitrary integration constants. Project JSON saves and restores the field.
+
+**Scope:** One scalar first-order ODE, one or two dependent-function values at finite real constant times with finite real constant values. Higher-order equations, derivative boundary conditions, PDE boundary conditions and free symbolic parameters are not supported by this initial-condition feature. SymPy requires an initial Pyodide/SymPy download and then runs locally in a worker. Offline numerical RK4/RK45 remains independent.
+
 ## First-order initial-value ODE (offline RK4)
 
 Open **Symbolic Solver → Numerical methods / PDE → First-order ODE initial-value problem · RK4**. Enter a real-valued derivative **dy/dt = f(t,y)** using the same safe Calculator expression syntax. Specify initial time t₀, final time t₁, initial value y(t₀), and a fixed number of time steps (4–1000). Example:

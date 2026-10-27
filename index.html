@@ -315,7 +315,7 @@
           <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="system">Solve system of equations</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="limit">Limit (SymPy)</option><option value="numeric">Numerical roots (SymPy)</option><optgroup label="Integral transforms · SymPy"><option value="laplace">Laplace transform ℒ</option><option value="inverse_laplace">Inverse Laplace ℒ⁻¹</option><option value="fourier">Fourier transform ℱ</option><option value="inverse_fourier">Inverse Fourier ℱ⁻¹</option></optgroup><optgroup label="Differential equations · SymPy"><option value="ode">Solve ODE (dsolve)</option><option value="pde">Solve PDE (pdsolve)</option></optgroup></select></label>
           <label class="cas-field cas-engine">Engine <select id="cas-engine"><option value="auto">Auto — offline → SymPy</option><option value="sympy">SymPy — full solver</option><option value="offline">Built-in — offline only</option></select></label>
           <label class="cas-field variable">Variable <input id="cas-variable" type="text" value="x" maxlength="24" spellcheck="false" aria-label="Symbolic variable" /></label>
-          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><label class="cas-field" id="cas-limit-point-wrap" hidden>Approach point <input id="cas-limit-point" type="text" value="0" maxlength="80" spellcheck="false" aria-label="Limit approach point"/></label><label class="cas-field" id="cas-limit-direction-wrap" hidden>Direction <select id="cas-limit-direction" aria-label="Limit direction"><option value="+-">Both sides</option><option value="-">From left (−)</option><option value="+">From right (+)</option></select></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
+          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><label class="cas-field" id="cas-limit-point-wrap" hidden>Approach point <input id="cas-limit-point" type="text" value="0" maxlength="80" spellcheck="false" aria-label="Limit approach point"/></label><label class="cas-field" id="cas-limit-direction-wrap" hidden>Direction <select id="cas-limit-direction" aria-label="Limit direction"><option value="+-">Both sides</option><option value="-">From left (−)</option><option value="+">From right (+)</option></select></label><label class="cas-field" id="cas-ode-ic-wrap" hidden>Initial condition(s) <input id="cas-ode-ic" type="text" maxlength="160" placeholder="y(0)=1; y(1)=e" aria-label="ODE initial conditions" spellcheck="false"/><span class="small-note">Optional; one or two conditions separated by semicolon.</span></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
         </div>
         <fieldset id="cas-assumptions" style="margin:8px 0 12px;border:1px solid #d7deec;border-radius:10px;padding:8px 12px"><legend>Selected variable assumptions (SymPy)</legend><label><input type="checkbox" id="cas-assume-real"> Real</label> <label><input type="checkbox" id="cas-assume-positive"> Positive</label> <label><input type="checkbox" id="cas-assume-negative"> Negative</label> <label><input type="checkbox" id="cas-assume-integer"> Integer</label><span class="small-note"> Sign implies real. Positive and negative conflict. Leave all unchecked for complex domain.</span></fieldset>
         <div id="cas-system-fields" hidden style="padding:12px;border:1px solid #d7deec;border-radius:10px;margin:12px 0"><label for="cas-system-input">Equations (one per line)</label><textarea id="cas-system-input" rows="4" style="width:100%;display:block" spellcheck="false">x = 2x + 2z
@@ -577,6 +577,11 @@ def _ms_process(job_text):
     expression=build(ast)
     if operation=='auto':operation='solve' if isinstance(expression,sp.Equality) else 'expand'
     is_equation=isinstance(expression,sp.Equality)
+    ics_asts=job.get('icsAsts',[])
+    if not isinstance(ics_asts,list) or len(ics_asts)>2:
+        raise MathStudioSympyError('Provide at most two ODE initial conditions.')
+    if operation!='ode' and ics_asts:
+        raise MathStudioSympyError('Initial conditions apply only to the ODE operation.')
     if operation in {'ode','pde'}:
         if not isinstance(expression,sp.Equality):
             expression=sp.Eq(expression,0,evaluate=False)
@@ -585,8 +590,29 @@ def _ms_process(job_text):
                 derivs=list(expression.atoms(sp.Derivative))
                 dependent=[d.expr for d in derivs if isinstance(d.expr,sp.core.function.AppliedUndef)]
                 if not dependent: raise MathStudioSympyError('ODE requires a derivative of an unknown function such as y(t).')
-                solution=sp.dsolve(expression, dependent[0])
-                note='SymPy analytic ODE solution. Integration constants are arbitrary; initial conditions are not applied.'
+                conditions={}
+                if ics_asts:
+                    func=dependent[0]
+                    if len(set(dependent))!=1 or len(func.args)!=1 or not func.args[0].is_Symbol or len(derivs)!=1 or derivs[0].expr!=func or derivs[0].variables!=(func.args[0],):
+                        raise MathStudioSympyError('Initial conditions currently support only one first-order ODE in y(t).')
+                    for condition_ast in ics_asts:
+                        if not isinstance(condition_ast,dict):
+                            raise MathStudioSympyError('Invalid initial condition structure.')
+                        ic=build(condition_ast)
+                        if not isinstance(ic,sp.Equality) or not isinstance(ic.lhs,sp.core.function.AppliedUndef) or ic.lhs.func!=func.func or len(ic.lhs.args)!=1:
+                            raise MathStudioSympyError('Use an initial condition of the form y(0)=1 for the ODE dependent function.')
+                        point=ic.lhs.args[0]
+                        value=ic.rhs
+                        if point.free_symbols or point.is_real is not True or point.is_finite is not True:
+                            raise MathStudioSympyError('Initial-condition time must be a finite real constant.')
+                        if not isinstance(value,sp.Expr) or value.free_symbols or value.is_real is not True or value.is_finite is not True:
+                            raise MathStudioSympyError('Initial-condition value must be a finite real constant.')
+                        if ic.lhs in conditions:
+                            raise MathStudioSympyError('Duplicate initial-condition time; provide distinct points.')
+                        conditions[ic.lhs]=value
+                solution=sp.dsolve(expression, dependent[0],ics=conditions) if conditions else sp.dsolve(expression, dependent[0])
+                note=('SymPy analytic ODE solution with '+str(len(conditions))+' initial condition(s) applied.' if conditions
+                      else 'SymPy analytic ODE solution. Integration constants are arbitrary; initial conditions are not applied.')
             else:
                 derivs=list(expression.atoms(sp.Derivative))
                 dependent=[d.expr for d in derivs if isinstance(d.expr,sp.core.function.AppliedUndef)]
@@ -1849,7 +1875,11 @@ def _ms_system(job_text):
       lines.push('result = sp.'+op+'(expr, '+v+', sp.Symbol('+JSON.stringify(target)+')'+(operation==='laplace'?', noconds=True':'')+')');
     }else if(['ode','pde'].includes(operation)){
       lines.push('equation = expr if isinstance(expr, sp.Equality) else sp.Eq(expr, 0)');
-      lines.push('result = sp.'+(operation==='ode'?'dsolve':'pdsolve')+'(equation)');
+      if(operation==='ode'&&extra.icsAsts?.length){
+        const conditions=extra.icsAsts.map(ic=>pythonDocument(ic).split('\n').find(line=>line.startsWith('expr = ')).slice(7));
+        lines.push('initial_conditions = ['+conditions.join(', ')+']');
+        lines.push('result = sp.dsolve(equation, ics={c.lhs: c.rhs for c in initial_conditions})');
+      }else lines.push('result = sp.'+(operation==='ode'?'dsolve':'pdsolve')+'(equation)');
     }else lines.push('result = '+({expand:'sp.expand' ,simplify:'sp.simplify',factor:'sp.factor',differentiate:'sp.diff',integrate:'sp.integrate'}[operation]||'sp.simplify')+'(expr'+(['differentiate','integrate'].includes(operation)?', '+v:'')+')');
     lines.push('print(sp.pretty(result))');return lines.join('\n');
   }
@@ -1918,6 +1948,16 @@ def _ms_system(job_text):
       const parsed=evaluate(raw);
       if(parsed.incomplete)throw new Error('Finish typing the equation before solving.');
       let sympyExtra={assumptions};
+      if(selected==='ode'){
+        const rawConditions=document.getElementById('cas-ode-ic').value.trim();
+        if(rawConditions){
+          if(rawConditions.length>160)throw Error('Initial conditions exceed 160 characters.');
+          const parts=rawConditions.split(';').map(x=>x.trim());
+          if(parts.length>2||parts.some(x=>!x))throw Error('Enter one or two initial conditions separated by semicolon.');
+          const icsAsts=parts.map(x=>{const ic=evaluate(x);if(ic.incomplete)throw Error('Complete each initial condition.');return ic.ast;});
+          sympyExtra={...sympyExtra,icsAsts};
+        }
+      }
       if(selected==='limit'){
         const pointRaw=document.getElementById('cas-limit-point').value.trim();
         if(!pointRaw)throw Error('Enter a limit approach point (e.g. 0, pi, oo or -oo).');
@@ -1980,6 +2020,7 @@ def _ms_system(job_text):
     t.hidden=!['laplace','inverse_laplace','fourier','inverse_fourier'].includes(name);
     document.getElementById('cas-limit-point-wrap').hidden=name!=='limit';
     document.getElementById('cas-limit-direction-wrap').hidden=name!=='limit';
+    document.getElementById('cas-ode-ic-wrap').hidden=name!=='ode';
     if(!t.hidden)document.getElementById('cas-target').value= name==='inverse_laplace'?'t':name==='inverse_fourier'?'x':name==='laplace'?'s':'k';
   }
   casOperation.addEventListener('change',updateTarget);updateTarget();
@@ -1989,6 +2030,7 @@ def _ms_system(job_text):
   });
   for(const field of [casOperation,casVariable,casEngine,document.getElementById('cas-limit-direction'),...assumptionKeys.map(k=>document.getElementById('cas-assume-'+k))])field.addEventListener('change',()=>{casRequest++;if(casLast)clearCas();});
   document.getElementById('cas-limit-point').addEventListener('input',()=>{casRequest++;if(casLast)clearCas();});
+  document.getElementById('cas-ode-ic').addEventListener('input',()=>{casRequest++;if(casLast)clearCas();});
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();casExecute();}},true);
   window.MathStudio.symbolic=casRun;
   window.MathStudio.solveWithSymPy=async raw=>{
@@ -2895,6 +2937,7 @@ self.onmessage=async ({data})=>{
     }
     if (data.solver) for (const key of ['expression', 'variable', 'operation', 'engine', 'limitPoint', 'limitDirection'])
       if (data.solver[key] !== undefined) short(data.solver[key], 12000, 'solver ' + key);
+    if (data.solver?.odeInitialCondition !== undefined) short(data.solver.odeInitialCondition, 160, 'ODE initial condition');
     if (data.solver?.assumptions !== undefined) {
       const flags=data.solver.assumptions;
       if (!record(flags) || Object.keys(flags).some(k=>!['real','positive','negative','integer'].includes(k)||typeof flags[k]!=='boolean') ||
@@ -3206,7 +3249,7 @@ self.onmessage=async ({data})=>{
   function projectData(){
     return {format:'mathstudio-project',version:2,date:new Date().toISOString(),working:state.active,origin:state.origin,
       recent:state.recent,notebook:engine.notebookBridge.list(),calculator:engine.advanced.getCalculatorState(),
-      solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value,limitPoint:$('cas-limit-point').value,limitDirection:$('cas-limit-direction').value,assumptions:Object.fromEntries(['real','positive','negative','integer'].map(k=>[k,$('cas-assume-'+k).checked]))},
+      solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value,limitPoint:$('cas-limit-point').value,limitDirection:$('cas-limit-direction').value,odeInitialCondition:$('cas-ode-ic').value,assumptions:Object.fromEntries(['real','positive','negative','integer'].map(k=>[k,$('cas-assume-'+k).checked]))},
       graph:engine.advanced.getGraphState(),customFunctions:window.MathStudio.customFunctions?.list()||[],tables:window.MathStudio.dataTables?.exportState()||null,fit:window.MathStudio.curveFit?.exportState()||null};
   }
   $('hub-export-project').addEventListener('click',()=>{
@@ -3222,7 +3265,7 @@ self.onmessage=async ({data})=>{
     engine.advanced.restoreGraphState(data.graph||{});
     window.MathStudio.dataTables?.restoreState(data.tables||null);
     window.MathStudio.curveFit?.restoreState(data.fit||null);
-    if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';$('cas-limit-point').value=data.solver.limitPoint||'0';$('cas-limit-direction').value=['+-','+','-'].includes(data.solver.limitDirection)?data.solver.limitDirection:'+-';for(const k of ['real','positive','negative','integer'])$('cas-assume-'+k).checked=data.solver.assumptions?.[k]===true;$('cas-operation').dispatchEvent(new Event('change'));}
+    if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';$('cas-limit-point').value=data.solver.limitPoint||'0';$('cas-ode-ic').value=data.solver.odeInitialCondition||'';$('cas-limit-direction').value=['+-','+','-'].includes(data.solver.limitDirection)?data.solver.limitDirection:'+-';for(const k of ['real','positive','negative','integer'])$('cas-assume-'+k).checked=data.solver.assumptions?.[k]===true;$('cas-operation').dispatchEvent(new Event('change'));}
     state.recent=Array.isArray(data.recent)?data.recent.filter(r=>r&&typeof r.raw==='string').slice(0,14):[];
     state.calculator=engine.advanced.getCalculator();state.solver=null;
     if(typeof data.working==='string'&&data.working.trim())current(data.working,data.origin||'project');

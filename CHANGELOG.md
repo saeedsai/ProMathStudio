@@ -1,3 +1,8 @@
+## Unreleased — symbolic first-order ODE initial conditions (2026-10-27)
+
+- Added optional one/two first-order SymPy ODE initial values: `diff(y(t),t)=y(t)` with `y(0)=1` → `y(t)=exp(t)`. Reject invalid functions/points/values, duplicate times, and contradictory overdetermined conditions.
+- Added worker payload, generated Python, project export/import validation, documentation and direct embedded-SymPy/browser regression. Dev only until CI/PR/main/Pages gates pass.
+
 ## Unreleased — graph pan CI regression: viewport-relative pointer targeting (2026-10-27)
 
 - Corrected 3D navigation's Playwright regression to click Pan first, scroll the canvas into view, recompute its bounding box and verify pointer hit-testing before dragging. Earlier real CI failures at PR runs 40522983794 and 40526526435 had panning stuck at (0, 0), consistent with stale screen coordinates after scrolling. The assertion remains strict about actual pan X/Y and zoom; this is a test repair, not an assertion bypass.

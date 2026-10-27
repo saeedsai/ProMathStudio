@@ -113,6 +113,17 @@ function evaluateExpression(raw,precision=40){
  return {result,precision:p,exact:!rounded,operations};
 }
 
+function toScientificDecimal(raw){
+ const value=String(raw);
+ if(!/^-?(?:\d+(?:\.\d+)?|\.\d+)$/.test(value))throw Error('Scientific formatting requires a decimal result.');
+ const negative=value.startsWith('-'),unsigned=negative?value.slice(1):value;
+ const dot=unsigned.indexOf('.'),integer=dot<0?unsigned:unsigned.slice(0,dot),fraction=dot<0?'':unsigned.slice(dot+1);
+ const digits=integer+fraction,first=digits.search(/[1-9]/);
+ if(first<0)return '0e+0';
+ const exponent=integer.length-first-1,significant=digits.slice(first).replace(/0+$/,'');
+ return (negative?'-':'')+significant[0]+(significant.length>1?'.'+significant.slice(1):'')+'e'+(exponent>=0?'+':'')+exponent;
+}
+
 const area=document.createElement('details');area.id='precision-details';
 area.innerHTML='<summary>High-precision decimal arithmetic · offline</summary>'+
  '<p class="small-note">Exact decimal +, − and ×; division rounded to 16–80 significant digits (ties to even). Plain decimal operands only, up to 300 digits each. Separate from the standard binary64 Calculator.</p>'+
@@ -130,6 +141,9 @@ expressionBox.innerHTML='<label for="precision-expression">Decimal expression (+
  '<div class="data-toolbar"><button id="precision-expression-run" type="button">Evaluate expression</button></div>'+
  '<pre id="precision-expression-output" role="status" aria-live="polite">Enter a decimal expression.</pre>';
 area.append(expressionBox);
+const scientificLabel=document.createElement('label');scientificLabel.className='precision-scientific-option';
+scientificLabel.innerHTML='<input id="precision-scientific" type="checkbox"> Also show scientific notation';
+area.append(scientificLabel);
 
 const style=document.createElement('style');style.textContent=
  '#precision-details{margin:16px 22px 22px;padding:14px;border:1px solid #dce4f6;border-radius:12px;background:#fbfcff}'+
@@ -141,25 +155,33 @@ const style=document.createElement('style');style.textContent=
  '#precision-output.error{color:#a82241;background:#fff2f4}'+
  '.precision-expression{margin-top:16px;padding-top:12px;border-top:1px solid #dce5f3}'+
  '.precision-expression label{display:block;font-size:12px;font-weight:700;color:#566784;margin-bottom:6px}'+
+ '.precision-scientific-option{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#566784;margin:12px 0}'+
  '.precision-expression textarea{display:block;width:100%;min-height:62px;border:1px solid #cdd8ec;border-radius:8px;padding:9px;font:inherit}'+
  '#precision-expression-output{white-space:pre-wrap;overflow-wrap:anywhere;background:white;border:1px solid #dce5f3;border-radius:9px;padding:12px}'+
  '#precision-expression-output.error{color:#a82241;background:#fff2f4}'+
  '@media(max-width:600px){.precision-fields{grid-template-columns:1fr}#precision-details{margin:12px}}';
 document.head.append(style);
-function invalidate(){$('precision-output').textContent='Inputs changed. Calculate again.';$('precision-output').classList.remove('error');}
+function invalidate(){lastPair=null;$('precision-output').textContent='Inputs changed. Calculate again.';$('precision-output').classList.remove('error');}
 for(const id of ['precision-a','precision-b','precision-digits'])$(id).addEventListener('input',invalidate);
 $('precision-op').addEventListener('change',invalidate);
+let lastPair=null,lastExpression=null;
+function displayValue(value){return value+($('precision-scientific').checked?'\nScientific: '+toScientificDecimal(value):'');}
+function renderPair(r){$('precision-output').classList.remove('error');$('precision-output').textContent=displayValue(r.result)+'\n'+(r.exact?'Exact decimal result':'Rounded to '+r.precision+' significant digits (half-even)');}
+function renderExpression(r){$('precision-expression-output').classList.remove('error');$('precision-expression-output').textContent=displayValue(r.result)+'\n'+(r.exact?'Exact decimal expression':'Division steps rounded to '+r.precision+' significant digits (half-even)');}
+$('precision-scientific').addEventListener('change',()=>{if(lastPair)renderPair(lastPair);if(lastExpression)renderExpression(lastExpression);});
 $('precision-run').addEventListener('click',()=>{
  try{const r=calculate({a:$('precision-a').value,b:$('precision-b').value,operation:$('precision-op').value,precision:$('precision-digits').value});
-  $('precision-output').classList.remove('error');$('precision-output').textContent=r.result+'\n'+(r.exact?'Exact decimal result':'Rounded to '+r.precision+' significant digits (half-even)');
- }catch(e){$('precision-output').classList.add('error');$('precision-output').textContent=e.message;}
+  lastPair=r;renderPair(r);
+ }catch(e){lastPair=null;$('precision-output').classList.add('error');$('precision-output').textContent=e.message;}
 });
 
 $('precision-expression').addEventListener('input',()=>{
+ lastExpression=null;
  $('precision-expression-output').textContent='Expression changed. Evaluate again.';
  $('precision-expression-output').classList.remove('error');
 });
 $('precision-digits').addEventListener('input',()=>{
+ lastExpression=null;
  $('precision-expression-output').textContent='Precision changed. Evaluate again.';
  $('precision-expression-output').classList.remove('error');
 });
@@ -169,10 +191,9 @@ $('precision-expression').addEventListener('keydown',event=>{
 $('precision-expression-run').addEventListener('click',()=>{
  try{
   const r=evaluateExpression($('precision-expression').value,$('precision-digits').value);
-  $('precision-expression-output').classList.remove('error');
-  $('precision-expression-output').textContent=r.result+'\n'+(r.exact?'Exact decimal expression':'Division steps rounded to '+r.precision+' significant digits (half-even)');
- }catch(e){$('precision-expression-output').classList.add('error');$('precision-expression-output').textContent=e.message;}
+  lastExpression=r;renderExpression(r);
+ }catch(e){lastExpression=null;$('precision-expression-output').classList.add('error');$('precision-expression-output').textContent=e.message;}
 });
 
-M.precisionTools={calculate,evaluateExpression};
+M.precisionTools={calculate,evaluateExpression,toScientificDecimal};
 })();

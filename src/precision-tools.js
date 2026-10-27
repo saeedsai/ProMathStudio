@@ -64,7 +64,7 @@ function evaluateExpression(raw,precision=40){
  const input=String(raw??'').trim();
  if(!input||input.length>1200)throw Error('Expression must contain 1–1200 characters.');
  const tokens=[];let cursor=0;
- for(const match of input.matchAll(/(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/]/g)){
+ for(const match of input.matchAll(/(?:\d+(?:\.\d*)?|\.\d+)|[()+\-*/^]/g)){
   if(input.slice(cursor,match.index).trim())throw Error('Unsupported expression token.');
   tokens.push(match[0]);cursor=match.index+match[0].length;
  }
@@ -77,9 +77,7 @@ function evaluateExpression(raw,precision=40){
   if(!outcome.exact)rounded=true;
   return outcome.result;
  };
- const factor=()=>{
-  let sign=1;
-  while(tokens[pos]==='+'||tokens[pos]==='-'){if(tokens[pos]==='-')sign=-sign;pos++;}
+ const atom=()=>{
   let value;
   if(tokens[pos]==='('){pos++;if(++depth>16)throw Error('Expression exceeds the 16-level nesting limit.');value=expression();if(tokens[pos]!==')')throw Error('Missing closing parenthesis.');pos++;depth--;}
   else {
@@ -88,6 +86,25 @@ function evaluateExpression(raw,precision=40){
    const parsed=parseDecimal(token,'Expression operand');
    value=formatDecimal(parsed.n,parsed.scale);pos++;
   }
+  return value;
+ };
+ const power=()=>{
+  const base=atom();
+  if(tokens[pos]!=='^')return base;
+  pos++;
+  const rawExponent=power(); // right-associative: 2^3^2 = 2^(3^2)
+  if(!/^\d+$/.test(rawExponent))throw Error('Exponent must be a nonnegative integer.');
+  const exponent=Number(rawExponent);
+  if(!Number.isSafeInteger(exponent)||exponent>20)throw Error('Exponent must be an integer from 0 to 20.');
+  if(base==='0'&&exponent===0)throw Error('0^0 is undefined.');
+  let result='1';
+  for(let i=0;i<exponent;i++)result=apply(result,base,'*');
+  return result;
+ };
+ const factor=()=>{
+  let sign=1;
+  while(tokens[pos]==='+'||tokens[pos]==='-'){if(tokens[pos]==='-')sign=-sign;pos++;}
+  const value=power();
   return sign<0?apply('0',value,'-'):value;
  };
  const term=()=>{let value=factor();while(tokens[pos]==='*'||tokens[pos]==='/'){const op=tokens[pos++];value=apply(value,factor(),op);}return value;};
@@ -108,7 +125,7 @@ area.innerHTML='<summary>High-precision decimal arithmetic · offline</summary>'
 panel.append(area);
 
 const expressionBox=document.createElement('section');expressionBox.className='precision-expression';
-expressionBox.innerHTML='<label for="precision-expression">Decimal expression (+, −, ×, ÷, parentheses)</label>'+
+expressionBox.innerHTML='<label for="precision-expression">Decimal expression (+, −, ×, ÷, ^ integer powers, parentheses)</label>'+
  '<textarea id="precision-expression" rows="2" spellcheck="false" placeholder="(0.1 + 0.2) * 3"></textarea>'+
  '<div class="data-toolbar"><button id="precision-expression-run" type="button">Evaluate expression</button></div>'+
  '<pre id="precision-expression-output" role="status" aria-live="polite">Enter a decimal expression.</pre>';

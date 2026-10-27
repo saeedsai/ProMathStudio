@@ -10,7 +10,17 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-27 after symbolic assumptions release)
+## Next five features (refreshed 2026-10-27 after workspace simplification)
+
+| Order | ID | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | UI-PROGRESSIVE-WORKSPACES | Five workspace task choices, correct form visibility, functional core, mobile/browser regression. | DEV IMPLEMENTED — CI PENDING |
+| 2 | P0-PRECISION | 30+ significant-digit references and invalid inputs. | TODO |
+| 3 | P0-SYMBOLIC-ODE-IC | y'=y with y(0)=1 and inconsistent conditions. | TODO |
+| 4 | P1-FITTING-DIAGNOSTICS | Residual/R² and graph/table exports. | TODO |
+| 5 | P1-FFT-1D | DC, frequency, inverse round-trip and exports. | TODO |
+
+## Prior five features (after symbolic assumptions release)
 
 | Order | ID | Next bounded implementation | User acceptance / regression requirements | Status |
 |---:|---|---|---|---|
@@ -247,3 +257,6 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 - dev before `ff4d9f964eadebd2424936b0f14d3cbe71e9013a`; tested candidate `3a9f0e1b8d98d47126f4ccd196ef74394580ec8e`; main merge `91bbf1cc3016c7b53a3142b44eb39bedb2270f7e` via [PR #32](https://github.com/saeedsai/ProMathStudio/pull/32).
 - Exact dev Quality 40493341552, PR Quality 40493654168, main Quality 40494473951 passed 42 steps; Pages 40494473799 and branch cleanup 40494474198 succeeded. No independent hosted UI browser certification. Branch protection still disabled; exactly dev/main after cleanup.
 - Next five: P0-PRECISION, P0-SYMBOLIC-ODE-IC, P1-FITTING-DIAGNOSTICS, P1-FFT-1D, P1-MATRIX-EIGEN.
+
+
+**2026-10-27 12:xx CET — UI-PROGRESSIVE-WORKSPACES checkpoint.** Starting dev f1fea13342da6a656aea29e53851604d009aab2b (Quality 40494879850 success); main 91bbf1cc3016c7b53a3142b44eb39bedb2270f7e (main Quality 40494473951, Pages 40494473799 success). No open PR; both refs unprotected. Implemented task chooser + optional forms across all five workspaces, synchronized standalone HTML, browser regression and CI integration. Exact candidate CI and promotion pending; no release claim. Next five: UI QA, precision, analytical ODE initial conditions, fitting diagnostics, FFT.

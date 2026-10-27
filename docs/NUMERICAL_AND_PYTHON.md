@@ -46,6 +46,12 @@ In **Symbolic Solver → Numerical methods / PDE**, choose **Adaptive Simpson in
 
 **Limitations:** Smooth real finite-interval functions only; the error estimate is heuristic, not a certified global bound. Discontinuities, singularities, and rapidly oscillatory integrands can be missed or fail. Exceeding evaluation/depth budgets, invalid bounds, non-real values, or non-finite results fails without exporting partial data. The integral is a scalar result, so table/graph export is disabled for this method. Fixed-step Calculator `int(...)` is unchanged. See `tests/smoke_quadrature_adaptive.py`.
 
+## One-dimensional piecewise-linear interpolation (offline)
+
+Open **Symbolic Solver → Numerical methods → 1D linear interpolation**. Enter 2–200 sorted, strictly increasing x/y sample pairs, one pair per line, and 1–1,000 query x values. You can load the first two columns of the active Data Table using **Load active table x/y**. The solver returns linearly interpolated real y values, sorted by query x, and can save them to Data Tables or plot them as a 2D line in Graphs.
+
+Example: samples `0,1`, `1,3`, `2,5` and queries `0,0.5,1,1.5,2` yield y values `1,2,3,4,5`. Duplicate/unsorted x values, malformed pairs, non-finite or overly large numbers and out-of-domain queries fail without exporting stale results. **No extrapolation**, cubic spline, multidimensional interpolation or uncertainty estimates are provided. See `tests/smoke_interpolation_linear.py`.
+
 ## One-dimensional Poisson equation
 
 Select **1D Poisson**, where the implemented convention is:
@@ -121,3 +127,8 @@ Both calculator-style and Equation Editor-style forms are accepted. For example,
 ## Composing Python custom functions in Calculator (bounded)
 
 Save a Python function under **Custom functions · Formula / Python**, e.g. `def myfun(x): return x*x`. Calculator accepts `2*myfun(3)+1` (19), `myfun(myfun(2)+1)` (25), and `if(1,myfun(3),myfun(100))` (9, without running the unused branch). Nested Python calls execute sequentially in an isolated Pyodide Web Worker; numeric AST operators remain in the native safe evaluator, never JavaScript eval. Arguments/results must be finite real numbers, calls are capped at 16 per expression, each worker call times out after 60 seconds, and a newer Calculator execution cancels any pending worker result. This is **not** Python support in Graphs, Data Tables, or formula-defined custom-function bodies; first-use CDN execution requires online QA. The focused Playwright regression mocks the worker transport and does not prove actual Pyodide downloads.
+
+
+### Linear interpolation numerical precision
+
+The bounded 1D piecewise-linear interpolator preserves exact supplied sample values when a query matches a sample x coordinate, even if neighboring y values differ greatly in magnitude. Between knots it uses ordinary binary64 linear interpolation; it does not extrapolate or guarantee exact decimal arithmetic.

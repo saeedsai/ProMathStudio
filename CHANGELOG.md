@@ -1,7 +1,14 @@
-## 2026-10-27 — Bounded adaptive Simpson quadrature (DEV IMPLEMENTED; release QA pending)
+## 2026-10-27 — Bounded offline 1D linear interpolation (implemented on dev; release pending)
+
+- Added a native piecewise-linear interpolator with strict sorted sample validation, finite-domain checks, active Data Tables x/y loading, and Data Tables/Graphs handoff.
+- Fixed exact-knot precision loss for sample values with very different magnitudes and repaired an embedded-JavaScript newline escaping failure in the browser regression. Added exact-knot and parser regression coverage.
+- Added focused Playwright regression `tests/smoke_interpolation_linear.py` to mandatory Quality CI and synchronized the standalone HTML build. Requires exact dev/PR/main CI and Pages verification before RELEASED status.
+- Scope excludes extrapolation, cubic/spline interpolation, multidimensional interpolation and uncertainty estimates.
+
+## 2026-10-27 — Bounded adaptive Simpson quadrature (PR #24 released; main Quality and Pages green)
 
 - Added offline finite-interval adaptive Simpson integration with tolerance and evaluation budget controls, local error estimate, bounded subdivision and non-finite rejection. Existing fixed-step Calculator integration and numerical methods are preserved.
-- Added focused Playwright reference/negative/budget/UI regression `tests/smoke_quadrature_adaptive.py` to mandatory Quality CI; production release requires exact dev/PR/main green checks and Pages verification. This is **not yet released**.
+- Added focused Playwright reference/negative/budget/UI regression `tests/smoke_quadrature_adaptive.py` to mandatory Quality CI. Exact dev Quality 40441269844, PR #24 Quality 40441540706, main Quality 40441796530 (33 steps) and Pages deployment 40441795972 passed for main `4bc5287d0e20d906ee7c8278310480a9ef9120c8`; hosted interactive smoke unavailable.
 - Scope excludes certified global error bounds, singular/improper, highly oscillatory and multidimensional integrals.
 
 ## 2026-10-27 — Coupled two-state RK4 IVP (PR #23 released; exact main Quality and Pages green)

@@ -1,3 +1,9 @@
+## 2026-10-27 — Adaptive scalar ODE RK45 (dev candidate; release gated)
+
+- Added bounded offline Dormand–Prince 5(4) scalar IVP integration with local error tolerance, accepted/rejected step diagnostics, maximum-attempt/underflow checks, and Data Tables/Graphs output.
+- Retained existing fixed-step RK4 as default. Added RK45 method/tolerance/attempt controls, a focused Playwright regression and mandatory Quality gate. Isolated Node references for y'=y passed with tightening tolerance; full exact-head CI, PR and Pages gates remain pending.
+- Scope excludes stiff, vector, event-driven, backward and certified-global-error ODE solvers.
+
 ## 2026-10-27 — Nested spreadsheet IF evaluation (dev candidate; release gated)
 
 - Corrected nested IF evaluation in Data Tables: short-circuit unselected branches (including #REF!, cycles and divide-by-zero), allow IF inside arithmetic and aggregates, and parse top-level comparisons without confusing nested conditions or adjacent IF arithmetic.

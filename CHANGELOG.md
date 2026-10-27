@@ -1,3 +1,9 @@
+## 2026-10-27 — Graph axes, multi-surface plots and camera controls (dev candidate)
+
+- Direct Axes & grid access for editable X/Y/Z bounds, optional uniform spacing and labeled numeric 3D axes.
+- Support z/z2/z3 3D surface definitions on separate lines. Preserve user-written 2D and 3D expressions and ranges when switching graph modes, plotting tables or resetting the view.
+- Pan using Pan 3D, Shift/right-drag, scroll zoom toward pointer, preserve camera offset in project state. Add mandatory browser regression; release gates pending.
+
 ## 2026-10-27 — Curve-fit residual diagnostics (dev candidate)
 
 - Added R²/RMSE/MAE/SSE and per-point measured/predicted/residual diagnostics for bounded 2D curve fits. Download a safe numeric CSV without modifying source tables. Disable export before a valid fit, after clearing, or after failed refit.

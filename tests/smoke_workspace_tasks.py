@@ -28,7 +28,7 @@ def main():
   page.get_by_role('button',name='Numerical methods',exact=True).click()
   assert page.locator('#num-details').evaluate('(e)=>e.open')
   assert page.locator('#symbolic-panel .cas-wrap').is_hidden()
-  page.get_by_role('button',name='Symbolic solve').click()
+  page.get_by_role('button',name='Symbolic solve',exact=True).click()
   assert page.locator('#symbolic-panel .cas-wrap').is_visible()
   page.get_by_role('button',name='Assumptions').click()
   assert page.locator('#ui-solver-assumptions').evaluate('(e)=>e.open')

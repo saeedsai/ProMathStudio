@@ -296,9 +296,11 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 **2026-10-27 — graph usability development checkpoint.** User reports hidden axes/grid controls, no numeric X/Y/Z ticks in 3D, inability to pan or zoom toward pointer, rejection of z2/z3-labeled surfaces and overwritten functions after plot/table/mode actions. Implemented graph UX corrections on dev, new focused browser regression tests/smoke_graph_navigation.py, mandatory Quality step, user guide and changelog. Exact CI, PR, main and Pages gates **pending**, do not claim released. Continue parallel fitting diagnostics verification, then precision, ODE IC and FFT.
 
 
-### 2026-10-27 15:xx CET — P0-PRECISION bounded first increment
+### 2026-10-27 14:57 CET — P0-PRECISION bounded first increment
 
 - Starting dev 4ceb25039a57abe0ed2ce10f463989f27c783266; main remained ce459eb89eb8f24de1956efac4d908c414cd23c1 at discovery. Root AGENTS, living plan, frozen audit and latest queued CI were reviewed. No open PR.
 - Implemented offline BigInt exact-decimal +, −, × and 16–80 significant-digit half-even rounded division in Calculator → High precision, bounded to 300 digits/operand. No eval, CDN or mutation of standard Calculator; no claims of arbitrary-precision transcendental or symbolic operations.
 - Added browser/reference/negative regression tests/smoke_precision.py, mandatory Quality step, synchronized standalone HTML, guide and changelog. Local isolated Node numerical and Chromium UI smoke passed; full repository browser/structural suite and exact-head CI await GitHub Actions.
 - Do not promote queued graph, fitting or precision increments until exact dev/PR checks pass. Main Quality 40502871511 and Pages 40502870819 still queued at discovery. Branch protection remains disabled. Next five as above.
+
+- Follow-up test commit d844df3ecda787c82e49aaa4e3099aa0024bfd8e adds explicit 16-digit half-even ties (positive/negative). Exact CI run 40516761190 queued at verification; no PR/main release.

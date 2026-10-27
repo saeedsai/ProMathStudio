@@ -16,7 +16,7 @@ def check(A, result, expected, rank):
     for i in range(2):
         for j in range(2):
             value = sum(result['U'][i][k]*result['S'][k]*result['V'][j][k] for k in range(2))
-            assert math.isclose(value, A[i][j], rel_tol=1e-8, abs_tol=1e-8*max(abs(x) for row in A for x in row, default=1)), (A, result)
+            assert math.isclose(value, A[i][j], rel_tol=1e-8, abs_tol=1e-8*max((abs(x) for row in A for x in row), default=1)), (A, result)
             for key in ('U','V'):
                 dot = sum(result[key][k][i]*result[key][k][j] for k in range(2))
                 assert math.isclose(dot, float(i == j), abs_tol=1e-8)

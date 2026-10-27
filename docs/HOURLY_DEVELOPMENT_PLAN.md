@@ -10,19 +10,17 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-27 — workspace usability priority)
+## Next five features (refreshed 2026-10-28 — task-first usability)
 
-**P1-UI-COMPACT-TASK — DEV IMPLEMENTED, CI pending.** Five-workspace duplicate shortcut strips replaced by an accessible, responsive task selector without deleting any underlying tools. Frozen inventory remains 166 gaps / 95 partial capabilities.
+**P1-UI-COMPACT-TASK — RELEASED via [PR #35](https://github.com/saeedsai/ProMathStudio/pull/35).** Main Quality [40598353877](https://github.com/saeedsai/ProMathStudio/actions/runs/40598353877) and Pages [40598353934](https://github.com/saeedsai/ProMathStudio/actions/runs/40598353934) passed at `a6e461c9c4e51c3053d6c8fc3fcd4efae56494c7`. Hosted interactive/mobile testing remains separate from workflow success. The frozen audit remains 166 gaps / 95 partial capabilities.
 
 | Priority | Feature | Concrete scope and acceptance tests | Status |
 |---:|---|---|---|
-| 1 | P1-UI-COMPACT-TASK | Single chooser per workspace, zero redundant shortcut buttons, all task routes, per-workspace memory, browser/mobile/keyboard QA, main/Pages release. | DEV IMPLEMENTED — exact-head CI pending |
-| 2 | P1-UI-ACTION-GROUPS | Group low-frequency Calculator/Editor copy, export and transfer actions while retaining their DOM IDs, functions and keyboard access; test all routes. | TODO |
-| 3 | P1-UI-GRAPH-PANELS | Clarify graph import/axes/appearance; keep Plot/2D/3D prominent and test pan/zoom, fitting and PNG. | TODO |
+| 1 | P1-UI-TASK-ISOLATION | Selecting another task collapses only registered task disclosures; Basic hides optional forms; preserve drafts, per-workspace choice and all routes; focused browser test plus full Quality, PR and Pages gates. | DEV IMPLEMENTED — exact-head CI pending |
+| 2 | P1-UI-ACTION-GROUPS | Group low-frequency Calculator/Editor copy, export and transfer actions while retaining DOM IDs, handlers and keyboard access; test each action. | TODO |
+| 3 | P1-UI-GRAPH-PANELS | Clarify graph import/axes/appearance; keep Plot/2D/3D prominent; test pan/zoom, fitting and PNG. | TODO |
 | 4 | P1-UI-DATA-TOOLBAR | Simplify filter/sort/files/Python entry points, preserve joins and CSV/XLSX import/export; browser regression. | TODO |
-| 5 | P1-UI-ACCESSIBILITY | Keyboard selection, focus, status labels and mobile widths 390/768/1280 px in all five workspaces. | TODO |
-
-**Prior scientific release verified:** PR #34 merged SVD, precision, symbolic ODE IC, FFT/Hann and matrix eigenanalysis; exact main Quality [40592620950](https://github.com/saeedsai/ProMathStudio/actions/runs/40592620950) and Pages [40592620256](https://github.com/saeedsai/ProMathStudio/actions/runs/40592620256) passed at `eb2173631d0881ba8183a7368f969b99bfd7f739`. Continue the numerical/mathematical gap backlog after the urgent UI cleanup, without altering the frozen audit.
+| 5 | P1-UI-ACCESSIBILITY | Keyboard selection, focus and status labels; mobile widths 390/768/1280 px in all five workspaces. | TODO |
 
 ### Previous five priorities (fitting diagnostics checkpoint)
 
@@ -365,3 +363,6 @@ GitHub PR Quality 40591087725 for `61da71e500a3` failed after the first 21 check
 Both exact-head `02db1b5e` Quality jobs [dev 40591639681](https://github.com/saeedsai/ProMathStudio/actions/runs/40591639681) and [PR 40591648137](https://github.com/saeedsai/ProMathStudio/actions/runs/40591648137) passed **47 steps including new SVD and precision tests**, then failed in `tests/smoke_fft.py`: Python test read nonexistent `p['imag']` from `analyze().recovered` even though inverse FFT values are documented `{re,im}` complex objects; spectrum uses `{real,imag}`. Repaired the test to assert `p['im']` and added a full recovered-real-versus-windowed-samples round-trip check, preserving strict 1e-10 tolerances. No runtime FFT API change or test weakening. New exact-head dev/PR CI, main Quality and Pages still required.
 
 **2026-10-27 — Requested UI decluttering.** Started synchronized dev/main `eb2173631d0881ba8183a7368f969b99bfd7f739`, prior main Quality+Pages green and no open PR. Identified repetitive 4–6-button task-choice row as the avoidable duplicate control repeated in all five workspaces. Replaced it with a single labeled native selection menu, preserving underlying controls and task mapping. Synchronized `src/workspace-tasks.js` and standalone `index.html`; refreshed task/restoration browser tests, added a separate five-workspace responsive functionality regression to mandatory Quality, and updated user guidance. Source commits `3167944cc07d` and `b1af0f70fa6c`; new exact-dev CI, ordinary PR, main Quality and Pages pending. Only dev/main authorized; no forced push or stale-file deletion. NEXT FIVE tracked above.
+
+
+**2026-10-28 00:00 Europe/Stockholm — P1-UI-TASK-ISOLATION development checkpoint.** Read root contract, frozen audit, living plan, latest Actions and branches. Baseline `dev=main=a6e461c9c4e51c3053d6c8fc3fcd4efae56494c7`; two unprotected branches, no open PR. Last main Quality 40598353877 and Pages 40598353934 succeeded; dev Quality 40598748465 was still running at discovery. Implemented exclusive task disclosure selection in `src/workspace-tasks.js` and synchronized standalone `index.html`; extended `tests/smoke_compact_tasks.py` with calculator/graph/data previous-panel closure, Basic reset and graph draft retention. JavaScript syntax and source/bundle consistency were checked before commit; full local browser suite unavailable because container GitHub DNS is blocked, so exact-head GitHub Quality and PR/Pages gates are mandatory. No stale tracked artifacts proven safe to remove. Branch protection remains unconfigured. **Status: DEV IMPLEMENTED; CI/PR/main/Pages pending.** Next five: P1-UI-TASK-ISOLATION release QA; P1-UI-ACTION-GROUPS; P1-UI-GRAPH-PANELS; P1-UI-DATA-TOOLBAR; P1-UI-ACCESSIBILITY.

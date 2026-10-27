@@ -1,3 +1,7 @@
+## Unreleased — exclusive workspace task disclosures (2026-10-28)
+
+- Selecting a workspace task now closes other registered optional task forms in that workspace, including when returning to Basic. The chosen tool opens as before; unrelated panels, input drafts and remembered workspace selections are retained. Expanded the mandatory compact-task Playwright regression to cover Calculator, Graphs and Data Tables transitions and unsaved graph input preservation. Await exact-head Quality, PR and Pages gates.
+
 ## Unreleased — compact workspace UI (2026-10-27)
 
 - Replaced redundant 4–6-button task shortcut bars in each workspace with one accessible, responsive **Workspace tools** selector. Original calculation, graph, solver, table, import/export and notebook functionality remains available. Added direct browser tests for selection, state restoration, zero duplicate task buttons and mobile overflow. Exact-head Quality and Pages required for release.

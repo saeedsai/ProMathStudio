@@ -1,4 +1,4 @@
-/* ProMathStudio: bounded offline one-dimensional linear and PCHIP interpolation. */
+/* ProMathStudio: bounded offline one-dimensional linear, PCHIP and barycentric interpolation. */
 (()=>{'use strict';
 const M=window.MathStudio, panel=document.getElementById('numerical-panel');
 if(!M?.dataTables||!M?.advanced||!panel)return;
@@ -38,8 +38,27 @@ function pchipSlopes(samples){
  }
  return slopes;
 }
+function barycentricWeights(samples){
+ // Global polynomial interpolation is deliberately capped to avoid high-degree instability.
+ if(samples.length>16)throw Error('Barycentric polynomial interpolation accepts at most 16 sample points.');
+ const logs=[],signs=[];
+ for(let i=0;i<samples.length;i++){
+  let logWeight=0,sign=1;
+  for(let j=0;j<samples.length;j++){
+   if(i===j)continue;
+   const dx=samples[i][0]-samples[j][0];
+   if(!Number.isFinite(dx)||Math.abs(dx)<=32*Number.EPSILON*Math.max(1,Math.abs(samples[i][0]),Math.abs(samples[j][0])))
+    throw Error('Sample x spacing is too small for stable polynomial interpolation.');
+   logWeight-=Math.log(Math.abs(dx));
+   if(dx<0)sign=-sign;
+  }
+  logs.push(logWeight);signs.push(sign);
+ }
+ const max=Math.max(...logs);
+ return logs.map((v,i)=>signs[i]*Math.exp(v-max));
+}
 function interpolate({points,queries,method='linear'}={}){
- if(method!=='linear'&&method!=='pchip')throw Error('Interpolation method must be linear or pchip.');
+ if(!['linear','pchip','barycentric'].includes(method))throw Error('Interpolation method must be linear, pchip or barycentric.');
  if(!Array.isArray(points)||points.length<2||points.length>MAX_POINTS)throw Error('Provide 2–200 sample points.');
  if(!Array.isArray(queries)||queries.length<1||queries.length>MAX_QUERIES)throw Error('Provide 1–1000 query x values.');
  const samples=points.map((pair,i)=>{
@@ -49,6 +68,7 @@ function interpolate({points,queries,method='linear'}={}){
  for(let i=1;i<samples.length;i++)if(!(samples[i][0]>samples[i-1][0]))
   throw Error('Sample x values must be strictly increasing; duplicates and unsorted points are not allowed.');
  const slopes=method==='pchip'?pchipSlopes(samples):null;
+ const weights=method==='barycentric'?barycentricWeights(samples):null;
  const xs=queries.map((x,i)=>number(x,'Query x '+(i+1))).sort((a,b)=>a-b);
  const min=samples[0][0],max=samples[samples.length-1][0];
  const rows=xs.map(x=>{
@@ -61,7 +81,20 @@ function interpolate({points,queries,method='linear'}={}){
   if(x===x1)return [x,y1];
   const fraction=(x-x0)/(x1-x0);
   let y;
-  if(method==='pchip'){
+  if(method==='barycentric'){
+   const terms=samples.map((p,i)=>weights[i]/(x-p[0]));
+   const scale=Math.max(...terms.map(Math.abs));
+   if(!(scale>0)||!Number.isFinite(scale))throw Error('Barycentric evaluation is numerically unstable.');
+   const scaled=terms.map(t=>t/scale);
+   const denominator=scaled.reduce((a,b)=>a+b,0);
+   const sumAbs=scaled.reduce((a,b)=>a+Math.abs(b),0);
+   if(!Number.isFinite(denominator)||Math.abs(denominator)<=1e-12*sumAbs)
+    throw Error('Barycentric evaluation is ill-conditioned; use fewer or better-spaced nodes.');
+   // Evaluate around a nearby y value to reduce cancellation, especially near knots.
+   const anchor=Math.abs(x-x0)<=Math.abs(x-x1)?y0:y1;
+   const correction=scaled.reduce((sum,t,i)=>sum+t*(samples[i][1]-anchor),0);
+   y=number(anchor+correction/denominator,'Interpolated y');
+  }else if(method==='pchip'){
    const t=fraction,t2=t*t,t3=t2*t,h=x1-x0;
    const h00=2*t3-3*t2+1,h10=t3-2*t2+t,h01=-2*t3+3*t2,h11=t3-t2;
    y=number(h00*y0+h10*h*slopes[lo]+h01*y1+h11*h*slopes[hi],'Interpolated y');
@@ -70,9 +103,9 @@ function interpolate({points,queries,method='linear'}={}){
   }else y=number(y0+(y1-y0)*fraction,'Interpolated y');
   return [x,y];
  });
- return {type:method==='pchip'?'interpolation-pchip':'interpolation-linear',columns:['x','y'],rows,domain:[min,max],
-  method:method==='pchip'?'Shape-preserving cubic Hermite interpolation (PCHIP)':'Piecewise-linear interpolation (sorted finite real samples)',
-  note:method==='pchip'?'Piecewise monotone cubic interpolation; no extrapolation, global smoothness or uncertainty estimate.':'Interpolates only within the supplied domain; no extrapolation, spline smoothing or uncertainty estimate.'};
+ return {type:method==='barycentric'?'interpolation-barycentric':method==='pchip'?'interpolation-pchip':'interpolation-linear',columns:['x','y'],rows,domain:[min,max],
+  method:method==='barycentric'?'Barycentric polynomial interpolation (global; at most 16 nodes)':method==='pchip'?'Shape-preserving cubic Hermite interpolation (PCHIP)':'Piecewise-linear interpolation (sorted finite real samples)',
+  note:method==='barycentric'?'Global polynomial can oscillate between nodes, especially for equally spaced/high-degree samples; no extrapolation or uncertainty estimate.':method==='pchip'?'Piecewise monotone cubic interpolation; no extrapolation, global smoothness or uncertainty estimate.':'Interpolates only within the supplied domain; no extrapolation, spline smoothing or uncertainty estimate.'};
 }
 function parsePairs(text){
  text=String(text);
@@ -93,9 +126,9 @@ function parseQueries(text){
  return parts;
 }
 const area=document.createElement('details');area.id='interp-details';
-area.innerHTML='<summary>1D interpolation · Linear / PCHIP · Data Tables / Graphs</summary>'+
+area.innerHTML='<summary>1D interpolation · Linear / PCHIP / Polynomial · Data Tables / Graphs</summary>'+
  '<p class="graph-data-muted">Enter sorted sample pairs (x,y), one per line, or load the first two columns of the active Data Table. Query values must be inside the sample domain.</p>'+
- '<div class="data-toolbar"><label>Interpolation method <select id="interp-method"><option value="linear">Linear</option><option value="pchip">Shape-preserving cubic (PCHIP)</option></select></label></div>'+ 
+ '<div class="data-toolbar"><label>Interpolation method <select id="interp-method"><option value="linear">Linear</option><option value="pchip">Shape-preserving cubic (PCHIP)</option><option value="barycentric">Polynomial (barycentric, 2–16 points)</option></select></label></div>'+ 
  '<div class="interp-fields"><label>Sample pairs (x,y)<textarea id="interp-samples" rows="5" spellcheck="false">0,0\n1,2\n2,4</textarea></label>'+
  '<label>Query x values (comma, space or newline separated)<textarea id="interp-queries" rows="5" spellcheck="false">0,0.5,1,1.5,2</textarea></label></div>'+
  '<div class="data-toolbar"><button id="interp-from-table" class="secondary" type="button">Load active table x/y</button>'+
@@ -147,7 +180,7 @@ $('interp-run').addEventListener('click',()=>{
 });
 function exportTable(){
  if(!last)throw Error('Run interpolation first.');
- return M.dataTables.importData({headers:last.columns,rows:last.rows},last.type==='interpolation-pchip'?'Interpolation_PCHIP':'Interpolation_Linear');
+ return M.dataTables.importData({headers:last.columns,rows:last.rows},last.type==='interpolation-barycentric'?'Interpolation_Barycentric':last.type==='interpolation-pchip'?'Interpolation_PCHIP':'Interpolation_Linear');
 }
 $('interp-to-table').addEventListener('click',()=>{try{exportTable();M.advanced.mode('data');}catch(e){fail(e);}});
 $('interp-to-graph').addEventListener('click',()=>{

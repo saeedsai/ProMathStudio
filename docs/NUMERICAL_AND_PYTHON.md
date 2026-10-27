@@ -60,6 +60,12 @@ Example: samples (0,0), (1,1), (2,1), (3,2), queries 0.5, 1.5, 2.5 stay within e
 
 PCHIP is not a natural cubic spline, globally twice differentiable, a multidimensional interpolator or a statistical uncertainty estimate. No extrapolation is performed. See tests/smoke_interpolation_pchip.py.
 
+## Barycentric polynomial interpolation (offline, bounded)
+
+In **Symbolic Solver → Numerical methods → 1D interpolation**, choose **Polynomial (barycentric)**. Provide 2–16 strictly increasing real x/y sample points and up to 1,000 in-domain query values. This is a *single global interpolating polynomial*, distinct from piecewise-linear and shape-preserving PCHIP. The method uses scaled barycentric weights and a near-knot y anchor to reduce avoidable floating-point cancellation, returns exact sample values at knots, and supports Data Tables and Graphs exports. It rejects duplicate/unsorted or extremely close x values, non-finite intermediate results, out-of-domain queries and excessive node counts.
+
+Example: samples (0,1), (1,2), (2,5), (3,10) interpolate the quadratic y=x²+1; query 1.5 yields 3.25. **Warning:** High-degree or equally spaced polynomial interpolation may oscillate severely between nodes (Runge phenomenon). This mode does not guarantee monotonicity, no overshoot, reliable conditioning, extrapolation, or an uncertainty estimate. Prefer PCHIP for shape-preserving data. See tests/smoke_interpolation_barycentric.py.
+
 ## One-dimensional Poisson equation
 
 Select **1D Poisson**, where the implemented convention is:

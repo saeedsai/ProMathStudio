@@ -1,3 +1,9 @@
+## 2026-10-27 — Bounded barycentric polynomial interpolation (dev implementation; release pending)
+
+- Added offline global polynomial interpolation for 2–16 nodes, normalized barycentric weights, exact-knot preservation, conditioning guards and 1,000 in-domain queries; linear/PCHIP modes remain unchanged.
+- Added polynomial method selection, Data Tables and Graphs handoff, numerical and browser regression tests, mandatory CI step, standalone HTML synchronization and mathematical limitations documentation.
+- Release status: **DEV IMPLEMENTED**, pending exact dev/PR/main Quality and Pages verification; no deployment claim yet.
+
 ## 2026-10-27 — Shape-preserving cubic interpolation (PR #26 released; exact main Quality and Pages green)
 
 - Added bounded offline PCHIP with monotone cubic Hermite slopes, exact-knot preservation, two-point linear fallback, method selector and Data Tables/Graphs export; linear mode remains default.

@@ -57,6 +57,11 @@ def main():
         for row in rows[1:]:
             assert len(row) == 4 and all(math.isfinite(float(x)) for x in row), row
             assert math.isclose(float(row[1])-float(row[2]), float(row[3]), abs_tol=1e-8)
+        page.locator("#fit-model").select_option("poly")
+        assert page.locator("#fit-export").is_disabled(), "Changing the model must invalidate previous residuals"
+        page.locator("#fit-model").select_option("linear")
+        page.locator("#fit-run").click()
+        assert page.locator("#fit-export").is_enabled()
         page.locator("#fit-clear").click()
         assert page.locator("#fit-export").is_disabled()
         assert not errors, errors

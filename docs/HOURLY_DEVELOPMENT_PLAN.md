@@ -10,17 +10,19 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-27 22:58 CET; 2×2 SVD implemented on dev, release gates pending)
+## Next five features (refreshed 2026-10-27 — workspace usability priority)
 
-**Cross-cutting release gate:** PR #34 includes graph navigation, fitting diagnostics, precision, ODE initial conditions, FFT and matrix eigenanalysis. No item is RELEASED until exact-head dev/PR Quality, main Quality and Pages pass. GitHub-hosted ubuntu-latest runners remain unassigned.
+**P1-UI-COMPACT-TASK — DEV IMPLEMENTED, CI pending.** Five-workspace duplicate shortcut strips replaced by an accessible, responsive task selector without deleting any underlying tools. Frozen inventory remains 166 gaps / 95 partial capabilities.
 
-| Order | ID | Next increment / acceptance tests | Status |
+| Priority | Feature | Concrete scope and acceptance tests | Status |
 |---:|---|---|---|
-| 1 | P0-MATRIX-SVD-2X2 | Bounded real 2×2 SVD, sorted nonnegative singular values, U/V orthogonality and A=UΣVᵀ residual, rank-deficient/zero/scaled references and UI/editor regression. | DEV IMPLEMENTED — V8 reference checks passed, full CI/Pages pending |
-| 2 | P0-PRECISION-EXPR | 599-digit quotient, scientific display, bounded powers and invalid input, full browser/structural and Pages checks. | DEV IMPLEMENTED — exact-head CI pending |
-| 3 | P0-SYMBOLIC-ODE-IC | y'=y, y(0)=1, consistent/inconsistent conditions, worker, project round-trip and exact-head CI/Pages. | DEV IMPLEMENTED — exact-head CI pending |
-| 4 | P1-FFT-WINDOW-HANN | Periodic Hann bin-centred amplitude 1, adjacent 0.5 sidelobes, DC/Nyquist, invalid option/bounds, stale UI, table/graph and CI/Pages. | DEV IMPLEMENTED — isolated V8 references passed, full CI pending |
-| 5 | P1-MATRIX-EIGEN | Symmetric 2×2/3×3 references, repeated/zero/scaled spectrum, nonsymmetric rejection, residuals, editor/mobile and CI/Pages. | DEV IMPLEMENTED — exact-head CI pending |
+| 1 | P1-UI-COMPACT-TASK | Single chooser per workspace, zero redundant shortcut buttons, all task routes, per-workspace memory, browser/mobile/keyboard QA, main/Pages release. | DEV IMPLEMENTED — exact-head CI pending |
+| 2 | P1-UI-ACTION-GROUPS | Group low-frequency Calculator/Editor copy, export and transfer actions while retaining their DOM IDs, functions and keyboard access; test all routes. | TODO |
+| 3 | P1-UI-GRAPH-PANELS | Clarify graph import/axes/appearance; keep Plot/2D/3D prominent and test pan/zoom, fitting and PNG. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR | Simplify filter/sort/files/Python entry points, preserve joins and CSV/XLSX import/export; browser regression. | TODO |
+| 5 | P1-UI-ACCESSIBILITY | Keyboard selection, focus, status labels and mobile widths 390/768/1280 px in all five workspaces. | TODO |
+
+**Prior scientific release verified:** PR #34 merged SVD, precision, symbolic ODE IC, FFT/Hann and matrix eigenanalysis; exact main Quality [40592620950](https://github.com/saeedsai/ProMathStudio/actions/runs/40592620950) and Pages [40592620256](https://github.com/saeedsai/ProMathStudio/actions/runs/40592620256) passed at `eb2173631d0881ba8183a7368f969b99bfd7f739`. Continue the numerical/mathematical gap backlog after the urgent UI cleanup, without altering the frozen audit.
 
 ### Previous five priorities (fitting diagnostics checkpoint)
 
@@ -361,3 +363,5 @@ GitHub PR Quality 40591087725 for `61da71e500a3` failed after the first 21 check
 ### 2026-10-27 23:06 CET — FFT CI regression repair
 
 Both exact-head `02db1b5e` Quality jobs [dev 40591639681](https://github.com/saeedsai/ProMathStudio/actions/runs/40591639681) and [PR 40591648137](https://github.com/saeedsai/ProMathStudio/actions/runs/40591648137) passed **47 steps including new SVD and precision tests**, then failed in `tests/smoke_fft.py`: Python test read nonexistent `p['imag']` from `analyze().recovered` even though inverse FFT values are documented `{re,im}` complex objects; spectrum uses `{real,imag}`. Repaired the test to assert `p['im']` and added a full recovered-real-versus-windowed-samples round-trip check, preserving strict 1e-10 tolerances. No runtime FFT API change or test weakening. New exact-head dev/PR CI, main Quality and Pages still required.
+
+**2026-10-27 — Requested UI decluttering.** Started synchronized dev/main `eb2173631d0881ba8183a7368f969b99bfd7f739`, prior main Quality+Pages green and no open PR. Identified repetitive 4–6-button task-choice row as the avoidable duplicate control repeated in all five workspaces. Replaced it with a single labeled native selection menu, preserving underlying controls and task mapping. Synchronized `src/workspace-tasks.js` and standalone `index.html`; refreshed task/restoration browser tests, added a separate five-workspace responsive functionality regression to mandatory Quality, and updated user guidance. Source commits `3167944cc07d` and `b1af0f70fa6c`; new exact-dev CI, ordinary PR, main Quality and Pages pending. Only dev/main authorized; no forced push or stale-file deletion. NEXT FIVE tracked above.

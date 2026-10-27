@@ -1,3 +1,7 @@
+## Unreleased — compact workspace UI (2026-10-27)
+
+- Replaced redundant 4–6-button task shortcut bars in each workspace with one accessible, responsive **Workspace tools** selector. Original calculation, graph, solver, table, import/export and notebook functionality remains available. Added direct browser tests for selection, state restoration, zero duplicate task buttons and mobile overflow. Exact-head Quality and Pages required for release.
+
 ## Unreleased — FFT inverse regression field-name correction (2026-10-27)
 
 - Repaired `smoke_fft.py` to read inverse FFT `{re,im}` objects rather than spectrum `{real,imag}` fields; added an explicit recovered-real/windowed-sample equality check at 1e-10. This addresses real CI failure after 47 successful checks, without changing production FFT math. Full exact-head QA remains mandatory.

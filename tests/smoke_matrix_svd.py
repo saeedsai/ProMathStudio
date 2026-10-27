@@ -52,7 +52,7 @@ def main():
             message = page.evaluate('(A)=>{try{MathStudio.matrixTools.svd2x2(A);return "";}catch(e){return e.message;}}', A)
             assert phrase in message, (A, message)
         page.locator('[data-workspace="calculator"]').click()
-        page.locator('#workspace-task-guide .task-choice[data-task="matrix"]').click()
+        page.locator("#workspace-task-select").select_option("matrix")
         assert page.locator('#matrix-tools').evaluate('(e)=>e.open')
         for i, value in enumerate(['3','0','0','2']):
             page.locator('#mat-grid input').nth(i).fill(value)
@@ -64,7 +64,7 @@ def main():
         page.locator('#mat-send').click()
         assert 'matrix([3],[2])' in page.locator('#equation-input').input_value()
         page.locator('[data-workspace="calculator"]').click()
-        page.locator('#workspace-task-guide .task-choice[data-task="matrix"]').click()
+        page.locator("#workspace-task-select").select_option("matrix")
         page.locator('#mat-grid input').first.fill('')
         assert page.locator('#mat-send').is_disabled()
         page.locator('#mat-svd').click()

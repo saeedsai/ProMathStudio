@@ -16,7 +16,7 @@ def main():
   page.locator('.palette-button[title*="Arc sine"]').first.click()
   assert page.locator('#calc-input').input_value()=='asin(x)'
   assert not page.evaluate("document.body.classList.contains('library-open')")
-  page.get_by_role('button',name='Number settings').click()
+  page.locator('#workspace-task-select').select_option('settings')
   assert page.locator('#ui-calc-settings').evaluate('(e)=>e.open')
   for expr,mode,expected in [('0b1010+0xF','dec','= 25'),('FF','hex','= 255'),('1010','bin','= 10'),('band(0xFF,0b1010)','dec','= 10'),('bxor(15,3)','dec','= 12'),('shl(3,2)','dec','= 12'),('sin(pi/2)','dec','= 1'),('0xFFFFFFFFFFFFFFFF','dec','= 18446744073709551615')]:
    page.locator('#calc-radix').select_option(mode)

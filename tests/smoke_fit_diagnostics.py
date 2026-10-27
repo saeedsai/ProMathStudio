@@ -41,7 +41,7 @@ def main():
                 if isinstance(error, AssertionError):
                     raise
         page.locator('[data-workspace="graph"]').click()
-        page.get_by_role("button", name="Plot table data").click()
+        page.locator("#workspace-task-select").select_option("table")
         page.locator("#dt-chart-type").select_option("scatter")
         page.locator("#fit-model").select_option("linear")
         assert page.locator("#fit-export").is_disabled()

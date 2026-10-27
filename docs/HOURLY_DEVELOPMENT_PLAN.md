@@ -10,15 +10,15 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-27 after task restoration QA)
+## Next five features (refreshed 2026-10-27 after fitting diagnostics implementation)
 
 | Order | ID | Acceptance tests | Status |
 |---:|---|---|---|
-| 1 | UI-PROGRESSIVE-WORKSPACES / UI-TASK-RESTORE | Five task choices per workspace; restore selected task independently after tab switching; desktop/mobile regression and no console errors. | DEV IMPLEMENTED — exact-head CI / PR / Pages gates pending |
-| 2 | P0-PRECISION | 30+ significant-digit references and invalid inputs. | TODO |
-| 3 | P0-SYMBOLIC-ODE-IC | y'=y with y(0)=1 and inconsistent conditions. | TODO |
-| 4 | P1-FITTING-DIAGNOSTICS | Residual/R² and graph/table exports. | TODO |
-| 5 | P1-FFT-1D | DC, frequency, inverse round-trip and exports. | TODO |
+| 1 | P1-FITTING-DIAGNOSTICS | Numerical residual/MAE/SSE references, invalid/singular input rejection, CSV download and stale-state browser regression; exact dev/PR/main/Pages gates. | DEV IMPLEMENTED — CI / promotion pending |
+| 2 | P0-PRECISION | 30+ significant-digit reference arithmetic, bounded controls, invalid/overflow tests. | TODO |
+| 3 | P0-SYMBOLIC-ODE-IC | y'=y with y(0)=1, inconsistent conditions and worker/UI regression. | TODO |
+| 4 | P1-FFT-1D | DC/sinusoid references, inverse round-trip, invalid length and graph/table export. | TODO |
+| 5 | P1-MATRIX-EIGEN | Symmetric 2×2/3×3 references, repeated eigenvalues, nonsymmetric rejection and residual tests. | TODO |
 
 ## Prior five features (after symbolic assumptions release)
 
@@ -269,3 +269,11 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 
 
 **2026-10-27 13:xx CET — UI-TASK-RESTORE development checkpoint.** Read root AGENTS, frozen feature inventory, living plan and exact dev Quality. Prior UI-PROGRESSIVE-WORKSPACES candidate dev `9ded24fc4658367c9622bb7d3b7e6dad2d4a08fd` passed [Quality 40500558863](https://github.com/saeedsai/ProMathStudio/actions/runs/40500558863) all checks; PR #33 was opened for ordinary protected-flow review. This compatible follow-on increment restores each workspace's selected task when returning to a tab without persistent storage, with a dedicated browser regression, mandatory Quality step, standalone bundle, user guide and changelog. Do not call it released until exact dev and PR CI, main Quality and Pages are verified. Branches `dev` and `main` only, no stale tracked files proven safe to delete. Next five: UI-PROGRESSIVE-WORKSPACES / UI-TASK-RESTORE release QA; P0-PRECISION; P0-SYMBOLIC-ODE-IC; P1-FITTING-DIAGNOSTICS; P1-FFT-1D.
+
+
+### 2026-10-27 14:xx CET — fitting diagnostics development checkpoint
+
+- Read root AGENTS.md, living plan, frozen audit and inspected branches/PRs and queued main Quality/Pages for PR #33. Starting dev/main `ce459eb89eb8f24de1956efac4d908c414cd23c1`, only `dev` and `main`, no open PR.
+- Chose bounded P1-FITTING-DIAGNOSTICS while P0 precision/ODE remain larger work items. Added per-point residuals, MAE/SSE, finite overflow guard, and download-only numeric CSV; preserves existing fitting models and graph export. Added dedicated browser/reference/negative regression and mandatory Quality step; updated guide and changelog.
+- Source commits `b7240454bad22738244157d62ddeb6df9733f508`, `951a07a55ba92abdded3638c193345e2916f3663`, CI `c98a8bafae766dd31110a9aa90629d98c57eec05`. Exact final dev CI and PR/main/Pages gates pending; do not claim released. Prior PR #33 main Quality 40502871511 and Pages 40502870819 were queued at inspection; hosted site fetch returned DisabledError.
+- Next five: P1-FITTING-DIAGNOSTICS QA/release, P0-PRECISION, P0-SYMBOLIC-ODE-IC, P1-FFT-1D, P1-MATRIX-EIGEN. No proven obsolete tracked files or branches to remove; branch protection not verified/enforced.

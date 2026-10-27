@@ -46,6 +46,12 @@ def main():
         assert page.evaluate(
             "MathStudio.dataTables.formula('IF(1,IF(0,100,11),12)','Data1')"
         ) == 11
+        assert page.evaluate(
+            "MathStudio.dataTables.formula('IF(1,2,3)+IF(0,4,5)','Data1')"
+        ) == 7
+        assert page.evaluate(
+            "MathStudio.dataTables.formula('IF(1,2,3)+4','Data1')"
+        ) == 6
         saved = page.evaluate("MathStudio.dataTables.exportState()")
         page.evaluate("(s) => MathStudio.dataTables.restoreState(s)", saved)
         assert [row[2] for row in page.evaluate("MathStudio.dataTables.calculate()")] == expected

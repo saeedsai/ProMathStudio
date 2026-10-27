@@ -1,3 +1,7 @@
+## Unreleased — high-precision expression keyboard workflow (2026-10-27)
+
+- Added Ctrl+Enter / Cmd+Enter to evaluate the high-precision expression from the editor, with dedicated Playwright regression; no change to decimal computation or graph rendering. Pending CI and deployment.
+
 ## Unreleased — exactness indicators for high-precision decimal division (2026-10-27)
 
 - Corrected decimal division metadata and expression status: exact terminating quotients (such as `1/8`) are reported exact, whereas rounded quotients (such as `1/3`) remain explicitly marked rounded. Verified through bounded integer cross-products; added focused browser regression cases and preserved all 2D/3D graph work. Pending full CI and Pages release.

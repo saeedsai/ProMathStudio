@@ -1,3 +1,7 @@
+## Unreleased — bounded real 2×2 SVD (2026-10-27)
+
+- Added scaled one-sided Jacobi SVD for real 2×2 matrices, nonnegative descending singular values, orthonormal U/V, numerical rank and reconstruction diagnostics, factor transfer to Equation Editor. Handles singular, zero and large-scale-separation matrices without an AᵀA eigenvalue cancellation. Added numerical/reference/negative/UI regression to mandatory Quality. Exact-source V8 reference checks passed; full CI and Pages pending.
+
 ## Unreleased — periodic Hann window for FFT (2026-10-27)
 
 - Added an optional periodic Hann analysis window to the offline real FFT, coherent-gain-corrected one-sided amplitude, original/windowed sample metadata, UI selection and stale-export invalidation. Preserved rectangular default. Added numerical reference, negative and browser UI/table regression in mandatory Quality; source/standalone synchronization verified. Dev candidate only until exact-head CI/PR/main/Pages gates pass.

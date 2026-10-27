@@ -1,6 +1,6 @@
 # Matrix calculator (bounded native functionality)
 
-ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, **LU (P·A=L·U)**, **QR (A=Q·R)**, or **Least squares (A·x≈b)**. Binary operations use independently sized Matrix B.
+ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, **LU (P·A=L·U)**, **QR (A=Q·R)**, **Least squares (A·x≈b)**, or **SVD (2×2 A)**. Binary operations use independently sized Matrix B.
 
 ## Operations and examples
 
@@ -50,3 +50,7 @@ The **RREF (A)** action computes reduced row-echelon form and displays the numer
 ## Next enhancements
 
 General-dimension arrays, larger/weighted least-squares and underdetermined systems, eigenvalues, SVD, pivoted/general-dimensional QR and sparse solvers remain distinct planned gaps in the frozen [feature inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md). Do not count them as finished solely because matrix notation already exists in Equation Editor.
+
+## Real 2×2 singular-value decomposition (dev candidate)
+
+**SVD (2×2 A)** computes A=U·diag(σ)·Vᵀ for a finite real 2×2 matrix, including rank-deficient and zero matrices. Singular values are nonnegative and descending. The method scales entries before a one-sided Jacobi rotation, uses the determinant to recover a small singular value without cancellation, and returns orthonormal U/V, reconstruction/orthogonality residuals, and a **numerical** rank at a relative 1e-12 cutoff. A null condition number means singular or not representable as a finite number; a tiny but nonzero singular value may still be reported even if the numerical rank is 1. Example A=[[1,2],[3,4]] has singular values approximately 5.464985704219 and 0.365966190626. The SVD factor selector transfers U, singular values as a column, or V to Equation Editor. This is not general-size/complex SVD or a pseudoinverse. Browser regression: `tests/smoke_matrix_svd.py`. Release pending exact-head CI/PR/main/Pages verification.

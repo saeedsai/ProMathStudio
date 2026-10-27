@@ -21,9 +21,15 @@ def main():
         excel = 'IF(A2>0,LOG10(B2)+ATAN2(C2,D2)+1E3+totalA2,"A1")+\'Sales 2026\'!$C$3'
         assert page.evaluate('formula => MathStudio.xlsxTools.formulaToExcel(formula)', original) == excel
         assert page.evaluate('formula => MathStudio.xlsxImport.fromExcel(formula)', excel) == original
-        for name in ('LOG10(A2)', 'ATAN2(A2,B2)', '1E3+A2', 'totalA2+A2'):
+        references = {
+            'LOG10(A2)': 'LOG10(A1)',
+            'ATAN2(A2,B2)': 'ATAN2(A1,B1)',
+            '1E3+A2': '1E3+A1',
+            'totalA2+A2': 'totalA2+A1',
+        }
+        for name, expected in references.items():
             converted = page.evaluate('formula => MathStudio.xlsxImport.fromExcel(formula)', name)
-            assert converted == name.replace('A2', 'A1') if name != 'totalA2+A2' else converted == 'totalA2+A1', (name, converted)
+            assert converted == expected, (name, converted)
         assert page.evaluate("""() => {
             try { MathStudio.xlsxImport.fromExcel('SUM(A1:A2)'); return false; }
             catch(e) { return e.message.includes('header'); }

@@ -43,7 +43,9 @@ function parse(text){
  fft(values);
  return values;
 }
-function analyze(samples){
+function analyze(samples,sampleRate=1){
+ const rate=Number(sampleRate);
+ if(!Number.isFinite(rate)||rate<=0||rate>1e12)throw Error('Sample rate must be positive and at most 1e12 Hz.');
  const values=Array.isArray(samples)?samples:parse(samples);
  if(!values.every(v=>typeof v==='number'&&Number.isFinite(v)))throw Error('FFT analysis requires real finite samples.');
  const transformed=fft(values),n=transformed.length,recovered=fft(transformed,true);
@@ -51,14 +53,15 @@ function analyze(samples){
  const scale=Math.max(1,...values.map(Math.abs));
  if(!Number.isFinite(maxError)||maxError>1e-8*scale)throw Error('Inverse FFT round-trip residual is too large.');
  const spectrum=transformed.slice(0,n/2+1).map((z,k)=>({
-  bin:k,amplitude:Math.hypot(z.re,z.im)*(k===0||k===n/2?1:2)/n,
+  bin:k,frequencyHz:k*rate/n,amplitude:Math.hypot(z.re,z.im)*(k===0||k===n/2?1:2)/n,
   phase:Math.atan2(z.im,z.re),real:z.re,imag:z.im
  }));
- return {samples:values.slice(),transformed,recovered,spectrum,maxError};
+ return {samples:values.slice(),sampleRate:rate,transformed,recovered,spectrum,maxError};
 }
 const area=document.createElement('details');area.id='fft-details';
 area.innerHTML='<summary>Signal spectrum · offline FFT (4–256 samples)</summary>'+
  '<p class="graph-data-muted">Enter a uniformly sampled real signal (power-of-two length). One-sided amplitude includes the correct DC/Nyquist scaling. Bin k means k cycles per sample window, not Hz unless you know the sample rate.</p>'+
+ '<label for="fft-rate">Sampling rate (Hz)<input id="fft-rate" type="number" min="0.000001" step="any" value="8"></label>'+ 
  '<label for="fft-samples">Real samples (comma/space separated)</label>'+
  '<textarea id="fft-samples" rows="3" spellcheck="false">0, 1, 0, -1, 0, 1, 0, -1</textarea>'+
  '<div class="data-toolbar"><button type="button" id="fft-run" class="primary">Analyze FFT</button>'+
@@ -67,23 +70,24 @@ area.innerHTML='<summary>Signal spectrum · offline FFT (4–256 samples)</summa
  '<pre id="fft-output" role="status" aria-live="polite">Analyze samples to view the frequency bins.</pre>';
 panel.append(area);
 const style=document.createElement('style');
-style.textContent='#fft-details{border-top:1px solid #dce4f6;margin-top:15px;padding-top:13px}#fft-details summary{cursor:pointer;color:#3c50ae;font-weight:750}#fft-samples{display:block;width:100%;min-height:65px;max-width:900px;margin-top:6px}#fft-output{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:white;border:1px solid #dce5f3;border-radius:10px}#fft-output.error{color:#a82241;background:#fff2f4}';
+style.textContent='#fft-details{border-top:1px solid #dce4f6;margin-top:15px;padding-top:13px}#fft-details summary{cursor:pointer;color:#3c50ae;font-weight:750}#fft-rate{display:block;width:180px;max-width:100%;margin:5px 0 12px;padding:7px;border:1px solid #cdd8ec;border-radius:7px}#fft-samples{display:block;width:100%;min-height:65px;max-width:900px;margin-top:6px}#fft-output{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:white;border:1px solid #dce5f3;border-radius:10px}#fft-output.error{color:#a82241;background:#fff2f4}';
 document.head.append(style);
 let last=null;
 function invalidate(){last=null;$('fft-to-table').disabled=true;$('fft-to-graph').disabled=true;$('fft-output').classList.remove('error');$('fft-output').textContent='Analyze samples to view the frequency bins.';}
 $('fft-samples').addEventListener('input',invalidate);
+$('fft-rate').addEventListener('input',invalidate);
 $('fft-run').addEventListener('click',()=>{
  try{
-  last=analyze($('fft-samples').value);
+  last=analyze($('fft-samples').value,$('fft-rate').value);
   $('fft-output').classList.remove('error');
   const top=last.spectrum.slice().sort((a,b)=>b.amplitude-a.amplitude)[0];
-  $('fft-output').textContent='FFT: '+last.samples.length+' real samples; '+last.spectrum.length+' nonnegative-frequency bins.\nPeak bin '+top.bin+', amplitude '+top.amplitude.toPrecision(10)+'\nInverse round-trip max error: '+last.maxError.toExponential(3)+'\nOne-sided amplitude spectrum; frequencies are bin indices.';
+  $('fft-output').textContent='FFT: '+last.samples.length+' real samples; '+last.spectrum.length+' nonnegative-frequency bins.\nPeak bin '+top.bin+' ('+top.frequencyHz+' Hz), amplitude '+top.amplitude.toPrecision(10)+'\nInverse round-trip max error: '+last.maxError.toExponential(3)+'\nOne-sided amplitude spectrum; frequency Hz = bin × sample rate / N.';
   $('fft-to-table').disabled=false;$('fft-to-graph').disabled=false;
  }catch(e){invalidate();$('fft-output').classList.add('error');$('fft-output').textContent=e.message;}
 });
 function importSpectrum(){
  if(!last)throw Error('Analyze a valid signal first.');
- return M.dataTables.importData({headers:['bin','amplitude','phase_rad','real','imag'],rows:last.spectrum.map(p=>[p.bin,p.amplitude,p.phase,p.real,p.imag])},'FFT_Spectrum');
+ return M.dataTables.importData({headers:['bin','frequency_Hz','amplitude','phase_rad','real','imag'],rows:last.spectrum.map(p=>[p.bin,p.frequencyHz,p.amplitude,p.phase,p.real,p.imag])},'FFT_Spectrum');
 }
 function fail(e){$('fft-output').classList.add('error');$('fft-output').textContent=e.message;}
 $('fft-to-table').addEventListener('click',()=>{try{importSpectrum();M.advanced.mode('data');}catch(e){fail(e);}});
@@ -92,7 +96,7 @@ $('fft-to-graph').addEventListener('click',()=>{
   const table=importSpectrum();M.advanced.mode('graph');
   $('dt-graph-table').value=table.id;
   $('dt-graph-table').dispatchEvent(new Event('change',{bubbles:true}));
-  $('dt-chart-type').value='line';$('dt-graph-x').value='0';$('dt-graph-y').value='1';
+  $('dt-chart-type').value='line';$('dt-graph-x').value='1';$('dt-graph-y').value='2';
   $('dt-plot-table').click();
  }catch(e){fail(e);}
 });

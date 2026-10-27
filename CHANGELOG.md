@@ -1,3 +1,7 @@
+## Unreleased — FFT sample-rate frequency in Hz (2026-10-27)
+
+- Added validated FFT sample-rate control, frequency_Hz spectrum columns and physical-frequency graph axis. Added dedicated Playwright tests for Hz references, bad sample rates, UI state and table/graph handoff. Exact-head CI and Pages verification pending.
+
 ## Unreleased — offline real-signal FFT (2026-10-27)
 
 - Added bounded offline 4–256-sample radix-2 FFT, one-sided amplitude spectrum, inverse round-trip check, Data Tables/Graphs handoff, dedicated browser/reference regression and structural CI checks. Local isolated Chromium harness passed; full repository Quality and Pages remain pending.

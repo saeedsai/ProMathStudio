@@ -67,3 +67,8 @@ In **Data Tables**, keep the sheet visible and open Table, Filter, Combine, File
 ## Right-click / long-press actions and numeric bases
 
 Right-click or long-press a table cell, row number, header, table tab, Calculator, Editor, Solver or Graph to open item-specific actions. Use Shift+F10 on a focused control and Escape to close. Calculator has DEC/BIN/HEX modes plus mixed `0x`/`0b` expressions; the Symbols drawer is available in Calculator and inserts into its expression window. For precise limits and details see [Context menus and number bases](CONTEXT_MENUS.md).
+
+
+### Interactive graph axes and 3D navigation
+
+Choose **Graphs → Plot functions** and click **Axes & grid** next to the 2D/3D switch. You can set X/Y/Z minimum and maximum, plus a shared grid spacing (blank means automatic). In 3D numeric ticks appear on each axis. Enter multiple surfaces on separate lines, e.g. `z=sin(sqrt(x^2+y^2))`, `z2=x^2`, `z3=y^2`. Drag to rotate; choose **Pan 3D** to move the view or hold Shift while dragging. Mouse wheel zooms toward the pointer. **Reset view** preserves entered functions. Switching between 2D and 3D remembers separate function drafts and bounds during the current session.

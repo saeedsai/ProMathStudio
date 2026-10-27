@@ -94,7 +94,7 @@ const children=(node,name,ns)=>Array.from(node?.children||[]).filter(e=>e.localN
 const child=(node,name,ns)=>children(node,name,ns)[0];
 function fromExcel(formula){
  if(/[\[\]]/.test(formula))fail('External workbook formulas are unsupported.');
- return String(formula).replace(/("(?:[^"]|"")*")|((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_.]*)!)?(\$?[A-Za-z]{1,3})(\$?)([1-9]\d*)/g,
+ return String(formula).replace(/(?<![A-Za-z0-9_.])("(?:[^"]|"")*")|(?<![A-Za-z0-9_.])((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_.]*)!)?(\$?[A-Za-z]{1,3})(\$?)([1-9]\d*)(?![A-Za-z0-9_.(])/g,
   (whole,literal,sheet,col,anchor,row)=>{
    if(literal)return literal;
    const n=Number(row)-1;

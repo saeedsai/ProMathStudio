@@ -67,6 +67,8 @@ jobs:
         run: python tests/smoke_xlsx_export.py
       - name: XLSX secure import and transactional round-trip regression
         run: python tests/smoke_xlsx_import.py
+      - name: XLSX formula token boundary regression
+        run: python tests/smoke_xlsx_formula_tokens.py
       - name: Context menus and programmer calculator smoke test
         run: python tests/smoke_context_actions.py
       - name: Graph styles, table zoom and calculator notation

@@ -14,7 +14,7 @@ function column(index){let s='';for(let n=index+1;n;n=Math.floor((n-1)/26))s=Str
 function formulaToExcel(formula){
  // Data Tables row 1 is the first DATA row; XLSX row 1 holds column headers.
  // Do not rewrite cell-like tokens inside Excel double-quoted string literals.
- return String(formula).replace(/("(?:[^"]|"")*")|((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_.]*)!)?(\$?[A-Za-z]{1,3})(\$?)([1-9]\d*)/g,
+ return String(formula).replace(/(?<![A-Za-z0-9_.])("(?:[^"]|"")*")|(?<![A-Za-z0-9_.])((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_.]*)!)?(\$?[A-Za-z]{1,3})(\$?)([1-9]\d*)(?![A-Za-z0-9_.(])/g,
   (whole,literal,sheet,col,anchor,row)=>{
    if(literal)return literal;
    const shifted=Number(row)+1;

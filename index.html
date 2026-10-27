@@ -6467,6 +6467,12 @@ function selectTask(key,scroll=false){
  guide.querySelector('#workspace-task-select').value=task[0];
  $('task-description').textContent=task[2];
  const dest=task[3]?document.querySelector(task[3]):null;
+ // Task selection is exclusive, but does not remove controls or clear draft inputs.
+ // Only close registered task disclosures; unrelated user-opened panels remain intact.
+ for(const entry of tasks[activeMode]){
+   const panel=entry[3]?document.querySelector(entry[3]):null;
+   if(panel?.tagName==='DETAILS'&&panel!==dest)panel.open=false;
+ }
  if(dest?.tagName==='DETAILS'){
    if(dest.parentElement?.id==='data-menu-navigation')for(const d of dest.parentElement.children)if(d!==dest)d.open=false;
    dest.open=true;
@@ -6487,7 +6493,12 @@ guide.querySelector('#workspace-task-select').addEventListener('change',event=>s
 selectMode(mode());
 document.addEventListener('click',event=>{
  const id=event.target?.closest('button')?.id;
- if(['ode-to-graph','num-to-graph','dt-send-graph'].includes(id))$('ui-graph-table').open=true;
+ if(['ode-to-graph','num-to-graph','dt-send-graph'].includes(id)){
+   // A graph handoff is a deliberate task switch; keep its table controls visible.
+   lastTask.graph='table';
+   $('ui-graph-table').open=true;
+   if(activeMode==='graph')selectTask('table');
+ }
 },true);
 new MutationObserver(()=>{const next=mode();if(next!==activeMode)selectMode(next);}).observe(document.querySelector('.workspace-bar'),{attributes:true,attributeFilter:['class'],subtree:true});
 window.MathStudio.workspaceTasks={select:selectTask,current:()=>activeMode};

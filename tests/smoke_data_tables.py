@@ -41,7 +41,7 @@ def main():
   page.evaluate("""() => {document.getElementById('dt-op').value='unionall';document.getElementById('dt-run').click()}""")
   assert page.evaluate('MathStudio.dataTables.tables.at(-1).rows.length')==5
   page.locator('[data-workspace="graph"]').click()
-  page.get_by_role('button',name='Plot table data').click()
+  page.locator('#workspace-task-select').select_option('table')
   assert page.locator('#ui-graph-table').evaluate('(e)=>e.open')
   page.locator('#dt-graph-table').select_option(label='orders')
   page.locator('#dt-chart-type').select_option('bar')

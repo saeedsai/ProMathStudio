@@ -30,7 +30,7 @@ def main():
         page.locator('[data-workspace="solver"]').click()
         page.locator('#cas-operation').select_option('simplify')
         page.locator('#equation-input').fill('sqrt(x^2)')
-        page.get_by_role('button',name='Assumptions').click()
+        page.locator('#workspace-task-select').select_option('assumptions')
         assert page.locator('#ui-solver-assumptions').evaluate('(e)=>e.open')
         page.locator('#cas-assume-positive').check()
         page.evaluate("""() => {

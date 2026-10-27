@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     assert '<script id="promath-interpolation-tools">' in html
-    assert "function interpolate({points,queries}" in html
+    assert "function interpolate({points,queries,method=\'linear\'}" in html
+    assert "method===\'pchip\'?pchipSlopes(samples):null" in html
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True, executable_path=os.getenv("CHROMIUM_PATH") or "/usr/bin/chromium", args=["--no-sandbox"])
         page = browser.new_page(viewport={"width": 1280, "height": 850})

@@ -1,8 +1,15 @@
-## 2026-10-27 — Bounded offline 1D linear interpolation (implemented on dev; release pending)
+## 2026-10-27 — Shape-preserving cubic interpolation (P1-NUMERIC-INTERPOLATION-PCHIP; dev candidate)
+
+- Added bounded offline PCHIP with monotone cubic Hermite slopes, exact-knot preservation, two-point linear fallback, method selector and Data Tables/Graphs export; linear mode remains default.
+- Added tests/smoke_interpolation_pchip.py reference, monotonicity, invalid-input, stale-export and browser regression as mandatory Quality step; synchronized standalone index.html.
+- Repaired existing linear browser regression's signature assertion to reflect the added optional method while retaining the linear-default and source-bundle assertions. Initial dev Quality 40453273799 failed at this outdated assertion; rerun exact-head checks after this repair.
+- Release gate pending: exact dev Quality, PR checks, main Quality and Pages deployment must be verified before marking RELEASED. Hosted interactive Pages smoke remains a separate limitation.
+
+## 2026-10-27 — Bounded offline 1D linear interpolation (PR #25 released; main Quality and Pages green)
 
 - Added a native piecewise-linear interpolator with strict sorted sample validation, finite-domain checks, active Data Tables x/y loading, and Data Tables/Graphs handoff.
 - Fixed exact-knot precision loss for sample values with very different magnitudes and repaired an embedded-JavaScript newline escaping failure in the browser regression. Added exact-knot and parser regression coverage.
-- Added focused Playwright regression `tests/smoke_interpolation_linear.py` to mandatory Quality CI and synchronized the standalone HTML build. Requires exact dev/PR/main CI and Pages verification before RELEASED status.
+- Added focused Playwright regression `tests/smoke_interpolation_linear.py` to mandatory Quality CI and synchronized the standalone HTML build. Exact dev Quality 40447298379 and PR #25 Quality 40447592140 passed (34 steps); merged main `170849cec91a7da8932e7a08bd339a76902c17fd`, Pages 40447830774 succeeded. Main Quality 40447830885 passed all 34 steps; Pages 40447830774 and cleanup 40447830999 succeeded for exact main. Hosted live interactive smoke remains unavailable.
 - Scope excludes extrapolation, cubic/spline interpolation, multidimensional interpolation and uncertainty estimates.
 
 ## 2026-10-27 — Bounded adaptive Simpson quadrature (PR #24 released; main Quality and Pages green)

@@ -2,6 +2,7 @@
 
 - Added bounded offline PCHIP with monotone cubic Hermite slopes, exact-knot preservation, two-point linear fallback, method selector and Data Tables/Graphs export; linear mode remains default.
 - Added tests/smoke_interpolation_pchip.py reference, monotonicity, invalid-input, stale-export and browser regression as mandatory Quality step; synchronized standalone index.html.
+- Repaired existing linear browser regression's signature assertion to reflect the added optional method while retaining the linear-default and source-bundle assertions. Initial dev Quality 40453273799 failed at this outdated assertion; rerun exact-head checks after this repair.
 - Release gate pending: exact dev Quality, PR checks, main Quality and Pages deployment must be verified before marking RELEASED. Hosted interactive Pages smoke remains a separate limitation.
 
 ## 2026-10-27 — Bounded offline 1D linear interpolation (PR #25 released; main Quality and Pages green)

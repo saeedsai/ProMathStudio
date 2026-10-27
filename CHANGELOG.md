@@ -1,13 +1,13 @@
-## 2026-10-27 — Adaptive scalar ODE RK45 (dev candidate; release gated)
+## 2026-10-27 — Adaptive scalar ODE RK45 (PR #22 released; main Quality and Pages green)
 
 - Added bounded offline Dormand–Prince 5(4) scalar IVP integration with local error tolerance, accepted/rejected step diagnostics, maximum-attempt/underflow checks, and Data Tables/Graphs output.
-- Retained existing fixed-step RK4 as default. Added RK45 method/tolerance/attempt controls, a focused Playwright regression and mandatory Quality gate. Isolated Node references for y'=y passed with tightening tolerance; full exact-head CI, PR and Pages gates remain pending.
+- Retained existing fixed-step RK4 as default. Added RK45 method/tolerance/attempt controls, a focused Playwright regression and mandatory Quality gate. Isolated Node references for y'=y passed with tightening tolerance; exact dev Quality 40430429819, PR Quality 40430435679, main Quality 40430673781 and Pages 40430673177 passed for PR #22 (main 9217036aa68751813fd68c60c5e1ce633b70edea). Hosted interactive smoke remains unverified.
 - Scope excludes stiff, vector, event-driven, backward and certified-global-error ODE solvers.
 
-## 2026-10-27 — Nested spreadsheet IF evaluation (dev candidate; release gated)
+## 2026-10-27 — Nested spreadsheet IF evaluation (PR #22 released; main Quality and Pages green)
 
 - Corrected nested IF evaluation in Data Tables: short-circuit unselected branches (including #REF!, cycles and divide-by-zero), allow IF inside arithmetic and aggregates, and parse top-level comparisons without confusing nested conditions or adjacent IF arithmetic.
-- Added `tests/smoke_sheet_nested_if.py` with numeric, malformed, cross-sheet, cycle, UI and project save/reload coverage; made it mandatory in Quality CI. Offline isolated Node reference checks passed (7 positive and 4 negative); exact dev/PR/main CI and Pages deployment remain unverified until the release gates complete.
+- Added `tests/smoke_sheet_nested_if.py` with numeric, malformed, cross-sheet, cycle, UI and project save/reload coverage; made it mandatory in Quality CI. Offline isolated Node reference checks passed (7 positive and 4 negative); exact dev Quality 40430429819, PR Quality 40430435679, main Quality 40430673781 and Pages 40430673177 passed on main 9217036aa68751813fd68c60c5e1ce633b70edea. Hosted interactive smoke remains unverified.
 - Scope: numeric spreadsheet formulas only; no Excel-compatible full expression grammar or XLSX import/export.
 
 ## 2026-10-27 — Bounded QR least-squares 3×2 solver (PR #21 released; exact-main Quality and Pages green)

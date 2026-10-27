@@ -31,7 +31,7 @@ The **RREF (A)** action computes reduced row-echelon form and displays the numer
 
 ## Thin QR decomposition (bounded real matrices)
 
-**QR (A=Q·R)** computes an economy-size decomposition of full-column-rank real 2×2, 3×2 and 3×3 matrices. Reorthogonalized modified Gram–Schmidt returns Q with orthonormal columns and upper-triangular R, along with reconstruction and orthogonality residuals. The QR factor selector transfers Q or R to Equation Editor. Wide 2×3 matrices and dependent/nearly dependent columns (relative tolerance 1e-12) are rejected. This is not pivoted QR, general-dimensional QR or least squares. Test: `tests/smoke_matrix_qr.py`.
+**QR (A=Q·R)** computes an economy-size decomposition of full-column-rank real 2×2, 3×2 and 3×3 matrices. Reorthogonalized modified Gram–Schmidt returns Q with orthonormal columns and upper-triangular R, along with reconstruction and orthogonality residuals. The QR factor selector transfers Q or R to Equation Editor. Wide 2×3 matrices and dependent/nearly dependent columns (relative tolerance 1e-12) are rejected. This QR action only displays factors; the separate least-squares action uses those factors to solve 3×2 tall systems. Neither supports pivoted or general-dimensional QR. Test: `tests/smoke_matrix_qr.py`.
 
 ## Least squares for tall real systems (bounded 3×2)
 
@@ -49,4 +49,4 @@ The **RREF (A)** action computes reduced row-echelon form and displays the numer
 
 ## Next enhancements
 
-General-dimension arrays, least-squares/underdetermined systems, eigenvalues, SVD, pivoted/general-dimensional QR and sparse solvers remain distinct planned gaps in the frozen [feature inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md). Do not count them as finished solely because matrix notation already exists in Equation Editor.
+General-dimension arrays, larger/weighted least-squares and underdetermined systems, eigenvalues, SVD, pivoted/general-dimensional QR and sparse solvers remain distinct planned gaps in the frozen [feature inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md). Do not count them as finished solely because matrix notation already exists in Equation Editor.

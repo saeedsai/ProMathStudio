@@ -199,21 +199,79 @@
   }
   const number=v=>{if(v===null||v==='')return 0;const n=Number(v);if(!Number.isFinite(n))throw Error('Not numeric: '+v);return n;};
   const splitArgs=str=>{const out=[];let depth=0,start=0;for(let i=0;i<str.length;i++){if(str[i]==='(')depth++;else if(str[i]===')')depth--;else if(str[i]===','&&depth===0){out.push(str.slice(start,i));start=i+1;}}out.push(str.slice(start));return out;};
+  // Find comparisons only at the top level: nested IF conditions may contain
+  // their own comparisons, which must not split the outer condition.
+  function ifComparison(expr){
+    let depth=0;
+    for(let i=0;i<expr.length;i++){
+      const ch=expr[i];
+      if(ch==='('){depth++;continue;}
+      if(ch===')'){if(--depth<0)throw Error('#IF');continue;}
+      if(depth)continue;
+      const op=/^(>=|<=|!=|<>|==|=|>|<)/.exec(expr.slice(i));
+      if(op){
+        const left=expr.slice(0,i),right=expr.slice(i+op[0].length);
+        if(!left.trim()||!right.trim())throw Error('#IF');
+        return {left,right,op:op[0]};
+      }
+    }
+    if(depth!==0)throw Error('#IF');
+    return null;
+  }
   function formula(expr,t,stack){
     expr=String(expr).trim();if(expr.length>500)throw Error('#LIMIT');
-    const ifMatch=/^IF\((.*)\)$/i.exec(expr);
-    if(ifMatch){const args=splitArgs(ifMatch[1]);if(args.length!==3)throw Error('#IF');const m=/^(.*?)(>=|<=|!=|<>|==|=|>|<)(.*)$/.exec(args[0]);const test=m?(()=>{const a=compute(m[1],t,stack),b=compute(m[3],t,stack);return ({'>':a>b,'<':a<b,'>=':a>=b,'<=':a<=b,'=':a===b,'==':a===b,'!=':a!==b,'<>':a!==b})[m[2]];})():Boolean(compute(args[0],t,stack));return compute(args[test?1:2],t,stack);}
+    // A whole-expression IF must close at the matching parenthesis, not the
+    // last ')' of an adjacent expression such as IF(...)+IF(...).
+    const ifStart=/^IF\s*\(/i.exec(expr);
+    let close=-1;
+    if(ifStart){
+      let depth=0;
+      for(let i=ifStart[0].length-1;i<expr.length;i++){
+        if(expr[i]==='(')depth++;
+        else if(expr[i]===')'&&--depth===0){close=i;break;}
+      }
+    }
+    if(ifStart&&close===expr.length-1){
+      const args=splitArgs(expr.slice(ifStart[0].length,close));
+      if(args.length!==3||args.some(arg=>!arg.trim()))throw Error('#IF');
+      const m=ifComparison(args[0]);
+      const test=m?(()=>{
+        const a=compute(m.left,t,stack),b=compute(m.right,t,stack);
+        return ({'>':a>b,'<':a<b,'>=':a>=b,'<=':a<=b,'=':a===b,'==':a===b,'!=':a!==b,'<>':a!==b})[m.op];
+      })():Boolean(compute(args[0],t,stack));
+      // Evaluate only the selected branch: unused #REF!, cycles and errors
+      // must not poison a valid spreadsheet conditional.
+      return compute(args[test?1:2],t,stack);
+    }
     return compute(expr,t,stack);
   }
+  function expandIfCalls(expr,t,stack){
+    let count=0;
+    while(true){
+      const match=/\bIF\s*\(/i.exec(expr);
+      if(!match)break;
+      const open=match.index+match[0].length-1;
+      let depth=0,end=-1;
+      for(let i=open;i<expr.length;i++){
+        if(expr[i]==='(')depth++;
+        else if(expr[i]===')'&&--depth===0){end=i;break;}
+      }
+      if(end<0)throw Error('#IF');
+      const result=formula(expr.slice(match.index,end+1),t,stack);
+      expr=expr.slice(0,match.index)+String(number(result))+expr.slice(end+1);
+      if(++count>40)throw Error('#LIMIT');
+    }
+    return expr;
+  }
   function compute(expr,t,stack){
-    if(String(expr).includes('#REF!'))throw Error('#REF!');
+    expr=expandIfCalls(String(expr),t,stack);
+    if(expr.includes('#REF!'))throw Error('#REF!');
     expr=String(expr).replace(/\b([A-Za-z][A-Za-z0-9_]*)\(([^()]*)\)/g,(all,name,body)=>{
       const fn=window.MathStudio.customFunctions?.list().find(f=>f.name.toLowerCase()===name.toLowerCase());
       if(!fn)return all;
       const values=splitArgs(body).map(part=>compute(part,t,stack));
       return '('+window.MathStudio.customFunctions.evaluate(name,values)+')';
     });
-    expr=String(expr).replace(/\bIF\(([^()]*)\)/gi,(all,body)=>'('+number(formula('IF('+body+')',t,stack))+')');
     // Aggregations accept ranges or comma-separated arguments. Nested expressions are supported by the recursive evaluator.
     expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\s*\(([^()]*)\)/gi,(all,fn,body)=>{
       const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());

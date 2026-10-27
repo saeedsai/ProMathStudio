@@ -14,6 +14,7 @@ modules = [
     ("promath-matrix-tools", "src/matrix-tools.js"),
     ("promath-ode-tools", "src/ode-tools.js"),
     ("promath-minimize-tools", "src/minimize-tools.js"),
+    ("promath-brent-tools", "src/brent-tools.js"),
     ("promath-project-schema", "src/project-schema.js"),
 ]
 for tag, source in modules:

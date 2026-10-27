@@ -72,3 +72,10 @@ The Python evaluator is embedded in a `type="text/plain"` script tag and receive
 The Equation Editor can render `laplace(exp(-2*t),t,s)`, `inverse_laplace(1/(s+2),s,t)`, `fourier(exp(-x^2),x,k)` and inverse Fourier notation as MathML/LaTeX/Word-ready equations. In Symbolic Solver, choose the corresponding operation and provide the input and output variables; the SymPy worker executes the transformation. Fourier uses SymPy's `exp(-2*pi*i*k*x)` convention.
 
 Solve ODE uses `sympy.dsolve` for recognized ODEs such as `diff(y(t),t)+y(t)=0`; Solve PDE uses `sympy.pdsolve` for recognized classes such as `pdiff(u(x,t),t)+pdiff(u(x,t),x)=0`. Arbitrary initial/boundary conditions, unsupported equations, and numerical PDE solvers are **not** supported. The solver will report an error rather than invent a result. See [Advanced mathematics](ADVANCED_MATHEMATICS.md).
+
+
+## Selected-variable assumptions (bounded P0 scope)
+
+In Symbolic Solver, check **Real**, **Positive**, **Negative**, or **Integer** for the selected variable. Positive and negative imply real; integer may be combined with sign. Positive plus negative is rejected. Unchecked retains the unrestricted complex default. The safe AST SymPy worker validates the flags independently and uses assumption-bearing symbols. Auto mode switches to SymPy; Built-in-only mode rejects assumptions instead of ignoring them.
+
+Examples: `sqrt(x^2)` under positive assumptions simplifies to `x`, and under real assumptions to `Abs(x)`. With positive x, solving `x^2=1` yields only `1`. Restricted Solve uses an explicit domain. Assumption-aware numerical roots and equation systems are not yet supported and reject these settings. The flags persist in validated version-2 project backups; legacy backups default to unrestricted. No general proof, arbitrary-domain or branch-cut guarantees.

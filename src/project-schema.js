@@ -42,6 +42,11 @@
     }
     if (data.solver) for (const key of ['expression', 'variable', 'operation', 'engine', 'limitPoint', 'limitDirection'])
       if (data.solver[key] !== undefined) short(data.solver[key], 12000, 'solver ' + key);
+    if (data.solver?.assumptions !== undefined) {
+      const flags=data.solver.assumptions;
+      if (!record(flags) || Object.keys(flags).some(k=>!['real','positive','negative','integer'].includes(k)||typeof flags[k]!=='boolean') ||
+          (flags.positive===true && flags.negative===true)) fail('solver assumptions are invalid or contradictory.');
+    }
     if (data.graph?.functions !== undefined) short(data.graph.functions, 12000, 'graph functions');
     if (data.graph?.dataset !== undefined && data.graph.dataset !== null) {
       const set = data.graph.dataset;

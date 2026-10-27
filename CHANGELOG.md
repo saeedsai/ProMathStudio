@@ -1,3 +1,9 @@
+## 2026-10-27 — Nested spreadsheet IF evaluation (dev candidate; release gated)
+
+- Corrected nested IF evaluation in Data Tables: short-circuit unselected branches (including #REF!, cycles and divide-by-zero), allow IF inside arithmetic and aggregates, and parse top-level comparisons without confusing nested conditions.
+- Added `tests/smoke_sheet_nested_if.py` with numeric, malformed, cross-sheet, cycle, UI and project save/reload coverage; made it mandatory in Quality CI. Offline isolated Node reference checks passed (7 positive and 4 negative); exact dev/PR/main CI and Pages deployment remain unverified until the release gates complete.
+- Scope: numeric spreadsheet formulas only; no Excel-compatible full expression grammar or XLSX import/export.
+
 ## 2026-10-27 — Bounded QR least-squares 3×2 solver (PR #21 released; exact-main Quality and Pages green)
 
 - Added offline full-column-rank 3×2 real least squares using existing QR, residual and orthogonality diagnostics, RHS grid, and Equation Editor transfer.

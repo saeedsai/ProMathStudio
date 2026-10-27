@@ -260,3 +260,5 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 
 
 **2026-10-27 12:xx CET — UI-PROGRESSIVE-WORKSPACES checkpoint.** Starting dev f1fea13342da6a656aea29e53851604d009aab2b (Quality 40494879850 success); main 91bbf1cc3016c7b53a3142b44eb39bedb2270f7e (main Quality 40494473951, Pages 40494473799 success). No open PR; both refs unprotected. Implemented task chooser + optional forms across all five workspaces, synchronized standalone HTML, browser regression and CI integration. Exact candidate CI and promotion pending; no release claim. Next five: UI QA, precision, analytical ODE initial conditions, fitting diagnostics, FFT.
+
+**2026-10-27 UI test follow-up:** Updated existing calculator/programmer, assumptions, fitting and table-chart Playwright tests to explicitly choose visible UI tasks before changing advanced controls. Preserved all prior assertions; strengthened UI navigation expectations. Exact commit and CI pending. No main promotion before green gates.

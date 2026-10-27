@@ -11,6 +11,8 @@ def main():
   errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
   page.set_content((ROOT/'index.html').read_text(encoding='utf-8'),wait_until='load')
   page.locator('[data-workspace="calculator"]').click()
+  page.get_by_role('button',name='Number settings').click()
+  assert page.locator('#ui-calc-settings').evaluate('(e)=>e.open')
   page.locator('#calc-number-format').select_option('scientific')
   page.locator('#calc-input').fill('123456789.125')
   page.locator('#calc-execute').click()

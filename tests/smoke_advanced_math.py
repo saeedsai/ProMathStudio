@@ -98,6 +98,8 @@ def main():
             result=page.evaluate('([a,b])=>MathStudio.curveFit.analyze(a,b,2)',[points,model])
             assert result['r2']>.999999 and result['rmse']<.00001,(model,result)
         page.locator('[data-workspace="graph"]').click()
+        page.get_by_role('button',name='Plot table data').click()
+        assert page.locator('#ui-graph-table').evaluate('(e)=>e.open')
         page.locator('#dt-chart-type').select_option('scatter')
         page.locator('#fit-model').select_option('poly')
         page.locator('#fit-run').click()

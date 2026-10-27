@@ -21,9 +21,9 @@ def main():
             return json.loads(scope['_ms_process'](json.dumps({'ast':ast(s),'operation':op,'variable':'x','assumptions':flags})))
         assert 'Abs(x)' in run('sqrt(x^2)','simplify',{'real':True})['items'][0]['plain']
         assert run('sqrt(x^2)','simplify',{'positive':True})['items'][0]['plain']=='x'
-        assert run('x^2=1','solve',{'positive':True})['items'][0]['plain']=='1'
-        assert run('x^2=1','solve',{'negative':True})['items'][0]['plain']=='-1'
-        assert {i['plain'] for i in run('x^2=1','solve',{'integer':True})['items']}=={'-1','1'}
+        assert run('x^2=1','solve',{'positive':True})['items'][0]['plain']=='Eq(x, 1)'
+        assert run('x^2=1','solve',{'negative':True})['items'][0]['plain']=='Eq(x, -1)'
+        assert {i['plain'] for i in run('x^2=1','solve',{'integer':True})['items']}=={'Eq(x, -1)','Eq(x, 1)'}
         for flags,op in [({'positive':True,'negative':True},'simplify'),({'real':'yes'},'simplify'),({'other':True},'simplify'),({'integer':True},'numeric')]:
             try:run('x^2=1',op,flags);assert False,(flags,op)
             except scope['MathStudioSympyError']:pass

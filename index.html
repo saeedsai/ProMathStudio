@@ -5984,6 +5984,10 @@ function divide(a,b,precision){
  if(shift>=0)return formatDecimal(sign*roundQuotient(num*pow10(shift),den),shift);
  return formatDecimal(sign*roundQuotient(num,den*pow10(-shift))*pow10(-shift),0);
 }
+function isExactDivision(a,b,result){
+ const r=parseDecimal(result,'Division result');
+ return a.n*pow10(b.scale+r.scale)===r.n*b.n*pow10(a.scale);
+}
 function calculate({a,b,operation='add',precision=40}={}){
  const p=Number(precision);
  if(!Number.isInteger(p)||p<16||p>80)throw Error('Precision must be an integer from 16 to 80 significant digits.');
@@ -5996,7 +6000,7 @@ function calculate({a,b,operation='add',precision=40}={}){
   const scale=Math.max(x.scale,y.scale),left=x.n*pow10(scale-x.scale),right=y.n*pow10(scale-y.scale);
   result=formatDecimal(operation==='add'?left+right:left-right,scale);
  }
- return {result,exact:operation!=='divide',precision:p,operation};
+ return {result,exact:operation!=='divide'||isExactDivision(x,y,result),precision:p,operation};
 }
 
 function evaluateExpression(raw,precision=40){
@@ -6010,8 +6014,9 @@ function evaluateExpression(raw,precision=40){
  let pos=0,depth=0,operations=0,rounded=false;
  const apply=(a,b,op)=>{
   if(++operations>100)throw Error('Expression exceeds the 100-operation limit.');
-  if(op==='/')rounded=true;
-  return calculate({a,b,operation:({'+':'add','-':'subtract','*':'multiply','/':'divide'})[op],precision:p}).result;
+  const outcome=calculate({a,b,operation:({'+':'add','-':'subtract','*':'multiply','/':'divide'})[op],precision:p});
+  if(!outcome.exact)rounded=true;
+  return outcome.result;
  };
  const factor=()=>{
   let sign=1;

@@ -28,6 +28,16 @@ def main():
         for expr, expected, precision in cases:
             actual = page.evaluate('a => MathStudio.precisionTools.evaluateExpression(a.expr,a.precision).result', {'expr': expr, 'precision': precision})
             assert actual == expected, (expr, actual, expected)
+        # Bounded exact powers: right associativity and standard unary precedence.
+        for expr, expected in [('2^3', '8'), ('(1.2)^3', '1.728'),
+                               ('2^3^2', '512'), ('-2^2', '-4'),
+                               ('(-2)^2', '4'), ('2^(1+2)', '8'),
+                               ('2^0', '1'), ('0^4', '0')]:
+            actual = page.evaluate('e => MathStudio.precisionTools.evaluateExpression(e).result', expr)
+            assert actual == expected, (expr, expected, actual)
+        for expr in ['0^0', '2^-1', '2^21', '2^0.5', '2^^3']:
+            assert page.evaluate('e => {try{MathStudio.precisionTools.evaluateExpression(e);return false;}catch(error){return !!error.message;}}', expr), expr
+        assert page.evaluate('() => MathStudio.precisionTools.evaluateExpression("2^3^2").exact') is True
         # Adjacent numeric tokens separated by whitespace must not concatenate silently.
         for expr in ['1 2', '1 .2', '0 .1', '. 5', '12 . 3', '1\t2']:
             assert page.evaluate('x => {try{MathStudio.precisionTools.evaluateExpression(x);return false;}catch(e){return !!e.message;}}', expr), expr

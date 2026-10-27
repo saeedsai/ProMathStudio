@@ -30,6 +30,10 @@ The native classical fourth-order Runge–Kutta method computes a table of **t, 
 
 **Scope and limitations:** This is a scalar first-order *forward* IVP solver only (t₁ > t₀), with real finite values and a magnitude safety bound of 1e12. It uses fixed steps; it has no adaptive error estimator, stiffness handling, event detection, systems of ODEs, BVP, DAE or discontinuity detection. Large or rapidly varying derivatives may require more steps, and numerical results are approximations rather than proofs. Errors reject non-finite derivatives/states and invalid inputs instead of silently exporting invalid tables. See the dedicated Playwright RK4 reference and integration regression in tests/smoke_ode.py.
 
+## Coupled two-state initial-value ODE (offline RK4)
+
+Choose **Coupled two-state RK4** in the ODE panel. Enter `dy/dt=f(t,y,z)` and `dz/dt=g(t,y,z)`, both initial values, forward interval and 4–1000 fixed steps. Example: `dy/dt=z`, `dz/dt=-y`, with `y(0)=0`, `z(0)=1`; at `t=pi/2`, the result approximates `y=1`, `z=0`. Both derivatives use the safe offline numerical evaluator, without executing arbitrary JavaScript. Output columns are `t,y,z` for Data Tables; Graphs plots y(t), while z remains available in the imported table. This method is real-valued, fixed-step, forward-only and nonstiff; it is not an adaptive or general N-state solver. The new `tests/smoke_ode_system.py` covers reference convergence, both-state coupling, invalid inputs and UI export.
+
 ## Adaptive first-order IVP (offline RK45)
 
 In the same **First-order ODE initial-value problem** panel, choose **Adaptive RK45**. Enter the derivative, initial/final time, initial value, tolerance (1e-12 to 1e-2), and maximum integration attempts (4–10,000). The Dormand–Prince embedded Runge–Kutta 5(4) method accepts or rejects candidate steps based on a scaled local error estimate and reports accepted/rejected counts. The output is sampled at accepted time points, not at uniformly spaced intervals.

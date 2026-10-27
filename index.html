@@ -4136,8 +4136,45 @@ function heat1D({a=0,b=1,nx=40,nt=160,alpha=0.1,endTime=0.1,initial='sin(pi*x)',
   }
   return {type:'heat',columns:['x','t','u'],rows,nx,nt,dt,dx,cfl:r,method:'Explicit FTCS finite difference; CFL≤0.5',note:'Solves u_t=α u_xx with fixed Dirichlet boundaries and prescribed initial profile. The time grid is sampled for graph display.'};
 }
+// Bounded adaptive Simpson quadrature for smooth real integrands, without eval.
+function adaptiveSimpson({expression='sin(x)',a=0,b=Math.PI,tolerance=1e-8,maxEvaluations=4096}={}){
+  expression=exprLimit(expression);a=finite(a,'Start');b=finite(b,'End');
+  if(!(b>a))throw Error('Integration requires end > start.');
+  tolerance=finite(tolerance,'Tolerance');
+  if(tolerance<1e-12||tolerance>1e-2)throw Error('Tolerance must be between 1e-12 and 0.01.');
+  maxEvaluations=intRange(maxEvaluations,16,20000,'Maximum evaluations');
+  let evaluations=0,subintervals=0,refinements=0,estimatedError=0,result=0;
+  const f=x=>{
+    if(++evaluations>maxEvaluations)throw Error('Integration evaluation budget exceeded; increase maximum evaluations or relax tolerance.');
+    return val(expression,{x});
+  };
+  const mid=(a,b)=>a+(b-a)/2;
+  const m=mid(a,b),fa=f(a),fm=f(m),fb=f(b);
+  const simpson=(a,b,fa,fm,fb)=>(b-a)*(fa+4*fm+fb)/6;
+  const stack=[{a,b,fa,fm,fb,S:simpson(a,b,fa,fm,fb),tol:tolerance,depth:0}];
+  while(stack.length){
+    const p=stack.pop(),m=mid(p.a,p.b),lm=mid(p.a,m),rm=mid(m,p.b);
+    if(lm===p.a||lm===m||rm===m||rm===p.b)throw Error('Integration interval is too small to subdivide.');
+    const fl=f(lm),fr=f(rm);
+    const left=simpson(p.a,m,p.fa,fl,p.fm),right=simpson(m,p.b,p.fm,fr,p.fb);
+    const delta=left+right-p.S,err=Math.abs(delta)/15;
+    if(!Number.isFinite(err))throw Error('Non-finite integration error estimate.');
+    if(err<=p.tol){
+      result+=left+right+delta/15;estimatedError+=err;subintervals+=2;
+      if(!Number.isFinite(result))throw Error('Non-finite integration result.');
+    }else{
+      if(p.depth>=22)throw Error('Integration depth limit reached; function may be singular or too oscillatory.');
+      refinements++;
+      stack.push({a:m,b:p.b,fa:p.fm,fm:fr,fb:p.fb,S:right,tol:p.tol/2,depth:p.depth+1});
+      stack.push({a:p.a,b:m,fa:p.fa,fm:fl,fb:p.fm,S:left,tol:p.tol/2,depth:p.depth+1});
+    }
+  }
+  return {type:'quadrature',value:result,estimatedError,evaluations,subintervals,refinements,tolerance,
+    method:'Adaptive Simpson quadrature (real, finite interval)',
+    note:'Error estimate is local and heuristic, not a certified global bound; discontinuities and highly oscillatory functions may be missed.'};
+}
 // Unified expression input: the exact calculator parser is also used by the numerical solvers.
-const numerical={scalarRoots,systemRoots,poisson1D,heat1D,evaluate:val};M.numerical=numerical;
+const numerical={scalarRoots,systemRoots,poisson1D,heat1D,adaptiveSimpson,evaluate:val};M.numerical=numerical;
 const style=el('style');style.textContent=`
 #numerical-panel{margin-top:18px;background:#f9fbff;border:1px solid #dce4f6;border-radius:12px;padding:15px}
 #numerical-panel .num-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:11px;margin:12px 0}
@@ -4222,29 +4259,30 @@ $('calc-variable-apply').addEventListener('click',()=>{try{for(const key of Obje
 const panel=el('section',{id:'numerical-panel'});if(M.advanced.currentMode()!=='solver')panel.classList.add('workspace-hidden');panel.innerHTML=`
 <details id="num-details"><summary style="font-weight:750;cursor:pointer;color:#3c50ae">Numerical methods · nonlinear equations &amp; PDEs</summary>
 <p class="graph-data-muted">Numerical approximations require a domain, guess, mesh or boundary values. Reported results are approximate, not general symbolic solutions.</p>
-<div class="num-fields"><label>Method<select id="num-method"><option value="scalar">Real nonlinear roots: bracket + Newton</option><option value="system">2–3 nonlinear equations: damped Newton</option><option value="poisson">1D Poisson: -u_xx = source</option><option value="heat">1D heat: u_t = α u_xx</option></select></label><label>Equation / source / initial expression<input id="num-expression" value="sin(x)-x/2=0" /></label><label>Unknown(s)<input id="num-variable" value="x" /></label><label>Initial guess(es)<input id="num-guess" value="1,1" /></label></div>
-<div class="num-fields"><label>Domain start${nInput('num-start',-10)}</label><label>Domain end${nInput('num-end',10)}</label><label>Spatial intervals${nInput('num-nx',40)}</label><label>Time steps${nInput('num-nt',200)}</label><label>Final time${nInput('num-time',0.1)}</label><label>Diffusivity α${nInput('num-alpha',0.1)}</label><label>Boundary u(start)${nInput('num-left',0)}</label><label>Boundary u(end)${nInput('num-right',0)}</label></div>
+<div class="num-fields"><label>Method<select id="num-method"><option value="scalar">Real nonlinear roots: bracket + Newton</option><option value="system">2–3 nonlinear equations: damped Newton</option><option value="poisson">1D Poisson: -u_xx = source</option><option value="heat">1D heat: u_t = α u_xx</option><option value="quadrature">Adaptive Simpson integral ∫f(x) dx</option></select></label><label>Equation / source / initial expression<input id="num-expression" value="sin(x)-x/2=0" /></label><label>Unknown(s)<input id="num-variable" value="x" /></label><label>Initial guess(es)<input id="num-guess" value="1,1" /></label></div>
+<div class="num-fields"><label>Domain start${nInput('num-start',-10)}</label><label>Domain end${nInput('num-end',10)}</label><label>Spatial intervals${nInput('num-nx',40)}</label><label>Time steps${nInput('num-nt',200)}</label><label>Final time${nInput('num-time',0.1)}</label><label>Diffusivity α${nInput('num-alpha',0.1)}</label><label>Boundary u(start)${nInput('num-left',0)}</label><label>Boundary u(end)${nInput('num-right',0)}</label><label>Tolerance${nInput('num-tolerance',1e-8)}</label><label>Maximum evaluations${nInput('num-budget',4096)}</label></div>
 <div class="data-toolbar"><button id="num-run" class="primary" type="button">Solve numerically</button><button id="num-to-table" class="secondary" type="button" disabled>Save output to Data Tables</button><button id="num-to-graph" class="secondary" type="button" disabled>Show numerical results in Graphs</button></div><pre id="num-output" role="status">Choose a method and enter conditions.</pre></details>`;
 $('symbolic-panel').after(panel);
 // Progressive disclosure: a selected numerical method reveals only its required inputs.
-const numMode=$('num-method'),defaults={scalar:'sin(x)-x/2=0',system:'x^2+y^2=5; x-y=1',poisson:'pi^2*sin(pi*x)',heat:'sin(pi*x)'};
-const visMap={scalar:['num-expression','num-variable','num-start','num-end'],system:['num-expression','num-variable','num-guess'],poisson:['num-expression','num-start','num-end','num-nx','num-left','num-right'],heat:['num-expression','num-start','num-end','num-nx','num-nt','num-time','num-alpha','num-left','num-right']};
+const numMode=$('num-method'),defaults={scalar:'sin(x)-x/2=0',system:'x^2+y^2=5; x-y=1',poisson:'pi^2*sin(pi*x)',heat:'sin(pi*x)',quadrature:'sin(x)'};
+const visMap={scalar:['num-expression','num-variable','num-start','num-end'],system:['num-expression','num-variable','num-guess'],poisson:['num-expression','num-start','num-end','num-nx','num-left','num-right'],heat:['num-expression','num-start','num-end','num-nx','num-nt','num-time','num-alpha','num-left','num-right'],quadrature:['num-expression','num-start','num-end','num-tolerance','num-budget']};
 let lastMethod='scalar';
 function showMethod(){const mode=numMode.value;
   const active=new Set(visMap[mode]||[]);
-  for(const id of ['num-expression','num-variable','num-guess','num-start','num-end','num-nx','num-nt','num-time','num-alpha','num-left','num-right']){
+  for(const id of ['num-expression','num-variable','num-guess','num-start','num-end','num-nx','num-nt','num-time','num-alpha','num-left','num-right','num-tolerance','num-budget']){
     const label=$(id).closest('label');if(label)label.hidden=!active.has(id);
   }
   if(mode!==lastMethod){
     if($('num-expression').value===defaults[lastMethod])$('num-expression').value=defaults[mode];
     if(mode==='system'){$('num-variable').value='x,y';}
+    else if(mode==='quadrature'){$('num-start').value='0';$('num-end').value=String(Math.PI);$('num-variable').value='x';}
     else if(mode!=='scalar'){$('num-start').value='0';$('num-end').value='1';$('num-variable').value='x';}
     else $('num-variable').value='x';
     lastMethod=mode;
   }
-  const label=$('num-expression').closest('label');if(label)label.firstChild.textContent=mode==='scalar'?'Equation or residual':mode==='system'?'Equations (semicolon or new line)':mode==='poisson'?'Source function f(x)':'Initial profile u(x,0)';
+  const label=$('num-expression').closest('label');if(label)label.firstChild.textContent=mode==='scalar'?'Equation or residual':mode==='system'?'Equations (semicolon or new line)':mode==='poisson'?'Source function f(x)':mode==='quadrature'?'Integrand f(x)':'Initial profile u(x,0)';
 }
-numMode.addEventListener('change',showMethod);showMethod();
+numMode.addEventListener('change',()=>{showMethod();$('num-to-table').disabled=true;$('num-to-graph').disabled=true;lastNumeric=null;});showMethod();
 const casToolbar=$('cas-run')?.parentElement;if(casToolbar){const open=el('button',{type:'button',class:'secondary',id:'num-open'},'Numerical methods / PDE');open.addEventListener('click',()=>{M.advanced.mode('solver');$('num-details').open=true;panel.scrollIntoView({block:'start',behavior:'smooth'});});casToolbar.append(open);}
 let lastNumeric=null;const failure=(e)=>{const node=$('num-output');node.textContent=e.message;node.classList.add('error');};
 function runNumerical(){try{
@@ -4254,12 +4292,14 @@ function runNumerical(){try{
   if(mode==='scalar')result=scalarRoots(expr,v,a,b);
   else if(mode==='system')result=systemRoots(expr,v,$('num-guess').value);
   else if(mode==='poisson')result=poisson1D({a,b,nx,source:expr,left,right});
+  else if(mode==='quadrature')result=adaptiveSimpson({expression:expr,a,b,tolerance:$('num-tolerance').value,maxEvaluations:$('num-budget').value});
   else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
   lastNumeric=result;$('num-output').classList.remove('error');
   $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):'(none detected)'}\n${result.note}`:
+    result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
     result.type==='system'?`Converged: ${result.converged}\n${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('\n')}\nResidual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}\n${result.note}`:
       `${result.method}\n${result.rows.length} output rows\n${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'\n':''}${result.note}`;
-  $('num-to-table').disabled=false;$('num-to-graph').disabled=!['poisson','heat'].includes(result.type);
+  $('num-to-table').disabled=result.type==='quadrature';$('num-to-graph').disabled=!['poisson','heat'].includes(result.type);
 }catch(err){lastNumeric=null;$('num-to-table').disabled=$('num-to-graph').disabled=true;failure(err);}}
 $('num-run').addEventListener('click',runNumerical);
 function numericalTable(){if(!lastNumeric)throw Error('Run a numerical method first.');const type=lastNumeric.type;

@@ -28,7 +28,7 @@ Open **Symbolic Solver → Numerical methods / PDE → First-order ODE initial-v
 
 The native classical fourth-order Runge–Kutta method computes a table of **t, y** values. **Save output to Data Tables** preserves a new table, while **Plot y(t) in Graphs** imports it and opens a 2D line chart. The derivative may depend on both t and y, e.g. t+y. All calculations run locally without Pyodide or a network connection.
 
-**Scope and limitations:** This is a scalar first-order *forward* IVP solver only (t₁ > t₀), with real finite values and a magnitude safety bound of 1e12. It uses fixed steps; it has no adaptive error estimator, stiffness handling, event detection, systems of ODEs, BVP, DAE or discontinuity detection. Large or rapidly varying derivatives may require more steps, and numerical results are approximations rather than proofs. Errors reject non-finite derivatives/states and invalid inputs instead of silently exporting invalid tables. See the dedicated Playwright RK4 reference and integration regression in tests/smoke_ode.py.
+**Scope and limitations (scalar RK4 mode):** This is a scalar first-order *forward* IVP solver only (t₁ > t₀), with real finite values and a magnitude safety bound of 1e12. It uses fixed steps; this scalar mode has no adaptive error estimator, stiffness handling, event detection, BVP, DAE or discontinuity detection. A separate bounded two-state RK4 mode is described below. Large or rapidly varying derivatives may require more steps, and numerical results are approximations rather than proofs. Errors reject non-finite derivatives/states and invalid inputs instead of silently exporting invalid tables. See the dedicated Playwright RK4 reference and integration regression in tests/smoke_ode.py.
 
 ## Coupled two-state initial-value ODE (offline RK4)
 
@@ -39,6 +39,12 @@ Choose **Coupled two-state RK4** in the ODE panel. Enter `dy/dt=f(t,y,z)` and `d
 In the same **First-order ODE initial-value problem** panel, choose **Adaptive RK45**. Enter the derivative, initial/final time, initial value, tolerance (1e-12 to 1e-2), and maximum integration attempts (4–10,000). The Dormand–Prince embedded Runge–Kutta 5(4) method accepts or rejects candidate steps based on a scaled local error estimate and reports accepted/rejected counts. The output is sampled at accepted time points, not at uniformly spaced intervals.
 
 Example: dy/dt=y, t0=0, t1=1, y0=1, tolerance 1e-9 approximates e. Tighter tolerance normally increases the number of accepted steps and improves the reference result, but is not a global error guarantee. Both Data Tables and Graphs handoffs work with the variable-step output. Failed attempts, invalid tolerances, non-finite values and step-size underflow produce errors instead of partial exports. **Scope:** real scalar forward IVPs only; no stiff ODE guarantee, event handling, systems, backward integration or globally certified accuracy. RK4 remains the default and its fixed-step behavior is unchanged. See tests/smoke_ode_adaptive.py.
+
+## Adaptive Simpson quadrature (offline, bounded)
+
+In **Symbolic Solver → Numerical methods / PDE**, choose **Adaptive Simpson integral** and enter a real-valued integrand in `x`, finite start/end bounds (end greater than start), tolerance from 1e-12 to 1e-2, and maximum function evaluations from 16 to 20,000. For example, `sin(x)` on `[0, pi]` approximates 2; `x^2` on `[0,1]` approximates 1/3. The method recursively compares one Simpson panel with two half panels and reports an error estimate, evaluation count and refinement count. It uses the same safe native mathematical evaluator as the Calculator, and runs offline.
+
+**Limitations:** Smooth real finite-interval functions only; the error estimate is heuristic, not a certified global bound. Discontinuities, singularities, and rapidly oscillatory integrands can be missed or fail. Exceeding evaluation/depth budgets, invalid bounds, non-real values, or non-finite results fails without exporting partial data. The integral is a scalar result, so table/graph export is disabled for this method. Fixed-step Calculator `int(...)` is unchanged. See `tests/smoke_quadrature_adaptive.py`.
 
 ## One-dimensional Poisson equation
 

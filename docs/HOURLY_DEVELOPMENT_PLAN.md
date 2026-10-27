@@ -10,11 +10,11 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-27 after workspace simplification)
+## Next five features (refreshed 2026-10-27 after task restoration QA)
 
 | Order | ID | Acceptance tests | Status |
 |---:|---|---|---|
-| 1 | UI-PROGRESSIVE-WORKSPACES | Five workspace task choices, correct form visibility, functional core, mobile/browser regression. | DEV IMPLEMENTED — CI PENDING |
+| 1 | UI-PROGRESSIVE-WORKSPACES / UI-TASK-RESTORE | Five task choices per workspace; restore selected task independently after tab switching; desktop/mobile regression and no console errors. | DEV IMPLEMENTED — exact-head CI / PR / Pages gates pending |
 | 2 | P0-PRECISION | 30+ significant-digit references and invalid inputs. | TODO |
 | 3 | P0-SYMBOLIC-ODE-IC | y'=y with y(0)=1 and inconsistent conditions. | TODO |
 | 4 | P1-FITTING-DIAGNOSTICS | Residual/R² and graph/table exports. | TODO |
@@ -266,3 +266,6 @@ Chosen: P0-CUSTOM-PY-COMPOSE, bounded Calculator AST composition. Before: dev/ma
 **2026-10-27 UI CI repair:** Exact dev 41b9db8267997603c9b7cbe81af7a3ec4555e55a Quality 40499668973 passed structural and existing browser smoke but new task-picker regression failed due Playwright text matching two existing buttons (`Numerical methods` and `Numerical methods / PDE`). Tightened task selector test to exact accessible name, without disabling checks. CI and promotion pending.
 
 **2026-10-27 UI handoff QA repair:** Exact dev 2b287276c825ee99e6b1de27d18cdcc08830b687 Quality 40500042752 reached 39 passed steps then RK4 browser handoff failed while chart controls were collapsed. Updated task-first UI to automatically reveal plotting controls before ODE/numerical/table-to-graph handoffs, and strengthened existing RK4 browser regression to assert the handoff controls and detailed plotting status. Re-run full CI on resulting dev SHA; no main release until green.
+
+
+**2026-10-27 13:xx CET — UI-TASK-RESTORE development checkpoint.** Read root AGENTS, frozen feature inventory, living plan and exact dev Quality. Prior UI-PROGRESSIVE-WORKSPACES candidate dev `9ded24fc4658367c9622bb7d3b7e6dad2d4a08fd` passed [Quality 40500558863](https://github.com/saeedsai/ProMathStudio/actions/runs/40500558863) all checks; PR #33 was opened for ordinary protected-flow review. This compatible follow-on increment restores each workspace's selected task when returning to a tab without persistent storage, with a dedicated browser regression, mandatory Quality step, standalone bundle, user guide and changelog. Do not call it released until exact dev and PR CI, main Quality and Pages are verified. Branches `dev` and `main` only, no stale tracked files proven safe to delete. Next five: UI-PROGRESSIVE-WORKSPACES / UI-TASK-RESTORE release QA; P0-PRECISION; P0-SYMBOLIC-ODE-IC; P1-FITTING-DIAGNOSTICS; P1-FFT-1D.

@@ -1,5 +1,6 @@
 ## 2026-10-27 — XLSX formula token boundary correction (PR #31 released)
 
+- **UI-TASK-RESTORE (dev candidate):** Remember the last selected task independently for each of the five workspaces during the current page session; preserve the correct active button, description and form when returning. Adds a focused desktop/mobile browser regression and mandatory Quality gate. No localStorage/project schema change.
 - **UI-PROGRESSIVE-WORKSPACES (dev candidate):** Task-first navigation in five workspaces, optional calculator display/history, variable assumptions, graph axes/table chart and generated Python forms collapsed until selected; retains existing mathematical engines. Adds desktop/mobile Playwright regression and mandatory CI coverage.
 - **Released via PR #32 (2026-10-27):** selected-variable SymPy real/positive/negative/integer assumptions, restricted scalar solve, contradiction rejection, validated project persistence and new worker/browser regression. Dev, PR and main Quality passed; GitHub Pages deployment succeeded for main `91bbf1cc3016c7b53a3142b44eb39bedb2270f7e`.
 

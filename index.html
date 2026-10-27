@@ -5921,9 +5921,12 @@ const guide=document.createElement('section');guide.id='workspace-task-guide';gu
 guide.innerHTML='<div class="task-heading">What would you like to do?</div><div class="task-choices" role="group" aria-label="Workspace tasks"></div><p class="task-description" id="task-description"></p>';
 $('workspace-subtitle').after(guide);
 let activeMode='';
+// In-memory task choice per workspace; no persistent user preference is written.
+const lastTask=Object.create(null);
 const mode=()=>document.querySelector('.workspace-tab.active[data-workspace]')?.dataset.workspace||'editor';
 function selectTask(key,scroll=false){
  const task=(tasks[activeMode]||tasks.editor).find(x=>x[0]===key)||(tasks[activeMode]||tasks.editor)[0];
+ lastTask[activeMode]=task[0];
  for(const b of guide.querySelectorAll('.task-choice'))b.setAttribute('aria-pressed',String(b.dataset.task===task[0]));
  $('task-description').textContent=task[2];
  const dest=task[3]?document.querySelector(task[3]):null;
@@ -5941,7 +5944,7 @@ function selectMode(m){
   const b=document.createElement('button');b.type='button';b.className='task-choice';b.dataset.task=key;b.textContent=label;
   b.addEventListener('click',()=>selectTask(key,true));bar.append(b);
  }
- selectTask('basic');
+ selectTask(lastTask[activeMode]||'basic');
 }
 selectMode(mode());
 document.addEventListener('click',event=>{

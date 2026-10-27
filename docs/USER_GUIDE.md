@@ -2,7 +2,7 @@
 
 ## Open the application
 
-Open `index.html` directly, or use the GitHub Pages site after it is enabled. Use Chrome, Edge or Firefox with JavaScript. The application has four tabs and a connected **Working equation** panel at the bottom of each active workspace.
+Open `index.html` directly, or use the GitHub Pages site after it is enabled. Use Chrome, Edge or Firefox with JavaScript. The application has five workspaces and a connected **Working equation** panel at the bottom of each active workspace. Each workspace has a **What would you like to do?** task chooser. Choose a task to reveal its relevant controls; when switching between workspaces, the last task selected in each workspace is remembered until the page is reloaded. This choice is not saved to the project.
 
 ### 1 — Calculator
 

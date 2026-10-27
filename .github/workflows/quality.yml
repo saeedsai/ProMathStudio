@@ -33,6 +33,8 @@ jobs:
         run: python tests/smoke_browser.py
       - name: Task-first workspace browser regression
         run: python tests/smoke_workspace_tasks.py
+      - name: Per-workspace task restoration browser regression
+        run: python tests/smoke_workspace_task_restore.py
       - name: Project migration and rollback browser regression
         run: python tests/smoke_project_schema.py
       - name: CSV/JSON graph import smoke test

@@ -78,7 +78,7 @@ def main():
         before = page.evaluate("MathStudio.dataTables.tables.length")
         page.locator("#ode-to-table").click()
         assert page.evaluate("MathStudio.dataTables.tables.length") == before + 1
-        assert page.evaluate("MathStudio.dataTables.tables.at(-1).headers") == ["t","y","z"]
+        assert page.evaluate("MathStudio.dataTables.tables.at(-1).columns") == ["t","y","z"]
 
         page.locator('[data-workspace="solver"]').click()
         panel.evaluate("(element) => element.open = true")

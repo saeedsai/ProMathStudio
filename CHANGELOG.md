@@ -1,3 +1,8 @@
+## 2026-10-27 — Brent-Dekker bracketed root refinement (dev candidate)
+
+- Added bounded offline real root refinement with residual validation, strict input limits, browser UI and one-row Data Tables export; previous root search remains intact.
+- Added `tests/smoke_root_brent.py` to mandatory Quality; synchronized `src/brent-tools.js` and standalone `index.html`. Local JS numerical reference checks passed; exact CI and release verification pending.
+
 ## 2026-10-27 — Bounded offline 1D golden-section minimization (PR #28 released; main Quality and Pages green)
 
 - Added a finite-interval, unimodal scalar minimizer with safe numeric expression evaluation, endpoint comparison, tie/flat handling, configurable tolerance and bounded iteration budget.

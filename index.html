@@ -317,6 +317,7 @@
           <label class="cas-field variable">Variable <input id="cas-variable" type="text" value="x" maxlength="24" spellcheck="false" aria-label="Symbolic variable" /></label>
           <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><label class="cas-field" id="cas-limit-point-wrap" hidden>Approach point <input id="cas-limit-point" type="text" value="0" maxlength="80" spellcheck="false" aria-label="Limit approach point"/></label><label class="cas-field" id="cas-limit-direction-wrap" hidden>Direction <select id="cas-limit-direction" aria-label="Limit direction"><option value="+-">Both sides</option><option value="-">From left (−)</option><option value="+">From right (+)</option></select></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
         </div>
+        <fieldset id="cas-assumptions" style="margin:8px 0 12px;border:1px solid #d7deec;border-radius:10px;padding:8px 12px"><legend>Selected variable assumptions (SymPy)</legend><label><input type="checkbox" id="cas-assume-real"> Real</label> <label><input type="checkbox" id="cas-assume-positive"> Positive</label> <label><input type="checkbox" id="cas-assume-negative"> Negative</label> <label><input type="checkbox" id="cas-assume-integer"> Integer</label><span class="small-note"> Sign implies real. Positive and negative conflict. Leave all unchecked for complex domain.</span></fieldset>
         <div id="cas-system-fields" hidden style="padding:12px;border:1px solid #d7deec;border-radius:10px;margin:12px 0"><label for="cas-system-input">Equations (one per line)</label><textarea id="cas-system-input" rows="4" style="width:100%;display:block" spellcheck="false">x = 2x + 2z
 y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separated)</label><input id="cas-system-vars" value="x,y,z" aria-label="System unknowns"/><label for="cas-system-method">Method</label><select id="cas-system-method" aria-label="System solving method"><option value="auto">Auto (linear first, nonlinear if needed)</option><option value="linear">Linear only</option><option value="nonlinear">Nonlinear polynomial</option></select><p class="small-note">Auto preserves fast linear solutions and solves supported nonlinear polynomial systems with up to 3 unknowns. Solutions may be real or complex. SymPy required.</p></div>
         <label class="cas-examples-label">Try a calculation
@@ -494,7 +495,15 @@ def _ms_process(job_text):
         raise MathStudioSympyError('Choose a valid symbolic variable such as x, t, or theta.')
     if operation not in {'auto','solve','expand','simplify','factor','differentiate','integrate','limit','numeric','laplace','inverse_laplace','fourier','inverse_fourier','ode','pde'}:
         raise MathStudioSympyError('Unsupported symbolic operation.')
-    variable = sp.Symbol(varname)
+    assumptions = job.get('assumptions', {})
+    if not isinstance(assumptions, dict) or any(k not in {'real','positive','negative','integer'} or type(v) is not bool for k,v in assumptions.items()):
+        raise MathStudioSympyError('Assumptions require real/positive/negative/integer Boolean flags.')
+    if assumptions.get('positive') and assumptions.get('negative'):
+        raise MathStudioSympyError('Contradictory assumptions: positive and negative cannot both hold.')
+    options = {k:True for k,v in assumptions.items() if v}
+    if options.get('positive') or options.get('negative') or options.get('integer'):
+        options['real'] = True
+    variable = sp.Symbol(varname, **options)
     pole_expressions = []
     steps = [0]
     def build(node):
@@ -506,7 +515,7 @@ def _ms_process(job_text):
         if kind=='symbol':
             name = str(node['value'])
             if name in MS_CONST: return MS_CONST[name]
-            return sp.Symbol(name)
+            return variable if name == varname else sp.Symbol(name)
         if kind=='group':return build(node['value'])
         if kind=='unary':
             val=build(node['value'])
@@ -620,6 +629,13 @@ def _ms_process(job_text):
         else:outputs=[sp.inverse_fourier_transform(expression,variable,target)]
         note='SymPy '+operation.replace('_',' ')+' (Fourier uses exp(-2πikx) convention). Check convergence and assumptions.'
     elif operation in {'solve','numeric'}:
+        if operation=='numeric' and any(assumptions.values()):
+            raise MathStudioSympyError('Restricted numerical roots are unsupported; use Solve.')
+        domain = sp.S.Complexes
+        if any(assumptions.values()):
+            domain = sp.S.Integers if assumptions.get('integer') else sp.S.Reals
+            if assumptions.get('positive'): domain = sp.Intersection(domain,sp.Interval.open(0,sp.oo))
+            if assumptions.get('negative'): domain = sp.Intersection(domain,sp.Interval.open(-sp.oo,0))
         delta=(expression.lhs-expression.rhs) if is_equation else expression
         if isinstance(delta,sp.MatrixBase):raise MathStudioSympyError('Use a scalar equation to solve for a variable.')
         if not delta.has(variable):
@@ -630,7 +646,11 @@ def _ms_process(job_text):
             note='SymPy symbolic solutions over the complex numbers.'
             try: p=sp.Poly(sp.cancel(delta),variable)
             except (sp.PolynomialError,TypeError,ValueError):p=None
-            if p is not None and p.degree()>0:
+            if any(assumptions.values()):
+                solution_set=sp.solveset(delta,variable,domain=domain)
+                values=sorted(solution_set,key=sp.default_sort_key) if isinstance(solution_set,sp.FiniteSet) else [solution_set]
+                note='Solutions restricted to '+str(domain)+'.'
+            elif p is not None and p.degree()>0:
                 if p.degree()>MS_MAX_RESULTS:raise MathStudioSympyError('Polynomial degree exceeds 30 for interactive solving.')
                 if operation=='numeric':
                     values=p.nroots(n=12,maxsteps=100)
@@ -680,6 +700,8 @@ def _ms_process(job_text):
             'mathml':html.unescape(sp.printing.mathml(r,printer='presentation')), 
             'approx':(str(sp.N(r.rhs,10)) if isinstance(r,sp.Equality) and r.rhs.is_number else ''),
         })
+    if any(assumptions.values()):
+        note += ' Assumptions: '+', '.join(k for k in ('real','positive','negative','integer') if assumptions.get(k))+'.'
     return json.dumps({'items':result,'note':note,'operation':operation,'engine':'SymPy','version':sp.__version__},ensure_ascii=False)
 
 def _ms_system(job_text):
@@ -1805,12 +1827,19 @@ def _ms_system(job_text):
     });
   }
   function sympyPythonCode(ast,operation,v,extra={}){
-    const main=pythonDocument(ast).replace(/\nprint\(sp\.pretty\(expr\)\)\s*$/,'');
+    const flags=extra.assumptions||{},active=['real','positive','negative','integer'].filter(k=>flags[k]);
+    let main=pythonDocument(ast).replace(/\nprint\(sp\.pretty\(expr\)\)\s*$/,'');
+    if(active.length)main=main.replace(v+' = sp.Symbol('+JSON.stringify(v)+')',v+' = sp.Symbol('+JSON.stringify(v)+', '+active.map(k=>k+'=True').join(', ')+')');
     const lines=[main,''];
     if(['solve','numeric'].includes(operation)){
       lines.push('polynomial = expr.lhs - expr.rhs if isinstance(expr, sp.Equality) else expr');
       if(operation==='numeric')lines.push('result = sp.Poly(polynomial, '+v+').nroots()');
-      else lines.push('result = sp.solveset(polynomial, '+v+', domain=sp.S.Complexes)');
+      else {
+        let domain=active.length?(flags.integer?'sp.S.Integers':'sp.S.Reals'):'sp.S.Complexes';
+        if(flags.positive)domain='sp.Intersection('+domain+', sp.Interval.open(0, sp.oo))';
+        if(flags.negative)domain='sp.Intersection('+domain+', sp.Interval.open(-sp.oo, 0))';
+        lines.push('result = sp.solveset(polynomial, '+v+', domain='+domain+')');
+      }
     }else if(operation==='limit'){
       const pointLine=pythonDocument(extra.pointAst).split('\n').find(line=>line.startsWith('expr = '));
       lines.push('result = sp.limit(expr, '+v+', '+pointLine.slice(7)+', dir='+JSON.stringify(extra.direction)+')');
@@ -1854,6 +1883,9 @@ def _ms_system(job_text):
     casCode.textContent=result.python;setCasButtons(true);
     document.getElementById('cas-result-count').textContent=result.lines.length+(result.lines.length===1?' result':' results')+(result.engine==='SymPy'?' · SymPy':' · built-in');
   }
+  const assumptionKeys=['real','positive','negative','integer'];
+  function casAssumptions(){return Object.fromEntries(assumptionKeys.map(k=>[k,document.getElementById('cas-assume-'+k).checked]));}
+  function validatedAssumptions(a){if(a.positive&&a.negative)throw Error('Contradictory assumptions: positive and negative.');return a;}
   casOperation.addEventListener('change',()=>{document.getElementById('cas-system-fields').hidden=casOperation.value!=='system';});
   async function casExecute(){
     if(casBusy)return;
@@ -1864,7 +1896,10 @@ def _ms_system(job_text):
     casLast=null;casOut.replaceChildren();setCasButtons(false);
     try{
       if(!/^[\p{L}][\p{L}0-9_]*$/u.test(v))throw new Error('Choose a valid variable name such as x, t or theta.');
+      const assumptions=validatedAssumptions(casAssumptions()),restricted=Object.values(assumptions).some(Boolean);
+      if(restricted&&engine==='offline')throw Error('Symbolic assumptions require SymPy. Choose Auto or SymPy.');
       if(selected==='system'){
+        if(restricted)throw Error('Assumptions are not supported for equation systems yet.');
         if(engine==='offline')throw Error('Systems require SymPy. Choose Auto or SymPy.');
         const values=document.getElementById('cas-system-input').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
         const unknowns=document.getElementById('cas-system-vars').value.split(',').map(x=>x.trim()).filter(Boolean);
@@ -1882,18 +1917,18 @@ def _ms_system(job_text):
       if(['laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)&&! /^[A-Za-z][A-Za-z0-9_]*$/.test(document.getElementById('cas-target').value.trim()))throw Error('Choose a valid transform output variable.');
       const parsed=evaluate(raw);
       if(parsed.incomplete)throw new Error('Finish typing the equation before solving.');
-      let sympyExtra={};
+      let sympyExtra={assumptions};
       if(selected==='limit'){
         const pointRaw=document.getElementById('cas-limit-point').value.trim();
         if(!pointRaw)throw Error('Enter a limit approach point (e.g. 0, pi, oo or -oo).');
         const pointParsed=evaluate(pointRaw);
         if(pointParsed.incomplete)throw Error('Finish typing the limit approach point.');
-        sympyExtra={pointAst:pointParsed.ast,direction:document.getElementById('cas-limit-direction').value};
+        sympyExtra={...sympyExtra,pointAst:pointParsed.ast,direction:document.getElementById('cas-limit-direction').value};
       }
       let result=null,offlineError='';
       // Numerical roots are SymPy-only. In auto mode prefer fast/offline results,
       // and automatically retry with actual SymPy if the built-in CAS cannot solve.
-      if(engine!=='sympy'&&!['limit','numeric','ode','pde','laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)){
+      if(engine!=='sympy'&&!restricted&&!['limit','numeric','ode','pde','laplace','inverse_laplace','fourier','inverse_fourier'].includes(selected)){
         try{result=casRun(raw,selected,v);result.engine='Offline';}
         catch(e){offlineError=e.message;if(engine==='offline')throw e;}
       }
@@ -1952,13 +1987,13 @@ def _ms_system(job_text):
     if(casLast){casMessage.className='cas-status';casMessage.textContent='Input changed — run again to update the calculation.';casLast=null;setCasButtons(false);}
     casRequest++;
   });
-  for(const field of [casOperation,casVariable,casEngine,document.getElementById('cas-limit-direction')])field.addEventListener('change',()=>{casRequest++;if(casLast)clearCas();});
+  for(const field of [casOperation,casVariable,casEngine,document.getElementById('cas-limit-direction'),...assumptionKeys.map(k=>document.getElementById('cas-assume-'+k))])field.addEventListener('change',()=>{casRequest++;if(casLast)clearCas();});
   document.getElementById('cas-limit-point').addEventListener('input',()=>{casRequest++;if(casLast)clearCas();});
   input.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();casExecute();}},true);
   window.MathStudio.symbolic=casRun;
   window.MathStudio.solveWithSymPy=async raw=>{
     const result=evaluate(raw);
-    return await sympyJob(result.ast,'solve',casVariable.value.trim()||'x');
+    return await sympyJob(result.ast,'solve',casVariable.value.trim()||'x',{assumptions:validatedAssumptions(casAssumptions())});
   };
   window.MathStudio.notebookBridge={
     list:()=>equations.map(q=>JSON.parse(JSON.stringify(q))),
@@ -2807,6 +2842,11 @@ self.onmessage=async ({data})=>{
     }
     if (data.solver) for (const key of ['expression', 'variable', 'operation', 'engine', 'limitPoint', 'limitDirection'])
       if (data.solver[key] !== undefined) short(data.solver[key], 12000, 'solver ' + key);
+    if (data.solver?.assumptions !== undefined) {
+      const flags=data.solver.assumptions;
+      if (!record(flags) || Object.keys(flags).some(k=>!['real','positive','negative','integer'].includes(k)||typeof flags[k]!=='boolean') ||
+          (flags.positive===true && flags.negative===true)) fail('solver assumptions are invalid or contradictory.');
+    }
     if (data.graph?.functions !== undefined) short(data.graph.functions, 12000, 'graph functions');
     if (data.graph?.dataset !== undefined && data.graph.dataset !== null) {
       const set = data.graph.dataset;
@@ -3113,7 +3153,7 @@ self.onmessage=async ({data})=>{
   function projectData(){
     return {format:'mathstudio-project',version:2,date:new Date().toISOString(),working:state.active,origin:state.origin,
       recent:state.recent,notebook:engine.notebookBridge.list(),calculator:engine.advanced.getCalculatorState(),
-      solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value,limitPoint:$('cas-limit-point').value,limitDirection:$('cas-limit-direction').value},
+      solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value,limitPoint:$('cas-limit-point').value,limitDirection:$('cas-limit-direction').value,assumptions:Object.fromEntries(['real','positive','negative','integer'].map(k=>[k,$('cas-assume-'+k).checked]))},
       graph:engine.advanced.getGraphState(),customFunctions:window.MathStudio.customFunctions?.list()||[],tables:window.MathStudio.dataTables?.exportState()||null,fit:window.MathStudio.curveFit?.exportState()||null};
   }
   $('hub-export-project').addEventListener('click',()=>{
@@ -3129,7 +3169,7 @@ self.onmessage=async ({data})=>{
     engine.advanced.restoreGraphState(data.graph||{});
     window.MathStudio.dataTables?.restoreState(data.tables||null);
     window.MathStudio.curveFit?.restoreState(data.fit||null);
-    if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';$('cas-limit-point').value=data.solver.limitPoint||'0';$('cas-limit-direction').value=['+-','+','-'].includes(data.solver.limitDirection)?data.solver.limitDirection:'+-';$('cas-operation').dispatchEvent(new Event('change'));}
+    if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';$('cas-limit-point').value=data.solver.limitPoint||'0';$('cas-limit-direction').value=['+-','+','-'].includes(data.solver.limitDirection)?data.solver.limitDirection:'+-';for(const k of ['real','positive','negative','integer'])$('cas-assume-'+k).checked=data.solver.assumptions?.[k]===true;$('cas-operation').dispatchEvent(new Event('change'));}
     state.recent=Array.isArray(data.recent)?data.recent.filter(r=>r&&typeof r.raw==='string').slice(0,14):[];
     state.calculator=engine.advanced.getCalculator();state.solver=null;
     if(typeof data.working==='string'&&data.working.trim())current(data.working,data.origin||'project');

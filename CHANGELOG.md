@@ -1,4 +1,5 @@
 ## 2026-10-27 — XLSX formula token boundary correction (PR #31 released)
+- **Dev, unreleased:** selected-variable SymPy real/positive/negative/integer assumptions with domain-restricted scalar solve, validated project persistence and regression coverage.
 
 - Corrected XLSX import/export row-reference rewriting to preserve numeric function names such as LOG10/ATAN2, scientific notation (1E3), longer identifiers and quoted literals, while continuing to shift real cell and quoted-sheet references.
 - Added a dedicated browser regression `tests/smoke_xlsx_formula_tokens.py` and mandatory Quality step; synchronized both modules with the standalone HTML bundle. Exact dev Quality 40486708265, PR #31 Quality 40488048299 and main Quality 40488465426 passed all 41 steps; Pages 40488463589 succeeded for main 6e50b82b203d9233a2fcacd6c4dd829e2eb59a3c.

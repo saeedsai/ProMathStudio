@@ -1,3 +1,7 @@
+## Unreleased — exactness indicators for high-precision decimal division (2026-10-27)
+
+- Corrected decimal division metadata and expression status: exact terminating quotients (such as `1/8`) are reported exact, whereas rounded quotients (such as `1/3`) remain explicitly marked rounded. Verified through bounded integer cross-products; added focused browser regression cases and preserved all 2D/3D graph work. Pending full CI and Pages release.
+
 ## Unreleased — bounded high-precision expression evaluation (2026-10-27)
 
 - Added offline Calculator → High precision decimal expressions with parentheses, unary signs and operator precedence, reusing exact BigInt decimal arithmetic and 16–80 digit half-even division at each division step. Bounded 120 tokens, 16 nested levels, 300-digit operands; rejects invalid tokens, implicit multiplication and division by zero without dynamic evaluation.

@@ -45,7 +45,9 @@ def main():
   ]:
    assert page.evaluate('a=>{try{MathStudio.precisionTools.calculate(a);return false;}catch(e){return !!e.message;}}',args),args
   page.locator('[data-workspace="calculator"]').click()
-  page.get_by_role('button',name='High precision').click()
+  assert page.locator('[data-workspace="calculator"].active').count() == 1
+        page.locator('#workspace-task-guide .task-choice[data-task="precision"]').click()
+        assert page.locator('#precision-details').evaluate('(e) => e.open')
   assert page.locator('#precision-details').evaluate('(e)=>e.open')
   page.locator('#precision-a').fill('1')
   page.locator('#precision-b').fill('3')

@@ -36,7 +36,9 @@ def main():
             'v => {try {MathStudio.precisionTools.calculate({a:v,b:"1",operation:"divide"});return false;} catch(e) {return !!e.message;}}',
             '1' + '0' * 300)
         page.locator('[data-workspace="calculator"]').click()
-        page.get_by_role('button', name='High precision').click()
+        assert page.locator('[data-workspace="calculator"].active').count() == 1
+        page.locator('#workspace-task-guide .task-choice[data-task="precision"]').click()
+        assert page.locator('#precision-details').evaluate('(e) => e.open')
         page.locator('#precision-a').fill(a)
         page.locator('#precision-b').fill(b)
         page.locator('#precision-op').select_option('divide')

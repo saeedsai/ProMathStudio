@@ -6493,7 +6493,12 @@ guide.querySelector('#workspace-task-select').addEventListener('change',event=>s
 selectMode(mode());
 document.addEventListener('click',event=>{
  const id=event.target?.closest('button')?.id;
- if(['ode-to-graph','num-to-graph','dt-send-graph'].includes(id))$('ui-graph-table').open=true;
+ if(['ode-to-graph','num-to-graph','dt-send-graph'].includes(id)){
+   // A graph handoff is a deliberate task switch; keep its table controls visible.
+   lastTask.graph='table';
+   $('ui-graph-table').open=true;
+   if(activeMode==='graph')selectTask('table');
+ }
 },true);
 new MutationObserver(()=>{const next=mode();if(next!==activeMode)selectMode(next);}).observe(document.querySelector('.workspace-bar'),{attributes:true,attributeFilter:['class'],subtree:true});
 window.MathStudio.workspaceTasks={select:selectTask,current:()=>activeMode};

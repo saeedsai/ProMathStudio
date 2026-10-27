@@ -1,6 +1,6 @@
 ## Unreleased — exclusive workspace task disclosures (2026-10-28)
 
-- Selecting a workspace task now closes other registered optional task forms in that workspace, including when returning to Basic. The chosen tool opens as before; unrelated panels, input drafts and remembered workspace selections are retained. Expanded the mandatory compact-task Playwright regression to cover Calculator, Graphs and Data Tables transitions and unsaved graph input preservation. Await exact-head Quality, PR and Pages gates.
+- Selecting a workspace task now closes other registered optional task forms in that workspace, including when returning to Basic. The chosen tool opens as before; unrelated panels, input drafts and remembered workspace selections are retained. Expanded the mandatory compact-task Playwright regression to cover Calculator, Graphs and Data Tables transitions and unsaved graph input preservation. Preserves explicit ODE/numerical/table-to-graph handoffs by selecting the Graphs Table task; added a handoff-specific browser assertion after CI exposed a regression. Await exact-head Quality, PR and Pages gates.
 
 ## Unreleased — compact workspace UI (2026-10-27)
 

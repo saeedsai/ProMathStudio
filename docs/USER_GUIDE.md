@@ -30,6 +30,10 @@ Use **Send to → Solve** from the connected bar or open **Symbolic solver** and
 
 Open **2D & 3D graphs**. Choose 2D for one or multiple lines such as `y=sin(x)` and `y=cos(x)`; choose 3D for `z=x^2-y^2`. Click **Plot functions** after editing functions. Set axis ranges, pan/rotate with the pointer, zoom with the wheel, reset the view, or **Export PNG**. Trig graph inputs always use radians.
 
+### Curve-fit diagnostics and residual export
+
+In **Graphs → Plot table data**, choose a numeric X/Y table, select a 2D scatter or line chart and a fitting model, then select **Fit and show on graph**. The result reports R², RMSE, MAE and the number of included measurements. Select **Export residuals CSV** to download the included points as `x,y,predicted,residual` (residual = measured y − predicted y). This export does not modify the source table. The button is disabled until a fit succeeds, and is disabled again after clearing the fit or a failed refit. The statistics describe the selected model and data, not a guarantee of statistical significance or global optimality. Invalid or out-of-domain points are excluded as described by the fit count.
+
 ### 5 — Connected workflow
 
 1. Type in **Working equation** or choose an entry in **Select an input, saved equation or result**.

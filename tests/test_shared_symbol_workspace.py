@@ -8,6 +8,12 @@ class SharedSymbolWorkspaceTests(unittest.TestCase):
     def test_palette_visible_across_math_workspaces(self):
         for workspace in ("editor","calculator","solver","graph"):
             self.assertIn("body.ws-"+workspace+" #quick-symbols",HTML)
+    def test_workspace_classes_follow_central_navigation(self):
+        self.assertIn("for(const workspace of ['editor','calculator','solver','graph','data'])",HTML)
+        self.assertIn("document.body.classList.toggle('ws-'+workspace,mode===workspace)",HTML)
+        self.assertIn("setAttribute('aria-expanded',String(next))",HTML)
+        self.assertIn("if(wasOpen){e.preventDefault();$('quick-symbols').focus();}",HTML)
+
     def test_graph_insertion_routes_to_graph_editor(self):
         self.assertIn("activeWorkspace==='graph'",HTML)
         self.assertIn("document.getElementById('graph-input'):input",HTML)

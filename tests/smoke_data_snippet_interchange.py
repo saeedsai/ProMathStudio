@@ -46,6 +46,8 @@ def main():
             def import_payload(payload):
                 file_input.set_input_files({'name': 'snippets.json', 'mimeType': 'application/json',
                                             'buffer': json.dumps(payload).encode('utf-8')})
+                # File.text() is async; wait for the handler's finally reset before asserting.
+                page.wait_for_function("() => document.querySelector('#dt-snippet-file').value === ''")
 
             def stored():
                 return page.evaluate("JSON.parse(localStorage.getItem('promathstudio-data-snippets-v1') || '[]')")
@@ -90,9 +92,11 @@ def main():
                 assert 'rejected' in status.inner_text().lower()
                 assert stored() == original
             file_input.set_input_files({'name': 'broken.json', 'mimeType': 'application/json', 'buffer': b'{broken'})
+            page.wait_for_function("() => document.querySelector('#dt-snippet-file').value === ''")
             assert 'rejected' in status.inner_text().lower()
             assert stored() == original
             file_input.set_input_files({'name': 'huge.json', 'mimeType': 'application/json', 'buffer': b'x' * 400001})
+            page.wait_for_function("() => document.querySelector('#dt-snippet-file').value === ''")
             assert '400 KB' in status.inner_text()
             assert stored() == original
 

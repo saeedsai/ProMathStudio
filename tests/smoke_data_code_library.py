@@ -46,6 +46,10 @@ def main():
   page.wait_for_function('()=>document.querySelector("#data-menu-navigation > details:nth-child(5)")?.open')
   assert ".query('value > 0')" in page.locator('#dt-python-code').input_value()
   assert page.locator('#python-output-result').text_content()==before
+  assert page.locator('#dt-python-code').evaluate('(e)=>document.activeElement===e')
+  # The Python editor lives in a popover; dismiss it before using the library.
+  page.keyboard.press('Escape')
+  assert not page.locator('#data-menu-navigation > details:nth-child(5)').evaluate('(e)=>e.open')
   # Operation chooser must not execute a join or create a new table.
   category.select_option('Operation')
   search.fill('UNION ALL')

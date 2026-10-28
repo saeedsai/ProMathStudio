@@ -19,10 +19,10 @@ def main():
   assert menus.count() == 5
   table, filt, combine, files, python = [menus.nth(i) for i in range(5)]
 
-  table.locator('summary').focus()
+  table.locator(':scope > summary').focus()
   page.keyboard.press('Enter')
   assert table.evaluate('(e)=>e.open')
-  filt.locator('summary').focus()
+  filt.locator(':scope > summary').focus()
   page.keyboard.press('Space')
   assert filt.evaluate('(e)=>e.open')
   assert not table.evaluate('(e)=>e.open')
@@ -31,8 +31,8 @@ def main():
   search.fill('draft search')
   page.keyboard.press('Escape')
   assert not filt.evaluate('(e)=>e.open')
-  assert filt.locator('summary').evaluate('(e)=>document.activeElement===e')
-  filt.locator('summary').click()
+  assert filt.locator(':scope > summary').evaluate('(e)=>document.activeElement===e')
+  filt.locator(':scope > summary').click()
   assert search.input_value() == 'draft search'
   search.fill('')
   page.locator('#dt-sortcol').select_option(index=0)
@@ -41,12 +41,13 @@ def main():
 
   page.locator('#dt-status').click()
   assert not filt.evaluate('(e)=>e.open')
-  files.locator('summary').click()
+  assert files.locator(':scope > summary').count() == 1  # Nested file-import disclosures must not match.
+  files.locator(':scope > summary').click()
   assert files.evaluate('(e)=>e.open')
   with page.expect_download() as download:
    page.locator('#dt-export-csv').click()
   assert download.value.suggested_filename.endswith('.csv')
-  python.locator('summary').click()
+  python.locator(':scope > summary').click()
   assert python.evaluate('(e)=>e.open')
   assert not files.evaluate('(e)=>e.open')
   assert page.locator('#python-panel textarea').count() >= 1
@@ -55,8 +56,8 @@ def main():
 
   for width in (390,768,1280):
    page.set_viewport_size({'width':width,'height':850})
-   filt.locator('summary').click()
-   assert filt.locator('summary').is_visible()
+   filt.locator(':scope > summary').click()
+   assert filt.locator(':scope > summary').is_visible()
    assert search.is_visible()
    page.keyboard.press('Escape')
    assert not filt.evaluate('(e)=>e.open')

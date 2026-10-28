@@ -1,3 +1,33 @@
+## 2026-10-28 21:58 CET — P1-DATA-FORMULA-CUSTOM-COMPOSITION implemented on dev; release QA pending
+
+**Feature ledger: IMPLEMENTED ON DEV / NOT YET RELEASED.** Data Tables now composes user-defined numeric functions and SUM/AVERAGE/MEDIAN/COUNT/MIN/MAX across nested calls, including custom functions wrapping aggregates and vice versa, without eager evaluation of inactive IF branches. A 40-pass bound, strict custom arity and finite numeric result guard prevent pathological composition. Added mandatory Chromium `tests/smoke_sheet_custom_composition.py` and structural `tests/test_sheet_custom_composition.py`; registered browser test in Quality workflow and synchronized modular `src/data-tables.js` with standalone `index.html`. Local GitHub clone failed DNS resolution, so browser/unit execution must be verified through GitHub Actions. Prior release PR #70 had dev Quality 40759480095, PR Quality 40760282028, main Quality 40760948437 and Pages 40760947939 green; latest post-release dev Quality 40761749594 had all 83 steps successful. Do not claim this candidate released until its own exact-head CI, PR CI, main CI and Pages deployment pass. Historical 166-gap/95-partial baseline remains active; recurring task remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-FORMULA-CUSTOM-COMPOSITION release QA | Numeric oracles for nested custom/aggregate, lazy IF, invalid arity, 41-depth limit, persistence, responsive Chromium, exact-head PR/main/Pages checks. | DEV COMMITTED / QA PENDING |
+| 2 | P1-GRAPH-PALETTE-VALIDITY | 2D/3D executable symbols vs typesetting-only, Equation preservation, keyboard caret and mobile regression. | TODO |
+| 3 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Row/column/schema preview, cancel rollback, invalid/large input and Unicode/mobile regression. | TODO |
+| 4 | P1-MATRIX-PSEUDOINVERSE-3X2 | Rank-deficient and full-rank 3x2, Moore–Penrose identities, least-norm reference and UI browser tests. | TODO |
+| 5 | P1-DATA-LIBRARY-LONG-SNIPPET-INSPECTION | Full long-code preview, no execution, escaping, focus restoration and 390/768/1280px browser tests. | TODO |
+
+## 2026-10-28 21:16 CET — PR #70 P0-MATRIX-PSEUDOINVERSE-2X2 released
+
+**Feature ledger: RELEASED FOR STATED SCOPE.** Real 2×2 Moore–Penrose pseudoinverse supports full-rank, rank-one, zero and scaled matrices via the existing bounded SVD, with relative singular-value cutoff, all four Moore–Penrose identities, rank/residual display and Equation Editor transfer. Existing matrix operations preserved. Mandatory structural and Chromium numerical/UI/mobile regressions added and passed. Standalone `index.html` parity with `src/matrix-tools.js` verified. Independent local Node and NumPy reference checks agreed for seven representative matrices.
+
+**Execution log / verified release:** Started at `dev=669ddc11c7fc69f9da6ae60b1278eae3cd9c6513`, `main=f01123aa02952046005d2f210f371e370f4aa3dc`; no open PR, only dev/main. One atomic seven-file commit `59121a777a5412be6f034602b2d1f579f5d98ca6` passed [dev Quality 40759480095](https://github.com/saeedsai/ProMathStudio/actions/runs/40759480095) **83/83 steps** and [PR #70 Quality 40760282028](https://github.com/saeedsai/ProMathStudio/actions/runs/40760282028) **83/83 steps**. Reviewed clean, mergeable [PR #70](https://github.com/saeedsai/ProMathStudio/pull/70) with seven expected files, verified unchanged exact head, merged using ordinary SHA-checked PR to `main=03dce94e4bd8e0abda12bad20d9a8f02511e9421`. Fast-forwarded dev to merge commit without force. [Main Quality 40760948437](https://github.com/saeedsai/ProMathStudio/actions/runs/40760948437) passed **83/83 steps**, [Pages deployment 40760947939](https://github.com/saeedsai/ProMathStudio/actions/runs/40760947939) succeeded, post-merge [dev Quality 40760971364](https://github.com/saeedsai/ProMathStudio/actions/runs/40760971364) passed **83/83 steps**, cleanup [40760948584](https://github.com/saeedsai/ProMathStudio/actions/runs/40760948584) succeeded. No stale branches found. Branch protection remains disabled; no bypass performed. Interactive external Pages fetch remains unavailable, so only deployment workflow (not live browser navigation) is verified. Local full suite could not execute from this environment due to GitHub DNS; GitHub Actions executed the mandatory full browser/structural suite. Documentation-only post-release dev checkpoint will have its own separate Quality gate. Historical 166-gap/95-partial baseline remains active and recurring hourly task remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Named functions nested in SUM/IF, numeric reference oracles, unknown names, recursion limits and no eval; mandatory Chromium and structural tests. | TODO |
+| 2 | P1-GRAPH-PALETTE-VALIDITY | Executable 2D/3D symbols versus typesetting-only, preserve Equation palette, keyboard caret and 390/768/1280px tests. | TODO |
+| 3 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Row/column/schema preview before sheet creation, cancel rollback, malformed/large file, Unicode and mobile tests. | TODO |
+| 4 | P1-MATRIX-PSEUDOINVERSE-3X2 | Rectangular Moore–Penrose 3×2 including rank deficiency, minimum-norm reference, four identities, UI and browser tests. | TODO |
+| 5 | P1-DATA-LIBRARY-LONG-SNIPPET-INSPECTION | Full long-code preview without execution, safe escaping, keyboard focus, 390/768/1280px browser regression. | TODO |
+
 ## 2026-10-28 20:58 CET — P0-MATRIX-PSEUDOINVERSE-2X2 implemented on dev; QA pending
 
 **Feature ledger: IMPLEMENTED ON DEV / NOT YET RELEASED.** The matrix calculator now offers Moore–Penrose pseudoinverse for 2×2 real A, including full rank, rank-one and zero matrices. Reuses the validated scaled SVD, applies relative singular-value cutoff 1e-12, checks all four Moore–Penrose identities, displays numerical rank and residuals, and sends the result to Equation Editor. Added `tests/smoke_matrix_pseudoinverse.py` mandatory Chromium numerical/UI/mobile regression and `tests/test_matrix_pseudoinverse.py` structural and module/standalone parity regression. Existing SVD, inverse and other operations unchanged. Isolated Node numeric reference checks passed for invertible, rank-one, zero, scaled and near-rank-deficient matrices. **Full GitHub Actions CI and production deployment must be verified before release.**

@@ -1,12 +1,17 @@
-## Unreleased — Real 2×2 Moore–Penrose pseudoinverse (2026-10-28)
+## In QA — Nested spreadsheet custom-function composition (2026-10-28)
+
+- Data Tables now evaluates innermost custom functions and built-in aggregates in a shared bounded loop. Expressions such as `=SUM(TWICE(2),TWICE(SUM(A1:A3)))` and `=TWICE(TWICE(3))` work when the user defines `TWICE(x)=2*x`; lazy `IF` remains intact. The evaluator rejects invalid argument counts, non-finite results and excessive nesting without `eval` or `Function`.
+- Added structural and mandatory Chromium regression for numeric references, cross-nesting, lazy IF, unknown functions, invalid arity, 41-deep nesting, workbook persistence, UI and responsive layouts. **Not released until exact-head dev, PR, main Quality and Pages deployment gates succeed.**
+
+## Released — Real 2×2 Moore–Penrose pseudoinverse (2026-10-28, PR #70)
 
 - Added a Pseudoinverse button to the matrix calculator for invertible, rank-deficient, and zero 2×2 real matrices, with SVD-relative singular-value cutoff, numerical rank, Moore–Penrose residual diagnostics, and Equation Editor transfer. The existing inverse, SVD and other matrix operations are preserved.
-- Added structural and mandatory Chromium numerical/UI/mobile regressions, including singular, zero, scaled, invalid and editor-transfer cases. **Implemented on dev; not released until exact-head CI, PR checks, main Quality and Pages deployment are verified.**
+- Added structural and mandatory Chromium numerical/UI/mobile regressions, including singular, zero, scaled, invalid and editor-transfer cases. **Released:** [dev Quality 40759480095](https://github.com/saeedsai/ProMathStudio/actions/runs/40759480095), [PR #70 Quality 40760282028](https://github.com/saeedsai/ProMathStudio/actions/runs/40760282028), [main Quality 40760948437](https://github.com/saeedsai/ProMathStudio/actions/runs/40760948437) and [Pages deployment 40760947939](https://github.com/saeedsai/ProMathStudio/actions/runs/40760947939) all succeeded.
 
-## Unreleased — Accessible saved-snippet import preview keyboard cancellation (2026-10-28)
+## Released — Accessible saved-snippet import preview keyboard cancellation (2026-10-28, PR #69)
 
 - Importing a saved snippet JSON file moves keyboard focus into its review preview. Escape dismisses the preview without writing to saved snippets and returns focus to the Import button; the existing Cancel button remains available.
-- Expanded mandatory Chromium preview regression for immediate Escape dismissal and focus restoration at 390/768/1280px, plus structural assertions for preview focus and standalone source parity. **Not released until exact-head dev/PR/main CI and Pages deployment are verified.**
+- Expanded mandatory Chromium preview regression for immediate Escape dismissal and focus restoration at 390/768/1280px, plus structural assertions for preview focus and standalone source parity. **Released:** [PR #69 Quality 40755066897](https://github.com/saeedsai/ProMathStudio/actions/runs/40755066897), [main Quality 40755825780](https://github.com/saeedsai/ProMathStudio/actions/runs/40755825780) and [Pages 40755826828](https://github.com/saeedsai/ProMathStudio/actions/runs/40755826828) succeeded.
 
 ## Released — Single-column Data Tables CSV/TSV/JSON interchange (2026-10-28, PR #68)
 

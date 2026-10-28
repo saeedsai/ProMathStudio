@@ -1,3 +1,19 @@
+## 2026-10-28 23:56 CET — P1-DATA-LIBRARY-LONG-SNIPPET-INSPECTION implemented on dev
+
+**Feature ledger: IMPLEMENTED ON DEV / QA AND DEPLOYMENT PENDING.** Chose a bounded, independently testable usability fix while Data Tables import preview remains a larger multi-test migration. Saved Formula/Python snippets now have a read-only full-source preview (up to 8,000 characters), with safe DOM text/value insertion, Escape/Close dismissal, focus return, no execution/storage mutation and compact 120-character catalog summaries. Added structural `tests/test_data_snippet_inspection.py`, Chromium `tests/smoke_data_snippet_inspection.py`, required Quality workflow step and standalone source parity. The existing Import preview and prior Data Tables/Graph functionality are unchanged.
+
+**Execution log:** Started at `main=583ce294f9b7ab8749845e364b833ecfac653028`, `dev` two documentation commits ahead, no open PR. Last documented [main Quality 40777944534](https://github.com/saeedsai/ProMathStudio/actions/runs/40777944534), [Pages 40777944359](https://github.com/saeedsai/ProMathStudio/actions/runs/40777944359) and [dev Quality 40778685508](https://github.com/saeedsai/ProMathStudio/actions/runs/40778685508) were successful; fresh push CI is not yet verified. Local git clone failed DNS resolution; unit and browser execution require GitHub Actions. **Do not mark Released before exact-head CI, PR CI, main CI and Pages.** Existing branch protection remains unconfigured. Historical 166-gap/95-partial baseline remains active and hourly task stays enabled.
+
+### NEXT FIVE — acceptance-tested work
+
+| Priority | Feature | Acceptance tests / dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-LONG-SNIPPET-INSPECTION release QA | Full 8,000-character preview, inert HTML, keyboard Escape/Close and focus, 390/768/1280px, exact dev/PR/main/Pages gates. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Preview row/column count and schema before mutation; cancel without sheet creation; malformed/large/Unicode and old importer regression updates. | TODO |
+| 3 | P1-MATRIX-PSEUDOINVERSE-3X2 | Full/rank-deficient real 3×2, four Moore–Penrose identities, least-norm reference, browser UI/mobile. | TODO |
+| 4 | P1-DATA-CUSTOM-COMPOSITION-HARDENING | Nested numeric error propagation, collisions, complex/nonfinite guards, 40-depth and workbook persistence. | TODO |
+| 5 | P1-GRAPH-PALETTE-VALIDITY-EXPANSION | Additional executable graph templates versus Equation-only notation, caret preservation and 2D/3D browser oracles. | TODO |
+
 ## 2026-10-28 23:18 CET — PR #72 graph numeric palette released
 
 **Feature ledger: RELEASED FOR STATED SCOPE.** In Graphs 2D/3D the shared Symbols palette keeps known numeric plotting templates insertable while displaying Equation-only notation disabled with a clear explanation and accessible label; the Equation workstation retains every symbol. Palette redraws on search focus to reflect current workspace; caret, graph drafts and Equation state remain isolated. Added structural `tests/test_graph_palette_validity.py` and mandatory Chromium `tests/smoke_graph_palette_validity.py` covering 2D/3D, Equation, disabled notation, enabled sine templates, focus, responsive 390/768/1280px and runtime errors. No other feature removed. Exact PR diff reviewed: six expected files.

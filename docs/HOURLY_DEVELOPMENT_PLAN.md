@@ -1,3 +1,17 @@
+## 2026-10-28 20:24 CET — P1-DATA-SNIPPET-PREVIEW-ESCAPE checkpoint
+
+**DEV COMMITTED / NOT RELEASED.** Added Escape-to-cancel for the saved-snippet import preview; keyboard dismissal closes the preview, returns focus to Import and does not invoke storage persistence. Synchronized standalone HTML with `src/data-tables.js` and added focused `tests/test_snippet_preview_escape.py` covering cancellation and byte-for-byte parity. GitHub readback confirmed module/HTML parity. Attempted local unit execution, but GitHub clone failed due to DNS resolution; Chromium and exact-head Quality are not yet verified. **Do not merge until green checks.** Current main at checkpoint `f6a13bbe7daa8f10bb39bb20b2990a4291767f61`; concurrent hourly work may advance dev. Recurring task stays enabled.
+
+### NEXT FIVE with acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Snippet preview keyboard QA and release | Escape with preview focused, no mutation, focus restored, mobile 390/768/1280, exact-head CI, PR/main/Pages gates. | DEV COMMITTED / QA PENDING |
+| 2 | Data custom formula composition | Nested named functions, invalid names, recursion bounds and numeric reference cases. | TODO |
+| 3 | 2x2 matrix pseudoinverse | Moore–Penrose identities, singular/zero matrices and browser UI. | TODO |
+| 4 | Graph palette compatibility | 2D/3D executable symbols versus display-only notation and focus/caret tests. | TODO |
+| 5 | Data import preview validation | Schema/row counts, cancel rollback, malformed file and responsive tests. | TODO |
+
 ## 2026-10-28 20:24 CET — P1-DATA-SINGLE-COLUMN-INTERCHANGE RELEASED via PR #68
 
 **Feature ledger: RELEASED FOR STATED SCOPE.** Data Tables accepts one-column CSV/TSV/JSON, including quoted Unicode, embedded separators, multiline text, empty cells and editable formula-source CSV. CSV/TSV serializers now explicitly quote empty cells to preserve single-column blank records; TSV extension wins over ambiguous comma/semicolon sniffing. Regular TSV and JSON exports retain **evaluated** values, whereas formula-source CSV preserves editable expressions. Graph XY import and plot validation still require distinct coordinate columns. Added mandatory Chromium `tests/smoke_data_single_column.py` and structural `tests/test_single_column_import.py`; standalone `index.html` synchronized with `src/data-tables.js`.

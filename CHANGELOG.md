@@ -1,7 +1,7 @@
-## In development — Graph palette numeric validity (2026-10-28)
+## Released — Graph palette numeric validity (2026-10-28, PR #72)
 
 - In 2D and 3D Graphs, the shared Symbols library now distinguishes known executable numeric templates (sin/cos, logarithms, constants, powers and other supported operations) from Equation-only notation. Non-plotting symbols are visible but disabled with an explanation; the full symbol library remains available in Equation. A context hint explains the distinction, and focus-based redraw handles programmatic workspace navigation.
-- Added `tests/test_graph_palette_validity.py` and mandatory Chromium `tests/smoke_graph_palette_validity.py` for enabled/disabled entries, 2D/3D draft isolation, keyboard focus, Equation compatibility and 390/768/1280px layouts. **Not released:** exact-head dev CI, PR CI, main Quality and Pages deployment must be verified.
+- Added `tests/test_graph_palette_validity.py` and mandatory Chromium `tests/smoke_graph_palette_validity.py` for enabled/disabled entries, 2D/3D draft isolation, keyboard focus, Equation compatibility and 390/768/1280px layouts. **Released:** [PR #72 Quality 40777296427](https://github.com/saeedsai/ProMathStudio/actions/runs/40777296427) passed 85/85 steps; [main Quality 40777944534](https://github.com/saeedsai/ProMathStudio/actions/runs/40777944534) and [post-merge dev Quality 40777956663](https://github.com/saeedsai/ProMathStudio/actions/runs/40777956663) passed; [Pages 40777944359](https://github.com/saeedsai/ProMathStudio/actions/runs/40777944359) succeeded. Interactive hosted browser navigation remains unverified.
 
 ## Released — Nested spreadsheet custom-function composition (2026-10-28, PR #71)
 

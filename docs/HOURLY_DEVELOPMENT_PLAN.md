@@ -1,3 +1,17 @@
+## 2026-10-28 09:55 CET — P1-UI-SHARED-SYMBOL-LIBRARY: navigation bugfix and browser QA gate
+
+**Feature ledger: IMPLEMENTED ON DEV; CI/PR/Pages release pending.** Read AGENTS.md, frozen 166-gap/95-partial inventory, and current plan. Starting dev `53e05619226792a6140fe0637e1cdecb474c65f9`, main `92e4860303396700ebe94e2f116cc3086fe80b66`; latest exact prior-dev [Quality 40658582529](https://github.com/saeedsai/ProMathStudio/actions/runs/40658582529) passed. No open PRs and only `dev`/`main` branches; neither is protected. Browser QA investigation found the prior Symbols visibility change used `body.ws-solver`/`body.ws-graph` selectors without ever setting those classes. Fixed central workspace navigation to update all five `ws-*` classes on clicks, session restore and programmatic navigation; removed the obsolete Editor/Calculator-only click class handler. Added aria-expanded and keyboard Escape focus restoration. Existing graph palette insertion and Solver working equation insertion remain unchanged. Added new Playwright browser regression `tests/smoke_shared_symbols.py` (Solver, 2D/3D, keyboard, session/API, mobile, draft isolation), registered mandatory Quality, extended `tests/test_shared_symbol_workspace.py`, and updated `docs/USER_GUIDE.md` and CHANGELOG. CI for new exact head, PR, main and Pages must be inspected and recorded separately; do not infer release from the earlier green SHA. Local checkout cannot resolve github.com, so full Python and Chromium suites run via repository CI, not locally. No tracked files proven obsolete for deletion.
+
+### NEXT FIVE — actionable queue with acceptance tests
+
+| Priority | Feature | Acceptance tests / dependencies | State |
+|---:|---|---|---|
+| 1 | P1-UI-SHARED-SYMBOL-LIBRARY QA and release | New Chromium test plus full unit/browser Quality at exact dev SHA; verify search, caret insertion, 2D/3D drafts, Escape/focus, restored/programmatic workspace, 390/768/1280 px; PR checks then main Quality and Pages. | DEV IMPLEMENTED; QA GATE |
+| 2 | P1-DATA-LIBRARY-FORMULA-COMPATIBILITY | Test advertised SUM/AVERAGE/MIN/MAX/COUNT/IF against computed reference results, invalid ranges and cross-table errors; label unsupported Excel functions. | TODO |
+| 3 | P1-DATA-LIBRARY-SNIPPET-UX | Explicit cancel-edit, export/import JSON with schema validation and atomic rollback, no automatic Python execution; Playwright reload and quota cases. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode and formula round trips, empty rows and malformed-file rollback with browser tests. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY | Focus/ARIA, keyboard traps and overflow across five workspaces at 390/768/1280 px; automated axe/manual review as available. | IN PROGRESS |
+
 ## 2026-10-28 09:40 CET — Shared math palette, parallel feature checkpoint
 
 **DEV SOURCE AND FOCUSED TEST COMMITTED; CI/RELEASE NOT VERIFIED.** Enabled the existing Symbols quick-menu button in Solver and Graph workspaces, and routed palette insertion to the graph function textarea in graph mode; Solver continues inserting into the working equation editor. Added `tests/test_shared_symbol_workspace.py` for workspace visibility and routing assertions. Browser focus/selection, exact runtime graph behavior, responsive layout, full CI and Pages release remain pending. No PR or main merge claimed. Existing dev documentation ahead of main is preserved.

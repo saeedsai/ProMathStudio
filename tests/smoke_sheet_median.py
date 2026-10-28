@@ -34,6 +34,10 @@ def main():
         assert values[0][9] == 2
         assert page.evaluate("MathStudio.dataTables.formula('MEDIAN(1,2,3,4)','Data1')") == 2.5
         assert page.evaluate("MathStudio.dataTables.formula('MEDIAN(1,2,3)','Data1')") == 2
+        # In-grid but unpopulated rows are blank, not zero-valued observations.
+        assert page.evaluate("MathStudio.dataTables.formula('MEDIAN(A1:A5)','Data1')") == 4
+        assert page.evaluate("MathStudio.dataTables.formula('COUNT(A1:A5)','Data1')") == 3
+        assert abs(page.evaluate("MathStudio.dataTables.formula('AVERAGE(A1:A5)','Data1')") - 13/3) < 1e-10
         page.locator('#dt-code-library summary').click()
         page.locator('#dt-sheet td input[data-row="0"][data-col="7"]').click()
         page.locator('#dt-library-search').fill('median')

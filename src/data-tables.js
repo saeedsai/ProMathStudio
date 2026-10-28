@@ -434,7 +434,12 @@
           if((Math.abs(c1-c0)+1)*(Math.abs(r1-r0)+1)>6000)throw Error('#RANGE');
           // Unpopulated in-grid rows are blank; invalid workbook coordinates must not silently become zero.
           if(r0<0||r1<0||r0>=MAX_ROWS||r1>=MAX_ROWS||c0<0||c1<0||c0>=MAX_COLUMNS||c1>=MAX_COLUMNS)throw Error('#REF!');
-          for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(target,rr,cc,stack);if(v!==''&&String(v).trim()!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
+          for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){
+            // value() returns zero for missing coordinates, but an unpopulated spreadsheet cell is blank, not numeric zero.
+            if(rr>=target.rows.length||cc>=target.columns.length)continue;
+            const v=value(target,rr,cc,stack);
+            if(v!==''&&String(v).trim()!==''&&Number.isFinite(Number(v)))nums.push(Number(v));
+          }
         } else {const v=compute(arg,t,stack);if(Number.isFinite(Number(v)))nums.push(Number(v));}}
       const upper=fn.toUpperCase();
       let x;

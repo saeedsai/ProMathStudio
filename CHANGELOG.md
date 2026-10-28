@@ -1,8 +1,8 @@
-## In QA — Equation CAS accessible result announcements and keyboard focus (2026-10-28)
+## Released — Equation CAS accessible result announcements and keyboard focus (2026-10-28, PR #65)
 
 - Added one concise, screen-reader-accessible live summary for symbolic success, errors and worker progress, including the first result. The full MathML solution region remains navigable without duplicating live announcements.
 - Kept the **Execute** button keyboard-focusable while a SymPy job is running using `aria-disabled` and the existing guarded busy state; no duplicate submissions or solver capability changes.
-- Added mandatory Chromium `tests/smoke_equation_accessibility.py` for offline answers, invalid input, delayed worker reentry/focus, task picker focus and 390/768/1280px layouts. Release pending exact-head CI, PR, main Quality and Pages verification.
+- Added mandatory Chromium `tests/smoke_equation_accessibility.py` for offline answers, invalid input, delayed worker reentry/focus, task picker focus and 390/768/1280px layouts. Released via [PR #65](https://github.com/saeedsai/ProMathStudio/pull/65): [dev Quality 40721833455](https://github.com/saeedsai/ProMathStudio/actions/runs/40721833455), [PR Quality 40722710824](https://github.com/saeedsai/ProMathStudio/actions/runs/40722710824), [main Quality 40723301997](https://github.com/saeedsai/ProMathStudio/actions/runs/40723301997) and [Pages deployment 40723299988](https://github.com/saeedsai/ProMathStudio/actions/runs/40723299988) all passed.
 
 ## Released — Nested spreadsheet aggregates (2026-10-28, PR #64)
 

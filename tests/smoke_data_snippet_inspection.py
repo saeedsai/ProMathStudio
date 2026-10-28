@@ -40,6 +40,8 @@ def main():
             page.locator('#dt-library-search').fill(name)
             view = page.get_by_role('button', name='View full snippet '+name)
             assert view.count() == 1
+            # The catalog remains compact; the full 8,000-character source is in the preview only.
+            assert len(view.locator('xpath=..').inner_text()) < 400
             before = page.evaluate("localStorage.getItem('promathstudio-data-snippets-v1')")
             python_before = page.locator('#python-output-result').text_content()
             for width in (1280, 768, 390):

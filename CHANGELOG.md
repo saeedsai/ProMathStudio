@@ -1,3 +1,7 @@
+## Unreleased — Graphs action grouping and panel QA (2026-10-28)
+
+- Grouped secondary Graphs send-to-Editor/Solver actions in an accessible disclosure; kept Plot, Reset, PNG and 2D/3D mode switches visible. Preserved existing button IDs, event handlers, graph state and workspace drafts. Added dedicated Playwright graph-panel regression and mandatory CI step for axes, appearance, 2D/3D, PNG, keyboard transfer, table task and mobile. Full exact-head CI and Pages deployment pending.
+
 ## Unreleased — exclusive workspace task disclosures (2026-10-28)
 
 - Selecting a workspace task now closes other registered optional task forms in that workspace, including when returning to Basic. The chosen tool opens as before; unrelated panels, input drafts and remembered workspace selections are retained. Expanded the mandatory compact-task Playwright regression to cover Calculator, Graphs and Data Tables transitions and unsaved graph input preservation. Preserves explicit ODE/numerical/table-to-graph handoffs by selecting the Graphs Table task; added a handoff-specific browser assertion after CI exposed a regression. Await exact-head Quality, PR and Pages gates.

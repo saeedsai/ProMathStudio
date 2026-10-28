@@ -59,6 +59,9 @@ groupActions('ui-calc-more-actions','Copy and send results',
 groupActions('ui-editor-export-actions','Copy and export equation',
  document.querySelector('.preview-buttons'),
  ['#copy-latex','#copy-word','#copy-image','#export-word']);
+groupActions('ui-graph-share-actions','Send graph function to another workspace',
+ $('graph-panel').querySelector('.graph-actions'),
+ ['[data-forward="graph"][data-destination="editor"]','[data-forward="graph"][data-destination="solver"]']);
 
 const tasks={
  calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-tools'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['precision','High precision','Exact decimals and 16–80 digit division.','#precision-details'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],

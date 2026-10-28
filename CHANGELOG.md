@@ -1,8 +1,8 @@
-## In development — Graph Symbols caret-aware insertion (2026-10-28)
+## Released — Graph Symbols caret-aware insertion (2026-10-28, PR #66)
 
 - Unified the Symbols palette insertion path across Equation, Calculator and Graphs, removing duplicated graph/calculator insertion logic. 2D/3D graph function templates such as `sin(x)`, `cos(x)` and `sqrt(x)` select the editable `x` placeholder; replacing a selection inserts at the caret and restores editor focus.
 - Graph symbol edits remain drafts until **Plot** is clicked and no longer trigger an unrelated Equation preview refresh. Existing 2D/3D draft isolation, math library, symbolic solver and calculator features are preserved.
-- Added focused structural `tests/test_graph_symbol_caret.py` and mandatory Chromium `tests/smoke_graph_symbol_caret.py` for selection, focus, 2D/3D drafts, no auto-plot and 390/768/1280px layouts. **Release pending exact-head CI, PR, main QA and Pages deployment.**
+- Added focused structural `tests/test_graph_symbol_caret.py` and mandatory Chromium `tests/smoke_graph_symbol_caret.py` for selection, focus, 2D/3D drafts, no auto-plot and 390/768/1280px layouts. Released via [PR #66](https://github.com/saeedsai/ProMathStudio/pull/66). Exact-head [dev Quality 40730918150](https://github.com/saeedsai/ProMathStudio/actions/runs/40730918150), [PR Quality 40731721171](https://github.com/saeedsai/ProMathStudio/actions/runs/40731721171) and [main Quality 40732325880](https://github.com/saeedsai/ProMathStudio/actions/runs/40732325880) all passed (79 steps); [Pages deployment 40732326236](https://github.com/saeedsai/ProMathStudio/actions/runs/40732326236) succeeded.
 
 ## Released — Equation CAS accessible result announcements and keyboard focus (2026-10-28, PR #65)
 

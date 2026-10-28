@@ -17,7 +17,7 @@ def upload(page, filename, payload):
     })
     stem = filename.rsplit('.', 1)[0]
     page.wait_for_function(
-        '(name) => MathStudio.dataTables.tables.some(t => t.name === name)', stem)
+        '(name) => MathStudio.dataTables.tables.some(t => t.name === name)', arg=stem)
     return page.evaluate('MathStudio.dataTables.active')
 
 
@@ -109,7 +109,7 @@ def main():
                               'invalid.json': 'missing or unexpected columns'}[name]
             page.wait_for_function(
                 '(message) => document.querySelector("#dt-status").textContent.includes(message)',
-                expected_error)
+                arg=expected_error)
             assert page.evaluate('MathStudio.dataTables.exportState()') == before
 
         # Graphs must still reject a one-coordinate dataset.

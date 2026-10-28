@@ -1,8 +1,14 @@
-## Unreleased — Equation task-family organization (2026-10-28)
+## Unreleased — Data Tables saved-snippet JSON interchange (2026-10-28)
+
+- Added versioned `promathstudio-snippets` JSON export/import for saved Formula and Python snippets, with a data-only schema and browser download/file picker. Existing localStorage format is unchanged.
+- Import merges nonconflicting snippets without overwriting existing names, treats exact repeats as idempotent, and rejects unsupported versions, duplicate names, malformed/oversized files, invalid formulas, name conflicts and more than 40 saved snippets. Validation occurs before an atomic storage write; quota failures leave the catalog unchanged. Import never executes Python.
+- Added focused static test `tests/test_data_snippet_interchange.py` and mandatory Chromium regression `tests/smoke_data_snippet_interchange.py` covering JSON round trip, Unicode, rollback, reload and responsive controls. Source/standalone parity synchronized. CI, PR and Pages deployment must be verified before release.
+
+## Released — Equation task-family organization (2026-10-28, PR #61)
 
 - Organized the combined Equation workstation's existing task selector into four accessible native groups: **Write & solve**, **Notebook & examples**, **Numerical & differential**, and **Solver configuration**. No solver, notebook, CAS or export buttons were duplicated, removed or hidden by this grouping; task values and drafts are preserved.
 - Added `tests/smoke_equation_task_groups.py` with Chromium coverage for grouping, offline CAS, notebook, numerical/ODE, assumptions, draft preservation, other workspace isolation and 390/768/1280px layout. Registered it as a mandatory Quality workflow step. Source/standalone parity synchronized.
-- This change remains **on dev pending exact-head CI and ordinary PR promotion**; do not treat as released until verified.
+- Verified on exact dev and PR heads, merged through PR #61, passed main Quality, and published through GitHub Pages. Interactive public-site browsing remains unverified.
 
 ## Released — Unified Equation workstation (2026-10-28, PR #60)
 

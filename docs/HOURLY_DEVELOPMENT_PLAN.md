@@ -1,3 +1,37 @@
+## 2026-10-28 13:09 CET — CI recovery for snippet JSON interchange
+
+Exact dev-head [Quality 40684917142](https://github.com/saeedsai/ProMathStudio/actions/runs/40684917142) **FAILED** solely at the newly mandatory Chromium snippet-interchange test, line 70: an immediate assertion raced the asynchronous `File.text()` import handler. The remaining Quality steps were completed without reported failure. Fixed test synchronization by waiting for the import input to reset in its `finally` block before checking the resulting status/storage; applied the same wait to malformed and oversize cases. Repair commit `f5e4c234c68bc6b042a63f2639d76cc14c185613`. This is a test timing repair, not a bypass: all existing assertions and malformed/quota/conflict cases remain. Full exact-head CI and PR/Pages are still pending; no release claimed.
+
+## 2026-10-28 13:02 CET — P1-DATA-LIBRARY-SNIPPET-UX: versioned JSON interchange
+
+**Feature ledger: IMPLEMENTED ON DEV; QA/RELEASE PENDING.** Highest-priority unfinished NEXT FIVE item: saved snippet import/export. Added Export snippets JSON and Import snippets JSON controls in Data Tables Functions & Code Library. Export produces `{format:"promathstudio-snippets",version:1,snippets:[{name,kind,sample}]}` and import performs strict schema/name/formula/type/count/file-size validation before merging; existing names are never overwritten silently, exact duplicates are idempotent, malformed and storage-quota failures roll back entirely, and Python is never auto-executed. Existing saved snippets and storage key remain compatible. Source `src/data-tables.js` synchronized verbatim into standalone `index.html`. Added focused `tests/test_data_snippet_interchange.py` and mandatory `tests/smoke_data_snippet_interchange.py` with Unicode round-trip, collision, malformed/oversize, rollback, reload and mobile coverage. CI `.github/workflows/quality.yml` registers the new Chromium suite. Initial commits: source `9b94c22494c0b1ace13c4b4cdb36481fb0f93e69`, bundle `020508545e676d4bf5362dc3d3485ddd06d95732`, browser test `d036d4c42a960f0f0768ea3b55d34dad9e879f35`, CI `814764aad13b695a4bf81dabc56e0bc6baa4866e`, unit test `2bb815187ba0b2891f47fcfc47df6a776997f4af`. Prior main `a07be62a7fc92d8c6f994215895f4e8dddd44362` and post-release dev `21879d73d550068e574e60f301edc7bb2f23d5be` had passed Quality 40682255044. Exact candidate CI, PR, main and Pages remain **UNVERIFIED** at this checkpoint; do not claim released. No unrelated files deleted and only dev/main were previously verified. Keep hourly task enabled.
+
+### NEXT FIVE — acceptance-tested roadmap
+
+| Priority | Feature | Acceptance tests / dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-SNIPPET-UX final QA and release | New Chromium round-trip + quota/conflict/oversize, full Quality exact head, PR checks, main Quality and Pages. | IMPLEMENTED / CI PENDING |
+| 2 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode, blank records, formulas, malformed rollback and full browser round-trip. | IN PROGRESS |
+| 3 | P1-DATA-FORMULA-NESTED-AGGREGATES | Nested SUM/MEDIAN/IF, cycles and invalid ranges with numerical reference oracle. | TODO |
+| 4 | P1-UI-EQUATION-ACCESSIBILITY | Task group screen-reader labels, keyboard focus, CAS live status and 390/768/1280px layouts. | TODO |
+| 5 | P1-GRAPH-SYMBOL-INPUT | Valid 2D/3D symbol insertion, caret preservation and no accidental graph refresh. | TODO |
+
+## 2026-10-28 12:50 CET — PR #61 Equation task organization verified release
+
+**Feature ledger: RELEASED FOR STATED SCOPE.** Categorized the combined Equation task selector with accessible native `optgroup` headings (Write & solve, Notebook & examples, Numerical & differential, Solver configuration). All original tasks, CAS execution, notebook, numerical/ODE, assumptions and editor draft preservation remain. Mandatory `tests/smoke_equation_task_groups.py` checks the groups, offline CAS, task switching, no duplicate actions and 390/768/1280px layouts; source/standalone parity passed. No features or test gates removed.
+
+**Execution log:** Candidate `dev=6ffbabc2eaa980ee9c45b9f52b0f01ba561c1d67` passed [dev Quality 40680993680](https://github.com/saeedsai/ProMathStudio/actions/runs/40680993680) and [PR Quality 40681144402](https://github.com/saeedsai/ProMathStudio/actions/runs/40681144402), each 74/74 steps, with no failures. Inspected [PR #61](https://github.com/saeedsai/ProMathStudio/pull/61): exactly six expected files, mergeable clean; merged through ordinary SHA-checked GitHub PR to `main=a07be62a7fc92d8c6f994215895f4e8dddd44362`. Exact main [Quality 40681794597](https://github.com/saeedsai/ProMathStudio/actions/runs/40681794597) passed 74/74, [Pages 40681794708](https://github.com/saeedsai/ProMathStudio/actions/runs/40681794708) succeeded and [branch cleanup 40681794413](https://github.com/saeedsai/ProMathStudio/actions/runs/40681794413) succeeded. `dev` was fast-forwarded to main with a non-force expected-SHA update; only `dev` and `main` remain, both unprotected. Independent interactive browsing of Pages is unavailable, so live interaction not independently verified beyond Pages deployment and Chromium CI. Post-release documentation commits on `dev` require their own exact-head Quality check. Continue hourly development; 166 gaps/95 partials not complete.
+
+### NEXT FIVE — acceptance-tested roadmap
+
+| Priority | Feature | Acceptance tests / dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-SNIPPET-UX | Versioned JSON snippet export/import, schema validation, duplicates, malformed rollback, no Python auto-execute; Chromium. | NEXT |
+| 2 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode and blank rows, formulas, malformed rollback, round-trip browser tests. | IN PROGRESS |
+| 3 | P1-DATA-FORMULA-NESTED-AGGREGATES | Nested SUM/MEDIAN/IF references, cycles, bounds, deterministic malformed-expression errors; numeric oracle. | TODO |
+| 4 | P1-UI-EQUATION-ACCESSIBILITY | Task-picker groups screen-reader labels, keyboard focus, CAS status announcements, mobile and legacy routing. | TODO |
+| 5 | P1-GRAPH-SYMBOL-INPUT | Symbol library inserts valid 2D/3D functions with caret/focus preservation and no unintended plot refresh; Chromium. | TODO |
+
 ## 2026-10-28 12:35 CET — P1-UI-EQUATION-TOOL-ORGANIZATION: categorized Equation tools
 
 **Feature ledger: IN QA ON DEV; NOT YET RELEASED.** Highest-priority unfinished P1 UI task from the previous NEXT FIVE: organize the unified Equation station without duplicate buttons or removed capabilities. Grouped the existing task picker into four native accessible `<optgroup>` families: Write & solve, Notebook & examples, Numerical & differential, and Solver configuration. Retained original task keys, CAS/ODE/assumption controls, notebook, input state and other workspaces. Updated canonical `src/workspace-tasks.js` and standalone `index.html` with source parity; added mandatory Chromium `tests/smoke_equation_task_groups.py` and Quality workflow registration. No branch added or protection bypassed.

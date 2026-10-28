@@ -44,7 +44,7 @@ def main():
         impossible=[page.evaluate('(src)=>MathStudio.parse(src).ast',expr) for expr in ['x=1','x=2']]
         empty=json.loads(context['_ms_system'](json.dumps({'equations':impossible,'unknowns':['x']})))
         assert 'No solution' in empty['note'],empty
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator('#cas-operation').select_option('system')
         assert page.locator('#cas-system-fields').is_visible()
         assert 'x = 2x + 2z' in page.locator('#cas-system-input').input_value()

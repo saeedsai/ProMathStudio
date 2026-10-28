@@ -1,8 +1,8 @@
-## Unreleased — Data Tables saved-snippet JSON interchange (2026-10-28)
+## Released — Data Tables saved-snippet JSON interchange (2026-10-28, PR #62)
 
 - Added versioned `promathstudio-snippets` JSON export/import for saved Formula and Python snippets, with a data-only schema and browser download/file picker. Existing localStorage format is unchanged.
 - Import merges nonconflicting snippets without overwriting existing names, treats exact repeats as idempotent, and rejects unsupported versions, duplicate names, malformed/oversized files, invalid formulas, name conflicts and more than 40 saved snippets. Validation occurs before an atomic storage write; quota failures leave the catalog unchanged. Import never executes Python.
-- Added focused static test `tests/test_data_snippet_interchange.py` and mandatory Chromium regression `tests/smoke_data_snippet_interchange.py` covering JSON round trip, Unicode, rollback, reload and responsive controls. Source/standalone parity synchronized. CI, PR and Pages deployment must be verified before release.
+- Added focused static test `tests/test_data_snippet_interchange.py` and mandatory Chromium regression `tests/smoke_data_snippet_interchange.py` covering JSON round trip, Unicode, rollback, reload and responsive controls. Source/standalone parity synchronized. Verified on exact dev [Quality 40685392257](https://github.com/saeedsai/ProMathStudio/actions/runs/40685392257) and [PR Quality 40686077662](https://github.com/saeedsai/ProMathStudio/actions/runs/40686077662), merged through [PR #62](https://github.com/saeedsai/ProMathStudio/pull/62) to main `5cab0ca1a8539d981618c5647470fc87d4ceec72`. Exact-main [Quality 40686644777](https://github.com/saeedsai/ProMathStudio/actions/runs/40686644777), [Pages 40686645258](https://github.com/saeedsai/ProMathStudio/actions/runs/40686645258) and [cleanup 40686644691](https://github.com/saeedsai/ProMathStudio/actions/runs/40686644691) all passed; post-merge dev Quality 40686662154 passed. Hosted interactive browsing remains unverified.
 
 ## Released — Equation task-family organization (2026-10-28, PR #61)
 

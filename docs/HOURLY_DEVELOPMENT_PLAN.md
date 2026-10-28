@@ -1,3 +1,19 @@
+## 2026-10-28 18:57 CET — P1-DATA-LIBRARY-SNIPPET-UX implementation and execution log
+
+**Feature ledger: IMPLEMENTED ON DEV / QUALITY AND RELEASE PENDING.** Added explicit saved-snippet JSON import preview and cancellation. The preview counts new/identical/conflicting names before any storage mutation. Conflicts cannot overwrite saved code: Apply is disabled until the user explicitly checks **Skip conflicting names and keep saved versions**. Confirmation applies only non-conflicting entries transactionally; 40-entry and schema/file-size limits, quota rollback, no Python auto-execution and idempotent imports are preserved. Stale previews reject if the local snippet catalog changes between preview and Apply. Existing interchange browser regression updated to confirm valid imports; new mandatory Chromium `tests/smoke_data_snippet_preview.py` checks preview/cancel, conflict skipping, unchanged Python output, stale preview, quota failure, >40 entries and responsive widths 390/768/1280px. Source `src/data-tables.js` synchronized with standalone `index.html`; JavaScript syntax, bundle parity and workflow registration checked via connector-side assertions. **Full local Python/Chromium suites unavailable** (container cannot resolve github.com); GitHub Actions is the required QA gate.
+
+**Execution:** Began from `dev=9ed11ce1eeee73dc18bfa1f07903808ef95f2603`, `main=be7e4b3513156afbd38e6a5ea32b79e0b68d4bd4`, two documentation-only commits ahead, no open PR. Inspected latest previous [dev Quality 40733153588](https://github.com/saeedsai/ProMathStudio/actions/runs/40733153588) (job success, 80 steps including setup) and [Pages 40732326236](https://github.com/saeedsai/ProMathStudio/actions/runs/40732326236) (build/deploy/report success). No branch deletion or security bypass. **Exact new candidate Quality, PR Quality, main Quality, Pages and live interaction must be verified before marking RELEASED.** Frozen 166-gap/95-partial baseline unchanged; hourly task remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-SNIPPET-UX release QA | New and existing Chromium snippet tests; structural suite, full Quality for exact dev and PR; main Quality and Pages; no hidden overwrite. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-DATA-SINGLE-COLUMN-INTERCHANGE | One-column CSV/TSV/JSON Unicode, multiline and formula round-trip; graph XY still requires two coordinates; negative cases. | TODO |
+| 3 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Bounded custom functions nested in SUM/IF; reference oracles, invalid names, recursion and sandbox tests. | TODO |
+| 4 | P0-MATRIX-PSEUDOINVERSE-2X2 | Moore–Penrose identities, least-norm solve, singular/zero/scaled matrices and browser UI regression. | TODO |
+| 5 | P1-GRAPH-PALETTE-VALIDITY | Graph Symbols distinguish executable constants/functions from notation-only symbols; 2D/3D compile, keyboard and mobile regression. | TODO |
+
 ## 2026-10-28 — P1-GRAPH-SYMBOL-INPUT RELEASED via PR #66
 
 **Feature ledger: RELEASED FOR STATED SCOPE.** Shared Symbols insertion is caret-aware in Equation, Calculator and 2D/3D Graphs. A simple graph function template selects its `x`/`y` placeholder for editing, while replacing an existing selection keeps focus in the graph editor. Inserting a symbol does not auto-plot, modify the Equation draft or discard the other graph mode's draft. Structural `tests/test_graph_symbol_caret.py` and mandatory Chromium `tests/smoke_graph_symbol_caret.py` passed, including 390/768/1280px, 2D↔3D, focus, no redraw and no runtime errors. Existing shared-symbol and combined Equation regressions passed; no feature was removed.

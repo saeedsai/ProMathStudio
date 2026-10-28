@@ -6802,8 +6802,25 @@ function selectTask(key,scroll=false){
 function selectMode(m){
  activeMode=tasks[m]?m:'editor';
  const chooser=guide.querySelector('#workspace-task-select');chooser.replaceChildren();
+ // Keep one task selector, but expose Equation's distinct tool families
+ // as native, accessible option groups rather than duplicating action buttons.
+ const equationGroups={
+  basic:'Write & solve',examples:'Notebook & examples',notebook:'Notebook & examples',
+  python:'Notebook & examples',numerical:'Numerical & differential',ode:'Numerical & differential',
+  assumptions:'Solver configuration'
+ };
+ const groups=new Map();
  for(const [key,label] of tasks[activeMode]){
-  const option=document.createElement('option');option.value=key;option.textContent=label;chooser.append(option);
+  const option=document.createElement('option');option.value=key;option.textContent=label;
+  if(activeMode==='editor'){
+   const groupLabel=equationGroups[key];
+   if(!groupLabel)throw Error('Uncategorized Equation task: '+key);
+   if(!groups.has(groupLabel)){
+    const group=document.createElement('optgroup');group.label=groupLabel;
+    groups.set(groupLabel,group);chooser.append(group);
+   }
+   groups.get(groupLabel).append(option);
+  }else chooser.append(option);
  }
  selectTask(lastTask[activeMode]||'basic');
 }

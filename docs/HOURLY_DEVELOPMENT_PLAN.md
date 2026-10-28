@@ -1,3 +1,33 @@
+## 2026-10-28 12:35 CET — P1-UI-EQUATION-TOOL-ORGANIZATION: categorized Equation tools
+
+**Feature ledger: IN QA ON DEV; NOT YET RELEASED.** Highest-priority unfinished P1 UI task from the previous NEXT FIVE: organize the unified Equation station without duplicate buttons or removed capabilities. Grouped the existing task picker into four native accessible `<optgroup>` families: Write & solve, Notebook & examples, Numerical & differential, and Solver configuration. Retained original task keys, CAS/ODE/assumption controls, notebook, input state and other workspaces. Updated canonical `src/workspace-tasks.js` and standalone `index.html` with source parity; added mandatory Chromium `tests/smoke_equation_task_groups.py` and Quality workflow registration. No branch added or protection bypassed.
+
+**Execution log:** Read current root AGENTS.md, living plan and audited inventory; inspected latest dev/main and completed dev Quality 40679773477 (success) for pre-change head `851aa0277cefa5dd3611ebab6cd90507a1693644`. Committed source `e778eb7`, standalone sync `7a09935`, browser regression `1e0cbc7`, mandatory CI registration `0f2c0b5`, and changelog `87bffb0`. Container GitHub clone was unavailable due to DNS resolution failure; local full unit/browser execution not possible. GitHub Quality on the latest exact head, PR promotion and Pages deployment must be verified before release. Older push runs may be cancelled automatically by workflow concurrency. No claim of a passing new test or live deployment.
+
+### NEXT FIVE — acceptance-tested feature roadmap
+
+| Priority | Feature | Acceptance tests / dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-UI-EQUATION-TOOL-ORGANIZATION release QA | Mandatory Chromium grouped-picker regression, all existing 73+ Quality steps, 390/768/1280px, no duplicates, exact dev-head and PR green. | IN QA ON DEV |
+| 2 | P1-DATA-LIBRARY-SNIPPET-UX | Versioned JSON snippet export/import, schema and duplicate handling, malformed rollback, no Python auto-execute browser regression. | NEXT |
+| 3 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode and blank rows, formulas, malformed rollback, round-trip browser tests. | IN PROGRESS |
+| 4 | P1-DATA-FORMULA-NESTED-AGGREGATES | Nested SUM/MEDIAN/IF references, cycles, bounds and deterministic malformed-expression errors. | TODO |
+| 5 | P1-UI-EQUATION-ACCESSIBILITY | Task picker screen-reader groups, keyboard focus, CAS live results, mobile and legacy solver routing browser checks. | TODO |
+
+## 2026-10-28 12:23 CET — PR #60 verified release: Equation workstation merge
+
+**Feature ledger: RELEASED FOR STATED SCOPE.** One **Equation** station now contains Equation Editor and Symbolic Solver controls with live preview, notebook, examples, export, CAS/SymPy, numerical/ODE tools and assumptions; legacy solver routes continue to resolve to Equation. Merged via ordinary SHA-checked [PR #60](https://github.com/saeedsai/ProMathStudio/pull/60), candidate `dev=618637edecc493e2c917e9da60c5bb97da4b525d` passed [Quality 40678121140](https://github.com/saeedsai/ProMathStudio/actions/runs/40678121140) and [PR Quality 40678640721](https://github.com/saeedsai/ProMathStudio/actions/runs/40678640721), 73/73 steps each. `main=88cb73225fa564806225ae8a549ace8c7de7a33d` passed [main Quality 40679248178](https://github.com/saeedsai/ProMathStudio/actions/runs/40679248178), 73/73 steps, and [Pages 40679248370](https://github.com/saeedsai/ProMathStudio/actions/runs/40679248370) succeeded; [cleanup 40679248165](https://github.com/saeedsai/ProMathStudio/actions/runs/40679248165) succeeded. Dev was safely fast-forwarded to main with expected-SHA non-force update. Independent live UI interaction was unavailable; release evidence is Pages and Chromium CI. Only `dev` and `main` remain, neither protected; manual PR gate respected. This post-release documentation is a new dev-only commit pending exact-head CI. Frozen 166-gap and 95-partial-feature inventory remains a baseline, not a completed count.
+
+### NEXT FIVE — acceptance-tested roadmap
+
+| Priority | Feature | Acceptance tests / dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-UI-EQUATION-TOOL-ORGANIZATION | Group Equation CAS, numerical and notebook controls without duplicate buttons; keyboard and ARIA, 390/768/1280px, full browser suite. | NEXT |
+| 2 | P1-DATA-LIBRARY-SNIPPET-UX | Versioned JSON import/export; duplicate conflict, schema validation, rollback and no auto-execute browser test. | TODO |
+| 3 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode, blank rows, formulas, malformed-file rollback and round-trip. | IN PROGRESS |
+| 4 | P1-DATA-FORMULA-NESTED-AGGREGATES | Nested SUM/MEDIAN/IF reference oracle; cycles, bounds and malformed nesting. | TODO |
+| 5 | P1-UI-EQUATION-ACCESSIBILITY | Keyboard focus, screen-reader labels and announcements; mobile responsive, all legacy routing and no JS errors. | TODO |
+
 **2026-10-28 12:10 CET — Expanded cross-feature regression compatibility checkpoint.** A repository-wide review of browser scripts identified 19 additional symbolic/numerical/ODE/FFT/interpolation tests that still clicked the intentionally removed Solver tab. Updated their navigation to the unified Equation tab while preserving original mathematical assertions and reference oracles; no tests removed or skipped. Full Quality must execute these suites on the exact final dev head. Prior parity defect was fixed by synchronizing `src/workspace-tasks.js`. This checkpoint is not a release.
 
 ## 2026-10-28 12:03 CET — Combined Equation workstation CI recovery and browser regression

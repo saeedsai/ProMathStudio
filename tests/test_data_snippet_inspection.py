@@ -25,9 +25,9 @@ class SnippetInspectionTests(unittest.TestCase):
         self.assertIn("if(target?.isConnected)target.focus();else $('dt-library-search').focus();", SOURCE)
 
     def test_standalone_parity(self):
-        marker = '<script id="mathstudio-data-tables">\\n'
+        marker = '<script id="mathstudio-data-tables">\n'
         embedded = HTML.split(marker, 1)[1].split('</script>', 1)[0]
-        self.assertEqual(embedded.rstrip('\\n'), SOURCE.rstrip('\\n'))
+        self.assertEqual(embedded.rstrip('\n'), SOURCE.rstrip('\n'))
 
 if __name__ == "__main__":
     unittest.main()

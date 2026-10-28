@@ -8,7 +8,26 @@
 Run **once every hour indefinitely**. Each run picks a narrowly bounded item, adds implementation + regression tests on **dev**, verifies exact SHA in CI, promotes via PR to **main** only after passing checks, validates deployment, documents progress, and refreshes the next five. Carry over unfinished items without downgrading their tests. The GitHub Pages site is published from `main`; the existing manual Pages workflow is optional. Do not confuse a green PR with verified production. The agent cannot guarantee uninterrupted execution in outages, platform limits or when safety/permissions prevent an action.
 
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
-**Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
+**Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified.
+
+## 2026-10-28 03:53 CET — P1-UI-DATA-FILTER-ROW-ALIGNMENT
+
+**DEV IMPLEMENTED; exact-head CI, PR and Pages verification pending.** Starting dev=main=\`e40e8b29082de49448c54aae47fcc0076eb2ccd6\`; [dev Quality 40622864796](https://github.com/saeedsai/ProMathStudio/actions/runs/40622864796), [main Quality 40622573204](https://github.com/saeedsai/ProMathStudio/actions/runs/40622573204) and [Pages 40622573099](https://github.com/saeedsai/ProMathStudio/actions/runs/40622573099) passed. No open PRs, only dev/main branches, neither protected. Discovered an off-by-one in the advanced Data Tables column filter: displayed row headers are one-based, but filter logic subtracted two, shifting matches and hiding row one. Corrected the offset to one, preserving evaluated-value predicates, existing text search, sorting, workbook data and formula handling. New focused Playwright regression checks first/middle/final row matches, numeric comparisons, search intersection, sorting, reset and runtime errors; wired into mandatory Quality. Local Python test syntax compiled; full browser/unit suite awaits GitHub CI because this container cannot resolve github.com for checkout. This is a bounded correctness fix, not completion of the broad Data Tables feature or the frozen 166-gap/95-partial baseline.
+
+### NEXT FIVE after row-alignment fix
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-DATA-TOOLBAR end-to-end QA | CSV/XLSX round-trip, join and union values, formula references, context actions, 390/768/1280 px, no runtime errors. | IN PROGRESS |
+| 2 | P1-UI-ACCESSIBILITY remainder | Keyboard and screen-reader focus/labels across all five workspaces, responsive widths, no traps/errors. | IN PROGRESS |
+| 3 | P1-UI-MULTISERIES-UX | Independently style multiple 2D/3D series, overlay and reset, preserve project round-trip. | TODO |
+| 4 | P1-UI-PROJECT-TRANSFER | Accessible import/export grouping, transactional invalid-file rollback and draft preservation. | TODO |
+| 5 | P1-UI-GRAPH-IMPORT-DISCOVERY | Discoverable CSV/JSON import from Graphs, Data Tables handoff, axes, PNG and project round-trip. | TODO |
+
+### Execution log — 2026-10-28 03:53 CET
+
+Selected the highest-impact reproducible Data Tables correctness defect during toolbar QA: column filters were aligned to the preceding spreadsheet row. Changed inline \`index.html\` only (outside synchronized source modules), added \`tests/smoke_data_column_filter_alignment.py\`, registered it in mandatory \`quality.yml\`, updated changelog and this ledger. Exact candidate SHA, CI, PR and Pages outcomes must be appended after verification; no direct main push, branch creation or security bypass. No demonstrably obsolete tracked files found.
+ Source change alone is not release.
 
 ## 2026-10-28 03:22 CET — P1-UI-DATA-TOOLBAR menu navigation increment
 

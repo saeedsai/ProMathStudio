@@ -1185,7 +1185,8 @@ def _ms_system(job_text):
     const position=start+(Number.isFinite(caret)?caret:text.length);
     target.setSelectionRange(position,position+(Number.isFinite(caret)?1:0));
     target.dispatchEvent(new Event('input',{bubbles:true}));target.focus();
-    if(calculatorMode){document.body.classList.remove('library-open');}else refresh();
+    if(document.body.classList.contains('library-open')){document.body.classList.remove('library-open');document.getElementById('quick-symbols')?.setAttribute('aria-expanded','false');}
+    if(!calculatorMode)refresh();
   }
   function loadExample(raw){editId=null;btnAdd.innerHTML='＋ Add equation <span aria-hidden="true">↵</span>';cancelEdit.hidden=true;input.value=raw;refresh();renderNotebook();input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}
   function exportLatex(){
@@ -1306,7 +1307,7 @@ def _ms_system(job_text):
               const input=mode==='calculator'?document.getElementById('calc-input'):mode==='graph'?document.getElementById('graph-input'):null;
               if(input){
                 input.focus();const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
-                input.setRangeText(code,start,end,'end');input.dispatchEvent(new Event('input',{bubbles:true}));document.body.classList.remove('library-open');
+                input.setRangeText(code,start,end,'end');input.dispatchEvent(new Event('input',{bubbles:true}));document.body.classList.remove('library-open');document.getElementById('quick-symbols')?.setAttribute('aria-expanded','false');
               }else insertText(code);
             });grid.appendChild(b);found++;}
           inner.appendChild(grid);top.appendChild(inner);

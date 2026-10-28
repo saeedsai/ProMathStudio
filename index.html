@@ -4187,21 +4187,28 @@ self.onmessage=async ({data})=>{
   function compute(expr,t,stack){
     expr=expandIfCalls(String(expr),t,stack);
     if(expr.includes('#REF!'))throw Error('#REF!');
-    expr=String(expr).replace(/\b([A-Za-z][A-Za-z0-9_]*)\(([^()]*)\)/g,(all,name,body)=>{
-      const fn=window.MathStudio.customFunctions?.list().find(f=>f.name.toLowerCase()===name.toLowerCase());
-      if(!fn)return all;
-      const values=splitArgs(body).map(part=>compute(part,t,stack));
-      return '('+window.MathStudio.customFunctions.evaluate(name,values)+')';
-    });
-    // Resolve innermost aggregates first; a single regex replacement leaves outer
-    // SUM(MEDIAN(...),COUNT(...)) unparsed. Bound nesting to avoid pathological input.
+    // Custom functions and aggregates may wrap one another. Reduce innermost
+    // calls in alternating passes, without eval or eager IF branch evaluation.
+    const customPattern=/\b([A-Za-z][A-Za-z0-9_]*)\s*\(([^()]*)\)/g;
     const aggregatePattern=/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)\s*\(([^()]*)\)/gi;
-    let aggregatePasses=0;
+    let compositionPasses=0;
     while(true){
+      let changed=false;
+      expr=String(expr).replace(customPattern,(all,name,body)=>{
+        const fn=window.MathStudio.customFunctions?.find(name);
+        if(!fn)return all;
+        const args=splitArgs(body);
+        if(args.length!==fn.params.length||args.some(arg=>!arg.trim()))throw Error('#ARGS');
+        const values=args.map(part=>compute(part,t,stack));
+        const result=window.MathStudio.customFunctions.evaluate(name,values);
+        if(!Number.isFinite(result))throw Error('#VALUE');
+        changed=true;
+        return String(result);
+      });
       aggregatePattern.lastIndex=0;
-      if(!aggregatePattern.test(expr))break;
-      if(++aggregatePasses>40)throw Error('#LIMIT');
-      expr=String(expr).replace(aggregatePattern,(all,fn,body)=>{
+      if(aggregatePattern.test(expr)){
+        changed=true;
+        expr=String(expr).replace(aggregatePattern,(all,fn,body)=>{
       const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
         if(range){const target=range[1]?getByName(range[1].slice(0,-1).replace(/^'|'$/g,'')):t;
           if(!target)throw Error('#SHEET');
@@ -4228,7 +4235,10 @@ self.onmessage=async ({data})=>{
       // Emit a scalar token, not '(scalar)': parenthesized intermediate values
       // would prevent the next innermost-first pass from matching outer calls.
       return String(Number.isFinite(x)?x:0);
-      });
+        });
+      }
+      if(!changed)break;
+      if(++compositionPasses>40)throw Error('#LIMIT');
     }
     // Limited token grammar intentionally avoids eval()/Function() and script execution.
     const src=expr.trim();const rx=/\s*(?:((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!\$?[A-Za-z]+\$?\d+|\$?[A-Za-z]+\$?\d+)|((?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)|([()+\-*/^]))/giy;

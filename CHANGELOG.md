@@ -1,8 +1,8 @@
-## Unreleased — Saved-snippet JSON import preview and conflict-safe confirmation (2026-10-28)
+## Released — Saved-snippet JSON import preview and conflict-safe confirmation (2026-10-28, PR #67)
 
 - Saved Data Tables snippet JSON imports now show a review summary plus a safely escaped, scrollable list of names, types, and code excerpts before any localStorage mutation. Users can **Apply import** or **Cancel import**; name conflicts disable Apply until **Skip conflicting names and keep saved versions** is explicitly selected. Existing snippets are never silently overwritten, identical entries remain idempotent, and Python snippets are never executed on import.
 - A preview is invalidated if the local library changes before confirmation. File/schema/40-entry validation, atomic storage failure rollback, and existing export behavior remain in place.
-- Added mandatory Chromium `tests/smoke_data_snippet_preview.py` and updated the existing interchange regression for confirmation semantics. Release requires exact-head dev Quality, PR Quality, main Quality and GitHub Pages verification; do not treat this changelog entry as deployed.
+- Added mandatory Chromium `tests/smoke_data_snippet_preview.py` and updated the existing interchange regression for confirmation semantics. Released via [PR #67](https://github.com/saeedsai/ProMathStudio/pull/67). Exact-head [dev Quality 40741172865](https://github.com/saeedsai/ProMathStudio/actions/runs/40741172865), [PR Quality 40741901937](https://github.com/saeedsai/ProMathStudio/actions/runs/40741901937) and [main Quality 40742516492](https://github.com/saeedsai/ProMathStudio/actions/runs/40742516492) all passed (81 steps); [Pages 40742515657](https://github.com/saeedsai/ProMathStudio/actions/runs/40742515657) succeeded. Independent interactive verification of the published URL was unavailable.
 
 ## Released — Graph Symbols caret-aware insertion (2026-10-28, PR #66)
 

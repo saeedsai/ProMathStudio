@@ -1,3 +1,33 @@
+## 2026-10-28 20:58 CET — P0-MATRIX-PSEUDOINVERSE-2X2 implemented on dev; QA pending
+
+**Feature ledger: IMPLEMENTED ON DEV / NOT YET RELEASED.** The matrix calculator now offers Moore–Penrose pseudoinverse for 2×2 real A, including full rank, rank-one and zero matrices. Reuses the validated scaled SVD, applies relative singular-value cutoff 1e-12, checks all four Moore–Penrose identities, displays numerical rank and residuals, and sends the result to Equation Editor. Added `tests/smoke_matrix_pseudoinverse.py` mandatory Chromium numerical/UI/mobile regression and `tests/test_matrix_pseudoinverse.py` structural and module/standalone parity regression. Existing SVD, inverse and other operations unchanged. Isolated Node numeric reference checks passed for invertible, rank-one, zero, scaled and near-rank-deficient matrices. **Full GitHub Actions CI and production deployment must be verified before release.**
+
+**Previous release verification:** The previously unverified PR #69 main Quality [40755825780](https://github.com/saeedsai/ProMathStudio/actions/runs/40755825780) and GitHub Pages [40755826828](https://github.com/saeedsai/ProMathStudio/actions/runs/40755826828) both completed successfully for `main=f01123aa02952046005d2f210f371e370f4aa3dc`; post-release dev Quality [40755908233](https://github.com/saeedsai/ProMathStudio/actions/runs/40755908233) also passed. Independent interactive hosted verification remains unavailable. Local repository clone still fails GitHub DNS; run mandatory browser tests through GitHub Actions. No branch protections bypassed; recurring hourly development remains enabled. Baseline 166 gaps and 95 partials remains open.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P0-MATRIX-PSEUDOINVERSE-2X2 release | Numeric Moore–Penrose identities, singular/zero/scaled matrices, invalid input, editor transfer, mobile widths; exact dev/PR/main CI and Pages. | IMPLEMENTED ON DEV / CI PENDING |
+| 2 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Named functions nested in SUM/IF, numeric reference oracles, unknown names, recursion and no eval; Chromium tests. | TODO |
+| 3 | P1-GRAPH-PALETTE-VALIDITY | Distinguish executable 2D/3D symbols from typesetting-only, preserve Equation palette, keyboard caret and mobile tests. | TODO |
+| 4 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Row/column/schema preview before creating sheet, cancel rollback, malformed/large file, Unicode and mobile tests. | TODO |
+| 5 | P1-MATRIX-PSEUDOINVERSE-3X2 | Rectangular Moore–Penrose 3×2 rank-deficient matrices, residuals and least-norm oracles; bounded SVD and browser tests. | TODO |
+
+## 2026-10-28 20:35 CET — PR #69 keyboard-accessible snippet import merged; production verification pending
+
+**Feature ledger: MERGED TO MAIN / POST-MERGE QUALITY AND PAGES NOT VERIFIED.** Import preview receives keyboard focus on open; Escape cancels without storage mutation and restores focus to Import. Added `tests/test_snippet_preview_escape.py` structural regressions and extended mandatory `tests/smoke_data_snippet_preview.py` browser regression for Escape/focus/no-mutation at 390/768/1280px. Source and standalone `index.html` readback parity passed. Local full test suite could not run because `git ls-remote` failed DNS (`Could not resolve host: github.com`), but exact candidate `dev=b1d7572fbcaae021cc0c7e121bb0386f10e53ed0` passed [PR #69 Quality 40755066897](https://github.com/saeedsai/ProMathStudio/actions/runs/40755066897) **82/82 steps**, including structural and Chromium suites. Reviewed [PR #69](https://github.com/saeedsai/ProMathStudio/pull/69) six-file diff and clean mergeability, then ordinary SHA-checked merge to `main=f01123aa02952046005d2f210f371e370f4aa3dc`. Fast-forwarded `dev` to merged `main` with non-force expected-SHA ref update; verified branches identical, only dev/main. **Main Quality and GitHub Pages deployment have NOT been verified**: available GitHub connector exposes PR-triggered run lookup only, not new push/deployment run discovery; independent website fetch unavailable. Do not claim production deployed until main Quality and Pages checks can be inspected. Branch protection still unverified. No obsolete tracked files safely identified for deletion. Hourly development remains enabled; 166-gap/95-partial baseline remains open.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | PR #69 post-merge verification | Confirm exact `main=f01123aa...` Quality success and Pages publish; if failure inspect logs, roll forward via tested PR. | BLOCKED ON RUN DISCOVERY |
+| 2 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Bounded named functions nested in SUM/IF; numerical oracle, unknown names, recursion, no eval, browser regression. | TODO |
+| 3 | P0-MATRIX-PSEUDOINVERSE-2X2 | Moore–Penrose identities, singular/zero/scaled matrices, least-norm solve, numeric and browser tests. | TODO |
+| 4 | P1-GRAPH-PALETTE-VALIDITY | Executable 2D/3D symbols versus typesetting-only, keyboard caret insertion, mobile tests. | TODO |
+| 5 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Row/column/schema preview, cancel rollback, invalid/large input, Unicode, mobile tests. | TODO |
+
 ## 2026-10-28 20:29 CET — P1-DATA-SNIPPET-PREVIEW-KEYBOARD QA enhancement checkpoint
 
 **Feature ledger: IMPLEMENTED ON DEV / QA INCOMPLETE.** Fixed keyboard accessibility gap in the saved-snippet import review: the preview container is now programmatically focusable (`tabindex=-1`) and receives focus when a file is accepted, so Escape works immediately without first clicking a preview control. Escape closes the preview without persisting data and restores focus to Import. Existing Cancel button remains. Extended mandatory `tests/smoke_data_snippet_preview.py` to exercise focus, Escape, no storage mutation and 390/768/1280px widths, and added structural `tests/test_snippet_preview_escape.py::test_preview_is_focusable_and_receives_focus_on_open`. Synchronized `src/data-tables.js` with standalone `index.html` (readback parity confirmed). Local GitHub clone failed with `Could not resolve host: github.com`; full local unit and Chromium regressions cannot run from this environment. Exact-head dev push Quality cannot be observed with the available connector (PR-run lookup only), so do not merge until adequate CI evidence. Main at checkpoint `f6a13bbe7daa8f10bb39bb20b2990a4291767f61`. Preserve all concurrent work; do not bypass checks or disable hourly development.

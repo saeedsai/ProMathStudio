@@ -13,6 +13,10 @@ class SnippetPreviewEscapeTests(unittest.TestCase):
         self.assertIn("event.preventDefault();closeSnippetPreview();",handler)
         self.assertIn("$('dt-snippet-import').focus();",handler)
         self.assertNotIn("persistDataSnippets(",handler)
+    def test_preview_is_focusable_and_receives_focus_on_open(self):
+        self.assertIn('id="dt-snippet-preview" hidden tabindex="-1" role="group"', SOURCE)
+        self.assertIn('snippetPreview.hidden=false;\\n      snippetPreview.focus();', SOURCE)
+
     def test_standalone_matches_module(self):
         start=HTML.index("/* ProMathStudio Data Tables workspace.")
         end=HTML.index("</script>",start)

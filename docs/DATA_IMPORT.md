@@ -31,6 +31,8 @@ Records:
 [{"x":0,"y":0,"z":0},{"x":1,"y":1,"z":2}]
 ```
 
+Each object in a JSON record array must have the same set of column names (order may differ). An extra or missing key in a later record is rejected rather than silently discarding values. Invalid imports leave existing tables and graph datasets unchanged.
+
 Coordinate arrays:
 ```json
 [[0,1],[1,3],[2,5]]

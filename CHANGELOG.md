@@ -1,3 +1,10 @@
+## Unreleased — Reliable TSV round-trip and CSV fixture repair (2026-10-28)
+
+- Corrected Data Tables **Export TSV** to quote commas and semicolons in addition to tabs, newlines and quotation marks. The shared CSV/TSV importer sniffs separators from the header; unquoted commas in otherwise valid TSV headers could previously cause the wrong delimiter to be selected on reimport. The export remains value-only and offline.
+- Added an explanatory tooltip, preserved the existing Data Tables export actions, and synchronized standalone `index.html` with `src/data-tables.js`.
+- Added mandatory Chromium regression `tests/smoke_data_tsv_delimiter.py` covering Unicode, ambiguous headers, tabs, multiline fields, quotes, reimport, malformed-file rollback and responsive controls.
+- Diagnosed the previous dev Quality failure in `tests/smoke_data_formula_source_csv.py`: the test fixture itself contained an unquoted `IF(...,...,...)` CSV field. Rebuilt the fixture with Python's `csv.writer` while preserving all round-trip assertions. **Exact-head CI and production deployment remain pending.**
+
 ## Unreleased — Editable formula-source CSV export (2026-10-28)
 
 - Added **Export formulas CSV** to Data Tables, alongside the existing evaluated **Export CSV**. The new export preserves original editable cell strings, including formulas, quoted commas, embedded line breaks and Unicode; reimport restores formula text rather than flattening it into calculated values.

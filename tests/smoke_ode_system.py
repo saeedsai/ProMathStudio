@@ -60,7 +60,7 @@ def main():
                 catch(e) { return !!e.message; }
             }""", options), options
 
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel = page.locator("#ode-details")
         panel.evaluate("(element) => element.open = true")
         assert page.locator("#ode-system-derivative").is_hidden()
@@ -80,14 +80,14 @@ def main():
         assert page.evaluate("MathStudio.dataTables.tables.length") == before + 1
         assert page.evaluate("MathStudio.dataTables.tables.at(-1).columns") == ["t","y","z"]
 
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-run").click()
         page.locator("#ode-to-graph").click()
         assert page.locator("#graph-panel .graph-canvas-wrap").is_visible()
         assert page.evaluate("MathStudio.graphData.getState().points.length") == 81
 
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-system-derivative").fill("sqrt(-1)")
         assert page.locator("#ode-to-table").is_disabled()

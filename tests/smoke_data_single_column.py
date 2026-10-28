@@ -66,9 +66,12 @@ def main():
         with page.expect_download() as download:
             page.locator('#dt-export-tsv').click()
         tsv_raw = Path(download.value.path()).read_bytes()
+        # The regular TSV export intentionally exports calculated values,
+        # unlike the separate formula-source CSV export.
+        evaluated_tsv_rows = [['Å, B; C\tD'], ['two\nlines'], ['3'], ['']]
         assert list(csv.reader(io.StringIO(tsv_raw.decode('utf-8')),
-                               delimiter='\t')) == [['Metric'], *third['rows']]
-        assert upload(page, 'one_column_tsv_again.tsv', tsv_raw)['rows'] == third['rows']
+                               delimiter='\t')) == [['Metric'], *evaluated_tsv_rows]
+        assert upload(page, 'one_column_tsv_again.tsv', tsv_raw)['rows'] == evaluated_tsv_rows
         # A TSV file with a comma in its unquoted *single* header is still
         # one column: extension-specific tab delimiter wins over sniffing.
         comma_header = upload(page, 'comma_header.tsv',

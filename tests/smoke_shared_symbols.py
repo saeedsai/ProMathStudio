@@ -34,8 +34,8 @@ def main():
             graph = page.locator('#graph-input')
 
             # Solver shares the working equation editor and must expose the library.
-            page.locator('[data-workspace="solver"]').click()
-            assert page.locator('body').evaluate("(el) => el.classList.contains('ws-solver')")
+            page.locator('[data-workspace="editor"]').click()
+            assert page.locator('body').evaluate("(el) => el.classList.contains('ws-editor')")
             assert symbols.is_visible(), 'Symbols must be visible in Solver'
             equation.fill('x + ')
             equation.evaluate('(el) => el.setSelectionRange(el.value.length, el.value.length)')
@@ -80,6 +80,7 @@ def main():
 
             # Programmatic navigation and session restore must use the same classes.
             page.evaluate("() => window.MathStudio.advanced.mode('solver')")
+            assert page.locator('[data-workspace="editor"]').get_attribute('aria-current') == 'page'
             assert symbols.is_visible()
             page.evaluate("() => window.MathStudio.advanced.mode('graph')")
             page.reload(wait_until='load')

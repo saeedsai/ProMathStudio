@@ -55,7 +55,7 @@
       <input id="dt-library-search" type="search" placeholder="SUM, IF, filter, group..." autocomplete="off">
       <div class="data-toolbar"><label>Snippet name<input id="dt-snippet-name" maxlength="60" placeholder="My formula"></label><label>Type<select id="dt-snippet-kind"><option>Formula</option><option>Python</option></select></label><label>Snippet<textarea id="dt-snippet-code" rows="2" maxlength="8000" placeholder="=SUM(A1:A5)"></textarea></label><button id="dt-snippet-save" type="button" class="secondary">Save snippet</button></div>
       <div class="data-toolbar"><button id="dt-snippet-export" type="button" class="secondary">Export snippets JSON</button><button id="dt-snippet-import" type="button" class="secondary">Import snippets JSON</button><input id="dt-snippet-file" type="file" accept=".json,application/json" hidden aria-label="Choose saved snippets JSON file"></div>
-      <div id="dt-snippet-preview" hidden role="group" aria-label="Review snippet import"><p id="dt-snippet-preview-summary" role="status"></p><label id="dt-snippet-conflict-label" hidden><input id="dt-snippet-skip-conflicts" type="checkbox"> Skip conflicting names and keep saved versions</label><button id="dt-snippet-apply" class="primary" type="button">Apply import</button><button id="dt-snippet-cancel" class="secondary" type="button">Cancel import</button></div>
+      <div id="dt-snippet-preview" hidden role="group" aria-label="Review snippet import"><p id="dt-snippet-preview-summary" role="status"></p><ul id="dt-snippet-preview-list" aria-label="Snippets in import" style="max-height:240px;overflow:auto;overflow-wrap:anywhere"></ul><label id="dt-snippet-conflict-label" hidden><input id="dt-snippet-skip-conflicts" type="checkbox"> Skip conflicting names and keep saved versions</label><button id="dt-snippet-apply" class="primary" type="button">Apply import</button><button id="dt-snippet-cancel" class="secondary" type="button">Cancel import</button></div>
       <div id="dt-library-results" aria-live="polite"></div>
       <p id="dt-library-message" role="status" class="graph-data-muted">Select a spreadsheet cell or use the Python editor before inserting.</p>
     </details>
@@ -203,6 +203,17 @@
       $('dt-snippet-preview-summary').textContent='Preview: '+plan.added+' new, '+
         plan.unchanged+' already saved, '+plan.conflicts.length+' name conflicts.'+
         (plan.conflicts.length?' Name conflict: '+plan.conflicts.join(', ')+'.':'');
+      const previewList=$('dt-snippet-preview-list');
+      previewList.replaceChildren();
+      for(const entry of imported){
+        const existing=customDataSnippets.find(e=>e.name.toLowerCase()===entry.name.toLowerCase());
+        const state=!existing?'new':existing.kind===entry.kind&&existing.sample===entry.sample?
+          'already saved':'name conflict — saved version kept';
+        const item=document.createElement('li');
+        // Use textContent: imported names and code must never become executable markup.
+        item.textContent=entry.name+' ('+entry.kind+') — '+state+': '+entry.sample.slice(0,120);
+        previewList.append(item);
+      }
       $('dt-snippet-conflict-label').hidden=!plan.conflicts.length;
       $('dt-snippet-apply').disabled=!!plan.conflicts.length;
       snippetPreview.hidden=false;

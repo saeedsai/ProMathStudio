@@ -1,3 +1,8 @@
+## Unreleased — Accessible saved-snippet import preview keyboard cancellation (2026-10-28)
+
+- Importing a saved snippet JSON file moves keyboard focus into its review preview. Escape dismisses the preview without writing to saved snippets and returns focus to the Import button; the existing Cancel button remains available.
+- Expanded mandatory Chromium preview regression for immediate Escape dismissal and focus restoration at 390/768/1280px, plus structural assertions for preview focus and standalone source parity. **Not released until exact-head dev/PR/main CI and Pages deployment are verified.**
+
 ## Released — Single-column Data Tables CSV/TSV/JSON interchange (2026-10-28, PR #68)
 
 - Import one-column CSV, TSV and JSON into Data Tables, including quoted Unicode/multiline cells and editable formulas from source CSV; retain strict two-coordinate requirements in Graphs.

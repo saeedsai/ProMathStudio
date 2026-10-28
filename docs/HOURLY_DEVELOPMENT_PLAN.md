@@ -1,3 +1,19 @@
+## 2026-10-28 12:50 CET — PR #61 Equation task organization verified release
+
+**Feature ledger: RELEASED FOR STATED SCOPE.** Categorized the combined Equation task selector with accessible native `optgroup` headings (Write & solve, Notebook & examples, Numerical & differential, Solver configuration). All original tasks, CAS execution, notebook, numerical/ODE, assumptions and editor draft preservation remain. Mandatory `tests/smoke_equation_task_groups.py` checks the groups, offline CAS, task switching, no duplicate actions and 390/768/1280px layouts; source/standalone parity passed. No features or test gates removed.
+
+**Execution log:** Candidate `dev=6ffbabc2eaa980ee9c45b9f52b0f01ba561c1d67` passed [dev Quality 40680993680](https://github.com/saeedsai/ProMathStudio/actions/runs/40680993680) and [PR Quality 40681144402](https://github.com/saeedsai/ProMathStudio/actions/runs/40681144402), each 74/74 steps, with no failures. Inspected [PR #61](https://github.com/saeedsai/ProMathStudio/pull/61): exactly six expected files, mergeable clean; merged through ordinary SHA-checked GitHub PR to `main=a07be62a7fc92d8c6f994215895f4e8dddd44362`. Exact main [Quality 40681794597](https://github.com/saeedsai/ProMathStudio/actions/runs/40681794597) passed 74/74, [Pages 40681794708](https://github.com/saeedsai/ProMathStudio/actions/runs/40681794708) succeeded and [branch cleanup 40681794413](https://github.com/saeedsai/ProMathStudio/actions/runs/40681794413) succeeded. `dev` was fast-forwarded to main with a non-force expected-SHA update; only `dev` and `main` remain, both unprotected. Independent interactive browsing of Pages is unavailable, so live interaction not independently verified beyond Pages deployment and Chromium CI. Post-release documentation commits on `dev` require their own exact-head Quality check. Continue hourly development; 166 gaps/95 partials not complete.
+
+### NEXT FIVE — acceptance-tested roadmap
+
+| Priority | Feature | Acceptance tests / dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-SNIPPET-UX | Versioned JSON snippet export/import, schema validation, duplicates, malformed rollback, no Python auto-execute; Chromium. | NEXT |
+| 2 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode and blank rows, formulas, malformed rollback, round-trip browser tests. | IN PROGRESS |
+| 3 | P1-DATA-FORMULA-NESTED-AGGREGATES | Nested SUM/MEDIAN/IF references, cycles, bounds, deterministic malformed-expression errors; numeric oracle. | TODO |
+| 4 | P1-UI-EQUATION-ACCESSIBILITY | Task-picker groups screen-reader labels, keyboard focus, CAS status announcements, mobile and legacy routing. | TODO |
+| 5 | P1-GRAPH-SYMBOL-INPUT | Symbol library inserts valid 2D/3D functions with caret/focus preservation and no unintended plot refresh; Chromium. | TODO |
+
 ## 2026-10-28 12:35 CET — P1-UI-EQUATION-TOOL-ORGANIZATION: categorized Equation tools
 
 **Feature ledger: IN QA ON DEV; NOT YET RELEASED.** Highest-priority unfinished P1 UI task from the previous NEXT FIVE: organize the unified Equation station without duplicate buttons or removed capabilities. Grouped the existing task picker into four native accessible `<optgroup>` families: Write & solve, Notebook & examples, Numerical & differential, and Solver configuration. Retained original task keys, CAS/ODE/assumption controls, notebook, input state and other workspaces. Updated canonical `src/workspace-tasks.js` and standalone `index.html` with source parity; added mandatory Chromium `tests/smoke_equation_task_groups.py` and Quality workflow registration. No branch added or protection bypassed.

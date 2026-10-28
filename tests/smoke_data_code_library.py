@@ -41,11 +41,11 @@ def main():
   category.select_option('Python')
   search.fill('Filter rows')
   assert page.get_by_role('button',name='Insert SUM').count()==0
-  before=page.locator('#python-output-result').inner_text()
+  before=page.locator('#python-output-result').text_content()
   page.get_by_role('button',name='Insert Filter rows').click()
   page.wait_for_function('()=>document.querySelector("#data-menu-navigation > details:nth-child(5)")?.open')
   assert ".query('value > 0')" in page.locator('#dt-python-code').input_value()
-  assert page.locator('#python-output-result').inner_text()==before
+  assert page.locator('#python-output-result').text_content()==before
   # Operation chooser must not execute a join or create a new table.
   category.select_option('Operation')
   search.fill('UNION ALL')

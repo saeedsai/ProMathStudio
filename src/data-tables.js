@@ -7,6 +7,9 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const el = (tag, attrs, text) => { const e=document.createElement(tag); for(const [k,v] of Object.entries(attrs||{})){if(k==='class')e.className=v;else e.setAttribute(k,v);}if(text!==undefined)e.textContent=String(text);return e;};
   const csvCell = value => {const s=String(value??'');return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  // Quote alternate separator characters too: the shared importer sniffs CSV/TSV
+  // delimiters from the header and must not mistake commas/semicolons for tabs.
+  const tsvCell = value => {const s=String(value??'');return /[,;\t\r\n"]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
   const deep = value => JSON.parse(JSON.stringify(value));
   const colLetter = idx => {let a=''; for(let i=idx+1;i;i=Math.floor((i-1)/26))a=String.fromCharCode(65+(i-1)%26)+a; return a;};
   const colIndex = s => {let n=0;for(const c of s.toUpperCase())n=n*26+c.charCodeAt(0)-64;return n-1;};
@@ -63,7 +66,7 @@
       <button id="dt-run" class="primary" type="button">Run → New table</button></div></section>
     <section class="dt-box"><h3>Import / export</h3><div class="data-toolbar">
       <label>Import CSV / TSV / JSON<input id="dt-import" type="file" accept=".csv,.tsv,.json,text/csv,application/json"></label>
-      <button id="dt-export-csv" class="secondary" type="button">↓ Export CSV</button><button id="dt-export-source-csv" class="secondary" type="button" title="Export original cell text and formulas. External spreadsheet applications may execute formulas in this CSV.">↓ Export formulas CSV</button><button id="dt-export-tsv" class="secondary" type="button">↓ Export TSV</button><button id="dt-export-json" class="secondary" type="button">↓ Export JSON</button>
+      <button id="dt-export-csv" class="secondary" type="button">↓ Export CSV</button><button id="dt-export-source-csv" class="secondary" type="button" title="Export original cell text and formulas. External spreadsheet applications may execute formulas in this CSV.">↓ Export formulas CSV</button><button id="dt-export-tsv" class="secondary" type="button" title="Export calculated values as tab-separated text; text containing commas, semicolons or tabs is safely quoted.">↓ Export TSV</button><button id="dt-export-json" class="secondary" type="button">↓ Export JSON</button>
       <button id="dt-send-graph" class="primary" type="button">↗ Show in graphs</button></div>
       <details id="dt-advanced"><summary>Advanced dataset preview / X, Y, Z mapping</summary></details></section></div>`;
   // The library is a catalog, not an evaluator: insert only, never run code.
@@ -609,7 +612,7 @@
   $('dt-run').addEventListener('click',()=>safeAction(()=>{const l=tables.find(t=>t.id===$('dt-left').value),r=tables.find(t=>t.id===$('dt-right').value);if(!l||!r)throw Error('Select two tables.');const mode=$('dt-op').value,result=operation(mode,l,r,Number($('dt-left-key').value),Number($('dt-right-key').value));const resultTable=makeTable(l.name+'_'+mode+'_'+r.name,result.headers,result.rows);notify('Created '+resultTable.name+' with '+result.rows.length+' rows.');}));
   const download=(filename,contents,mime)=>{const url=URL.createObjectURL(new Blob([contents],{type:mime}));const a=el('a',{href:url,download:filename});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);};
   $('dt-export-csv').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=[t.columns,...evaluated(t)];download(t.name+'.csv',rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}));
-  $('dt-export-tsv').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=[t.columns,...evaluated(t)];download(t.name+'.tsv',rows.map(row=>row.map(value=>{const cell=String(value??'');return /[\t\r\n"]/.test(cell)?'"'+cell.replace(/"/g,'""')+'"':cell;}).join('\t')).join('\r\n')+'\r\n','text/tab-separated-values;charset=utf-8');}));
+  $('dt-export-tsv').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=[t.columns,...evaluated(t)];download(t.name+'.tsv',rows.map(row=>row.map(tsvCell).join('\t')).join('\r\n')+'\r\n','text/tab-separated-values;charset=utf-8');}));
   // Formula source export is opt-in; the original CSV still exports calculated values.
   // CSV spreadsheet viewers may execute imported formulas; users choose when to open.
   $('dt-export-source-csv').addEventListener('click',()=>safeAction(()=>{

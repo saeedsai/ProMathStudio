@@ -28,6 +28,8 @@ def main():
         assert page.locator('#cas-results .cas-equation').count() > 0
         page.locator('#add-btn').click()
         assert page.locator('#counter').inner_text() == '(1)'
+        # Adding a notebook entry intentionally clears the input; start a fresh draft.
+        editor.fill('(x+1)^2')
         tasks = page.locator('#workspace-task-select')
         assert tasks.locator('option').evaluate_all('(xs)=>xs.map(e=>e.value)') == [
             'basic','examples','notebook','python','numerical','ode','assumptions']

@@ -1,3 +1,9 @@
+## Unreleased — Saved-snippet JSON import preview and conflict-safe confirmation (2026-10-28)
+
+- Saved Data Tables snippet JSON imports now show a review summary before any localStorage mutation. Users can **Apply import** or **Cancel import**; name conflicts disable Apply until **Skip conflicting names and keep saved versions** is explicitly selected. Existing snippets are never silently overwritten, identical entries remain idempotent, and Python snippets are never executed on import.
+- A preview is invalidated if the local library changes before confirmation. File/schema/40-entry validation, atomic storage failure rollback, and existing export behavior remain in place.
+- Added mandatory Chromium `tests/smoke_data_snippet_preview.py` and updated the existing interchange regression for confirmation semantics. Release requires exact-head dev Quality, PR Quality, main Quality and GitHub Pages verification; do not treat this changelog entry as deployed.
+
 ## Released — Graph Symbols caret-aware insertion (2026-10-28, PR #66)
 
 - Unified the Symbols palette insertion path across Equation, Calculator and Graphs, removing duplicated graph/calculator insertion logic. 2D/3D graph function templates such as `sin(x)`, `cos(x)` and `sqrt(x)` select the editable `x` placeholder; replacing a selection inserts at the caret and restores editor focus.

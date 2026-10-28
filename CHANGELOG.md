@@ -1,3 +1,7 @@
+## In QA — Reject lossy JSON record schema drift on import (2026-10-28)
+
+- The shared Graphs/Data Tables JSON parser now rejects object-record arrays whose later rows introduce or omit column names, rather than silently dropping values outside the first record's header set. Key order may vary and Unicode values are preserved. Added focused Playwright coverage for reordered keys, extra/missing/replaced keys, transactional table/graph import rollback and responsive layouts; registered in mandatory Quality. Awaiting exact dev-head CI, independent PR gate, main Quality and Pages verification; not yet released.
+
 ## In QA — Preserve explicit empty CSV/TSV records on import (2026-10-28)
 
 - The shared graph and Data Tables delimited parser no longer discards intentional all-empty records (`,`, tab-delimited fields or quoted empty cells). Truly blank physical lines remain ignored. Added EOF row-limit enforcement and focused browser tests for multiline quoted data, CSV export/reimport, TSV, malformed-input rollback, boundaries and responsive viewports. Mandatory Quality, PR, main and Pages verification pending; not yet released.

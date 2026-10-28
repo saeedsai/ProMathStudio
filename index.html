@@ -3407,7 +3407,16 @@ self.onmessage=async ({data})=>{
     if(!isRecord(raw[0]))throw Error('JSON rows must be objects or coordinate arrays.');
     const keys=Object.keys(raw[0]);
     if(keys.length<2||keys.length>MAX_COLS)throw Error('JSON must contain 2–32 columns.');
-    return {headers:keys,rows:raw.map(r=>{if(!isRecord(r))throw Error('Mixed JSON record types.');return keys.map(k=>r[k]);})};
+    // A later record may not introduce or omit keys: otherwise mapping only
+    // the first record's keys silently discards its additional cell values.
+    const expected=new Set(keys);
+    return {headers:keys,rows:raw.map((r,i)=>{
+      if(!isRecord(r))throw Error('Mixed JSON record types.');
+      const rowKeys=Object.keys(r);
+      if(rowKeys.length!==keys.length||rowKeys.some(k=>!expected.has(k)))
+        throw Error('JSON record '+(i+1)+' has missing or unexpected columns; all records must share the same keys.');
+      return keys.map(k=>r[k]);
+    })};
   }
   function validateTable(table,name){
     if(!table||!Array.isArray(table.headers)||!Array.isArray(table.rows))throw Error('Invalid tabular data.');

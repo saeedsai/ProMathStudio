@@ -1,3 +1,21 @@
+## 2026-10-28 06:55 CET — P1-DATA-JSON-SCHEMA-DRIFT (bounded lossless JSON import)
+
+**DEV IMPLEMENTATION PENDING EXACT-SHA CI / PR / PAGES.** Fixed a silent JSON data-loss path shared by Data Tables and Graphs: object records with new keys in later rows previously lost those values because only the first record's keys were projected. Every record must now contain exactly the same key set, irrespective of order; missing and unexpected keys are rejected before table or graph state changes. Added `tests/smoke_json_record_schema.py` (Unicode, key reorder, extra/missing/replaced keys, UI transactional rollback, graph persistence, 390/768/1280 px and page errors), registered in mandatory Quality. Local GitHub checkout still blocked by DNS; full browser and unit gates must be verified via GitHub Actions. The frozen 166 gaps/95 partials baseline remains unchanged; broader JSON/CSV/XLSX import QA is not complete.
+
+### NEXT FIVE after JSON schema-drift guard
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-DATA-TOOLBAR remaining import/export QA | XLSX/CSV/TSV/JSON Unicode, quoting, limits, computed values, formula retention, malformed-file transactional rollback, 390/768/1280 px. | IN PROGRESS |
+| 2 | P1-UI-ACCESSIBILITY remainder | Keyboard focus, labels, live announcements across all five workspaces, no traps/overflow/browser errors. | IN PROGRESS |
+| 3 | P1-UI-MULTISERIES-UX | Independent 2D/3D styles, overlays, reset and project persistence with browser checks. | TODO |
+| 4 | P1-UI-PROJECT-TRANSFER | Project import/export menu, malformed rollback, preserved unsaved drafts and schema compatibility. | TODO |
+| 5 | P1-UI-GRAPH-IMPORT-DISCOVERY | Discoverable CSV/JSON graph import, table handoff, X/Y/Z mapping, PNG and project round-trip. | TODO |
+
+### Execution log — 2026-10-28 06:55 CET
+
+Read root AGENTS.md, living plan, frozen audit and latest Quality/Pages history. Starting dev/main both `5d70cab33fdedea73ef61e473d4a306b93f2521f`; latest synchronized dev Quality [40637005971](https://github.com/saeedsai/ProMathStudio/actions/runs/40637005971) passed; prior main Quality [40636711940](https://github.com/saeedsai/ProMathStudio/actions/runs/40636711940) and Pages [40636711692](https://github.com/saeedsai/ProMathStudio/actions/runs/40636711692) passed. No open PRs or extra branches. Implemented parser schema guard, browser regression, Quality registration, import docs and changelog. Exact new candidate SHA, test gates and release status to be recorded after GitHub confirms them. Branch protections remain absent; no force pushes or direct main writes.
+
 ## 2026-10-28 06:04 CET — P1-DATA-CSV-EMPTY-RECORDS (bounded lossless import)
 
 **DEV IMPLEMENTED; exact-head CI, PR, main and Pages gates pending.** Fixed a data-loss path in the shared graph/Data Tables CSV/TSV parser: explicit empty records written as `,`, tab-delimited empty fields, or quoted `"",""` were discarded as if they were blank physical lines. The parser now preserves records with explicit separators or quoted fields, still skips genuinely empty physical lines, retains multiline quoted text and rejects 6,001 data records even without a trailing newline. Added `tests/smoke_csv_empty_records.py` covering direct parser references, CSV export/reimport, TSV import, malformed quote rollback, record limits, 390/768/1280 px and browser errors; registered in mandatory Quality. Only inline graph-data parser in `index.html` changed; modular Data Tables code is untouched. Local GitHub clone unavailable due container DNS; full browser/unit gates must be verified in GitHub Actions. Baseline remains 166 gaps and 95 partial features; this does not close broad import QA. No branches created or protections bypassed.

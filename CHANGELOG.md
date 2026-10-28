@@ -1,7 +1,12 @@
-## In QA — Nested spreadsheet custom-function composition (2026-10-28)
+## In development — Graph palette numeric validity (2026-10-28)
+
+- In 2D and 3D Graphs, the shared Symbols library now distinguishes known executable numeric templates (sin/cos, logarithms, constants, powers and other supported operations) from Equation-only notation. Non-plotting symbols are visible but disabled with an explanation; the full symbol library remains available in Equation. A context hint explains the distinction, and focus-based redraw handles programmatic workspace navigation.
+- Added `tests/test_graph_palette_validity.py` and mandatory Chromium `tests/smoke_graph_palette_validity.py` for enabled/disabled entries, 2D/3D draft isolation, keyboard focus, Equation compatibility and 390/768/1280px layouts. **Not released:** exact-head dev CI, PR CI, main Quality and Pages deployment must be verified.
+
+## Released — Nested spreadsheet custom-function composition (2026-10-28, PR #71)
 
 - Data Tables now evaluates innermost custom functions and built-in aggregates in a shared bounded loop. Expressions such as `=SUM(TWICE(2),TWICE(SUM(A1:A3)))` and `=TWICE(TWICE(3))` work when the user defines `TWICE(x)=2*x`; lazy `IF` remains intact. The evaluator rejects invalid argument counts, non-finite results and excessive nesting without `eval` or `Function`.
-- Added structural and mandatory Chromium regression for numeric references, cross-nesting, lazy IF, unknown functions, invalid arity, 41-deep nesting, workbook persistence, UI and responsive layouts. **Not released until exact-head dev, PR, main Quality and Pages deployment gates succeed.**
+- Added structural and mandatory Chromium regression for numeric references, cross-nesting, lazy IF, unknown functions, invalid arity, 41-deep nesting, workbook persistence, UI and responsive layouts. **Released:** [PR #71 Quality 40768400816](https://github.com/saeedsai/ProMathStudio/actions/runs/40768400816), [main Quality 40768958629](https://github.com/saeedsai/ProMathStudio/actions/runs/40768958629), [dev Quality 40768995115](https://github.com/saeedsai/ProMathStudio/actions/runs/40768995115) and [Pages 40768957690](https://github.com/saeedsai/ProMathStudio/actions/runs/40768957690) all succeeded.
 
 ## Released — Real 2×2 Moore–Penrose pseudoinverse (2026-10-28, PR #70)
 

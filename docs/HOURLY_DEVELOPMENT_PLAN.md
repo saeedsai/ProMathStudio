@@ -1,3 +1,17 @@
+## 2026-10-28 12:03 CET — Combined Equation workstation CI recovery and browser regression
+
+**Feature ledger: IN QA ON DEV; NOT RELEASED.** Starting heads: `dev=4d4959fb70379b1174e8ff198b1f67aa13574fd5`, `main=49ce54e82ce4ffb7ef440f325c5ec726601b2e9a`; no open PR; exactly `dev` and `main` branches. Starting [Quality 40673846827](https://github.com/saeedsai/ProMathStudio/actions/runs/40673846827) **failed** at `tests/smoke_browser.py` because the former Solver tab was intentionally removed. Corrected the existing browser regressions for four navigation tabs without dropping assertions, implemented a merged seven-option Equation task picker (Editor, CAS, numerical, ODE, assumptions), added new mandatory `tests/smoke_equation_combined.py` covering offline CAS, editor preview, notebook, numerical/ODE/assumptions, mobile and legacy solver routing. Updated six existing Playwright scripts and expanded structural tests. [Quality 40677384808](https://github.com/saeedsai/ProMathStudio/actions/runs/40677384808) caught source parity: updated `src/workspace-tasks.js` to match the inlined standalone bundle; **do not bypass the parity test**. No local git checkout/browser available (DNS for github.com unavailable in execution container); GitHub Actions is the available full regression runner. Exact final dev-head CI, PR/main Quality and Pages remain to be verified before release. No branch protection configured; preserve manual PR-only main gate. No unrelated files deleted.
+
+### NEXT FIVE — acceptance-tested features
+
+| Priority | Feature | Acceptance tests / dependencies | State |
+|---:|---|---|---|
+| 1 | P1-UI-EQUATION-MERGE release QA | Exact-head structural + full Chromium checks including new merged Equation test; no console errors; ordinary dev→main PR checks, main Quality and Pages; 390/768/1280. | IN QA ON DEV |
+| 2 | P1-UI-EQUATION-WORKSTATION organization | All CAS and editor actions accessible without duplicate buttons; keyboard, ARIA, layout on mobile and desktop; notebook/export regression. | NEXT |
+| 3 | P1-DATA-LIBRARY-SNIPPET-UX | Versioned JSON import/export, schema validation, duplicate conflict, atomic rollback, no auto-Python. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode and blank-row round trip, malformed file rollback, formulas retained. | IN PROGRESS |
+| 5 | P1-DATA-FORMULA-NESTED-AGGREGATES | SUM/MEDIAN nesting and IF references, numeric oracle, invalid nesting/cycles/bounds. | TODO |
+
 ## 2026-10-28 — Combined Equation workstation (user-requested)
 
 **DEV IMPLEMENTED; CI/RELEASE PENDING.** Merged the Equation Editor and Symbolic Solver navigation into one **Equation** tab, displaying existing editor, live preview, notebook, examples, symbolic CAS controls, numerical panel and Python/SymPy tools together. Preserved legacy internal `solver` navigation as an alias to `editor`, without deleting solver IDs, operations, code or routes. Added `tests/test_equation_workspace_merge.py` focused regression guard. Need run unit + Chromium regression, check responsive layout and controls, exact-dev-head Quality, PR and Pages before marking released. Do not disable recurring task.

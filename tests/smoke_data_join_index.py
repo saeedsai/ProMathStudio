@@ -24,6 +24,8 @@ def main():
                     {id: 'sheet-2', name: 'Right', columns: ['key','label'], rows: data[1]}
                 ]
             })""", [left, right])
+            # Combine controls live inside a collapsed native disclosure.
+            page.locator('#data-menu-navigation > details').nth(2).evaluate('(e) => e.open = true')
             page.locator('#dt-left').select_option(label='Left')
             page.locator('#dt-right').select_option(label='Right')
             page.locator('#dt-left-key').select_option('0')

@@ -14,6 +14,10 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 
 **DEV IMPLEMENTED; release gates pending.** The existing nested-loop JOIN evaluated all left/right row pairs (up to 36 million comparisons for two 6,000-row tables) and delayed some output-limit checks. Replaced it with a right-hand key index that retains duplicate-key Cartesian output, empty keys, stable left-then-right ordering, unmatched outer rows and computed-value comparisons. Added early key/column validation and 6,000-row output rejection before creating a result table. New focused Playwright regression `tests/smoke_data_join_index.py` covers INNER/LEFT/RIGHT/FULL exact outputs, duplicate and empty keys, invalid keys, 10,000-result transactional rejection, 2,500-row unique joins, responsive widths and browser errors. Registered in mandatory Quality, synchronized modular/standalone source, updated Data Tables guide and changelog. Local git checkout unavailable (github.com DNS failure); exact-head GitHub CI is the test/release gate. Existing PR #49 documentation reconciliation was independently green and merged normally to `main=0e56626c6a6fae24829296a3fe6cfe2e31f63e27`; dev fast-forwarded without force before this increment. Both branches unprotected. No unrelated branch cleanup needed.
 
+### CI repair — 2026-10-28 05:08 CET
+
+Exact dev [Quality 40630278324](https://github.com/saeedsai/ProMathStudio/actions/runs/40630278324) passed the preceding 19 structural/browser steps, then the new JOIN regression timed out selecting a hidden Combine-menu control. This was a browser-test setup error: the Data Tables toolbar intentionally keeps Combine collapsed. Corrected the focused regression to open the existing native Combine disclosure before interacting; preserved every join result, boundary, rollback, responsive and console assertion. No production JOIN logic was changed by this repair. Await fresh exact-head Quality before PR.
+
 ### NEXT FIVE after indexed JOIN
 
 | Priority | Feature | Acceptance tests | Status |

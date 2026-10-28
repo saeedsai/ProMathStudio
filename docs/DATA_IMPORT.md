@@ -22,7 +22,7 @@ x,y
 2,4
 ```
 
-Files need a header row. Comma, semicolon and tab-separated files are supported, including quoted cells. Numeric data can use decimal and scientific notation. See [2D CSV sample](../examples/graph_2d.csv).
+Files need a header row. Comma, semicolon and tab-separated files are supported, including quoted cells. Explicit all-empty records such as `,` or `"",""` are preserved when importing tables, while completely blank physical lines are ignored. Numeric data can use decimal and scientific notation. See [2D CSV sample](../examples/graph_2d.csv).
 
 ## JSON examples
 

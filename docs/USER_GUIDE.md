@@ -66,7 +66,9 @@ In **Symbolic Solver**, press **Numerical methods / PDE** to open a collapsed so
 
 In **Calculator → Variable assignments & advanced numeric math**, assign scalars and use `diff`, `int`, `sum`, and `prod` with evaluation points and bounds.
 
-In **Data Tables**, keep the sheet visible and open Table, Filter, Combine, Files or Python as needed. Filter conditions apply to displayed rows only. The Python editor runs your own code with pandas in a browser worker; new `result` DataFrames become new tables. For syntax, method assumptions, limitations and examples, see [Numerical methods and Python](NUMERICAL_AND_PYTHON.md).
+In **Data Tables**, keep the sheet visible and open Table, Filter, Combine, Files or Python as needed. Filter conditions apply to displayed rows only. The Python editor runs your own code with pandas in a browser worker; new `result` DataFrames become new tables.
+
+**Spreadsheet formulas:** Use `=MEDIAN(A1:A5)` for the median of numeric cells or `=MEDIAN(A1:A3,B3)` to combine a range with another cell. Odd/even counts and quoted cross-table ranges such as `=MEDIAN('Other Data'!A1:A3)` are supported. Blank/text cells are ignored; no numeric values yields `#NUM!`. References outside the 6,000-row by 32-column workbook yield `#REF!`; unpopulated cells within those limits are blank. `SUM`, `AVERAGE`, `COUNT`, `MIN`, `MAX` and lazy `IF` remain supported. This is not full Excel formula compatibility. For syntax, method assumptions, limitations and examples, see [Numerical methods and Python](NUMERICAL_AND_PYTHON.md).
 
 ## Right-click / long-press actions and numeric bases
 

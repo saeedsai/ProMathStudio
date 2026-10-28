@@ -1,3 +1,9 @@
+## Unreleased — Data Tables MEDIAN and bounded formula references (2026-10-28)
+
+- Added `MEDIAN` to the searchable Functions & Code Library and offline spreadsheet evaluator: odd/even counts, multiple arguments, numeric ranges and quoted cross-table ranges. Ignores text/blank/whitespace cells; no numeric values returns `#NUM!`.
+- Aggregation ranges reject invalid workbook coordinates (row 0, rows above 6000, columns beyond AF) with `#REF!` instead of treating them as zero. Unpopulated in-grid cells remain blank.
+- Added focused unit and mandatory Playwright tests for MEDIAN, existing SUM/AVERAGE/COUNT/MIN/MAX/IF, cross-table, cycle, invalid ranges, insertion and persistence. **On dev; CI/PR/Pages pending.**
+
 ## Released — Shared Symbols palette navigation and keyboard accessibility (2026-10-28, PR #58)
 
 - Fixed the **∑ Symbols** quick-menu visibility in Symbolic Solver and 2D/3D Graphs: workspace-specific body classes are now synchronized by the central workspace switcher, including session restore and programmatic navigation, rather than only Editor/Calculator click handlers. Existing palette insertion targets the working equation in Solver and the current 2D/3D graph expression in Graphs; drafts remain separate.

@@ -72,6 +72,7 @@
     {name:'MIN',kind:'Formula',sample:'=MIN(A1:A5)',help:'Smallest numeric value.'},
     {name:'MAX',kind:'Formula',sample:'=MAX(A1:A5)',help:'Largest numeric value.'},
     {name:'COUNT',kind:'Formula',sample:'=COUNT(A1:A5)',help:'Count numeric cells.'},
+    {name:'MEDIAN',kind:'Formula',sample:'=MEDIAN(A1:A5)',help:'Median of numeric cells; ignores text and blanks.'},
     {name:'IF',kind:'Formula',sample:'=IF(A1>0,B1,0)',help:'Conditional formula.'},
     {name:'Cross-table reference',kind:'Formula',sample:'=Data2!A1',help:'Reference another table by name.'},
     {name:'Filter rows',kind:'Python',sample:"result = next(iter(tables.values())).query('value > 0')",help:'Edit the column name and condition before running.'},
@@ -425,15 +426,25 @@
       return '('+window.MathStudio.customFunctions.evaluate(name,values)+')';
     });
     // Aggregations accept ranges or comma-separated arguments. Nested expressions are supported by the recursive evaluator.
-    expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT)\s*\(([^()]*)\)/gi,(all,fn,body)=>{
+    expr=String(expr).replace(/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)\s*\(([^()]*)\)/gi,(all,fn,body)=>{
       const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
         if(range){const target=range[1]?getByName(range[1].slice(0,-1).replace(/^'|'$/g,'')):t;
           if(!target)throw Error('#SHEET');
           const c0=colIndex(range[3]),r0=+range[5]-1,c1=colIndex(range[7]),r1=+range[9]-1;
           if((Math.abs(c1-c0)+1)*(Math.abs(r1-r0)+1)>6000)throw Error('#RANGE');
-          for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(target,rr,cc,stack);if(v!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
+          // Unpopulated in-grid rows are blank; invalid workbook coordinates must not silently become zero.
+          if(r0<0||r1<0||r0>=MAX_ROWS||r1>=MAX_ROWS||c0<0||c1<0||c0>=MAX_COLUMNS||c1>=MAX_COLUMNS)throw Error('#REF!');
+          for(let rr=Math.min(r0,r1);rr<=Math.max(r0,r1);rr++)for(let cc=Math.min(c0,c1);cc<=Math.max(c0,c1);cc++){const v=value(target,rr,cc,stack);if(v!==''&&String(v).trim()!==''&&Number.isFinite(Number(v)))nums.push(Number(v));}
         } else {const v=compute(arg,t,stack);if(Number.isFinite(Number(v)))nums.push(Number(v));}}
-      const upper=fn.toUpperCase();const x=upper==='SUM'?nums.reduce((a,b)=>a+b,0):upper==='COUNT'?nums.length:upper==='AVERAGE'||upper==='AVG'?(nums.reduce((a,b)=>a+b,0)/(nums.length||1)):upper==='MIN'?Math.min(...nums):Math.max(...nums);
+      const upper=fn.toUpperCase();
+      let x;
+      if(upper==='MEDIAN'){
+        if(!nums.length)throw Error('#NUM!');
+        const ordered=nums.slice().sort((a,b)=>a-b),mid=Math.floor(ordered.length/2);
+        x=ordered.length%2?ordered[mid]:ordered[mid-1]/2+ordered[mid]/2;
+      }else{
+        x=upper==='SUM'?nums.reduce((a,b)=>a+b,0):upper==='COUNT'?nums.length:upper==='AVERAGE'||upper==='AVG'?(nums.reduce((a,b)=>a+b,0)/(nums.length||1)):upper==='MIN'?Math.min(...nums):Math.max(...nums);
+      }
       return '('+(Number.isFinite(x)?x:0)+')';
     });
     // Limited token grammar intentionally avoids eval()/Function() and script execution.

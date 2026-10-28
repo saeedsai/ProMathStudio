@@ -32,7 +32,7 @@ def main():
             {"maxEvaluations": 16, "expression": "sin(40*x)", "a": 0, "b": 1, "tolerance": 1e-12},
         ]:
             assert page.evaluate("""o => {try {MathStudio.numerical.adaptiveSimpson(o);return false;}catch(e){return !!e.message;}}""", invalid), invalid
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#num-details").evaluate("(e) => e.open=true")
         page.locator("#num-method").select_option("quadrature")
         assert page.locator("#num-tolerance").is_visible()

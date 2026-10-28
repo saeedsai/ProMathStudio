@@ -1,3 +1,17 @@
+## 2026-10-28 09:40 CET — Shared math palette, parallel feature checkpoint
+
+**DEV SOURCE AND FOCUSED TEST COMMITTED; CI/RELEASE NOT VERIFIED.** Enabled the existing Symbols quick-menu button in Solver and Graph workspaces, and routed palette insertion to the graph function textarea in graph mode; Solver continues inserting into the working equation editor. Added `tests/test_shared_symbol_workspace.py` for workspace visibility and routing assertions. Browser focus/selection, exact runtime graph behavior, responsive layout, full CI and Pages release remain pending. No PR or main merge claimed. Existing dev documentation ahead of main is preserved.
+
+### NEXT FIVE — feature delivery and acceptance
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-SHARED-SYMBOL-LIBRARY browser QA | Solver/graph 2D/3D insertion, caret/focus and search; mobile 390/768/1280; no Editor/Calculator regression. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-DATA-LIBRARY-SAVED-SNIPPETS browser QA | Reload, search, rename/delete, storage failure and no automatic Python execution. | RELEASED; FOLLOW-UP QA |
+| 3 | P1-DATA-FORMULA-REFERENCE-ACCURACY | Cross-table references and range edge cases; automated calculation assertions. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export correctness | CSV/TSV/JSON/XLSX round trip, malformed file rollback, Unicode. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY | Keyboard, screen reader announcements, focus and responsive regression. | IN PROGRESS |
+
 ## 2026-10-28 09:14 CET — PR #57 released; post-merge execution log
 
 **RELEASE VERIFIED.** Delivered the Data Tables saved Formula/Python snippet catalog with explicit Edit/rename/Delete, duplicate-name protection, confirmation and atomic localStorage failure rollback. Source, standalone HTML, new Playwright test, mandatory Quality, changelog and plan were updated. Original PR head `0ced9ff38e1f6b35aa54811411af528df44585bd` failed [Quality 40654438754](https://github.com/saeedsai/ProMathStudio/actions/runs/40654438754) due to test-harness misuse of Playwright `page.evaluate`; fixed with a real callback and retained quota-failure test. Exact final dev candidate `6f7f751551f6114cd9abe0e88b9fe1ed1da16846` passed [dev Quality 40654625640](https://github.com/saeedsai/ProMathStudio/actions/runs/40654625640) and [PR Quality 40654631674](https://github.com/saeedsai/ProMathStudio/actions/runs/40654631674), all 70 PR job steps passed. Ordinary [PR #57](https://github.com/saeedsai/ProMathStudio/pull/57) merged to `main=92e4860303396700ebe94e2f116cc3086fe80b66`. [Main Quality 40655146895](https://github.com/saeedsai/ProMathStudio/actions/runs/40655146895), [Pages 40655146396](https://github.com/saeedsai/ProMathStudio/actions/runs/40655146396), [cleanup 40655146814](https://github.com/saeedsai/ProMathStudio/actions/runs/40655146814) all succeeded on that exact SHA. Dev was safely fast-forwarded to main with a SHA-checked non-force update, then received post-release documentation. Only dev/main branches remain; no obsolete tracked files were proven safe to delete. Independent interactive browsing of the hosted Pages URL was inaccessible, so live UI was not independently verified beyond successful Pages and CI browser checks. Branch protection/rulesets remain unconfigured/unverified. Frozen 166-gap/95-partial audit remains the baseline; release does not claim Excel or MATLAB parity.

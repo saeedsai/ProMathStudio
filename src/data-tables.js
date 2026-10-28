@@ -63,7 +63,7 @@
       <button id="dt-run" class="primary" type="button">Run → New table</button></div></section>
     <section class="dt-box"><h3>Import / export</h3><div class="data-toolbar">
       <label>Import CSV / TSV / JSON<input id="dt-import" type="file" accept=".csv,.tsv,.json,text/csv,application/json"></label>
-      <button id="dt-export-csv" class="secondary" type="button">↓ Export CSV</button><button id="dt-export-tsv" class="secondary" type="button">↓ Export TSV</button><button id="dt-export-json" class="secondary" type="button">↓ Export JSON</button>
+      <button id="dt-export-csv" class="secondary" type="button">↓ Export CSV</button><button id="dt-export-source-csv" class="secondary" type="button" title="Export original cell text and formulas. External spreadsheet applications may execute formulas in this CSV.">↓ Export formulas CSV</button><button id="dt-export-tsv" class="secondary" type="button">↓ Export TSV</button><button id="dt-export-json" class="secondary" type="button">↓ Export JSON</button>
       <button id="dt-send-graph" class="primary" type="button">↗ Show in graphs</button></div>
       <details id="dt-advanced"><summary>Advanced dataset preview / X, Y, Z mapping</summary></details></section></div>`;
   // The library is a catalog, not an evaluator: insert only, never run code.
@@ -610,6 +610,12 @@
   const download=(filename,contents,mime)=>{const url=URL.createObjectURL(new Blob([contents],{type:mime}));const a=el('a',{href:url,download:filename});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);};
   $('dt-export-csv').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=[t.columns,...evaluated(t)];download(t.name+'.csv',rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}));
   $('dt-export-tsv').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=[t.columns,...evaluated(t)];download(t.name+'.tsv',rows.map(row=>row.map(value=>{const cell=String(value??'');return /[\\t\\r\\n"]/.test(cell)?'"'+cell.replace(/"/g,'""')+'"':cell;}).join('\\t')).join('\\r\\n')+'\\r\\n','text/tab-separated-values;charset=utf-8');}));
+  // Formula source export is opt-in; the original CSV still exports calculated values.
+  // CSV spreadsheet viewers may execute imported formulas; users choose when to open.
+  $('dt-export-source-csv').addEventListener('click',()=>safeAction(()=>{
+    const t=active(),rows=[t.columns,...t.rows];
+    download(t.name+'_formulas.csv',rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');
+  }));
   $('dt-export-json').addEventListener('click',()=>safeAction(()=>{const t=active();
     // JSON objects cannot represent duplicate property names without losing cells.
     // CSV and project JSON remain available for workbooks with repeated headers.

@@ -78,6 +78,10 @@ jobs:
         run: python tests/smoke_data_json_duplicate_headers.py
       - name: CSV and TSV explicit empty-row import/export and rollback regression
         run: python tests/smoke_csv_empty_records.py
+      - name: Data Tables formula-source CSV round-trip browser regression
+        run: python tests/smoke_data_formula_source_csv.py
+      - name: Data Tables TSV ambiguous-delimiter export and import browser regression
+        run: python tests/smoke_data_tsv_delimiter.py
       - name: JSON record schema consistency, Unicode and transactional import regression
         run: python tests/smoke_json_record_schema.py
       - name: Indexed Data Tables join ordering, limits and rollback regression

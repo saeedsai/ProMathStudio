@@ -1,8 +1,21 @@
-## Unreleased — Data Tables saved-snippet JSON interchange (2026-10-28)
+## Unreleased — Reliable TSV round-trip and CSV fixture repair (2026-10-28)
+
+- Corrected Data Tables **Export TSV** to quote commas and semicolons in addition to tabs, newlines and quotation marks. The shared CSV/TSV importer sniffs separators from the header; unquoted commas in otherwise valid TSV headers could previously cause the wrong delimiter to be selected on reimport. The export remains value-only and offline.
+- Added an explanatory tooltip, preserved the existing Data Tables export actions, and synchronized standalone `index.html` with `src/data-tables.js`.
+- Added mandatory Chromium regression `tests/smoke_data_tsv_delimiter.py` covering Unicode, ambiguous headers, tabs, multiline fields, quotes, reimport, malformed-file rollback and responsive controls.
+- Diagnosed the previous dev Quality failure in `tests/smoke_data_formula_source_csv.py`: the test fixture itself contained an unquoted `IF(...,...,...)` CSV field. Rebuilt the fixture with Python's `csv.writer` while preserving all round-trip assertions. **Exact-head CI and production deployment remain pending.**
+
+## Unreleased — Editable formula-source CSV export (2026-10-28)
+
+- Added **Export formulas CSV** to Data Tables, alongside the existing evaluated **Export CSV**. The new export preserves original editable cell strings, including formulas, quoted commas, embedded line breaks and Unicode; reimport restores formula text rather than flattening it into calculated values.
+- Kept the existing evaluated CSV and JSON export behavior unchanged. The new button explicitly warns that external spreadsheet programs may evaluate formulas on opening the exported CSV.
+- Added mandatory Chromium round-trip regression `tests/smoke_data_formula_source_csv.py`, registered in `.github/workflows/quality.yml`. CI/Pages validation pending; this is **not yet released**.
+
+## Released — Data Tables saved-snippet JSON interchange (2026-10-28, PR #62)
 
 - Added versioned `promathstudio-snippets` JSON export/import for saved Formula and Python snippets, with a data-only schema and browser download/file picker. Existing localStorage format is unchanged.
 - Import merges nonconflicting snippets without overwriting existing names, treats exact repeats as idempotent, and rejects unsupported versions, duplicate names, malformed/oversized files, invalid formulas, name conflicts and more than 40 saved snippets. Validation occurs before an atomic storage write; quota failures leave the catalog unchanged. Import never executes Python.
-- Added focused static test `tests/test_data_snippet_interchange.py` and mandatory Chromium regression `tests/smoke_data_snippet_interchange.py` covering JSON round trip, Unicode, rollback, reload and responsive controls. Source/standalone parity synchronized. CI, PR and Pages deployment must be verified before release.
+- Added focused static test `tests/test_data_snippet_interchange.py` and mandatory Chromium regression `tests/smoke_data_snippet_interchange.py` covering JSON round trip, Unicode, rollback, reload and responsive controls. Source/standalone parity synchronized. Verified on exact dev [Quality 40685392257](https://github.com/saeedsai/ProMathStudio/actions/runs/40685392257) and [PR Quality 40686077662](https://github.com/saeedsai/ProMathStudio/actions/runs/40686077662), merged through [PR #62](https://github.com/saeedsai/ProMathStudio/pull/62) to main `5cab0ca1a8539d981618c5647470fc87d4ceec72`. Exact-main [Quality 40686644777](https://github.com/saeedsai/ProMathStudio/actions/runs/40686644777), [Pages 40686645258](https://github.com/saeedsai/ProMathStudio/actions/runs/40686645258) and [cleanup 40686644691](https://github.com/saeedsai/ProMathStudio/actions/runs/40686644691) all passed; post-merge dev Quality 40686662154 passed. Hosted interactive browsing remains unverified.
 
 ## Released — Equation task-family organization (2026-10-28, PR #61)
 

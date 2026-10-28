@@ -1,3 +1,47 @@
+## 2026-10-28 15:00 CET — P1-DATA-TOOLBAR: TSV delimiter correctness and prior CI repair
+
+**Feature ledger: IMPLEMENTED ON DEV; QA/RELEASE PENDING.** Fixed an actual Data Tables TSV round-trip defect: the shared graph/data CSV/TSV parser sniffs the delimiter from the header, but TSV export previously left commas/semicolons unquoted. Headers such as `Cost, SEK, tax` could therefore be misread as comma-separated rather than tab-separated on reimport. The TSV encoder now quotes commas, semicolons, tabs, newlines and quotes, retaining Unicode, existing value-only behavior, and the same UI button. Added explanatory export tooltip, synchronized `src/data-tables.js` with standalone `index.html`, and registered mandatory Chromium regression `tests/smoke_data_tsv_delimiter.py` (ambiguous headers, round-trip, Unicode, tabs, multiline, quotes, malformed rollback, 390/768/1280px). Static source/bundle parity and workflow registration passed; isolated Node serializer assertions passed. Local full Python/Chromium execution unavailable because GitHub DNS prevents repository cloning.
+
+**CI investigation and repair:** Earlier exact-dev-head [Quality 40692329041](https://github.com/saeedsai/ProMathStudio/actions/runs/40692329041) failed at `tests/smoke_data_formula_source_csv.py` after 30s waiting for import. Its hand-written CSV fixture had an **unquoted IF formula with commas**, creating extra columns and causing import rejection. Replaced that fixture with standards-compliant `csv.writer` construction; original evaluated/formula round-trip assertions remain intact. Initial new TSV workflow [40702058321](https://github.com/saeedsai/ProMathStudio/actions/runs/40702058321) was pending at inspection. Recheck the **final exact dev head**, then PR Quality, main Quality and Pages before release. Last verified deployed `main=5cab0ca1a8539d981618c5647470fc87d4ceec72`; no release claimed. Existing dev/main only; no branch cleanup needed. Recurring development remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance test and dependency | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-TOOLBAR TSV and formula CSV QA/promotion | Exact-head Quality passes new TSV ambiguity/rollback and formula-source Chromium tests; verified PR Quality, main Quality and Pages. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-DATA-FORMULA-NESTED-AGGREGATES | SUM(MEDIAN(...)) and nested IF, oracle values, blank/text exclusion, cycles, invalid references and Chromium coverage. | TODO |
+| 3 | P1-UI-EQUATION-ACCESSIBILITY | CAS result live-region announcement, keyboard task navigation, focus restoration, mobile 390/768/1280px checks. | TODO |
+| 4 | P1-GRAPH-SYMBOL-INPUT | 2D/3D symbol insertion at caret with correct focus, no lost drafts, no unintended plot refresh, browser regression. | TODO |
+| 5 | P1-DATA-LIBRARY-SNIPPET-UX | Import preview/cancel and explicit conflict resolution, 40-entry boundary, storage rollback, browser tests. | TODO |
+
+## 2026-10-28 13:56 CET — P1-DATA-TOOLBAR: formula-source CSV round-trip (parallel dev work)
+
+**Feature ledger: IMPLEMENTED ON DEV / QA PENDING / NOT RELEASED.** Added opt-in **Export formulas CSV** next to the existing value-only CSV export, preserving original editable formula strings, Unicode, embedded commas/newlines and quotation marks. CSV remains offline, uses the existing RFC-style escaping, and reimports through the existing Data Tables importer; the button warns that external spreadsheet applications may evaluate CSV formulas. Existing evaluated CSV/JSON behavior unchanged. This is a bounded part of P1-UI-DATA-TOOLBAR, not XLSX support. Source `src/data-tables.js`, exact standalone `index.html`, mandatory `tests/smoke_data_formula_source_csv.py`, `.github/workflows/quality.yml`, and `CHANGELOG.md` changed. The browser regression checks raw formula round-trip, evaluated-export compatibility, Unicode/quoted multiline data and 390/768/1280px presence. A concurrent dev writer also introduced TSV export; a GitHub 409 source SHA conflict was recovered by refetching the current source, applying a compatible change, and re-synchronizing the exact standalone bundle. Static source/standalone/test-registration invariants all passed. **Unit/Chromium suites were not executed locally** because the runtime cannot resolve GitHub to clone the repo; current GitHub connector returns no push-triggered workflow runs or combined statuses for exact head. Do not claim CI green or merge until exact-head Quality can be inspected. The previous verified `main=5cab0ca1a8539d981618c5647470fc87d4ceec72` remains the last known deployed release. The recurring development task stays enabled.
+
+### NEXT FIVE — acceptance gates
+
+| Priority | Feature | Acceptance test / dependency | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-TOOLBAR formula CSV and TSV QA | Exact source/bundle parity; run mandatory Chromium round-trip tests, inspect exact-dev-head Quality; fix any failing job; PR and Pages only when green. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-DATA-FORMULA-NESTED-AGGREGATES | SUM(MEDIAN(...)) and nested IF with numerical oracle, cycle/blank/invalid range cases in Chromium. | TODO |
+| 3 | P1-UI-EQUATION-ACCESSIBILITY | Keyboard task-group navigation, accessible CAS status, 390/768/1280px browser checks. | TODO |
+| 4 | P1-GRAPH-SYMBOL-INPUT | Valid 2D/3D insertion at caret, no draft loss or unintended plot refresh, browser tests. | TODO |
+| 5 | P1-DATA-LIBRARY-SNIPPET-UX | Import preview/cancel and explicit conflict decisions, 40-entry boundary, rollback tests. | TODO |
+
+## 2026-10-28 13:22 CET — PR #62 saved-snippet JSON interchange released
+
+**Feature ledger: RELEASED FOR STATED SCOPE.** Data Tables saved Formula/Python snippets can be exported as versioned JSON and safely reimported with strict schema validation, no silent overwrites, idempotent identical entries, 40-entry/file-size bounds, atomic storage rollback and no automatic Python execution. Source/standalone parity preserved. New mandatory Chromium browser test and focused unit test committed; no prior feature removed. Initial exact-head Quality 40684917142 failed an asynchronous file-read race in the new test, fixed in `f5e4c234c68bc6b042a63f2639d76cc14c185613` with no assertion removed. Final candidate `dev=04ec163c97c687854b03c72912b7381ed1e68702` passed [dev Quality 40685392257](https://github.com/saeedsai/ProMathStudio/actions/runs/40685392257) and [PR Quality 40686077662](https://github.com/saeedsai/ProMathStudio/actions/runs/40686077662), each 75/75 workflow steps. Reviewed PR diff: seven expected files, 11 commits, mergeable clean. Merged ordinary SHA-checked [PR #62](https://github.com/saeedsai/ProMathStudio/pull/62) to `main=5cab0ca1a8539d981618c5647470fc87d4ceec72`. Exact main [Quality 40686644777](https://github.com/saeedsai/ProMathStudio/actions/runs/40686644777), [GitHub Pages 40686645258](https://github.com/saeedsai/ProMathStudio/actions/runs/40686645258), [branch cleanup 40686644691](https://github.com/saeedsai/ProMathStudio/actions/runs/40686644691), and fast-forwarded dev [Quality 40686662154](https://github.com/saeedsai/ProMathStudio/actions/runs/40686662154) all succeeded. Only dev/main branches were present; both remain unprotected (no administrative permission to enforce). Interactive live Pages browsing unavailable; deployment succeeded but live UI not independently clicked. Post-release documentation commits on dev require fresh exact-head Quality. Continue recurring task toward audited gaps.
+
+### NEXT FIVE — acceptance-tested roadmap
+
+| Priority | Feature | Acceptance tests / dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode, blank rows, formula preservation, malformed rollback, round-trip Chromium. | IN PROGRESS / NEXT |
+| 2 | P1-DATA-FORMULA-NESTED-AGGREGATES | Nested SUM/MEDIAN/IF, cycles and invalid ranges with numerical oracle and browser tests. | TODO |
+| 3 | P1-UI-EQUATION-ACCESSIBILITY | Native task group screen-reader labels, keyboard focus, CAS status announcements, 390/768/1280px. | TODO |
+| 4 | P1-GRAPH-SYMBOL-INPUT | 2D/3D symbols insert valid expressions at caret without unrelated plot refresh, browser tests. | TODO |
+| 5 | P1-DATA-LIBRARY-SNIPPET-UX follow-up | Optional import preview and explicit conflict resolution, deterministic 40-entry cap and import cancellation browser QA. | TODO |
+
 ## 2026-10-28 13:09 CET — CI recovery for snippet JSON interchange
 
 Exact dev-head [Quality 40684917142](https://github.com/saeedsai/ProMathStudio/actions/runs/40684917142) **FAILED** solely at the newly mandatory Chromium snippet-interchange test, line 70: an immediate assertion raced the asynchronous `File.text()` import handler. The remaining Quality steps were completed without reported failure. Fixed test synchronization by waiting for the import input to reset in its `finally` block before checking the resulting status/storage; applied the same wait to malformed and oversize cases. Repair commit `f5e4c234c68bc6b042a63f2639d76cc14c185613`. This is a test timing repair, not a bypass: all existing assertions and malformed/quota/conflict cases remain. Full exact-head CI and PR/Pages are still pending; no release claimed.

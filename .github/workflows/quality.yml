@@ -62,6 +62,8 @@ jobs:
         run: python tests/smoke_workspace_navigation.py
       - name: Shared Symbols palette Solver/2D/3D insertion and focus regression
         run: python tests/smoke_shared_symbols.py
+      - name: Graph palette caret, draft isolation and responsive browser regression
+        run: python tests/smoke_graph_symbol_caret.py
       - name: Combined Equation Editor and Symbolic Solver browser regression
         run: python tests/smoke_equation_combined.py
       - name: Equation tool-family grouping and mobile browser regression

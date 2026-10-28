@@ -30,6 +30,8 @@ Choose **Left table**, **Right table** and **Operation**:
 - INNER, LEFT, RIGHT or FULL OUTER JOIN match key columns (select each table's join key). Duplicate column names from the right side are prefixed with its table name. JOIN uses equality of the displayed cell values, so distinguish numeric strings carefully.
 - UNION ALL appends all rows, including duplicates. UNION DISTINCT removes duplicates. INTERSECT returns rows present in both, and EXCEPT returns rows from the left not present in the right. These set operations require the **same number of columns**, comparing values by column position.
 
+JOIN uses an indexed right-hand key lookup to avoid quadratic comparisons for large tables. Duplicate keys still produce every matching pair in original left-then-right order, and empty keys match empty keys. Invalid join-key selections, outputs wider than 32 columns, or results exceeding 6,000 rows are rejected before creating a result sheet.
+
 Every operation produces a **new table**, leaving the originals intact. The 6,000-row/32-column result limits still apply. There is no remote SQL database or user-authored SQL query execution.
 
 ## Import and export

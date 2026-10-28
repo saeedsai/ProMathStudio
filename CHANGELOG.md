@@ -1,6 +1,6 @@
 ## Unreleased — Data Tables quoted clipboard TSV round-trip (2026-10-28)
 
-- Fixed context-menu row/column copy/paste of cells containing tabs, embedded newlines and escaped double quotes. A bounded TSV parser now validates the entire clipboard payload before mutating the workbook, rejecting malformed quotes, excessive columns/rows/cell lengths and oversized text without partial writes. Quote-only cells are escaped on row/column copy. Added focused Playwright regression for context menus, formulas, invalid-input rollback and responsive viewports to mandatory Quality. Exact dev Quality, PR, main and Pages gates remain pending; no release claim.
+- Fixed context-menu row/column copy/paste of cells containing tabs, embedded newlines and escaped double quotes. A bounded TSV parser now validates the entire clipboard payload before mutating the workbook, rejecting malformed quotes, excessive columns/rows/cell lengths and oversized text without partial writes. Quote-only cells are escaped on row/column copy. Corrected context-action status routing so clipboard success/errors appear in the Data Tables status region rather than the generic hub. Added focused Playwright regression for context menus, formulas, invalid-input rollback and responsive viewports to mandatory Quality. Exact dev Quality, PR, main and Pages gates remain pending; no release claim.
 
 ## Released — Data Tables advanced column filter row alignment (2026-10-28, PR #46)
 

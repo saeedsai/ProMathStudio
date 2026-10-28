@@ -41,6 +41,7 @@ def main():
         row_menu(1)
         menu.get_by_text('Paste row', exact=True).click()
         assert page.evaluate('MathStudio.dataTables.active.rows[1]') == source
+        assert 'Pasted 1 row(s) into table' in page.locator('#dt-status').inner_text()
 
         # Quote-only fields must be escaped, not mistaken for formatting on paste.
         quoted = ['"literal quotes"', 'plain', '', 'end']

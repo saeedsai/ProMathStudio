@@ -4785,8 +4785,8 @@ M.interpolationTools={interpolate,parsePairs,parseQueries};
   const $=id=>document.getElementById(id), MS=window.MathStudio;
   const popup=document.createElement('div');popup.id='workspace-context-menu';popup.className='context-actions';popup.setAttribute('role','menu');popup.setAttribute('aria-label','Contextual workspace actions');popup.tabIndex=-1;popup.hidden=true;document.body.append(popup);
   let selection=null,internalClipboard='',returnFocus=null;
-  const status=text=>{const id=selection?.area==='table'?'dt-status':selection?.area==='calc'?'calc-message':'hub-status';const e=$(id);if(e)e.textContent=text;};
-  const note=e=>{status(e.message||String(e));};
+  const status=(text,area=selection?.area)=>{const id=area==='table'?'dt-status':area==='calc'?'calc-message':'hub-status';const e=$(id);if(e)e.textContent=text;};
+  const note=(e,area)=>{status(e.message||String(e),area);};
   const close=()=>{popup.hidden=true;selection=null;};
   const copy=async data=>{internalClipboard=String(data??'');try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(internalClipboard);}catch{}return internalClipboard;};
   const paste=async()=>{try{if(navigator.clipboard?.readText){const r=await navigator.clipboard.readText();if(r!==undefined)return r;}}catch{}return internalClipboard;};
@@ -4836,9 +4836,9 @@ M.interpolationTools={interpolate,parsePairs,parseQueries};
     else if(row.length){endCell();endRow();}
     return rows;
   }
-  const pasteCells=async(r,c)=>{const text=await paste();if(!text){status('Clipboard is empty.');return;}const t=active(),rows=parseClipboard(text);if(!rows.length)return;const maxWidth=Math.max(...rows.map(x=>x.length)),maxRows=r+rows.length,maxCols=c+maxWidth;validate(t,maxRows,maxCols);
+  const pasteCells=async(r,c)=>{const text=await paste();if(!text){status('Clipboard is empty.','table');return;}const t=active(),rows=parseClipboard(text);if(!rows.length)return;const maxWidth=Math.max(...rows.map(x=>x.length)),maxRows=r+rows.length,maxCols=c+maxWidth;validate(t,maxRows,maxCols);
     while(t.rows.length<maxRows)t.rows.push(t.columns.map(()=>''));while(t.columns.length<maxCols){t.columns.push('Column'+(t.columns.length+1));t.rows.forEach(x=>x.push(''));}
-    rows.forEach((row,ri)=>row.forEach((v,ci)=>{t.rows[r+ri][c+ci]=String(v).slice(0,8000);}));update();status('Pasted '+rows.length+' row(s) into table.');};
+    rows.forEach((row,ri)=>row.forEach((v,ci)=>{t.rows[r+ri][c+ci]=String(v).slice(0,8000);}));update();status('Pasted '+rows.length+' row(s) into table.','table');};
   function filterEquals(column,content){const t=active(),filter=$('dt-filter-column'),op=$('dt-filter-op'),value=$('dt-filter-value');if(!filter||!t)return;
     const details=$('data-menu-navigation')?.querySelectorAll('details')[1];if(details)details.open=true;
     filter.value=String(column);op.value='eq';value.value=String(content);$('dt-filter-apply').click();}
@@ -4902,7 +4902,7 @@ M.interpolationTools={interpolate,parsePairs,parseQueries};
     const commands=actions(sel);if(!commands.length)return false;
     selection=sel;returnFocus=event.target;popup.replaceChildren();
     const heading=document.createElement('div');heading.className='context-heading';heading.textContent=sel.area==='table'?'Data Tables — '+(sel.kind||'actions'):sel.area+' actions';popup.append(heading);
-    for(const cmd of commands){const b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');b.textContent=cmd.title;if(cmd.danger)b.style.color='#b03648';b.addEventListener('click',async()=>{close();try{await cmd.run();}catch(e){note(e);}});popup.append(b);}
+    for(const cmd of commands){const b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');b.textContent=cmd.title;if(cmd.danger)b.style.color='#b03648';b.addEventListener('click',async()=>{const area=selection?.area;close();try{await cmd.run();}catch(e){note(e,area);}});popup.append(b);}
     popup.hidden=false;popup.style.left='0px';popup.style.top='0px';const rect=popup.getBoundingClientRect();const x=Math.max(6,Math.min(event.clientX||20,innerWidth-rect.width-6)),y=Math.max(6,Math.min(event.clientY||20,innerHeight-rect.height-6));popup.style.left=x+'px';popup.style.top=y+'px';popup.focus({preventScroll:true});return true;
   }
   document.addEventListener('contextmenu',e=>{if(popup.contains(e.target))return;if(detect(e.target)){e.preventDefault();open(e);}else close();},true);

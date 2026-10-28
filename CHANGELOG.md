@@ -1,15 +1,21 @@
-## Unreleased — Reliable TSV round-trip and CSV fixture repair (2026-10-28)
+## Unreleased — Nested spreadsheet aggregates (2026-10-28)
+
+- Fixed Data Tables formulas that combine aggregate functions, such as `=SUM(MEDIAN(A1:A5),COUNT(A1:A5))`. Aggregations now resolve innermost-first with a bounded 40-pass nesting limit, preserving existing `IF` lazy evaluation, range/reference checks, cycle detection, and the no-`eval` token grammar.
+- Added a searchable **Nested aggregates** example to the Functions & Code Library; no existing formulas or actions were removed.
+- Added mandatory Chromium regression `tests/smoke_sheet_nested_aggregates.py` covering numeric reference values, nested `SUM/MEDIAN/COUNT/AVERAGE/MIN/MAX`, nested `IF`, cross-sheet ranges, blank/text exclusion, cycles, invalid references, nesting limit, library insertion and responsive controls. **Development branch only until exact-head CI, PR and Pages verification.**
+
+## Released — Reliable TSV round-trip and CSV fixture repair (2026-10-28, PR #63)
 
 - Corrected Data Tables **Export TSV** to quote commas and semicolons in addition to tabs, newlines and quotation marks. The shared CSV/TSV importer sniffs separators from the header; unquoted commas in otherwise valid TSV headers could previously cause the wrong delimiter to be selected on reimport. The export remains value-only and offline.
 - Added an explanatory tooltip, preserved the existing Data Tables export actions, and synchronized standalone `index.html` with `src/data-tables.js`.
 - Added mandatory Chromium regression `tests/smoke_data_tsv_delimiter.py` covering Unicode, ambiguous headers, tabs, multiline fields, quotes, reimport, malformed-file rollback and responsive controls.
-- Diagnosed the previous dev Quality failure in `tests/smoke_data_formula_source_csv.py`: the test fixture itself contained an unquoted `IF(...,...,...)` CSV field. Rebuilt the fixture with Python's `csv.writer` while preserving all round-trip assertions. **Exact-head CI and production deployment remain pending.**
+- Diagnosed the previous dev Quality failure in `tests/smoke_data_formula_source_csv.py`: the test fixture itself contained an unquoted `IF(...,...,...)` CSV field. Rebuilt the fixture with Python's `csv.writer` while preserving all round-trip assertions. Verified exact-dev-head Quality [40702968005](https://github.com/saeedsai/ProMathStudio/actions/runs/40702968005), PR Quality [40703576622](https://github.com/saeedsai/ProMathStudio/actions/runs/40703576622), main Quality [40704132299](https://github.com/saeedsai/ProMathStudio/actions/runs/40704132299) and GitHub Pages [40704131521](https://github.com/saeedsai/ProMathStudio/actions/runs/40704131521).
 
-## Unreleased — Editable formula-source CSV export (2026-10-28)
+## Released — Editable formula-source CSV export (2026-10-28, PR #63)
 
 - Added **Export formulas CSV** to Data Tables, alongside the existing evaluated **Export CSV**. The new export preserves original editable cell strings, including formulas, quoted commas, embedded line breaks and Unicode; reimport restores formula text rather than flattening it into calculated values.
 - Kept the existing evaluated CSV and JSON export behavior unchanged. The new button explicitly warns that external spreadsheet programs may evaluate formulas on opening the exported CSV.
-- Added mandatory Chromium round-trip regression `tests/smoke_data_formula_source_csv.py`, registered in `.github/workflows/quality.yml`. CI/Pages validation pending; this is **not yet released**.
+- Added mandatory Chromium round-trip regression `tests/smoke_data_formula_source_csv.py`, registered in `.github/workflows/quality.yml`. Released through [PR #63](https://github.com/saeedsai/ProMathStudio/pull/63) with full Chromium regression and verified GitHub Pages deployment.
 
 ## Released — Data Tables saved-snippet JSON interchange (2026-10-28, PR #62)
 

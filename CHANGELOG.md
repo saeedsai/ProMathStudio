@@ -1,8 +1,14 @@
-## Unreleased — Nested spreadsheet aggregates (2026-10-28)
+## In QA — Equation CAS accessible result announcements and keyboard focus (2026-10-28)
+
+- Added one concise, screen-reader-accessible live summary for symbolic success, errors and worker progress, including the first result. The full MathML solution region remains navigable without duplicating live announcements.
+- Kept the **Execute** button keyboard-focusable while a SymPy job is running using `aria-disabled` and the existing guarded busy state; no duplicate submissions or solver capability changes.
+- Added mandatory Chromium `tests/smoke_equation_accessibility.py` for offline answers, invalid input, delayed worker reentry/focus, task picker focus and 390/768/1280px layouts. Release pending exact-head CI, PR, main Quality and Pages verification.
+
+## Released — Nested spreadsheet aggregates (2026-10-28, PR #64)
 
 - Fixed Data Tables formulas that combine aggregate functions, such as `=SUM(MEDIAN(A1:A5),COUNT(A1:A5))`. Aggregations now resolve innermost-first with a bounded 40-pass nesting limit, preserving existing `IF` lazy evaluation, range/reference checks, cycle detection, and the no-`eval` token grammar.
 - Added a searchable **Nested aggregates** example to the Functions & Code Library; no existing formulas or actions were removed.
-- Added mandatory Chromium regression `tests/smoke_sheet_nested_aggregates.py` covering numeric reference values, nested `SUM/MEDIAN/COUNT/AVERAGE/MIN/MAX`, nested `IF`, cross-sheet ranges, blank/text exclusion, cycles, invalid references, nesting limit, library insertion and responsive controls. **Development branch only until exact-head CI, PR and Pages verification.**
+- Added mandatory Chromium regression `tests/smoke_sheet_nested_aggregates.py` covering numeric reference values, nested `SUM/MEDIAN/COUNT/AVERAGE/MIN/MAX`, nested `IF`, cross-sheet ranges, blank/text exclusion, cycles, invalid references, nesting limit, library insertion and responsive controls. Released via [PR #64](https://github.com/saeedsai/ProMathStudio/pull/64): [dev Quality 40712426644](https://github.com/saeedsai/ProMathStudio/actions/runs/40712426644), [PR Quality 40713240766](https://github.com/saeedsai/ProMathStudio/actions/runs/40713240766), [main Quality 40713839887](https://github.com/saeedsai/ProMathStudio/actions/runs/40713839887) and [Pages 40713838707](https://github.com/saeedsai/ProMathStudio/actions/runs/40713838707) all succeeded (78 QA steps per candidate).
 
 ## Released — Reliable TSV round-trip and CSV fixture repair (2026-10-28, PR #63)
 

@@ -316,7 +316,7 @@
           <label class="cas-field">Operation <select id="cas-operation"><option value="auto">Auto — expand or solve</option><option value="expand">Expand</option><option value="simplify">Simplify</option><option value="factor">Factor</option><option value="solve">Solve equation</option><option value="system">Solve system of equations</option><option value="differentiate">Differentiate</option><option value="integrate">Integrate</option><option value="limit">Limit (SymPy)</option><option value="numeric">Numerical roots (SymPy)</option><optgroup label="Integral transforms · SymPy"><option value="laplace">Laplace transform ℒ</option><option value="inverse_laplace">Inverse Laplace ℒ⁻¹</option><option value="fourier">Fourier transform ℱ</option><option value="inverse_fourier">Inverse Fourier ℱ⁻¹</option></optgroup><optgroup label="Differential equations · SymPy"><option value="ode">Solve ODE (dsolve)</option><option value="pde">Solve PDE (pdsolve)</option></optgroup></select></label>
           <label class="cas-field cas-engine">Engine <select id="cas-engine"><option value="auto">Auto — offline → SymPy</option><option value="sympy">SymPy — full solver</option><option value="offline">Built-in — offline only</option></select></label>
           <label class="cas-field variable">Variable <input id="cas-variable" type="text" value="x" maxlength="24" spellcheck="false" aria-label="Symbolic variable" /></label>
-          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><label class="cas-field" id="cas-limit-point-wrap" hidden>Approach point <input id="cas-limit-point" type="text" value="0" maxlength="80" spellcheck="false" aria-label="Limit approach point"/></label><label class="cas-field" id="cas-limit-direction-wrap" hidden>Direction <select id="cas-limit-direction" aria-label="Limit direction"><option value="+-">Both sides</option><option value="-">From left (−)</option><option value="+">From right (+)</option></select></label><label class="cas-field" id="cas-ode-ic-wrap" hidden>Initial condition(s) <input id="cas-ode-ic" type="text" maxlength="160" placeholder="y(0)=1; y(1)=e" aria-label="ODE initial conditions" spellcheck="false"/><span class="small-note">Optional; one or two conditions separated by semicolon.</span></label><button type="button" class="primary" id="cas-run">▶ Execute</button>
+          <label class="cas-field cas-target" id="cas-target-wrap" hidden>Output variable <input id="cas-target" type="text" value="s" maxlength="24" aria-label="Transform output variable"/></label><label class="cas-field" id="cas-limit-point-wrap" hidden>Approach point <input id="cas-limit-point" type="text" value="0" maxlength="80" spellcheck="false" aria-label="Limit approach point"/></label><label class="cas-field" id="cas-limit-direction-wrap" hidden>Direction <select id="cas-limit-direction" aria-label="Limit direction"><option value="+-">Both sides</option><option value="-">From left (−)</option><option value="+">From right (+)</option></select></label><label class="cas-field" id="cas-ode-ic-wrap" hidden>Initial condition(s) <input id="cas-ode-ic" type="text" maxlength="160" placeholder="y(0)=1; y(1)=e" aria-label="ODE initial conditions" spellcheck="false"/><span class="small-note">Optional; one or two conditions separated by semicolon.</span></label><button type="button" class="primary" id="cas-run" aria-controls="cas-results cas-status">▶ Execute</button>
         </div>
         <fieldset id="cas-assumptions" style="margin:8px 0 12px;border:1px solid #d7deec;border-radius:10px;padding:8px 12px"><legend>Selected variable assumptions (SymPy)</legend><label><input type="checkbox" id="cas-assume-real"> Real</label> <label><input type="checkbox" id="cas-assume-positive"> Positive</label> <label><input type="checkbox" id="cas-assume-negative"> Negative</label> <label><input type="checkbox" id="cas-assume-integer"> Integer</label><span class="small-note"> Sign implies real. Positive and negative conflict. Leave all unchecked for complex domain.</span></fieldset>
         <div id="cas-system-fields" hidden style="padding:12px;border:1px solid #d7deec;border-radius:10px;margin:12px 0"><label for="cas-system-input">Equations (one per line)</label><textarea id="cas-system-input" rows="4" style="width:100%;display:block" spellcheck="false">x = 2x + 2z
@@ -344,8 +344,9 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
           </select>
         </label>
         <p class="cas-engine-note"><strong>Auto:</strong> fast offline algebra first; advanced problems automatically switch to real Python/SymPy via Pyodide. First use needs internet to download the Python runtime and SymPy; computations stay on your device. No server or API key required.</p>
-        <div id="cas-results" class="cas-results" aria-live="polite"></div>
-        <div class="cas-status" id="cas-status" role="status">Run an operation to see calculated answers.</div>
+        <div id="cas-results" class="cas-results" role="region" aria-label="Symbolic results"></div>
+        <div class="cas-status" id="cas-status">Run an operation to see calculated answers.</div>
+        <span id="cas-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></span>
         <div class="cas-actions"><button class="secondary small" type="button" id="hub-solver-result">↑ Use first solution</button><button class="secondary small" type="button" data-forward="solver" data-destination="graph2d">Graph original equation</button>
           <button class="secondary small" type="button" id="cas-save" disabled>＋ Save result to notebook</button>
           <button class="secondary small" type="button" id="cas-copy-tex" disabled>Copy result LaTeX</button>
@@ -1783,14 +1784,14 @@ def _ms_system(job_text):
   // Interactive symbolic execution: exact built-in kernel + actual SymPy in Pyodide.
   // Python is loaded lazily into a dedicated Web Worker, so expensive calculations
   // won't freeze the equation editor. No arbitrary Python from the user is executed.
-  const casOut=document.getElementById('cas-results'),casMessage=document.getElementById('cas-status'),casCode=document.getElementById('cas-python'),casOperation=document.getElementById('cas-operation'),casVariable=document.getElementById('cas-variable'),casEngine=document.getElementById('cas-engine');
+  const casOut=document.getElementById('cas-results'),casMessage=document.getElementById('cas-status'),casAnnouncement=document.getElementById('cas-announcement'),casCode=document.getElementById('cas-python'),casOperation=document.getElementById('cas-operation'),casVariable=document.getElementById('cas-variable'),casEngine=document.getElementById('cas-engine');
   const casActionButtons=['cas-save','cas-word','cas-copy-tex'];
   let casLast=null,casBusy=false,casRequest=0;
   let sympyWorker=null,sympyWorkerUrl=null,sympyWorkerSeq=0;
   const sympyPending=new Map();
   function setCasButtons(enabled){for(const id of casActionButtons)document.getElementById(id).disabled=!enabled;}
-  function setCasLoading(text){casMessage.className='cas-status loading';casMessage.textContent=text;}
-  function clearCas(){casLast=null;casOut.replaceChildren();casMessage.textContent='Run an operation to see calculated answers.';casMessage.className='cas-status';casCode.textContent='# Execute an operation to generate matching SymPy code.';setCasButtons(false);document.getElementById('cas-result-count').textContent='Ready to calculate';}
+  function setCasLoading(text){casMessage.className='cas-status loading';casMessage.textContent=text;casAnnouncement.textContent=text;}
+  function clearCas(){casLast=null;casOut.replaceChildren();casAnnouncement.textContent='';casMessage.textContent='Run an operation to see calculated answers.';casMessage.className='cas-status';casCode.textContent='# Execute an operation to generate matching SymPy code.';setCasButtons(false);document.getElementById('cas-result-count').textContent='Ready to calculate';}
   function stopSympyWorker(reason){
     if(sympyWorker){sympyWorker.terminate();sympyWorker=null;}
     if(sympyWorkerUrl){URL.revokeObjectURL(sympyWorkerUrl);sympyWorkerUrl=null;}
@@ -1914,6 +1915,10 @@ def _ms_system(job_text):
       row.append(index,frame);casOut.append(row);
     }
     casMessage.className='cas-status success';casMessage.textContent=result.note;
+    // Announce a concise textual answer once, rather than reading every MathML node.
+    const count=result.lines.length,first=result.lines[0];
+    const preview=first?String(first.plain||first.raw||'').replace(/\s+/g,' ').trim().slice(0,180):'';
+    casAnnouncement.textContent=(result.operation||'Symbolic operation').replace(/_/g,' ')+' completed: '+count+(count===1?' result':' results')+(preview?'. First result: '+preview:'')+'.';
     window.dispatchEvent(new CustomEvent('mathstudio:solver-result',{detail:{raw:result.raw,operation:result.operation,engine:result.engine,lines:result.lines.map(line=>({raw:line.mathml?sympyToInput(line.plain):line.raw,plain:line.plain,mathml:line.mathml||'',latex:line.latex||line.tex||'',approx:line.approx||''}))}}));
     casCode.textContent=result.python;setCasButtons(true);
     document.getElementById('cas-result-count').textContent=result.lines.length+(result.lines.length===1?' result':' results')+(result.engine==='SymPy'?' · SymPy':' · built-in');
@@ -1926,9 +1931,10 @@ def _ms_system(job_text):
     if(casBusy)return;
     const raw=input.value.trim(),v=casVariable.value.trim()||'x',selected=casOperation.value,engine=casEngine.value;
     const requested=++casRequest;
-    casBusy=true;document.getElementById('cas-run').disabled=true;
+    casBusy=true;document.getElementById('cas-run').setAttribute('aria-disabled','true');
     document.getElementById('cas-run').classList.add('cas-run-busy');
     casLast=null;casOut.replaceChildren();setCasButtons(false);
+    casAnnouncement.textContent='Calculating symbolic result…';
     try{
       if(!/^[\p{L}][\p{L}0-9_]*$/u.test(v))throw new Error('Choose a valid variable name such as x, t or theta.');
       const assumptions=validatedAssumptions(casAssumptions()),restricted=Object.values(assumptions).some(Boolean);
@@ -1992,10 +1998,10 @@ def _ms_system(job_text):
       if(requested===casRequest){
         let message=e.message||'Unable to solve this equation.';
         if(/fetch|load|network|importscripts|failed to|could not|cdn|cross.origin|worker/i.test(message))message+=' The SymPy engine requires an internet connection on first use. The built-in solver still works offline.';
-        casMessage.className='cas-status error';casMessage.textContent=message;casCode.textContent='# '+message;
+        casMessage.className='cas-status error';casMessage.textContent=message;casAnnouncement.textContent='Unable to solve: '+message;casCode.textContent='# '+message;
         document.getElementById('cas-result-count').textContent='No results';setCasButtons(false);
       }
-    }finally{casBusy=false;document.getElementById('cas-run').disabled=false;document.getElementById('cas-run').classList.remove('cas-run-busy');}
+    }finally{casBusy=false;document.getElementById('cas-run').removeAttribute('aria-disabled');document.getElementById('cas-run').classList.remove('cas-run-busy');}
   }
   document.getElementById('cas-run').addEventListener('click',casExecute);
   document.getElementById('cas-save').addEventListener('click',()=>{

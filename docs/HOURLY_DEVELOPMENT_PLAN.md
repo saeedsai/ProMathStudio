@@ -10,17 +10,17 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-28 — graph panels development checkpoint)
+## Next five features (refreshed 2026-10-28 — verified graph action release)
 
-**P1-UI-GRAPH-PANELS — DEV IMPLEMENTED, CI AND RELEASE PENDING.** Grouped secondary Graphs workspace transfers in a keyboard-accessible native disclosure while keeping Plot, Reset, PNG export and 2D/3D mode controls immediately available. Existing graph task selector continues to expose table plotting, axes and appearance; source and standalone HTML synchronized. New focused Playwright regression checks 2D/3D plotting, axes, appearance exclusivity, PNG download, keyboard transfer, table task, draft preservation, responsive widths and console errors. Full CI, PR, main and Pages evidence required before marking RELEASED.
+**P1-UI-GRAPH-PANELS (bounded action grouping) — RELEASED via [PR #39](https://github.com/saeedsai/ProMathStudio/pull/39).** Secondary graph transfer actions are grouped under a keyboard-accessible disclosure, preserving 2D/3D mode, Plot, Reset, PNG export, axes, appearance and graph table plotting. New Playwright graph-panel regression passed in exact dev [Quality 40609332818](https://github.com/saeedsai/ProMathStudio/actions/runs/40609332818) and PR [Quality 40609762689](https://github.com/saeedsai/ProMathStudio/actions/runs/40609762689). Merged normally into main `10a1e067ca7184e0315f88d29982e848b069e189`; main [Quality 40610140241](https://github.com/saeedsai/ProMathStudio/actions/runs/40610140241), [Pages 40610140252](https://github.com/saeedsai/ProMathStudio/actions/runs/40610140252) and [cleanup 40610140278](https://github.com/saeedsai/ProMathStudio/actions/runs/40610140278) succeeded. `dev` fast-forwarded to released main without force. This bounded UI increment **does not** close the separate Graph CSV/JSON import discoverability gap. Independent interactive hosted Pages smoke was unavailable (remote site inaccessible to available tool).
 
 | Priority | Feature | Concrete acceptance tests | Status |
 |---:|---|---|---|
-| 1 | P1-UI-GRAPH-PANELS release QA | Exact-head full dev and PR Quality green; verify PNG, 2D/3D, transfer and project regressions; main Quality and Pages deploy. | IN PROGRESS |
-| 2 | P1-UI-DATA-TOOLBAR | Group filter/sort/files/Python controls; preserve joins, CSV/XLSX import/export, formulas and context actions in browser tests. | TODO |
-| 3 | P1-UI-ACCESSIBILITY | Keyboard tab/Enter/Space, focus/status labels, 390/768/1280 px across all five workspaces. | TODO |
-| 4 | P1-UI-MULTISERIES-UX | Multiple 2D/3D expressions, independent colors/styles, overlays, reset and project round-trip tests. | TODO |
-| 5 | P1-UI-PROJECT-TRANSFER | Consolidate import/export, invalid-file rollback, draft preservation and mobile/keyboard regression. | TODO |
+| 1 | P1-UI-DATA-TOOLBAR | Group filter/sort/files/Python controls; preserve joins, CSV/XLSX import/export, formulas and context actions in browser tests. | TODO |
+| 2 | P1-UI-ACCESSIBILITY | Keyboard tab/Enter/Space, focus/status labels, 390/768/1280 px across all five workspaces. | TODO |
+| 3 | P1-UI-MULTISERIES-UX | Multiple 2D/3D expressions, independent colors/styles, overlays, reset and project round-trip tests. | TODO |
+| 4 | P1-UI-PROJECT-TRANSFER | Consolidate import/export, invalid-file rollback, draft preservation and mobile/keyboard regression. | TODO |
+| 5 | P1-UI-GRAPH-IMPORT-DISCOVERY | Expose CSV/JSON graph data import from Graphs via visible UI, preserve Data Tables route and chart overlays, fit axes, PNG and project round-trip browser tests. | TODO |
 
 ### Previous five priorities (fitting diagnostics checkpoint)
 
@@ -98,6 +98,9 @@ Next five feature IDs in order:
 **2026-10-28 01:xx CET — P1-UI-ACTION-GROUPS development checkpoint.** Read AGENTS.md, living plan, frozen inventory and latest CI. Started with dev=main `fe6973350e02d5152e48353d8aa335887917f2ec`, no open PR, both refs unprotected. Added native keyboard-accessible disclosure groups for secondary Calculator and Editor actions while preserving existing DOM IDs/listeners, primary actions and drafts. Synchronized modular source and standalone HTML; added a focused Playwright regression for actual DOCX download, clipboard fallback, result/hub transfer, keyboard and responsive widths, wired into mandatory Quality. Local clone and full browser suite blocked by `github.com` DNS resolution failure; exact-head GitHub CI, PR, main and Pages gates remain mandatory. No branch created or stale artifact deleted. NEXT FIVE: P1-UI-ACTION-GROUPS release QA, P1-UI-GRAPH-PANELS, P1-UI-DATA-TOOLBAR, P1-UI-ACCESSIBILITY, P1-UI-MULTISERIES-UX. Frozen 166-gap/95-partial baseline unchanged.
 
 ## Execution record
+
+**2026-10-28 01:40 CET — P1-UI-GRAPH-PANELS verified release.** Dev source commit `b88c507e33c5c78c73aaa1b5c203cad223ac79da` changed six files including source, bundled HTML, focused Playwright test, mandatory Quality, changelog and ledger. Full exact-head dev Quality 40609332818 and PR #39 Quality 40609762689 passed; reviewed six-file PR diff and merged normally to main `10a1e067ca7184e0315f88d29982e848b069e189`. Main Quality 40610140241, Pages deployment 40610140252 and cleanup 40610140278 succeeded. Safely fast-forwarded dev to main, no force or direct main push; only dev/main remain, both unprotected. Hosted interactive Pages smoke could not be independently reached. This increment closes only the secondary Graphs action grouping scope; graph import discovery remains open. Frozen 166-gap/95-partial baseline retained. NEXT FIVE: data toolbar, accessibility, multiseries UX, project transfer, graph import discovery.
+
 
 **2026-10-28 01:30 CET — P1-UI-GRAPH-PANELS development checkpoint.** Read AGENTS.md, frozen inventory, living ledger and latest GitHub CI; baseline dev=main `1850c24b48b4e899928736f2daf59b4ccd43bd9d`, no open PR, only dev/main, both unprotected. Implemented graph function transfer disclosure without hiding Plot/Reset/PNG/2D/3D or changing existing action IDs/listeners; synchronized bundled HTML and added `tests/smoke_graph_panels.py` to mandatory Quality. CI/PR/main/Pages checks must be inspected before release. Local git clone unavailable because github.com DNS resolution fails; no tests or hosted smoke claimed locally. Frozen inventory unchanged; no unrelated file cleanup. NEXT FIVE: graph panels release QA, data toolbar, accessibility, multi-series UX, project transfer.
 

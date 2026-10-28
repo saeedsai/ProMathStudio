@@ -150,6 +150,13 @@
     $('dt-library-message').textContent='Snippet import canceled; saved snippets unchanged.';
     $('dt-snippet-import').focus();
   });
+  // Escape closes an import preview without touching the saved catalog.
+  snippetPreview.addEventListener('keydown',event=>{
+    if(event.key!=='Escape'||snippetPreview.hidden)return;
+    event.preventDefault();closeSnippetPreview();
+    $('dt-library-message').textContent='Snippet import canceled; saved snippets unchanged.';
+    $('dt-snippet-import').focus();
+  });
   snippetSkipConflicts.addEventListener('change',()=>{
     $('dt-snippet-apply').disabled=!!pendingSnippetImport?.plan.conflicts.length&&!snippetSkipConflicts.checked;
   });

@@ -74,7 +74,8 @@ def main():
         run.press('Enter')
         page.wait_for_function("() => window.__casCalls === 1")
         assert run.get_attribute('aria-disabled') == 'true'
-        assert run.is_enabled()  # aria-disabled keeps keyboard focus; JS guards reentry
+        assert not run.is_enabled()  # ARIA reports busy, even though the native button remains focusable
+        assert run.evaluate('(e) => e.disabled === false')  # no native disabled focus loss
         assert page.evaluate('document.activeElement.id') == 'cas-run'
         run.press('Enter')
         assert page.evaluate('window.__casCalls') == 1

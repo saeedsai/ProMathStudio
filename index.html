@@ -3987,7 +3987,11 @@ self.onmessage=async ({data})=>{
   $('dt-run').addEventListener('click',()=>safeAction(()=>{const l=tables.find(t=>t.id===$('dt-left').value),r=tables.find(t=>t.id===$('dt-right').value);if(!l||!r)throw Error('Select two tables.');const mode=$('dt-op').value,result=operation(mode,l,r,Number($('dt-left-key').value),Number($('dt-right-key').value));const resultTable=makeTable(l.name+'_'+mode+'_'+r.name,result.headers,result.rows);notify('Created '+resultTable.name+' with '+result.rows.length+' rows.');}));
   const download=(filename,contents,mime)=>{const url=URL.createObjectURL(new Blob([contents],{type:mime}));const a=el('a',{href:url,download:filename});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);};
   $('dt-export-csv').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=[t.columns,...evaluated(t)];download(t.name+'.csv',rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}));
-  $('dt-export-json').addEventListener('click',()=>safeAction(()=>{const t=active(),rows=evaluated(t);download(t.name+'.json',JSON.stringify(rows.map(row=>Object.fromEntries(t.columns.map((h,i)=>[h,row[i]]))),null,2),'application/json');}));
+  $('dt-export-json').addEventListener('click',()=>safeAction(()=>{const t=active();
+    // JSON objects cannot represent duplicate property names without losing cells.
+    // CSV and project JSON remain available for workbooks with repeated headers.
+    if(new Set(t.columns).size!==t.columns.length)throw Error('JSON export requires unique column headers; rename duplicates before exporting.');
+    const rows=evaluated(t);download(t.name+'.json',JSON.stringify(rows.map(row=>Object.fromEntries(t.columns.map((h,i)=>[h,row[i]]))),null,2),'application/json');}));
   $('dt-import').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{
     if(file.size>MAX_BYTES)throw Error('Import file exceeds 1 MB.');if(!/\.(csv|tsv|json)$/i.test(file.name))throw Error('Choose CSV, TSV or JSON.');
     const text=await file.text(),decoder=window.MathStudio.graphData;const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text):decoder.parseCSV(text);

@@ -1,3 +1,19 @@
+## 2026-10-28 — Requested workspace libraries (requirements queued)
+
+- **P1-UI-SHARED-SYMBOL-LIBRARY:** expose the existing searchable mathematical symbol catalog in Symbolic Solver and 2D/3D Graphs; insert at the active cursor, preserve drafts and focus, use compatible expression syntax, and avoid duplicated toolbars. **Acceptance:** browser tests for insertion in all three targets, keyboard/search behavior, mobile widths, and no regression to Editor/Calculator. **Status:** REQUESTED; not implemented.
+- **P1-DATA-FUNCTION-CODE-LIBRARY:** one searchable **Functions & Code** library inside Data Tables, with distinct supported spreadsheet formulas (SUM, AVERAGE, MIN, MAX, COUNT, IF, references), native table operations (JOIN/UNION/INTERSECT/EXCEPT), Python/pandas recipes and saved user snippets. Each entry shows target runtime, syntax, example and support limitations; insert into selected cell or Python editor without execution. **Acceptance:** formula insertion preserves other cells; code insertion targets editor only and does not execute; unsupported Excel functions labeled unsupported; search/category/keyboard/mobile tests, persistence/rollback tests and no duplicate controls. **Status:** REQUESTED; not implemented.
+- Both features must follow AGENTS.md: implement on dev with focused automated regression tests, exact-head Quality and PR checks, verified main merge and Pages deployment before marking Released.
+
+### NEXT FIVE (updated request priority)
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-SHARED-SYMBOL-LIBRARY | Solver and 2D/3D graph insertion, cursor/focus, search, mobile and existing Editor/Calculator regressions. | REQUESTED |
+| 2 | P1-DATA-FUNCTION-CODE-LIBRARY | Formula/code/operation search and examples, correct target insertion, no autoexecution, saved snippets, keyboard/mobile. | REQUESTED |
+| 3 | P1-UI-DATA-TOOLBAR remaining import/export QA | CSV/TSV/JSON/XLSX round-trip, malformed-file rollback, formulas and 390/768/1280 px. | IN PROGRESS |
+| 4 | P1-UI-ACCESSIBILITY remainder | Focus/labels/live status in all workspaces; no traps, overflow or browser errors. | IN PROGRESS |
+| 5 | P1-UI-MULTISERIES-UX | Independent 2D/3D styles, reset and project persistence. | TODO |
+
 ## 2026-10-28 06:55 CET — P1-DATA-JSON-SCHEMA-DRIFT (bounded lossless JSON import)
 
 **DEV IMPLEMENTATION PENDING EXACT-SHA CI / PR / PAGES.** Fixed a silent JSON data-loss path shared by Data Tables and Graphs: object records with new keys in later rows previously lost those values because only the first record's keys were projected. Every record must now contain exactly the same key set, irrespective of order; missing and unexpected keys are rejected before table or graph state changes. Added `tests/smoke_json_record_schema.py` (Unicode, key reorder, extra/missing/replaced keys, UI transactional rollback, graph persistence, 390/768/1280 px and page errors), registered in mandatory Quality. Local GitHub checkout still blocked by DNS; full browser and unit gates must be verified via GitHub Actions. The frozen 166 gaps/95 partials baseline remains unchanged; broader JSON/CSV/XLSX import QA is not complete.

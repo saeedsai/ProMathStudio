@@ -56,11 +56,11 @@ def main():
 
         # Single-column TSV has no delimiter in its header. Commas inside
         # unquoted formulas are valid TSV content, not CSV separators.
-        tsv = 'Metric\r\n"Å, B; C\tD"\r\n"two\nlines"\r\n=SUM(1,2)\r\n'
+        tsv = 'Metric\r\n"Å, B; C\tD"\r\n"two\nlines"\r\n=SUM(1,2)\r\n""\r\n'
         third = upload(page, 'one_column_tsv.tsv', tsv)
         assert third['columns'] == ['Metric'], third
         assert third['rows'] == [['Å, B; C\tD'], ['two\nlines'],
-                                 ['=SUM(1,2)']], third
+                                 ['=SUM(1,2)'], ['']], third
         page.locator('#data-menu-navigation > details').nth(3).evaluate(
             '(e) => e.open = true')
         with page.expect_download() as download:

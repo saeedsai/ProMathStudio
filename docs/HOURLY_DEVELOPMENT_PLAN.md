@@ -1,3 +1,17 @@
+## 2026-10-28 — Data Functions & Code Library implementation checkpoint
+
+**IMPLEMENTED ON DEV, NOT RELEASED.** Added searchable Functions & Code Library to Data Tables with supported spreadsheet formula examples, cross-table reference, and Python/pandas recipes. Insertion targets last focused data cell or Python script editor, dispatches normal input/change events, and never executes Python. Updated modular source and standalone bundle. Added `tests/test_data_code_library.py` for source/bundle parity and insertion safeguards. Browser UI regression, full Quality and exact-head CI, PR promotion and Pages verification remain pending; do not mark released. This is an initial catalog, not complete Excel compatibility or saved-snippet support. Follow-up must verify focus, active-cell updates, persistence, and responsive behavior in Chromium and fix defects before release.
+
+### NEXT FIVE after implementation checkpoint
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-FUNCTION-CODE-LIBRARY QA and release | Chromium cell/formula and Python editor insertion, no execution, keyboard/mobile, full CI and Pages. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-UI-SHARED-SYMBOL-LIBRARY | Symbolic Solver and 2D/3D graph insertion with cursor/focus and Editor/Calculator regressions. | REQUESTED |
+| 3 | P1-DATA-LIBRARY-SAVED-SNIPPETS | Persist/edit/delete user snippets safely; invalid names and malformed storage recovery. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export QA | CSV/TSV/JSON/XLSX round-trip, malformed-file rollback and formulas. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY remainder | Focus/labels/live status in all five workspaces, mobile overflow and browser errors. | IN PROGRESS |
+
 ## 2026-10-28 — Requested workspace libraries (requirements queued)
 
 - **P1-UI-SHARED-SYMBOL-LIBRARY:** expose the existing searchable mathematical symbol catalog in Symbolic Solver and 2D/3D Graphs; insert at the active cursor, preserve drafts and focus, use compatible expression syntax, and avoid duplicated toolbars. **Acceptance:** browser tests for insertion in all three targets, keyboard/search behavior, mobile widths, and no regression to Editor/Calculator. **Status:** REQUESTED; not implemented.

@@ -16,7 +16,7 @@ Only scalar expressions with numeric input can be calculated. For an equation in
 
 ### 2 — Equation editor
 
-Open **Equation editor**, type `x^2=(x/(x-1))^(-1/2)` and inspect **Live preview**. Press Enter or **Add equation** to save it to the notebook; Shift+Enter adds a text line. You can edit previously saved entries. The palette sidebar groups symbols, Greek letters, matrices, calculus and more; its search finds templates. **Copy LaTeX**, **Copy for Word**, **Copy image**, **Word .docx** and **Export .tex** are available. The **Python / SymPy** panel produces corresponding code (which you should review before running elsewhere).
+Open **Equation editor**, type `x^2=(x/(x-1))^(-1/2)` and inspect **Live preview**. Press Enter or **Add equation** to save it to the notebook; Shift+Enter adds a text line. You can edit previously saved entries. The palette sidebar groups symbols, Greek letters, matrices, calculus and more; its search finds templates. The floating **∑ Symbols** button also opens this searchable library in **Symbolic solver** and **2D/3D graphs**. Select an expression in your working equation or graph function, open Symbols, search (for example `Sine`), and choose a template to insert at the caret. Press **Escape** to close the library and return keyboard focus to the Symbols button. Some notation is typesetting-only and will not evaluate in a graph or solver. **Copy LaTeX**, **Copy for Word**, **Copy image**, **Word .docx** and **Export .tex** are available. The **Python / SymPy** panel produces corresponding code (which you should review before running elsewhere).
 
 ### 3 — Symbolic solver
 

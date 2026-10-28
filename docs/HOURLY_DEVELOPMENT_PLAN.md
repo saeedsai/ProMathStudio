@@ -1,3 +1,45 @@
+## 2026-10-28 09:55 CET — P1-UI-SHARED-SYMBOL-LIBRARY: navigation bugfix and browser QA gate
+
+**Feature ledger: IMPLEMENTED ON DEV; CI/PR/Pages release pending.** Read AGENTS.md, frozen 166-gap/95-partial inventory, and current plan. Starting dev `53e05619226792a6140fe0637e1cdecb474c65f9`, main `92e4860303396700ebe94e2f116cc3086fe80b66`; latest exact prior-dev [Quality 40658582529](https://github.com/saeedsai/ProMathStudio/actions/runs/40658582529) passed. No open PRs and only `dev`/`main` branches; neither is protected. Browser QA investigation found the prior Symbols visibility change used `body.ws-solver`/`body.ws-graph` selectors without ever setting those classes. Fixed central workspace navigation to update all five `ws-*` classes on clicks, session restore and programmatic navigation; removed the obsolete Editor/Calculator-only click class handler. Added aria-expanded and keyboard Escape focus restoration. Existing graph palette insertion and Solver working equation insertion remain unchanged. Added new Playwright browser regression `tests/smoke_shared_symbols.py` (Solver, 2D/3D, keyboard, session/API, mobile, draft isolation), registered mandatory Quality, extended `tests/test_shared_symbol_workspace.py`, and updated `docs/USER_GUIDE.md` and CHANGELOG. CI for new exact head, PR, main and Pages must be inspected and recorded separately; do not infer release from the earlier green SHA. Local checkout cannot resolve github.com, so full Python and Chromium suites run via repository CI, not locally. No tracked files proven obsolete for deletion.
+
+### NEXT FIVE — actionable queue with acceptance tests
+
+| Priority | Feature | Acceptance tests / dependencies | State |
+|---:|---|---|---|
+| 1 | P1-UI-SHARED-SYMBOL-LIBRARY QA and release | New Chromium test plus full unit/browser Quality at exact dev SHA; verify search, caret insertion, 2D/3D drafts, Escape/focus, restored/programmatic workspace, 390/768/1280 px; PR checks then main Quality and Pages. | DEV IMPLEMENTED; QA GATE |
+| 2 | P1-DATA-LIBRARY-FORMULA-COMPATIBILITY | Test advertised SUM/AVERAGE/MIN/MAX/COUNT/IF against computed reference results, invalid ranges and cross-table errors; label unsupported Excel functions. | TODO |
+| 3 | P1-DATA-LIBRARY-SNIPPET-UX | Explicit cancel-edit, export/import JSON with schema validation and atomic rollback, no automatic Python execution; Playwright reload and quota cases. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode and formula round trips, empty rows and malformed-file rollback with browser tests. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY | Focus/ARIA, keyboard traps and overflow across five workspaces at 390/768/1280 px; automated axe/manual review as available. | IN PROGRESS |
+
+## 2026-10-28 09:40 CET — Shared math palette, parallel feature checkpoint
+
+**DEV SOURCE AND FOCUSED TEST COMMITTED; CI/RELEASE NOT VERIFIED.** Enabled the existing Symbols quick-menu button in Solver and Graph workspaces, and routed palette insertion to the graph function textarea in graph mode; Solver continues inserting into the working equation editor. Added `tests/test_shared_symbol_workspace.py` for workspace visibility and routing assertions. Browser focus/selection, exact runtime graph behavior, responsive layout, full CI and Pages release remain pending. No PR or main merge claimed. Existing dev documentation ahead of main is preserved.
+
+### NEXT FIVE — feature delivery and acceptance
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-SHARED-SYMBOL-LIBRARY browser QA | Solver/graph 2D/3D insertion, caret/focus and search; mobile 390/768/1280; no Editor/Calculator regression. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-DATA-LIBRARY-SAVED-SNIPPETS browser QA | Reload, search, rename/delete, storage failure and no automatic Python execution. | RELEASED; FOLLOW-UP QA |
+| 3 | P1-DATA-FORMULA-REFERENCE-ACCURACY | Cross-table references and range edge cases; automated calculation assertions. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export correctness | CSV/TSV/JSON/XLSX round trip, malformed file rollback, Unicode. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY | Keyboard, screen reader announcements, focus and responsive regression. | IN PROGRESS |
+
+## 2026-10-28 09:14 CET — PR #57 released; post-merge execution log
+
+**RELEASE VERIFIED.** Delivered the Data Tables saved Formula/Python snippet catalog with explicit Edit/rename/Delete, duplicate-name protection, confirmation and atomic localStorage failure rollback. Source, standalone HTML, new Playwright test, mandatory Quality, changelog and plan were updated. Original PR head `0ced9ff38e1f6b35aa54811411af528df44585bd` failed [Quality 40654438754](https://github.com/saeedsai/ProMathStudio/actions/runs/40654438754) due to test-harness misuse of Playwright `page.evaluate`; fixed with a real callback and retained quota-failure test. Exact final dev candidate `6f7f751551f6114cd9abe0e88b9fe1ed1da16846` passed [dev Quality 40654625640](https://github.com/saeedsai/ProMathStudio/actions/runs/40654625640) and [PR Quality 40654631674](https://github.com/saeedsai/ProMathStudio/actions/runs/40654631674), all 70 PR job steps passed. Ordinary [PR #57](https://github.com/saeedsai/ProMathStudio/pull/57) merged to `main=92e4860303396700ebe94e2f116cc3086fe80b66`. [Main Quality 40655146895](https://github.com/saeedsai/ProMathStudio/actions/runs/40655146895), [Pages 40655146396](https://github.com/saeedsai/ProMathStudio/actions/runs/40655146396), [cleanup 40655146814](https://github.com/saeedsai/ProMathStudio/actions/runs/40655146814) all succeeded on that exact SHA. Dev was safely fast-forwarded to main with a SHA-checked non-force update, then received post-release documentation. Only dev/main branches remain; no obsolete tracked files were proven safe to delete. Independent interactive browsing of the hosted Pages URL was inaccessible, so live UI was not independently verified beyond successful Pages and CI browser checks. Branch protection/rulesets remain unconfigured/unverified. Frozen 166-gap/95-partial audit remains the baseline; release does not claim Excel or MATLAB parity.
+
+### NEXT FIVE — after verified release
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-UI-SHARED-SYMBOL-LIBRARY | Reuse searchable math library in Solver and 2D/3D Graphs; insert at caret, preserve focus and draft, syntax-appropriate functions; Chromium keyboard/mobile, Editor/Calculator regressions. | REQUESTED |
+| 2 | P1-DATA-LIBRARY-FORMULA-COMPATIBILITY | Compare every advertised formula to supported parser; reference numerical outputs, bad ranges/cross-table errors and clear unsupported Excel labeling. | TODO |
+| 3 | P1-DATA-LIBRARY-SNIPPET-UX | Explicit cancel editing, user-friendly storage error/recovery and import/export of snippets without executing code; browser reload/rollback. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR remaining import/export QA | CSV/TSV/JSON/XLSX lossless round-trip, Unicode, formula retention and malformed-file rollback, mobile. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY remainder | Focus, labels, screen-reader status, no keyboard traps/overflow in five workspaces at 390/768/1280 px. | IN PROGRESS |
+
 **CI recovery 2026-10-28 09:08 CET.** [PR #57](https://github.com/saeedsai/ProMathStudio/pull/57) created from dev. Exact PR-head [Quality 40654438754](https://github.com/saeedsai/ProMathStudio/actions/runs/40654438754) failed in new `smoke_data_saved_snippets.py`: the test passed a JavaScript assignment expression returning a function to Playwright `page.evaluate`, which invoked that function and raised the deliberately injected `quota` exception before the intended click. App structural tests and all earlier browser steps passed. Fixed the test harness to pass an explicit zero-argument callback for injection and restoration, preserving the quota failure assertion. Repair commit `d1aed2d228e521a670bbec31ee6cb78dd37841b9`; new exact-head CI/PR checks pending, no bypass or merge. NEXT FIVE priorities remain the table below.
 
 ## 2026-10-28 09:03 CET — P1-DATA-LIBRARY-SNIPPET-MANAGEMENT (parallel development)

@@ -1176,13 +1176,17 @@ def _ms_system(job_text):
   }
   function insertText(text,caret){
     const calculatorMode=!!document.querySelector('[data-workspace="calculator"].active');
-    const target=calculatorMode?document.getElementById('calc-input'):input;
+    const activeWorkspace=document.querySelector('.workspace-tab.active')?.dataset.workspace||'';
+    const graphMode=activeWorkspace==='graph'||activeWorkspace==='graph2d'||activeWorkspace==='graph3d';
+    // Solver reads the working equation; graph uses its own function editor.
+    const target=calculatorMode?document.getElementById('calc-input'):graphMode?document.getElementById('graph-input'):input;
     const start=target.selectionStart,end=target.selectionEnd;
     target.setRangeText(text,start,end,'end');
     const position=start+(Number.isFinite(caret)?caret:text.length);
     target.setSelectionRange(position,position+(Number.isFinite(caret)?1:0));
     target.dispatchEvent(new Event('input',{bubbles:true}));target.focus();
-    if(calculatorMode){document.body.classList.remove('library-open');}else refresh();
+    if(document.body.classList.contains('library-open')){document.body.classList.remove('library-open');document.getElementById('quick-symbols')?.setAttribute('aria-expanded','false');}
+    if(!calculatorMode)refresh();
   }
   function loadExample(raw){editId=null;btnAdd.innerHTML='＋ Add equation <span aria-hidden="true">↵</span>';cancelEdit.hidden=true;input.value=raw;refresh();renderNotebook();input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}
   function exportLatex(){
@@ -1303,7 +1307,7 @@ def _ms_system(job_text):
               const input=mode==='calculator'?document.getElementById('calc-input'):mode==='graph'?document.getElementById('graph-input'):null;
               if(input){
                 input.focus();const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
-                input.setRangeText(code,start,end,'end');input.dispatchEvent(new Event('input',{bubbles:true}));document.body.classList.remove('library-open');
+                input.setRangeText(code,start,end,'end');input.dispatchEvent(new Event('input',{bubbles:true}));document.body.classList.remove('library-open');document.getElementById('quick-symbols')?.setAttribute('aria-expanded','false');
               }else insertText(code);
             });grid.appendChild(b);found++;}
           inner.appendChild(grid);top.appendChild(inner);
@@ -2250,6 +2254,8 @@ def _ms_system(job_text):
     $('workspace-subtitle').textContent=modeDescriptions[mode];
     document.title='Math Studio Pro — '+({calculator:'Advanced Calculator',editor:'Equation Editor',solver:'Symbolic Solver',graph:'2D / 3D Graph Generator',data:'Data Tables'}[mode]);
     const sidebar=document.querySelector('aside');sidebar.classList.toggle('ws-secondary',mode==='calculator'||mode==='graph'||mode==='data'); document.querySelector('.shell').classList.toggle('no-symbol-sidebar',mode==='calculator'||mode==='graph'||mode==='data');
+    // Keep the visual workspace state in sync for clicks, restored sessions and API navigation.
+    for(const workspace of ['editor','calculator','solver','graph','data'])document.body.classList.toggle('ws-'+workspace,mode===workspace);
     try{sessionStorage.setItem('mathstudio-mode',mode)}catch{}
     if(mode==='graph')requestAnimationFrame(()=>drawGraph());
     if(mode==='calculator')$('calc-input').focus({preventScroll:true});
@@ -4333,7 +4339,7 @@ const css=document.createElement('style');css.textContent=`
   #quick-menu{position:fixed;top:12px;right:16px;z-index:130;display:flex;gap:7px;padding:7px;background:#ffffffee;border:1px solid #dfe5f3;border-radius:12px;box-shadow:0 5px 25px #26345618;backdrop-filter:blur(10px)}
   #quick-menu button{border:0;background:#eef2ff;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:750;color:#3b51ab}
   #quick-menu button:hover{background:#dbe5ff}
-  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols,body.ws-calculator #quick-symbols{display:block!important}
+  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols,body.ws-calculator #quick-symbols,body.ws-solver #quick-symbols,body.ws-graph #quick-symbols,body.ws-graph2d #quick-symbols,body.ws-graph3d #quick-symbols{display:block!important}
   #examples .examples{display:none}body.examples-open #examples .examples{display:grid}
   #examples{min-height:65px;scroll-margin-top:76px}
   body.examples-open #examples{position:fixed;right:0;top:65px;width:min(660px,95vw);height:calc(100vh - 75px);overflow:auto;padding:20px;background:#fff;border-radius:14px 0 0 14px;z-index:120;box-shadow:-10px 0 70px #071b3455;margin:0}
@@ -4361,17 +4367,18 @@ quick.innerHTML=`<button id="quick-symbols" type="button" aria-label="Open math 
 document.body.appendChild(quick);
 const options=document.createElement('section');options.className='ui-options';options.id='ui-options';options.hidden=true;options.innerHTML='<h3>Workspace display</h3><label><input type="checkbox" id="ui-history">Calculator history</label><label><input type="checkbox" id="ui-python">Show Python code</label><label><input type="checkbox" id="ui-details">Advanced explanations</label><button type="button" class="secondary" id="ui-close">Close</button>';
 document.body.appendChild(options);
-function closeMenus(){document.body.classList.remove('library-open','examples-open');options.hidden=true;}
+function closeMenus(){document.body.classList.remove('library-open','examples-open');options.hidden=true;$('quick-symbols').setAttribute('aria-expanded','false');}
 overlay.addEventListener('click',closeMenus);
-$('quick-symbols').addEventListener('click',()=>{const next=!document.body.classList.contains('library-open');closeMenus();document.body.classList.toggle('library-open',next);$('palette-search').focus();});
+$('quick-symbols').setAttribute('aria-expanded','false');
+$('quick-symbols').setAttribute('aria-controls','palette-nav');
+$('quick-symbols').addEventListener('click',()=>{const next=!document.body.classList.contains('library-open');closeMenus();document.body.classList.toggle('library-open',next);$('quick-symbols').setAttribute('aria-expanded',String(next));if(next)$('palette-search').focus();else $('quick-symbols').focus();});
 $('quick-examples').addEventListener('click',()=>{const next=!document.body.classList.contains('examples-open');closeMenus();document.body.classList.toggle('examples-open',next);if(next)$('example-category').focus();});
 $('quick-options').addEventListener('click',()=>{const next=options.hidden;closeMenus();options.hidden=!next;});
 $('quick-help').addEventListener('click',()=>{closeMenus();$('help-dialog').showModal();});
 $('ui-close').addEventListener('click',closeMenus);
 for(const [box,cls] of [['ui-history','ui-history-on'],['ui-python','ui-python-on'],['ui-details','ui-details-on']])$(''+box).addEventListener('change',e=>document.body.classList.toggle(cls,e.target.checked));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenus();});
-for(const b of document.querySelectorAll('[data-workspace]'))b.addEventListener('click',()=>{closeMenus();document.body.classList.remove('ws-editor');document.body.classList.toggle('ws-editor',b.dataset.workspace==='editor');document.body.classList.toggle('ws-calculator',b.dataset.workspace==='calculator');});
-document.body.classList.add('ws-editor');
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const wasOpen=document.body.classList.contains('library-open');closeMenus();if(wasOpen){e.preventDefault();$('quick-symbols').focus();}});
+for(const b of document.querySelectorAll('[data-workspace]'))b.addEventListener('click',closeMenus);
 // Examples are in a contextual sliding drawer. Selecting one closes the drawer.
 $('examples-list').addEventListener('click',e=>{if(e.target.closest('button'))closeMenus();});
 // Compact advanced controls: hide axes settings until opened; preserve IDs.

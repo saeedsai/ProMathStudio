@@ -162,7 +162,9 @@
     .workspace-bar{display:flex;flex-wrap:wrap;gap:7px;padding:0 0 15px;position:relative;z-index:1}
     .workspace-tab{background:white;border:1px solid var(--edge);color:#52617a;padding:11px 17px;border-radius:11px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 6px #111a2b08}
     .workspace-tab.active{color:#354bc9;border-color:#9fb0ff;background:#eef1ff;box-shadow:0 0 0 1px #bfcbff55}
-    .workspace-tab:hover{border-color:#99abe4}.ws-emoji{font:19px Georgia,serif}.workspace-subtitle{font-size:13px;color:#647189;margin:-7px 0 18px}
+    .workspace-tab:hover{border-color:#99abe4}
+    .workspace-tab:focus-visible{outline:3px solid #354bc9;outline-offset:3px;position:relative;z-index:2}
+    .ws-emoji{font:19px Georgia,serif}.workspace-subtitle{font-size:13px;color:#647189;margin:-7px 0 18px}
     .workspace-hidden{display:none!important} #calculator-panel,#graph-panel{margin-bottom:20px}
     .calculator-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(205px,260px);gap:22px;padding:22px}
     .calc-label,.graph-input-label{font-weight:700;font-size:12px;display:block;margin-bottom:7px}
@@ -284,7 +286,7 @@
       <button type="button" class="workspace-tab" data-workspace="solver"><span class="ws-emoji">ƒ</span> Symbolic solver</button>
       <button type="button" class="workspace-tab" data-workspace="graph"><span class="ws-emoji">⌁</span> 2D &amp; 3D graphs</button>
     </div>
-    <div class="workspace-subtitle" id="workspace-subtitle">Write, preview and export professional mathematical equations.</div>
+    <div class="workspace-subtitle" id="workspace-subtitle" aria-live="polite" aria-atomic="true">Write, preview and export professional mathematical equations.</div>
     <header class="topbar"><div><div class="kicker">Creative workspace / Mathematics</div><h1>Your equations, beautifully written.</h1><p>Type familiar text notation and see professional math typesetting in real time. Press <kbd>Enter</kbd> to add your result to the notebook.</p></div><button type="button" class="subtle-button" id="help-btn">Syntax guide ↗</button></header>
     <section class="panel" id="calculator-panel" aria-label="Advanced calculator">
       <div class="panel-head"><div class="panel-title"><span class="step">01</span> Advanced calculator <span class="cas-label">real + complex</span></div><span class="small-note">Scientific notation · Trigonometry · Factorials</span></div>
@@ -2253,6 +2255,24 @@ def _ms_system(job_text):
     if(mode==='calculator')$('calc-input').focus({preventScroll:true});
   }
   for(const b of document.querySelectorAll('[data-workspace]'))b.addEventListener('click',()=>changeMode(b.dataset.workspace));
+  // Native buttons keep their normal Tab/Enter/Space behavior. Arrow/Home/End
+  // move focus only; activation remains explicit. Delegate so the Data Tables
+  // button, which is appended by its module after startup, participates too.
+  document.querySelector('.workspace-bar').addEventListener('keydown',event=>{
+    if(!event.target.matches('button[data-workspace]'))return;
+    const buttons=[...event.currentTarget.querySelectorAll('button[data-workspace]:not(:disabled)')];
+    const index=buttons.indexOf(event.target);
+    if(index<0||!buttons.length)return;
+    let next;
+    if(event.key==='ArrowRight')next=(index+1)%buttons.length;
+    else if(event.key==='ArrowLeft')next=(index+buttons.length-1)%buttons.length;
+    else if(event.key==='Home')next=0;
+    else if(event.key==='End')next=buttons.length-1;
+    else return;
+    event.preventDefault();
+    buttons[next].focus();
+  });
+
 
   // Scientific calculator
   const keys=[

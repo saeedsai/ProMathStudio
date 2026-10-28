@@ -10,17 +10,17 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-28 — released action groups)
+## Next five features (refreshed 2026-10-28 — graph panels development checkpoint)
 
-**P1-UI-ACTION-GROUPS — RELEASED via [PR #37](https://github.com/saeedsai/ProMathStudio/pull/37).** Exact dev [Quality 40606508008](https://github.com/saeedsai/ProMathStudio/actions/runs/40606508008), PR [Quality 40606906734](https://github.com/saeedsai/ProMathStudio/actions/runs/40606906734), main [Quality 40607265984](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265984) and [Pages 40607265308](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265308) succeeded on released main `137b008c583ee9f938430f5dd02cee4bb7df585a`. New Playwright browser regression covers real Word download, result transfer, keyboard and responsive layout. Hosted independent interactive Pages verification remains unavailable.
+**P1-UI-GRAPH-PANELS — DEV IMPLEMENTED, CI AND RELEASE PENDING.** Grouped secondary Graphs workspace transfers in a keyboard-accessible native disclosure while keeping Plot, Reset, PNG export and 2D/3D mode controls immediately available. Existing graph task selector continues to expose table plotting, axes and appearance; source and standalone HTML synchronized. New focused Playwright regression checks 2D/3D plotting, axes, appearance exclusivity, PNG download, keyboard transfer, table task, draft preservation, responsive widths and console errors. Full CI, PR, main and Pages evidence required before marking RELEASED.
 
 | Priority | Feature | Concrete acceptance tests | Status |
 |---:|---|---|---|
-| 1 | P1-UI-GRAPH-PANELS | Group graph import, axes and appearance without hiding Plot/2D/3D; pan/zoom, fit axes, PNG download and project round-trip browser tests. | TODO |
-| 2 | P1-UI-DATA-TOOLBAR | Simplify filter/sort/files/Python entry points; preserve joins and CSV/XLSX import/export, formulas and right-click actions; browser tests. | TODO |
-| 3 | P1-UI-ACCESSIBILITY | Keyboard tab/Enter/Space navigation, focus/status labels, and 390/768/1280 px layouts across all five workspaces. | TODO |
-| 4 | P1-UI-MULTISERIES-UX | Preserve multiple 2D/3D expressions, independent colors/styles and overlays across plot/reset/project round-trip; browser tests. | TODO |
-| 5 | P1-UI-PROJECT-TRANSFER | Consolidate project import/export controls with explicit invalid-file rollback, unsaved draft preservation and keyboard/mobile regression. | TODO |
+| 1 | P1-UI-GRAPH-PANELS release QA | Exact-head full dev and PR Quality green; verify PNG, 2D/3D, transfer and project regressions; main Quality and Pages deploy. | IN PROGRESS |
+| 2 | P1-UI-DATA-TOOLBAR | Group filter/sort/files/Python controls; preserve joins, CSV/XLSX import/export, formulas and context actions in browser tests. | TODO |
+| 3 | P1-UI-ACCESSIBILITY | Keyboard tab/Enter/Space, focus/status labels, 390/768/1280 px across all five workspaces. | TODO |
+| 4 | P1-UI-MULTISERIES-UX | Multiple 2D/3D expressions, independent colors/styles, overlays, reset and project round-trip tests. | TODO |
+| 5 | P1-UI-PROJECT-TRANSFER | Consolidate import/export, invalid-file rollback, draft preservation and mobile/keyboard regression. | TODO |
 
 ### Previous five priorities (fitting diagnostics checkpoint)
 
@@ -98,6 +98,9 @@ Next five feature IDs in order:
 **2026-10-28 01:xx CET — P1-UI-ACTION-GROUPS development checkpoint.** Read AGENTS.md, living plan, frozen inventory and latest CI. Started with dev=main `fe6973350e02d5152e48353d8aa335887917f2ec`, no open PR, both refs unprotected. Added native keyboard-accessible disclosure groups for secondary Calculator and Editor actions while preserving existing DOM IDs/listeners, primary actions and drafts. Synchronized modular source and standalone HTML; added a focused Playwright regression for actual DOCX download, clipboard fallback, result/hub transfer, keyboard and responsive widths, wired into mandatory Quality. Local clone and full browser suite blocked by `github.com` DNS resolution failure; exact-head GitHub CI, PR, main and Pages gates remain mandatory. No branch created or stale artifact deleted. NEXT FIVE: P1-UI-ACTION-GROUPS release QA, P1-UI-GRAPH-PANELS, P1-UI-DATA-TOOLBAR, P1-UI-ACCESSIBILITY, P1-UI-MULTISERIES-UX. Frozen 166-gap/95-partial baseline unchanged.
 
 ## Execution record
+
+**2026-10-28 01:30 CET — P1-UI-GRAPH-PANELS development checkpoint.** Read AGENTS.md, frozen inventory, living ledger and latest GitHub CI; baseline dev=main `1850c24b48b4e899928736f2daf59b4ccd43bd9d`, no open PR, only dev/main, both unprotected. Implemented graph function transfer disclosure without hiding Plot/Reset/PNG/2D/3D or changing existing action IDs/listeners; synchronized bundled HTML and added `tests/smoke_graph_panels.py` to mandatory Quality. CI/PR/main/Pages checks must be inspected before release. Local git clone unavailable because github.com DNS resolution fails; no tests or hosted smoke claimed locally. Frozen inventory unchanged; no unrelated file cleanup. NEXT FIVE: graph panels release QA, data toolbar, accessibility, multi-series UX, project transfer.
+
 
 **2026-10-28 01:16 CET — P1-UI-ACTION-GROUPS verified release.** Source commit `945497e51c2a78e89edd8706ba789120bf284640` updated `src/workspace-tasks.js`, synchronized `index.html`, added `tests/smoke_action_groups.py` and its mandatory Quality step, and updated docs/changelog/ledger. JavaScript syntax and exact bundled-source equality checked. Dev Quality [40606508008](https://github.com/saeedsai/ProMathStudio/actions/runs/40606508008) and PR #37 Quality [40606906734](https://github.com/saeedsai/ProMathStudio/actions/runs/40606906734) passed full structural and browser regressions, including new keyboard/DOCX/clipboard/hub/mobile test. Reviewed six-file diff and merged PR #37 normally to main `137b008c583ee9f938430f5dd02cee4bb7df585a`; main Quality [40607265984](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265984), Pages [40607265308](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265308) and branch cleanup [40607265979](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265979) succeeded. Safely fast-forwarded dev to main without force. Local clone blocked by GitHub DNS; independent interactive hosted site inaccessible. Branch protections remain absent; only dev/main refs, no stale files removed. Next five: P1-UI-GRAPH-PANELS, P1-UI-DATA-TOOLBAR, P1-UI-ACCESSIBILITY, P1-UI-MULTISERIES-UX, P1-UI-PROJECT-TRANSFER. Frozen baseline unchanged (166 gaps/95 partial).
 

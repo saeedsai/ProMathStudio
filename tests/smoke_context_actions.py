@@ -54,7 +54,7 @@ def main():
   page.locator('#equation-input').fill('x^2-1')
   page.locator('#equation-input').click(button='right')
   menu.get_by_text('Send to Solver').click()
-  assert page.locator('[data-workspace="solver"].active').count()==1
+  assert page.locator('[data-workspace="editor"].active').count()==1
   page.locator('[data-workspace="graph"]').click()
   page.locator('#graph-canvas').click(button='right')
   assert menu.get_by_text('Export graph PNG').is_visible()

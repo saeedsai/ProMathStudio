@@ -3364,8 +3364,8 @@ self.onmessage=async ({data})=>{
     const guessed=Object.keys(count).sort((a,b)=>count[b]-count[a])[0];
     // A single-column header has no separator to sniff. Data Tables opts in;
     // Graphs still requires two numeric coordinate columns.
-    const delimiter=count[guessed]?guessed:(options.allowSingleColumn===true
-      ?(options.delimiterHint==='\t'?'\t':','):null);
+    const delimiter=options.delimiterHint==='\t'?'\t':(count[guessed]?guessed:
+      (options.allowSingleColumn===true?',':null));
     if(!delimiter)throw Error('CSV header must contain at least two columns.');
     const rows=[],row=[];let field='',quotedCell=false,closed=false,explicitRecord=false;
     for(let i=0;i<text.length;i++){

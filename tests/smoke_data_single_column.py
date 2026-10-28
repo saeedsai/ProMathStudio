@@ -69,6 +69,12 @@ def main():
         assert list(csv.reader(io.StringIO(tsv_raw.decode('utf-8')),
                                delimiter='\t')) == [['Metric'], *third['rows']]
         assert upload(page, 'one_column_tsv_again.tsv', tsv_raw)['rows'] == third['rows']
+        # A TSV file with a comma in its unquoted *single* header is still
+        # one column: extension-specific tab delimiter wins over sniffing.
+        comma_header = upload(page, 'comma_header.tsv',
+                              'Metric, USD\r\n=SUM(1,2)\r\n')
+        assert comma_header['columns'] == ['Metric, USD'], comma_header
+        assert comma_header['rows'] == [['=SUM(1,2)']], comma_header
 
         records = [{'Reading': '日本語'}, {'Reading': 'Ångström'}]
         fourth = upload(page, 'one_column_json.json',

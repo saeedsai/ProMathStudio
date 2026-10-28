@@ -83,11 +83,11 @@ def main():
             name.fill('Do not persist')
             kind.select_option('Formula')
             code.fill('=MAX(A1:A5)')
-            page.evaluate("window.__setItem = Storage.prototype.setItem; Storage.prototype.setItem = function(){throw Error('quota');}")
+            page.evaluate("() => { window.__setItem = Storage.prototype.setItem; Storage.prototype.setItem = function(){throw Error('quota');}; }")
             page.get_by_role('button', name='Save snippet').click()
             assert 'Storage unavailable' in status.inner_text()
             assert page.get_by_role('button', name='Edit snippet Do not persist').count() == 0
-            page.evaluate('Storage.prototype.setItem = window.__setItem')
+            page.evaluate('() => { Storage.prototype.setItem = window.__setItem; }')
             # Browser reload retains the renamed snippet and not deleted/failed entries.
             page.reload(wait_until='load')
             page.locator('[data-workspace="data"]').click()

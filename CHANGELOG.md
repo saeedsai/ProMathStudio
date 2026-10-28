@@ -1,9 +1,16 @@
-## Unreleased — Shared Symbols palette navigation and keyboard accessibility (2026-10-28)
+## Unreleased — Data Tables MEDIAN and bounded formula references (2026-10-28)
+
+- Added `MEDIAN` to the searchable Functions & Code Library and offline spreadsheet evaluator: odd/even counts, multiple arguments, numeric ranges and quoted cross-table ranges. Ignores text/blank/whitespace cells; no numeric values returns `#NUM!`.
+- Range aggregation now treats unpopulated in-grid rows and columns as blanks rather than zero-valued observations, fixing MEDIAN/AVERAGE/COUNT on short tables. Existing explicit numeric zeros are still counted.
+- Aggregation ranges reject invalid workbook coordinates (row 0, rows above 6000, columns beyond AF) with `#REF!` instead of treating them as zero. Unpopulated in-grid cells remain blank.
+- Added focused unit and mandatory Playwright tests for MEDIAN, existing SUM/AVERAGE/COUNT/MIN/MAX/IF, cross-table, cycle, invalid ranges, insertion and persistence. **On dev; CI/PR/Pages pending.**
+
+## Released — Shared Symbols palette navigation and keyboard accessibility (2026-10-28, PR #58)
 
 - Fixed the **∑ Symbols** quick-menu visibility in Symbolic Solver and 2D/3D Graphs: workspace-specific body classes are now synchronized by the central workspace switcher, including session restore and programmatic navigation, rather than only Editor/Calculator click handlers. Existing palette insertion targets the working equation in Solver and the current 2D/3D graph expression in Graphs; drafts remain separate.
 - The Symbols button now exposes `aria-expanded`/`aria-controls` state. Escape closes the drawer and restores focus to its trigger; clicking an open Symbols trigger closes it without focusing a hidden search field.
 - Added Playwright regression `tests/smoke_shared_symbols.py` covering Solver, 2D and 3D insertion, draft isolation, keyboard focus, session/API mode restore, 390/768/1280 px visibility and Data Tables isolation. Registered as a mandatory Quality step. Updated user guide.
-- **Status:** implemented on `dev`; exact-head full CI, PR gate and GitHub Pages deployment must be verified before calling this released.
+- **Released:** [PR #58](https://github.com/saeedsai/ProMathStudio/pull/58) merged via ordinary PR to `main=4cb8d38319e7d3bc62a31b871818ad609311f93b`. Exact dev Quality [40660701904](https://github.com/saeedsai/ProMathStudio/actions/runs/40660701904), PR Quality [40661179270](https://github.com/saeedsai/ProMathStudio/actions/runs/40661179270), main Quality [40661759085](https://github.com/saeedsai/ProMathStudio/actions/runs/40661759085), post-merge dev Quality [40661779124](https://github.com/saeedsai/ProMathStudio/actions/runs/40661779124), Pages [40661757481](https://github.com/saeedsai/ProMathStudio/actions/runs/40661757481), and branch cleanup [40661757692](https://github.com/saeedsai/ProMathStudio/actions/runs/40661757692) all passed. Initial [Quality 40660474297](https://github.com/saeedsai/ProMathStudio/actions/runs/40660474297) caught an actual missing `aria-expanded=false` update after insertion; fixed on dev and retained browser assertion. Hosted page was not independently interactively verified because external browsing was inaccessible; Pages deployment and CI browser tests were verified.
 
 ## Released — Data Tables saved snippet management and safe persistence (2026-10-28, PR #57)
 

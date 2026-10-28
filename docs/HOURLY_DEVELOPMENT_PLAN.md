@@ -1,3 +1,17 @@
+## 2026-10-28 09:03 CET — P1-DATA-LIBRARY-SNIPPET-MANAGEMENT (parallel development)
+
+**Implemented on dev, pending exact-head CI and PR.** Started from `dev=ce793228b9d21bac93a1798b4eaa30e5faef43ed` and `main=8d9849c2cbece6d1d128f59098ffb455f6e1eab5` (five dev-only commits). The existing saved snippets lacked Edit/Delete and silently overwrote matching names, and failed storage writes changed in-memory state. Added explicit Edit/rename, confirmation-based Delete, duplicate-name rejection unless editing, and atomic storage-first catalog updates. Updated modular source and exact standalone bundle; added focused `tests/smoke_data_saved_snippets.py` and registered it in mandatory Quality; updated CHANGELOG. JavaScript parsed successfully in V8; local full Python/Chromium suites unavailable because the runtime cannot resolve github.com for a checkout. CI push status not exposed by available commit-status/PR-only workflow connector (both returned empty), so **do not mark green or released**. Exact-dev-head PR CI, main promotion and Pages checks are required. No obsolete branches to delete (only dev/main). Frozen 166-gap/95-partial inventory unchanged.
+
+### NEXT FIVE — acceptance tests and dependencies
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-SNIPPET-MANAGEMENT QA/release | New Playwright create/edit/rename/duplicate/delete/cancel/quota/reload/mobile plus full unittest/browser CI; exact SHA PR, main Quality, Pages. | DEV IMPLEMENTED / CI PENDING |
+| 2 | P1-UI-SHARED-SYMBOL-LIBRARY | Solver and 2D/3D graph insertion at caret, syntax validation, keyboard/search/mobile, Editor/Calculator regression. | REQUESTED |
+| 3 | P1-DATA-LIBRARY-FORMULA-COMPATIBILITY | Catalog entries match supported parser, reference numeric outputs, invalid range/cross-table handling, unsupported Excel labeling. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export QA | CSV/TSV/JSON/XLSX round-trip, formula retention, Unicode and transactional rollback, mobile. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY remainder | Focus/labels/live status and no overflow/traps across all five workspaces at 390/768/1280 px. | IN PROGRESS |
+
 ## 2026-10-28 — Parallel feature: saved Data Tables snippets
 
 **DEV IMPLEMENTED; CI/RELEASE NOT VERIFIED.** Added named locally persisted Formula/Python snippets to the Data Tables Functions & Code Library. Includes search/category integration, bounded 40-entry catalog, 60-character names, 8000-character snippet validation, formula '=' requirement, and malformed storage recovery. Synchronized modular Data Tables code with standalone index.html; added discoverable unittest `tests/test_data_saved_snippets.py`. **QA pending:** run full Python/unittest and Chromium regressions, verify saved snippets persist across reloads, focus and insertion, storage failure behavior, mobile layout, exact-dev-head CI and safe PR/Pages deployment. This does not yet support snippet deletion; add a separate small enhancement. Do not claim production deployment.

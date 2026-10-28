@@ -1,3 +1,7 @@
+## In QA — Data Tables Functions & Code Library and reliable insertion (2026-10-28)
+
+- Added searchable Formula, Python and Table Operation categories, including INNER/LEFT JOIN, UNION ALL, INTERSECT and EXCEPT chooser entries. Fixed a real focus/blur race: the table grid re-renders on cell blur, so library insertion now uses stable sheet/row/column coordinates instead of a detached input element; formula selection replaces the whole cell and persists it. Python recipes insert without running code, reveal the Python editor, and operation recipes select the native Combine controls without executing the operation. Added structural unittest and dedicated Playwright regression to mandatory Quality, with responsive and no-auto-run assertions. Awaiting exact-dev-head Quality, PR, main Quality and Pages verification; not released yet.
+
 ## In QA — Reject lossy JSON record schema drift on import (2026-10-28)
 
 - The shared Graphs/Data Tables JSON parser now rejects object-record arrays whose later rows introduce or omit column names, rather than silently dropping values outside the first record's header set. Key order may vary and Unicode values are preserved. Added focused Playwright coverage for reordered keys, extra/missing/replaced keys, transactional table/graph import rollback and responsive layouts; registered in mandatory Quality. Awaiting exact dev-head CI, independent PR gate, main Quality and Pages verification; not yet released.

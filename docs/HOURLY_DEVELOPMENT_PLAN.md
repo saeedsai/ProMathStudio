@@ -1,3 +1,17 @@
+## 2026-10-28 — P1-DATA-FUNCTION-CODE-LIBRARY follow-up and CI recovery
+
+**IN QA, NOT RELEASED.** Latest pre-run exact-dev-head Quality [40647176079](https://github.com/saeedsai/ProMathStudio/actions/runs/40647176079) failed the existing strict standalone/source parity test because the previous update trimmed a trailing newline. This run restored exact module parity and replaced the detached-input formula insertion with stable table coordinates, adding Formula/Python/Operation categories and native operation selection. Added discoverable unittest (the earlier pytest-style functions were not run by unittest discovery), a focused Playwright browser test, and mandatory Quality registration. No checks bypassed. New commit, CI, PR and Pages outcomes must be appended after verification.
+
+### NEXT FIVE — current execution queue
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-FUNCTION-CODE-LIBRARY QA/release | Exact standalone parity; formula persists after blur; no wrong-sheet mutation; Python and native operations do not auto-run; 390/768/1280 px, full CI and Pages. | IN QA |
+| 2 | P1-UI-SHARED-SYMBOL-LIBRARY | Insert at cursor in Solver, 2D and 3D Graphs; search, keyboard/mobile, Editor/Calculator regression. | REQUESTED |
+| 3 | P1-DATA-LIBRARY-SAVED-SNIPPETS | Create/edit/delete snippets, safe local persistence and malformed-storage rollback. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export QA | CSV/TSV/JSON/XLSX lossless round-trip, formula retention, invalid-file rollback and browser. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY remainder | Keyboard/focus/live status and overflow across all workspaces. | IN PROGRESS |
+
 ## 2026-10-28 — Data Functions & Code Library implementation checkpoint
 
 **IMPLEMENTED ON DEV, NOT RELEASED.** Added searchable Functions & Code Library to Data Tables with supported spreadsheet formula examples, cross-table reference, and Python/pandas recipes. Insertion targets last focused data cell or Python script editor, dispatches normal input/change events, and never executes Python. Updated modular source and standalone bundle. Added `tests/test_data_code_library.py` for source/bundle parity and insertion safeguards. Browser UI regression, full Quality and exact-head CI, PR promotion and Pages verification remain pending; do not mark released. This is an initial catalog, not complete Excel compatibility or saved-snippet support. Follow-up must verify focus, active-cell updates, persistence, and responsive behavior in Chromium and fix defects before release.

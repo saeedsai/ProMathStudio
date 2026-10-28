@@ -3351,20 +3351,20 @@ self.onmessage=async ({data})=>{
     }
     const delimiter=Object.keys(count).sort((a,b)=>count[b]-count[a])[0];
     if(!count[delimiter])throw Error('CSV header must contain at least two columns.');
-    const rows=[],row=[];let field='',quotedCell=false,closed=false;
+    const rows=[],row=[];let field='',quotedCell=false,closed=false,explicitRecord=false;
     for(let i=0;i<text.length;i++){
       const ch=text[i];
       if(ch==='"'){
         if(quotedCell&&text[i+1]==='"'){field+='"';i++;}
         else if(quotedCell){quotedCell=false;closed=true;}
-        else if(!field&&!closed)quotedCell=true;
+        else if(!field&&!closed){quotedCell=true;explicitRecord=true;}
         else throw Error('Unexpected quote in CSV field.');
       }else if(!quotedCell&&ch===delimiter){
-        row.push(field);field='';closed=false;
+        row.push(field);field='';closed=false;explicitRecord=true;
       }else if(!quotedCell&&(ch==='\r'||ch==='\n')){
         row.push(field);field='';closed=false;
-        if(row.some(x=>x.trim()!=='')){rows.push(row.slice());if(rows.length>MAX_ROWS+1)throw Error('File exceeds 6,000 data rows.');}
-        row.length=0;if(ch==='\r'&&text[i+1]==='\n')i++;
+        if(explicitRecord||row.some(x=>x.trim()!=='')){rows.push(row.slice());if(rows.length>MAX_ROWS+1)throw Error('File exceeds 6,000 data rows.');}
+        row.length=0;explicitRecord=false;if(ch==='\r'&&text[i+1]==='\n')i++;
       }else{
         if(closed&&ch!==' '&&ch!=='\t')throw Error('Invalid characters after quoted CSV field.');
         field+=ch;
@@ -3373,7 +3373,8 @@ self.onmessage=async ({data})=>{
     }
     if(quotedCell)throw Error('CSV contains an unclosed quote.');
     row.push(field);
-    if(row.some(x=>x.trim()!==''))rows.push(row);
+    if(explicitRecord||row.some(x=>x.trim()!==''))rows.push(row);
+    if(rows.length>MAX_ROWS+1)throw Error('File exceeds 6,000 data rows.');
     if(rows.length<2)throw Error('CSV needs a header row and at least one data row.');
     const headers=rows.shift().map(trim);
     if(headers.length<2||headers.length>MAX_COLS)throw Error('CSV must contain 2–32 columns.');

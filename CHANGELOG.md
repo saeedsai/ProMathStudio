@@ -1,3 +1,7 @@
+## In QA — Preserve explicit empty CSV/TSV records on import (2026-10-28)
+
+- The shared graph and Data Tables delimited parser no longer discards intentional all-empty records (`,`, tab-delimited fields or quoted empty cells). Truly blank physical lines remain ignored. Added EOF row-limit enforcement and focused browser tests for multiline quoted data, CSV export/reimport, TSV, malformed-input rollback, boundaries and responsive viewports. Mandatory Quality, PR, main and Pages verification pending; not yet released.
+
 ## Released — Reject lossy Data Tables JSON export for duplicate headers (2026-10-28, PR #52)
 
 - JSON export now rejects duplicate column labels before downloading, preventing silent overwrites when rows are converted to JSON objects. CSV still retains duplicate headers, and distinct case-sensitive labels and one empty header remain valid. Added focused browser regression covering rejection, workbook rollback, CSV preservation, formula values, case/empty-header edges and responsive viewports; registered in mandatory Quality. Exact dev Quality 40632849087, PR Quality 40633188532, main Quality 40633492145, Pages 40633491520 and synchronized dev Quality 40633506608 succeeded. Released via [PR #52](https://github.com/saeedsai/ProMathStudio/pull/52) into `main=f067cef5804eb8721ea621de6f67fd120c6798ef`. Public interactive Pages QA unavailable; branch protections remain absent.

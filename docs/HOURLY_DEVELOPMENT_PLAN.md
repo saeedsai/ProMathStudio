@@ -1,3 +1,19 @@
+## 2026-10-28 17:54 CET — P1-GRAPH-SYMBOL-INPUT implemented on dev
+
+**Feature ledger: IMPLEMENTED ON DEV / QA PENDING.** The shared Symbols palette now uses one insertion path for Equation, Calculator and Graphs; when a graph template is a simple function with `x` or `y` as its sole argument, that placeholder is selected for immediate editing. The selected graph range is replaced without changing the Equation draft, other 2D/3D draft, or plotted canvas; no unintended Equation preview refresh. Added `tests/test_graph_symbol_caret.py` (structural) and mandatory Chromium `tests/smoke_graph_symbol_caret.py` (caret/selection, 2D↔3D drafts, no auto-plot, 390/768/1280px and runtime errors). Preserved existing palette entries and workflows. **Not released** until exact dev Quality, PR Quality, main Quality and Pages are verified.
+
+**Execution log:** Started from `dev=192d12357b82aea8c760e03c1844d07f4ac90f3c`, `main=4aea6df4b54a87af1c91a82503fb0f3a26f3ac79`; dev Quality [40723942003](https://github.com/saeedsai/ProMathStudio/actions/runs/40723942003), main Quality [40723301997](https://github.com/saeedsai/ProMathStudio/actions/runs/40723301997), Pages [40723299988](https://github.com/saeedsai/ProMathStudio/actions/runs/40723299988) all succeeded before changes. No open PR. GitHub clone and local Chromium blocked by container DNS; GitHub CI remains mandatory. No branch deletions; no proven obsolete tracked files. Branch protection disabled. Frozen 166-gap/95-partial baseline unchanged. Hourly task remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-GRAPH-SYMBOL-INPUT release QA | New Chromium + structural test, existing graph/shared-symbol regressions, exact dev/PR/main Quality and Pages. | DEV IMPLEMENTED / IN QA |
+| 2 | P1-DATA-LIBRARY-SNIPPET-UX | Preview/cancel JSON import, explicit conflicts, 40-entry boundary, storage rollback and no Python auto-run; Chromium regression. | TODO |
+| 3 | P1-DATA-SINGLE-COLUMN-INTERCHANGE | One-column CSV/TSV/JSON Unicode/multiline/formula round-trip, graph XY still two coordinates, negative cases. | TODO |
+| 4 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Nested custom functions in SUM/IF, recursion and invalid-name guards, reference oracles and browser tests. | TODO |
+| 5 | P0-MATRIX-PSEUDOINVERSE-2X2 | Moore–Penrose identities, least-norm solve, singular/zero/scaled matrices, UI regression. | TODO |
+
 ## 2026-10-28 — P1-UI-EQUATION-ACCESSIBILITY RELEASED via PR #65
 
 **Feature ledger: RELEASED FOR STATED SCOPE.** Equation CAS now announces progress, first answer and actionable errors through a single atomic polite live region while retaining the navigable MathML results and visual status. The Execute button uses `aria-disabled` with the existing `casBusy` guard so keyboard focus is retained during asynchronous SymPy calculations and repeated Enter cannot submit a duplicate job. No existing symbolic operations, exports, notebook or task tools were removed. Mandatory Chromium `tests/smoke_equation_accessibility.py` covers offline result/error, delayed mocked SymPy worker, duplicate submit guard, keyboard focus, task picker and 390/768/1280px layouts.

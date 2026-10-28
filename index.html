@@ -4431,7 +4431,7 @@ function filterTable(){const t=M.dataTables.active;if(!t)return;const col=$('dt-
   const rule=filterState.byTable.get(t.id);if(!rule){$('dt-filter-report').textContent='No column filter applied.';for(const tr of $('dt-sheet').querySelectorAll('tbody tr'))tr.hidden=false;return;}
   col.value=String(rule.column);$('dt-filter-op').value=rule.op;$('dt-filter-value').value=rule.value;
   const rows=M.dataTables.calculate(t);let shown=0;
-  for(const tr of $('dt-sheet').querySelectorAll('tbody tr')){const label=tr.querySelector('th')?.textContent||'',index=Number(label)-2;
+  for(const tr of $('dt-sheet').querySelectorAll('tbody tr')){const label=tr.querySelector('th')?.textContent||'',index=Number(label)-1;
     const show=Number.isInteger(index)&&index>=0&&matches(rows[index]?.[rule.column],rule.op,rule.value);tr.hidden=!show;if(show)shown++;
   }
   $('dt-filter-report').textContent=shown+' visible rows match the column filter.';

@@ -23,14 +23,15 @@ def main():
   page.get_by_role('button',name='Insert SUM').click()
   assert 'Select a spreadsheet data cell first' in page.locator('#dt-library-message').inner_text()
   assert page.evaluate('JSON.stringify(MathStudio.dataTables.active.rows)')==initial
+  # Preserve actual fixture values; the default workbook may contain examples.
+  unchanged=page.evaluate('MathStudio.dataTables.active.rows[0].slice(0,2)')
   # Blur rebuilds the spreadsheet grid before the library button is clicked.
   cell=page.locator('#dt-sheet td input[data-row="0"][data-col="2"]')
   cell.click()
   search.fill('sum')
   page.get_by_role('button',name='Insert SUM').click()
   assert page.evaluate('MathStudio.dataTables.active.rows[0][2]')=='=SUM(A1:A5)'
-  assert page.evaluate('MathStudio.dataTables.active.rows[0][0]')==''
-  assert page.evaluate('MathStudio.dataTables.active.rows[0][1]')==''
+  assert page.evaluate('MathStudio.dataTables.active.rows[0].slice(0,2)')==unchanged
   assert 'Inserted SUM into C1' in page.locator('#dt-library-message').inner_text()
   # Replacing a formula must not append a second equals sign.
   search.fill('IF')
@@ -49,7 +50,7 @@ def main():
   category.select_option('Operation')
   search.fill('UNION ALL')
   count=page.evaluate('MathStudio.dataTables.tables.length')
-  page.get_by_role('button',name='Insert UNION ALL').count()==0
+  assert page.get_by_role('button',name='Insert UNION ALL').count()==0
   page.get_by_role('button',name='Choose UNION ALL').click()
   page.wait_for_function('()=>document.querySelector("#data-menu-navigation > details:nth-child(3)")?.open')
   assert page.locator('#dt-op').input_value()=='unionall'

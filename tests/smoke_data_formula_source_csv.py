@@ -18,7 +18,15 @@ def main():
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.set_content((ROOT / 'index.html').read_text(encoding='utf-8'), wait_until='load')
         page.locator('[data-workspace="data"]').click()
-        original = 'id,note,calc\n1,"Ångström, one",=SUM(A1:A2)\n2,"two\nlines",=IF(A2>0,42,0)\n'
+        # Build a standards-compliant fixture: commas inside IF(...) are
+        # part of a single CSV field and must be quoted, not delimiters.
+        fixture = io.StringIO(newline='')
+        csv.writer(fixture, lineterminator='\\r\\n').writerows([
+            ['id', 'note', 'calc'],
+            ['1', 'Ångström, one', '=SUM(A1:A2)'],
+            ['2', 'two\\nlines', '=IF(A2>0,42,0)'],
+        ])
+        original = fixture.getvalue()
         page.locator('#dt-import').set_input_files({
             'name': 'formula_source.csv', 'mimeType': 'text/csv',
             'buffer': original.encode('utf-8')})

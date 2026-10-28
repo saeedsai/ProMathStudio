@@ -19,7 +19,7 @@ def main():
         nav = page.locator('.workspace-bar')
         buttons = nav.locator('button[data-workspace]')
         assert nav.get_attribute('role') == 'navigation'
-        assert buttons.count() == 5  # Includes dynamically injected Data Tables.
+        assert buttons.count() == 4  # Equation combines editor and solver; Data Tables is injected.
         assert page.locator('#workspace-subtitle').get_attribute('aria-live') == 'polite'
         assert page.locator('[data-workspace="editor"]').get_attribute('aria-current') == 'page'
 
@@ -31,11 +31,9 @@ def main():
 
         page.locator('[data-workspace="editor"]').focus()
         page.keyboard.press('ArrowRight')
-        assert focused() == 'solver'
+        assert focused() == 'graph'
         assert current() == 'editor', 'Arrows must not silently change the workspace'
         assert page.evaluate('getComputedStyle(document.activeElement).outlineStyle') != 'none'
-        page.keyboard.press('ArrowRight')
-        assert focused() == 'graph'
         page.keyboard.press('ArrowRight')
         assert focused() == 'data'
         page.keyboard.press('ArrowRight')
@@ -73,7 +71,7 @@ def main():
             assert focused() == 'data', width
             page.keyboard.press('ArrowRight')
             assert focused() == 'calculator', width
-            assert buttons.count() == 5
+            assert buttons.count() == 4
             assert nav.evaluate('(e) => e.scrollWidth <= e.clientWidth + 1'), width
         assert not errors, errors
         browser.close()

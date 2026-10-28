@@ -1,14 +1,48 @@
-## 2026-10-28 — P1-DATA-FUNCTION-CODE-LIBRARY follow-up and CI recovery
+**CI recovery 2026-10-28 09:08 CET.** [PR #57](https://github.com/saeedsai/ProMathStudio/pull/57) created from dev. Exact PR-head [Quality 40654438754](https://github.com/saeedsai/ProMathStudio/actions/runs/40654438754) failed in new `smoke_data_saved_snippets.py`: the test passed a JavaScript assignment expression returning a function to Playwright `page.evaluate`, which invoked that function and raised the deliberately injected `quota` exception before the intended click. App structural tests and all earlier browser steps passed. Fixed the test harness to pass an explicit zero-argument callback for injection and restoration, preserving the quota failure assertion. Repair commit `d1aed2d228e521a670bbec31ee6cb78dd37841b9`; new exact-head CI/PR checks pending, no bypass or merge. NEXT FIVE priorities remain the table below.
 
-**IN QA, NOT RELEASED.** Latest pre-run exact-dev-head Quality [40647176079](https://github.com/saeedsai/ProMathStudio/actions/runs/40647176079) failed the existing strict standalone/source parity test because the previous update trimmed a trailing newline. This run restored exact module parity and replaced the detached-input formula insertion with stable table coordinates, adding Formula/Python/Operation categories and native operation selection. Added discoverable unittest (the earlier pytest-style functions were not run by unittest discovery), a focused Playwright browser test, and mandatory Quality registration. No checks bypassed. New commit, CI, PR and Pages outcomes must be appended after verification.
+## 2026-10-28 09:03 CET — P1-DATA-LIBRARY-SNIPPET-MANAGEMENT (parallel development)
 
-### NEXT FIVE — current execution queue
+**Implemented on dev, pending exact-head CI and PR.** Started from `dev=ce793228b9d21bac93a1798b4eaa30e5faef43ed` and `main=8d9849c2cbece6d1d128f59098ffb455f6e1eab5` (five dev-only commits). The existing saved snippets lacked Edit/Delete and silently overwrote matching names, and failed storage writes changed in-memory state. Added explicit Edit/rename, confirmation-based Delete, duplicate-name rejection unless editing, and atomic storage-first catalog updates. Updated modular source and exact standalone bundle; added focused `tests/smoke_data_saved_snippets.py` and registered it in mandatory Quality; updated CHANGELOG. JavaScript parsed successfully in V8; local full Python/Chromium suites unavailable because the runtime cannot resolve github.com for a checkout. CI push status not exposed by available commit-status/PR-only workflow connector (both returned empty), so **do not mark green or released**. Exact-dev-head PR CI, main promotion and Pages checks are required. No obsolete branches to delete (only dev/main). Frozen 166-gap/95-partial inventory unchanged.
+
+### NEXT FIVE — acceptance tests and dependencies
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-SNIPPET-MANAGEMENT QA/release | New Playwright create/edit/rename/duplicate/delete/cancel/quota/reload/mobile plus full unittest/browser CI; exact SHA PR, main Quality, Pages. | DEV IMPLEMENTED / CI PENDING |
+| 2 | P1-UI-SHARED-SYMBOL-LIBRARY | Solver and 2D/3D graph insertion at caret, syntax validation, keyboard/search/mobile, Editor/Calculator regression. | REQUESTED |
+| 3 | P1-DATA-LIBRARY-FORMULA-COMPATIBILITY | Catalog entries match supported parser, reference numeric outputs, invalid range/cross-table handling, unsupported Excel labeling. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export QA | CSV/TSV/JSON/XLSX round-trip, formula retention, Unicode and transactional rollback, mobile. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY remainder | Focus/labels/live status and no overflow/traps across all five workspaces at 390/768/1280 px. | IN PROGRESS |
+
+## 2026-10-28 — Parallel feature: saved Data Tables snippets
+
+**DEV IMPLEMENTED; CI/RELEASE NOT VERIFIED.** Added named locally persisted Formula/Python snippets to the Data Tables Functions & Code Library. Includes search/category integration, bounded 40-entry catalog, 60-character names, 8000-character snippet validation, formula '=' requirement, and malformed storage recovery. Synchronized modular Data Tables code with standalone index.html; added discoverable unittest `tests/test_data_saved_snippets.py`. **QA pending:** run full Python/unittest and Chromium regressions, verify saved snippets persist across reloads, focus and insertion, storage failure behavior, mobile layout, exact-dev-head CI and safe PR/Pages deployment. This does not yet support snippet deletion; add a separate small enhancement. Do not claim production deployment.
+
+### NEXT FIVE — parallel delivery queue
 
 | Priority | Feature | Acceptance tests | Status |
 |---:|---|---|---|
-| 1 | P1-DATA-FUNCTION-CODE-LIBRARY QA/release | Exact standalone parity; formula persists after blur; no wrong-sheet mutation; Python and native operations do not auto-run; 390/768/1280 px, full CI and Pages. | IN QA |
-| 2 | P1-UI-SHARED-SYMBOL-LIBRARY | Insert at cursor in Solver, 2D and 3D Graphs; search, keyboard/mobile, Editor/Calculator regression. | REQUESTED |
-| 3 | P1-DATA-LIBRARY-SAVED-SNIPPETS | Create/edit/delete snippets, safe local persistence and malformed-storage rollback. | TODO |
+| 1 | P1-DATA-LIBRARY-SAVED-SNIPPETS QA | Unittest, browser reload/search, valid/invalid inputs, no execution, mobile, full CI. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-UI-SHARED-SYMBOL-LIBRARY | Solver and 2D/3D graph insertion, cursor/focus, mobile and Editor/Calculator regressions. | REQUESTED |
+| 3 | P1-DATA-LIBRARY-SNIPPET-MANAGEMENT | Delete and rename custom snippets, avoid accidental overwrite and recover storage failures. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR remaining import/export QA | CSV/TSV/JSON/XLSX round-trip and malformed-file rollback. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY remainder | Keyboard and screen-reader status across five workspaces, mobile and no browser errors. | IN PROGRESS |
+
+## 2026-10-28 — P1-DATA-FUNCTION-CODE-LIBRARY release and execution log
+
+**RELEASED via [PR #56](https://github.com/saeedsai/ProMathStudio/pull/56).** Latest pre-run exact-dev-head Quality [40647176079](https://github.com/saeedsai/ProMathStudio/actions/runs/40647176079) failed the existing strict standalone/source parity test because the previous update trimmed a trailing newline. This run restored exact module parity and replaced the detached-input formula insertion with stable table coordinates, adding Formula/Python/Operation categories and native operation selection. Added discoverable unittest (the earlier pytest-style functions were not run by unittest discovery), a focused Playwright browser test, and mandatory Quality registration. No checks bypassed. New commit, CI, PR and Pages outcomes must be appended after verification.
+
+### Execution log — 2026-10-28 08:20 CET
+
+Started from `dev=2cf81d884e72699245f58ca031af155ff74837a3`, `main=be4f4ea8608d79e4670c5c5ef01189ed65f1ceac`; found [Quality 40647176079](https://github.com/saeedsai/ProMathStudio/actions/runs/40647176079) failing strict source/bundle parity. Repaired exact standalone parity, replaced detached input-element references with stable sheet/row/column coordinates, added searchable Formula/Python/Operation categories and native operation chooser, restored discoverable unittest coverage, and registered a new Playwright regression in mandatory CI. Diagnosed and corrected three additional test/UX issues from actual Actions logs: assumed blank default workbook, hidden-vs-visible output comparison, and accessible operation chooser naming; added Escape dismissal assertion for Python popover. Final exact candidate `a780ba44c1f41ea4293a30aaa584430445c65216` passed [dev Quality 40648285412](https://github.com/saeedsai/ProMathStudio/actions/runs/40648285412) and [PR Quality 40648574352](https://github.com/saeedsai/ProMathStudio/actions/runs/40648574352). Merged ordinary [PR #56](https://github.com/saeedsai/ProMathStudio/pull/56) to `main=8d9849c2cbece6d1d128f59098ffb455f6e1eab5`; [main Quality 40648944819](https://github.com/saeedsai/ProMathStudio/actions/runs/40648944819), [Pages 40648944379](https://github.com/saeedsai/ProMathStudio/actions/runs/40648944379), [dev Quality 40648967588](https://github.com/saeedsai/ProMathStudio/actions/runs/40648967588) and [branch cleanup 40648944840](https://github.com/saeedsai/ProMathStudio/actions/runs/40648944840) all succeeded. Both branches synchronized at merge SHA; only `dev` and `main`, neither protected. Public hosted interactive browser QA could not be independently performed because the external site was inaccessible from the available browsing environment; Actions browser QA and Pages deployment verified. Frozen baseline remains 166 gaps and 95 partial features; saved snippets and full Excel parity not claimed.
+
+### NEXT FIVE — after release
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-SHARED-SYMBOL-LIBRARY | Insert at cursor in Solver and 2D/3D Graphs, keyboard/search/mobile, Editor/Calculator regression. | REQUESTED |
+| 2 | P1-DATA-LIBRARY-SAVED-SNIPPETS | Create/edit/delete snippets, safe local persistence and malformed-storage rollback. | TODO |
+| 3 | P1-DATA-LIBRARY-FORMULA-COMPATIBILITY | Catalog entries match supported parser, formulas calculate reference values and unsupported Excel functions clearly labeled. | TODO |
 | 4 | P1-UI-DATA-TOOLBAR import/export QA | CSV/TSV/JSON/XLSX lossless round-trip, formula retention, invalid-file rollback and browser. | IN PROGRESS |
 | 5 | P1-UI-ACCESSIBILITY remainder | Keyboard/focus/live status and overflow across all workspaces. | IN PROGRESS |
 

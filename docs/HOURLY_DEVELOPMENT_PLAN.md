@@ -12,15 +12,15 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 
 ## Next five features (refreshed 2026-10-28 — task-first usability)
 
-**P1-UI-COMPACT-TASK — RELEASED via [PR #35](https://github.com/saeedsai/ProMathStudio/pull/35).** Main Quality [40598353877](https://github.com/saeedsai/ProMathStudio/actions/runs/40598353877) and Pages [40598353934](https://github.com/saeedsai/ProMathStudio/actions/runs/40598353934) passed at `a6e461c9c4e51c3053d6c8fc3fcd4efae56494c7`. Hosted interactive/mobile testing remains separate from workflow success. The frozen audit remains 166 gaps / 95 partial capabilities.
+**P1-UI-TASK-ISOLATION — RELEASED via [PR #36](https://github.com/saeedsai/ProMathStudio/pull/36).** Main Quality [40600600643](https://github.com/saeedsai/ProMathStudio/actions/runs/40600600643) and Pages [40600600623](https://github.com/saeedsai/ProMathStudio/actions/runs/40600600623) passed at `fe6973350e02d5152e48353d8aa335887917f2ec`. Independent hosted browser smoke remains unverified.
 
-| Priority | Feature | Concrete scope and acceptance tests | Status |
+| Priority | Feature | Acceptance tests | Status |
 |---:|---|---|---|
-| 1 | P1-UI-TASK-ISOLATION | Selecting another task collapses only registered task disclosures; Basic hides optional forms; preserve drafts, per-workspace choice and all routes; focused browser test plus full Quality, PR and Pages gates. | DEV IMPLEMENTED — exact-head CI pending |
-| 2 | P1-UI-ACTION-GROUPS | Group low-frequency Calculator/Editor copy, export and transfer actions while retaining DOM IDs, handlers and keyboard access; test each action. | TODO |
-| 3 | P1-UI-GRAPH-PANELS | Clarify graph import/axes/appearance; keep Plot/2D/3D prominent; test pan/zoom, fitting and PNG. | TODO |
-| 4 | P1-UI-DATA-TOOLBAR | Simplify filter/sort/files/Python entry points, preserve joins and CSV/XLSX import/export; browser regression. | TODO |
-| 5 | P1-UI-ACCESSIBILITY | Keyboard selection, focus and status labels; mobile widths 390/768/1280 px in all five workspaces. | TODO |
+| 1 | P1-UI-ACTION-GROUPS | Group secondary Calculator result copy/transfer and Editor equation copy/Word export without changing IDs/handlers; keyboard, DOCX download, result routing and 390/768/1280 px browser regression. | DEV IMPLEMENTED — exact-head Quality/PR/Pages pending |
+| 2 | P1-UI-GRAPH-PANELS | Clarify graph import/axes/appearance; keep Plot/2D/3D prominent; test pan/zoom, fitting and PNG. | TODO |
+| 3 | P1-UI-DATA-TOOLBAR | Simplify filter/sort/files/Python, preserve joins and CSV/XLSX import/export; browser regression. | TODO |
+| 4 | P1-UI-ACCESSIBILITY | Keyboard navigation, focus/status labels; 390/768/1280 px layouts in all five workspaces. | TODO |
+| 5 | P1-UI-MULTISERIES-UX | Preserve multiple 2D/3D expressions and independent styles across project round-trip; browser regression. | TODO |
 
 ### Previous five priorities (fitting diagnostics checkpoint)
 
@@ -94,6 +94,8 @@ Next five feature IDs in order:
 ## P0-NUMERIC-ODE — 2026-10-26 released bounded scope
 
 **RELEASED VIA PR #8 (exact-head CI and Pages build green).** Added offline scalar first-order forward IVP solver using classical fixed-step RK4 (4–1000 steps), safe Calculator numeric evaluator, finite/magnitude validation, initial value and interval controls, Data Tables import and Graphs line-chart handoff. Files: `src/ode-tools.js`, bundled `index.html`, `scripts/build.py`, `tests/smoke_ode.py`, `tests/test_data_source.py`, `.github/workflows/quality.yml`, `docs/NUMERICAL_AND_PYTHON.md`, `README.md`, `CHANGELOG.md`. Reference test checks `y'=y`, `y(0)=1` against `e`, fourth-order step refinement, `y'=t`, invalid intervals, non-finite derivatives, table and graph UI, disabled stale export and narrow viewport. Not adaptive RK45, stiff ODE, vector systems or general ODE coverage. Verified dev push 40339312523 and PR CI 40339587084 for candidate 75fc6a38, merged PR #8 to main 8fa44979, main Quality 40339843074 and Pages 40339842239 succeeded. Live interactive Pages smoke could not be independently run due browser/network tool restrictions.
+
+**2026-10-28 01:xx CET — P1-UI-ACTION-GROUPS development checkpoint.** Read AGENTS.md, living plan, frozen inventory and latest CI. Started with dev=main `fe6973350e02d5152e48353d8aa335887917f2ec`, no open PR, both refs unprotected. Added native keyboard-accessible disclosure groups for secondary Calculator and Editor actions while preserving existing DOM IDs/listeners, primary actions and drafts. Synchronized modular source and standalone HTML; added a focused Playwright regression for actual DOCX download, clipboard fallback, result/hub transfer, keyboard and responsive widths, wired into mandatory Quality. Local clone and full browser suite blocked by `github.com` DNS resolution failure; exact-head GitHub CI, PR, main and Pages gates remain mandatory. No branch created or stale artifact deleted. NEXT FIVE: P1-UI-ACTION-GROUPS release QA, P1-UI-GRAPH-PANELS, P1-UI-DATA-TOOLBAR, P1-UI-ACCESSIBILITY, P1-UI-MULTISERIES-UX. Frozen 166-gap/95-partial baseline unchanged.
 
 ## Execution record
 

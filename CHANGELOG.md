@@ -301,6 +301,12 @@
 
 # Changelog
 
+## 2026-10-28 — Group secondary Calculator and Editor actions (dev candidate)
+
+- Group low-frequency Calculator copy/result-transfer and Editor copy/Word export buttons in keyboard-accessible native disclosures; primary actions remain visible and original event listeners are retained.
+- Add Playwright browser coverage for actual Word download, answer routing, clipboard fallback, keyboard and mobile layout; exact-head CI/PR/main/Pages gates required before release.
+
+
 Changes are documented in functional groups; historical version numbers are not reconstructed where no tagged release is available.
 
 ## 2026-10-23 — CSV and JSON imports for graphing

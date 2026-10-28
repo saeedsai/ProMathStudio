@@ -63,7 +63,7 @@ def main():
                 try {MathStudio.interpolationTools.interpolate(o);return false;}
                 catch(e){return !!e.message;}
             }""", invalid), invalid
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#interp-details").evaluate("(e) => e.open=true")
         page.locator("#interp-method").select_option("pchip")
         page.locator("#interp-samples").fill("0,0\n1,1\n2,1\n3,2")
@@ -75,13 +75,13 @@ def main():
         page.locator("#interp-to-table").click()
         assert page.evaluate("MathStudio.dataTables.tables.length") == before+1
         assert page.evaluate("MathStudio.dataTables.tables.at(-1).name").startswith("Interpolation_PCHIP")
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#interp-details").evaluate("(e) => e.open=true")
         page.locator("#interp-run").click()
         page.locator("#interp-to-graph").click()
         assert page.locator("#graph-panel .graph-canvas-wrap").is_visible()
         assert page.evaluate("MathStudio.graphData.getState().points.length") == 3
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#interp-details").evaluate("(e) => e.open=true")
         page.locator("#interp-method").select_option("linear")
         assert page.locator("#interp-to-table").is_disabled()

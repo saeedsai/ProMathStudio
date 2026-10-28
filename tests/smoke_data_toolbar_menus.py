@@ -39,7 +39,7 @@ def main():
   page.locator('#dt-sortdir').select_option('asc')
   page.locator('#dt-sort').click()
 
-  page.locator('#dt-status').click()
+  page.mouse.click(5, 5)  # Outside the fixed/absolute menu overlay.
   assert not filt.evaluate('(e)=>e.open')
   assert files.locator(':scope > summary').count() == 1  # Nested file-import disclosures must not match.
   files.locator(':scope > summary').click()
@@ -51,7 +51,7 @@ def main():
   assert python.evaluate('(e)=>e.open')
   assert not files.evaluate('(e)=>e.open')
   assert page.locator('#python-panel textarea').count() >= 1
-  page.locator('#dt-status').click()
+  page.mouse.click(5, 5)  # Outside the fixed/absolute menu overlay.
   assert not python.evaluate('(e)=>e.open')
 
   for width in (390,768,1280):

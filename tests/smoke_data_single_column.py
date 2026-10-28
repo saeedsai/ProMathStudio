@@ -84,16 +84,16 @@ def main():
         assert upload(page, 'one_column_json_again.json', exported)['rows'] == fourth['rows']
 
         # Also accept single-column JSON coordinate and column-array formats.
-        for payload, expected in [
+        for variant_index, (payload, expected) in enumerate([
             ('[[1],[2]]', [['1'], ['2']]),
             ('{"score":[3,4]}', [['3'], ['4']]),
             ('{"columns":["score"],"rows":[[5],[6]]}', [['5'], ['6']]),
-        ]:
+        ]):
             result = page.evaluate(
                 '(s) => MathStudio.graphData.parseJSON(s,{allowSingleColumn:true})',
                 payload)
             assert len(result['headers']) == 1 and len(result['rows']) == 2
-            assert upload(page, 'one_column_variant.json', payload)['rows'] == expected
+            assert upload(page, f'one_column_variant_{variant_index}.json', payload)['rows'] == expected
 
         before = page.evaluate('MathStudio.dataTables.exportState()')
         for name, payload in [
@@ -104,8 +104,12 @@ def main():
             page.locator('#dt-import').set_input_files({
                 'name': name, 'mimeType': 'text/plain',
                 'buffer': payload.encode('utf-8')})
+            expected_error = {'invalid.csv': 'Inconsistent CSV column count',
+                              'invalid.tsv': 'unclosed quote',
+                              'invalid.json': 'missing or unexpected columns'}[name]
             page.wait_for_function(
-                '() => document.querySelector("#dt-status").textContent.includes("Import failed")')
+                '(message) => document.querySelector("#dt-status").textContent.includes(message)',
+                expected_error)
             assert page.evaluate('MathStudio.dataTables.exportState()') == before
 
         # Graphs must still reject a one-coordinate dataset.

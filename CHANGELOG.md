@@ -1,3 +1,8 @@
+## Unreleased — Single-column Data Tables CSV/TSV/JSON interchange (2026-10-28)
+
+- Import one-column CSV, TSV and JSON into Data Tables, including quoted Unicode/multiline cells and editable formulas from source CSV; retain strict two-coordinate requirements in Graphs.
+- Add mandatory browser round-trip/rollback and structural parity regression coverage. **Pending exact-head CI and production release.**
+
 ## Released — Saved-snippet JSON import preview and conflict-safe confirmation (2026-10-28, PR #67)
 
 - Saved Data Tables snippet JSON imports now show a review summary plus a safely escaped, scrollable list of names, types, and code excerpts before any localStorage mutation. Users can **Apply import** or **Cancel import**; name conflicts disable Apply until **Skip conflicting names and keep saved versions** is explicitly selected. Existing snippets are never silently overwritten, identical entries remain idempotent, and Python snippets are never executed on import.

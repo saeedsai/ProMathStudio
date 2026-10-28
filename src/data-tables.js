@@ -699,7 +699,10 @@
     const rows=evaluated(t);download(t.name+'.json',JSON.stringify(rows.map(row=>Object.fromEntries(t.columns.map((h,i)=>[h,row[i]]))),null,2),'application/json');}));
   $('dt-import').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{
     if(file.size>MAX_BYTES)throw Error('Import file exceeds 1 MB.');if(!/\.(csv|tsv|json)$/i.test(file.name))throw Error('Choose CSV, TSV or JSON.');
-    const text=await file.text(),decoder=window.MathStudio.graphData;const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text):decoder.parseCSV(text);
+    const text=await file.text(),decoder=window.MathStudio.graphData;
+    // One-column tabular imports are valid sheets, but never XY graph datasets.
+    const options={allowSingleColumn:true,delimiterHint:/\.tsv$/i.test(file.name)?'\t':','};
+    const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text,options):decoder.parseCSV(text,options);
     const t=makeTable(file.name.replace(/\.(csv|tsv|json)$/i,''),tbl.headers,tbl.rows);notify('Imported '+file.name+': '+t.rows.length+' rows.');
   }catch(e){notify('Import failed: '+e.message,true);}finally{event.target.value='';}});
   // Existing chart-data importer is now in the Data Tables tab. Imports there also create a sheet.

@@ -3351,7 +3351,7 @@ self.onmessage=async ({data})=>{
     const n=Number(raw);return finite(n)?n:null;
   };
   const isRecord=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
-  function csvRows(text){
+  function csvRows(text, options={}){
     text=text.replace(/^\uFEFF/,'');
     // Sniff separator from the first non-quoted record, supports CSV/TSV/semicolon CSV.
     const count={',':0,';':0,'\t':0};let quoted=false;
@@ -3361,8 +3361,12 @@ self.onmessage=async ({data})=>{
         if(quoted&&text[i+1]==='"'){i++;continue;}quoted=!quoted;
       }else if(!quoted){if(ch==='\r'||ch==='\n')break;if(ch in count)count[ch]++;}
     }
-    const delimiter=Object.keys(count).sort((a,b)=>count[b]-count[a])[0];
-    if(!count[delimiter])throw Error('CSV header must contain at least two columns.');
+    const guessed=Object.keys(count).sort((a,b)=>count[b]-count[a])[0];
+    // A single-column header has no separator to sniff. Data Tables opts in;
+    // Graphs still requires two numeric coordinate columns.
+    const delimiter=count[guessed]?guessed:(options.allowSingleColumn===true
+      ?(options.delimiterHint==='\t'?'\t':','):null);
+    if(!delimiter)throw Error('CSV header must contain at least two columns.');
     const rows=[],row=[];let field='',quotedCell=false,closed=false,explicitRecord=false;
     for(let i=0;i<text.length;i++){
       const ch=text[i];
@@ -3389,23 +3393,27 @@ self.onmessage=async ({data})=>{
     if(rows.length>MAX_ROWS+1)throw Error('File exceeds 6,000 data rows.');
     if(rows.length<2)throw Error('CSV needs a header row and at least one data row.');
     const headers=rows.shift().map(trim);
-    if(headers.length<2||headers.length>MAX_COLS)throw Error('CSV must contain 2–32 columns.');
+    if(headers.length<(options.allowSingleColumn===true?1:2)||headers.length>MAX_COLS)throw Error('CSV must contain 1–32 columns in Data Tables, or 2–32 in Graphs.');
     if(headers.some(x=>!x))throw Error('CSV column names cannot be empty.');
     for(const r of rows)if(r.length!==headers.length)throw Error('Inconsistent CSV column count.');
     return {headers,rows};
   }
-  function jsonRows(text){
+  function jsonRows(text, options={}){
+    const minColumns=options.allowSingleColumn===true?1:2;
     const input=JSON.parse(text);
     let raw=input;
     if(isRecord(input)){
       if(Array.isArray(input.data))raw=input.data;
       else if(Array.isArray(input.points))raw=input.points;
       else if(Array.isArray(input.rows)&&Array.isArray(input.columns)){
-        if(input.columns.every(s=>typeof s==='string'))return {headers:input.columns,rows:input.rows};
+        if(input.columns.every(s=>typeof s==='string')){
+          if(input.columns.length<minColumns||input.columns.length>MAX_COLS)throw Error('Invalid JSON column count.');
+          return {headers:input.columns,rows:input.rows};
+        }
         throw Error('JSON columns must be strings.');
       }else{
         const keys=Object.keys(input).filter(k=>Array.isArray(input[k]));
-        if(keys.length>=2&&keys.every(k=>input[k].length===input[keys[0]].length))
+        if(keys.length>=minColumns&&keys.every(k=>input[k].length===input[keys[0]].length))
           return {headers:keys,rows:input[keys[0]].map((_,i)=>keys.map(k=>input[k][i]))};
         throw Error('JSON requires an array of rows/objects, {data:[...]}, {points:[...]}, {columns,rows}, or column arrays.');
       }
@@ -3413,12 +3421,12 @@ self.onmessage=async ({data})=>{
     if(!Array.isArray(raw)||!raw.length)throw Error('JSON needs a non-empty array of records or coordinate arrays.');
     if(Array.isArray(raw[0])){
       const n=raw[0].length;
-      if(n<2||n>MAX_COLS)throw Error('JSON coordinate arrays need 2–32 values per row.');
+      if(n<minColumns||n>MAX_COLS)throw Error('JSON coordinate arrays have an invalid column count.');
       return {headers:['x','y','z',...Array.from({length:Math.max(0,n-3)},(_,i)=>'v'+(i+4))].slice(0,n),rows:raw};
     }
     if(!isRecord(raw[0]))throw Error('JSON rows must be objects or coordinate arrays.');
     const keys=Object.keys(raw[0]);
-    if(keys.length<2||keys.length>MAX_COLS)throw Error('JSON must contain 2–32 columns.');
+    if(keys.length<minColumns||keys.length>MAX_COLS)throw Error('JSON has an invalid column count.');
     // A later record may not introduce or omit keys: otherwise mapping only
     // the first record's keys silently discards its additional cell values.
     const expected=new Set(keys);
@@ -4326,7 +4334,10 @@ self.onmessage=async ({data})=>{
     const rows=evaluated(t);download(t.name+'.json',JSON.stringify(rows.map(row=>Object.fromEntries(t.columns.map((h,i)=>[h,row[i]]))),null,2),'application/json');}));
   $('dt-import').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{
     if(file.size>MAX_BYTES)throw Error('Import file exceeds 1 MB.');if(!/\.(csv|tsv|json)$/i.test(file.name))throw Error('Choose CSV, TSV or JSON.');
-    const text=await file.text(),decoder=window.MathStudio.graphData;const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text):decoder.parseCSV(text);
+    const text=await file.text(),decoder=window.MathStudio.graphData;
+    // One-column tabular imports are valid sheets, but never XY graph datasets.
+    const options={allowSingleColumn:true,delimiterHint:/\.tsv$/i.test(file.name)?'\t':','};
+    const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text,options):decoder.parseCSV(text,options);
     const t=makeTable(file.name.replace(/\.(csv|tsv|json)$/i,''),tbl.headers,tbl.rows);notify('Imported '+file.name+': '+t.rows.length+' rows.');
   }catch(e){notify('Import failed: '+e.message,true);}finally{event.target.value='';}});
   // Existing chart-data importer is now in the Data Tables tab. Imports there also create a sheet.

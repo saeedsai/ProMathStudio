@@ -1,3 +1,19 @@
+## 2026-10-28 20:01 CET — P1-DATA-SINGLE-COLUMN-INTERCHANGE implemented on dev; QA pending
+
+**Feature ledger: IMPLEMENTED ON DEV / NOT YET RELEASED.** Data Tables CSV/TSV/JSON import opts into 1–32-column records, while the shared Graphs parser and graph XY validation remain strict at 2–32 columns. Separator-free one-column headers use a CSV comma or TSV tab hint; quoted commas, semicolons, tabs, Unicode, multiline text, blank cells and formula-source CSV are preserved. JSON supports one-field object records, coordinate arrays, column arrays and {columns,rows}. Existing multi-column and evaluated export semantics remain unchanged. Added mandatory Chromium `tests/smoke_data_single_column.py` (round trips, source formulas, graph rejection, malformed rollback, 390/768/1280px) and structural `tests/test_single_column_import.py`. Standalone/index and modular source kept synchronized. **Do not mark Released until exact-head dev CI, PR CI, main CI and Pages deployment all succeed.** Historical 166-gap/95-partial baseline unchanged; recurring development stays enabled.
+
+**Execution log:** Started from `dev=5d31fe1f70eec0fe472cbbb138170e7268060a70`, `main=cca1d0967144941b652c57fdf4def628b164ef0e`; [dev Quality 40743234320](https://github.com/saeedsai/ProMathStudio/actions/runs/40743234320), [main Quality 40742516492](https://github.com/saeedsai/ProMathStudio/actions/runs/40742516492) and [Pages 40742515657](https://github.com/saeedsai/ProMathStudio/actions/runs/40742515657) succeeded before changes. No open PR; only dev/main branches. Local GitHub clone unavailable (DNS), so full Chromium regression must run in GitHub Actions. Branch protection remains disabled; no unrelated tracked file proven obsolete. Exact new SHA/CI and release results must be recorded in follow-up entry.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-SINGLE-COLUMN-INTERCHANGE release QA | Exact dev and PR full CI; single-column CSV/TSV/JSON round trips, formula CSV, malformed rollback, strict graph XY; main Quality and Pages. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Nested custom spreadsheet functions in SUM/IF, invalid names, recursion limits, reference numeric oracles, sandbox tests. | TODO |
+| 3 | P0-MATRIX-PSEUDOINVERSE-2X2 | Moore–Penrose identities, singular/zero/scaled matrices, least-norm solve and Chromium UI regression. | TODO |
+| 4 | P1-GRAPH-PALETTE-VALIDITY | Distinguish executable 2D/3D graph symbols from typesetting-only notation; no Equation palette regression. | TODO |
+| 5 | P1-DATA-LIBRARY-SNIPPET-UX-FOLLOWUP | Escape cancellation, focus restoration, full code preview, safe long-content rendering and mobile browser tests. | TODO |
+
 ## 2026-10-28 19:12 CET — P1-DATA-LIBRARY-SNIPPET-UX RELEASED via PR #67
 
 **Feature ledger: RELEASED FOR STATED SCOPE.** Saved-snippet JSON import now stages a visible, scrollable and text-escaped preview of name/type/code excerpts and new/identical/conflicting counts. **Apply import** commits only after explicit user confirmation; **Cancel import** leaves the catalog unchanged. Conflicting names disable Apply until **Skip conflicting names and keep saved versions** is explicitly checked, never silently overwriting. Stale previews reject when the library changed, quota/storage failure leaves saved snippets intact, malformed/oversized files and >40 entries reject, Python snippets never auto-run. Existing import/export remains compatible. Added mandatory Chromium `tests/smoke_data_snippet_preview.py`, updated `tests/smoke_data_snippet_interchange.py` and structural assertions. Standalone `index.html` synchronized with `src/data-tables.js`.

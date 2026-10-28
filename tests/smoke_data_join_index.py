@@ -68,7 +68,13 @@ def main():
         page.locator('#dt-run').click()
         assert '6,000 rows' in page.locator('#dt-status').inner_text()
         assert page.evaluate('MathStudio.dataTables.exportState()') == before
-        page.evaluate("document.getElementById('dt-left-key').value='-1'")
+        # A select cannot retain an unlisted value; insert a malformed option
+        # to exercise the application's invalid-key guard explicitly.
+        page.evaluate("""() => {
+            const key = document.getElementById('dt-left-key');
+            key.add(new Option('Invalid', '-1'));
+            key.value = '-1';
+        }""")
         page.locator('#dt-run').click()
         assert 'Invalid join key' in page.locator('#dt-status').inner_text()
         assert page.evaluate('MathStudio.dataTables.exportState()') == before

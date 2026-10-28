@@ -18,6 +18,10 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 
 Exact dev [Quality 40630278324](https://github.com/saeedsai/ProMathStudio/actions/runs/40630278324) passed the preceding 19 structural/browser steps, then the new JOIN regression timed out selecting a hidden Combine-menu control. This was a browser-test setup error: the Data Tables toolbar intentionally keeps Combine collapsed. Corrected the focused regression to open the existing native Combine disclosure before interacting; preserved every join result, boundary, rollback, responsive and console assertion. No production JOIN logic was changed by this repair. Await fresh exact-head Quality before PR.
 
+### CI repair — 2026-10-28 05:10 CET
+
+The disclosure-corrected dev [Quality 40630589972](https://github.com/saeedsai/ProMathStudio/actions/runs/40630589972) advanced through exact JOIN ordering and 10,000-result rollback, then exposed a second test-fixture error: assigning an option value not present in a native select coerces its value to empty, and `Number('')` becomes 0, so the intended invalid-key branch was never exercised. The regression now appends an explicit invalid `-1` option before selecting it. No production logic or assertions were weakened; rerun full exact-head CI.
+
 ### NEXT FIVE after indexed JOIN
 
 | Priority | Feature | Acceptance tests | Status |

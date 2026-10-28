@@ -1182,11 +1182,16 @@ def _ms_system(job_text):
     const target=calculatorMode?document.getElementById('calc-input'):graphMode?document.getElementById('graph-input'):input;
     const start=target.selectionStart,end=target.selectionEnd;
     target.setRangeText(text,start,end,'end');
-    const position=start+(Number.isFinite(caret)?caret:text.length);
-    target.setSelectionRange(position,position+(Number.isFinite(caret)?1:0));
+    // In graph editors, leave the editable x/y placeholder selected in a simple
+    // function template (sin(x), sqrt(x), etc.). Other symbols keep normal caret behavior.
+    const graphPlaceholder=graphMode&&/^[A-Za-z_][A-Za-z0-9_]*\\([xy]\\)$/.test(text)?text.length-2:undefined;
+    const focusOffset=Number.isFinite(caret)?caret:graphPlaceholder;
+    const position=start+(Number.isFinite(focusOffset)?focusOffset:text.length);
+    target.setSelectionRange(position,position+(Number.isFinite(focusOffset)?1:0));
     target.dispatchEvent(new Event('input',{bubbles:true}));target.focus();
     if(document.body.classList.contains('library-open')){document.body.classList.remove('library-open');document.getElementById('quick-symbols')?.setAttribute('aria-expanded','false');}
-    if(!calculatorMode)refresh();
+    // Graph symbol edits are drafts until Plot is clicked; never refresh the Equation preview.
+    if(!calculatorMode&&!graphMode)refresh();
   }
   function loadExample(raw){editId=null;btnAdd.innerHTML='＋ Add equation <span aria-hidden="true">↵</span>';cancelEdit.hidden=true;input.value=raw;refresh();renderNotebook();input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}
   function exportLatex(){
@@ -1302,14 +1307,8 @@ def _ms_system(job_text):
           const grid=document.createElement('div');grid.className='palette-grid';
           for(const [glyph,label,code] of sub.items){const b=document.createElement('button');b.type='button';b.className='palette-button';b.title='Insert '+label+': '+code;
             const icon=document.createElement('span');icon.className='glyph';icon.textContent=glyph;const small=document.createElement('span');small.className='glyph-label';small.textContent=label;b.append(icon,small);
-            b.addEventListener('click',()=>{
-              const mode=document.querySelector('[data-workspace].active')?.dataset.workspace;
-              const input=mode==='calculator'?document.getElementById('calc-input'):mode==='graph'?document.getElementById('graph-input'):null;
-              if(input){
-                input.focus();const start=input.selectionStart??input.value.length,end=input.selectionEnd??start;
-                input.setRangeText(code,start,end,'end');input.dispatchEvent(new Event('input',{bubbles:true}));document.body.classList.remove('library-open');document.getElementById('quick-symbols')?.setAttribute('aria-expanded','false');
-              }else insertText(code);
-            });grid.appendChild(b);found++;}
+            // All workspaces use the same selection-aware insertion path.
+            b.addEventListener('click',()=>insertText(code));grid.appendChild(b);found++;}
           inner.appendChild(grid);top.appendChild(inner);
         }nav.appendChild(top);
       }

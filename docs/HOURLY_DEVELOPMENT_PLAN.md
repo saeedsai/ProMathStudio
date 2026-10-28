@@ -10,6 +10,24 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
+## 2026-10-28 02:55 CET — P1-UI-ACCESSIBILITY-WSNAV bounded navigation increment
+
+**DEV IMPLEMENTED — exact-head CI, PR, main Quality and Pages remain required.** Added visible keyboard focus and ArrowLeft/ArrowRight/Home/End navigation among all five workspace buttons, including the dynamically inserted Data Tables tab. Arrow keys move focus without silently changing workspaces; native Enter/Space activate. Workspace subtitle changes are announced politely and graph drafts survive switching. Added focused Chromium regression `tests/smoke_workspace_navigation.py` for focus/wrap, activation, active route, live label, drafts, no runtime errors and 390/768/1280 px widths; wired into mandatory Quality. Existing workspace mode routing and source module bundles are unchanged. This is a bounded accessibility improvement, **not** complete WCAG certification. The frozen 166-gap/95-partial baseline is unchanged.
+
+### NEXT FIVE after this increment
+
+| Priority | Feature | Concrete acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-DATA-TOOLBAR completion | Browser QA of CSV/XLSX import/export, joins, sort, contextual actions and mobile; preserve workbook state. | IN PROGRESS |
+| 2 | P1-UI-ACCESSIBILITY remainder | Focus/status labels and keyboard traps across Calculator, Editor, Solver, Graphs and Tables; 390/768/1280 px, screen-reader semantics. | IN PROGRESS |
+| 3 | P1-UI-MULTISERIES-UX | Independent 2D/3D colors/styles, overlays, reset, multiple expressions and project round-trip. | TODO |
+| 4 | P1-UI-PROJECT-TRANSFER | Import/export grouping, invalid-file rollback, draft preservation and mobile keyboard navigation. | TODO |
+| 5 | P1-UI-GRAPH-IMPORT-DISCOVERY | Discoverable CSV/JSON import from Graphs; verify table handoff, overlay, axis fit and PNG. | TODO |
+
+### Execution log — 2026-10-28 02:55 CET
+
+Initial dev=main=`62074700d407f99fa527f474c265e123024d81f7`; prior [dev Quality 40613655403](https://github.com/saeedsai/ProMathStudio/actions/runs/40613655403) succeeded, no open PRs, both refs unprotected. Selected bounded navigation accessibility improvement rather than claiming completion of the broad Data Tables and WCAG roadmaps. Changes: inline HTML/CSS, new browser regression, mandatory CI, changelog and this ledger. **New commit SHA, exact-head CI, PR, main Quality and Pages must be verified separately before release.** Container DNS prevents local GitHub clone; full browser tests are delegated to mandatory CI. No tracked obsolete file proven safe to delete; dev/main only.
+
 ## 2026-10-28 01:55 CET — P1-UI-DATA-TOOLBAR keyboard and dismissal increment
 
 **DEV IMPLEMENTED; exact-head CI, PR and Pages verification pending.** Preserved the existing Table/Filter/Combine/Files/Python menus, filter and sort drafts, and all original action IDs. Added visible keyboard focus, Escape-to-close with focus restoration, and pointer-outside dismissal without swallowing toolbar quick actions. Added `tests/smoke_data_toolbar_menus.py` to mandatory Quality for keyboard Enter/Space, exclusive menus, Escape, draft retention, sorting, CSV download, Python and responsive widths. This is a bounded usability improvement, **not** completion of the entire Data Tables or accessibility roadmap. Source: `index.html`; no modular source was modified (the menu implementation is inline, outside build.py's embedded module sections). Local browser execution is blocked by container DNS failure to github.com; exact-head CI remains required. Frozen baseline remains 166 gaps / 95 partial features.

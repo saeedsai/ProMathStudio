@@ -1,3 +1,7 @@
+## Unreleased — keyboard workspace navigation and live status (2026-10-28)
+
+- ArrowLeft/ArrowRight/Home/End move visible keyboard focus among all five workspace buttons, including Data Tables; Enter/Space still activate, with no accidental mode change from arrows. Added high-contrast focus outline and polite workspace subtitle announcement. Preserves graph drafts and native tab order. New Playwright regression tests focus wrap, active route, activation, responsive widths and runtime errors. Exact dev/PR/main/Pages release checks pending; no full WCAG certification claimed.
+
 ## Unreleased — Data Tables action-menu keyboard and dismissal QA (2026-10-28)
 
 - Improved the existing Table/Filter/Combine/Files/Python menus: visible keyboard focus, Escape dismissal with focus returned to the active summary, and outside-pointer dismissal. Preserved existing input drafts, menu quick buttons, action handlers and workbook data. Added dedicated Playwright regression for keyboard, menu exclusivity, draft retention, sort, CSV download, Python and mobile; wired it into mandatory Quality. Exact dev/PR/main/Pages verification pending; this is not a general accessibility certification.

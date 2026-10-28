@@ -54,6 +54,8 @@ jobs:
         run: python tests/smoke_graph_navigation.py
       - name: Data Tables action-menu keyboard, dismissal and export regression
         run: python tests/smoke_data_toolbar_menus.py
+      - name: Workspace navigation keyboard, focus and responsive regression
+        run: python tests/smoke_workspace_navigation.py
       - name: Spreadsheet and chart regression
         run: python tests/smoke_data_tables.py
       - name: Spreadsheet structural reference regression

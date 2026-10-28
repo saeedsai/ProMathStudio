@@ -4340,6 +4340,7 @@ const style=el('style');style.textContent=`
 .dt-action-menu{position:relative;border:1px solid #d6dff1;background:#f5f8ff;border-radius:9px}
 .dt-action-menu summary{list-style:none;cursor:pointer;padding:10px 14px;font-size:13px;font-weight:700;color:#415aab}
 .dt-action-menu summary::-webkit-details-marker{display:none}
+.dt-action-menu summary:focus-visible{outline:3px solid #93a5ed;outline-offset:2px;border-radius:8px}
 .dt-action-menu[open]{z-index:30}
 .dt-action-menu .dt-action-content{position:absolute;top:100%;left:0;z-index:35;min-width:min(440px,85vw);max-width:90vw;max-height:70vh;overflow:auto;padding:16px;border:1px solid #d8e3f3;border-radius:11px;box-shadow:0 12px 40px #24385b30;background:#fff}
 .dt-action-menu .dt-action-content .dt-box{border:none;margin:0;padding:0}
@@ -4370,7 +4371,20 @@ function simplifyTable(){const data=$('data-panel'),area=data.querySelector('.da
   quick.append(showFilter,openPython);bar.append(quick);
   area.insertBefore(bar,area.querySelector('#dt-tabs'));
   for(const m of nav.children)m.querySelector('summary').addEventListener('click',()=>{if(!m.open)closeOtherMenus(m)});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')for(const m of nav.children)m.open=false;});
+  // Escape dismisses the active menu and returns keyboard users to its trigger.
+  // Pointer dismissal does not steal focus or discard filter/sort drafts.
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape')return;
+    const opened=[...nav.children].filter(m=>m.open);
+    if(!opened.length)return;
+    const focused=opened.find(m=>m.contains(document.activeElement));
+    if(focused)e.preventDefault();
+    closeOtherMenus(null);
+    if(focused)focused.querySelector('summary').focus();
+  });
+  document.addEventListener('pointerdown',e=>{
+    if(!bar.contains(e.target))closeOtherMenus(null);
+  });
   function closeOtherMenus(except){for(const m of nav.children)if(m!==except)m.open=false;}
   return {filterContent,pythonContent:pythonMenu.querySelector('.dt-action-content'),menus:nav};
 }

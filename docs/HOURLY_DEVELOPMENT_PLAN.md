@@ -10,6 +10,24 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
+## 2026-10-28 01:55 CET — P1-UI-DATA-TOOLBAR keyboard and dismissal increment
+
+**DEV IMPLEMENTED; exact-head CI, PR and Pages verification pending.** Preserved the existing Table/Filter/Combine/Files/Python menus, filter and sort drafts, and all original action IDs. Added visible keyboard focus, Escape-to-close with focus restoration, and pointer-outside dismissal without swallowing toolbar quick actions. Added `tests/smoke_data_toolbar_menus.py` to mandatory Quality for keyboard Enter/Space, exclusive menus, Escape, draft retention, sorting, CSV download, Python and responsive widths. This is a bounded usability improvement, **not** completion of the entire Data Tables or accessibility roadmap. Source: `index.html`; no modular source was modified (the menu implementation is inline, outside build.py's embedded module sections). Local browser execution is blocked by container DNS failure to github.com; exact-head CI remains required. Frozen baseline remains 166 gaps / 95 partial features.
+
+### NEXT FIVE after this increment
+
+| Priority | Feature | Concrete acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-DATA-TOOLBAR completion | Verify all menu routes, CSV/XLSX import/export, joins, sorting, context actions and mobile in browser; confirm CI/Pages release. | IN PROGRESS |
+| 2 | P1-UI-ACCESSIBILITY | Tab/Enter/Space/Escape, focus/status labels and 390/768/1280 px checks across all five workspaces. | TODO |
+| 3 | P1-UI-MULTISERIES-UX | Multiple 2D/3D expressions, independent colors/styles, overlays, reset and project round-trip. | TODO |
+| 4 | P1-UI-PROJECT-TRANSFER | Import/export grouping, invalid-file rollback, draft preservation, mobile/keyboard regression. | TODO |
+| 5 | P1-UI-GRAPH-IMPORT-DISCOVERY | Visible CSV/JSON import from Graphs, table route, overlays, axis fit, PNG and project round-trip. | TODO |
+
+### Execution log — 2026-10-28 01:55 CET
+
+Initial `dev=main=b0ad27f1175e86e08914f11399615e02736f845d`, no open PRs, both refs unprotected. Prior main Quality 40611395852 and Pages 40611395593 succeeded; latest dev Quality 40611768474 was still in progress at discovery. Chosen P1-UI-DATA-TOOLBAR; implemented focus/dismissal and new browser regression, CI wiring, changelog and ledger. Pending new exact dev SHA, Quality, PR and Pages; no direct main push, force, branch creation or deletion. Next five as above.
+
 ## Next five features (refreshed 2026-10-28 — verified graph action release)
 
 **P1-UI-GRAPH-PANELS (bounded action grouping) — RELEASED via [PR #39](https://github.com/saeedsai/ProMathStudio/pull/39).** Secondary graph transfer actions are grouped under a keyboard-accessible disclosure, preserving 2D/3D mode, Plot, Reset, PNG export, axes, appearance and graph table plotting. New Playwright graph-panel regression passed in exact dev [Quality 40609332818](https://github.com/saeedsai/ProMathStudio/actions/runs/40609332818) and PR [Quality 40609762689](https://github.com/saeedsai/ProMathStudio/actions/runs/40609762689). Merged normally into main `10a1e067ca7184e0315f88d29982e848b069e189`; main [Quality 40610140241](https://github.com/saeedsai/ProMathStudio/actions/runs/40610140241), [Pages 40610140252](https://github.com/saeedsai/ProMathStudio/actions/runs/40610140252) and [cleanup 40610140278](https://github.com/saeedsai/ProMathStudio/actions/runs/40610140278) succeeded. `dev` fast-forwarded to released main without force. This bounded UI increment **does not** close the separate Graph CSV/JSON import discoverability gap. Independent interactive hosted Pages smoke was unavailable (remote site inaccessible to available tool).

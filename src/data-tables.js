@@ -520,7 +520,9 @@
       }else{
         x=upper==='SUM'?nums.reduce((a,b)=>a+b,0):upper==='COUNT'?nums.length:upper==='AVERAGE'||upper==='AVG'?(nums.reduce((a,b)=>a+b,0)/(nums.length||1)):upper==='MIN'?Math.min(...nums):Math.max(...nums);
       }
-      return '('+(Number.isFinite(x)?x:0)+')';
+      // Emit a scalar token, not '(scalar)': parenthesized intermediate values
+      // would prevent the next innermost-first pass from matching outer calls.
+      return String(Number.isFinite(x)?x:0);
       });
     }
     // Limited token grammar intentionally avoids eval()/Function() and script execution.

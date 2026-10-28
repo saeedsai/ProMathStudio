@@ -1,7 +1,7 @@
-## Implemented on dev — Full saved-snippet source inspection (2026-10-28; QA pending)
+## Merged to main — Full saved-snippet source inspection (2026-10-28, PR #73; Pages verification pending)
 
 - Data Tables Functions & Code Library now provides a **View full** action for saved Formula/Python snippets. It displays the complete read-only source (up to 8,000 characters) in an accessible, scrollable preview without insertion or execution. Escape and Close dismiss the preview, clear the displayed code and restore focus. Catalog descriptions truncate long samples to 120 characters; built-in examples and existing Edit/Insert/Delete actions are preserved.
-- Added structural `tests/test_data_snippet_inspection.py` and mandatory Chromium `tests/smoke_data_snippet_inspection.py` for 8,000-character source, HTML-injection text, storage immutability, Python nonexecution, focus restoration and 390/768/1280px. Updated Quality workflow and synchronized standalone `index.html`. **Not released** until exact-head dev and PR Quality, main Quality and Pages deployment are verified.
+- Added structural `tests/test_data_snippet_inspection.py` and mandatory Chromium `tests/smoke_data_snippet_inspection.py` for 8,000-character source, HTML-injection text, storage immutability, Python nonexecution, focus restoration and 390/768/1280px. Updated Quality workflow and synchronized standalone `index.html`. **Merged via [PR #73](https://github.com/saeedsai/ProMathStudio/pull/73):** exact-head PR [Quality 40784222466](https://github.com/saeedsai/ProMathStudio/actions/runs/40784222466) passed 86/86 steps; merge commit `a226b3be31d80b90ad67399c178d8bb7d0fc5cf1`. Post-merge main Quality and Pages deployment could not be inspected with available workflow endpoints, so production verification remains pending.
 
 ## Released — Graph palette numeric validity (2026-10-28, PR #72)
 

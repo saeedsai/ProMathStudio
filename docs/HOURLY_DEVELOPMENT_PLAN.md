@@ -10,17 +10,17 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
-## Next five features (refreshed 2026-10-28 — task-first usability)
+## Next five features (refreshed 2026-10-28 — released action groups)
 
-**P1-UI-TASK-ISOLATION — RELEASED via [PR #36](https://github.com/saeedsai/ProMathStudio/pull/36).** Main Quality [40600600643](https://github.com/saeedsai/ProMathStudio/actions/runs/40600600643) and Pages [40600600623](https://github.com/saeedsai/ProMathStudio/actions/runs/40600600623) passed at `fe6973350e02d5152e48353d8aa335887917f2ec`. Independent hosted browser smoke remains unverified.
+**P1-UI-ACTION-GROUPS — RELEASED via [PR #37](https://github.com/saeedsai/ProMathStudio/pull/37).** Exact dev [Quality 40606508008](https://github.com/saeedsai/ProMathStudio/actions/runs/40606508008), PR [Quality 40606906734](https://github.com/saeedsai/ProMathStudio/actions/runs/40606906734), main [Quality 40607265984](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265984) and [Pages 40607265308](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265308) succeeded on released main `137b008c583ee9f938430f5dd02cee4bb7df585a`. New Playwright browser regression covers real Word download, result transfer, keyboard and responsive layout. Hosted independent interactive Pages verification remains unavailable.
 
-| Priority | Feature | Acceptance tests | Status |
+| Priority | Feature | Concrete acceptance tests | Status |
 |---:|---|---|---|
-| 1 | P1-UI-ACTION-GROUPS | Group secondary Calculator result copy/transfer and Editor equation copy/Word export without changing IDs/handlers; keyboard, DOCX download, result routing and 390/768/1280 px browser regression. | DEV IMPLEMENTED — exact-head Quality/PR/Pages pending |
-| 2 | P1-UI-GRAPH-PANELS | Clarify graph import/axes/appearance; keep Plot/2D/3D prominent; test pan/zoom, fitting and PNG. | TODO |
-| 3 | P1-UI-DATA-TOOLBAR | Simplify filter/sort/files/Python, preserve joins and CSV/XLSX import/export; browser regression. | TODO |
-| 4 | P1-UI-ACCESSIBILITY | Keyboard navigation, focus/status labels; 390/768/1280 px layouts in all five workspaces. | TODO |
-| 5 | P1-UI-MULTISERIES-UX | Preserve multiple 2D/3D expressions and independent styles across project round-trip; browser regression. | TODO |
+| 1 | P1-UI-GRAPH-PANELS | Group graph import, axes and appearance without hiding Plot/2D/3D; pan/zoom, fit axes, PNG download and project round-trip browser tests. | TODO |
+| 2 | P1-UI-DATA-TOOLBAR | Simplify filter/sort/files/Python entry points; preserve joins and CSV/XLSX import/export, formulas and right-click actions; browser tests. | TODO |
+| 3 | P1-UI-ACCESSIBILITY | Keyboard tab/Enter/Space navigation, focus/status labels, and 390/768/1280 px layouts across all five workspaces. | TODO |
+| 4 | P1-UI-MULTISERIES-UX | Preserve multiple 2D/3D expressions, independent colors/styles and overlays across plot/reset/project round-trip; browser tests. | TODO |
+| 5 | P1-UI-PROJECT-TRANSFER | Consolidate project import/export controls with explicit invalid-file rollback, unsaved draft preservation and keyboard/mobile regression. | TODO |
 
 ### Previous five priorities (fitting diagnostics checkpoint)
 
@@ -98,6 +98,8 @@ Next five feature IDs in order:
 **2026-10-28 01:xx CET — P1-UI-ACTION-GROUPS development checkpoint.** Read AGENTS.md, living plan, frozen inventory and latest CI. Started with dev=main `fe6973350e02d5152e48353d8aa335887917f2ec`, no open PR, both refs unprotected. Added native keyboard-accessible disclosure groups for secondary Calculator and Editor actions while preserving existing DOM IDs/listeners, primary actions and drafts. Synchronized modular source and standalone HTML; added a focused Playwright regression for actual DOCX download, clipboard fallback, result/hub transfer, keyboard and responsive widths, wired into mandatory Quality. Local clone and full browser suite blocked by `github.com` DNS resolution failure; exact-head GitHub CI, PR, main and Pages gates remain mandatory. No branch created or stale artifact deleted. NEXT FIVE: P1-UI-ACTION-GROUPS release QA, P1-UI-GRAPH-PANELS, P1-UI-DATA-TOOLBAR, P1-UI-ACCESSIBILITY, P1-UI-MULTISERIES-UX. Frozen 166-gap/95-partial baseline unchanged.
 
 ## Execution record
+
+**2026-10-28 01:16 CET — P1-UI-ACTION-GROUPS verified release.** Source commit `945497e51c2a78e89edd8706ba789120bf284640` updated `src/workspace-tasks.js`, synchronized `index.html`, added `tests/smoke_action_groups.py` and its mandatory Quality step, and updated docs/changelog/ledger. JavaScript syntax and exact bundled-source equality checked. Dev Quality [40606508008](https://github.com/saeedsai/ProMathStudio/actions/runs/40606508008) and PR #37 Quality [40606906734](https://github.com/saeedsai/ProMathStudio/actions/runs/40606906734) passed full structural and browser regressions, including new keyboard/DOCX/clipboard/hub/mobile test. Reviewed six-file diff and merged PR #37 normally to main `137b008c583ee9f938430f5dd02cee4bb7df585a`; main Quality [40607265984](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265984), Pages [40607265308](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265308) and branch cleanup [40607265979](https://github.com/saeedsai/ProMathStudio/actions/runs/40607265979) succeeded. Safely fast-forwarded dev to main without force. Local clone blocked by GitHub DNS; independent interactive hosted site inaccessible. Branch protections remain absent; only dev/main refs, no stale files removed. Next five: P1-UI-GRAPH-PANELS, P1-UI-DATA-TOOLBAR, P1-UI-ACCESSIBILITY, P1-UI-MULTISERIES-UX, P1-UI-PROJECT-TRANSFER. Frozen baseline unchanged (166 gaps/95 partial).
 
 **2026-10-26 initialization (setup session)** — Inspected existing `main` `4cbb99e215b4e6071633866261244feaceecc09c`, green quality and Pages deploy. Added `dev` and permanent instructions. GitHub Pages publishing is main-branch-based, while `.github/workflows/pages.yml` is optional manual deployment. Establishing workflow checks and merged-only branch cleanup is the initial reliability deliverable. See subsequent commits and CI logs for verified outcomes; the run remains IN PROGRESS until those checks finish.
 

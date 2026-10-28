@@ -301,10 +301,10 @@
 
 # Changelog
 
-## 2026-10-28 — Group secondary Calculator and Editor actions (dev candidate)
+## 2026-10-28 — Group secondary Calculator and Editor actions (released via PR #37)
 
 - Group low-frequency Calculator copy/result-transfer and Editor copy/Word export buttons in keyboard-accessible native disclosures; primary actions remain visible and original event listeners are retained.
-- Add Playwright browser coverage for actual Word download, answer routing, clipboard fallback, keyboard and mobile layout; exact-head CI/PR/main/Pages gates required before release.
+- Add Playwright browser coverage for actual Word download, answer routing, clipboard fallback, keyboard and mobile layout; dev Quality 40606508008, PR Quality 40606906734, main Quality 40607265984 and Pages 40607265308 passed; main `137b008c583ee9f938430f5dd02cee4bb7df585a`. Independent hosted interactive smoke remains unavailable.
 
 
 Changes are documented in functional groups; historical version numbers are not reconstructed where no tagged release is available.

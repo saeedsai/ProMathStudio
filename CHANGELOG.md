@@ -1,6 +1,6 @@
 ## Unreleased — Saved-snippet JSON import preview and conflict-safe confirmation (2026-10-28)
 
-- Saved Data Tables snippet JSON imports now show a review summary before any localStorage mutation. Users can **Apply import** or **Cancel import**; name conflicts disable Apply until **Skip conflicting names and keep saved versions** is explicitly selected. Existing snippets are never silently overwritten, identical entries remain idempotent, and Python snippets are never executed on import.
+- Saved Data Tables snippet JSON imports now show a review summary plus a safely escaped, scrollable list of names, types, and code excerpts before any localStorage mutation. Users can **Apply import** or **Cancel import**; name conflicts disable Apply until **Skip conflicting names and keep saved versions** is explicitly selected. Existing snippets are never silently overwritten, identical entries remain idempotent, and Python snippets are never executed on import.
 - A preview is invalidated if the local library changes before confirmation. File/schema/40-entry validation, atomic storage failure rollback, and existing export behavior remain in place.
 - Added mandatory Chromium `tests/smoke_data_snippet_preview.py` and updated the existing interchange regression for confirmation semantics. Release requires exact-head dev Quality, PR Quality, main Quality and GitHub Pages verification; do not treat this changelog entry as deployed.
 

@@ -1,6 +1,6 @@
-## Unreleased — Graphs action grouping and panel QA (2026-10-28)
+## Released — Graphs action grouping and panel QA (2026-10-28, PR #39)
 
-- Grouped secondary Graphs send-to-Editor/Solver actions in an accessible disclosure; kept Plot, Reset, PNG and 2D/3D mode switches visible. Preserved existing button IDs, event handlers, graph state and workspace drafts. Added dedicated Playwright graph-panel regression and mandatory CI step for axes, appearance, 2D/3D, PNG, keyboard transfer, table task and mobile. Full exact-head CI and Pages deployment pending.
+- Grouped secondary Graphs send-to-Editor/Solver actions in an accessible disclosure; kept Plot, Reset, PNG and 2D/3D mode switches visible. Preserved existing button IDs, event handlers, graph state and workspace drafts. Added dedicated Playwright graph-panel regression and mandatory CI step for axes, appearance, 2D/3D, PNG, keyboard transfer, table task and mobile. Exact dev Quality 40609332818, PR Quality 40609762689, main Quality 40610140241 and Pages 40610140252 succeeded for main `10a1e067ca7184e0315f88d29982e848b069e189`. Hosted interactive smoke unavailable; graph import discoverability remains a separate open gap.
 
 ## Unreleased — exclusive workspace task disclosures (2026-10-28)
 

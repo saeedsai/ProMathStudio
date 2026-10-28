@@ -108,6 +108,8 @@ jobs:
         run: python tests/smoke_xlsx_formula_tokens.py
       - name: Context menus and programmer calculator smoke test
         run: python tests/smoke_context_actions.py
+      - name: Quoted spreadsheet clipboard TSV and transactional paste regression
+        run: python tests/smoke_sheet_tsv_clipboard.py
       - name: Graph styles, table zoom and calculator notation
         run: python tests/smoke_visual_options.py
       - name: Matrix calculator numeric and UI regression

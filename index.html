@@ -4785,8 +4785,8 @@ M.interpolationTools={interpolate,parsePairs,parseQueries};
   const $=id=>document.getElementById(id), MS=window.MathStudio;
   const popup=document.createElement('div');popup.id='workspace-context-menu';popup.className='context-actions';popup.setAttribute('role','menu');popup.setAttribute('aria-label','Contextual workspace actions');popup.tabIndex=-1;popup.hidden=true;document.body.append(popup);
   let selection=null,internalClipboard='',returnFocus=null;
-  const status=text=>{const id=selection?.area==='table'?'dt-status':selection?.area==='calc'?'calc-message':'hub-status';const e=$(id);if(e)e.textContent=text;};
-  const note=e=>{status(e.message||String(e));};
+  const status=(text,area=selection?.area)=>{const id=area==='table'?'dt-status':area==='calc'?'calc-message':'hub-status';const e=$(id);if(e)e.textContent=text;};
+  const note=(e,area)=>{status(e.message||String(e),area);};
   const close=()=>{popup.hidden=true;selection=null;};
   const copy=async data=>{internalClipboard=String(data??'');try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(internalClipboard);}catch{}return internalClipboard;};
   const paste=async()=>{try{if(navigator.clipboard?.readText){const r=await navigator.clipboard.readText();if(r!==undefined)return r;}}catch{}return internalClipboard;};
@@ -4800,11 +4800,45 @@ M.interpolationTools={interpolate,parsePairs,parseQueries};
   function colDelete(index){const t=active();if(t.columns.length<=1)throw Error('Keep at least one column.');if(!confirm('Delete column '+t.columns[index]+'? This cannot be undone.'))return;MS.dataTables.deleteColumn(index);}
   const validCoord=(r,c)=>{const t=active();if(!t||r<0||c<0||r>=t.rows.length||c>=t.columns.length)throw Error('Selected table cell is unavailable.');return t;};
   const setCell=(r,c,v)=>{const t=validCoord(r,c);t.rows[r][c]=String(v??'').slice(0,8000);update();};
-  const csvEscape=v=>String(v??'').includes('\t')||String(v).includes('\n')?'"'+String(v).replace(/"/g,'""')+'"':String(v??'');
-  function parseClipboard(content){return String(content).replace(/\r\n/g,'\n').split('\n').filter((s,i,arr)=>i<arr.length-1||s!=='').map(line=>line.split('\t'));}
-  const pasteCells=async(r,c)=>{const text=await paste();if(!text){status('Clipboard is empty.');return;}const t=active(),rows=parseClipboard(text);if(!rows.length)return;const maxWidth=Math.max(...rows.map(x=>x.length)),maxRows=r+rows.length,maxCols=c+maxWidth;validate(t,maxRows,maxCols);
+  const csvEscape=v=>{const s=String(v??'');return /[\t\n\r"]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  // Spreadsheet clipboard uses tab-delimited fields with CSV-style quoting.
+  // Parse the complete input before touching workbook rows, so malformed or
+  // oversized clipboard content cannot partially overwrite a table.
+  function parseClipboard(content){
+    const input=String(content??'').replace(/\r\n?/g,'\n');
+    if(input.length>2000000)throw Error('Clipboard text exceeds 2,000,000 characters.');
+    const rows=[],row=[];let cell='',quoted=false,closed=false;
+    const endCell=()=>{
+      row.push(cell);
+      if(row.length>32)throw Error('Clipboard has too many columns (maximum 32).');
+      cell='';closed=false;
+    };
+    const endRow=()=>{
+      rows.push(row.splice(0));
+      if(rows.length>6000)throw Error('Clipboard has too many rows (maximum 6,000).');
+    };
+    for(let i=0;i<input.length;i++){
+      const ch=input[i];
+      if(quoted){
+        if(ch==='"'){
+          if(input[i+1]==='"'){cell+='"';i++;}
+          else{quoted=false;closed=true;}
+        }else cell+=ch;
+      }else if(ch==='\t'||ch==='\n'){
+        endCell();if(ch==='\n')endRow();
+      }else if(closed)throw Error('Invalid characters after closing clipboard quote.');
+      else if(ch==='"'&&cell==='')quoted=true;
+      else cell+=ch;
+      if(cell.length>8000)throw Error('Clipboard cell exceeds 8,000 characters.');
+    }
+    if(quoted)throw Error('Unterminated quoted clipboard cell.');
+    if(!input.endsWith('\n')){endCell();endRow();}
+    else if(row.length){endCell();endRow();}
+    return rows;
+  }
+  const pasteCells=async(r,c)=>{const text=await paste();if(!text){status('Clipboard is empty.','table');return;}const t=active(),rows=parseClipboard(text);if(!rows.length)return;const maxWidth=Math.max(...rows.map(x=>x.length)),maxRows=r+rows.length,maxCols=c+maxWidth;validate(t,maxRows,maxCols);
     while(t.rows.length<maxRows)t.rows.push(t.columns.map(()=>''));while(t.columns.length<maxCols){t.columns.push('Column'+(t.columns.length+1));t.rows.forEach(x=>x.push(''));}
-    rows.forEach((row,ri)=>row.forEach((v,ci)=>{t.rows[r+ri][c+ci]=String(v).slice(0,8000);}));update();status('Pasted '+rows.length+' row(s) into table.');};
+    rows.forEach((row,ri)=>row.forEach((v,ci)=>{t.rows[r+ri][c+ci]=String(v).slice(0,8000);}));update();status('Pasted '+rows.length+' row(s) into table.','table');};
   function filterEquals(column,content){const t=active(),filter=$('dt-filter-column'),op=$('dt-filter-op'),value=$('dt-filter-value');if(!filter||!t)return;
     const details=$('data-menu-navigation')?.querySelectorAll('details')[1];if(details)details.open=true;
     filter.value=String(column);op.value='eq';value.value=String(content);$('dt-filter-apply').click();}
@@ -4868,7 +4902,7 @@ M.interpolationTools={interpolate,parsePairs,parseQueries};
     const commands=actions(sel);if(!commands.length)return false;
     selection=sel;returnFocus=event.target;popup.replaceChildren();
     const heading=document.createElement('div');heading.className='context-heading';heading.textContent=sel.area==='table'?'Data Tables — '+(sel.kind||'actions'):sel.area+' actions';popup.append(heading);
-    for(const cmd of commands){const b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');b.textContent=cmd.title;if(cmd.danger)b.style.color='#b03648';b.addEventListener('click',async()=>{close();try{await cmd.run();}catch(e){note(e);}});popup.append(b);}
+    for(const cmd of commands){const b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');b.textContent=cmd.title;if(cmd.danger)b.style.color='#b03648';b.addEventListener('click',async()=>{const area=selection?.area;close();try{await cmd.run();}catch(e){note(e,area);}});popup.append(b);}
     popup.hidden=false;popup.style.left='0px';popup.style.top='0px';const rect=popup.getBoundingClientRect();const x=Math.max(6,Math.min(event.clientX||20,innerWidth-rect.width-6)),y=Math.max(6,Math.min(event.clientY||20,innerHeight-rect.height-6));popup.style.left=x+'px';popup.style.top=y+'px';popup.focus({preventScroll:true});return true;
   }
   document.addEventListener('contextmenu',e=>{if(popup.contains(e.target))return;if(detect(e.target)){e.preventDefault();open(e);}else close();},true);

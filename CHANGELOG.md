@@ -1,8 +1,8 @@
-## Unreleased — Nested spreadsheet aggregates (2026-10-28)
+## Released — Nested spreadsheet aggregates (2026-10-28, PR #64)
 
 - Fixed Data Tables formulas that combine aggregate functions, such as `=SUM(MEDIAN(A1:A5),COUNT(A1:A5))`. Aggregations now resolve innermost-first with a bounded 40-pass nesting limit, preserving existing `IF` lazy evaluation, range/reference checks, cycle detection, and the no-`eval` token grammar.
 - Added a searchable **Nested aggregates** example to the Functions & Code Library; no existing formulas or actions were removed.
-- Added mandatory Chromium regression `tests/smoke_sheet_nested_aggregates.py` covering numeric reference values, nested `SUM/MEDIAN/COUNT/AVERAGE/MIN/MAX`, nested `IF`, cross-sheet ranges, blank/text exclusion, cycles, invalid references, nesting limit, library insertion and responsive controls. **Development branch only until exact-head CI, PR and Pages verification.**
+- Added mandatory Chromium regression `tests/smoke_sheet_nested_aggregates.py` covering numeric reference values, nested `SUM/MEDIAN/COUNT/AVERAGE/MIN/MAX`, nested `IF`, cross-sheet ranges, blank/text exclusion, cycles, invalid references, nesting limit, library insertion and responsive controls. Released via [PR #64](https://github.com/saeedsai/ProMathStudio/pull/64): [dev Quality 40712426644](https://github.com/saeedsai/ProMathStudio/actions/runs/40712426644), [PR Quality 40713240766](https://github.com/saeedsai/ProMathStudio/actions/runs/40713240766), [main Quality 40713839887](https://github.com/saeedsai/ProMathStudio/actions/runs/40713839887) and [Pages 40713838707](https://github.com/saeedsai/ProMathStudio/actions/runs/40713838707) all succeeded (78 QA steps per candidate).
 
 ## Released — Reliable TSV round-trip and CSV fixture repair (2026-10-28, PR #63)
 

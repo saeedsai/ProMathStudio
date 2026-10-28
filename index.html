@@ -4386,11 +4386,23 @@ function simplifyTable(){const data=$('data-panel'),area=data.querySelector('.da
   const pythonMenu=menu('Python',el('div',{id:'python-panel'}));
   nav.append(tableMenu,filterMenu,opMenu,importMenu,pythonMenu);bar.append(nav);
   const quick=el('div',{class:'data-toolbar'});
-  const showFilter=el('button',{class:'secondary',type:'button'},'Filter rows');showFilter.addEventListener('click',()=>{filterMenu.open=true;closeOtherMenus(filterMenu);});
-  const openPython=el('button',{class:'secondary',type:'button'},'Python');openPython.addEventListener('click',()=>{pythonMenu.open=true;closeOtherMenus(pythonMenu);});
+  const showFilter=el('button',{class:'secondary',type:'button'},'Filter rows');showFilter.addEventListener('click',()=>{filterMenu.open=true;closeOtherMenus(filterMenu);filterMenu.querySelector('summary').focus();});
+  const openPython=el('button',{class:'secondary',type:'button'},'Python');openPython.addEventListener('click',()=>{pythonMenu.open=true;closeOtherMenus(pythonMenu);pythonMenu.querySelector('summary').focus();});
   quick.append(showFilter,openPython);bar.append(quick);
   area.insertBefore(bar,area.querySelector('#dt-tabs'));
   for(const m of nav.children)m.querySelector('summary').addEventListener('click',()=>{if(!m.open)closeOtherMenus(m)});
+  // Traverse top-level action summaries without hijacking arrows in table inputs.
+  // Moving focus alone never opens a menu or modifies the workbook/drafts.
+  nav.addEventListener('keydown',e=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+    const summaries=[...nav.children].map(m=>m.querySelector(':scope > summary'));
+    const index=summaries.indexOf(e.target);
+    if(index<0)return;
+    e.preventDefault();
+    const next=e.key==='Home'?0:e.key==='End'?summaries.length-1:
+      (index+(e.key==='ArrowRight'?1:-1)+summaries.length)%summaries.length;
+    summaries[next].focus();
+  });
   // Escape dismisses the active menu and returns keyboard users to its trigger.
   // Pointer dismissal does not steal focus or discard filter/sort drafts.
   document.addEventListener('keydown',e=>{

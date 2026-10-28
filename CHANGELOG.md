@@ -1,3 +1,7 @@
+## Unreleased — Data Tables keyboard menu traversal and quick-action focus (2026-10-28)
+
+- ArrowLeft/ArrowRight/Home/End move keyboard focus among the five top-level Data Tables action summaries with wraparound, without opening menus or intercepting arrows in table filter inputs. Quick **Filter rows** and **Python** buttons now move focus to their opened menu summaries. Native Enter/Space, Escape, existing workbook state and unsaved filter drafts remain intact. New focused Playwright regression covers traversal, wrap, exclusive opening, input-arrow behavior, quick-action focus, drafts and 390/768/1280 px viewports. Mandatory full CI, PR and production Pages verification are still required before this is marked released.
+
 ## Released — keyboard workspace navigation and live status (2026-10-28, PR #42)
 
 - ArrowLeft/ArrowRight/Home/End move visible keyboard focus among all five workspace buttons, including Data Tables; Enter/Space still activate, with no accidental mode change from arrows. Added high-contrast focus outline and polite workspace subtitle announcement. Preserves graph drafts and native tab order. New Playwright regression tests focus wrap, active route, activation, responsive widths and runtime errors. Dev Quality 40617989352, PR Quality 40618289024, main Quality 40618678114, Pages 40618678231 and synchronized dev Quality 40618700413 all succeeded for merge `70e7fdedc120a817724c72ae0f0068663a428f41`. Hosted interactive Pages smoke unavailable; no full WCAG certification claimed.

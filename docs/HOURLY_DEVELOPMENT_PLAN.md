@@ -10,6 +10,24 @@ Run **once every hour indefinitely**. Each run picks a narrowly bounded item, ad
 **Statuses:** TODO, IN PROGRESS, DEV IMPLEMENTED, CI GREEN, RELEASED, BLOCKED, PARTIAL.  
 **Meaning of RELEASED:** exact code shipped to main, all required CI checks green, production deployment verified. Source change alone is not release.
 
+## 2026-10-28 03:22 CET — P1-UI-DATA-TOOLBAR menu navigation increment
+
+**DEV IMPLEMENTED; exact-head CI, PR and Pages verification pending.** Starting dev=main=`6de404a660f5ba7a7f3084d60523c7c39fbe6baa` with no open PRs; latest dev Quality [40620059306](https://github.com/saeedsai/ProMathStudio/actions/runs/40620059306), main Quality [40620045340](https://github.com/saeedsai/ProMathStudio/actions/runs/40620045340), and Pages [40620044999](https://github.com/saeedsai/ProMathStudio/actions/runs/40620044999) all succeeded. Both refs remain unprotected. Bounded change: arrow/Home/End keyboard focus traversal of five Data Tables action summaries and focus transfer from quick Filter/Python actions. Preserve menu open state on focus-only movement, drafts, input arrow keys, native Enter/Space, Escape dismissal, and existing table actions. Added `tests/smoke_data_menu_navigation.py` to mandatory Quality; source is inline `index.html` outside modular bundles. Container cannot resolve github.com for local checkout; browser and unit verification must run in CI. Frozen baseline remains 166 opportunities / 95 partial features; this increment is not completion of broad Data Tables QA or WCAG accessibility. No obsolete tracked files identified; dev/main are the only branches.
+
+### NEXT FIVE after this increment
+
+| Priority | Feature | Concrete acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-DATA-TOOLBAR end-to-end QA | Import/export CSV and XLSX, joins, sorting, context actions and mobile; verify workbook values and formula references survive. | IN PROGRESS |
+| 2 | P1-UI-ACCESSIBILITY remainder | Test focus/labels and keyboard behavior across five workspaces; 390/768/1280 px and no browser runtime errors. | IN PROGRESS |
+| 3 | P1-UI-MULTISERIES-UX | Independently style 2D/3D series, preserve overlays, reset, multiple expressions and project round-trip. | TODO |
+| 4 | P1-UI-PROJECT-TRANSFER | Consolidate import/export controls, reject invalid files transactionally, preserve drafts and keyboard navigation. | TODO |
+| 5 | P1-UI-GRAPH-IMPORT-DISCOVERY | Discoverable CSV/JSON Graphs entry; verify Data Tables handoff, axes, overlays, PNG and project round-trip. | TODO |
+
+### Execution log — 2026-10-28 03:22 CET
+
+Selected keyboard navigation of Data Tables action summaries as the next bounded unfinished usability increment. Changed `index.html`, mandatory Quality workflow, new focused Playwright test, `CHANGELOG.md`, and this ledger. Commit/CI/PR/Pages outcome to be reconciled against exact SHAs; no direct main push or protection bypass. Live hosted interactive test is unavailable in the current environment.
+
 ## 2026-10-28 02:55 CET — P1-UI-ACCESSIBILITY-WSNAV bounded navigation increment
 
 **RELEASED via [PR #42](https://github.com/saeedsai/ProMathStudio/pull/42), bounded keyboard navigation only.** Exact dev commit `17c872072a9a7ff492d2a079fce57a3bfd63b0bd` passed [push Quality 40617989352](https://github.com/saeedsai/ProMathStudio/actions/runs/40617989352) and independent [PR Quality 40618289024](https://github.com/saeedsai/ProMathStudio/actions/runs/40618289024), the full structural and browser regression suite. Guarded ordinary PR merged into `main=70e7fdedc120a817724c72ae0f0068663a428f41`; [main Quality 40618678114](https://github.com/saeedsai/ProMathStudio/actions/runs/40618678114), [Pages 40618678231](https://github.com/saeedsai/ProMathStudio/actions/runs/40618678231), [cleanup 40618678041](https://github.com/saeedsai/ProMathStudio/actions/runs/40618678041) and synchronized [dev Quality 40618700413](https://github.com/saeedsai/ProMathStudio/actions/runs/40618700413) all passed. Live hosted interactive testing unavailable (`DisabledError`); branch protection remains absent. Added visible keyboard focus and ArrowLeft/ArrowRight/Home/End navigation among all five workspace buttons, including the dynamically inserted Data Tables tab. Arrow keys move focus without silently changing workspaces; native Enter/Space activate. Workspace subtitle changes are announced politely and graph drafts survive switching. Added focused Chromium regression `tests/smoke_workspace_navigation.py` for focus/wrap, activation, active route, live label, drafts, no runtime errors and 390/768/1280 px widths; wired into mandatory Quality. Existing workspace mode routing and source module bundles are unchanged. This is a bounded accessibility improvement, **not** complete WCAG certification. The frozen 166-gap/95-partial baseline is unchanged.

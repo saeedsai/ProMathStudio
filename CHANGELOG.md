@@ -1,3 +1,9 @@
+## Unreleased — Nested spreadsheet aggregates (2026-10-28)
+
+- Fixed Data Tables formulas that combine aggregate functions, such as `=SUM(MEDIAN(A1:A5),COUNT(A1:A5))`. Aggregations now resolve innermost-first with a bounded 40-pass nesting limit, preserving existing `IF` lazy evaluation, range/reference checks, cycle detection, and the no-`eval` token grammar.
+- Added a searchable **Nested aggregates** example to the Functions & Code Library; no existing formulas or actions were removed.
+- Added mandatory Chromium regression `tests/smoke_sheet_nested_aggregates.py` covering numeric reference values, nested `SUM/MEDIAN/COUNT/AVERAGE/MIN/MAX`, nested `IF`, cross-sheet ranges, blank/text exclusion, cycles, invalid references, nesting limit, library insertion and responsive controls. **Development branch only until exact-head CI, PR and Pages verification.**
+
 ## Released — Reliable TSV round-trip and CSV fixture repair (2026-10-28, PR #63)
 
 - Corrected Data Tables **Export TSV** to quote commas and semicolons in addition to tabs, newlines and quotation marks. The shared CSV/TSV importer sniffs separators from the header; unquoted commas in otherwise valid TSV headers could previously cause the wrong delimiter to be selected on reimport. The export remains value-only and offline.

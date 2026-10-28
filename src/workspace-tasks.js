@@ -16,6 +16,13 @@ css.textContent=`
 #ui-calc-history{align-self:start}
 #ui-graph-table>.dt-graph-tools{margin:4px 0 12px}
 #ui-editor-python .python-wrap{margin-top:9px}
+.task-action-group{display:inline-block;vertical-align:middle;max-width:100%;border:1px solid #d6deee;border-radius:9px;background:#f8faff;padding:0 8px}
+.task-action-group>summary{cursor:pointer;color:#344d85;font-size:12px;font-weight:700;padding:9px 4px}
+.task-action-group>summary:focus-visible{outline:3px solid #93a5ed;outline-offset:2px}
+.task-action-group[open]{display:block;flex-basis:100%;width:100%;box-sizing:border-box}
+.task-action-controls{display:flex;flex-wrap:wrap;gap:7px;padding:7px 2px 10px}
+.task-action-controls>button{max-width:100%;white-space:normal}
+
 .task-disclosure>summary:focus-visible{outline:3px solid #93a5ed;outline-offset:2px}
 @media(max-width:700px){#workspace-task-guide{grid-template-columns:minmax(0,1fr);padding:10px 12px;gap:8px;margin:8px 0 13px}#workspace-task-guide .task-heading{grid-column:1}#workspace-task-guide .task-description{font-size:11px}.task-disclosure{padding:0 9px}}
 `;
@@ -32,6 +39,27 @@ wrap('ui-solver-assumptions','Variable assumptions (optional)',$('cas-assumption
 wrap('ui-graph-axes','Axes and numeric ranges',$('graph-panel').querySelector('.graph-controls'));
 wrap('ui-graph-table','Plot a Data Table',$('graph-panel').querySelector('.dt-graph-tools'));
 wrap('ui-editor-python','Generated Python / SymPy code',$('python-output').closest('.python-wrap'));
+function groupActions(id,label,container,selectors){
+ if(!container)throw Error('Missing action toolbar '+id);
+ const d=document.createElement('details');d.className='task-action-group';d.id=id;
+ const s=document.createElement('summary');s.textContent=label;
+ const controls=document.createElement('div');controls.className='task-action-controls';
+ d.append(s,controls);
+ for(const selector of selectors){
+  const button=document.querySelector(selector);
+  if(!button||button.tagName!=='BUTTON')throw Error('Missing action '+selector);
+  // Move existing nodes: retain IDs, listeners, keyboard behavior and context actions.
+  controls.append(button);
+ }
+ container.append(d);return d;
+}
+groupActions('ui-calc-more-actions','Copy and send results',
+ $('calculator-panel').querySelector('.calc-footer'),
+ ['#calc-copy','#hub-calc-result','[data-forward="calculator"][data-destination="solver"]','[data-forward="calculator"][data-destination="graph2d"]']);
+groupActions('ui-editor-export-actions','Copy and export equation',
+ document.querySelector('.preview-buttons'),
+ ['#copy-latex','#copy-word','#copy-image','#export-word']);
+
 const tasks={
  calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-tools'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['precision','High precision','Exact decimals and 16–80 digit division.','#precision-details'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],
  editor:[['basic','Write equation','Write an expression and see its live preview.'],['examples','Try examples','Select an example to insert.','#examples'],['notebook','My equations','Reopen saved equations.','#notebook'],['python','Python code','Show the generated SymPy code.','#ui-editor-python']],

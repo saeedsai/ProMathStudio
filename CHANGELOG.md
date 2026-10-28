@@ -1,3 +1,7 @@
+## Unreleased — Data Tables quoted clipboard TSV round-trip (2026-10-28)
+
+- Fixed context-menu row/column copy/paste of cells containing tabs, embedded newlines and escaped double quotes. A bounded TSV parser now validates the entire clipboard payload before mutating the workbook, rejecting malformed quotes, excessive columns/rows/cell lengths and oversized text without partial writes. Quote-only cells are escaped on row/column copy. Added focused Playwright regression for context menus, formulas, invalid-input rollback and responsive viewports to mandatory Quality. Exact dev Quality, PR, main and Pages gates remain pending; no release claim.
+
 ## Released — Data Tables advanced column filter row alignment (2026-10-28, PR #46)
 
 - Corrected an off-by-one error in advanced column filtering: visible spreadsheet row numbers start at 1, but the filter had evaluated the previous row and hidden the first. Filtered first/last rows, numeric conditions, text search intersections, sort re-render and reset are now covered by a new focused Playwright test registered in mandatory Quality. This preserves workbook source values and existing filter drafts. Implementation dev Quality 40623617625, final dev Quality 40624054180, PR Quality 40624058378, main Quality 40624474851, Pages 40624474428 and cleanup 40624474885 all passed; merged via [PR #46](https://github.com/saeedsai/ProMathStudio/pull/46) into `main=f08fbaafbe1879f35b1acacff06c6e08d44f93ec`. Independent hosted interactive smoke remains unavailable; broader Data Tables QA remains open.

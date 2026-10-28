@@ -50,6 +50,7 @@
       <label for="dt-library-category">Category</label>
       <select id="dt-library-category"><option value="">All</option><option value="Formula">Formulas</option><option value="Python">Python recipes</option><option value="Operation">Table operations</option></select>
       <input id="dt-library-search" type="search" placeholder="SUM, IF, filter, group..." autocomplete="off">
+      <div class="data-toolbar"><label>Snippet name<input id="dt-snippet-name" maxlength="60" placeholder="My formula"></label><label>Type<select id="dt-snippet-kind"><option>Formula</option><option>Python</option></select></label><label>Snippet<textarea id="dt-snippet-code" rows="2" maxlength="8000" placeholder="=SUM(A1:A5)"></textarea></label><button id="dt-snippet-save" type="button" class="secondary">Save snippet</button></div>
       <div id="dt-library-results" aria-live="polite"></div>
       <p id="dt-library-message" role="status" class="graph-data-muted">Select a spreadsheet cell or use the Python editor before inserting.</p>
     </details>
@@ -82,6 +83,26 @@
     {name:'INTERSECT',kind:'Operation',operation:'intersect',sample:'INTERSECT',help:'Keep rows present in both tables.'},
     {name:'EXCEPT',kind:'Operation',operation:'except',sample:'EXCEPT',help:'Keep left-table rows absent from the right table.'}
   ];
+  const snippetStorageKey='promathstudio-data-snippets-v1';
+  let customDataSnippets=[];
+  try {
+    const stored=JSON.parse(localStorage.getItem(snippetStorageKey)||'[]');
+    if(Array.isArray(stored))customDataSnippets=stored.filter(e=>e&&typeof e.name==='string'&&e.name.length<=60&&['Formula','Python'].includes(e.kind)&&typeof e.sample==='string'&&e.sample.length<=8000).slice(0,40).map(e=>({name:e.name,kind:e.kind,sample:e.sample,help:'Saved user snippet',custom:true}));
+  }catch{customDataSnippets=[];}
+  $('dt-snippet-save').addEventListener('click',()=>{
+    const name=$('dt-snippet-name').value.trim(),kind=$('dt-snippet-kind').value,sample=$('dt-snippet-code').value;
+    const message=$('dt-library-message');
+    if(!name||name.length>60||!['Formula','Python'].includes(kind)||!sample.trim()||sample.length>8000||(kind==='Formula'&&!sample.startsWith('='))){
+      message.textContent='Enter a name and valid snippet (formulas must begin with =).';return;
+    }
+    const previous=customDataSnippets.findIndex(e=>e.name.toLowerCase()===name.toLowerCase());
+    if(previous<0&&customDataSnippets.length>=40){message.textContent='Maximum 40 saved snippets.';return;}
+    const entry={name,kind,sample,help:'Saved user snippet',custom:true};
+    if(previous>=0)customDataSnippets[previous]=entry;else customDataSnippets.push(entry);
+    try{localStorage.setItem(snippetStorageKey,JSON.stringify(customDataSnippets));}
+    catch{message.textContent='Storage unavailable; snippet was not saved.';return;}
+    renderDataLibrary();message.textContent='Saved '+name+'.';
+  });
   // Store the logical cell coordinates: the grid is rebuilt on blur, so
   // retaining the old input element would silently break toolbar insertion.
   let lastLibraryCell=null;
@@ -94,7 +115,7 @@
     const query=$('dt-library-search').value.trim().toLowerCase();
     const category=$('dt-library-category').value;
     const root=$('dt-library-results');root.replaceChildren();
-    for(const entry of dataLibrary.filter(e=>(!category||e.kind===category)&&(e.name+' '+e.kind+' '+e.help).toLowerCase().includes(query))){
+    for(const entry of dataLibrary.concat(customDataSnippets).filter(e=>(!category||e.kind===category)&&(e.name+' '+e.kind+' '+e.help).toLowerCase().includes(query))){
       const item=el('div',{class:'data-toolbar'});
       const description=el('span',{},entry.kind+' · '+entry.name+' — '+entry.help+' Example: '+entry.sample);
       const insert=el('button',{type:'button',class:'secondary','aria-label':(entry.kind==='Operation'?'Choose ':'Insert ')+entry.name},entry.kind==='Operation'?'Choose':'Insert');

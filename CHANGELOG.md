@@ -1,6 +1,6 @@
-## Unreleased — Data Tables advanced column filter row alignment (2026-10-28)
+## Released — Data Tables advanced column filter row alignment (2026-10-28, PR #46)
 
-- Corrected an off-by-one error in advanced column filtering: visible spreadsheet row numbers start at 1, but the filter had evaluated the previous row and hidden the first. Filtered first/last rows, numeric conditions, text search intersections, sort re-render and reset are now covered by a new focused Playwright test registered in mandatory Quality. This preserves workbook source values and existing filter drafts; exact-head CI, PR and Pages validation are required before release.
+- Corrected an off-by-one error in advanced column filtering: visible spreadsheet row numbers start at 1, but the filter had evaluated the previous row and hidden the first. Filtered first/last rows, numeric conditions, text search intersections, sort re-render and reset are now covered by a new focused Playwright test registered in mandatory Quality. This preserves workbook source values and existing filter drafts. Implementation dev Quality 40623617625, final dev Quality 40624054180, PR Quality 40624058378, main Quality 40624474851, Pages 40624474428 and cleanup 40624474885 all passed; merged via [PR #46](https://github.com/saeedsai/ProMathStudio/pull/46) into `main=f08fbaafbe1879f35b1acacff06c6e08d44f93ec`. Independent hosted interactive smoke remains unavailable; broader Data Tables QA remains open.
 
 ## Released — Data Tables keyboard menu traversal and quick-action focus (2026-10-28, PR #44)
 

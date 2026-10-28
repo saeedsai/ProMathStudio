@@ -1184,7 +1184,7 @@ def _ms_system(job_text):
     target.setRangeText(text,start,end,'end');
     // In graph editors, leave the editable x/y placeholder selected in a simple
     // function template (sin(x), sqrt(x), etc.). Other symbols keep normal caret behavior.
-    const graphPlaceholder=graphMode&&/^[A-Za-z_][A-Za-z0-9_]*\\([xy]\\)$/.test(text)?text.length-2:undefined;
+    const graphPlaceholder=graphMode&&/^[A-Za-z_][A-Za-z0-9_]*\([xy]\)$/.test(text)?text.length-2:undefined;
     const focusOffset=Number.isFinite(caret)?caret:graphPlaceholder;
     const position=start+(Number.isFinite(focusOffset)?focusOffset:text.length);
     target.setSelectionRange(position,position+(Number.isFinite(focusOffset)?1:0));

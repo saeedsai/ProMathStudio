@@ -6,10 +6,10 @@
   const MAX_ROWS = 6000, MAX_COLUMNS = 32, MAX_BYTES = 1000000, MAX_DISPLAY = 150;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const el = (tag, attrs, text) => { const e=document.createElement(tag); for(const [k,v] of Object.entries(attrs||{})){if(k==='class')e.className=v;else e.setAttribute(k,v);}if(text!==undefined)e.textContent=String(text);return e;};
-  const csvCell = value => {const s=String(value??'');return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  const csvCell = value => {const s=String(value??'');return (s===''||/[",\n\r]/.test(s))?'"'+s.replace(/"/g,'""')+'"':s;};
   // Quote alternate separator characters too: the shared importer sniffs CSV/TSV
   // delimiters from the header and must not mistake commas/semicolons for tabs.
-  const tsvCell = value => {const s=String(value??'');return /[,;\t\r\n"]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  const tsvCell = value => {const s=String(value??'');return (s===''||/[,;\t\r\n"]/.test(s))?'"'+s.replace(/"/g,'""')+'"':s;};
   const deep = value => JSON.parse(JSON.stringify(value));
   const colLetter = idx => {let a=''; for(let i=idx+1;i;i=Math.floor((i-1)/26))a=String.fromCharCode(65+(i-1)%26)+a; return a;};
   const colIndex = s => {let n=0;for(const c of s.toUpperCase())n=n*26+c.charCodeAt(0)-64;return n-1;};
@@ -699,7 +699,10 @@
     const rows=evaluated(t);download(t.name+'.json',JSON.stringify(rows.map(row=>Object.fromEntries(t.columns.map((h,i)=>[h,row[i]]))),null,2),'application/json');}));
   $('dt-import').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{
     if(file.size>MAX_BYTES)throw Error('Import file exceeds 1 MB.');if(!/\.(csv|tsv|json)$/i.test(file.name))throw Error('Choose CSV, TSV or JSON.');
-    const text=await file.text(),decoder=window.MathStudio.graphData;const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text):decoder.parseCSV(text);
+    const text=await file.text(),decoder=window.MathStudio.graphData;
+    // One-column tabular imports are valid sheets, but never XY graph datasets.
+    const options={allowSingleColumn:true,delimiterHint:/\.tsv$/i.test(file.name)?'\t':','};
+    const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text,options):decoder.parseCSV(text,options);
     const t=makeTable(file.name.replace(/\.(csv|tsv|json)$/i,''),tbl.headers,tbl.rows);notify('Imported '+file.name+': '+t.rows.length+' rows.');
   }catch(e){notify('Import failed: '+e.message,true);}finally{event.target.value='';}});
   // Existing chart-data importer is now in the Data Tables tab. Imports there also create a sheet.

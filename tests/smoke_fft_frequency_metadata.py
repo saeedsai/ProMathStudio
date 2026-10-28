@@ -16,7 +16,7 @@ def main():
    assert abs(r['spectrum'][0]['amplitude']-3)<1e-9
   for invalid in [True,False,None,[],{},' ',0,-4,1e13,'hello']:
    assert page.evaluate('v=>{try{MathStudio.fftTools.analyze([0,1,0,-1],v);return false;}catch(e){return true;}}',invalid),invalid
-  page.locator('[data-workspace="solver"]').click()
+  page.locator('[data-workspace="editor"]').click()
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-rate').fill('8')
   page.locator('#fft-run').click()

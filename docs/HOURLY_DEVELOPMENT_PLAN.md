@@ -1,3 +1,21 @@
+## 2026-10-28 05:30 CET — P1-DATA-JSON-HEADER-LOSS (bounded export correctness)
+
+**DEV IMPLEMENTED — awaiting exact-head CI.** Identified a silent data-loss defect: exporting a table with duplicate column labels as JSON uses `Object.fromEntries`, which overwrites the earlier value for a repeated key. The new JSON export guard rejects duplicate labels before download; CSV and project JSON continue to preserve them. Case-distinct labels and a single empty label remain allowed. Added `tests/smoke_data_json_duplicate_headers.py` with duplicate/empty/case checks, computed formula export, CSV preservation, workbook rollback, viewport widths and browser errors; registered in mandatory Quality. Modular and standalone source synchronized; documentation and changelog updated. No direct main push, forced ref update, or branch creation. Local checkout is blocked by github.com DNS resolution; GitHub CI is the authoritative full test gate. Promotion remains conditional on exact SHA dev + PR Quality and main/Pages verification. Branch protection is absent.
+
+### NEXT FIVE after JSON duplicate-header export guard
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-UI-DATA-TOOLBAR remaining CSV/TSV/JSON/XLSX QA | Round-trip multiline quoted CSV/TSV, malformed import rollback, 1 MB limit, formula and context preservation at 390/768/1280 px with no runtime errors. | IN PROGRESS |
+| 2 | P1-UI-ACCESSIBILITY remainder | Keyboard focus, labels, screen-reader semantics across five workspaces, no focus traps or overflow. | IN PROGRESS |
+| 3 | P1-UI-MULTISERIES-UX | Independent 2D/3D styles, overlays, reset and project round-trip. | TODO |
+| 4 | P1-UI-PROJECT-TRANSFER | Import/export grouping, invalid-file rollback and unsaved draft retention. | TODO |
+| 5 | P1-UI-GRAPH-IMPORT-DISCOVERY | Discoverable CSV/JSON graph import, table handoff, axis mapping, PNG and project round-trip. | TODO |
+
+### Execution log — 2026-10-28 05:30 CET
+
+Read root AGENTS.md, living ledger, frozen 26-Oct audit and latest CI; dev/main both `1ab836edd8d9002db03a7a5f2df05d451dfbb643` before this change. Latest main Quality 40632432933 and Pages 40632432687 passed; synchronized dev Quality 40632446809 still in progress when inspected. No open PRs. Implemented JSON duplicate-header guard, new Playwright regression, CI registration, docs and changelog. New dev commit/CI and release outcome to be reconciled after GitHub returns exact SHAs. Local git checkout DNS unavailable; no branch cleanup candidates observed in current tree.
+
 # ProMathStudio — Hourly Development Plan & Execution Ledger
 
 **Living plan** · initialized 2026-10-26 · authoritative operating rules: [AGENTS.md](../AGENTS.md).  

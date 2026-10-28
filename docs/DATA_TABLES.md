@@ -36,7 +36,7 @@ Every operation produces a **new table**, leaving the originals intact. The 6,00
 
 ## Import and export
 
-Use Data Tables → **Import CSV / TSV / JSON**. The importer accepts headed CSV/TSV files and several JSON tabular layouts. Maximum source file size **1 MB**. Export the active sheet as CSV or JSON. Both exports use **calculated values**; for formulas and sheet links, save the **MathStudio project JSON** using the Connected Workspaces panel at the bottom. An advanced import preview and X/Y/Z mapping control also lives inside Data Tables, not Graphs.
+Use Data Tables → **Import CSV / TSV / JSON**. The importer accepts headed CSV/TSV files and several JSON tabular layouts. Maximum source file size **1 MB**. Export the active sheet as CSV or JSON. JSON export requires **unique, case-sensitive column headers** because repeated JSON object keys would silently discard values; rename duplicate headers or use CSV/project JSON instead. CSV retains duplicate headers. Both exports use **calculated values**; for formulas and sheet links, save the **MathStudio project JSON** using the Connected Workspaces panel at the bottom. An advanced import preview and X/Y/Z mapping control also lives inside Data Tables, not Graphs.
 
 
 ### XLSX import and export (bounded offline scope)

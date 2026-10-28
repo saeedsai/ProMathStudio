@@ -1,3 +1,19 @@
+## 2026-10-28 23:03 CET — P1-GRAPH-PALETTE-VALIDITY implemented on dev; QA pending
+
+**Feature ledger: IMPLEMENTED ON DEV / NOT YET RELEASED.** The shared Symbols library now distinguishes known numeric plot templates from Equation-only notation in both 2D/3D Graphs. Plotting templates remain insertable with selection/caret preservation; unsupported notation stays visible but disabled with explanatory title and accessible label. Equation retains the complete palette. The graph context hint refreshes on palette focus, including programmatic workspace changes. Added `tests/test_graph_palette_validity.py` structural regression and mandatory Chromium `tests/smoke_graph_palette_validity.py` covering 2D/3D, Equation, unchanged drafts, focus, 390/768/1280px and runtime errors. Added the test to Quality workflow. No external dependencies or dynamic evaluation.
+
+**Execution log:** Started at `main=33517eff925e28253edcccbddb87364b5e928279`, `dev=000b019488d74f11047cc8af46c7001a57c971b6` with two documentation-only commits ahead and no open PR. Latest recorded [PR #71 Quality 40768400816](https://github.com/saeedsai/ProMathStudio/actions/runs/40768400816) and [main Quality 40768958629](https://github.com/saeedsai/ProMathStudio/actions/runs/40768958629) passed; [Pages 40768957690](https://github.com/saeedsai/ProMathStudio/actions/runs/40768957690) succeeded. New source commit `f9daac44d27f6b09cf4c064fbb18f6e3e75fe814`, browser test `37796dca953ba4ed2944261b5ac27d22c43f67e1`, structural test `ab0c5b0f15d992e3dd1ad33703ef205502387283`, workflow `ff4c3bacf3167595f54af43ea97e4f2dbc1fbd1f`. Local git clone unavailable (github.com DNS resolution failure); static assertions passed in connector readback. Exact-head CI not yet exposed by push-only connector; do not merge without verified PR CI and post-merge main/Pages. Hourly task remains enabled; historical 166-gap/95-partial baseline unchanged.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-GRAPH-PALETTE-VALIDITY release QA | 2D/3D numeric templates enabled, Equation-only symbols disabled in Graph but enabled in Equation, focus/caret, responsive Chromium, exact-head PR/main/Pages green. | DEV COMMITTED / QA PENDING |
+| 2 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Preview row/column count and schema before mutation, cancel rollback, invalid/large/Unicode input, mobile Chromium. | TODO |
+| 3 | P1-MATRIX-PSEUDOINVERSE-3X2 | Full/rank-deficient 3×2, four Moore–Penrose identities, least-norm reference, browser/mobile tests. | TODO |
+| 4 | P1-DATA-LIBRARY-LONG-SNIPPET-INSPECTION | Full long-code read-only preview, escaping, keyboard focus, no execution, 390/768/1280px. | TODO |
+| 5 | P1-DATA-CUSTOM-COMPOSITION-HARDENING | Negative/complex boundaries, custom-name collisions, error propagation, 40-depth guard and persistence. | TODO |
+
 ## 2026-10-28 22:12 CET — PR #71 nested custom spreadsheet composition released
 
 **Feature ledger: RELEASED FOR STATED SCOPE.** Data Tables evaluates nested custom numeric functions together with SUM/AVERAGE/AVG/MIN/MAX/COUNT/MEDIAN, supports either as inner or outer call, preserves lazy IF, validates argument count and finite outputs, and limits expansion to 40 passes. New structural `tests/test_sheet_custom_composition.py` and mandatory Chromium `tests/smoke_sheet_custom_composition.py` cover numeric oracles, nested composition, inactive IF branches, unknown/invalid calls, 41-level depth, workbook round-trip and 390/768/1280px layouts. Standalone `index.html` and `src/data-tables.js` parity verified. No eval/Function introduced.

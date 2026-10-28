@@ -1,7 +1,7 @@
-## In QA — Nested spreadsheet custom-function composition (2026-10-28)
+## Released — Nested spreadsheet custom-function composition (2026-10-28, PR #71)
 
 - Data Tables now evaluates innermost custom functions and built-in aggregates in a shared bounded loop. Expressions such as `=SUM(TWICE(2),TWICE(SUM(A1:A3)))` and `=TWICE(TWICE(3))` work when the user defines `TWICE(x)=2*x`; lazy `IF` remains intact. The evaluator rejects invalid argument counts, non-finite results and excessive nesting without `eval` or `Function`.
-- Added structural and mandatory Chromium regression for numeric references, cross-nesting, lazy IF, unknown functions, invalid arity, 41-deep nesting, workbook persistence, UI and responsive layouts. **Not released until exact-head dev, PR, main Quality and Pages deployment gates succeed.**
+- Added structural and mandatory Chromium regression for numeric references, cross-nesting, lazy IF, unknown functions, invalid arity, 41-deep nesting, workbook persistence, UI and responsive layouts. **Released:** [PR #71 Quality 40768400816](https://github.com/saeedsai/ProMathStudio/actions/runs/40768400816), [main Quality 40768958629](https://github.com/saeedsai/ProMathStudio/actions/runs/40768958629), [dev Quality 40768995115](https://github.com/saeedsai/ProMathStudio/actions/runs/40768995115) and [Pages 40768957690](https://github.com/saeedsai/ProMathStudio/actions/runs/40768957690) all succeeded.
 
 ## Released — Real 2×2 Moore–Penrose pseudoinverse (2026-10-28, PR #70)
 

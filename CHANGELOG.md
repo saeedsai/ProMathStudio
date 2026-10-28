@@ -1,3 +1,8 @@
+## Unreleased — Real 2×2 Moore–Penrose pseudoinverse (2026-10-28)
+
+- Added a Pseudoinverse button to the matrix calculator for invertible, rank-deficient, and zero 2×2 real matrices, with SVD-relative singular-value cutoff, numerical rank, Moore–Penrose residual diagnostics, and Equation Editor transfer. The existing inverse, SVD and other matrix operations are preserved.
+- Added structural and mandatory Chromium numerical/UI/mobile regressions, including singular, zero, scaled, invalid and editor-transfer cases. **Implemented on dev; not released until exact-head CI, PR checks, main Quality and Pages deployment are verified.**
+
 ## Unreleased — Accessible saved-snippet import preview keyboard cancellation (2026-10-28)
 
 - Importing a saved snippet JSON file moves keyboard focus into its review preview. Escape dismisses the preview without writing to saved snippets and returns focus to the Import button; the existing Cancel button remains available.

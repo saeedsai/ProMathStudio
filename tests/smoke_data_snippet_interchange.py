@@ -48,6 +48,9 @@ def main():
                                             'buffer': json.dumps(payload).encode('utf-8')})
                 # File.text() is async; wait for the handler's finally reset before asserting.
                 page.wait_for_function("() => document.querySelector('#dt-snippet-file').value === ''")
+                # Imports now require explicit confirmation; invalid/conflicting files remain uncommitted.
+                if page.locator('#dt-snippet-preview').is_visible() and page.locator('#dt-snippet-apply').is_enabled():
+                    page.locator('#dt-snippet-apply').click()
 
             def stored():
                 return page.evaluate("JSON.parse(localStorage.getItem('promathstudio-data-snippets-v1') || '[]')")

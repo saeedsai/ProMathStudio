@@ -57,6 +57,11 @@
       <div class="data-toolbar"><button id="dt-snippet-export" type="button" class="secondary">Export snippets JSON</button><button id="dt-snippet-import" type="button" class="secondary">Import snippets JSON</button><input id="dt-snippet-file" type="file" accept=".json,application/json" hidden aria-label="Choose saved snippets JSON file"></div>
       <div id="dt-snippet-preview" hidden tabindex="-1" role="group" aria-label="Review snippet import"><p id="dt-snippet-preview-summary" role="status"></p><ul id="dt-snippet-preview-list" aria-label="Snippets in import" style="max-height:240px;overflow:auto;overflow-wrap:anywhere"></ul><label id="dt-snippet-conflict-label" hidden><input id="dt-snippet-skip-conflicts" type="checkbox"> Skip conflicting names and keep saved versions</label><button id="dt-snippet-apply" class="primary" type="button">Apply import</button><button id="dt-snippet-cancel" class="secondary" type="button">Cancel import</button></div>
       <div id="dt-library-results" aria-live="polite"></div>
+      <section id="dt-snippet-inspect" hidden role="region" aria-label="Full saved snippet preview">
+        <p id="dt-snippet-inspect-label"></p>
+        <textarea id="dt-snippet-inspect-code" readonly rows="12" aria-label="Read-only full snippet source" style="display:block;box-sizing:border-box;width:100%;max-width:100%;font-family:monospace;white-space:pre;overflow:auto"></textarea>
+        <button id="dt-snippet-inspect-close" type="button" class="secondary">Close snippet preview</button>
+      </section>
       <p id="dt-library-message" role="status" class="graph-data-muted">Select a spreadsheet cell or use the Python editor before inserting.</p>
     </details>
     <p class="graph-data-muted">Select a cell to edit. Formulas begin with <code>=</code>; examples: <code>=A1*B1</code>, <code>=SUM(B1:B4)</code>, <code>=AVERAGE(A1:A9)</code>, <code>=IF(A1&gt;1,B1,0)</code>, <code>=Data2!A1</code>. Row 1 is the first data row; column names are displayed separately.</p>
@@ -258,13 +263,31 @@
       lastLibraryCell={id:active()?.id,r:Number(event.target.dataset.row),c:Number(event.target.dataset.col)};
     }
   });
+  // Inspection is read-only and never inserts or executes a saved snippet.
+  let inspectReturnFocus=null;
+  function closeSnippetInspection(){
+    const preview=$('dt-snippet-inspect');
+    if(preview.hidden)return;
+    preview.hidden=true;
+    $('dt-snippet-inspect-code').value='';
+    const target=inspectReturnFocus;
+    inspectReturnFocus=null;
+    if(target?.isConnected)target.focus();else $('dt-library-search').focus();
+  }
+  $('dt-snippet-inspect-close').addEventListener('click',closeSnippetInspection);
+  $('dt-snippet-inspect').addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&!$('dt-snippet-inspect').hidden){
+      event.preventDefault();event.stopPropagation();closeSnippetInspection();
+    }
+  });
   function renderDataLibrary(){
     const query=$('dt-library-search').value.trim().toLowerCase();
     const category=$('dt-library-category').value;
     const root=$('dt-library-results');root.replaceChildren();
     for(const entry of dataLibrary.concat(customDataSnippets).filter(e=>(!category||e.kind===category)&&(e.name+' '+e.kind+' '+e.help).toLowerCase().includes(query))){
       const item=el('div',{class:'data-toolbar'});
-      const description=el('span',{},entry.kind+' · '+entry.name+' — '+entry.help+' Example: '+entry.sample);
+      const summary=entry.custom&&entry.sample.length>120?entry.sample.slice(0,120)+'…':entry.sample;
+      const description=el('span',{},entry.kind+' · '+entry.name+' — '+entry.help+' Example: '+summary);
       const insert=el('button',{type:'button',class:'secondary','aria-label':(entry.kind==='Operation'?'Choose ':'Insert ')+entry.name},entry.kind==='Operation'?'Choose':'Insert');
       insert.addEventListener('click',()=>{
         const message=$('dt-library-message');
@@ -333,7 +356,15 @@
           renderDataLibrary();
           $('dt-library-message').textContent='Deleted '+entry.name+'.';
         });
-        item.append(edit,remove);
+        const inspect=el('button',{type:'button',class:'secondary','aria-label':'View full snippet '+entry.name},'View full');
+        inspect.addEventListener('click',()=>{
+          inspectReturnFocus=inspect;
+          $('dt-snippet-inspect-label').textContent=entry.kind+' snippet: '+entry.name+' ('+entry.sample.length+' characters)';
+          $('dt-snippet-inspect-code').value=entry.sample;
+          $('dt-snippet-inspect').hidden=false;
+          $('dt-snippet-inspect-code').focus();
+        });
+        item.append(inspect,edit,remove);
       }
       root.append(item);
     }

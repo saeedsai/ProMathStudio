@@ -1,6 +1,6 @@
-## Unreleased — Indexed Data Tables JOIN ordering and bounded output (2026-10-28)
+## Released — Indexed Data Tables JOIN ordering and bounded output (2026-10-28, PR #50)
 
-- Replaced quadratic nested-loop equality JOIN with indexed right-hand key lookup while retaining duplicate-key Cartesian matches, empty-key matching, original left/right row ordering, and INNER/LEFT/RIGHT/FULL semantics. Rejects invalid join keys and oversize outputs before creating any new table. Added dedicated Playwright reference/negative/2,500-row/browser/mobile regression to mandatory Quality. Source and standalone index synchronized; exact dev/PR/main Quality and Pages gates pending.
+- Replaced quadratic nested-loop equality JOIN with indexed right-hand key lookup while retaining duplicate-key Cartesian matches, empty-key matching, original left/right row ordering, and INNER/LEFT/RIGHT/FULL semantics. Rejects invalid join keys and oversize outputs before creating any new table. Added dedicated Playwright reference/negative/2,500-row/browser/mobile regression to mandatory Quality. Source and standalone index synchronized. Exact dev Quality 40630778150, PR Quality 40631064272, main Quality 40631391132 and Pages 40631391048 passed; merged via [PR #50](https://github.com/saeedsai/ProMathStudio/pull/50) to `main=97cd999b969feef6cbc83043e48befbb9b05ae72`. Hosted interactive QA unavailable; broader Data Tables and inventory gaps remain open.
 
 ## Released — Data Tables quoted clipboard TSV round-trip (2026-10-28, PR #48)
 

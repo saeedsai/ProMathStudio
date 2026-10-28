@@ -73,6 +73,11 @@ def main():
                     snippet('Gamma', sample='=MEDIAN(A1:A5)')])
             assert '2 new' in summary.inner_text()
             assert '1 name conflicts' in summary.inner_text()
+            preview_entries = page.locator('#dt-snippet-preview-list li')
+            assert preview_entries.count() == 3
+            assert 'Alpha (Formula)' in preview_entries.nth(0).inner_text()
+            assert 'name conflict' in preview_entries.nth(0).inner_text()
+            assert 'Beta (Python)' in preview_entries.nth(1).inner_text()
             assert apply.is_disabled()
             assert stored() == original
             skip.check()

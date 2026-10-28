@@ -31,7 +31,9 @@ class DataSnippetInterchangeTests(unittest.TestCase):
         segment = SOURCE.split("// Versioned, data-only interchange.", 1)[1].split(
             "$('dt-snippet-save').addEventListener", 1
         )[0]
-        self.assertIn("persistDataSnippets(next)", segment)
+        self.assertIn("persistDataSnippets(plan.next)", segment)
+        self.assertIn("snapshot!==JSON.stringify(customDataSnippets)", segment)
+        self.assertIn("plan.conflicts.length&&!snippetSkipConflicts.checked", segment)
         self.assertIn("renderDataLibrary()", segment)
         self.assertNotIn("eval(", segment)
         self.assertNotIn("new Function(", segment)

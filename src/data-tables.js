@@ -55,6 +55,7 @@
       <input id="dt-library-search" type="search" placeholder="SUM, IF, filter, group..." autocomplete="off">
       <div class="data-toolbar"><label>Snippet name<input id="dt-snippet-name" maxlength="60" placeholder="My formula"></label><label>Type<select id="dt-snippet-kind"><option>Formula</option><option>Python</option></select></label><label>Snippet<textarea id="dt-snippet-code" rows="2" maxlength="8000" placeholder="=SUM(A1:A5)"></textarea></label><button id="dt-snippet-save" type="button" class="secondary">Save snippet</button></div>
       <div class="data-toolbar"><button id="dt-snippet-export" type="button" class="secondary">Export snippets JSON</button><button id="dt-snippet-import" type="button" class="secondary">Import snippets JSON</button><input id="dt-snippet-file" type="file" accept=".json,application/json" hidden aria-label="Choose saved snippets JSON file"></div>
+      <div id="dt-snippet-preview" hidden role="group" aria-label="Review snippet import"><p id="dt-snippet-preview-summary" role="status"></p><ul id="dt-snippet-preview-list" aria-label="Snippets in import" style="max-height:240px;overflow:auto;overflow-wrap:anywhere"></ul><label id="dt-snippet-conflict-label" hidden><input id="dt-snippet-skip-conflicts" type="checkbox"> Skip conflicting names and keep saved versions</label><button id="dt-snippet-apply" class="primary" type="button">Apply import</button><button id="dt-snippet-cancel" class="secondary" type="button">Cancel import</button></div>
       <div id="dt-library-results" aria-live="polite"></div>
       <p id="dt-library-message" role="status" class="graph-data-muted">Select a spreadsheet cell or use the Python editor before inserting.</p>
     </details>
@@ -116,10 +117,66 @@
     setTimeout(()=>URL.revokeObjectURL(url),1000);
     $('dt-library-message').textContent='Exported '+payload.snippets.length+' saved snippets as JSON.';
   });
+  // Import is a two-phase transaction: validate and preview without touching storage.
+  // Conflicting saved names are never overwritten; users may explicitly skip them.
+  let pendingSnippetImport=null;
+  const snippetPreview=$('dt-snippet-preview');
+  const snippetSkipConflicts=$('dt-snippet-skip-conflicts');
+  function closeSnippetPreview(){
+    pendingSnippetImport=null;
+    snippetPreview.hidden=true;
+    $('dt-snippet-conflict-label').hidden=true;
+    snippetSkipConflicts.checked=false;
+    $('dt-snippet-apply').disabled=false;
+  }
+  function planSnippetImport(imported){
+    const next=customDataSnippets.slice(),conflicts=[];
+    let added=0,unchanged=0;
+    for(const entry of imported){
+      const existing=next.find(e=>e.name.toLowerCase()===entry.name.toLowerCase());
+      if(existing){
+        if(existing.kind!==entry.kind||existing.sample!==entry.sample)conflicts.push(entry.name);
+        else unchanged++;
+      }else{
+        if(next.length>=40)throw Error('Maximum 40 saved snippets; import not applied.');
+        next.push(entry);added++;
+      }
+    }
+    return {next,added,unchanged,conflicts};
+  }
   $('dt-snippet-import').addEventListener('click',()=>$('dt-snippet-file').click());
+  $('dt-snippet-cancel').addEventListener('click',()=>{
+    closeSnippetPreview();
+    $('dt-library-message').textContent='Snippet import canceled; saved snippets unchanged.';
+    $('dt-snippet-import').focus();
+  });
+  snippetSkipConflicts.addEventListener('change',()=>{
+    $('dt-snippet-apply').disabled=!!pendingSnippetImport?.plan.conflicts.length&&!snippetSkipConflicts.checked;
+  });
+  $('dt-snippet-apply').addEventListener('click',()=>{
+    if(!pendingSnippetImport)return;
+    const message=$('dt-library-message');
+    try{
+      const {plan,snapshot}=pendingSnippetImport;
+      if(snapshot!==JSON.stringify(customDataSnippets))
+        throw Error('Saved snippets changed during preview; choose the file again.');
+      if(plan.conflicts.length&&!snippetSkipConflicts.checked)
+        throw Error('Name conflict: select Skip conflicting names or cancel.');
+      if(plan.added&&!persistDataSnippets(plan.next))
+        throw Error('Storage unavailable; import not applied.');
+      renderDataLibrary();
+      message.textContent='Imported '+plan.added+' snippets; '+plan.unchanged+' already saved.'+
+        (plan.conflicts.length?' '+plan.conflicts.length+' conflicts skipped.':'');
+      closeSnippetPreview();
+    }catch(error){
+      closeSnippetPreview();
+      message.textContent='Snippet import rejected: '+(error instanceof Error?error.message:'Import failed');
+    }
+  });
   $('dt-snippet-file').addEventListener('change',async event=>{
     const file=event.target.files?.[0],message=$('dt-library-message');
     if(!file)return;
+    closeSnippetPreview();
     try{
       if(file.size>MAX_SNIPPET_FILE_BYTES)throw Error('Snippet file exceeds 400 KB.');
       const payload=JSON.parse(await file.text());
@@ -141,23 +198,28 @@
         imported.push({name:entry.name,kind:entry.kind,sample:entry.sample,
           help:'Saved user snippet',custom:true});
       }
-      const next=customDataSnippets.slice();
-      let added=0,unchanged=0;
+      const plan=planSnippetImport(imported);
+      pendingSnippetImport={plan,snapshot:JSON.stringify(customDataSnippets)};
+      $('dt-snippet-preview-summary').textContent='Preview: '+plan.added+' new, '+
+        plan.unchanged+' already saved, '+plan.conflicts.length+' name conflicts.'+
+        (plan.conflicts.length?' Name conflict: '+plan.conflicts.join(', ')+'.':'');
+      const previewList=$('dt-snippet-preview-list');
+      previewList.replaceChildren();
       for(const entry of imported){
-        const existing=next.find(e=>e.name.toLowerCase()===entry.name.toLowerCase());
-        if(existing){
-          if(existing.kind!==entry.kind||existing.sample!==entry.sample)
-            throw Error('Name conflict: '+entry.name+'. Rename before importing.');
-          unchanged++;
-        }else{
-          if(next.length>=40)throw Error('Maximum 40 saved snippets; import not applied.');
-          next.push(entry);added++;
-        }
+        const existing=customDataSnippets.find(e=>e.name.toLowerCase()===entry.name.toLowerCase());
+        const state=!existing?'new':existing.kind===entry.kind&&existing.sample===entry.sample?
+          'already saved':'name conflict — saved version kept';
+        const item=document.createElement('li');
+        // Use textContent: imported names and code must never become executable markup.
+        item.textContent=entry.name+' ('+entry.kind+') — '+state+': '+entry.sample.slice(0,120);
+        previewList.append(item);
       }
-      if(added&&!persistDataSnippets(next))throw Error('Storage unavailable; import not applied.');
-      renderDataLibrary();
-      message.textContent='Imported '+added+' snippets; '+unchanged+' already saved.';
+      $('dt-snippet-conflict-label').hidden=!plan.conflicts.length;
+      $('dt-snippet-apply').disabled=!!plan.conflicts.length;
+      snippetPreview.hidden=false;
+      message.textContent='Review the import preview before applying. No snippets have changed.';
     }catch(error){
+      closeSnippetPreview();
       message.textContent='Snippet import rejected: '+(error instanceof Error?error.message:'Invalid JSON file');
     }finally{event.target.value='';}
   });

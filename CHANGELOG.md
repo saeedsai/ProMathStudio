@@ -1,8 +1,14 @@
-## In development — Graph Symbols caret-aware insertion (2026-10-28)
+## Unreleased — Saved-snippet JSON import preview and conflict-safe confirmation (2026-10-28)
+
+- Saved Data Tables snippet JSON imports now show a review summary plus a safely escaped, scrollable list of names, types, and code excerpts before any localStorage mutation. Users can **Apply import** or **Cancel import**; name conflicts disable Apply until **Skip conflicting names and keep saved versions** is explicitly selected. Existing snippets are never silently overwritten, identical entries remain idempotent, and Python snippets are never executed on import.
+- A preview is invalidated if the local library changes before confirmation. File/schema/40-entry validation, atomic storage failure rollback, and existing export behavior remain in place.
+- Added mandatory Chromium `tests/smoke_data_snippet_preview.py` and updated the existing interchange regression for confirmation semantics. Release requires exact-head dev Quality, PR Quality, main Quality and GitHub Pages verification; do not treat this changelog entry as deployed.
+
+## Released — Graph Symbols caret-aware insertion (2026-10-28, PR #66)
 
 - Unified the Symbols palette insertion path across Equation, Calculator and Graphs, removing duplicated graph/calculator insertion logic. 2D/3D graph function templates such as `sin(x)`, `cos(x)` and `sqrt(x)` select the editable `x` placeholder; replacing a selection inserts at the caret and restores editor focus.
 - Graph symbol edits remain drafts until **Plot** is clicked and no longer trigger an unrelated Equation preview refresh. Existing 2D/3D draft isolation, math library, symbolic solver and calculator features are preserved.
-- Added focused structural `tests/test_graph_symbol_caret.py` and mandatory Chromium `tests/smoke_graph_symbol_caret.py` for selection, focus, 2D/3D drafts, no auto-plot and 390/768/1280px layouts. **Release pending exact-head CI, PR, main QA and Pages deployment.**
+- Added focused structural `tests/test_graph_symbol_caret.py` and mandatory Chromium `tests/smoke_graph_symbol_caret.py` for selection, focus, 2D/3D drafts, no auto-plot and 390/768/1280px layouts. Released via [PR #66](https://github.com/saeedsai/ProMathStudio/pull/66). Exact-head [dev Quality 40730918150](https://github.com/saeedsai/ProMathStudio/actions/runs/40730918150), [PR Quality 40731721171](https://github.com/saeedsai/ProMathStudio/actions/runs/40731721171) and [main Quality 40732325880](https://github.com/saeedsai/ProMathStudio/actions/runs/40732325880) all passed (79 steps); [Pages deployment 40732326236](https://github.com/saeedsai/ProMathStudio/actions/runs/40732326236) succeeded.
 
 ## Released — Equation CAS accessible result announcements and keyboard focus (2026-10-28, PR #65)
 

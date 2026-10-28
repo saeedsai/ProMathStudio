@@ -48,6 +48,9 @@ def main():
                                             'buffer': json.dumps(payload).encode('utf-8')})
                 # File.text() is async; wait for the handler's finally reset before asserting.
                 page.wait_for_function("() => document.querySelector('#dt-snippet-file').value === ''")
+                # Imports now require explicit confirmation; invalid/conflicting files remain uncommitted.
+                if page.locator('#dt-snippet-preview').is_visible() and page.locator('#dt-snippet-apply').is_enabled():
+                    page.locator('#dt-snippet-apply').click()
 
             def stored():
                 return page.evaluate("JSON.parse(localStorage.getItem('promathstudio-data-snippets-v1') || '[]')")
@@ -78,7 +81,8 @@ def main():
 
             conflict = dict(payload, snippets=[dict(payload['snippets'][0], sample='=MAX(A1:A3)')])
             import_payload(conflict)
-            assert 'Name conflict' in status.inner_text()
+            assert 'Name conflict' in page.locator('#dt-snippet-preview-summary').inner_text()
+            assert page.locator('#dt-snippet-apply').is_disabled()
             assert stored() == original
 
             for bad in (

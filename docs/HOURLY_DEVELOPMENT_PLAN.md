@@ -1,3 +1,17 @@
+## 2026-10-28 20:29 CET — P1-DATA-SNIPPET-PREVIEW-KEYBOARD QA enhancement checkpoint
+
+**Feature ledger: IMPLEMENTED ON DEV / QA INCOMPLETE.** Fixed keyboard accessibility gap in the saved-snippet import review: the preview container is now programmatically focusable (`tabindex=-1`) and receives focus when a file is accepted, so Escape works immediately without first clicking a preview control. Escape closes the preview without persisting data and restores focus to Import. Existing Cancel button remains. Extended mandatory `tests/smoke_data_snippet_preview.py` to exercise focus, Escape, no storage mutation and 390/768/1280px widths, and added structural `tests/test_snippet_preview_escape.py::test_preview_is_focusable_and_receives_focus_on_open`. Synchronized `src/data-tables.js` with standalone `index.html` (readback parity confirmed). Local GitHub clone failed with `Could not resolve host: github.com`; full local unit and Chromium regressions cannot run from this environment. Exact-head dev push Quality cannot be observed with the available connector (PR-run lookup only), so do not merge until adequate CI evidence. Main at checkpoint `f6a13bbe7daa8f10bb39bb20b2990a4291767f61`. Preserve all concurrent work; do not bypass checks or disable hourly development.
+
+### NEXT FIVE — explicit acceptance tests
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | Snippet keyboard preview QA and release | New structural + Chromium Escape/focus/storage/mobile tests, exact candidate PR Quality green, main Quality and Pages green; no forced merge. | IMPLEMENTED / CI PENDING |
+| 2 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Named function composition inside SUM/IF, valid numeric reference oracles, unknown names, recursion bounds, browser and unit regression. | TODO |
+| 3 | P0-MATRIX-PSEUDOINVERSE-2X2 | Moore–Penrose identities, singular/zero/scaled 2x2, least-norm solve, numeric and UI tests. | TODO |
+| 4 | P1-GRAPH-PALETTE-VALIDITY | 2D/3D executable symbols distinguished from typesetting-only, caret insertion, keyboard/mobile tests. | TODO |
+| 5 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Row/column/schema preview, cancel rollback, invalid/malformed file, Unicode, 390/768/1280px. | TODO |
+
 ## 2026-10-28 20:24 CET — P1-DATA-SNIPPET-PREVIEW-ESCAPE checkpoint
 
 **DEV COMMITTED / NOT RELEASED.** Added Escape-to-cancel for the saved-snippet import preview; keyboard dismissal closes the preview, returns focus to Import and does not invoke storage persistence. Synchronized standalone HTML with `src/data-tables.js` and added focused `tests/test_snippet_preview_escape.py` covering cancellation and byte-for-byte parity. GitHub readback confirmed module/HTML parity. Attempted local unit execution, but GitHub clone failed due to DNS resolution; Chromium and exact-head Quality are not yet verified. **Do not merge until green checks.** Current main at checkpoint `f6a13bbe7daa8f10bb39bb20b2990a4291767f61`; concurrent hourly work may advance dev. Recurring task stays enabled.

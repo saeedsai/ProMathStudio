@@ -1,3 +1,17 @@
+## 2026-10-29 00:05 CET — PR #73 merged; post-merge Pages verification pending
+
+**Feature ledger: MERGED TO MAIN / POST-MERGE VERIFICATION PENDING.** Full saved-snippet inspection for 8,000-character Formula/Python code, read-only safe text rendering, compact catalog summaries, Escape/Close focus return, no automatic execution or storage changes. Source and standalone parity checked. New structural tests and mandatory Chromium passed in [PR #73 Quality 40784222466](https://github.com/saeedsai/ProMathStudio/actions/runs/40784222466), **86/86 workflow steps**, including 390/768/1280px browser checks. Seven expected PR files, mergeability clean, exact-head candidate `b615d9b8ac72e2a90674848a18b0c83bf0b4f2ff` reviewed. Ordinary SHA-checked [PR #73](https://github.com/saeedsai/ProMathStudio/pull/73) merged to `main=a226b3be31d80b90ad67399c178d8bb7d0fc5cf1`; `dev` fast-forwarded without force. **Main Quality and Pages deployment could not be independently verified:** available GitHub workflow-run lookup only returns pull-request-triggered runs, commit statuses empty, public GitHub fetch unavailable. Do not mark Released until evidence of successful post-merge main Quality and Pages. Local clone remains blocked by DNS; hosted interactive verification unavailable. Existing branch protection unconfigured; no protections bypassed. No stale files/branches removed without evidence. Hourly development remains enabled; historical 166-gap/95-partial baseline active.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests / dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-LONG-SNIPPET-INSPECTION post-merge QA | Verify main Quality and Pages for merge `a226b3be`; hosted keyboard/mobile path when available. | MERGED / DEPLOYMENT UNVERIFIED |
+| 2 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Preview row/column count and schema before mutation, cancel with zero sheets created, malformed/large/Unicode; update legacy importer tests. | TODO |
+| 3 | P1-MATRIX-PSEUDOINVERSE-3X2 | Full-rank/rank-deficient real 3×2, four Moore–Penrose identities, least-norm reference, mobile UI. | TODO |
+| 4 | P1-DATA-CUSTOM-COMPOSITION-HARDENING | Numeric error propagation, custom-name collisions, complex/nonfinite guards, 40-depth and persistence. | TODO |
+| 5 | P1-GRAPH-PALETTE-VALIDITY-EXPANSION | Additional executable graph templates, Equation-only symbols, caret/2D/3D/browser oracles. | TODO |
+
 ## 2026-10-28 23:56 CET — P1-DATA-LIBRARY-LONG-SNIPPET-INSPECTION implemented on dev
 
 **Feature ledger: IMPLEMENTED ON DEV / QA AND DEPLOYMENT PENDING.** Chose a bounded, independently testable usability fix while Data Tables import preview remains a larger multi-test migration. Saved Formula/Python snippets now have a read-only full-source preview (up to 8,000 characters), with safe DOM text/value insertion, Escape/Close dismissal, focus return, no execution/storage mutation and compact 120-character catalog summaries. Added structural `tests/test_data_snippet_inspection.py`, Chromium `tests/smoke_data_snippet_inspection.py`, required Quality workflow step and standalone source parity. The existing Import preview and prior Data Tables/Graph functionality are unchanged.

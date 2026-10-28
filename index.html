@@ -3673,6 +3673,7 @@ self.onmessage=async ({data})=>{
       <select id="dt-library-category"><option value="">All</option><option value="Formula">Formulas</option><option value="Python">Python recipes</option><option value="Operation">Table operations</option></select>
       <input id="dt-library-search" type="search" placeholder="SUM, IF, filter, group..." autocomplete="off">
       <div class="data-toolbar"><label>Snippet name<input id="dt-snippet-name" maxlength="60" placeholder="My formula"></label><label>Type<select id="dt-snippet-kind"><option>Formula</option><option>Python</option></select></label><label>Snippet<textarea id="dt-snippet-code" rows="2" maxlength="8000" placeholder="=SUM(A1:A5)"></textarea></label><button id="dt-snippet-save" type="button" class="secondary">Save snippet</button></div>
+      <div class="data-toolbar"><button id="dt-snippet-export" type="button" class="secondary">Export snippets JSON</button><button id="dt-snippet-import" type="button" class="secondary">Import snippets JSON</button><input id="dt-snippet-file" type="file" accept=".json,application/json" hidden aria-label="Choose saved snippets JSON file"></div>
       <div id="dt-library-results" aria-live="polite"></div>
       <p id="dt-library-message" role="status" class="graph-data-muted">Select a spreadsheet cell or use the Python editor before inserting.</p>
     </details>
@@ -3720,6 +3721,64 @@ self.onmessage=async ({data})=>{
     customDataSnippets=next;
     return true;
   }
+  // Versioned, data-only interchange. Existing localStorage format stays unchanged.
+  const SNIPPET_FILE_FORMAT='promathstudio-snippets', SNIPPET_FILE_VERSION=1;
+  const MAX_SNIPPET_FILE_BYTES=400000;
+  $('dt-snippet-export').addEventListener('click',()=>{
+    const payload={format:SNIPPET_FILE_FORMAT,version:SNIPPET_FILE_VERSION,
+      snippets:customDataSnippets.map(({name,kind,sample})=>({name,kind,sample}))};
+    const blob=new Blob([JSON.stringify(payload,null,2)+'\n'],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const link=el('a',{href:url,download:'promathstudio-snippets.json'});
+    document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    $('dt-library-message').textContent='Exported '+payload.snippets.length+' saved snippets as JSON.';
+  });
+  $('dt-snippet-import').addEventListener('click',()=>$('dt-snippet-file').click());
+  $('dt-snippet-file').addEventListener('change',async event=>{
+    const file=event.target.files?.[0],message=$('dt-library-message');
+    if(!file)return;
+    try{
+      if(file.size>MAX_SNIPPET_FILE_BYTES)throw Error('Snippet file exceeds 400 KB.');
+      const payload=JSON.parse(await file.text());
+      if(!payload||Array.isArray(payload)||payload.format!==SNIPPET_FILE_FORMAT||
+         payload.version!==SNIPPET_FILE_VERSION||!Array.isArray(payload.snippets)||
+         payload.snippets.length>40)throw Error('Unsupported snippet JSON format or version.');
+      const imported=[],seen=new Set();
+      for(const entry of payload.snippets){
+        if(!entry||Array.isArray(entry)||typeof entry.name!=='string'||
+           !entry.name.trim()||entry.name!==entry.name.trim()||entry.name.length>60||
+           !['Formula','Python'].includes(entry.kind)||typeof entry.sample!=='string'||
+           !entry.sample.trim()||entry.sample.length>8000||
+           (entry.kind==='Formula'&&!entry.sample.startsWith('='))){
+          throw Error('Invalid snippet name, type or code.');
+        }
+        const key=entry.name.toLowerCase();
+        if(seen.has(key))throw Error('Duplicate snippet names in import.');
+        seen.add(key);
+        imported.push({name:entry.name,kind:entry.kind,sample:entry.sample,
+          help:'Saved user snippet',custom:true});
+      }
+      const next=customDataSnippets.slice();
+      let added=0,unchanged=0;
+      for(const entry of imported){
+        const existing=next.find(e=>e.name.toLowerCase()===entry.name.toLowerCase());
+        if(existing){
+          if(existing.kind!==entry.kind||existing.sample!==entry.sample)
+            throw Error('Name conflict: '+entry.name+'. Rename before importing.');
+          unchanged++;
+        }else{
+          if(next.length>=40)throw Error('Maximum 40 saved snippets; import not applied.');
+          next.push(entry);added++;
+        }
+      }
+      if(added&&!persistDataSnippets(next))throw Error('Storage unavailable; import not applied.');
+      renderDataLibrary();
+      message.textContent='Imported '+added+' snippets; '+unchanged+' already saved.';
+    }catch(error){
+      message.textContent='Snippet import rejected: '+(error instanceof Error?error.message:'Invalid JSON file');
+    }finally{event.target.value='';}
+  });
   $('dt-snippet-save').addEventListener('click',()=>{
     const name=$('dt-snippet-name').value.trim(),kind=$('dt-snippet-kind').value,sample=$('dt-snippet-code').value;
     const message=$('dt-library-message');

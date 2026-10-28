@@ -1,10 +1,10 @@
-## Unreleased — keyboard workspace navigation and live status (2026-10-28)
+## Released — keyboard workspace navigation and live status (2026-10-28, PR #42)
 
-- ArrowLeft/ArrowRight/Home/End move visible keyboard focus among all five workspace buttons, including Data Tables; Enter/Space still activate, with no accidental mode change from arrows. Added high-contrast focus outline and polite workspace subtitle announcement. Preserves graph drafts and native tab order. New Playwright regression tests focus wrap, active route, activation, responsive widths and runtime errors. Exact dev/PR/main/Pages release checks pending; no full WCAG certification claimed.
+- ArrowLeft/ArrowRight/Home/End move visible keyboard focus among all five workspace buttons, including Data Tables; Enter/Space still activate, with no accidental mode change from arrows. Added high-contrast focus outline and polite workspace subtitle announcement. Preserves graph drafts and native tab order. New Playwright regression tests focus wrap, active route, activation, responsive widths and runtime errors. Dev Quality 40617989352, PR Quality 40618289024, main Quality 40618678114, Pages 40618678231 and synchronized dev Quality 40618700413 all succeeded for merge `70e7fdedc120a817724c72ae0f0068663a428f41`. Hosted interactive Pages smoke unavailable; no full WCAG certification claimed.
 
-## Unreleased — Data Tables action-menu keyboard and dismissal QA (2026-10-28)
+## Released — Data Tables action-menu keyboard and dismissal QA (2026-10-28, PR #41)
 
-- Improved the existing Table/Filter/Combine/Files/Python menus: visible keyboard focus, Escape dismissal with focus returned to the active summary, and outside-pointer dismissal. Preserved existing input drafts, menu quick buttons, action handlers and workbook data. Added dedicated Playwright regression for keyboard, menu exclusivity, draft retention, sort, CSV download, Python and mobile; wired it into mandatory Quality. Exact dev/PR/main/Pages verification pending; this is not a general accessibility certification.
+- Improved the existing Table/Filter/Combine/Files/Python menus: visible keyboard focus, Escape dismissal with focus returned to the active summary, and outside-pointer dismissal. Preserved existing input drafts, menu quick buttons, action handlers and workbook data. Added dedicated Playwright regression for keyboard, menu exclusivity, draft retention, sort, CSV download, Python and mobile; wired it into mandatory Quality. Dev Quality 40612392877, PR Quality 40612788052, main Quality 40613229652, Pages 40613229183 and synchronized dev Quality 40613655403 succeeded for merge `62074700d407f99fa527f474c265e123024d81f7`. This is not a general accessibility certification.
 
 ## Released — Graphs action grouping and panel QA (2026-10-28, PR #39)
 

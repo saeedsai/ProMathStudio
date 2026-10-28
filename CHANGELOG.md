@@ -1,3 +1,9 @@
+## In QA — Equation CAS accessible result announcements and keyboard focus (2026-10-28)
+
+- Added one concise, screen-reader-accessible live summary for symbolic success, errors and worker progress, including the first result. The full MathML solution region remains navigable without duplicating live announcements.
+- Kept the **Execute** button keyboard-focusable while a SymPy job is running using `aria-disabled` and the existing guarded busy state; no duplicate submissions or solver capability changes.
+- Added mandatory Chromium `tests/smoke_equation_accessibility.py` for offline answers, invalid input, delayed worker reentry/focus, task picker focus and 390/768/1280px layouts. Release pending exact-head CI, PR, main Quality and Pages verification.
+
 ## Released — Nested spreadsheet aggregates (2026-10-28, PR #64)
 
 - Fixed Data Tables formulas that combine aggregate functions, such as `=SUM(MEDIAN(A1:A5),COUNT(A1:A5))`. Aggregations now resolve innermost-first with a bounded 40-pass nesting limit, preserving existing `IF` lazy evaluation, range/reference checks, cycle detection, and the no-`eval` token grammar.

@@ -1,3 +1,17 @@
+## 2026-10-28 16:57 CET — P1-UI-EQUATION-ACCESSIBILITY implemented on dev (QA/release pending)
+
+**Feature ledger: IMPLEMENTED ON DEV; NOT YET RELEASED.** Equation CAS has a single visually hidden, atomic polite live region that announces loading, a concise first symbolic result and errors. Removed competing live announcements from the MathML result container and visual note. The Execute button remains keyboard-focusable while a worker is running, with `aria-disabled` plus existing `casBusy` reentry guard, avoiding duplicate jobs. The original math display, engine operations, notebook, export and task picker are retained. Added mandatory Chromium regression `tests/smoke_equation_accessibility.py` with offline success, empty input, slow mocked SymPy worker, duplicate Enter guard, task disclosure focus and 390/768/1280px checks. Exact-head CI, PR checks, main Quality and Pages deployment must be verified before marking Released. Local GitHub clone/browser unavailable because container DNS cannot resolve github.com. Historical 166-gap/95-partial audit remains frozen; hourly development remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-UI-EQUATION-ACCESSIBILITY release QA | Exact dev Quality, Chromium keyboard/worker/status/390-768-1280 tests, PR checks, main Quality, Pages. | DEV IMPLEMENTED / IN QA |
+| 2 | P1-GRAPH-SYMBOL-INPUT | Palette inserts into 2D/3D at caret without overwriting other draft or triggering redraw; browser regression. | TODO |
+| 3 | P1-DATA-LIBRARY-SNIPPET-UX | Preview/cancel JSON import, conflict decisions, 40-entry bound, atomic rollback, no Python auto-run; browser regression. | TODO |
+| 4 | P1-DATA-SINGLE-COLUMN-INTERCHANGE | Data Tables one-column CSV/TSV/JSON Unicode, multiline and formula round-trip; graph XY remains two-coordinate; negative tests. | TODO |
+| 5 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Bounded user-defined spreadsheet functions nested in SUM/IF; numeric oracle, recursion, invalid name, sandbox and browser tests. | TODO |
+
 ## 2026-10-28 16:19 CET — P1-DATA-FORMULA-NESTED-AGGREGATES RELEASED via PR #64
 
 **Feature ledger: RELEASED FOR STATED SCOPE.** Fixed nested spreadsheet aggregate parsing with iterative innermost-first scalar substitutions and a 40-pass `#LIMIT` guard. Retains no-`eval` arithmetic grammar, lazy `IF`, cross-sheet ranges, blank/text exclusion, `#REF!`, `#NUM!` and `#CYCLE`. Added searchable Nested aggregates formula example, standalone/source parity and mandatory Chromium `tests/smoke_sheet_nested_aggregates.py`. The first implementation used parenthesized intermediate numbers, which prevented the next outer aggregate pass from matching; repaired to scalar tokens before the final test run, with explicit negative-result and precedence assertions. Isolated V8 evaluation of the extracted actual formula implementation passed 10/10 numeric and failure-oracle cases; static source/standalone parity passed. Full local Chromium unavailable because container GitHub DNS prevents cloning.

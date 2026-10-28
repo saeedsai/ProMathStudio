@@ -1,3 +1,10 @@
+## In QA on dev — Unified Equation workstation (2026-10-28)
+
+- Combined the Equation Editor and Symbolic Solver into one **Equation** navigation tab. Retained live preview, math input, notebook, examples, CAS engine and symbolic operations, numerical methods, ODE initial values, assumptions, Python/SymPy code and exports. Legacy `mode('solver')` routes now activate Equation without creating a duplicate workspace.
+- Unified the progressive workspace task selector so numerical/ODE/assumptions tools remain discoverable; CAS operation controls remain available under the basic Equation task. Preserved task selection across workspace changes and mobile layout.
+- Added mandatory Chromium `tests/smoke_equation_combined.py` with CAS computation, task picker, notebook, responsive layout and legacy-route assertions; adapted existing navigation, task and Symbols browser regressions to the four-tab UI, preserving their functionality assertions.
+- CI initially failed because existing browser smoke expected the removed Solver tab ([run 40673846827](https://github.com/saeedsai/ProMathStudio/actions/runs/40673846827)); subsequent CI identified the modular/standalone workspace task source parity failure ([run 40677384808](https://github.com/saeedsai/ProMathStudio/actions/runs/40677384808)). Updated `src/workspace-tasks.js` to match the standalone `index.html` without weakening the source-consistency test. Full exact-head CI, PR checks and Pages deployment remain release gates.
+
 ## Released — Data Tables MEDIAN and bounded formula references (2026-10-28, PR #59)
 
 - Added `MEDIAN` to the searchable Functions & Code Library and offline spreadsheet evaluator: odd/even counts, multiple arguments, numeric ranges and quoted cross-table ranges. Ignores text/blank/whitespace cells; no numeric values returns `#NUM!`.

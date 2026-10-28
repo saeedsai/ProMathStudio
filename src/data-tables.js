@@ -45,6 +45,14 @@
       <button id="dt-sort" class="secondary" type="button">Sort table</button><button id="dt-clear-filter" class="secondary" type="button">Clear filter</button></div>
     <p id="dt-status" class="graph-data-muted" role="status">Start editing cells or import data.</p>
     <div class="table-zoom-toolbar"><label for="table-zoom">Table zoom <output id="table-zoom-value">100%</output></label><button type="button" id="table-zoom-out" class="secondary" title="Zoom out">−</button><input id="table-zoom" type="range" min="50" max="200" value="100" step="10"><button type="button" id="table-zoom-in" class="secondary" title="Zoom in">＋</button><button type="button" class="secondary" id="table-zoom-reset">100%</button></div><div class="dt-grid-scroll"><div id="table-zoom-content"><table class="dt-sheet" id="dt-sheet" aria-label="Editable spreadsheet"></table></div></div>
+    <details id="dt-code-library" class="dt-box"><summary>Functions &amp; Code Library</summary>
+      <label for="dt-library-search">Search formulas and Python recipes</label>
+      <label for="dt-library-category">Category</label>
+      <select id="dt-library-category"><option value="">All</option><option value="Formula">Formulas</option><option value="Python">Python recipes</option><option value="Operation">Table operations</option></select>
+      <input id="dt-library-search" type="search" placeholder="SUM, IF, filter, group..." autocomplete="off">
+      <div id="dt-library-results" aria-live="polite"></div>
+      <p id="dt-library-message" role="status" class="graph-data-muted">Select a spreadsheet cell or use the Python editor before inserting.</p>
+    </details>
     <p class="graph-data-muted">Select a cell to edit. Formulas begin with <code>=</code>; examples: <code>=A1*B1</code>, <code>=SUM(B1:B4)</code>, <code>=AVERAGE(A1:A9)</code>, <code>=IF(A1&gt;1,B1,0)</code>, <code>=Data2!A1</code>. Row 1 is the first data row; column names are displayed separately.</p>
     <section class="dt-box"><h3>Database operations</h3><div class="data-toolbar">
       <label>Left table<select id="dt-left"></select></label><label>Right table<select id="dt-right"></select></label>
@@ -56,6 +64,88 @@
       <button id="dt-export-csv" class="secondary" type="button">↓ Export CSV</button><button id="dt-export-json" class="secondary" type="button">↓ Export JSON</button>
       <button id="dt-send-graph" class="primary" type="button">↗ Show in graphs</button></div>
       <details id="dt-advanced"><summary>Advanced dataset preview / X, Y, Z mapping</summary></details></section></div>`;
+  // The library is a catalog, not an evaluator: insert only, never run code.
+  const dataLibrary = [
+    {name:'SUM',kind:'Formula',sample:'=SUM(A1:A5)',help:'Sum a numeric cell range.'},
+    {name:'AVERAGE',kind:'Formula',sample:'=AVERAGE(A1:A5)',help:'Average numeric cells.'},
+    {name:'MIN',kind:'Formula',sample:'=MIN(A1:A5)',help:'Smallest numeric value.'},
+    {name:'MAX',kind:'Formula',sample:'=MAX(A1:A5)',help:'Largest numeric value.'},
+    {name:'COUNT',kind:'Formula',sample:'=COUNT(A1:A5)',help:'Count numeric cells.'},
+    {name:'IF',kind:'Formula',sample:'=IF(A1>0,B1,0)',help:'Conditional formula.'},
+    {name:'Cross-table reference',kind:'Formula',sample:'=Data2!A1',help:'Reference another table by name.'},
+    {name:'Filter rows',kind:'Python',sample:"result = next(iter(tables.values())).query('value > 0')",help:'Edit the column name and condition before running.'},
+    {name:'Group and sum',kind:'Python',sample:"result = next(iter(tables.values())).groupby('category', as_index=False).sum(numeric_only=True)",help:'Edit the category column before running.'},
+    {name:'Missing values',kind:'Python',sample:"result = next(iter(tables.values())).dropna()",help:'Drop rows containing missing values.'},
+    {name:'INNER JOIN',kind:'Operation',operation:'inner',sample:'INNER JOIN',help:'Combine matching rows using selected key columns.'},
+    {name:'LEFT JOIN',kind:'Operation',operation:'left',sample:'LEFT JOIN',help:'Preserve every row of the left table.'},
+    {name:'UNION ALL',kind:'Operation',operation:'unionall',sample:'UNION ALL',help:'Append rows, including duplicates.'},
+    {name:'INTERSECT',kind:'Operation',operation:'intersect',sample:'INTERSECT',help:'Keep rows present in both tables.'},
+    {name:'EXCEPT',kind:'Operation',operation:'except',sample:'EXCEPT',help:'Keep left-table rows absent from the right table.'}
+  ];
+  // Store the logical cell coordinates: the grid is rebuilt on blur, so
+  // retaining the old input element would silently break toolbar insertion.
+  let lastLibraryCell=null;
+  panel.addEventListener('focusin',event=>{
+    if(event.target.matches('#dt-sheet td input')){
+      lastLibraryCell={id:active()?.id,r:Number(event.target.dataset.row),c:Number(event.target.dataset.col)};
+    }
+  });
+  function renderDataLibrary(){
+    const query=$('dt-library-search').value.trim().toLowerCase();
+    const category=$('dt-library-category').value;
+    const root=$('dt-library-results');root.replaceChildren();
+    for(const entry of dataLibrary.filter(e=>(!category||e.kind===category)&&(e.name+' '+e.kind+' '+e.help).toLowerCase().includes(query))){
+      const item=el('div',{class:'data-toolbar'});
+      const description=el('span',{},entry.kind+' · '+entry.name+' — '+entry.help+' Example: '+entry.sample);
+      const insert=el('button',{type:'button',class:'secondary','aria-label':(entry.kind==='Operation'?'Choose ':'Insert ')+entry.name},entry.kind==='Operation'?'Choose':'Insert');
+      insert.addEventListener('click',()=>{
+        const message=$('dt-library-message');
+        if(entry.kind==='Formula'){
+          const cell=lastLibraryCell,t=active();
+          if(!cell||cell.id!==t?.id||!t.rows[cell.r]||cell.c<0||cell.c>=t.columns.length){
+            message.textContent='Select a spreadsheet data cell first.';return;
+          }
+          // A formula replaces the entire cell, never concatenates two formulas.
+          t.rows[cell.r][cell.c]=entry.sample.slice(0,8000);
+          save();render();
+          const field=$('dt-sheet').querySelector('td input[data-row="'+cell.r+'"][data-col="'+cell.c+'"]');
+          field?.focus();
+          message.textContent='Inserted '+entry.name+' into '+colLetter(cell.c)+(cell.r+1)+'.';
+        }else if(entry.kind==='Python'){
+          const target=$('dt-python-code');
+          if(!target){message.textContent='Python editor is unavailable.';return;}
+          const start=Number.isInteger(target.selectionStart)?target.selectionStart:target.value.length;
+          const end=Number.isInteger(target.selectionEnd)?target.selectionEnd:start;
+          target.setRangeText(entry.sample,start,end,'end');
+          target.dispatchEvent(new Event('input',{bubbles:true}));
+          // The Python editor is inside a disclosure; reveal it after the click
+          // bubbles so the outside-click menu handler cannot immediately close it.
+          requestAnimationFrame(()=>{
+            const menu=$('data-menu-navigation')?.querySelector(':scope > details:nth-child(5)');
+            if(menu)menu.open=true;
+            target.focus();
+          });
+          message.textContent='Inserted '+entry.name+' into Python editor. Code has not run.';
+        }else{
+          const selector=$('dt-op');
+          if(!selector){message.textContent='Table operation controls are unavailable.';return;}
+          selector.value=entry.operation;
+          selector.dispatchEvent(new Event('change',{bubbles:true}));
+          requestAnimationFrame(()=>{
+            const menu=$('data-menu-navigation')?.querySelector(':scope > details:nth-child(3)');
+            if(menu)menu.open=true;
+            selector.focus();
+          });
+          message.textContent='Selected '+entry.name+'. Choose tables and click Run to execute.';
+        }
+      });
+      item.append(description,insert);root.append(item);
+    }
+    if(!root.childElementCount)root.append(el('p',{},'No matching functions or recipes.'));
+  }
+  $('dt-library-search').addEventListener('input',renderDataLibrary);
+  $('dt-library-category').addEventListener('change',renderDataLibrary);
+  renderDataLibrary();
   const oldImporter=$('graph-data-panel');if(oldImporter)$('dt-advanced').append(oldImporter);
   const graphControls=el('div',{class:'dt-graph-tools'});
   graphControls.innerHTML=`<div class="data-toolbar">

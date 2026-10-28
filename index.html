@@ -113,6 +113,8 @@
     #palette-search::placeholder{color:#a3afc4}
     #palette-search:focus{border-color:#98a5ef}
     .palette-nav{flex:1;min-height:0;overflow-y:auto;padding-right:3px;margin-bottom:9px;scrollbar-width:thin;scrollbar-color:#5b6984 #12182a} .sidebar-bottom{flex:none}
+    #palette-nav .palette-button:disabled{opacity:.48;cursor:not-allowed}
+    #palette-graph-hint{white-space:normal;line-height:1.45;margin:0 0 10px;color:#cbd7f0}
     .palette-nav details{border:1px solid #36435e;border-radius:9px;margin-bottom:8px;background:#1e2941;overflow:hidden}
     .palette-nav details[open]{border-color:#647195}
     .palette-nav summary{list-style:none;cursor:pointer;padding:9px 11px;font-size:12px;font-weight:750;display:flex;align-items:center;justify-content:space-between;color:#ecf1ff}
@@ -276,6 +278,7 @@
     <div class="palette-top"><div class="eyebrow">Math library</div><span class="palette-count" id="palette-count">100+ items</span></div>
     <label class="sr-only" for="palette-search">Search math symbols and expressions</label>
     <input id="palette-search" type="search" placeholder="Search symbols, calculus…" autocomplete="off" />
+    <p id="palette-graph-hint" class="palette-count" role="status" hidden>Graph: numeric plotting templates are available. Notation-only symbols are disabled; switch to Equation for the full library.</p>
     <nav class="palette-nav" id="palette-nav" aria-label="Math symbol and equation menus"></nav>
     <div class="sidebar-bottom"><strong>Keyboard shortcuts</strong><div><kbd>Enter</kbd> Add / update equation</div><div><kbd>Shift</kbd> + <kbd>Enter</kbd> New input line</div><div><kbd>Esc</kbd> Cancel editing</div><br/>Calculator, editor and graphs work offline. SymPy needs internet to load initially.</div>
   </aside>
@@ -1295,7 +1298,20 @@ def _ms_system(job_text):
     const nav=document.getElementById('palette-nav'),search=document.getElementById('palette-search');
     const all=paletteGroups.flatMap(g=>g.groups.flatMap(c=>c.items));
     document.getElementById('palette-count').textContent=all.length+' items';
+    // Conservative graph palette: notation-only entries remain available in Equation,
+    // but cannot silently insert invalid numeric graph expressions.
+    const graphNumericTemplates=new Set([
+      'pi','e','tau','x^2','sin(x)','cos(x)','tan(x)',
+      'asin(x)','acos(x)','atan(x)','ln(x)','log(x)','log10(x)',
+      'exp(x)','sqrt(x)','abs(x)','floor(x)','ceil(x)',
+      'min(a,b)','max(a,b)','*'
+    ]);
+    const graphPaletteSupported=code=>graphNumericTemplates.has(code)||
+      customFunctions.some(f=>f.type==='formula'&&code===f.name+'('+f.params.join(',')+')');
     function draw(){
+      const activeWorkspace=document.querySelector('.workspace-tab.active')?.dataset.workspace||'';
+      const graphMode=['graph','graph2d','graph3d'].includes(activeWorkspace);
+      document.getElementById('palette-graph-hint').hidden=!graphMode;
       const term=search.value.toLowerCase().trim();nav.replaceChildren();let found=0;
       for(const group of paletteGroups){
         const subs=group.groups.map(s=>({...s,items:s.items.filter(i=>!term||[...i,group.name,s.name].join(' ').toLowerCase().includes(term))})).filter(x=>x.items.length);
@@ -1307,6 +1323,12 @@ def _ms_system(job_text):
           const grid=document.createElement('div');grid.className='palette-grid';
           for(const [glyph,label,code] of sub.items){const b=document.createElement('button');b.type='button';b.className='palette-button';b.title='Insert '+label+': '+code;
             const icon=document.createElement('span');icon.className='glyph';icon.textContent=glyph;const small=document.createElement('span');small.className='glyph-label';small.textContent=label;b.append(icon,small);
+            // Graph plotting is numeric; keep the complete notation palette in Equation.
+            if(graphMode&&!graphPaletteSupported(code)){
+              b.disabled=true;
+              b.title=label+' is Equation-only; numeric Graph templates remain enabled.';
+              b.setAttribute('aria-label',label+' (Equation-only; unavailable in Graph)');
+            }
             // All workspaces use the same selection-aware insertion path.
             b.addEventListener('click',()=>insertText(code));grid.appendChild(b);found++;}
           inner.appendChild(grid);top.appendChild(inner);
@@ -1314,7 +1336,8 @@ def _ms_system(job_text):
       }
       if(!found){const n=document.createElement('p');n.className='palette-nothing';n.textContent='No matching symbol. Try “matrix”, “derivative” or “Greek”.';nav.appendChild(n);}
     }
-    search.addEventListener('input',draw);draw();
+    search.addEventListener('input',draw);
+    search.addEventListener('focus',draw);draw();
   }
   function mathMatrix(ast,open,close){
     const rows=ast.args.map(v=>v.kind==='array'?v.items:[v]),wid=Math.max(...rows.map(a=>a.length));

@@ -1,7 +1,7 @@
-## Unreleased — Single-column Data Tables CSV/TSV/JSON interchange (2026-10-28)
+## Released — Single-column Data Tables CSV/TSV/JSON interchange (2026-10-28, PR #68)
 
 - Import one-column CSV, TSV and JSON into Data Tables, including quoted Unicode/multiline cells and editable formulas from source CSV; retain strict two-coordinate requirements in Graphs.
-- Add mandatory browser round-trip/rollback and structural parity regression coverage. **Pending exact-head CI and production release.**
+- Added mandatory browser round-trip/rollback and structural parity regression coverage. [Dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40751963576), [PR Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40752718843), [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40753328201) and [Pages deployment](https://github.com/saeedsai/ProMathStudio/actions/runs/40753327266) passed.
 
 ## Released — Saved-snippet JSON import preview and conflict-safe confirmation (2026-10-28, PR #67)
 

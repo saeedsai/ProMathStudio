@@ -1176,7 +1176,10 @@ def _ms_system(job_text):
   }
   function insertText(text,caret){
     const calculatorMode=!!document.querySelector('[data-workspace="calculator"].active');
-    const target=calculatorMode?document.getElementById('calc-input'):input;
+    const activeWorkspace=document.querySelector('.workspace-tab.active')?.dataset.workspace||'';
+    const graphMode=activeWorkspace==='graph'||activeWorkspace==='graph2d'||activeWorkspace==='graph3d';
+    // Solver reads the working equation; graph uses its own function editor.
+    const target=calculatorMode?document.getElementById('calc-input'):graphMode?document.getElementById('graph-input'):input;
     const start=target.selectionStart,end=target.selectionEnd;
     target.setRangeText(text,start,end,'end');
     const position=start+(Number.isFinite(caret)?caret:text.length);
@@ -4333,7 +4336,7 @@ const css=document.createElement('style');css.textContent=`
   #quick-menu{position:fixed;top:12px;right:16px;z-index:130;display:flex;gap:7px;padding:7px;background:#ffffffee;border:1px solid #dfe5f3;border-radius:12px;box-shadow:0 5px 25px #26345618;backdrop-filter:blur(10px)}
   #quick-menu button{border:0;background:#eef2ff;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:750;color:#3b51ab}
   #quick-menu button:hover{background:#dbe5ff}
-  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols,body.ws-calculator #quick-symbols{display:block!important}
+  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols,body.ws-calculator #quick-symbols,body.ws-solver #quick-symbols,body.ws-graph #quick-symbols,body.ws-graph2d #quick-symbols,body.ws-graph3d #quick-symbols{display:block!important}
   #examples .examples{display:none}body.examples-open #examples .examples{display:grid}
   #examples{min-height:65px;scroll-margin-top:76px}
   body.examples-open #examples{position:fixed;right:0;top:65px;width:min(660px,95vw);height:calc(100vh - 75px);overflow:auto;padding:20px;background:#fff;border-radius:14px 0 0 14px;z-index:120;box-shadow:-10px 0 70px #071b3455;margin:0}

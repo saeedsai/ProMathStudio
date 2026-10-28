@@ -1,9 +1,9 @@
-## Unreleased — Data Tables MEDIAN and bounded formula references (2026-10-28)
+## Released — Data Tables MEDIAN and bounded formula references (2026-10-28, PR #59)
 
 - Added `MEDIAN` to the searchable Functions & Code Library and offline spreadsheet evaluator: odd/even counts, multiple arguments, numeric ranges and quoted cross-table ranges. Ignores text/blank/whitespace cells; no numeric values returns `#NUM!`.
 - Range aggregation now treats unpopulated in-grid rows and columns as blanks rather than zero-valued observations, fixing MEDIAN/AVERAGE/COUNT on short tables. Existing explicit numeric zeros are still counted.
 - Aggregation ranges reject invalid workbook coordinates (row 0, rows above 6000, columns beyond AF) with `#REF!` instead of treating them as zero. Unpopulated in-grid cells remain blank.
-- Added focused unit and mandatory Playwright tests for MEDIAN, existing SUM/AVERAGE/COUNT/MIN/MAX/IF, cross-table, cycle, invalid ranges, insertion and persistence. **On dev; CI/PR/Pages pending.**
+- Added focused unit and mandatory Playwright tests for MEDIAN, existing SUM/AVERAGE/COUNT/MIN/MAX/IF, cross-table, cycle, invalid ranges, insertion and persistence. **Released:** [PR #59](https://github.com/saeedsai/ProMathStudio/pull/59) merged to `main=49ce54e82ce4ffb7ef440f325c5ec726601b2e9a`; [dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40669918914), [PR Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40670408512), [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40670931938) and [Pages deployment](https://github.com/saeedsai/ProMathStudio/actions/runs/40670930496) passed. Independent live UI browsing unavailable.
 
 ## Released — Shared Symbols palette navigation and keyboard accessibility (2026-10-28, PR #58)
 

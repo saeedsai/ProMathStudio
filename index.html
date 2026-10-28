@@ -282,8 +282,7 @@
   <main>
     <div class="workspace-bar" role="navigation" aria-label="Math Studio tools">
       <button type="button" class="workspace-tab" data-workspace="calculator"><span class="ws-emoji">▦</span> Calculator</button>
-      <button type="button" class="workspace-tab active" data-workspace="editor"><span class="ws-emoji">∑</span> Equation editor</button>
-      <button type="button" class="workspace-tab" data-workspace="solver"><span class="ws-emoji">ƒ</span> Symbolic solver</button>
+      <button type="button" class="workspace-tab active" data-workspace="editor"><span class="ws-emoji">∑</span> Equation</button>
       <button type="button" class="workspace-tab" data-workspace="graph"><span class="ws-emoji">⌁</span> 2D &amp; 3D graphs</button>
     </div>
     <div class="workspace-subtitle" id="workspace-subtitle" aria-live="polite" aria-atomic="true">Write, preview and export professional mathematical equations.</div>
@@ -2230,7 +2229,7 @@ def _ms_system(job_text):
   }
 
   // Navigation — one active work area at a time, preserving notebook and input state.
-  const modeDescriptions={calculator:'Scientific calculator · real and complex arithmetic · history.',editor:'Write, preview and export professional mathematical equations.',solver:'Expand, factor, solve, differentiate and integrate using built-in algebra or SymPy.',graph:'Explore mathematical plots and data-driven charts.',data:'Edit multiple tables, formulas, joins and unions.'};
+  const modeDescriptions={calculator:'Scientific calculator · real and complex arithmetic · history.',editor:'Write, preview, export and symbolically solve equations using CAS + SymPy.',solver:'Expand, factor, solve, differentiate and integrate using built-in algebra or SymPy.',graph:'Explore mathematical plots and data-driven charts.',data:'Edit multiple tables, formulas, joins and unions.'};
   const topbar=document.querySelector('.topbar');
   const sharedEditor=document.querySelector('section[aria-label="Equation input"]');
   const sharedPreview=document.querySelector('section[aria-label="Live math preview"]');
@@ -2243,16 +2242,18 @@ def _ms_system(job_text):
   let activeMode='editor';
   function changeMode(mode){
     if(!modeDescriptions[mode])return;
+    // Legacy solver navigation remains supported, but shares the Equation station.
+    if(mode==='solver')mode='editor';
     activeMode=mode;
-    document.getElementById('numerical-panel')?.classList.toggle('workspace-hidden',mode!=='solver');
+    document.getElementById('numerical-panel')?.classList.toggle('workspace-hidden',mode!=='editor');
     for(const b of document.querySelectorAll('[data-workspace]')){
       b.classList.toggle('active',b.dataset.workspace===mode);b.setAttribute('aria-current',b.dataset.workspace===mode?'page':'false');
     }
-    const show=new Set(mode==='calculator'?['calculator']:mode==='graph'?['graph']:mode==='data'?['data']:mode==='solver'?['editor','preview','solver','python']:['editor','preview','python','notebook','notebookTitle','examples','tip']);
+    const show=new Set(mode==='calculator'?['calculator']:mode==='graph'?['graph']:mode==='data'?['data']:['editor','preview','solver','python','notebook','notebookTitle','examples','tip']);
     for(const [key,el] of Object.entries(panels))el?.classList.toggle('workspace-hidden',!show.has(key));
     topbar.classList.toggle('workspace-hidden',mode!=='editor');
     $('workspace-subtitle').textContent=modeDescriptions[mode];
-    document.title='Math Studio Pro — '+({calculator:'Advanced Calculator',editor:'Equation Editor',solver:'Symbolic Solver',graph:'2D / 3D Graph Generator',data:'Data Tables'}[mode]);
+    document.title='Math Studio Pro — '+({calculator:'Advanced Calculator',editor:'Equation',solver:'Equation',graph:'2D / 3D Graph Generator',data:'Data Tables'}[mode]);
     const sidebar=document.querySelector('aside');sidebar.classList.toggle('ws-secondary',mode==='calculator'||mode==='graph'||mode==='data'); document.querySelector('.shell').classList.toggle('no-symbol-sidebar',mode==='calculator'||mode==='graph'||mode==='data');
     // Keep the visual workspace state in sync for clicks, restored sessions and API navigation.
     for(const workspace of ['editor','calculator','solver','graph','data'])document.body.classList.toggle('ws-'+workspace,mode===workspace);

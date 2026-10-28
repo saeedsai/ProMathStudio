@@ -42,7 +42,7 @@ def main():
                 try {MathStudio.minimizeTools.minimize(o);return false;}
                 catch(e){return !!e.message;}
             }""", invalid), invalid
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#minimize-details").evaluate("(e) => e.open=true")
         page.locator("#minimize-run").click()
         assert "Golden-section" in page.locator("#minimize-output").inner_text()
@@ -51,7 +51,7 @@ def main():
         page.locator("#minimize-to-table").click()
         assert page.evaluate("MathStudio.dataTables.tables.length") == before+1
         assert page.evaluate("MathStudio.dataTables.tables.at(-1).name").startswith("Numerical_Minimum")
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#minimize-details").evaluate("(e) => e.open=true")
         page.locator("#minimize-lo").fill("4")
         assert page.locator("#minimize-to-table").is_disabled()

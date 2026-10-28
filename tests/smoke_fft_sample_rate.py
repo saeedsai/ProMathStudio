@@ -15,7 +15,7 @@ def main():
   assert page.evaluate('() => MathStudio.fftTools.analyze([1,1,1,1],100).spectrum[1].frequencyHz')==25
   for rate in [0,-1,1e13,'abc','']:
    assert page.evaluate('r=>{try{MathStudio.fftTools.analyze([1,0,0,0],r);return false;}catch(e){return true;}}',rate)
-  page.locator('[data-workspace="solver"]').click()
+  page.locator('[data-workspace="editor"]').click()
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-run').click()
   assert '2 Hz' in page.locator('#fft-output').inner_text()
@@ -23,12 +23,12 @@ def main():
   table=page.evaluate('MathStudio.dataTables.active')
   assert table['columns'][:3]==['bin','frequency_Hz','amplitude']
   assert float(table['rows'][2][1])==2
-  page.locator('[data-workspace="solver"]').click()
+  page.locator('[data-workspace="editor"]').click()
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-to-graph').click()
   pts=page.evaluate('MathStudio.graphData.getState().points')
   assert abs(pts[2]['x']-2)<1e-12 and abs(pts[2]['y']-1)<1e-12,pts[2]
-  page.locator('[data-workspace="solver"]').click()
+  page.locator('[data-workspace="editor"]').click()
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-rate').fill('16')
   assert page.locator('#fft-to-table').is_disabled()

@@ -9,7 +9,7 @@ def main():
   page=browser.new_page(viewport={'width':1280,'height':850})
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.set_content((ROOT/'index.html').read_text(encoding='utf-8'),wait_until='load')
-  routes={'editor':['basic','examples','notebook','python'],'calculator':['basic','matrix','variables','precision','settings','history'],'solver':['basic','numerical','ode','assumptions'],'graph':['basic','table','axes','appearance'],'data':['basic','filter','combine','files','python']}
+  routes={'editor':['basic','examples','notebook','python','numerical','ode','assumptions'],'calculator':['basic','matrix','variables','precision','settings','history'],'graph':['basic','table','axes','appearance'],'data':['basic','filter','combine','files','python']}
   picker=page.locator('#workspace-task-select')
   for workspace,expected in routes.items():
    page.locator('[data-workspace="'+workspace+'"]').click()
@@ -25,7 +25,7 @@ def main():
   assert page.locator('#precision-run').is_visible()
   picker.select_option('matrix')
   assert page.locator('#matrix-tools').evaluate('(e)=>e.open')
-  page.locator('[data-workspace="solver"]').click()
+  page.locator('[data-workspace="editor"]').click()
   picker.select_option('ode')
   assert page.locator('#ode-details').evaluate('(e)=>e.open')
   assert page.locator('#symbolic-panel .cas-wrap').is_hidden()

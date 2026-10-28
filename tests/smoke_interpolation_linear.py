@@ -46,7 +46,7 @@ def main():
             catch(e){return /exactly/.test(e.message);}
         }""")
         assert page.evaluate("""() => MathStudio.interpolationTools.parsePairs('0,0\\n1,1')""") == [["0","0"],["1","1"]]
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#interp-details").evaluate("(e) => e.open=true")
         page.locator("#interp-run").click()
         assert "5 query results" in page.locator("#interp-output").inner_text()
@@ -55,7 +55,7 @@ def main():
         page.locator("#interp-to-table").click()
         assert page.evaluate("MathStudio.dataTables.tables.length") == before + 1
         assert page.evaluate("MathStudio.dataTables.tables.at(-1).columns") == ["x","y"]
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#interp-details").evaluate("(e) => e.open=true")
         page.evaluate("""() => MathStudio.dataTables.importData({
             headers:['x','y'],rows:[[0,0],[1,3],[2,6]]
@@ -69,7 +69,7 @@ def main():
         page.locator("#interp-to-graph").click()
         assert page.locator("#graph-panel .graph-canvas-wrap").is_visible()
         assert page.evaluate("MathStudio.graphData.getState().points.length") == 5
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#interp-details").evaluate("(e) => e.open=true")
         page.locator("#interp-queries").fill("3")
         assert page.locator("#interp-to-table").is_disabled()

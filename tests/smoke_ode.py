@@ -57,7 +57,7 @@ def main():
             }""", options), options
 
         # Real UI: solve, import table, and route a second solve to a 2D graph.
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel = page.locator("#ode-details")
         panel.evaluate("(element) => element.open = true")
         assert panel.is_visible()
@@ -72,7 +72,7 @@ def main():
         assert page.evaluate("MathStudio.dataTables.tables.length") == before + 1
         assert page.locator("#dt-sheet tbody tr").count() == 21
 
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-run").click()
         page.locator("#ode-to-graph").click()
@@ -82,7 +82,7 @@ def main():
         assert "Plotted" in page.locator("#dt-chart-status").inner_text(), page.locator("#dt-chart-status").inner_text()
         assert page.evaluate("MathStudio.graphData.getState().points.length") == 21
 
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-end").fill("0")
         assert page.locator("#ode-to-table").is_disabled()

@@ -64,7 +64,7 @@ def main():
             }""", options), options
 
         # UI: RK45 selection, error diagnostics, Data Tables and Graphs handoffs.
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel = page.locator("#ode-details")
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-method").select_option("rk45")
@@ -78,14 +78,14 @@ def main():
         page.locator("#ode-to-table").click()
         assert page.evaluate("MathStudio.dataTables.tables.length") == before + 1
 
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-run").click()
         page.locator("#ode-to-graph").click()
         assert page.locator("#graph-panel .graph-canvas-wrap").is_visible()
         assert page.evaluate("MathStudio.graphData.getState().points.length") > 2
 
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         panel.evaluate("(element) => element.open = true")
         page.locator("#ode-tolerance").fill("0")
         assert page.locator("#ode-to-table").is_disabled()

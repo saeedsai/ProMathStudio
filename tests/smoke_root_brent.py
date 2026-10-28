@@ -28,7 +28,7 @@ def main():
                  {"expression":"x^7-0.1","lo":0,"hi":1,"maxIterations":8,"tolerance":1e-12}]
         for o in invalid:
             assert page.evaluate("o=>{try{MathStudio.brentTools.refine(o);return false}catch(e){return !!e.message}}",o),o
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#brent-details").evaluate("(e)=>e.open=true")
         page.locator("#brent-run").click()
         assert "Brent-Dekker" in page.locator("#brent-output").inner_text()
@@ -36,7 +36,7 @@ def main():
         before=page.evaluate("MathStudio.dataTables.tables.length")
         page.locator("#brent-to-table").click()
         assert page.evaluate("MathStudio.dataTables.tables.length")==before+1
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator("#brent-details").evaluate("(e)=>e.open=true")
         page.locator("#brent-hi").fill("1")
         assert page.locator("#brent-to-table").is_disabled()

@@ -1,3 +1,47 @@
+**2026-10-28 12:10 CET — Expanded cross-feature regression compatibility checkpoint.** A repository-wide review of browser scripts identified 19 additional symbolic/numerical/ODE/FFT/interpolation tests that still clicked the intentionally removed Solver tab. Updated their navigation to the unified Equation tab while preserving original mathematical assertions and reference oracles; no tests removed or skipped. Full Quality must execute these suites on the exact final dev head. Prior parity defect was fixed by synchronizing `src/workspace-tasks.js`. This checkpoint is not a release.
+
+## 2026-10-28 12:03 CET — Combined Equation workstation CI recovery and browser regression
+
+**Feature ledger: IN QA ON DEV; NOT RELEASED.** Starting heads: `dev=4d4959fb70379b1174e8ff198b1f67aa13574fd5`, `main=49ce54e82ce4ffb7ef440f325c5ec726601b2e9a`; no open PR; exactly `dev` and `main` branches. Starting [Quality 40673846827](https://github.com/saeedsai/ProMathStudio/actions/runs/40673846827) **failed** at `tests/smoke_browser.py` because the former Solver tab was intentionally removed. Corrected the existing browser regressions for four navigation tabs without dropping assertions, implemented a merged seven-option Equation task picker (Editor, CAS, numerical, ODE, assumptions), added new mandatory `tests/smoke_equation_combined.py` covering offline CAS, editor preview, notebook, numerical/ODE/assumptions, mobile and legacy solver routing. Updated six existing Playwright scripts and expanded structural tests. [Quality 40677384808](https://github.com/saeedsai/ProMathStudio/actions/runs/40677384808) caught source parity: updated `src/workspace-tasks.js` to match the inlined standalone bundle; **do not bypass the parity test**. No local git checkout/browser available (DNS for github.com unavailable in execution container); GitHub Actions is the available full regression runner. Exact final dev-head CI, PR/main Quality and Pages remain to be verified before release. No branch protection configured; preserve manual PR-only main gate. No unrelated files deleted.
+
+### NEXT FIVE — acceptance-tested features
+
+| Priority | Feature | Acceptance tests / dependencies | State |
+|---:|---|---|---|
+| 1 | P1-UI-EQUATION-MERGE release QA | Exact-head structural + full Chromium checks including new merged Equation test; no console errors; ordinary dev→main PR checks, main Quality and Pages; 390/768/1280. | IN QA ON DEV |
+| 2 | P1-UI-EQUATION-WORKSTATION organization | All CAS and editor actions accessible without duplicate buttons; keyboard, ARIA, layout on mobile and desktop; notebook/export regression. | NEXT |
+| 3 | P1-DATA-LIBRARY-SNIPPET-UX | Versioned JSON import/export, schema validation, duplicate conflict, atomic rollback, no auto-Python. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode and blank-row round trip, malformed file rollback, formulas retained. | IN PROGRESS |
+| 5 | P1-DATA-FORMULA-NESTED-AGGREGATES | SUM/MEDIAN nesting and IF references, numeric oracle, invalid nesting/cycles/bounds. | TODO |
+
+## 2026-10-28 — Combined Equation workstation (user-requested)
+
+**DEV IMPLEMENTED; CI/RELEASE PENDING.** Merged the Equation Editor and Symbolic Solver navigation into one **Equation** tab, displaying existing editor, live preview, notebook, examples, symbolic CAS controls, numerical panel and Python/SymPy tools together. Preserved legacy internal `solver` navigation as an alias to `editor`, without deleting solver IDs, operations, code or routes. Added `tests/test_equation_workspace_merge.py` focused regression guard. Need run unit + Chromium regression, check responsive layout and controls, exact-dev-head Quality, PR and Pages before marking released. Do not disable recurring task.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Combined Equation workstation QA | Editor preview/export, CAS execute/engine/variable, numerical panel, notebook and examples all visible and working at 390/768/1280px; legacy solver links. | DEV IMPLEMENTED / QA PENDING |
+| 2 | Equation workstation layout refinement | No duplicate toolbar actions, compact logical editor/CAS sections, keyboard/focus and screen-reader labeling. | TODO |
+| 3 | Saved snippet import/export | JSON round-trip, schema validation, duplicate-name conflict, malformed file rollback and browser test. | TODO |
+| 4 | Data import/export correctness | CSV/TSV/JSON/XLSX round trips and formula stability, browser regression. | IN PROGRESS |
+| 5 | Nested spreadsheet aggregates | Valid numeric ranges and nested aggregations, blank/text exclusion, deterministic errors. | TODO |
+
+## 2026-10-28 11:18 CET — P1-DATA-LIBRARY-FORMULA-COMPATIBILITY released via PR #59
+
+**Feature ledger: RELEASED for stated scope.** Added the offline `MEDIAN` spreadsheet function and searchable library entry; supports odd/even numeric counts, multiple inputs, cross-table ranges, text/blank exclusion and clear errors. Fixed an actual correctness defect discovered by the new browser regression: unpopulated cells within valid ranges were previously counted as numeric zero, corrupting MEDIAN/AVERAGE/COUNT. Initial [dev Quality 40669617199](https://github.com/saeedsai/ProMathStudio/actions/runs/40669617199) failed that new assertion; fixed source without weakening tests. Exact candidate `204857d3ed73eedf2e3d19c6d8fdd8ec83d6c4bb` passed [dev Quality 40669918914](https://github.com/saeedsai/ProMathStudio/actions/runs/40669918914) and [PR #59 Quality 40670408512](https://github.com/saeedsai/ProMathStudio/actions/runs/40670408512), each 72/72 steps green. [PR #59](https://github.com/saeedsai/ProMathStudio/pull/59) merged by ordinary SHA-checked PR to `main=49ce54e82ce4ffb7ef440f325c5ec726601b2e9a`. [Main Quality 40670931938](https://github.com/saeedsai/ProMathStudio/actions/runs/40670931938), [post-merge dev Quality 40670948562](https://github.com/saeedsai/ProMathStudio/actions/runs/40670948562), [GitHub Pages 40670930496](https://github.com/saeedsai/ProMathStudio/actions/runs/40670930496), and [cleanup 40670931941](https://github.com/saeedsai/ProMathStudio/actions/runs/40670931941) all succeeded on exact merge SHA. Dev was safely fast-forwarded to main; only dev/main remain. **Independent interactive browsing of the published site was unavailable**, so deployment is confirmed by GitHub Pages and CI browser tests, not live site interaction. Branch protection is still disabled; manual PR-only gate respected. Frozen 166-gap/95-partial inventory remains a historical baseline; no false full-Excel/MATLAB parity claim. This post-release documentation commit on dev requires its own exact-head CI and is not a new production release.
+
+### NEXT FIVE — small features with acceptance tests
+
+| Priority | Feature | Acceptance tests / dependencies | State |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-SNIPPET-UX | Cancel edit, versioned JSON import/export, duplicate and malformed schema rejection, atomic quota rollback, reload and no auto-Python execution. | NEXT |
+| 2 | P1-UI-DATA-TOOLBAR import/export | CSV/TSV/JSON/XLSX Unicode/formula/blank-row round trips, schema errors and transactional rollback. | IN PROGRESS |
+| 3 | P1-UI-ACCESSIBILITY | Focus/ARIA, keyboard and announcements across all five workspaces; 390/768/1280 px and no browser errors. | IN PROGRESS |
+| 4 | P1-GRAPH-PALETTE-SEMANTIC-COMPATIBILITY | Graph-executable versus display-only palette items; 2D/3D parser and Editor/Solver regression. | TODO |
+| 5 | P1-DATA-FORMULA-NESTED-AGGREGATES | Nested SUM/MEDIAN and IF references with numeric oracle, malformed nesting, cycle and bounds regressions. | TODO |
+
 **2026-10-28 11:09 CET — CI failure and root-cause repair.** [Quality 40669617199](https://github.com/saeedsai/ProMathStudio/actions/runs/40669617199) failed the newly mandatory `tests/smoke_sheet_median.py` assertion after inserting `=MEDIAN(A1:A5)` into a 3-row table; all preceding structural and browser steps passed. Root cause: the existing `value()` API returns numeric zero for out-of-data coordinates; range aggregation treated unpopulated rows as numeric zeros, distorting MEDIAN, AVERAGE and COUNT (SUM was unaffected). Fixed the range loop to skip unpopulated coordinates while retaining real numeric zero and existing bounds/area errors. Strengthened browser assertions for MEDIAN, COUNT and AVERAGE on A1:A5 and unit source guard. No CI bypass or weakened assertion. Exact repair SHA/CI, PR and Pages must be verified before release.
 
 ## 2026-10-28 11:03 CET — P1-DATA-LIBRARY-FORMULA-COMPATIBILITY: MEDIAN and reference bounds

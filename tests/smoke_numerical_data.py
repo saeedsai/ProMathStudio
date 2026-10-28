@@ -39,7 +39,7 @@ def run():
         page.locator('#calc-input').fill('x^2+y^2')
         page.locator('#calc-execute').click()
         assert '= 13' in page.locator('#calc-result-plain').inner_text()
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         assert page.locator('#numerical-panel').is_visible()
         page.locator('#num-open').click()
         page.locator('#num-method').select_option('poisson')

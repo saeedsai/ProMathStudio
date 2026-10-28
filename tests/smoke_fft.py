@@ -42,7 +42,7 @@ def main():
   }""")
   assert result['unchanged'] and all(result['bad']) and all(result['strings']),result
   assert all(abs(z['re']-i)<1e-10 and abs(z['im'])<1e-10 for i,z in enumerate(result['back'],start=1))
-  page.locator('[data-workspace="solver"]').click()
+  page.locator('[data-workspace="editor"]').click()
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-run').click()
   assert 'Peak bin 2' in page.locator('#fft-output').inner_text()
@@ -52,13 +52,13 @@ def main():
   assert page.locator('#data-panel').is_visible()
   assert page.evaluate('MathStudio.dataTables.tables.length')==before+1
   assert page.locator('#dt-sheet tbody tr').count()==5
-  page.locator('[data-workspace="solver"]').click()
+  page.locator('[data-workspace="editor"]').click()
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-run').click()
   page.locator('#fft-to-graph').click()
   assert page.locator('#graph-panel .graph-canvas-wrap').is_visible()
   assert page.evaluate('MathStudio.graphData.getState().points.length')==5
-  page.locator('[data-workspace="solver"]').click()
+  page.locator('[data-workspace="editor"]').click()
   page.locator('#fft-details').evaluate('(e)=>e.open=true')
   page.locator('#fft-samples').fill('1,2,3')
   assert page.locator('#fft-to-table').is_disabled() and page.locator('#fft-to-graph').is_disabled()

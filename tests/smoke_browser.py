@@ -25,7 +25,6 @@ def main():
             page.set_viewport_size({'width': width, 'height': height})
             for mode, last in [('editor', '#examples'),
                                ('calculator', '#calculator-panel'),
-                               ('solver', '#symbolic-panel'),
                                ('graph', '#graph-panel')]:
                 page.locator(f'[data-workspace="{mode}"]').click()
                 panel = page.locator(last).bounding_box()
@@ -40,8 +39,8 @@ def main():
         page.locator('#add-btn').click()
         assert page.locator('#counter').inner_text() == '(1)'
 
-        page.locator('[data-workspace="solver"]').click()
-        assert page.locator('#symbolic-panel').is_visible()
+        page.locator('[data-workspace="editor"]').click()
+        assert page.locator('#symbolic-panel').is_visible(), 'CAS must share Equation station'
         page.locator('#equation-input').fill('(x-1)^2')
         page.locator('#cas-engine').select_option('offline')
         page.locator('#cas-operation').select_option('expand')

@@ -31,7 +31,7 @@ def main():
         for bad in [None,{},[ast('y(0)=1')]*3]:
             try:scope['_ms_process'](json.dumps({'ast':ode,'operation':'ode','variable':'t','icsAsts':bad}));assert False,bad
             except scope['MathStudioSympyError']:pass
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator('#cas-operation').select_option('ode')
         assert page.locator('#cas-ode-ic').is_visible()
         page.locator('#cas-variable').fill('t')

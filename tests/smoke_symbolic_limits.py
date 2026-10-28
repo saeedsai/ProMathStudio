@@ -51,7 +51,7 @@ def main():
         assert 'scalar expression' in invalid('x=1', '0').lower()
         assert 'direction' in invalid('x', '0', 'sideways').lower()
         assert 'valid symbolic variable' in invalid('x', '0', variable='pi').lower()
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator('#cas-operation').select_option('limit')
         assert page.locator('#cas-limit-point').is_visible()
         assert page.locator('#cas-limit-direction').is_visible()

@@ -55,7 +55,7 @@ def main():
         assert h['maxError'] < 1e-11
         near(h['windowedSamples'][0], 0)
         assert len(h['samples']) == 32 and len(h['windowedSamples']) == 32
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator('#fft-details').evaluate('(e)=>e.open=true')
         page.locator('#fft-window').select_option('hann')
         page.locator('#fft-samples').fill(','.join(
@@ -70,7 +70,7 @@ def main():
         table = page.evaluate('MathStudio.dataTables.active')
         assert table['columns'][:3] == ['bin','frequency_Hz','amplitude']
         near(float(table['rows'][5][2]), 1)
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator('#fft-details').evaluate('(e)=>e.open=true')
         page.locator('#fft-window').select_option('rectangular')
         assert page.locator('#fft-to-table').is_disabled()

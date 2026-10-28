@@ -3712,7 +3712,7 @@ self.onmessage=async ({data})=>{
     for(const entry of dataLibrary.filter(e=>(!category||e.kind===category)&&(e.name+' '+e.kind+' '+e.help).toLowerCase().includes(query))){
       const item=el('div',{class:'data-toolbar'});
       const description=el('span',{},entry.kind+' · '+entry.name+' — '+entry.help+' Example: '+entry.sample);
-      const insert=el('button',{type:'button',class:'secondary','aria-label':'Insert '+entry.name},entry.kind==='Operation'?'Choose':'Insert');
+      const insert=el('button',{type:'button',class:'secondary','aria-label':(entry.kind==='Operation'?'Choose ':'Insert ')+entry.name},entry.kind==='Operation'?'Choose':'Insert');
       insert.addEventListener('click',()=>{
         const message=$('dt-library-message');
         if(entry.kind==='Formula'){

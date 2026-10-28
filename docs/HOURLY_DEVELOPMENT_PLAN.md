@@ -1,3 +1,17 @@
+## 2026-10-28 16:05 CET — P1-DATA-FORMULA-NESTED-AGGREGATES: implementation and browser QA gate
+
+**Feature ledger: IMPLEMENTED ON DEV / IN QA / NOT YET RELEASED.** Fixed the nested aggregation evaluator so `SUM(MEDIAN(A1:A5),COUNT(A1:A5))` resolves innermost-first rather than failing the restricted expression parser after only one aggregate substitution. Bound nesting to 40 passes (`#LIMIT`), preserve existing cycle detection (`#CYCLE`), bad reference (`#REF!`), no-numeric-median (`#NUM!`), lazy `IF` and custom-function behavior. Added a searchable Nested aggregates library example. Changed `src/data-tables.js` and the exact standalone `index.html` bundle, new mandatory Chromium `tests/smoke_sheet_nested_aggregates.py`, `.github/workflows/quality.yml`, and `CHANGELOG.md`. Static checks confirmed source/bundle parity and mandatory workflow registration. Local git clone / complete unit and browser execution unavailable due `Could not resolve host: github.com` in the container. Inspect exact-head GitHub Quality, PR Quality, main Quality and Pages before release. Existing deployed `main=7e1ecb2ce5bdd0e8ab129fbd7b67a4cd023c15ab`; previous `dev=7fe0d03c4793a958ecf6376675ba2bd84d955a50` was verified green in [Quality 40704860033](https://github.com/saeedsai/ProMathStudio/actions/runs/40704860033). No branch cleanup was justified; open PR search empty; branch protection not configured. Recurring development remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-FORMULA-NESTED-AGGREGATES release QA | Exact-dev-head structural/unit + full Chromium Quality passes nested numeric oracle, nested IF, cross-sheet, blanks, cycles, invalid refs, depth cap and library insertion; verified PR, main Quality and Pages. | DEV IMPLEMENTED / IN QA |
+| 2 | P1-UI-EQUATION-ACCESSIBILITY | Accessible live announcement for CAS result/errors, task keyboard focus restoration, and 390/768/1280px Chromium keyboard and screen-reader semantics checks. | TODO |
+| 3 | P1-GRAPH-SYMBOL-INPUT | 2D/3D palette insertion at caret with preserved drafts and focus, no unintended plot refresh; browser tests. | TODO |
+| 4 | P1-DATA-LIBRARY-SNIPPET-UX | JSON import preview/cancel, explicit conflict handling, 40-entry boundary, storage rollback and no Python auto-run; browser tests. | TODO |
+| 5 | P1-DATA-SINGLE-COLUMN-INTERCHANGE | Data Tables one-column CSV/TSV/JSON Unicode/multiline/formula round trips; graph XY still requires two coordinates; negative and rollback tests. | TODO |
+
 ## 2026-10-28 15:14 CET — PR #63 CSV formula source + TSV delimiter round-trip RELEASED
 
 **Feature ledger: RELEASED FOR STATED SCOPE.** Data Tables now offers opt-in formula-preserving CSV export without changing existing value-only CSV/TSV/JSON exports, and TSV export quotes commas and semicolons as well as tabs/newlines/quotes to prevent the shared CSV/TSV delimiter sniffer from choosing the wrong separator on reimport. Added clear TSV tooltip, synchronized `src/data-tables.js` with standalone `index.html`, and committed mandatory Chromium regressions `tests/smoke_data_formula_source_csv.py` and `tests/smoke_data_tsv_delimiter.py`. Both include Unicode, multiline, quoted fields and reimport; TSV also checks malformed-file rollback and responsive controls.

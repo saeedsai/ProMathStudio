@@ -81,7 +81,8 @@ def main():
 
             conflict = dict(payload, snippets=[dict(payload['snippets'][0], sample='=MAX(A1:A3)')])
             import_payload(conflict)
-            assert 'Name conflict' in status.inner_text()
+            assert 'Name conflict' in page.locator('#dt-snippet-preview-summary').inner_text()
+            assert page.locator('#dt-snippet-apply').is_disabled()
             assert stored() == original
 
             for bad in (

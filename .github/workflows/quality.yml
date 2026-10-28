@@ -78,6 +78,8 @@ jobs:
         run: python tests/smoke_data_saved_snippets.py
       - name: Data Tables saved snippet JSON import/export and rollback browser regression
         run: python tests/smoke_data_snippet_interchange.py
+      - name: Data Tables snippet import preview, cancel and conflict browser regression
+        run: python tests/smoke_data_snippet_preview.py
       - name: Data Tables JSON export duplicate-header and lossless CSV regression
         run: python tests/smoke_data_json_duplicate_headers.py
       - name: CSV and TSV explicit empty-row import/export and rollback regression

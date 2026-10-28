@@ -1,3 +1,9 @@
+## Unreleased — Equation task-family organization (2026-10-28)
+
+- Organized the combined Equation workstation's existing task selector into four accessible native groups: **Write & solve**, **Notebook & examples**, **Numerical & differential**, and **Solver configuration**. No solver, notebook, CAS or export buttons were duplicated, removed or hidden by this grouping; task values and drafts are preserved.
+- Added `tests/smoke_equation_task_groups.py` with Chromium coverage for grouping, offline CAS, notebook, numerical/ODE, assumptions, draft preservation, other workspace isolation and 390/768/1280px layout. Registered it as a mandatory Quality workflow step. Source/standalone parity synchronized.
+- This change remains **on dev pending exact-head CI and ordinary PR promotion**; do not treat as released until verified.
+
 ## Released — Unified Equation workstation (2026-10-28, PR #60)
 
 - Combined the Equation Editor and Symbolic Solver into one **Equation** navigation tab. Retained live preview, math input, notebook, examples, CAS engine and symbolic operations, numerical methods, ODE initial values, assumptions, Python/SymPy code and exports. Legacy `mode('solver')` routes now activate Equation without creating a duplicate workspace.

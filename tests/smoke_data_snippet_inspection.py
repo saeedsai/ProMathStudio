@@ -30,7 +30,7 @@ def main():
             page.locator('#dt-code-library summary').click()
             name = 'Long <unsafe>'
             injection = '</textarea><img src=x onerror="window.__snippetXss=true">'
-            sample = "print('not executed')\\n" + injection
+            sample = "print('not executed')\n" + injection
             sample += 'x' * (8000 - len(sample))
             assert len(sample) == 8000
             page.locator('#dt-snippet-name').fill(name)

@@ -349,11 +349,29 @@
   $('dt-sort').addEventListener('click',()=>safeAction(()=>sortRows(Number($('dt-sortcol').value),$('dt-sortdir').value)));
   for(const id of ['dt-left','dt-right'])$(id).addEventListener('change',refreshMenus);
   function operation(type,l,r,lkey=0,rkey=0){const A=evaluated(l),B=evaluated(r),isJoin=['inner','left','right','full'].includes(type);
-    if(isJoin){const headers=l.columns.concat(r.columns.map(h=>l.columns.includes(h)?r.name+'_'+h:h));const out=[];
-      const matched=new Set();for(let i=0;i<A.length;i++){let ok=false;for(let j=0;j<B.length;j++)if(String(A[i][lkey])===String(B[j][rkey])){out.push(A[i].concat(B[j]));ok=true;matched.add(j);if(out.length>MAX_ROWS)throw Error('Join exceeds 6,000 rows.');}
-        if(!ok&&['left','full'].includes(type))out.push(A[i].concat(r.columns.map(()=>'')));}
-      if(['right','full'].includes(type))for(let j=0;j<B.length;j++)if(!matched.has(j))out.push(l.columns.map(()=>'' ).concat(B[j]));
-      if(out.length>MAX_ROWS||headers.length>MAX_COLUMNS)throw Error('Operation exceeds 6,000 rows or 32 columns.');return {headers,rows:out};}
+    if(isJoin){
+      if(!Number.isInteger(lkey)||lkey<0||lkey>=l.columns.length||
+         !Number.isInteger(rkey)||rkey<0||rkey>=r.columns.length)throw Error('Invalid join key.');
+      const headers=l.columns.concat(r.columns.map(h=>l.columns.includes(h)?r.name+'_'+h:h));
+      if(headers.length>MAX_COLUMNS)throw Error('Operation exceeds 32 columns.');
+      // Index the right-hand keys once. Preserve original right-row order and
+      // duplicate-key Cartesian matches, including empty-string keys.
+      const rightIndex=new Map();
+      for(let j=0;j<B.length;j++){
+        const key=String(B[j][rkey]),bucket=rightIndex.get(key);
+        if(bucket)bucket.push(j);else rightIndex.set(key,[j]);
+      }
+      const out=[],matched=new Set();
+      const append=row=>{if(out.length>=MAX_ROWS)throw Error('Join exceeds 6,000 rows.');out.push(row);};
+      for(const leftRow of A){
+        const hits=rightIndex.get(String(leftRow[lkey]));
+        if(hits){for(const j of hits){append(leftRow.concat(B[j]));matched.add(j);}}
+        else if(type==='left'||type==='full')append(leftRow.concat(r.columns.map(()=>'')));
+      }
+      if(type==='right'||type==='full')
+        for(let j=0;j<B.length;j++)if(!matched.has(j))append(l.columns.map(()=>'').concat(B[j]));
+      return {headers,rows:out};
+    }
     if(l.columns.length!==r.columns.length)throw Error('Set operations require matching column counts.');
     const key=row=>JSON.stringify(row.map(v=>String(v))),setB=new Set(B.map(key));let out;
     if(type==='unionall')out=A.concat(B);else if(type==='union')out=Array.from(new Map(A.concat(B).map(row=>[key(row),row])).values());

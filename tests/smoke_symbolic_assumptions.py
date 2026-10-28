@@ -27,7 +27,7 @@ def main():
         for flags,op in [({'positive':True,'negative':True},'simplify'),({'real':'yes'},'simplify'),({'other':True},'simplify'),({'integer':True},'numeric')]:
             try:run('x^2=1',op,flags);assert False,(flags,op)
             except scope['MathStudioSympyError']:pass
-        page.locator('[data-workspace="solver"]').click()
+        page.locator('[data-workspace="editor"]').click()
         page.locator('#cas-operation').select_option('simplify')
         page.locator('#equation-input').fill('sqrt(x^2)')
         page.locator('#workspace-task-select').select_option('assumptions')

@@ -1,3 +1,35 @@
+## 2026-10-28 17:54 CET — P1-GRAPH-SYMBOL-INPUT implemented on dev
+
+**Feature ledger: IMPLEMENTED ON DEV / QA PENDING.** The shared Symbols palette now uses one insertion path for Equation, Calculator and Graphs; when a graph template is a simple function with `x` or `y` as its sole argument, that placeholder is selected for immediate editing. The selected graph range is replaced without changing the Equation draft, other 2D/3D draft, or plotted canvas; no unintended Equation preview refresh. Added `tests/test_graph_symbol_caret.py` (structural) and mandatory Chromium `tests/smoke_graph_symbol_caret.py` (caret/selection, 2D↔3D drafts, no auto-plot, 390/768/1280px and runtime errors). Preserved existing palette entries and workflows. **Not released** until exact dev Quality, PR Quality, main Quality and Pages are verified.
+
+**Execution log:** Started from `dev=192d12357b82aea8c760e03c1844d07f4ac90f3c`, `main=4aea6df4b54a87af1c91a82503fb0f3a26f3ac79`; dev Quality [40723942003](https://github.com/saeedsai/ProMathStudio/actions/runs/40723942003), main Quality [40723301997](https://github.com/saeedsai/ProMathStudio/actions/runs/40723301997), Pages [40723299988](https://github.com/saeedsai/ProMathStudio/actions/runs/40723299988) all succeeded before changes. No open PR. GitHub clone and local Chromium blocked by container DNS; GitHub CI remains mandatory. No branch deletions; no proven obsolete tracked files. Branch protection disabled. Frozen 166-gap/95-partial baseline unchanged. Hourly task remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-GRAPH-SYMBOL-INPUT release QA | New Chromium + structural test, existing graph/shared-symbol regressions, exact dev/PR/main Quality and Pages. | DEV IMPLEMENTED / IN QA |
+| 2 | P1-DATA-LIBRARY-SNIPPET-UX | Preview/cancel JSON import, explicit conflicts, 40-entry boundary, storage rollback and no Python auto-run; Chromium regression. | TODO |
+| 3 | P1-DATA-SINGLE-COLUMN-INTERCHANGE | One-column CSV/TSV/JSON Unicode/multiline/formula round-trip, graph XY still two coordinates, negative cases. | TODO |
+| 4 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Nested custom functions in SUM/IF, recursion and invalid-name guards, reference oracles and browser tests. | TODO |
+| 5 | P0-MATRIX-PSEUDOINVERSE-2X2 | Moore–Penrose identities, least-norm solve, singular/zero/scaled matrices, UI regression. | TODO |
+
+## 2026-10-28 — P1-UI-EQUATION-ACCESSIBILITY RELEASED via PR #65
+
+**Feature ledger: RELEASED FOR STATED SCOPE.** Equation CAS now announces progress, first answer and actionable errors through a single atomic polite live region while retaining the navigable MathML results and visual status. The Execute button uses `aria-disabled` with the existing `casBusy` guard so keyboard focus is retained during asynchronous SymPy calculations and repeated Enter cannot submit a duplicate job. No existing symbolic operations, exports, notebook or task tools were removed. Mandatory Chromium `tests/smoke_equation_accessibility.py` covers offline result/error, delayed mocked SymPy worker, duplicate submit guard, keyboard focus, task picker and 390/768/1280px layouts.
+
+**Verified CI/CD:** exact candidate `dev=99f6e85b5760d217232a613475f40908ae2cefe6` passed [Quality 40721833455](https://github.com/saeedsai/ProMathStudio/actions/runs/40721833455) **79/79 steps**. [PR #65](https://github.com/saeedsai/ProMathStudio/pull/65) had five expected files, clean mergeability and [PR Quality 40722710824](https://github.com/saeedsai/ProMathStudio/actions/runs/40722710824) **79/79 steps**. SHA-checked ordinary PR merge produced `main=4aea6df4b54a87af1c91a82503fb0f3a26f3ac79`; [main Quality 40723301997](https://github.com/saeedsai/ProMathStudio/actions/runs/40723301997) passed **79/79 steps**, [Pages 40723299988](https://github.com/saeedsai/ProMathStudio/actions/runs/40723299988) and [merged-branch cleanup 40723302017](https://github.com/saeedsai/ProMathStudio/actions/runs/40723302017) succeeded. Only `dev` and `main` exist. **Limitations:** branch protection remains disabled (no repository administration permission), local GitHub clone/Chromium unavailable due container DNS, independent hosted interactive verification unavailable. Release is confirmed by GitHub Pages workflow, not independent live browser. Frozen 166-gap/95-partial audit unchanged; hourly task remains enabled. This post-release docs commit on dev requires its own exact-head Quality.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-GRAPH-SYMBOL-INPUT | 2D/3D symbol palette inserts at caret, preserves both drafts and focus, no unintended redraw; Chromium regression at mobile/desktop widths. | TODO |
+| 2 | P1-DATA-LIBRARY-SNIPPET-UX | Preview/cancel JSON import, explicit conflict decisions, 40-entry boundary, storage rollback and no Python auto-run; browser regression. | TODO |
+| 3 | P1-DATA-SINGLE-COLUMN-INTERCHANGE | Data Tables one-column CSV/TSV/JSON Unicode, multiline, formula round-trip; graph XY still requires two coordinates; negative tests. | TODO |
+| 4 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Bounded user-defined formula calls nested in SUM/IF; reference oracles, invalid names, recursion, sandbox and browser tests. | TODO |
+| 5 | P0-MATRIX-PSEUDOINVERSE-2X2 | Real 2×2 Moore–Penrose identities, least-norm solve, singular/zero/scaled matrices and UI browser regression. | TODO |
+
 ## 2026-10-28 16:57 CET — P1-UI-EQUATION-ACCESSIBILITY implemented on dev (QA/release pending)
 
 **Feature ledger: IMPLEMENTED ON DEV; NOT YET RELEASED.** Equation CAS has a single visually hidden, atomic polite live region that announces loading, a concise first symbolic result and errors. Removed competing live announcements from the MathML result container and visual note. The Execute button remains keyboard-focusable while a worker is running, with `aria-disabled` plus existing `casBusy` reentry guard, avoiding duplicate jobs. The original math display, engine operations, notebook, export and task picker are retained. Added mandatory Chromium regression `tests/smoke_equation_accessibility.py` with offline success, empty input, slow mocked SymPy worker, duplicate Enter guard, task disclosure focus and 390/768/1280px checks. Exact-head CI, PR checks, main Quality and Pages deployment must be verified before marking Released. Local GitHub clone/browser unavailable because container DNS cannot resolve github.com. Historical 166-gap/95-partial audit remains frozen; hourly development remains enabled.

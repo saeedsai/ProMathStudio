@@ -1,8 +1,14 @@
-## In QA — Equation CAS accessible result announcements and keyboard focus (2026-10-28)
+## In development — Graph Symbols caret-aware insertion (2026-10-28)
+
+- Unified the Symbols palette insertion path across Equation, Calculator and Graphs, removing duplicated graph/calculator insertion logic. 2D/3D graph function templates such as `sin(x)`, `cos(x)` and `sqrt(x)` select the editable `x` placeholder; replacing a selection inserts at the caret and restores editor focus.
+- Graph symbol edits remain drafts until **Plot** is clicked and no longer trigger an unrelated Equation preview refresh. Existing 2D/3D draft isolation, math library, symbolic solver and calculator features are preserved.
+- Added focused structural `tests/test_graph_symbol_caret.py` and mandatory Chromium `tests/smoke_graph_symbol_caret.py` for selection, focus, 2D/3D drafts, no auto-plot and 390/768/1280px layouts. **Release pending exact-head CI, PR, main QA and Pages deployment.**
+
+## Released — Equation CAS accessible result announcements and keyboard focus (2026-10-28, PR #65)
 
 - Added one concise, screen-reader-accessible live summary for symbolic success, errors and worker progress, including the first result. The full MathML solution region remains navigable without duplicating live announcements.
 - Kept the **Execute** button keyboard-focusable while a SymPy job is running using `aria-disabled` and the existing guarded busy state; no duplicate submissions or solver capability changes.
-- Added mandatory Chromium `tests/smoke_equation_accessibility.py` for offline answers, invalid input, delayed worker reentry/focus, task picker focus and 390/768/1280px layouts. Release pending exact-head CI, PR, main Quality and Pages verification.
+- Added mandatory Chromium `tests/smoke_equation_accessibility.py` for offline answers, invalid input, delayed worker reentry/focus, task picker focus and 390/768/1280px layouts. Released via [PR #65](https://github.com/saeedsai/ProMathStudio/pull/65): [dev Quality 40721833455](https://github.com/saeedsai/ProMathStudio/actions/runs/40721833455), [PR Quality 40722710824](https://github.com/saeedsai/ProMathStudio/actions/runs/40722710824), [main Quality 40723301997](https://github.com/saeedsai/ProMathStudio/actions/runs/40723301997) and [Pages deployment 40723299988](https://github.com/saeedsai/ProMathStudio/actions/runs/40723299988) all passed.
 
 ## Released — Nested spreadsheet aggregates (2026-10-28, PR #64)
 

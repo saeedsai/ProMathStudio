@@ -1,3 +1,9 @@
+## Unreleased — Editable formula-source CSV export (2026-10-28)
+
+- Added **Export formulas CSV** to Data Tables, alongside the existing evaluated **Export CSV**. The new export preserves original editable cell strings, including formulas, quoted commas, embedded line breaks and Unicode; reimport restores formula text rather than flattening it into calculated values.
+- Kept the existing evaluated CSV and JSON export behavior unchanged. The new button explicitly warns that external spreadsheet programs may evaluate formulas on opening the exported CSV.
+- Added mandatory Chromium round-trip regression `tests/smoke_data_formula_source_csv.py`, registered in `.github/workflows/quality.yml`. CI/Pages validation pending; this is **not yet released**.
+
 ## Released — Data Tables saved-snippet JSON interchange (2026-10-28, PR #62)
 
 - Added versioned `promathstudio-snippets` JSON export/import for saved Formula and Python snippets, with a data-only schema and browser download/file picker. Existing localStorage format is unchanged.

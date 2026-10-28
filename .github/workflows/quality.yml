@@ -52,6 +52,8 @@ jobs:
         run: python tests/smoke_graph_import.py
       - name: Graph axis, 3D surfaces, pan/zoom and draft preservation regression
         run: python tests/smoke_graph_navigation.py
+      - name: Data Tables action-menu keyboard, dismissal and export regression
+        run: python tests/smoke_data_toolbar_menus.py
       - name: Spreadsheet and chart regression
         run: python tests/smoke_data_tables.py
       - name: Spreadsheet structural reference regression

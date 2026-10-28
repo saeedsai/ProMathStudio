@@ -1,3 +1,7 @@
+## Unreleased — Data Tables action-menu keyboard and dismissal QA (2026-10-28)
+
+- Improved the existing Table/Filter/Combine/Files/Python menus: visible keyboard focus, Escape dismissal with focus returned to the active summary, and outside-pointer dismissal. Preserved existing input drafts, menu quick buttons, action handlers and workbook data. Added dedicated Playwright regression for keyboard, menu exclusivity, draft retention, sort, CSV download, Python and mobile; wired it into mandatory Quality. Exact dev/PR/main/Pages verification pending; this is not a general accessibility certification.
+
 ## Released — Graphs action grouping and panel QA (2026-10-28, PR #39)
 
 - Grouped secondary Graphs send-to-Editor/Solver actions in an accessible disclosure; kept Plot, Reset, PNG and 2D/3D mode switches visible. Preserved existing button IDs, event handlers, graph state and workspace drafts. Added dedicated Playwright graph-panel regression and mandatory CI step for axes, appearance, 2D/3D, PNG, keyboard transfer, table task and mobile. Exact dev Quality 40609332818, PR Quality 40609762689, main Quality 40610140241 and Pages 40610140252 succeeded for main `10a1e067ca7184e0315f88d29982e848b069e189`. Hosted interactive smoke unavailable; graph import discoverability remains a separate open gap.

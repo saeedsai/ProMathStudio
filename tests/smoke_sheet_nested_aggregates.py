@@ -56,6 +56,13 @@ def main():
         assert page.evaluate(
             "MathStudio.dataTables.formula('SUM(1,2)','Data1')"
         ) == 3
+        # A negative aggregate is still a scalar in multiplication and powers.
+        assert page.evaluate(
+            "MathStudio.dataTables.formula('SUM(2*SUM(-3))','Data1')"
+        ) == -6
+        assert page.evaluate(
+            "MathStudio.dataTables.formula('SUM(-2)^2','Data1')"
+        ) == 4
         deep_error = page.evaluate("""() => {
           try { MathStudio.dataTables.formula('SUM('.repeat(41)+'1'+')'.repeat(41),'Data1'); }
           catch(e) { return e.message; }

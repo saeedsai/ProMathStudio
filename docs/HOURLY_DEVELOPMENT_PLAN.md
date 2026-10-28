@@ -1,3 +1,47 @@
+## 2026-10-28 20:29 CET — P1-DATA-SNIPPET-PREVIEW-KEYBOARD QA enhancement checkpoint
+
+**Feature ledger: IMPLEMENTED ON DEV / QA INCOMPLETE.** Fixed keyboard accessibility gap in the saved-snippet import review: the preview container is now programmatically focusable (`tabindex=-1`) and receives focus when a file is accepted, so Escape works immediately without first clicking a preview control. Escape closes the preview without persisting data and restores focus to Import. Existing Cancel button remains. Extended mandatory `tests/smoke_data_snippet_preview.py` to exercise focus, Escape, no storage mutation and 390/768/1280px widths, and added structural `tests/test_snippet_preview_escape.py::test_preview_is_focusable_and_receives_focus_on_open`. Synchronized `src/data-tables.js` with standalone `index.html` (readback parity confirmed). Local GitHub clone failed with `Could not resolve host: github.com`; full local unit and Chromium regressions cannot run from this environment. Exact-head dev push Quality cannot be observed with the available connector (PR-run lookup only), so do not merge until adequate CI evidence. Main at checkpoint `f6a13bbe7daa8f10bb39bb20b2990a4291767f61`. Preserve all concurrent work; do not bypass checks or disable hourly development.
+
+### NEXT FIVE — explicit acceptance tests
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | Snippet keyboard preview QA and release | New structural + Chromium Escape/focus/storage/mobile tests, exact candidate PR Quality green, main Quality and Pages green; no forced merge. | IMPLEMENTED / CI PENDING |
+| 2 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Named function composition inside SUM/IF, valid numeric reference oracles, unknown names, recursion bounds, browser and unit regression. | TODO |
+| 3 | P0-MATRIX-PSEUDOINVERSE-2X2 | Moore–Penrose identities, singular/zero/scaled 2x2, least-norm solve, numeric and UI tests. | TODO |
+| 4 | P1-GRAPH-PALETTE-VALIDITY | 2D/3D executable symbols distinguished from typesetting-only, caret insertion, keyboard/mobile tests. | TODO |
+| 5 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Row/column/schema preview, cancel rollback, invalid/malformed file, Unicode, 390/768/1280px. | TODO |
+
+## 2026-10-28 20:24 CET — P1-DATA-SNIPPET-PREVIEW-ESCAPE checkpoint
+
+**DEV COMMITTED / NOT RELEASED.** Added Escape-to-cancel for the saved-snippet import preview; keyboard dismissal closes the preview, returns focus to Import and does not invoke storage persistence. Synchronized standalone HTML with `src/data-tables.js` and added focused `tests/test_snippet_preview_escape.py` covering cancellation and byte-for-byte parity. GitHub readback confirmed module/HTML parity. Attempted local unit execution, but GitHub clone failed due to DNS resolution; Chromium and exact-head Quality are not yet verified. **Do not merge until green checks.** Current main at checkpoint `f6a13bbe7daa8f10bb39bb20b2990a4291767f61`; concurrent hourly work may advance dev. Recurring task stays enabled.
+
+### NEXT FIVE with acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Snippet preview keyboard QA and release | Escape with preview focused, no mutation, focus restored, mobile 390/768/1280, exact-head CI, PR/main/Pages gates. | DEV COMMITTED / QA PENDING |
+| 2 | Data custom formula composition | Nested named functions, invalid names, recursion bounds and numeric reference cases. | TODO |
+| 3 | 2x2 matrix pseudoinverse | Moore–Penrose identities, singular/zero matrices and browser UI. | TODO |
+| 4 | Graph palette compatibility | 2D/3D executable symbols versus display-only notation and focus/caret tests. | TODO |
+| 5 | Data import preview validation | Schema/row counts, cancel rollback, malformed file and responsive tests. | TODO |
+
+## 2026-10-28 20:24 CET — P1-DATA-SINGLE-COLUMN-INTERCHANGE RELEASED via PR #68
+
+**Feature ledger: RELEASED FOR STATED SCOPE.** Data Tables accepts one-column CSV/TSV/JSON, including quoted Unicode, embedded separators, multiline text, empty cells and editable formula-source CSV. CSV/TSV serializers now explicitly quote empty cells to preserve single-column blank records; TSV extension wins over ambiguous comma/semicolon sniffing. Regular TSV and JSON exports retain **evaluated** values, whereas formula-source CSV preserves editable expressions. Graph XY import and plot validation still require distinct coordinate columns. Added mandatory Chromium `tests/smoke_data_single_column.py` and structural `tests/test_single_column_import.py`; standalone `index.html` synchronized with `src/data-tables.js`.
+
+**Verified execution log:** Began at `dev=5d31fe1f70eec0fe472cbbb138170e7268060a70`, `main=cca1d0967144941b652c57fdf4def628b164ef0e`, no open PR. Two new-test failures were diagnosed from CI logs and fixed without removing assertions: single blank-cell CSV/TSV export and incorrect expectation that evaluated TSV preserved formula source. Final exact `dev=3dee186b597d84742902896776451ffc74e37f9c` passed [dev Quality 40751963576](https://github.com/saeedsai/ProMathStudio/actions/runs/40751963576) **82/82 steps**, and [PR #68 Quality 40752718843](https://github.com/saeedsai/ProMathStudio/actions/runs/40752718843) **82/82 steps**. Reviewed seven expected files, clean mergeability and unchanged head; ordinary SHA-checked [PR #68](https://github.com/saeedsai/ProMathStudio/pull/68) merged to `main=f6a13bbe7daa8f10bb39bb20b2990a4291767f61`. [Main Quality 40753328201](https://github.com/saeedsai/ProMathStudio/actions/runs/40753328201) passed **82/82 steps** and [Pages 40753327266](https://github.com/saeedsai/ProMathStudio/actions/runs/40753327266) succeeded; branch cleanup workflow 40753328129 succeeded. Only dev/main branches found. Independent interactive Pages verification unavailable (external fetch disabled); deployment workflow verified. Branch protection remains disabled (no administration permission). No demonstrably obsolete tracked files removed. Historical 166-gap/95-partial baseline remains active, and hourly task stays enabled. Post-release dev documentation commit has its own separate Quality gate.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-FORMULA-CUSTOM-COMPOSITION | Bounded custom functions nested inside SUM/IF, numeric oracles, invalid names, recursion and sandbox guards; mandatory Chromium test. | TODO |
+| 2 | P0-MATRIX-PSEUDOINVERSE-2X2 | Moore–Penrose identities, singular/zero/scaled matrices, least-norm solve, UI browser and numeric reference tests. | TODO |
+| 3 | P1-GRAPH-PALETTE-VALIDITY | Graph Symbols distinguish executable 2D/3D functions/constants from typesetting-only notation without losing Equation symbols; mobile tests. | TODO |
+| 4 | P1-DATA-LIBRARY-SNIPPET-UX-FOLLOWUP | Preview Escape cancellation, focus restoration, full long-code inspection, safe escaping and 390/768/1280px tests. | TODO |
+| 5 | P1-DATA-IMPORT-PREVIEW-VALIDATION | Before creating Data Tables sheet show row/column count and schema issues, cancel without mutation, large-file and invalid input regression. | TODO |
+
 ## 2026-10-28 20:01 CET — P1-DATA-SINGLE-COLUMN-INTERCHANGE implemented on dev; QA pending
 
 **Feature ledger: IMPLEMENTED ON DEV / NOT YET RELEASED.** Data Tables CSV/TSV/JSON import opts into 1–32-column records, while the shared Graphs parser and graph XY validation remain strict at 2–32 columns. Separator-free one-column headers use a CSV comma or TSV tab hint; quoted commas, semicolons, tabs, Unicode, multiline text, blank cells and formula-source CSV are preserved. JSON supports one-field object records, coordinate arrays, column arrays and {columns,rows}. Existing multi-column and evaluated export semantics remain unchanged. Added mandatory Chromium `tests/smoke_data_single_column.py` (round trips, source formulas, graph rejection, malformed rollback, 390/768/1280px) and structural `tests/test_single_column_import.py`. Standalone/index and modular source kept synchronized. **Do not mark Released until exact-head dev CI, PR CI, main CI and Pages deployment all succeed.** Historical 166-gap/95-partial baseline unchanged; recurring development stays enabled.

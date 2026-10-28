@@ -56,9 +56,13 @@ def main():
             assert preview.is_visible()
             assert '1 new' in summary.inner_text()
             assert stored() == []
-            cancel.click()
+            # Keyboard users land on the preview immediately after choosing a file.
+            # Escape must cancel without writing to storage, and restore focus.
+            assert page.evaluate('document.activeElement.id') == 'dt-snippet-preview'
+            page.keyboard.press('Escape')
             assert not preview.is_visible()
             assert stored() == []
+            assert page.evaluate('document.activeElement.id') == 'dt-snippet-import'
             assert 'canceled' in status.inner_text().lower()
 
             upload([snippet('Alpha')])
@@ -124,7 +128,10 @@ def main():
                 assert preview.is_visible()
                 assert apply.is_visible()
                 assert cancel.is_visible()
-                cancel.click()
+                assert page.evaluate('document.activeElement.id') == 'dt-snippet-preview'
+                page.keyboard.press('Escape')
+                assert not preview.is_visible()
+                assert page.evaluate('document.activeElement.id') == 'dt-snippet-import'
             assert not errors, errors
             browser.close()
     finally:

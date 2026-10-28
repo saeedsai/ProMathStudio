@@ -1,7 +1,12 @@
-## Unreleased — Single-column Data Tables CSV/TSV/JSON interchange (2026-10-28)
+## Unreleased — Accessible saved-snippet import preview keyboard cancellation (2026-10-28)
+
+- Importing a saved snippet JSON file moves keyboard focus into its review preview. Escape dismisses the preview without writing to saved snippets and returns focus to the Import button; the existing Cancel button remains available.
+- Expanded mandatory Chromium preview regression for immediate Escape dismissal and focus restoration at 390/768/1280px, plus structural assertions for preview focus and standalone source parity. **Not released until exact-head dev/PR/main CI and Pages deployment are verified.**
+
+## Released — Single-column Data Tables CSV/TSV/JSON interchange (2026-10-28, PR #68)
 
 - Import one-column CSV, TSV and JSON into Data Tables, including quoted Unicode/multiline cells and editable formulas from source CSV; retain strict two-coordinate requirements in Graphs.
-- Add mandatory browser round-trip/rollback and structural parity regression coverage. **Pending exact-head CI and production release.**
+- Added mandatory browser round-trip/rollback and structural parity regression coverage. [Dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40751963576), [PR Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40752718843), [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/40753328201) and [Pages deployment](https://github.com/saeedsai/ProMathStudio/actions/runs/40753327266) passed.
 
 ## Released — Saved-snippet JSON import preview and conflict-safe confirmation (2026-10-28, PR #67)
 

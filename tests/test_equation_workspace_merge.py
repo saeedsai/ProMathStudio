@@ -13,6 +13,14 @@ class EquationWorkspaceMergeTests(unittest.TestCase):
         self.assertIn("['editor','preview','solver','python','notebook','notebookTitle','examples','tip']",HTML)
         for token in ('id="equation-input"','id="symbolic-panel"','id="cas-run"','id="cas-operation"','id="cas-engine"','id="latex-preview"','id="notebook"'):
             self.assertIn(token,HTML)
+    def test_combined_task_picker_preserves_all_solver_operations(self):
+        for key in ("'numerical','Numerical methods'", "'ode','ODE initial values'",
+                    "'assumptions','Assumptions'", "'examples','Try examples'",
+                    "'notebook','My equations'", "'python','Python code'"):
+            self.assertIn(key,HTML)
+        self.assertIn("if(activeMode==='editor')$('symbolic-panel').querySelector('.cas-wrap')",HTML)
+        self.assertNotIn("if(activeMode==='solver')$('symbolic-panel').querySelector('.cas-wrap')",HTML)
+
     def test_numerical_panel_and_legacy_routes(self):
         self.assertIn("mode!=='editor'",HTML)
         self.assertIn("solver:'Expand, factor, solve",HTML)

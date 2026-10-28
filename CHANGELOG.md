@@ -1,3 +1,8 @@
+## Implemented on dev — Full saved-snippet source inspection (2026-10-28; QA pending)
+
+- Data Tables Functions & Code Library now provides a **View full** action for saved Formula/Python snippets. It displays the complete read-only source (up to 8,000 characters) in an accessible, scrollable preview without insertion or execution. Escape and Close dismiss the preview, clear the displayed code and restore focus. Catalog descriptions truncate long samples to 120 characters; built-in examples and existing Edit/Insert/Delete actions are preserved.
+- Added structural `tests/test_data_snippet_inspection.py` and mandatory Chromium `tests/smoke_data_snippet_inspection.py` for 8,000-character source, HTML-injection text, storage immutability, Python nonexecution, focus restoration and 390/768/1280px. Updated Quality workflow and synchronized standalone `index.html`. **Not released** until exact-head dev and PR Quality, main Quality and Pages deployment are verified.
+
 ## Released — Graph palette numeric validity (2026-10-28, PR #72)
 
 - In 2D and 3D Graphs, the shared Symbols library now distinguishes known executable numeric templates (sin/cos, logarithms, constants, powers and other supported operations) from Equation-only notation. Non-plotting symbols are visible but disabled with an explanation; the full symbol library remains available in Equation. A context hint explains the distinction, and focus-based redraw handles programmatic workspace navigation.

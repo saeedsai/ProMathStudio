@@ -1,8 +1,8 @@
-## Unreleased — Equation task-family organization (2026-10-28)
+## Released — Equation task-family organization (2026-10-28, PR #61)
 
 - Organized the combined Equation workstation's existing task selector into four accessible native groups: **Write & solve**, **Notebook & examples**, **Numerical & differential**, and **Solver configuration**. No solver, notebook, CAS or export buttons were duplicated, removed or hidden by this grouping; task values and drafts are preserved.
 - Added `tests/smoke_equation_task_groups.py` with Chromium coverage for grouping, offline CAS, notebook, numerical/ODE, assumptions, draft preservation, other workspace isolation and 390/768/1280px layout. Registered it as a mandatory Quality workflow step. Source/standalone parity synchronized.
-- This change remains **on dev pending exact-head CI and ordinary PR promotion**; do not treat as released until verified.
+- Verified on exact dev and PR heads, merged through PR #61, passed main Quality, and published through GitHub Pages. Interactive public-site browsing remains unverified.
 
 ## Released — Unified Equation workstation (2026-10-28, PR #60)
 

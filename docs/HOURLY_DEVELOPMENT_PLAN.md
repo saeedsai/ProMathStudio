@@ -1,3 +1,17 @@
+## 2026-10-28 — Parallel feature: saved Data Tables snippets
+
+**DEV IMPLEMENTED; CI/RELEASE NOT VERIFIED.** Added named locally persisted Formula/Python snippets to the Data Tables Functions & Code Library. Includes search/category integration, bounded 40-entry catalog, 60-character names, 8000-character snippet validation, formula '=' requirement, and malformed storage recovery. Synchronized modular Data Tables code with standalone index.html; added discoverable unittest `tests/test_data_saved_snippets.py`. **QA pending:** run full Python/unittest and Chromium regressions, verify saved snippets persist across reloads, focus and insertion, storage failure behavior, mobile layout, exact-dev-head CI and safe PR/Pages deployment. This does not yet support snippet deletion; add a separate small enhancement. Do not claim production deployment.
+
+### NEXT FIVE — parallel delivery queue
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-LIBRARY-SAVED-SNIPPETS QA | Unittest, browser reload/search, valid/invalid inputs, no execution, mobile, full CI. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-UI-SHARED-SYMBOL-LIBRARY | Solver and 2D/3D graph insertion, cursor/focus, mobile and Editor/Calculator regressions. | REQUESTED |
+| 3 | P1-DATA-LIBRARY-SNIPPET-MANAGEMENT | Delete and rename custom snippets, avoid accidental overwrite and recover storage failures. | TODO |
+| 4 | P1-UI-DATA-TOOLBAR remaining import/export QA | CSV/TSV/JSON/XLSX round-trip and malformed-file rollback. | IN PROGRESS |
+| 5 | P1-UI-ACCESSIBILITY remainder | Keyboard and screen-reader status across five workspaces, mobile and no browser errors. | IN PROGRESS |
+
 ## 2026-10-28 — P1-DATA-FUNCTION-CODE-LIBRARY release and execution log
 
 **RELEASED via [PR #56](https://github.com/saeedsai/ProMathStudio/pull/56).** Latest pre-run exact-dev-head Quality [40647176079](https://github.com/saeedsai/ProMathStudio/actions/runs/40647176079) failed the existing strict standalone/source parity test because the previous update trimmed a trailing newline. This run restored exact module parity and replaced the detached-input formula insertion with stable table coordinates, adding Formula/Python/Operation categories and native operation selection. Added discoverable unittest (the earlier pytest-style functions were not run by unittest discovery), a focused Playwright browser test, and mandatory Quality registration. No checks bypassed. New commit, CI, PR and Pages outcomes must be appended after verification.

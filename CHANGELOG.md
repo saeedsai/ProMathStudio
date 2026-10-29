@@ -1,3 +1,10 @@
+## Dev candidate — Rectangular SVD numerical-rank cutoff and conditioning (2026-10-29)
+
+- Added scale-safe absolute numerical-rank cutoff and explicit condition assessment (rank deficient / well / moderately / ill-conditioned) to thin 3×2 SVD and transposed wide 2×3 SVD. Condition-number ratio is computed from normalized QR singular values to avoid avoidable scale-dependent rounding; zero matrices report rank-deficient diagnostics.
+- Matrix UI now displays the cutoff and advisory for rectangular SVD and correctly labels the 2×3 option. Existing reconstruction and orthogonality rejection gates are unchanged.
+- Added `tests/test_matrix_svd_rectangular_condition.py` for standalone/module parity and Node syntax, plus mandatory Chromium `tests/smoke_matrix_svd_rectangular_condition.py` using 80-digit rational orthonormal references, near-rank-one rank boundaries, scales 1e-12/1/1e11, wide transpose parity, invalid inputs, Equation Editor transfer and mobile layouts.
+- Direct exact-source V8 checks passed nine rotated near-rank-one matrices at three scales (maximum observed small-singular-value relative error ~7.4e-5, reconstruction residual ~2.1e-16). Full CI/PR QA and Pages verification remain pending.
+
 ## PR #89 merged — 3×3 SVD conditioning and rank-cutoff diagnostics (2026-10-29)
 
 - Released to `main` through ordinary expected-head [PR #89](https://github.com/saeedsai/ProMathStudio/pull/89), merge commit `aab6236604f0716487a56bf2d0d9ec56e4713d90`, after exact-head [PR Quality 40878671063](https://github.com/saeedsai/ProMathStudio/actions/runs/40878671063) passed **103/103 steps** at `622273b630ef07f8a658f26c714bb44d41ade416` (all successful, zero unresolved review threads). Dev fast-forwarded without force.

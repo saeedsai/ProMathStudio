@@ -1,3 +1,7 @@
+## 3×3 SVD QA correction (2026-10-29)
+
+- Initial exact-head [PR #85 Quality 40850284532](https://github.com/saeedsai/ProMathStudio/actions/runs/40850284532) failed only the new 3×3 SVD Chromium regression at its responsive visibility check: the test had transferred to Equation Editor and did not return to Calculator. Corrected the test to restore the Matrix workspace before checking viewport visibility, retaining all assertions. New exact-head CI is pending; no production claim.
+
 ## Dev candidate — 3×3 real SVD diagnostics (2026-10-29)
 
 - Added a bounded real 3×3 one-sided Jacobi SVD to Matrix Calculator (alongside existing 2×2), returning sorted singular values, U/V, numerical rank, condition number when full rank, and verified reconstruction/orthogonality residuals. Rank-deficient cases use orthogonal null-space completion; no dynamic evaluation or external libraries.

@@ -1,3 +1,17 @@
+## 2026-10-29 — Ax=b numeric RHS grammar correction (dev, QA pending)
+
+**Execution log:** Read AGENTS.md, frozen inventory, live ledger and recent CI evidence. Found an inconsistent remaining parser: `solve(A,b)` RHS accepted JS numeric prefixes (`0x10`, `0b10`, `0o10`) even though A had strict decimal-only validation. Implemented strict decimal/scientific grammar for string RHS before `Number`, retained signed/exponent inputs and magnitude guards, synchronized module and HTML, added mandatory dedicated Chromium test `tests/smoke_matrix_rhs_decimal.py` and workflow step. This is a dev checkpoint, **not yet QA-green, merged or deployed**. Last verified main `43cc4e68cd58e3d035235cda8e47e4087da4f66e`; production verification for #83 still pending. Do not merge until exact-head dev + PR CI green. No branch or protection changes; keep hourly task enabled.
+
+### NEXT FIVE — explicit acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Ax=b RHS decimal validation release | Chromium API/UI rejects 0x/0b/0o, malformed strings; accepts decimal/exponents and numeric inputs, recovers, is responsive; full suite and PR Quality green, Pages checked. | DEV / QA PENDING |
+| 2 | Confirm production PR #83 | Main Quality, exact SHA Pages deployment and hosted UI decimal matrix input tested. | UNVERIFIED |
+| 3 | Rotated near-dependent 3×3 pseudoinverse | Independent high-precision oracle, rank/scale and four Moore–Penrose residual gates. | TODO |
+| 4 | 3×3 SVD diagnostics | Rank0–3 singular vectors, reconstruction and orthogonality tests, transfer. | TODO |
+| 5 | Hosted Data Tables / Graph QA | CSV/TSV/JSON preview rollback, graph numerical templates, keyboard/mobile/no runtime errors. | ACCESS BLOCKED |
+
 ## 2026-10-29 09:15 CET — PR #83 merged after verified Chromium and structural QA
 
 **Feature ledger: MERGED / PAGES NOT YET VERIFIED.** Matrix input now rejects JavaScript-specific hexadecimal/binary/octal prefixes and malformed numeric strings, accepts signed decimal/scientific notation, and keeps finite/magnitude guards. Standalone/module parity restored with required newline. Added `tests/test_matrix_decimal_input.py` and mandatory `tests/smoke_matrix_decimal_input.py`. First [PR Quality 40839293729](https://github.com/saeedsai/ProMathStudio/actions/runs/40839293729) failed seven structural bundle parity assertions because of a missing trailing newline; repaired without weakening assertions. Final exact-head [PR Quality 40839418058](https://github.com/saeedsai/ProMathStudio/actions/runs/40839418058) **passed 96/96 steps** at `7c5b292737a273f515ab94a99fedcce84b0da0e9`. Reviewed seven-file diff and zero unresolved review threads. Ordinary expected-SHA [PR #83](https://github.com/saeedsai/ProMathStudio/pull/83) merge succeeded at **main `43cc4e68cd58e3d035235cda8e47e4087da4f66e`**, then dev was safely fast-forwarded to main without force. Main push Quality, Pages deployment and independent hosted interactive QA remain **unverified** because the connector exposes only PR-triggered runs and direct website/DNS access is unavailable. Do not claim Pages deployed until evidence is obtained. Branch protection remains unconfigured. Only dev/main branches verified.

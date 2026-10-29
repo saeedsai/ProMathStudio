@@ -788,7 +788,7 @@
   });
   tableImportPreview.addEventListener('keydown',event=>{
     if(event.key!=='Escape'||tableImportPreview.hidden)return;
-    event.preventDefault();closeTableImportPreview();
+    event.preventDefault();event.stopPropagation();closeTableImportPreview();
     notify('Import canceled; tables unchanged.');
     $('dt-import').focus();
   });

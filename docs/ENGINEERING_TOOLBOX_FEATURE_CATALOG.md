@@ -1,3 +1,5 @@
+**Electromagnetics (tenth planned discipline):** [163-feature electromagnetic engineering catalog](ELECTROMAGNETICS_TOOLBOX_FEATURE_LIST.md) including static/dynamic fields, waves, microwave, antennas, EMC/EMI, numerical electromagnetics, photonics and electromechanical systems. Share reusable math and engineering services with existing toolboxes.
+
 **Cryptography & Security (ninth planned discipline):** [145-feature cryptography catalog](CRYPTOGRAPHY_SECURITY_TOOLBOX_FEATURE_LIST.md), including cryptographic mathematics, hashes, keys, encryption, digital signatures, PKI, protocols, post-quantum and validation. Reuse shared services; no production primitives from scratch.
 
 **Signal Engineering & Processing (eighth planned discipline):** [177-feature signal catalog](SIGNAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md) covering signal types, synthesis, acquisition, reading/decoding, coding, filtering, transforms, statistics, detection and visualization. Share algorithms with Control, GNSS, Electronics and other disciplines.

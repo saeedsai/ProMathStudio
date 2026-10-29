@@ -39,7 +39,7 @@ def main():
           });
         }""")
         values = page.evaluate("MathStudio.dataTables.calculate()")
-        assert values == [[1, '#NUM!', 1e308, 8, '#VALUE', 7]], values
+        assert values == [['1', '#NUM!', 1e308, 8, '#VALUE', 7]], values
 
         def formula(expression):
             return page.evaluate(

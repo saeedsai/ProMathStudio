@@ -1575,98 +1575,7 @@ def _ms_system(job_text):
   async function copyWord(){
     if(!currentResult){showToast('Type an equation first');return;}
     const xml=new XMLSerializer().serializeToString(mathElement(currentResult.ast));
-    const html='<!DOCTYPE html><html><body><div style="font-family:Cambria Math,serif;font-size:20pt">'+xml+'</div><script id="promath-complex-graph">
-(function(){
-'use strict';
-const root=document.getElementById('complex-graph-workbench');
-if(!root)return;
-const get=id=>document.getElementById(id);
-const canvas=get('complex-canvas'),ctx=canvas.getContext('2d');
-const calc=(a,b,kind)=>{
- if(kind==='square')return [a*a-b*b,2*a*b];
- if(kind==='inverse'){const d=a*a+b*b;return d>1e-16?[a/d,-b/d]:[NaN,NaN];}
- if(kind==='exp'){const m=Math.exp(a);return [m*Math.cos(b),m*Math.sin(b)];}
- return [a,b];
-};
-const valid=(a,b)=>Number.isFinite(a)&&Number.isFinite(b);
-function render(){
- const a=Number(get('complex-real').value),b=Number(get('complex-imag').value);
- if(!get('complex-real').value.trim()||!get('complex-imag').value.trim()||!valid(a,b)||Math.abs(a)>1e6||Math.abs(b)>1e6){
- get('complex-status').textContent='Enter finite real and imaginary values (absolute value ≤ 1,000,000).';return;
- }
- const kind=get('complex-function').value,mode=get('complex-view').value;
- const result=calc(a,b,kind);
- if(!valid(...result)){get('complex-status').textContent='Function undefined or overflows at this point.';return;}
- const w=canvas.width,h=canvas.height;
- ctx.clearRect(0,0,w,h);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
- ctx.font='15px system-ui,sans-serif';ctx.lineWidth=1;
- if(mode==='2d'){
- const bound=Math.max(4,Math.abs(a)*1.25,Math.abs(b)*1.25,Math.abs(result[0])*1.25,Math.abs(result[1])*1.25);
- const scale=Math.min((w-110)/(bound*2),(h-80)/(bound*2)),cx=w/2,cy=h/2;
- ctx.strokeStyle='#e6eef0';
- for(let t=-4;t<=4;t++){const v=t*bound/4;ctx.beginPath();ctx.moveTo(cx+v*scale,20);ctx.lineTo(cx+v*scale,h-20);ctx.moveTo(30,cy-v*scale);ctx.lineTo(w-30,cy-v*scale);ctx.stroke();}
- ctx.strokeStyle='#597b82';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(30,cy);ctx.lineTo(w-25,cy);ctx.moveTo(cx,20);ctx.lineTo(cx,h-25);ctx.stroke();
- ctx.fillStyle='#385d66';ctx.fillText('Re',w-50,cy-12);ctx.fillText('Im',cx+12,24);
- const x=cx+result[0]*scale,y=cy-result[1]*scale;
- ctx.strokeStyle='#188b81';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.stroke();
- ctx.fillStyle='#ec824f';ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#27444b';ctx.fillText('f(z)',Math.min(w-50,x+12),Math.max(20,y-12));
- }else{
- const range=3,steps=26,mag=(x,y)=>{const v=calc(x,y,kind);return valid(...v)?Math.min(8,Math.hypot(...v)):NaN;};
- const project=(x,y,v)=>[w/2+(x-y)*52,h*.68+(x+y)*21-v*26];
- ctx.lineWidth=1;ctx.strokeStyle='#8ebfb8';
- for(let axis=0;axis<2;axis++)for(let i=0;i<=steps;i++){
- const fixed=-range+2*range*i/steps;ctx.beginPath();let started=false;
- for(let j=0;j<=steps;j++){const variable=-range+2*range*j/steps;const x=axis?variable:fixed,y=axis?fixed:variable;const m=mag(x,y);
- if(!Number.isFinite(m)){started=false;continue;}const [px,py]=project(x,y,m);
- if(!started){ctx.moveTo(px,py);started=true;}else ctx.lineTo(px,py);}
- ctx.stroke();
- }
- const [px,py]=project(a,b,Math.min(8,Math.hypot(...result)));
- if(Math.abs(a)<=range&&Math.abs(b)<=range){ctx.fillStyle='#e77843';ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fill();}
- ctx.fillStyle='#27444b';ctx.fillText('Re(z) →',w*.72,h*.86);ctx.fillText('Im(z) →',w*.22,h*.86);ctx.fillText('|f(z)| ↑',w*.51,30);
- }
- const fmt=n=>Number(n.toPrecision(6));
- get('complex-status').textContent='Plotted '+(mode==='2d'?'Argand point':'magnitude surface')+'.';
- get('complex-detail').textContent='z = '+fmt(a)+(b<0?' − ':' + ')+fmt(Math.abs(b))+'i; f(z) = '+fmt(result[0])+(result[1]<0?' − ':' + ')+fmt(Math.abs(result[1]))+'i; |f(z)| = '+fmt(Math.hypot(...result))+'. 3D surface domain: Re, Im ∈ [−3, 3]; height clipped to 8.';
-}
-get('complex-plot').addEventListener('click',render);
-get('complex-view').addEventListener('change',render);
-get('complex-function').addEventListener('change',render);
-root.addEventListener('toggle',()=>{if(root.open)render();});
-window.ProMathComplexGraph={evaluate:calc,render};
-})();
-</script>
-<script id="promath-control-theory">
-(function(){
-'use strict';
-const by=id=>document.getElementById(id),canvas=by('ct-canvas'),ctx=canvas.getContext('2d');
-function coefficients(text){const v=text.split(/[ ,;]+/).filter(Boolean).map(Number);if(!v.length||v.length>7||v.some(x=>!Number.isFinite(x)||Math.abs(x)>1e8)||v[0]===0)throw Error('Use 1–7 finite coefficients, first coefficient nonzero, |value| ≤ 1e8.');return v;}
-function pad(a,n){return Array(n-a.length).fill(0).concat(a);}
-function add(a,b){const n=Math.max(a.length,b.length),x=pad(a,n),y=pad(b,n);return x.map((v,i)=>v+y[i]);}
-function mul(a,k){return a.map(v=>v*k);}
-function evalPoly(poly,re,im){let x=0,y=0;for(const c of poly){const next=x*re-y*im+c;y=x*im+y*re;x=next;}return [x,y];}
-function div(a,b){const d=b[0]*b[0]+b[1]*b[1];return d>1e-25?[(a[0]*b[0]+a[1]*b[1])/d,(a[1]*b[0]-a[0]*b[1])/d]:[NaN,NaN];}
-function response(n,d,k,w){const z=div(evalPoly(n,0,w),evalPoly(d,0,w));return z.map(v=>v*k);}
-function routh(p){let c=p.slice();const n=c.length-1,size=Math.ceil(c.length/2),rows=Array.from({length:n+1},()=>Array(size).fill(0));
-for(let j=0;j<size;j++){rows[0][j]=c[2*j]||0;if(n)rows[1][j]=c[2*j+1]||0;}
-let degenerate=false;for(let i=2;i<=n;i++){if(rows[i-1].every(x=>Math.abs(x)<1e-11)){degenerate=true;const power=n-(i-2);for(let j=0;j<size;j++)rows[i-1][j]=rows[i-2][j]*(power-2*j);}if(Math.abs(rows[i-1][0])<1e-11){rows[i-1][0]=1e-9;degenerate=true;}for(let j=0;j<size-1;j++)rows[i][j]=(rows[i-1][0]*rows[i-2][j+1]-rows[i-2][0]*rows[i-1][j+1])/rows[i-1][0];}
-const first=rows.map(r=>r[0]);const changes=first.slice(1).reduce((n,x,i)=>n+(x*first[i]<0?1:0),0);return {rows,first,changes,degenerate};}
-function roots(poly){let p=poly.slice();while(p.length>1&&Math.abs(p[0])<1e-12)p.shift();const degree=p.length-1;if(!degree)return [];const norm=p.map(v=>v/p[0]),radius=1+Math.max(...norm.slice(1).map(Math.abs));let z=Array.from({length:degree},(_,i)=>[radius*Math.cos(2*Math.PI*(i+.2)/degree),radius*Math.sin(2*Math.PI*(i+.2)/degree)]);
-for(let iteration=0;iteration<160;iteration++){let delta=0;for(let i=0;i<degree;i++){let den=[1,0];for(let j=0;j<degree;j++)if(i!==j){const a=z[i][0]-z[j][0],b=z[i][1]-z[j][1];den=[den[0]*a-den[1]*b,den[0]*b+den[1]*a];}const step=div(evalPoly(norm,...z[i]),den);if(!Number.isFinite(step[0]))continue;const length=Math.hypot(...step);delta=Math.max(delta,length);z[i]=[z[i][0]-step[0],z[i][1]-step[1]];}if(delta<1e-9)break;}return z;}
-function draw(points,xlabel,ylabel,scatter=false){const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);const finite=points.filter(p=>p.every(Number.isFinite));if(!finite.length)return;const xs=finite.map(p=>p[0]),ys=finite.map(p=>p[1]);let xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);const dx=Math.max(xmax-xmin,1e-4),dy=Math.max(ymax-ymin,1e-4);xmin-=dx*.08;xmax+=dx*.08;ymin-=dy*.08;ymax+=dy*.08;const X=x=>55+(x-xmin)/(xmax-xmin)*(w-90),Y=y=>h-45-(y-ymin)/(ymax-ymin)*(h-85);ctx.strokeStyle='#dde8ea';ctx.lineWidth=1;for(let i=0;i<=5;i++){ctx.beginPath();ctx.moveTo(55+i*(w-90)/5,20);ctx.lineTo(55+i*(w-90)/5,h-45);ctx.moveTo(55,20+i*(h-85)/5);ctx.lineTo(w-35,20+i*(h-85)/5);ctx.stroke();}ctx.strokeStyle='#157e78';ctx.fillStyle='#157e78';ctx.lineWidth=2;if(scatter){finite.forEach(p=>{ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),2.2,0,Math.PI*2);ctx.fill();});}else{ctx.beginPath();finite.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));ctx.stroke();}ctx.fillStyle='#25464f';ctx.font='14px system-ui';ctx.fillText(xlabel,w/2,h-12);ctx.fillText(ylabel,15,25);}
-function analyze(){try{const n=coefficients(by('ct-num').value),d=coefficients(by('ct-den').value),k=Number(by('ct-gain').value);if(!Number.isFinite(k)||Math.abs(k)>1e6)throw Error('Gain must be finite and bounded.');const mode=by('ct-mode').value,closed=add(d,mul(n,k));let pts=[],message='G(s) = '+n.join(', ')+' / ('+d.join(', ')+'); gain '+k+'.\n';const samples=Array.from({length:220},(_,i)=>Math.pow(10,-2+5*i/219));
-if(mode==='bode'){pts=samples.map(w=>{const z=response(n,d,k,w);return [Math.log10(w),20*Math.log10(Math.hypot(...z))];});const phases=samples.map(w=>Math.atan2(response(n,d,k,w)[1],response(n,d,k,w)[0])*180/Math.PI);message+='Bode magnitude (dB) vs log10(ω). Phase samples: '+phases[0].toFixed(2)+'° → '+phases.at(-1).toFixed(2)+'° (wrapped).';draw(pts,'log10(ω rad/s)','Gain (dB)');}
-else if(mode==='nyquist'){pts=samples.map(w=>response(n,d,k,w));pts=pts.concat(pts.slice().reverse().map(p=>[p[0],-p[1]]));message+='Nyquist frequency response for ±ω; critical point is (-1,0). Stability must be confirmed with open-loop RHP pole count.';draw(pts,'Re G(jω)','Im G(jω)');}
-else if(mode==='root'){pts=Array.from({length:90},(_,i)=>roots(add(d,mul(n,100*i/89)))).flat();message+='Root-locus pole samples for K from 0 to 100 (discrete markers, not a branch-continuous curve). Repeated poles require verification.';draw(pts,'Real pole','Imaginary pole',true);}
-else if(mode==='routh'){const result=routh(d);message+='Routh table:\n'+result.rows.map(row=>row.map(x=>Number(x.toPrecision(6))).join('    ')).join('\n')+'\nSign changes in first column: '+result.changes+(result.degenerate?' (special zero-row/pivot case; inspect separately)':'')+'.';draw(result.first.map((v,i)=>[i,v]),'Routh row','First-column value');}
-else{const r=routh(closed);pts=samples.map(w=>{const z=div(evalPoly(mul(n,k),0,w),evalPoly(closed,0,w));return [Math.log10(w),20*Math.log10(Math.hypot(...z))];});message+='Unity negative feedback: T(s) = K N(s) / [D(s)+K N(s)]\nCharacteristic polynomial: '+closed.join(', ')+'\nRouth sign changes: '+r.changes+(r.degenerate?' (special-case caveat)':'')+'.';draw(pts,'log10(ω rad/s)','Closed-loop dB');}
-by('ct-output').textContent=message;by('ct-status').textContent='Analysis completed for supported continuous-time SISO model.';}
-catch(e){by('ct-status').textContent=e.message;by('ct-output').textContent='No valid result.';ctx.clearRect(0,0,canvas.width,canvas.height);}}
-by('ct-run').addEventListener('click',analyze);
-window.ProMathControlTheory={coefficients,routh,roots,response,analyze};
-})();
-</script></body></html>';
+    const html='<!DOCTYPE html><html><body><div style="font-family:Cambria Math,serif;font-size:20pt">'+xml+'</div></body></html>';
     try{
       if(window.ClipboardItem&&navigator.clipboard?.write&&window.isSecureContext){
         await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([currentResult.tex],{type:'text/plain'})})]);
@@ -7637,6 +7546,98 @@ document.addEventListener('click',event=>{
 },true);
 new MutationObserver(()=>{const next=mode();if(next!==activeMode)selectMode(next);}).observe(document.querySelector('.workspace-bar'),{attributes:true,attributeFilter:['class'],subtree:true});
 window.MathStudio.workspaceTasks={select:selectTask,current:()=>activeMode};
+})();
+</script>
+<script id="promath-complex-graph">
+(function(){
+'use strict';
+const root=document.getElementById('complex-graph-workbench');
+if(!root)return;
+const get=id=>document.getElementById(id);
+const canvas=get('complex-canvas'),ctx=canvas.getContext('2d');
+const calc=(a,b,kind)=>{
+ if(kind==='square')return [a*a-b*b,2*a*b];
+ if(kind==='inverse'){const d=a*a+b*b;return d>1e-16?[a/d,-b/d]:[NaN,NaN];}
+ if(kind==='exp'){const m=Math.exp(a);return [m*Math.cos(b),m*Math.sin(b)];}
+ return [a,b];
+};
+const valid=(a,b)=>Number.isFinite(a)&&Number.isFinite(b);
+function render(){
+ const a=Number(get('complex-real').value),b=Number(get('complex-imag').value);
+ if(!get('complex-real').value.trim()||!get('complex-imag').value.trim()||!valid(a,b)||Math.abs(a)>1e6||Math.abs(b)>1e6){
+ get('complex-status').textContent='Enter finite real and imaginary values (absolute value ≤ 1,000,000).';return;
+ }
+ const kind=get('complex-function').value,mode=get('complex-view').value;
+ const result=calc(a,b,kind);
+ if(!valid(...result)){get('complex-status').textContent='Function undefined or overflows at this point.';return;}
+ const w=canvas.width,h=canvas.height;
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
+ ctx.font='15px system-ui,sans-serif';ctx.lineWidth=1;
+ if(mode==='2d'){
+ const bound=Math.max(4,Math.abs(a)*1.25,Math.abs(b)*1.25,Math.abs(result[0])*1.25,Math.abs(result[1])*1.25);
+ const scale=Math.min((w-110)/(bound*2),(h-80)/(bound*2)),cx=w/2,cy=h/2;
+ ctx.strokeStyle='#e6eef0';
+ for(let t=-4;t<=4;t++){const v=t*bound/4;ctx.beginPath();ctx.moveTo(cx+v*scale,20);ctx.lineTo(cx+v*scale,h-20);ctx.moveTo(30,cy-v*scale);ctx.lineTo(w-30,cy-v*scale);ctx.stroke();}
+ ctx.strokeStyle='#597b82';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(30,cy);ctx.lineTo(w-25,cy);ctx.moveTo(cx,20);ctx.lineTo(cx,h-25);ctx.stroke();
+ ctx.fillStyle='#385d66';ctx.fillText('Re',w-50,cy-12);ctx.fillText('Im',cx+12,24);
+ const x=cx+result[0]*scale,y=cy-result[1]*scale;
+ ctx.strokeStyle='#188b81';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.stroke();
+ ctx.fillStyle='#ec824f';ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#27444b';ctx.fillText('f(z)',Math.min(w-50,x+12),Math.max(20,y-12));
+ }else{
+ const range=3,steps=26,mag=(x,y)=>{const v=calc(x,y,kind);return valid(...v)?Math.min(8,Math.hypot(...v)):NaN;};
+ const project=(x,y,v)=>[w/2+(x-y)*52,h*.68+(x+y)*21-v*26];
+ ctx.lineWidth=1;ctx.strokeStyle='#8ebfb8';
+ for(let axis=0;axis<2;axis++)for(let i=0;i<=steps;i++){
+ const fixed=-range+2*range*i/steps;ctx.beginPath();let started=false;
+ for(let j=0;j<=steps;j++){const variable=-range+2*range*j/steps;const x=axis?variable:fixed,y=axis?fixed:variable;const m=mag(x,y);
+ if(!Number.isFinite(m)){started=false;continue;}const [px,py]=project(x,y,m);
+ if(!started){ctx.moveTo(px,py);started=true;}else ctx.lineTo(px,py);}
+ ctx.stroke();
+ }
+ const [px,py]=project(a,b,Math.min(8,Math.hypot(...result)));
+ if(Math.abs(a)<=range&&Math.abs(b)<=range){ctx.fillStyle='#e77843';ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fill();}
+ ctx.fillStyle='#27444b';ctx.fillText('Re(z) →',w*.72,h*.86);ctx.fillText('Im(z) →',w*.22,h*.86);ctx.fillText('|f(z)| ↑',w*.51,30);
+ }
+ const fmt=n=>Number(n.toPrecision(6));
+ get('complex-status').textContent='Plotted '+(mode==='2d'?'Argand point':'magnitude surface')+'.';
+ get('complex-detail').textContent='z = '+fmt(a)+(b<0?' − ':' + ')+fmt(Math.abs(b))+'i; f(z) = '+fmt(result[0])+(result[1]<0?' − ':' + ')+fmt(Math.abs(result[1]))+'i; |f(z)| = '+fmt(Math.hypot(...result))+'. 3D surface domain: Re, Im ∈ [−3, 3]; height clipped to 8.';
+}
+get('complex-plot').addEventListener('click',render);
+get('complex-view').addEventListener('change',render);
+get('complex-function').addEventListener('change',render);
+root.addEventListener('toggle',()=>{if(root.open)render();});
+window.ProMathComplexGraph={evaluate:calc,render};
+})();
+</script>
+<script id="promath-control-theory">
+(function(){
+'use strict';
+const by=id=>document.getElementById(id),canvas=by('ct-canvas'),ctx=canvas.getContext('2d');
+function coefficients(text){const v=text.split(/[ ,;]+/).filter(Boolean).map(Number);if(!v.length||v.length>7||v.some(x=>!Number.isFinite(x)||Math.abs(x)>1e8)||v[0]===0)throw Error('Use 1–7 finite coefficients, first coefficient nonzero, |value| ≤ 1e8.');return v;}
+function pad(a,n){return Array(n-a.length).fill(0).concat(a);}
+function add(a,b){const n=Math.max(a.length,b.length),x=pad(a,n),y=pad(b,n);return x.map((v,i)=>v+y[i]);}
+function mul(a,k){return a.map(v=>v*k);}
+function evalPoly(poly,re,im){let x=0,y=0;for(const c of poly){const next=x*re-y*im+c;y=x*im+y*re;x=next;}return [x,y];}
+function div(a,b){const d=b[0]*b[0]+b[1]*b[1];return d>1e-25?[(a[0]*b[0]+a[1]*b[1])/d,(a[1]*b[0]-a[0]*b[1])/d]:[NaN,NaN];}
+function response(n,d,k,w){const z=div(evalPoly(n,0,w),evalPoly(d,0,w));return z.map(v=>v*k);}
+function routh(p){let c=p.slice();const n=c.length-1,size=Math.ceil(c.length/2),rows=Array.from({length:n+1},()=>Array(size).fill(0));
+for(let j=0;j<size;j++){rows[0][j]=c[2*j]||0;if(n)rows[1][j]=c[2*j+1]||0;}
+let degenerate=false;for(let i=2;i<=n;i++){if(rows[i-1].every(x=>Math.abs(x)<1e-11)){degenerate=true;const power=n-(i-2);for(let j=0;j<size;j++)rows[i-1][j]=rows[i-2][j]*(power-2*j);}if(Math.abs(rows[i-1][0])<1e-11){rows[i-1][0]=1e-9;degenerate=true;}for(let j=0;j<size-1;j++)rows[i][j]=(rows[i-1][0]*rows[i-2][j+1]-rows[i-2][0]*rows[i-1][j+1])/rows[i-1][0];}
+const first=rows.map(r=>r[0]);const changes=first.slice(1).reduce((n,x,i)=>n+(x*first[i]<0?1:0),0);return {rows,first,changes,degenerate};}
+function roots(poly){let p=poly.slice();while(p.length>1&&Math.abs(p[0])<1e-12)p.shift();const degree=p.length-1;if(!degree)return [];const norm=p.map(v=>v/p[0]),radius=1+Math.max(...norm.slice(1).map(Math.abs));let z=Array.from({length:degree},(_,i)=>[radius*Math.cos(2*Math.PI*(i+.2)/degree),radius*Math.sin(2*Math.PI*(i+.2)/degree)]);
+for(let iteration=0;iteration<160;iteration++){let delta=0;for(let i=0;i<degree;i++){let den=[1,0];for(let j=0;j<degree;j++)if(i!==j){const a=z[i][0]-z[j][0],b=z[i][1]-z[j][1];den=[den[0]*a-den[1]*b,den[0]*b+den[1]*a];}const step=div(evalPoly(norm,...z[i]),den);if(!Number.isFinite(step[0]))continue;const length=Math.hypot(...step);delta=Math.max(delta,length);z[i]=[z[i][0]-step[0],z[i][1]-step[1]];}if(delta<1e-9)break;}return z;}
+function draw(points,xlabel,ylabel,scatter=false){const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);const finite=points.filter(p=>p.every(Number.isFinite));if(!finite.length)return;const xs=finite.map(p=>p[0]),ys=finite.map(p=>p[1]);let xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);const dx=Math.max(xmax-xmin,1e-4),dy=Math.max(ymax-ymin,1e-4);xmin-=dx*.08;xmax+=dx*.08;ymin-=dy*.08;ymax+=dy*.08;const X=x=>55+(x-xmin)/(xmax-xmin)*(w-90),Y=y=>h-45-(y-ymin)/(ymax-ymin)*(h-85);ctx.strokeStyle='#dde8ea';ctx.lineWidth=1;for(let i=0;i<=5;i++){ctx.beginPath();ctx.moveTo(55+i*(w-90)/5,20);ctx.lineTo(55+i*(w-90)/5,h-45);ctx.moveTo(55,20+i*(h-85)/5);ctx.lineTo(w-35,20+i*(h-85)/5);ctx.stroke();}ctx.strokeStyle='#157e78';ctx.fillStyle='#157e78';ctx.lineWidth=2;if(scatter){finite.forEach(p=>{ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),2.2,0,Math.PI*2);ctx.fill();});}else{ctx.beginPath();finite.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));ctx.stroke();}ctx.fillStyle='#25464f';ctx.font='14px system-ui';ctx.fillText(xlabel,w/2,h-12);ctx.fillText(ylabel,15,25);}
+function analyze(){try{const n=coefficients(by('ct-num').value),d=coefficients(by('ct-den').value),k=Number(by('ct-gain').value);if(!Number.isFinite(k)||Math.abs(k)>1e6)throw Error('Gain must be finite and bounded.');const mode=by('ct-mode').value,closed=add(d,mul(n,k));let pts=[],message='G(s) = '+n.join(', ')+' / ('+d.join(', ')+'); gain '+k+'.\n';const samples=Array.from({length:220},(_,i)=>Math.pow(10,-2+5*i/219));
+if(mode==='bode'){pts=samples.map(w=>{const z=response(n,d,k,w);return [Math.log10(w),20*Math.log10(Math.hypot(...z))];});const phases=samples.map(w=>Math.atan2(response(n,d,k,w)[1],response(n,d,k,w)[0])*180/Math.PI);message+='Bode magnitude (dB) vs log10(ω). Phase samples: '+phases[0].toFixed(2)+'° → '+phases.at(-1).toFixed(2)+'° (wrapped).';draw(pts,'log10(ω rad/s)','Gain (dB)');}
+else if(mode==='nyquist'){pts=samples.map(w=>response(n,d,k,w));pts=pts.concat(pts.slice().reverse().map(p=>[p[0],-p[1]]));message+='Nyquist frequency response for ±ω; critical point is (-1,0). Stability must be confirmed with open-loop RHP pole count.';draw(pts,'Re G(jω)','Im G(jω)');}
+else if(mode==='root'){pts=Array.from({length:90},(_,i)=>roots(add(d,mul(n,100*i/89)))).flat();message+='Root-locus pole samples for K from 0 to 100 (discrete markers, not a branch-continuous curve). Repeated poles require verification.';draw(pts,'Real pole','Imaginary pole',true);}
+else if(mode==='routh'){const result=routh(d);message+='Routh table:\n'+result.rows.map(row=>row.map(x=>Number(x.toPrecision(6))).join('    ')).join('\n')+'\nSign changes in first column: '+result.changes+(result.degenerate?' (special zero-row/pivot case; inspect separately)':'')+'.';draw(result.first.map((v,i)=>[i,v]),'Routh row','First-column value');}
+else{const r=routh(closed);pts=samples.map(w=>{const z=div(evalPoly(mul(n,k),0,w),evalPoly(closed,0,w));return [Math.log10(w),20*Math.log10(Math.hypot(...z))];});message+='Unity negative feedback: T(s) = K N(s) / [D(s)+K N(s)]\nCharacteristic polynomial: '+closed.join(', ')+'\nRouth sign changes: '+r.changes+(r.degenerate?' (special-case caveat)':'')+'.';draw(pts,'log10(ω rad/s)','Closed-loop dB');}
+by('ct-output').textContent=message;by('ct-status').textContent='Analysis completed for supported continuous-time SISO model.';}
+catch(e){by('ct-status').textContent=e.message;by('ct-output').textContent='No valid result.';ctx.clearRect(0,0,canvas.width,canvas.height);}}
+by('ct-run').addEventListener('click',analyze);
+window.ProMathControlTheory={coefficients,routh,roots,response,analyze};
 })();
 </script>
 </body>

@@ -73,7 +73,7 @@ def main():
         output=page.locator('#mat-result').inner_text()
         assert 'Numerical rank: 3' in output and 'Condition assessment: ill-conditioned' in output,output
         assert 'Singular values: 1.000000e+0, 1.000000e-8, 1.000000e-9' in output,output
-        assert 'Relative rank cutoff: 1.000e-12' in output,output
+        assert 'Rank cutoff (absolute): 1.000e-12' in output,output
         assert page.locator('#mat-send').is_enabled()
         page.locator('#mat-send').click()
         assert 'matrix(' in page.locator('#equation-input').input_value()

@@ -14,7 +14,7 @@ class Matrix3x3ConditionAdvisory(unittest.TestCase):
             self.assertIn(token,body)
         self.assertNotIn('eval(',body)
         self.assertIn("Singular values: ",SRC)
-        self.assertIn("Relative rank cutoff: ",SRC)
+        self.assertIn("Rank cutoff (absolute): ",SRC)
         self.assertIn("Condition assessment: ",SRC)
         self.assertIn("value.cutoff.toExponential(3)",SRC)
     def test_self_contained_bundle_parity(self):

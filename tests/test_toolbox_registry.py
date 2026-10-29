@@ -67,6 +67,22 @@ class ToolboxRegistryTests(unittest.TestCase):
                 entries = registry.parse_catalog("sample", "catalog.md")
         self.assertEqual([item["title"] for item in entries], ["FFT"])
 
+    def test_textual_summary_rows_are_not_features(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            (folder / "catalog.md").write_text(
+                "| Feature | Description |\n"
+                "|---|---|\n"
+                "| Total | See summary below |\n"
+                "| Grand total | Eleven planned areas |\n"
+                "| Count | Various disciplines |\n"
+                "| FFT | Frequency spectrum analysis |\n",
+                encoding="utf-8",
+            )
+            with patch.object(registry, "DOCS", folder):
+                entries = registry.parse_catalog("sample", "catalog.md")
+        self.assertEqual([item["title"] for item in entries], ["FFT"])
+
     def test_catalogs_are_present_and_registry_deterministic(self):
         for filename in registry.CATALOGS.values():
             self.assertTrue((registry.DOCS / filename).is_file(), filename)

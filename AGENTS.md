@@ -9,6 +9,18 @@ This file is the durable operating instruction for the scheduled ProMathStudio d
 - Do useful dev-branch work if CI or promotion is pending. A pending release is *not* a reason to stop coding. Work in compatible small increments and keep them tested.
 - Maintain the **next five concrete upcoming features** in `docs/HOURLY_DEVELOPMENT_PLAN.md` on **every run**, with status, dependencies and acceptance tests.
 
+## Reusable engineering architecture and workspace mandate
+
+Read [Engineering Architecture and Workspace Plan](docs/ENGINEERING_ARCHITECTURE_AND_WORKSPACE_PLAN.md) and [Engineering Toolbox Feature Catalog](docs/ENGINEERING_TOOLBOX_FEATURE_CATALOG.md) when changing engineering tools, shared math, UI or file structure. The planned Engineering Toolbox is a fifth workspace with six disciplines; it must reuse the existing core rather than duplicate algorithms or action buttons.
+
+- Before adding any engineering feature, search existing implementations and catalog entries; assign one stable tool ID and one canonical solver, allowing multiple discipline links with presets.
+- Prefer pure calculation functions, explicit input/output contracts, shared units/validation/errors, reusable plots, and composition. Use classes only when state or backend polymorphism warrants them. Separate DOM/UI from math; avoid unnecessary abstractions, circular dependencies and global state.
+- Incrementally extract readable source modules and tests while preserving the existing offline self-contained `index.html`, `scripts/build.py`, source/bundle consistency, public APIs, saved projects and current navigation.
+- Reuse one contextual command bar and one source of truth for tool metadata. Never duplicate Run/Plot/Export controls, tool implementations or math kernels across engineering disciplines.
+- Refactor one bounded slice per run, with before/after numerical reference, error, keyboard/mobile and regression tests; benchmark source/bundle size and load performance rather than assuming a file split optimizes size.
+- Track planned/partial/implemented/verified states with evidence. Do not conflate the historical 158 present/166 gaps, 148 broad engineering families and 19 deferred electrical/electronics details or claim them as a deduplicated total.
+- Preserve domain assumptions, unit dimensional correctness, standards edition/jurisdiction disclaimers and engineering safety limitations. Do not ship placeholder tool actions as implemented features.
+
 ## Repository and branch policy
 - Canonical repository: `saeedsai/ProMathStudio`. Desired long-lived refs: **exactly `dev` and `main`**. `dev` is sole development branch; `main` contains only promoted and validated releases. No feature, fix, experiment, temporary or release branches. Do not force-push or rewrite published history.
 - Before editing, inspect both heads and open PRs; if `dev` is absent, safely recreate it from `main`. If `main` advanced, reconcile it into `dev` without losing work. Resolve merge conflicts and rerun affected tests.

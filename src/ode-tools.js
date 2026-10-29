@@ -14,6 +14,11 @@ function bounded(value,label){
  if(!Number.isFinite(value)||Math.abs(value)>MAX)throw Error(label+' became non-finite or exceeded magnitude 1e12; shorten the interval or change the initial value.');
  return value;
 }
+function timeResolution(t,direction){
+ let delta=Math.max(Number.MIN_VALUE,Math.abs(t)*Number.EPSILON/2);
+ while(t+direction*delta===t)delta*=2;
+ return Math.abs((t+direction*delta)-t);
+}
 function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  expression=String(expression).trim();
  if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
@@ -56,8 +61,15 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
   if(attempts>=maxSteps)throw Error('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit.');
-  h=direction*Math.min(Math.abs(h),Math.abs(t1-t));
-  if(!(direction*h>0)||t+h===t)throw Error('Adaptive step size underflow; shorten the interval or relax tolerance.');
+  const remaining=t1-t;
+  h=direction*Math.min(Math.abs(h),Math.abs(remaining));
+  if(!(direction*h>0))throw Error('Adaptive step size underflow; shorten the interval or relax tolerance.');
+  const quantum=timeResolution(t,direction);
+  let nextT=t+h;
+  if(nextT===t)nextT=t+direction*quantum;
+  if(direction*(nextT-t1)>0)nextT=t1;
+  h=nextT-t;
+  if(!(direction*h>0))throw Error('Adaptive step size underflow at current time resolution; rescale time or relax tolerance.');
   attempts++;
   const k1=f(t,y);
   const k2=f(t+h/5,y+h*k1/5);
@@ -70,10 +82,12 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   const y4=bounded(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State');
   const error=Math.abs(y5-y4),scale=tolerance*(1+Math.max(Math.abs(y),Math.abs(y5)));
   if(error<=scale){
-   t=bounded(t+h,'Time');
-   if(Math.abs(t1-t)<=Math.max(Number.EPSILON*Math.max(Math.abs(t1),Math.abs(t))*2,Math.abs(span)*1e-14))t=t1;
+   t=nextT;
    y=y5;rows.push([t,y]);accepted++;
-  }else rejected++;
+  }else{
+   rejected++;
+   if(Math.abs(h)<=quantum)throw Error('Adaptive step size underflow at current time resolution; rescale time or relax tolerance.');
+  }
   const factor=error===0?5:Math.max(0.2,Math.min(5,0.9*Math.pow(scale/error,0.2)));
   h=bounded(h*factor,'Step size');
  }

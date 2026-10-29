@@ -1,3 +1,13 @@
+## 2026-10-29 — RK45 time-resolution and exact-endpoint correctness (dev QA candidate)
+
+**Change:** Scalar adaptive RK45 now advances by representable time increments, uses the *actual rounded* step in stage calculations, never silently snaps to a distant endpoint, and reports time-resolution underflow when the local error tolerance cannot be met. Fixes constant-derivative integrations at large epochs near 1e12 in both directions without changing the safe AST evaluator or exports. **New regression:** `tests/test_ode_rk45_endpoint.py` plus `tests/smoke_ode_rk45_endpoint.py` (one-ULP intervals, large-epoch forward/reverse constant derivative, tiny spans, stiff rejection, exponential references, UI/table/mobile and disabled exports). **Status:** source and tests prepared for exact-head CI; no main release claim until verified.
+
+**NEXT FIVE (acceptance and dependencies):** (1) Canonical toolbox registry: generate deterministic catalog JSON and validate unique IDs/aliases, after current CI; (2) Reproducible source/build baseline: two rebuilds yield identical standalone HTML and offline Chromium boots; (3) Shared linear solver: two consumers, numerical residual and singular-matrix tests; (4) RK45 derivative singularity/overflow diagnostics: failure message, invalidated exports and numerical boundary tests; (5) Contextual action-bar deduplication: one shared command source, keyboard/mobile regression, no lost actions. All promotion remains gated on exact-head dev+PR CI and Pages verification.
+
+## 2026-10-29 — Reconcile prior release checkpoint
+
+Backward coupled RK4 PR #93 merged at `4dc28d966905431c91f8a242752a01a3755ee138`. Exact SHA [dev Quality 40920561431](https://github.com/saeedsai/ProMathStudio/actions/runs/40920561431), [main Quality 40920539776](https://github.com/saeedsai/ProMathStudio/actions/runs/40920539776), and [Pages deployment 40920539516](https://github.com/saeedsai/ProMathStudio/actions/runs/40920539516) all succeeded. Hosted interactive behavior not independently checked. Historical older plan entries are checkpoints, not current status.
+
 ## 2026-10-29 — Backward coupled RK4 implementation candidate
 
 Signed-step coupled two-state RK4 supports decreasing time with retained forward behavior and ordered Data Tables/Graph export. New static, reference, invalid-input, Chromium UI/mobile and source/bundle tests are in CI. **Status:** implemented on dev; exact-head CI, PR and Pages verification pending.

@@ -1,3 +1,19 @@
+## 2026-10-29 12:01 CET — Thin 3×2 SVD (dev candidate / CI pending)
+
+**Execution log:** Read root AGENTS.md, live ledger, frozen 26-Oct inventory, latest GitHub branch/PR state and last verified [PR #86 Quality 40854136591](https://github.com/saeedsai/ProMathStudio/actions/runs/40854136591) (100/100 steps successful at `8f5652a860b02023d0a18c82796d4dd25cfef1ae`). Before implementation main `2846feb0ccc97dfc7cc7892c8e90d53f707d0aa3`, dev two documentation commits ahead; no open PRs. Production Pages and exact main push CI remain unverified because available GitHub connector returns only PR-triggered runs. No branch cleanup needed.
+
+**New feature / dev only:** Implemented bounded thin 3×2 real SVD by scaled, pivoted and twice-reorthogonalized QR followed by the existing tested 2×2 SVD. Returns 3×2 orthonormal U, two descending singular values, 2×2 orthonormal V, numerical rank 0–2, finite conditioning when rank2, and explicit reconstruction/orthogonality residual gates. Handles rank0, rank1 and small/large scales. Added SVD dispatch for 3×2, UI scope label and factor transfer; kept 2×2 and 3×3 unchanged. Synced `src/matrix-tools.js` with standalone `index.html`, added mandatory Chromium regression `tests/smoke_matrix_svd_3x2.py` with independent analytic references, invalid inputs, editor transfer, mobile widths, no page errors. No CI success or deployment claim until exact-head checks verified. Keep hourly development enabled.
+
+### NEXT FIVE — acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Release 3×2 thin SVD | Full structural+Chromium green at exact PR head, rank0–2 and analytic references, reviewed diff, ordinary dev→main PR, main Quality and Pages verified. | DEV / QA PENDING |
+| 2 | Verify production PR #86 | Main SHA Quality, Pages publishing and hosted 3×3 pseudoinverse on desktop/mobile. | ACCESS BLOCKED |
+| 3 | Wide 2×3 SVD | Transposed 3×2 factors, rank0–2, analytic reconstruction/orthogonality and factor transfer in Chromium. | TODO |
+| 4 | Extreme-conditioning 3×3 SVD | Rotated scale extremes, numerical cutoff, residual oracle and rejection on unstable cases. | TODO |
+| 5 | Hosted Data Tables/Graph QA | Transactional CSV/TSV/JSON import rollback, graph roots/fractions, keyboard/mobile and zero runtime errors. | HOSTED ACCESS BLOCKED |
+
 ## 2026-10-29 11:04 CET — PR #86 verified green and merged; Pages still unverified
 
 **Feature ledger: MERGED / PRODUCTION NOT VERIFIED.** Initial [PR Quality 40854024353](https://github.com/saeedsai/ProMathStudio/actions/runs/40854024353) failed a stale structural assertion for the intentionally removed duplicate Jacobi loop; repaired structural checks to validate the shared `svd3x3` convergence/reconstruction/orthogonality and the caller's rank cutoff and four Moore–Penrose identity checks. Final exact PR head `8f5652a860b02023d0a18c82796d4dd25cfef1ae` [Quality 40854136591](https://github.com/saeedsai/ProMathStudio/actions/runs/40854136591) completed **success, 100/100 steps** including new rotated 65-digit Decimal oracle browser regression and all previous tests. Reviewed seven changed files and zero unresolved review threads. [PR #86](https://github.com/saeedsai/ProMathStudio/pull/86) ordinary expected-SHA merge returned **main `2846feb0ccc97dfc7cc7892c8e90d53f707d0aa3`**. Fast-forwarded dev to main without force. No other branches changed. Exact main push Quality and GitHub Pages publishing/hosted behavior remain **unverified** because connector lists PR-triggered runs only and web/Pages fetch is disabled. The merged implementation is not marked production deployed. Keep hourly task enabled; continue next feature even with Pages verification blocked.

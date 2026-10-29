@@ -1,3 +1,17 @@
+## 2026-10-29 — Required browser test for Control Theory workspace
+
+**Feature ledger — REGRESSION ADDED ON DEV; RELEASE NOT VERIFIED.** Re-read AGENTS.md, frozen inventory and plan, verified dev 27 ahead of main before coding. Implemented `tests/smoke_control_theory.py`: actual Chromium interaction through the Graph workbench for Bode, Nyquist, root-locus, Routh–Hurwitz and unity feedback; checks plotted canvas, characteristic polynomial of 1/(s+1) under gain 1, rejection of zero leading denominator, mobile layouts at 390/768px, page errors, and panel visibility. Registered as a mandatory Quality step in `.github/workflows/quality.yml`. Retains `tests/test_control_numerical_reference.py` for independent numerical reference values. All source changes are regression/CI support, not additional control algorithms. Full exact-head CI and protected release not yet confirmed. The 19 deferred electrical/electronics features remain untouched.
+
+### NEXT FIVE — prioritized acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Validate Control Theory Chromium regression | Exact-head Quality green including Bode/Nyquist/Routh/root-locus/feedback interactions, 390/768 px and no JS errors | QA PENDING |
+| 2 | Verify restored mobile workspace navigation | Existing 390/768/1280 Playwright controls, no horizontal overflow, keyboard focus and drafts | QA PENDING |
+| 3 | Promote existing PR #91 safely | Review changed-file diff, full green PR checks, ordinary authorized merge only, verify exact main Quality and Pages | BLOCKED ON CI |
+| 4 | Track root-locus branches | Stable branch correspondence through gains, repeated roots and analytic 2nd/3rd-order references | TODO |
+| 5 | PID / lead-lag control design | Known reference margins, step response, invalid-domain safeguards and browser integration | TODO |
+
 ## 2026-10-29 15:55 CET — Mobile workspace navigation overflow regression (current iteration)
 
 **Feature ledger:** P1 UI accessibility / mobile navigation **FIXED ON DEV, QA PENDING; NOT RELEASED**. Prior exact-head [Quality run 40896098381](https://github.com/saeedsai/ProMathStudio/actions/runs/40896098381) failed only at `tests/smoke_workspace_navigation.py` (390px width): navigation `scrollWidth > clientWidth`. Root cause: the new computation-first mobile CSS forced all four workspace tabs onto one unwrapped horizontal flex row with `overflow-x:auto`, violating existing no-horizontal-overflow keyboard-navigation acceptance. Replaced the <=760px nav layout with two equal minmax(0,1fr) grid columns, each tab width 100%, wrapping labels as needed. Preserved keyboard arrows/Home/End, focus styling and draft retention. Added new focused structural regression `tests/test_mobile_workspace_grid.py` (grid layout, no overflow style, keyboard hooks) and retained existing 390/768/1280px Playwright smoke. Direct structural inspection confirmed expected CSS and executable inline JS syntax; full Playwright and exact-head GitHub CI **not yet confirmed**. Do not merge until full required checks are green.

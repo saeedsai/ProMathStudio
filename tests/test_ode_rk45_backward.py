@@ -21,7 +21,9 @@ class BackwardAdaptiveRK45(unittest.TestCase):
         self.assertIn("const remaining=t1-t", adaptive)
         self.assertIn("const quantum=timeResolution(t,direction)", adaptive)
         self.assertIn("h=nextT-t", adaptive)
-        self.assertIn("if(Math.abs(h)<=quantum)throw Error", adaptive)
+        self.assertIn("if(Math.abs(h)<=quantum)throw progressError", adaptive)
+        self.assertIn("const progressError=reason=>Error", adaptive)
+        self.assertIn("Adaptive step size underflow at current time resolution", adaptive)
         self.assertIn("if(t1===t0)throw Error", adaptive)
         self.assertIn("forward or backward", adaptive)
 

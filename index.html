@@ -6487,18 +6487,24 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   }
  };
  let t=t0,y=y0,h=span/20,attempts=0,rejected=0,accepted=0;
+ // Include the last representable time and accepted/rejected work in failure reports.
+ // This is deliberately a diagnostic only: it does not change RK45 step selection.
+ const progressError=reason=>Error(reason+'; at t='+t.toPrecision(16)+
+  ', target='+t1.toPrecision(16)+', attempted step='+h.toPrecision(8)+
+  '; attempts='+attempts+'/'+maxSteps+', accepted='+accepted+
+  ', rejected='+rejected+', tolerance='+tolerance+'.');
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
-  if(attempts>=maxSteps)throw Error('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit.');
+  if(attempts>=maxSteps)throw progressError('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit');
   const remaining=t1-t;
   h=direction*Math.min(Math.abs(h),Math.abs(remaining));
-  if(!(direction*h>0))throw Error('Adaptive step size underflow; shorten the interval or relax tolerance.');
+  if(!(direction*h>0))throw progressError('Adaptive step size underflow; shorten the interval or relax tolerance');
   const quantum=timeResolution(t,direction);
   let nextT=t+h;
   if(nextT===t)nextT=t+direction*quantum;
   if(direction*(nextT-t1)>0)nextT=t1;
   h=nextT-t;
-  if(!(direction*h>0))throw Error('Adaptive step size underflow at current time resolution; rescale time or relax tolerance.');
+  if(!(direction*h>0))throw progressError('Adaptive step size underflow at current time resolution; rescale time or relax tolerance');
   attempts++;
   const k1=f(t,y,'k1');
   const k2=f(t+h/5,y+h*k1/5,'k2');
@@ -6515,7 +6521,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    y=y5;rows.push([t,y]);accepted++;
   }else{
    rejected++;
-   if(Math.abs(h)<=quantum)throw Error('Adaptive step size underflow at current time resolution; rescale time or relax tolerance.');
+   if(Math.abs(h)<=quantum)throw progressError('Adaptive step size underflow at current time resolution; rescale time or relax tolerance');
   }
   const factor=error===0?5:Math.max(0.2,Math.min(5,0.9*Math.pow(scale/error,0.2)));
   h=bounded(h*factor,'Step size');

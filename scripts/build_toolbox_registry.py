@@ -153,8 +153,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--alias-review", action="store_true", help="Print cross-catalog title matches for manual review")
+    parser.add_argument("--alias-review-json", action="store_true", help="Print machine-readable cross-catalog manual review queue")
     args = parser.parse_args()
     registry = build()
+    if args.alias_review and args.alias_review_json:
+        parser.error("Choose only one alias review output format")
+    if args.alias_review_json:
+        print(json.dumps({"status": "manual-review-required", "groups": alias_review_rows(registry)}, indent=2, ensure_ascii=False))
+        return
     if args.alias_review:
         print(alias_review_markdown(registry))
         return

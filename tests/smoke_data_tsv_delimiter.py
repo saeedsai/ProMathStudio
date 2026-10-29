@@ -33,6 +33,8 @@ def main():
         page.locator('#dt-import').set_input_files({
             'name': 'ambiguous.csv', 'mimeType': 'text/csv',
             'buffer': original.getvalue().encode('utf-8')})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function(
             '() => MathStudio.dataTables.tables.some(t => t.name === "ambiguous")')
         assert page.evaluate('MathStudio.dataTables.active.columns') == headers
@@ -53,6 +55,8 @@ def main():
         page.locator('#dt-import').set_input_files({
             'name': 'reimport.tsv', 'mimeType': 'text/tab-separated-values',
             'buffer': raw})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function(
             '() => MathStudio.dataTables.tables.some(t => t.name === "reimport")')
         assert page.evaluate('MathStudio.dataTables.active.columns') == headers

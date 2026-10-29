@@ -22,7 +22,7 @@ def main():
         page.locator("#matrix-tools").evaluate("(el) => el.open = true")
         page.locator("#mat-rows").select_option("3")
         assert page.locator("#mat-weight-grid input").count() == 3
-        assert page.locator("#mat-weight-grid input").all_input_values() == ["1", "1", "1"]
+        assert [page.locator("#mat-weight-grid input").nth(i).input_value() for i in range(3)] == ["1", "1", "1"]
         for i, value in enumerate(["1", "0", "1", "1", "1", "2"]):
             page.locator("#mat-grid input").nth(i).fill(value)
         for i, value in enumerate(["1", "2", "9"]):

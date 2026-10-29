@@ -1,3 +1,19 @@
+## 2026-10-29 10:58 CET — Rotated 3×3 pseudoinverse SVD consolidation (dev candidate)
+
+**Execution log / feature ledger:** Read root AGENTS.md, frozen 26-Oct inventory, living plan, latest merged PR #85 Quality 40850954000 (99 successful steps at `92600e3c37b6cdacbc8ff8507237d314b90fdbbb`), current branches and open PRs. Main `6c20f36a263d7e673f99a021cd5b05a3f5a26644`, dev was 2 documentation commits ahead, no open PRs. Production main Quality, Pages publishing and hosted behavior remain **unverified** (PR-only workflow connector; no accessible live hosted browser). No unrelated branch cleanup needed.
+
+**Implementation on dev / QA pending:** Consolidated 3×3 pseudoinverse onto the already residual-checked Jacobi `svd3x3` factors, removing its duplicated rotation loop without changing 1e-12 relative cutoff, diagnostics or the four Moore–Penrose identity gates. Synchronized `src/matrix-tools.js` and inline `index.html`; added `tests/smoke_matrix_pseudoinverse_rotated.py` with 65-digit Decimal independent rational-rotation reference matrices (rank-2 near-dependence at 1, 1e-6, 1e6 scales; rank-3 1e6 condition), four identities, invalid inputs, Equation transfer, responsive layouts and page-error assertion. Registered mandatory CI step. This is not yet a released feature; inspect exact-head CI and repair any failures before PR promotion. Recurring task remains enabled; no security or branch bypass.
+
+### NEXT FIVE — explicit acceptance tests
+
+| Priority | Feature | Acceptance criteria | Status |
+|---:|---|---|---|
+| 1 | Rotated 3×3 pseudoinverse QA and release | Independent Decimal oracles, rank/scale, all Moore–Penrose identities, full structural + browser suite and exact-head PR green; merge and verify Pages. | DEV / QA PENDING |
+| 2 | Verify production PR #85 and new release | Main Quality at merge SHA, Pages publish, hosted SVD 3×3 and tiny nonzero values on desktop/mobile. | ACCESS BLOCKED |
+| 3 | Rectangular 3×2 SVD diagnostics | Rank 0–2, U/S/V reconstruction and orthogonality oracle, Equation factor transfer and browser QA. | TODO |
+| 4 | Wide 2×3 SVD diagnostics | Transpose-consistent singular vectors, zero/rank-deficient references, editor transfer and mobile regression. | TODO |
+| 5 | Hosted Data Tables/Graph QA | CSV/TSV/JSON preview rollback, roots/fractions/graph numerical tests, keyboard/mobile and zero console errors. | ACCESS BLOCKED |
+
 ## 2026-10-29 10:43 CET — PR #85 green, merged; Pages verification outstanding
 
 **Feature ledger: MERGED / PRODUCTION UNVERIFIED.** Exact PR head `92600e3c37b6cdacbc8ff8507237d314b90fdbbb` passed [PR Quality 40850954000](https://github.com/saeedsai/ProMathStudio/actions/runs/40850954000) with all 99 workflow steps successful (including 3×3 SVD rank 0–3, matrix tiny-nonzero UI and existing regression suite). Seven changed files reviewed; no unresolved PR review threads. [PR #85](https://github.com/saeedsai/ProMathStudio/pull/85) ordinary expected-SHA merge returned **main `6c20f36a263d7e673f99a021cd5b05a3f5a26644`**; dev was fast-forwarded to that merge commit without force. GitHub PR reports merged and branches identical at verification. Main push Quality and Pages publish/hosted behavior are **not verified**: GitHub connector returns PR-triggered workflow runs only, main commit has no visible runs, direct Actions web access is disabled and Pages URL inaccessible from web tool. Never call this production-deployed without proof. Branch search confirmed only `dev` and `main`; no cleanup needed. The scheduled development task stays enabled.

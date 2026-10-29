@@ -1,3 +1,17 @@
+## 2026-10-29 — Complex-number graph workbench (dev candidate)
+
+**Feature ledger: IMPLEMENTED ON DEV / CI PENDING; NOT DEPLOYED.** User requested complex numbers in both 2D and 3D graphs. Added an independent collapsible complex visualization section inside the existing Graph workspace. 2D uses Argand axes Re(f(z)), Im(f(z)), marking the selected complex number's image; 3D renders an isometric sampled |f(z)| magnitude surface over Re(z), Im(z) in [-3,3]. Presets: f(z)=z, z², 1/z (singularity omitted) and exp(z). Numeric controls Re(z)/Im(z), finite input bounds, status/output diagnostics, mobile layout, and defensive nonfinite/overflow rejection. Preserved original real 2D/3D graphs and imported data workflow. Added structural regression `tests/test_complex_graph.py`. The 3D plot is a canvas projection, not a WebGL rotational 3D renderer; heights are clipped at 8 and singularities omitted. Exact-head full CI, browser smoke, PR merge and production Pages verification remain pending.
+
+### NEXT FIVE — acceptance tests
+
+| Priority | Feature | Acceptance criteria | Status |
+|---:|---|---|---|
+| 1 | Verify complex graph and redesign | Full exact-head CI, 2D Argand/square/inverse/exp and 3D surface browser tests, responsive layout, no runtime errors; review PR and merge only if green. | DEV / CI PENDING |
+| 2 | Confirm GitHub Pages production | Exact main push Quality and Pages deployment, hosted complex visualization + original workstations on desktop/mobile. | ACCESS BLOCKED |
+| 3 | Expand complex graph 3D interactions | Rotatable zoomable surface, axes and legend, regression for singularities and scale limits. | TODO |
+| 4 | Complex graph function parser | Safe supported expression grammar for z with precedence, complex arithmetic, unsupported function rejection, numerical reference tests. | TODO |
+| 5 | Rectangular SVD near-cutoff reliability | 80+ digit independent oracle, rank1/rank2, residuals, responsive browser UI. | TODO |
+
 ## 2026-10-29 — Computation-first interface refresh (user-requested priority)
 
 **Feature ledger: IMPLEMENTED ON DEV; REQUIRED CI / BROWSER QA / DEPLOYMENT PENDING.** User requested a one-shot visual and usability refresh inspired by Wolfram|Alpha. Added an original teal/ivory/amber visual design in the existing standalone `index.html`: clearer workstation tabs, differentiated math inputs and answer surfaces, consolidated visual hierarchy, sidebar math search and palette treatment, consistent buttons/cards, keyboard focus rings, reduced-motion accommodation and 760/440px responsive layout. All existing controls and navigation hooks remain; do not describe this as supporting Wolfram|Alpha natural-language queries or engines. Structural regression `tests/test_computation_first_ui.py` checks redesign uniqueness, workstation hooks, responsive and accessibility coverage. Full browser and required CI are pending. No `main` change has been made; Pages not verified. This design work was prioritized by explicit user request over the previous matrix backlog.

@@ -1,3 +1,19 @@
+## 2026-10-29 14:00 CET — 3×3 SVD scale-safe conditioning and numerical rank cutoff (dev QA candidate)
+
+**Execution log / discovery:** Read current root `AGENTS.md`, living ledger and frozen 26-Oct gap audit. Confirmed main `1e0367052f38cef3c8629460a4c59d4ff3e2dd38`, dev three documentation commits ahead at start, no open PR, and exact [PR #88 Quality 40870173410](https://github.com/saeedsai/ProMathStudio/actions/runs/40870173410) completed success (102/102 steps). Main Quality, GitHub Pages and hosted UI still **not independently verified**; GitHub connector only exposes PR-triggered runs and direct clone/Pages DNS was inaccessible. No additional branches created, no protection/CI bypass.
+
+**Feature ledger — IMPLEMENTED ON DEV / RELEASE QA PENDING:** Enhanced 3×3 Jacobi SVD with explicit absolute rank cutoff, scaled condition number computation (avoids avoidable scaling overflow/underflow), and rank-deficient / well / moderate / ill conditioning advisory. Zero matrix receives explicit diagnostics; Matrix Calculator renders cutoff and advisory for 3×3 only, leaving other SVD sizes unchanged. Added structural `tests/test_matrix_svd_3x3_condition.py` and mandatory Chromium `tests/smoke_matrix_svd_3x3_condition.py` with independent 75-digit rational-rotation numerical oracle, scale 1e-12/1/1e12, rank threshold boundaries, invalid input, reconstruction, orthogonality, Equation factor transfer and 390/768/1280 responsive UI. Module and inline bundle parity verified; exact-source V8 numerical checks passed a diagonal and three rotated-scale cases. Full GitHub Actions/Chromium verification of this candidate remains pending; do not mark released until exact-head PR CI, main checks and Pages evidence are obtained.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Release 3×3 SVD condition diagnostics | 75-digit rotated references, numerical rank cutoff boundary, valid/invalid cases, complete structural/Chromium CI, ordinary green PR merge, main Quality and Pages confirmation. | DEV / QA PENDING |
+| 2 | Verify PR #88 production | Main exact SHA Quality and Pages publish; hosted 2×3 SVD rank/U/S/V, factor transfer, mobile and no console errors. | ACCESS BLOCKED |
+| 3 | Rectangular SVD near-rank-one stability | 3×2/2×3 rotated nearly dependent references from 65+ digit oracle, rank cutoff, residual/orthogonality, extreme scales and UI. | TODO |
+| 4 | Rectangular SVD condition diagnostics | Explicit rank cutoff and condition assessment for 3×2/2×3, finite/undefined cases, structural and browser tests, transfer and mobile. | TODO |
+| 5 | Hosted Data Tables / Graph QA | CSV/TSV/JSON transactional import rollback, graph numerical templates, keyboard focus, responsive layouts, zero runtime errors. | HOSTED ACCESS BLOCKED |
+
 ## 2026-10-29 — PR #88 Quality green and safely merged; Pages unverified
 
 **Feature ledger: MERGED / PRODUCTION NOT VERIFIED.** Wide 2×3 thin SVD completed on dev with U(2×2), S(2), V(3×2), rank0–2, reconstruction and orthogonality diagnostics, Matrix Calculator UI and Equation Editor factor transfer. Added `tests/test_matrix_svd_2x3.py` structural bundle parity and mandatory Chromium `tests/smoke_matrix_svd_2x3.py` with independent references, transpose parity, invalid input, scale, rank, mobile and transfer coverage. Exact-source V8 numeric checks passed 15 analytic/invalid/transpose cases plus 200 deterministic matrices (max discrepancy about 2.3e-15). Direct clone/browser execution locally was blocked by DNS; GitHub Actions ran complete structural and Chromium suite.

@@ -1,3 +1,17 @@
+## 2026-10-29 12:10 CET — PR #87 verified green and merged; production still unverified
+
+**Feature ledger: MERGED / PAGES NOT VERIFIED.** Implemented 3×2 thin SVD via scaled pivoted QR with twice-reorthogonalized columns and existing 2×2 SVD, supporting numerical ranks 0–2, independent analytic references, extreme scales, reconstruction/orthogonality residual gates and Equation transfer. Added mandatory Chromium `tests/smoke_matrix_svd_3x2.py`, synchronized module/standalone bundle and UI labels. Refined test zero-singular-value tolerance to match relative rank cutoff without weakening strict nonzero-value checks. Superseded CI attempts were cancelled by workflow concurrency; exact final PR head `889c54ce1b21b5e22b311afc614f10784182910b` [Quality 40862593177](https://github.com/saeedsai/ProMathStudio/actions/runs/40862593177) completed **success: 101/101 steps**, including all structural and Chromium regressions. Reviewed six-file diff, zero unresolved review threads. Ordinary expected-SHA [PR #87](https://github.com/saeedsai/ProMathStudio/pull/87) merge succeeded at **main `c6d5f4efc7367ccaceb7bb912a883faf83b18989`**; safely fast-forwarded dev to main without force. Branch enumeration found only `dev` and `main`; no cleanup required. GitHub connector returns PR-only workflow runs; main push Quality and Pages/hosted UI cannot be independently confirmed, and web fetch is disabled. **Do not claim production deployment**. Hourly development remains enabled.
+
+### NEXT FIVE — explicit acceptance tests
+
+| Priority | Feature | Acceptance criteria | Status |
+|---:|---|---|---|
+| 1 | Verify PR #87 production | Confirm exact main SHA Quality, Pages publish and hosted 3×2 SVD U/S/V on desktop and mobile. | ACCESS BLOCKED |
+| 2 | Wide 2×3 SVD | Transpose-factor parity with 3×2 SVD; U(2×2), S(2), V(3×2), rank0–2, independent reconstruction/orthogonality and editor transfer browser tests. | TODO |
+| 3 | Extreme-conditioning 3×3 SVD | Rotated scale extremes, numerical rank cutoff, reconstruction/orthogonality reference, unstable rejection where required. | TODO |
+| 4 | Rectangular SVD stability | Rank1/near-rank1 rotations and scale extremes with independent high-precision reference, strict reconstruction/orthogonality and UI. | TODO |
+| 5 | Hosted Data Tables/Graph QA | Transactional CSV/TSV/JSON import rollback, graph roots/fractions, keyboard/mobile and no runtime errors. | HOSTED ACCESS BLOCKED |
+
 ## 2026-10-29 12:01 CET — Thin 3×2 SVD (dev candidate / CI pending)
 
 **Execution log:** Read root AGENTS.md, live ledger, frozen 26-Oct inventory, latest GitHub branch/PR state and last verified [PR #86 Quality 40854136591](https://github.com/saeedsai/ProMathStudio/actions/runs/40854136591) (100/100 steps successful at `8f5652a860b02023d0a18c82796d4dd25cfef1ae`). Before implementation main `2846feb0ccc97dfc7cc7892c8e90d53f707d0aa3`, dev two documentation commits ahead; no open PRs. Production Pages and exact main push CI remain unverified because available GitHub connector returns only PR-triggered runs. No branch cleanup needed.

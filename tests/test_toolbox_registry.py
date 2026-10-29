@@ -1,5 +1,8 @@
 """Regression tests for deterministic, planning-only toolbox catalog registry."""
 import importlib.util
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -107,6 +110,25 @@ class ToolboxRegistryTests(unittest.TestCase):
         self.assertIn("Cross-catalog review groups: 1", report)
         self.assertIn("No solver IDs or runtime aliases are created", report)
         self.assertNotIn("## filter", report)
+
+    def test_alias_review_json_cli_matches_registry_and_is_stable(self):
+        command = [sys.executable, str(SCRIPT), "--alias-review-json"]
+        first = subprocess.run(command, capture_output=True, text=True, check=True)
+        second = subprocess.run(command, capture_output=True, text=True, check=True)
+        self.assertEqual(first.stdout, second.stdout)
+        payload = json.loads(first.stdout)
+        self.assertEqual(payload["status"], "manual-review-required")
+        self.assertEqual(payload["groups"], registry.alias_review_rows(registry.build()))
+        self.assertTrue(all(group["reviewStatus"] == "manual-review-required"
+                            for group in payload["groups"]))
+
+    def test_alias_review_formats_are_mutually_exclusive(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--alias-review", "--alias-review-json"],
+            capture_output=True, text=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Choose only one alias review output format", result.stderr)
 
     def test_catalogs_are_present_and_registry_deterministic(self):
         for filename in registry.CATALOGS.values():

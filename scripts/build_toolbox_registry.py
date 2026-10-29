@@ -68,6 +68,9 @@ def parse_catalog(key, filename):
         # Reject summary/navigation tables and count/priority metadata.
         if re.fullmatch(r"[\d,]+", description) or description.startswith("[") and "](" in description:
             continue
+        # Summary rows are metadata, not implementable engineering tools.
+        if normalized_title(title) in {"total", "subtotal", "grand total", "count", "total features", "number of features"}:
+            continue
         fid = feature_id(key, title)
         if fid in seen:
             continue

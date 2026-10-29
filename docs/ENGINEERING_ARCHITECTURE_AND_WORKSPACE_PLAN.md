@@ -1,3 +1,5 @@
+**Eighth discipline — Signal Engineering:** [177-feature signal processing catalog](SIGNAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md). Provide a separate searchable toolbox for waveform types, generation, decoding, filtering, communications coding, spectral analysis, estimation and signal pipelines. Reuse shared FFT/filter/estimation/plotting services and preserve sample rate, units, timestamps, calibration and channel metadata. Existing seven disciplines remain.
+
 **Seventh discipline — GNSS & Positioning:** [144-feature catalog](GNSS_POSITIONING_OBSERVATION_TOOLBOX_FEATURE_LIST.md). Add GNSS/GPS/observation/position estimation as a selectable Engineering Toolbox discipline. Reuse shared geodesy, matrix/optimization, state-estimation, signal-processing and visualization services; never duplicate Kalman filters or coordinate transforms. Existing six disciplines remain.
 
 **Control Theory Toolbox:** [181-feature comprehensive control catalog](CONTROL_THEORY_TOOLBOX_FEATURE_LIST.md). The control toolbox is a shared cross-discipline category and must use canonical registry IDs and reusable solvers.

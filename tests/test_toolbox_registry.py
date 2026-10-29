@@ -83,6 +83,31 @@ class ToolboxRegistryTests(unittest.TestCase):
                 entries = registry.parse_catalog("sample", "catalog.md")
         self.assertEqual([item["title"] for item in entries], ["FFT"])
 
+    def test_alias_review_only_cross_catalog_and_is_deterministic(self):
+        entries = [
+            {"id": "a1", "catalog": "control", "title": "FFT"},
+            {"id": "a2", "catalog": "control", "title": "FFT"},
+            {"id": "b1", "catalog": "signals", "title": "FFT"},
+            {"id": "c1", "catalog": "signals", "title": "Filter"},
+            {"id": "c2", "catalog": "signals", "title": "Filter"},
+        ]
+        sample = {
+            "entries": entries,
+            "aliasCandidates": [
+                {"normalizedTitle": "fft", "ids": ["a1", "a2", "b1"]},
+                {"normalizedTitle": "filter", "ids": ["c1", "c2"]},
+            ],
+        }
+        rows = registry.alias_review_rows(sample)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["catalogs"], ["control", "signals"])
+        self.assertEqual(rows[0]["reviewStatus"], "manual-review-required")
+        report = registry.alias_review_markdown(sample)
+        self.assertEqual(report, registry.alias_review_markdown(sample))
+        self.assertIn("Cross-catalog review groups: 1", report)
+        self.assertIn("No solver IDs or runtime aliases are created", report)
+        self.assertNotIn("## filter", report)
+
     def test_catalogs_are_present_and_registry_deterministic(self):
         for filename in registry.CATALOGS.values():
             self.assertTrue((registry.DOCS / filename).is_file(), filename)

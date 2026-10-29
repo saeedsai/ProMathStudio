@@ -1,3 +1,15 @@
+## Dev candidate — Thin wide 2×3 SVD (2026-10-29)
+
+- Added bounded real wide 2×3 thin SVD by transposing the validated 3×2 SVD, exchanging U/V factor shapes and orthogonality diagnostics. Supports ranks 0–2, singular values, conditioning, reconstruction, Matrix Calculator output and Equation Editor factor transfer. Existing square and 3×2 SVD preserved.
+- Updated `src/matrix-tools.js` and standalone `index.html` in parity, plus Matrix Calculator scope note. Added structural `tests/test_matrix_svd_2x3.py` and mandatory Chromium `tests/smoke_matrix_svd_2x3.py` with independent analytic references, transpose parity, zero/rank1/rank2/extreme scales, invalid inputs, factor transfer and responsive layouts.
+- Candidate remains **dev-only** until exact-head CI, reviewed PR, main Quality and Pages deployment are independently verified. Previous PR #87 was merged after [Quality 40862593177](https://github.com/saeedsai/ProMathStudio/actions/runs/40862593177) (101/101); production Pages remains unverified.
+
+## PR #87 merged — Thin 3×2 SVD (2026-10-29)
+
+- New thin real 3×2 SVD with pivoted scaled QR, twice-reorthogonalized Q and shared 2×2 factorization; reports U(3×2), S(2), V(2×2), numerical rank 0–2, conditioning, reconstruction and orthogonality. Matrix Calculator and Equation Editor factor transfer support 3×2; existing square SVD paths retained.
+- Mandatory Chromium regression checks independent analytic singular-value references including rank-deficient and extreme-scale cases, invalid inputs, UI transfer and mobile layouts. The regression uses a relative rank cutoff only for zero singular-value roundoff, and strict relative checks for nonzero singular values.
+- [PR #87](https://github.com/saeedsai/ProMathStudio/pull/87) passed exact-head [Quality 40862593177](https://github.com/saeedsai/ProMathStudio/actions/runs/40862593177) (101/101 steps) at `889c54ce1b21b5e22b311afc614f10784182910b` and merged ordinarily to main `c6d5f4efc7367ccaceb7bb912a883faf83b18989`. Main push Quality, Pages publish and hosted behavior remain **unverified**; do not mark deployed.
+
 ## Dev candidate — Thin 3×2 SVD diagnostics (2026-10-29)
 
 - Added thin real 3×2 SVD with scaled pivoted QR, twice-reorthogonalized columns, and existing 2×2 SVD factorization. Exposes U (3×2), two singular values, V (2×2), rank 0–2, condition number, reconstruction and orthogonality diagnostics; retains existing 2×2 and 3×3 paths.

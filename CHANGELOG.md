@@ -1,3 +1,4 @@
+- 2026-10-29 (dev, pending CI): Refreshed the entire interface with an original computational math-first design: stronger input/result hierarchy, teal navigation, palette/sidebar, consistent panels, focus visibility, mobile and reduced-motion refinements; added structural UI regression coverage. Deployment not yet verified.
 ## PR #90 merged — Rectangular SVD conditioning and cutoff (2026-10-29)
 
 - [PR #90](https://github.com/saeedsai/ProMathStudio/pull/90) merged normally at main `2c286be5cefa164ffae6c27dad48db2eba74c465` after exact-head [PR Quality 40888207291](https://github.com/saeedsai/ProMathStudio/actions/runs/40888207291) passed **104/104 steps** at `5b4f623a5ebc6a8048d4a9dcbc5459e840f6974f`. Dev fast-forwarded without force. Main Quality, Pages publishing and hosted behavior remain unverified.

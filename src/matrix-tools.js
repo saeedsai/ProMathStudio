@@ -462,11 +462,22 @@ function pseudoinverse3x2(A){
   throw Error('Pseudoinverse failed its Moore-Penrose residual check.');
  return {matrix,rank,cutoff:cutoff*scale,residual,symmetryResidual};
 }
+/* Wide 2×3 Moore–Penrose inverse via (Aᵀ)⁺ᵀ. This uses the same
+   scaled Jacobi rank cutoff and four-identity verification as 3×2. */
+function pseudoinverse2x3(A){
+ A=validate(A);
+ if(A.length!==2||A[0].length!==3)throw Error('Pseudoinverse requires a 2×3 real matrix.');
+ const tall=A[0].map((_,j)=>A.map(row=>row[j]));
+ const result=pseudoinverse3x2(tall);
+ const matrix=result.matrix[0].map((_,j)=>result.matrix.map(row=>row[j]));
+ return {...result,matrix};
+}
 function pseudoinverse(A){
  A=validate(A);
  if(A.length===2&&A[0].length===2)return pseudoinverse2x2(A);
  if(A.length===3&&A[0].length===2)return pseudoinverse3x2(A);
- throw Error('Pseudoinverse requires a 2×2 or 3×2 real matrix.');
+ if(A.length===2&&A[0].length===3)return pseudoinverse2x3(A);
+ throw Error('Pseudoinverse requires a 2×2, 3×2 or 2×3 real matrix.');
 }
 function format(x){
  if(!Number.isFinite(x))throw Error('Result exceeded finite floating-point range.');
@@ -476,7 +487,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD supports real 2×2 A; pseudoinverse supports real 2×2 and 3×2 A, including singular/zero matrices, with a relative 1e-12 singular-value cutoff and verified Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD supports real 2×2 A; pseudoinverse supports real 2×2, 3×2 and 2×3 A, including singular/zero matrices, with a relative 1e-12 singular-value cutoff and verified Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -498,7 +509,7 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-least-squares" class="secondary">Least squares (A·x≈b)</button>'+
  '<button type="button" id="mat-eigen" class="secondary">Eigen (symmetric A)</button>'+ 
  '<button type="button" id="mat-svd" class="secondary">SVD (2×2 A)</button>'+ 
- '<button type="button" id="mat-pseudoinverse" class="secondary">Pseudoinverse (2×2 / 3×2 A)</button>'+
+ '<button type="button" id="mat-pseudoinverse" class="secondary">Pseudoinverse (2×2 / 3×2 / 2×3 A)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
  '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+ 
@@ -591,5 +602,5 @@ send.addEventListener('click',()=>{
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse,notation,read,readSecond,readRhs,calculate};
 })();

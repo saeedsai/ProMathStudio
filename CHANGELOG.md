@@ -1,3 +1,9 @@
+## Implemented on dev — Wide 2×3 matrix pseudoinverse (2026-10-29; QA pending)
+
+- Matrix Calculator supports real wide 2×3 pseudoinverse using transpose duality of the existing scaled 3×2 Jacobi method; preserves the relative 1e-12 singular-value cutoff, rank 0/1/2 cases, four Moore–Penrose identity residuals, input validation, editor transfer and offline operation. Previous 2×2 and 3×2 paths remain available.
+- Added `tests/test_matrix_pseudoinverse_wide.py` and mandatory Chromium `tests/smoke_matrix_pseudoinverse_wide.py` with numerical references, transpose duality, singular/zero/scaled inputs, least-norm solution, malformed inputs and 390/768/1280px UI. Updated the prior 3×2 negative case because 2×3 is now valid. **Do not mark Released before exact-head dev/PR/main Quality and Pages gates.**
+- Previously pending PRs #75, #76 and #77 have now had their main Quality and Pages **workflow** successes independently confirmed through the GitHub Actions runs API (see living ledger); interactive hosted verification remains unavailable.
+
 ## Merged to main — Graph Symbols numeric root, fraction and factorial (2026-10-29, PR #77; Pages verification pending)
 
 - The Graph Symbols palette now enables existing numeric AST templates **Nth root** (`root(3,x)`), **Fraction** (`frac(a,b)`) and **Factorial** (`5!`) in both 2D and 3D Graph. Fraction placeholders must be replaced with graph variables or constants; root is real only on supported domains. Equation-only notation remains disabled in Graph and available in Equation.

@@ -39,6 +39,20 @@ class ToolboxRegistryTests(unittest.TestCase):
         self.assertEqual(result[1]["section"], "Group B")
         self.assertTrue(all(item["status"] == "planned-unverified" for item in result))
 
+    def test_escaped_markdown_pipe_preserves_description(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            (folder / "catalog.md").write_text(
+                "| Feature | Description |\n|---|---|\n"
+                "| Filter | Accept A \| B without splitting the cell |\n",
+                encoding="utf-8",
+            )
+            with patch.object(registry, "DOCS", folder):
+                entries = registry.parse_catalog("sample", "catalog.md")
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["title"], "Filter")
+        self.assertEqual(entries[0]["description"], "Accept A | B without splitting the cell")
+
     def test_catalogs_are_present_and_registry_deterministic(self):
         for filename in registry.CATALOGS.values():
             self.assertTrue((registry.DOCS / filename).is_file(), filename)

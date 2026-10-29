@@ -1,3 +1,17 @@
+## 2026-10-29 — Recovery: HTML export / script parsing and root-locus sample integrity
+
+**Execution ledger: FIXED ON DEV; CI NOT YET VERIFIED.** Exact PR #91 head previously failed GitHub [Quality 40894821384](https://github.com/saeedsai/ProMathStudio/actions/runs/40894821384) at browser smoke: `Failed to execute 'write' on 'Document': Invalid or unexpected token`. Traced to inserting the complex/control script blocks at the *first* `</body>` occurrence, which was inside a quoted HTML export literal in the application's main JS. Restored the export string and moved both blocks immediately before the document's last `</body>`. Fresh parse checks using V8 `new Function` succeeded on every inline executable script. Added mandatory `tests/test_inline_script_boundaries.py` with Node `--check` over all inline scripts, boundary assertions, and exact uniqueness checks. Corrected root-locus rendering from misleading continuous lines between unordered sampled roots to discrete markers, retaining its explicitly sampled scope. Full structural and browser regression CI remains required; no main release or Pages verification claimed.
+
+### NEXT FIVE — acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Validate recovered browser startup | Exact-head full Quality green, exported HTML literal, calculator/editor/graph smoke and zero page errors | DEV / CI PENDING |
+| 2 | Test control transfer functions numerically | Bode 1/(s+1) −3.0103 dB at ω=1, Nyquist symmetry, stable/unstable Routh and closed-loop coefficient tests, mobile Chromium | TODO |
+| 3 | Review and promote PR #91 | Green required PR checks, changed-file review, normal dev→main merge, verify exact main Quality and Pages | BLOCKED ON CI |
+| 4 | Root-locus branch tracking | Continuous pole matching and repeated-root controls, reference roots for 2nd/3rd order examples, browser graph | TODO |
+| 5 | PID and lead-lag controller design | Validated PI/PID response and margins, gain limits, negative cases, feedback/feedforward integration | TODO |
+
 ## 2026-10-29 — Control theory SISO toolbox (requested new scope)
 
 **Ledger: IMPLEMENTED ON DEV; CI and browser QA pending; NOT DEPLOYED.** Added a collapsible continuous-time SISO Transfer Function workbench under Graphs for polynomial numerator/denominator (descending powers, degree ≤ 6), finite gain, Bode magnitude in dB with phase end-point diagnostics, Nyquist locus, sampled unity-feedback root locus, Routh–Hurwitz array and first-column sign-change count, and negative unity feedback closed-loop frequency response. Invalid/nonfinite/high-order inputs rejected; Nyquist poles/encirclement and special Routh rows need analyst confirmation, and root-locus line segments currently connect sample order rather than tracked branches. **This is bounded numerical exploratory analysis, not a MATLAB Control System Toolbox replacement.** `tests/test_control_theory_toolbox.py` covers required UI/modes, guardrails, existing graph/complex graph coexistence, and responsive CSS. Existing PR #91 redesign/complex graph CI previously failed in browser smoke; investigate before any PR merge. No direct main push.

@@ -1,3 +1,8 @@
+## Dev candidate — Ax=b RHS decimal validation (2026-10-29)
+
+- Align right-hand-side vector input for Matrix Calculator solve(A,b) with the existing strict decimal/scientific matrix-entry grammar; reject JavaScript-only 0x/0b/0o forms and malformed inputs, retaining finite limits.
+- Synchronize standalone `index.html` and `src/matrix-tools.js`; add mandatory `tests/smoke_matrix_rhs_decimal.py` Chromium UI/API regression for positive, negative, recovery and 390/768/1280 layouts. Exact-head CI, PR and Pages release are pending verification.
+
 ## PR #83 merged — Matrix decimal-only validation (2026-10-29)
 
 - Corrected Matrix Calculator string input parsing, retaining decimal and scientific notation while rejecting hexadecimal, binary, octal and malformed forms; preserved 2×2/3×3 pseudoinverse behavior.

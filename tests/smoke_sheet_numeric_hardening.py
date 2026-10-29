@@ -67,7 +67,8 @@ def main():
         assert formula('MEDIAN(1e308,1e308)') == 1e308
         assert formula('SUM(1e308,-1e308)') == 0
         assert failure('SUM(1e308,1e308)') == '#NUM!'
-        assert failure('SUM(TWICE(1e308),2)') == '#VALUE'
+        nested_overflow = failure('SUM(TWICE(1e308),2)')
+        assert nested_overflow == '#VALUE', nested_overflow
         assert failure('BROKEN(2)') == '#VALUE'
         assert failure('COUNT(BROKEN(1))') == '#VALUE'
         assert formula('IF(0,BROKEN(1),SUM(1,2))') == 3

@@ -1,3 +1,7 @@
+## Implemented on dev — Real 3×3 pseudoinverse (2026-10-29; QA pending)
+
+- Added scaled one-sided Jacobi SVD for rank 0–3 real 3×3 Moore–Penrose pseudoinverse, four identity residual checks, finite condition diagnostics, explicit instability rejection, Equation transfer and self-contained bundle parity. Added structural and mandatory Chromium numerical/reference/responsive regression; release awaits exact dev/PR/main Quality and Pages.
+
 ## Released via PR #80 — 2×2 pseudoinverse condition diagnostics (2026-10-29)
 
 - Real 2×2 pseudoinverse now reports SVD singular values and finite condition numbers for full-rank matrices, null/rank-deficient diagnostics otherwise, retaining Moore–Penrose residual checks and editor transfer.

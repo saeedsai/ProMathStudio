@@ -1,3 +1,17 @@
+## 2026-10-29 10:43 CET — PR #85 green, merged; Pages verification outstanding
+
+**Feature ledger: MERGED / PRODUCTION UNVERIFIED.** Exact PR head `92600e3c37b6cdacbc8ff8507237d314b90fdbbb` passed [PR Quality 40850954000](https://github.com/saeedsai/ProMathStudio/actions/runs/40850954000) with all 99 workflow steps successful (including 3×3 SVD rank 0–3, matrix tiny-nonzero UI and existing regression suite). Seven changed files reviewed; no unresolved PR review threads. [PR #85](https://github.com/saeedsai/ProMathStudio/pull/85) ordinary expected-SHA merge returned **main `6c20f36a263d7e673f99a021cd5b05a3f5a26644`**; dev was fast-forwarded to that merge commit without force. GitHub PR reports merged and branches identical at verification. Main push Quality and Pages publish/hosted behavior are **not verified**: GitHub connector returns PR-triggered workflow runs only, main commit has no visible runs, direct Actions web access is disabled and Pages URL inaccessible from web tool. Never call this production-deployed without proof. Branch search confirmed only `dev` and `main`; no cleanup needed. The scheduled development task stays enabled.
+
+### NEXT FIVE — scoped acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Production verify PR #85 | Exact main SHA Quality, Pages publish, hosted SVD 3×3 and tiny-nonzero result on desktop/mobile. | ACCESS BLOCKED / MERGED |
+| 2 | Rotated near-dependent 3×3 pseudoinverse | High-precision independent oracle, rank/scale and all four Moore–Penrose residual checks, instability rejection. | TODO |
+| 3 | Rectangular 3×2 SVD | U/S/V, rank 0–2, independent reconstruction and orthogonality references, UI factor transfer and mobile. | TODO |
+| 4 | Wide 2×3 SVD | Transposed decomposition reference, zero/rank-deficient cases, transfer and browser QA. | TODO |
+| 5 | Hosted Data Tables and Graph QA | CSV/TSV/JSON transactional preview rollback, numerical graph roots/fractions, keyboard/mobile and no browser errors. | HOSTED ACCESS BLOCKED |
+
 ## 2026-10-29 10:36 CET — 3×3 SVD PR #85 first CI diagnosed and test navigation repaired
 
 **QA execution log:** Exact PR #85 head `3fa40bd3f9a1dcf0bdf9976e0db93d2472e40303` [Quality 40850284532](https://github.com/saeedsai/ProMathStudio/actions/runs/40850284532) completed **failure**, with only new `tests/smoke_matrix_svd_3x3.py` failing at line 71 (`#mat-svd` not visible after Equation transfer). Reviewed complete GitHub job log; 2×2 SVD and preceding regression steps passed. Root cause was the new test remaining in Equation workspace after the successful SVD factor transfer; restored Calculator/Matrix workspace before responsive visibility checks. Regression test correction committed on dev, no assertions removed. Exact new head must pass complete Quality before PR merge. Main still `183421a23e943a0920bebabc76f39569c91ace92`; Pages/main push checks still not independently accessible. Keep hourly schedule active.

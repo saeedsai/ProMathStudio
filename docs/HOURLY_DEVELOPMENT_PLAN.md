@@ -4,6 +4,10 @@
 
 **Feature ledger — IMPLEMENTED ON DEV / RELEASE QA PENDING:** Enhanced 3×3 Jacobi SVD with explicit absolute rank cutoff, scaled condition number computation (avoids avoidable scaling overflow/underflow), and rank-deficient / well / moderate / ill conditioning advisory. Zero matrix receives explicit diagnostics; Matrix Calculator renders cutoff and advisory for 3×3 only, leaving other SVD sizes unchanged. Added structural `tests/test_matrix_svd_3x3_condition.py` and mandatory Chromium `tests/smoke_matrix_svd_3x3_condition.py` with independent 75-digit rational-rotation numerical oracle, scale 1e-12/1/1e12, rank threshold boundaries, invalid input, reconstruction, orthogonality, Equation factor transfer and 390/768/1280 responsive UI. Module and inline bundle parity verified; exact-source V8 numerical checks passed a diagonal and three rotated-scale cases. Full GitHub Actions/Chromium verification of this candidate remains pending; do not mark released until exact-head PR CI, main checks and Pages evidence are obtained.
 
+### 2026-10-29 14:03 CET — PR #89 first CI failure diagnosed and repaired
+
+[PR #89](https://github.com/saeedsai/ProMathStudio/pull/89) initial [Quality run 40878422463](https://github.com/saeedsai/ProMathStudio/actions/runs/40878422463) failed at `tests/smoke_browser.py`: `Failed to execute 'write' on 'Document': Invalid or unexpected token`. Downloaded exact job logs and traced it to a missing quote in the newly added SVD result-label string. Corrected `src/matrix-tools.js` and its inline `index.html` copy; verified `new Function(source)` parses. Added `node --check` to `tests/test_matrix_svd_3x3_condition.py` as a focused structural regression to catch syntax before browser tests. No assertions weakened, no CI bypass. Repaired candidate is **DEV / PR CI RECHECK PENDING**, not deployed. Keep next-five queue below unchanged until verified results.
+
 ### NEXT FIVE — concrete acceptance gates
 
 | Priority | Feature | Acceptance tests | Status |

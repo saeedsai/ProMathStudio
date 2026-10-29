@@ -1,3 +1,8 @@
+## Dev candidate — Thin 3×2 SVD diagnostics (2026-10-29)
+
+- Added thin real 3×2 SVD with scaled pivoted QR, twice-reorthogonalized columns, and existing 2×2 SVD factorization. Exposes U (3×2), two singular values, V (2×2), rank 0–2, condition number, reconstruction and orthogonality diagnostics; retains existing 2×2 and 3×3 paths.
+- Updated Matrix Calculator SVD dispatch and labels, standalone bundle, and Equation Editor transfer. Added mandatory Chromium regression `tests/smoke_matrix_svd_3x2.py` with independent analytic singular-value references, rank/scale/invalid cases, UI and responsive checks. CI, PR, main and Pages verification pending; not released.
+
 ## PR #86 merged — Shared 3×3 SVD pseudoinverse and rotated oracle QA (2026-10-29)
 
 - Consolidated 3×3 Moore–Penrose pseudoinverse onto the validated 3×3 Jacobi SVD and preserved rank cutoff, condition diagnostics and four identity gates. Added independent 65-digit Decimal rational-rotation/scaling oracle, invalid-input, Equation transfer and responsive Chromium regression.

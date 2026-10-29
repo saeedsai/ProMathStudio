@@ -393,6 +393,78 @@ function svd2x2(A){
  const ratio=S[1]>0?S[0]/S[1]:Infinity;
  return {U,S,V,rank,conditionNumber:Number.isFinite(ratio)?ratio:null,residual,orthogonalityU,orthogonalityV};
 }
+/* One-sided Jacobi SVD for bounded real 3×3 matrices, including rank loss.
+   Rotate columns directly, avoiding squaring the condition number via AᵀA.
+   Complete null-space directions orthogonally and verify reconstruction. */
+function svd3x3(A){
+ A=validate(A);
+ if(A.length!==3||A[0].length!==3)throw Error('SVD requires a 3×3 real matrix.');
+ const identity=()=>Array.from({length:3},(_,i)=>Array.from({length:3},(_,j)=>Number(i===j)));
+ const scale=Math.max(...A.flat().map(Math.abs));
+ if(scale===0)return {U:identity(),S:[0,0,0],V:identity(),rank:0,conditionNumber:null,residual:0,orthogonalityU:0,orthogonalityV:0};
+ const B=A.map(row=>row.map(x=>x/scale)),V=identity();
+ let converged=false;
+ for(let sweep=0;sweep<64;sweep++){
+  let changed=false;
+  for(let p=0;p<2;p++)for(let q=p+1;q<3;q++){
+   let aa=0,bb=0,ab=0;
+   for(let i=0;i<3;i++){aa+=B[i][p]*B[i][p];bb+=B[i][q]*B[i][q];ab+=B[i][p]*B[i][q];}
+   if(aa===0||bb===0||Math.abs(ab)<=1e-14*Math.sqrt(aa)*Math.sqrt(bb))continue;
+   changed=true;
+   const tau=(bb-aa)/(2*ab),t=(tau<0?-1:1)/(Math.abs(tau)+Math.hypot(1,tau));
+   const c=1/Math.hypot(1,t),sn=c*t;
+   for(let i=0;i<3;i++){
+    const bp=B[i][p],bq=B[i][q],vp=V[i][p],vq=V[i][q];
+    B[i][p]=c*bp-sn*bq;B[i][q]=sn*bp+c*bq;
+    V[i][p]=c*vp-sn*vq;V[i][q]=sn*vp+c*vq;
+   }
+  }
+  if(!changed){converged=true;break;}
+ }
+ if(!converged)throw Error('3×3 SVD Jacobi rotations did not converge.');
+ const values=Array.from({length:3},(_,j)=>Math.hypot(...B.map(row=>row[j])));
+ const order=[0,1,2].sort((i,j)=>values[j]-values[i]||i-j);
+ const S=order.map(k=>values[k]*scale),cutoff=1e-12*values[order[0]];
+ const rank=order.filter(k=>values[k]>cutoff).length;
+ const sortedV=V.map(row=>order.map(k=>row[k]));
+ let U=Array.from({length:3},()=>[0,0,0]);
+ for(let j=0;j<rank;j++){
+  const k=order[j];
+  for(let i=0;i<3;i++)U[i][j]=B[i][k]/values[k];
+ }
+ const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+ if(rank===0)U=identity();
+ else if(rank<3){
+  if(rank===1){
+   const u=U.map(row=>row[0]);
+   const axis=[0,1,2].sort((a,b)=>Math.abs(u[a])-Math.abs(u[b]))[0];
+   const v=[0,1,2].map(i=>Number(i===axis)-u[axis]*u[i]);
+   const norm=Math.hypot(...v);
+   for(let i=0;i<3;i++)U[i][1]=v[i]/norm;
+  }
+  const a=U.map(row=>row[0]),b=U.map(row=>row[1]);
+  const v=cross(a,b),norm=Math.hypot(...v);
+  if(norm===0)throw Error('3×3 SVD null-space completion failed.');
+  for(let i=0;i<3;i++)U[i][2]=v[i]/norm;
+ }
+ let residual=0,orthogonalityU=0,orthogonalityV=0;
+ for(let i=0;i<3;i++)for(let j=0;j<3;j++){
+  let reconstructed=0,uu=0,vv=0;
+  for(let k=0;k<3;k++){
+   reconstructed+=U[i][k]*S[k]*sortedV[j][k];
+   uu+=U[k][i]*U[k][j];vv+=sortedV[k][i]*sortedV[k][j];
+  }
+  residual=Math.max(residual,Math.abs(reconstructed-A[i][j])/scale);
+  orthogonalityU=Math.max(orthogonalityU,Math.abs(uu-Number(i===j)));
+  orthogonalityV=Math.max(orthogonalityV,Math.abs(vv-Number(i===j)));
+ }
+ if(![...S,...U.flat(),...sortedV.flat(),residual,orthogonalityU,orthogonalityV].every(Number.isFinite)
+  ||residual>1e-8||orthogonalityU>1e-8||orthogonalityV>1e-8)
+  throw Error('3×3 SVD failed numerical reconstruction or orthogonality checks.');
+ const conditionNumber=rank===3?S[0]/S[2]:Infinity;
+ return {U,S,V:sortedV,rank,conditionNumber:Number.isFinite(conditionNumber)?conditionNumber:null,
+  residual,orthogonalityU,orthogonalityV};
+}
 /* Moore-Penrose pseudoinverse of a real 2×2 matrix, including rank-deficient
    inputs. Reuse the scaled SVD and its relative 1e-12 rank threshold. */
 function pseudoinverse2x2(A){
@@ -558,7 +630,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD supports real 2×2 A; pseudoinverse supports real 2×2, 3×2, 2×3 and 3×3 A, including singular/zero matrices, with a relative 1e-12 singular-value cutoff, condition diagnostics and verified Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD supports real 2×2 and 3×3 A; pseudoinverse supports real 2×2, 3×2, 2×3 and 3×3 A, including singular/zero matrices, with a relative 1e-12 singular-value cutoff, condition diagnostics and verified Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -579,7 +651,7 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-qr" class="secondary">QR (A=Q·R)</button>'+
  '<button type="button" id="mat-least-squares" class="secondary">Least squares (A·x≈b)</button>'+
  '<button type="button" id="mat-eigen" class="secondary">Eigen (symmetric A)</button>'+ 
- '<button type="button" id="mat-svd" class="secondary">SVD (2×2 A)</button>'+ 
+ '<button type="button" id="mat-svd" class="secondary">SVD (2×2 / 3×3 A)</button>'+ 
  '<button type="button" id="mat-pseudoinverse" class="secondary">Pseudoinverse (2×2 / 3×2 / 2×3 / 3×3 A)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
@@ -645,7 +717,7 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?svd2x2(A):operation==='pseudoinverse'?pseudoinverse(A):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?(A.length===3?svd3x3(A):svd2x2(A)):operation==='pseudoinverse'?pseudoinverse(A):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares')?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
@@ -673,5 +745,5 @@ send.addEventListener('click',()=>{
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,svd3x3,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,calculate};
 })();

@@ -88,6 +88,8 @@ function solve(A,b){
  if(!Array.isArray(b)||b.length!==n)throw Error('Right-hand side b must contain '+n+' values.');
  const rhs=b.map((entry,i)=>{
   if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in b row '+(i+1)+'.');
+  if(typeof entry==='string'&&!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(entry.trim()))
+   throw Error('Right-hand side b must use decimal or scientific notation.');
   const value=Number(entry);
   if(!Number.isFinite(value)||Math.abs(value)>MAX_ENTRY)throw Error('Right-hand side b must contain finite numbers with magnitude at most 1e12.');
   return value;

@@ -1,3 +1,13 @@
+## Dev candidate — Ax=b RHS decimal validation (2026-10-29)
+
+- Align right-hand-side vector input for Matrix Calculator solve(A,b) with the existing strict decimal/scientific matrix-entry grammar; reject JavaScript-only 0x/0b/0o forms and malformed inputs, retaining finite limits.
+- Synchronize standalone `index.html` and `src/matrix-tools.js`; add mandatory `tests/smoke_matrix_rhs_decimal.py` Chromium UI/API regression for positive, negative, recovery and 390/768/1280 layouts. Exact-head CI, PR and Pages release are pending verification.
+
+## PR #83 merged — Matrix decimal-only validation (2026-10-29)
+
+- Corrected Matrix Calculator string input parsing, retaining decimal and scientific notation while rejecting hexadecimal, binary, octal and malformed forms; preserved 2×2/3×3 pseudoinverse behavior.
+- Added structural parity and mandatory Chromium regression covering API validation, error recovery, and mobile layouts. Initial bundle newline parity failure fixed without relaxing tests. [PR Quality 40839418058](https://github.com/saeedsai/ProMathStudio/actions/runs/40839418058) passed 96/96 steps; [PR #83](https://github.com/saeedsai/ProMathStudio/pull/83) merged at `43cc4e68cd58e3d035235cda8e47e4087da4f66e`. Production Pages verification pending.
+
 ## Dev checkpoint — Matrix decimal-only validation and browser regression (2026-10-29)
 
 - Reject JavaScript-only hexadecimal/binary/octal numeric prefixes and malformed string entries in matrix validation, while accepting signed decimal/scientific notation and preserving finite/magnitude bounds.

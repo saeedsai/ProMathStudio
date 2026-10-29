@@ -1,3 +1,13 @@
+## Dev checkpoint — Matrix decimal-only validation and browser regression (2026-10-29)
+
+- Reject JavaScript-only hexadecimal/binary/octal numeric prefixes and malformed string entries in matrix validation, while accepting signed decimal/scientific notation and preserving finite/magnitude bounds.
+- Synchronize standalone HTML and module, add structural parity test and mandatory Chromium regression for direct API validation, UI rejection/recovery and responsive layouts. Release pending exact-head Quality and PR checks; no deployment claim.
+
+## Released via PR #82 — 3×3 condition-risk diagnostics (2026-10-29)
+
+- Matrix Calculator now exposes scientific-notation pseudoinverse singular values, the absolute numerical rank cutoff and a bounded 3×3 conditioning advisory (well/moderate/ill-conditioned or rank deficient), retaining strict instability rejection and Equation transfer. Corrected the UI cutoff label before merging.
+- [dev Quality 40832920276](https://github.com/saeedsai/ProMathStudio/actions/runs/40832920276), [PR Quality 40832926954](https://github.com/saeedsai/ProMathStudio/actions/runs/40832926954), [main Quality 40833488246](https://github.com/saeedsai/ProMathStudio/actions/runs/40833488246) and [post-merge dev Quality 40833505946](https://github.com/saeedsai/ProMathStudio/actions/runs/40833505946) passed 95/95 workflow steps. [Pages 40833487595](https://github.com/saeedsai/ProMathStudio/actions/runs/40833487595) succeeded for main `505e44eb64a71a66d5c53e17d8c9184ec08b0b02`. Independent hosted interaction unavailable.
+
 ## Implemented on dev — 3×3 matrix condition-risk diagnostics (2026-10-29; release QA pending)
 
 - Display scientific-notation singular values and numerical rank cutoff for matrix pseudoinverses; classify real 3×3 results as well-conditioned, moderately conditioned, ill-conditioned or rank deficient. Preserve the strict Moore–Penrose stability rejection and Equation transfer. Add independent rotated numerical oracle, scaled/near-dependent/invalid tests, structural parity and mandatory Chromium/mobile regression.

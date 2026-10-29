@@ -1,3 +1,47 @@
+## 2026-10-29 09:05 CET — PR #83 matrix validation QA diagnosis and recovery
+
+**Status: OPEN PR / CI RECHECK PENDING; NOT DEPLOYED.** Added `tests/smoke_matrix_decimal_input.py` and registered it as a mandatory Chromium Quality step, covering hexadecimal/binary/octal and malformed rejection, signed/scientific acceptance, matrix UI error recovery and 390/768/1280 responsive layouts. Source change and tests are on `dev`, PR [#83](https://github.com/saeedsai/ProMathStudio/pull/83). First PR [Quality 40839293729](https://github.com/saeedsai/ProMathStudio/actions/runs/40839293729) failed at structural step (seven existing standalone parity assertions): inline matrix bundle was missing the required trailing newline. Restored `src/matrix-tools.js` + newline in `index.html`, and aligned the new parity test with that established invariant. Final repair checkpoint `e8cf76a265946ce37da273aa1ed34b27bf172dec`. Recheck exact-head Quality and PR CI before any merge. GitHub clone DNS unavailable; no local browser execution. Main remains `505e44eb64a71a66d5c53e17d8c9184ec08b0b02` pending safe release.
+
+### NEXT FIVE — acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Release matrix validation PR #83 | Full structural + mandatory Chromium + PR Quality green, reviewed diff, ordinary PR merge, main Quality and Pages successful. | PR OPEN / QA PENDING |
+| 2 | Rotated near-dependent 3×3 pseudoinverse | High-precision independent oracle, rank/scale/MP residual, unstable rejection and browser regression. | TODO |
+| 3 | 3×3 SVD diagnostics | Rank0–3 singular vectors, reconstruction and orthogonality references, mobile UI. | TODO |
+| 4 | Hosted import preview QA | CSV/TSV/JSON preview, Cancel/Escape rollback, schema warnings, mobile. | HOSTED QA BLOCKED |
+| 5 | Hosted spreadsheet/graph QA | Nested custom functions, overflow, 2D/3D root/fraction/factorial, accessibility. | HOSTED QA BLOCKED |
+
+## 2026-10-29 09 CET — Matrix numeric-input validation hardening (dev checkpoint)
+
+**DEV ONLY / QA PENDING.** Fixed a matrix-input inconsistency: JavaScript `Number()` previously accepted hexadecimal/binary/octal string literals (e.g. `0x10`) even though the UI expects decimal or scientific notation. String entries now require an explicit decimal/scientific grammar before finite/magnitude checks; numeric inputs and ordinary decimal/exponent entries remain supported. Added `tests/test_matrix_decimal_input.py` for the validation contract and standalone parity, and synchronized `src/matrix-tools.js` into `index.html`. Exact-head CI and browser regression are not yet confirmed, so **do not merge or claim deployed**. Previous main SHA `505e44eb64a71a66d5c53e17d8c9184ec08b0b02`. Keep recurring task active.
+
+### NEXT FIVE with acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Matrix decimal input QA/release | Browser rejects 0x/0b/0o and accepts 1e-6, -0.5, +2; unit, Chromium, PR/main Quality and Pages green. | DEV COMMITTED / QA PENDING |
+| 2 | Rotated 3×3 near-dependent stability | Independent high-precision oracle, rank cutoff, Moore–Penrose residual and scale tests. | TODO |
+| 3 | 3×3 SVD diagnostics | Reconstruction and orthogonality numeric reference tests, accessible UI. | TODO |
+| 4 | Hosted Data Tables import QA | CSV/TSV/JSON preview, cancellation, malformed rollback and mobile tests. | TODO |
+| 5 | Hosted custom-function/graph QA | Numeric overflow, nested functions, graph symbols, focus and responsive tests. | TODO |
+
+## 2026-10-29 08 CET — P1-MATRIX-3X3-CONDITION-ADVISORY RELEASED via PR #82
+
+**Feature ledger: RELEASED FOR BOUNDED REAL 3×3 CONDITION-RISK DIAGNOSTICS (Pages workflow verified; hosted interactive QA unavailable).** The Matrix Calculator now reports scientific-notation singular values, correctly labeled **absolute** rank cutoff and a condition-risk advisory: well-conditioned κ<1e4, moderately conditioned 1e4≤κ<1e8, ill-conditioned κ≥1e8, or rank deficient (numerical rank <3). Advisory thresholds are heuristics, not a promise of accuracy; the original scaled Jacobi SVD and four Moore–Penrose checks still reject unstable inverses. Existing 2×2, 3×2, 2×3, 3×3 workflows and Equation transfer preserved. Modular `src/matrix-tools.js` and standalone `index.html` synchronized.
+
+**Execution log / verified gates:** Started dev `2db858d12a27f25ff190d25d405f17605d4f1334`, main `128e578683e4f13960db6b3dd42f59c0add43ab5`. Implementation `62cd7cad4cf17cc0dda838cc7b2f6c7fc7ed800f` passed [dev Quality 40832379412](https://github.com/saeedsai/ProMathStudio/actions/runs/40832379412). Corrected the absolute-cutoff UI label in candidate `538597b3aadb568b1df08ec9d6739ac02ef9b39b`; [dev Quality 40832920276](https://github.com/saeedsai/ProMathStudio/actions/runs/40832920276) and [PR #82 Quality 40832926954](https://github.com/saeedsai/ProMathStudio/actions/runs/40832926954) passed **95/95 steps**. Reviewed seven-file PR diff, verified no unresolved review threads, unchanged exact head and clean mergeability; ordinary SHA-checked [PR #82](https://github.com/saeedsai/ProMathStudio/pull/82) merge produced **main `505e44eb64a71a66d5c53e17d8c9184ec08b0b02`**. [Main Quality 40833488246](https://github.com/saeedsai/ProMathStudio/actions/runs/40833488246) and [post-merge dev Quality 40833505946](https://github.com/saeedsai/ProMathStudio/actions/runs/40833505946) passed 95/95; [Pages 40833487595](https://github.com/saeedsai/ProMathStudio/actions/runs/40833487595) succeeded for exact main SHA. dev safely fast-forwarded to main without force. New direct structural and mandatory Chromium tests include independent rotated 3×3 numerical oracle, condition numbers 3/1e6/1e9, scale and rank0/2/3, invalid inputs, near-dependent unstable rejection, Equation transfer, 390/768/1280px and no browser errors. Only dev/main branches remain, no open PR; no stale tracked files removed without proof. GitHub branch protection remains unconfigured. Direct hosted interactive access returned DisabledError; local clone DNS unavailable. Frozen 166-gap/95-partial baseline and hourly task remain intact.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-MATRIX-3X3-NUMERICAL-CONDITIONING follow-up | Improve near-dependent rotated full-rank 3×3 stability using independent higher-precision numerical oracle, rank cutoff, all four identities, strict rejection and responsive browser tests. | TODO / FEASIBILITY FIRST |
+| 2 | P1-MATRIX-3X3-SVD-DIAGNOSTICS | Provide singular vectors U/V with reconstruction and orthogonality for rank0–3; preserve 2×2 SVD, Equation transfer and mobile UI. | TODO / DEPENDS ON #1 |
+| 3 | P1-DATA-IMPORT-PREVIEW hosted QA | Confirm live CSV/TSV/JSON schema warnings, Cancel/Escape rollback, Create, focus, mobile and no console errors. | DEPLOYED / HOSTED QA BLOCKED BY ACCESS |
+| 4 | P1-DATA-CUSTOM-COMPOSITION hosted QA | Confirm live 1e308, #NUM! overflow, built-in protection, nested functions, persistence and mobile. | DEPLOYED / HOSTED QA BLOCKED BY ACCESS |
+| 5 | P1-GRAPH-PALETTE-VALIDITY hosted QA | Confirm live 2D/3D root/fraction/factorial, invalid division, notation gating, keyboard focus and mobile. | DEPLOYED / HOSTED QA BLOCKED BY ACCESS |
+
 ## 2026-10-29 07:55 CET — P1-MATRIX-3X3-CONDITION-ADVISORY implemented on dev; release QA pending
 
 **Feature ledger: IMPLEMENTED ON DEV / NOT YET RELEASED.** The real 3×3 pseudoinverse now explains condition risk as well-conditioned (κ<1e4), moderately conditioned (1e4≤κ<1e8), ill-conditioned (κ≥1e8), or rank deficient (numerical rank <3). The matrix result now exposes singular values in scientific notation and the absolute 1e-12-relative rank cutoff, avoiding misleading zero formatting for tiny singular values. Existing Jacobi SVD, rank decisions, all four Moore–Penrose residual checks, explicit unstable rejection and Equation transfer are unchanged. This is a diagnostic advisory, **not** a promise of accurate inversion of ill-conditioned inputs or completion of broader 3×3 conditioning work.

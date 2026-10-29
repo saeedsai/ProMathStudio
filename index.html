@@ -5482,6 +5482,9 @@ function validate(A){
   throw Error('Matrix must be rectangular with 2 or 3 columns.');
  return A.map((row,r)=>row.map((entry,c)=>{
   if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in row '+(r+1)+', column '+(c+1)+'.');
+  // Matrix input accepts decimal/scientific notation, not JS numeric prefixes (0x, 0b, 0o).
+  if(typeof entry==='string'&&!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(entry.trim()))
+   throw Error('Matrix entries must use decimal or scientific notation.');
   const value=Number(entry);
   if(!Number.isFinite(value)||Math.abs(value)>MAX_ENTRY)throw Error('Matrix entries must be finite numbers with magnitude at most 1e12.');
   return value;

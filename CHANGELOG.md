@@ -1,3 +1,7 @@
+### PR #89 CI recovery checkpoint (2026-10-29)
+
+- Initial [PR Quality 40878422463](https://github.com/saeedsai/ProMathStudio/actions/runs/40878422463) failed the existing browser smoke because the new SVD diagnostic output concatenation omitted a closing JavaScript string quote. Fixed the source and standalone bundle, and strengthened the new structural test to run `node --check` on the matrix module so this syntax regression is caught before Chromium. No assertions or security gates were disabled. Exact repaired-head CI is pending.
+
 ## Dev candidate — Scale-safe 3×3 SVD condition diagnostics (2026-10-29)
 
 - Extended the 3×3 SVD result with the relative numerical rank cutoff expressed in original input units and an explicit rank-deficient / well-conditioned / moderately conditioned / ill-conditioned assessment. Condition number now uses scaled singular values before multiplying by matrix magnitude to avoid avoidable overflow or underflow in the estimate. Zero-matrix diagnostics remain finite and explicit.

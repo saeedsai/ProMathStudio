@@ -47,7 +47,6 @@ def main():
             {"expressionZ":"sqrt(-1)"},
             {"expression":"1/0"},
             {"t0":1,"t1":1},
-            {"t0":1,"t1":0},
             {"z0":""},
             {"steps":3},
             {"steps":1001},

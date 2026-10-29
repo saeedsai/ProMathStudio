@@ -238,3 +238,5 @@ jobs:
         run: python tests/smoke_ode_rk45_backward.py
       - name: Coupled two-state RK4 reference and UI regression
         run: python tests/smoke_ode_system.py
+      - name: Backward coupled RK4 numerical and browser regression
+        run: python tests/smoke_ode_system_backward.py

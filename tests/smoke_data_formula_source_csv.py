@@ -30,6 +30,8 @@ def main():
         page.locator('#dt-import').set_input_files({
             'name': 'formula_source.csv', 'mimeType': 'text/csv',
             'buffer': original.encode('utf-8')})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function('() => MathStudio.dataTables.tables.some(t => t.name === "formula_source")')
         rows = page.evaluate('MathStudio.dataTables.active.rows')
         assert rows == [['1', 'Ångström, one', '=SUM(A1:A2)'],
@@ -53,6 +55,8 @@ def main():
             ['id', 'note', 'calc'], *rows]
         page.locator('#dt-import').set_input_files({
             'name': 'roundtrip.csv', 'mimeType': 'text/csv', 'buffer': raw})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function('() => MathStudio.dataTables.tables.some(t => t.name === "roundtrip")')
         assert page.evaluate('MathStudio.dataTables.active.rows') == rows
         for width in (390, 768, 1280):

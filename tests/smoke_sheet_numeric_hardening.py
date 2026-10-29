@@ -24,6 +24,7 @@ def main():
             {name:'MEDIAN',params:['x','y'],expression:'99',type:'formula'},
             {name:'IF',params:['a','b','c'],expression:'99',type:'formula'},
             {name:'TWICE',params:['x'],expression:'2*x',type:'formula'},
+            {name:'IDENTITY',params:['x'],expression:'x',type:'formula'},
             {name:'BROKEN',params:['x'],expression:'x/0',type:'formula'}
           ]);
           MathStudio.dataTables.restoreState({
@@ -59,6 +60,9 @@ def main():
         assert formula('MEDIAN(1,3)') == 2
         assert formula('IF(1,COUNT(2,3),BROKEN(1))') == 2
         assert formula('SUM(TWICE(2),SUM(1,2))') == 7
+        # Numeric arguments must not be stringified into unsupported 1e+308 notation.
+        assert formula('IDENTITY(1e308)') == 1e308
+        assert abs(formula('TWICE(1e-100)') - 2e-100) < 1e-110
 
         # Finite averages stay finite even if an intermediate sum would overflow.
         assert formula('AVERAGE(1e308,1e308)') == 1e308

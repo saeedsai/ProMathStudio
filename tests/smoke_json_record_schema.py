@@ -26,6 +26,8 @@ def main():
         page.locator('#dt-import').set_input_files({
             'name': 'valid.json', 'mimeType': 'application/json',
             'buffer': json.dumps(valid, ensure_ascii=False).encode('utf-8')})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function('() => MathStudio.dataTables.tables.some(t => t.name === "valid")')
         assert page.evaluate('MathStudio.dataTables.active.rows') == [
             ['1', 'Ångström'], ['2', '日本語']]

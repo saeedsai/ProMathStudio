@@ -13,7 +13,7 @@ function validate(A){
  if(columns<2||columns>limit||A.some(row=>!Array.isArray(row)||row.length!==columns))
   throw Error('Matrix must be rectangular with 2 or 3 columns.');
  return A.map((row,r)=>row.map((entry,c)=>{
-  if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in row '+(r+1)+', column '+(c+1)+'.');
+  if((typeof entry!=='number'&&typeof entry!=='string')||String(entry).trim()==='')throw Error('Enter a number in row '+(r+1)+', column '+(c+1)+'.');
   // Matrix input accepts decimal/scientific notation, not JS numeric prefixes (0x, 0b, 0o).
   if(typeof entry==='string'&&!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(entry.trim()))
    throw Error('Matrix entries must use decimal or scientific notation.');
@@ -87,7 +87,7 @@ function solve(A,b){
  const n=A.length,tolerance=1e-12;
  if(!Array.isArray(b)||b.length!==n)throw Error('Right-hand side b must contain '+n+' values.');
  const rhs=b.map((entry,i)=>{
-  if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in b row '+(i+1)+'.');
+  if((typeof entry!=='number'&&typeof entry!=='string')||String(entry).trim()==='')throw Error('Enter a number in b row '+(i+1)+'.');
   if(typeof entry==='string'&&!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(entry.trim()))
    throw Error('Right-hand side b must use decimal or scientific notation.');
   const value=Number(entry);

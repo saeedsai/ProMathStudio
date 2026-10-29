@@ -1,3 +1,9 @@
+## 2026-10-29 — Markdown alignment row filtering (dev QA)
+
+**New parser correctness feature:** the toolbox registry ignores Markdown alignment delimiter rows (`---`, `:---`, `---:`, `:---:`) instead of inventing catalog entries from formatting. Added focused `test_alignment_delimiters_are_not_catalog_features` fixture. Source and test committed on dev. Exact-head CI, browser regression, PR and Pages remain unverified for this candidate. Earlier CI was still running when inspected; no gate bypass.
+
+**NEXT FIVE (with acceptance tests):** (1) confirm current dev Quality including unit/browser checks and repair any failing assertions; (2) add malformed/escaped table parser fixtures with deterministic registry output; (3) create semantic-alias review report without equating matching titles to algorithms; (4) shared linear solver consumed by two workflows with residual and singular-matrix references; (5) RK45 singular derivative/overflow errors with disabled exports and mobile/browser regression. Keep inventory counts audit-backed and release only through green PR.
+
 ## 2026-10-29 — Escaped-pipe toolbox catalog parsing (dev QA)
 
 **Feature:** Catalog registry parser now treats escaped Markdown table pipes as cell content rather than separators, retaining complete feature descriptions. Added focused fixture regression `test_escaped_markdown_pipe_preserves_description` in `tests/test_toolbox_registry.py`. **Status:** dev source and regression committed; exact-head CI, browser suite and deployment pending. No verified production release claim.

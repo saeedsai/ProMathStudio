@@ -1,3 +1,17 @@
+## 2026-10-29 10:28 CET — 3×3 Jacobi SVD added while PR #85 Quality was running
+
+**Execution log:** Re-read root AGENTS.md, living plan, frozen 26-Oct feature inventory, current PR #85 and exact-head CI. PR #85 at `0677115f199dd6affa858edada30db6041afb2bc` had [Quality 40849820919](https://github.com/saeedsai/ProMathStudio/actions/runs/40849820919) **in progress** at inspection; no green release claim. Prior PR #84 was merged on main `183421a23e943a0920bebabc76f39569c91ace92`; its main Quality and Pages remain unverified. Because CI was pending, continued compatible development on dev: implemented 3×3 one-sided Jacobi SVD with U/S/V, rank 0–3 and reconstruction/orthogonality checks, orthogonal completion for null singular directions, UI/editor integration, standalone bundle parity, mandatory new `tests/smoke_matrix_svd_3x3.py` regression and CI step. Both source changes (tiny nonzero formatting and 3×3 SVD) remain **DEV / QA PENDING**. Do not merge until latest exact-head PR Quality succeeds; re-evaluate PR #85 head and review. No branch protection bypass or extra branches; hourly task remains enabled.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Release 3×3 SVD + tiny nonzero formatting | Full exact-head 98+ step CI, rank 0–3 independent references, orthogonality, factor transfer, mobile and zero-vs-tiny display; PR merge only when green. | DEV / CI PENDING |
+| 2 | Verify production PR #84 and new release | Exact main SHA Quality and GitHub Pages publish, hosted Ax=b validation and SVD UI. | BLOCKED ON HOSTED ACCESS |
+| 3 | Rotated near-dependent 3×3 pseudoinverse | High-precision oracle, all four Moore–Penrose residual gates, stable rank/scale and rejection for unstable cases. | TODO |
+| 4 | SVD diagnostics for rectangular 3×2 and 2×3 | Reference U/S/V reconstruction, rank 0–2, factor transfer and responsive UI. | TODO |
+| 5 | Hosted Data Tables and Graph QA | CSV/TSV/JSON transactional rollback; 2D/3D numerical graph references, keyboard/mobile/no errors. | HOSTED ACCESS BLOCKED |
+
 ## 2026-10-29 10:24 CET — PR #84 merged; small nonzero matrix display corrected on dev
 
 **Execution log:** Read current root AGENTS.md, living plan, frozen feature inventory, latest repository state and exact-head PR Quality. [PR #84](https://github.com/saeedsai/ProMathStudio/pull/84) final head `e10c768c280edd00696f59f8d81ac768982f29bd` passed [PR Quality 40846480766](https://github.com/saeedsai/ProMathStudio/actions/runs/40846480766): one passing job, 97 passing steps, no unresolved review threads, mergeable. Ordinary expected-SHA merge returned main `183421a23e943a0920bebabc76f39569c91ace92`. Fast-forwarded dev to main without force. Main Quality/Pages and hosted interactive QA remain **unverified**: GitHub connector only lists PR runs and web direct Actions/Pages returned disabled/inaccessible. No claim of production deployment.

@@ -1304,6 +1304,9 @@ def _ms_system(job_text):
       'pi','e','tau','x^2','sin(x)','cos(x)','tan(x)',
       'asin(x)','acos(x)','atan(x)','ln(x)','log(x)','log10(x)',
       'exp(x)','sqrt(x)','abs(x)','floor(x)','ceil(x)',
+      // These palette entries are evaluated by numeric(): root, fraction and
+      // postfix factorial. Placeholder variables must be supplied by the user.
+      'root(3,x)','frac(a,b)','5!',
       'min(a,b)','max(a,b)','*'
     ]);
     const graphPaletteSupported=code=>graphNumericTemplates.has(code)||

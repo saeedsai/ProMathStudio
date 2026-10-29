@@ -45,7 +45,6 @@ def main():
 
         invalid = [
             {"t0": 1, "t1": 1},
-            {"t0": 1, "t1": 0},
             {"tolerance": 0},
             {"tolerance": 1e-13},
             {"tolerance": 0.1},

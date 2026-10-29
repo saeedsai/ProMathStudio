@@ -234,5 +234,7 @@ jobs:
         run: python tests/smoke_ode_backward.py
       - name: Adaptive RK45 numerical and UI regression
         run: python tests/smoke_ode_adaptive.py
+      - name: Backward adaptive RK45 reference, rejection and UI regression
+        run: python tests/smoke_ode_rk45_backward.py
       - name: Coupled two-state RK4 reference and UI regression
         run: python tests/smoke_ode_system.py

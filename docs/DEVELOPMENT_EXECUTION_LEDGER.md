@@ -4,11 +4,17 @@ Baseline: 158 present (63 bounded complete, 95 partial), 166 gap/improvement opp
 
 | ID | Feature | Status | Evidence |
 |---|---|---|---|
-| MATH-MATRIX-WLS-UI-001 | Interactive weighted QR least-squares for 3×2 real matrices | Implemented on dev; exact-head CI/PR/Pages pending | src/matrix-tools.js, index.html, tests/smoke_matrix_weighted_least_squares.py, .github/workflows/quality.yml |\n| MATH-ODE-RK45-TIME-RESOLUTION-004 | Large-epoch representable-step and exact-endpoint RK45 integration | Implemented on dev; exact-head CI and PR/Pages pending | src/ode-tools.js, index.html, tests/test_ode_rk45_endpoint.py, tests/smoke_ode_rk45_endpoint.py |
+| MATH-MATRIX-WLS-UI-001 | Interactive weighted QR least-squares for 3×2 real matrices | Released via PR #95; dev/main Quality and Pages success at 352c1dd8549beb8cb0707012b7bd466d1fcd25c1; independent live-browser check unavailable | src/matrix-tools.js, index.html, tests/smoke_matrix_weighted_least_squares.py, .github/workflows/quality.yml |
+| MATH-MATRIX-WLS-RHS-002 | Strict decimal RHS and positive weight input types for QR least-squares | Implemented on dev; exact-head CI/PR/Pages pending | src/matrix-tools.js, index.html, tests/test_weighted_least_squares_rhs_validation.py; 51 V8 numerical assertions passed |
+| MATH-ODE-RK45-TIME-RESOLUTION-004 | Large-epoch representable-step and exact-endpoint RK45 integration | Implemented on dev; exact-head CI and PR/Pages pending | src/ode-tools.js, index.html, tests/test_ode_rk45_endpoint.py, tests/smoke_ode_rk45_endpoint.py |
 | MATH-ODE-RK4-BACKWARD-001 | Backward scalar RK4 initial-value problems | Released via PR #91; main and Pages Quality green at f5ce020595ec0c0d8e6dcbae4a8301afaf505535 | src/ode-tools.js, index.html, tests/test_ode_backward.py, tests/smoke_ode_backward.py |
 | MATH-ODE-RK45-BACKWARD-002 | Backward scalar adaptive RK45 initial-value problems | PR #92 merged at 04886109013b08cde9e312933a8b74ab842406be; dev/PR CI green, Pages workflow succeeded, main Quality pending at checkpoint | src/ode-tools.js, index.html, tests/test_ode_rk45_backward.py, tests/smoke_ode_rk45_backward.py |
 
 | MATH-ODE-RK4-SYSTEM-BACKWARD-003 | Backward coupled RK4 two-state IVPs | Implemented on dev; exact-head CI/PR/Pages pending | src/ode-tools.js, index.html, tests/test_ode_system_backward.py, tests/smoke_ode_system_backward.py |
+
+## 2026-10-29 — QR least-squares strict-input execution checkpoint
+
+Pre-change dev/main: `352c1dd8549beb8cb0707012b7bd466d1fcd25c1`, no open PR. Latest main [Quality 40938128712](https://github.com/saeedsai/ProMathStudio/actions/runs/40938128712), dev [Quality 40938172409](https://github.com/saeedsai/ProMathStudio/actions/runs/40938172409) and [Pages 40938128804](https://github.com/saeedsai/ProMathStudio/actions/runs/40938128804) succeeded. Found direct weighted API accepted `"0x10"`, `"0b10"` and `[2]` as RHS through JavaScript Number coercion. Fixed shared ordinary/weighted QR RHS parsing and weighted object/array coercion; preserved valid decimal and scientific notation, original QR method and 3×2 scope. Added `tests/test_weighted_least_squares_rhs_validation.py` and synchronized standalone `index.html`. Executed the exact new JavaScript test body against modified source in V8: 51 assertions passed (positive, invalid, large/small scales, near-singular). Full Python unittest/Chromium Quality, PR and Pages remain pending at this checkpoint; historical audit totals unchanged. No stale tracked files proven safe to remove. Current next-five acceptance gates are at top of hourly plan.
 
 ## 2026-10-29 — Weighted least-squares UI execution checkpoint
 

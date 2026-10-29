@@ -5782,18 +5782,28 @@ function qr(A){
   throw Error('QR decomposition failed its numerical reconstruction or orthogonality check.');
  return {Q,R,residual,orthogonality};
 }
+/* Shared strict RHS parsing for ordinary and weighted least squares.
+   Do not let Number() silently accept hexadecimal, binary or array coercion. */
+function parseLeastSquaresRhs(b,m){
+ if(!Array.isArray(b)||b.length!==m)throw Error('Right-hand side b must contain '+m+' values.');
+ return b.map((entry,i)=>{
+  if(entry===null||typeof entry==='boolean'||
+     (typeof entry!=='number'&&typeof entry!=='string')||String(entry).trim()==='')
+   throw Error('Enter a number in b row '+(i+1)+'.');
+  if(typeof entry==='string'&&!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(entry.trim()))
+   throw Error('Right-hand side b must use decimal or scientific notation at row '+(i+1)+'.');
+  const value=Number(entry);
+  if(!Number.isFinite(value)||Math.abs(value)>MAX_ENTRY)
+   throw Error('Right-hand side b must contain finite numbers with magnitude at most 1e12.');
+  return value;
+ });
+}
 /* Bounded full-rank tall 3x2 least squares via existing QR; no normal-equation solve. */
 function leastSquares(A,b){
  A=validate(A);
  const m=A.length,n=A[0].length;
  if(m<=n)throw Error('Least squares requires a tall matrix (3 rows, 2 columns).');
- if(!Array.isArray(b)||b.length!==m)throw Error('Right-hand side b must contain '+m+' values.');
- const rhs=b.map((entry,i)=>{
-  if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in b row '+(i+1)+'.');
-  const value=Number(entry);
-  if(!Number.isFinite(value)||Math.abs(value)>MAX_ENTRY)throw Error('Right-hand side b must contain finite numbers with magnitude at most 1e12.');
-  return value;
- });
+ const rhs=parseLeastSquaresRhs(b,m);
  const {Q,R}=qr(A);
  const projected=Array.from({length:n},(_,j)=>Q.reduce((sum,row,i)=>sum+row[j]*rhs[i],0));
  const solution=Array(n).fill(0);
@@ -5827,15 +5837,10 @@ function weightedLeastSquares(A,b,weights){
  A=validate(A);
  const m=A.length,n=A[0].length;
  if(m!==3||n!==2)throw Error('Weighted least squares requires a 3×2 matrix.');
- if(!Array.isArray(b)||b.length!==m)throw Error('Right-hand side b must contain 3 values.');
  if(!Array.isArray(weights)||weights.length!==m)throw Error('Weights must contain 3 positive values.');
- const rhs=b.map((v,i)=>{
-  if(v===null||typeof v==='boolean'||String(v).trim()==='')throw Error('Invalid right-hand side at row '+(i+1)+'.');
-  const x=Number(v);if(!Number.isFinite(x)||Math.abs(x)>MAX_ENTRY)throw Error('Right-hand side must contain finite values at most 1e12.');
-  return x;
- });
+ const rhs=parseLeastSquaresRhs(b,m);
  const w=weights.map((v,i)=>{
-  if(v===null||typeof v==='boolean'||String(v).trim()===''||
+  if(v===null||typeof v==='boolean'||(typeof v!=='number'&&typeof v!=='string')||String(v).trim()===''||
     typeof v==='string'&&!/^[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(v.trim()))
    throw Error('Invalid positive weight at row '+(i+1)+'.');
   const x=Number(v);if(!Number.isFinite(x)||x<=0||x>1e12||x<1e-12)

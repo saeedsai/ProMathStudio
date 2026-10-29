@@ -24,6 +24,8 @@ def main():
         page.locator('#mat-rows').select_option('2')
         page.locator('#mat-cols').select_option('2')
         fields=page.locator('#mat-grid input')
+        # HTML number inputs sanitize prefixes; temporarily use text to exercise the defensive read() path.
+        fields.nth(0).evaluate("el=>el.type='text'")
         for i,v in enumerate(('0x10','0','0','1')):
             fields.nth(i).fill(v)
         page.locator('#mat-pseudoinverse').click()

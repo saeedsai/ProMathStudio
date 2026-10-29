@@ -1,3 +1,19 @@
+## 2026-10-29 15:03 CET — Rectangular SVD cutoff/condition diagnostics and near-rank-one regression
+
+**Execution log / discovery:** Read root AGENTS.md, live development plan, frozen 26-Oct audit and latest exact-head [PR #89 Quality 40878671063](https://github.com/saeedsai/ProMathStudio/actions/runs/40878671063), which completed successfully (103/103 steps). Verified `main` at `aab6236604f0716487a56bf2d0d9ec56e4713d90`; `dev` started two documentation commits ahead; no open PR. The GitHub connector only exposes PR-triggered CI runs, not main push Quality/Pages deployment, so production remains **unverified**.
+
+**Feature ledger — IMPLEMENTED ON DEV / QA PENDING:** Added 3×2 and 2×3 SVD absolute rank cutoff, condition assessment and normalized QR-based condition-number ratio; preserved rank/reconstruction/orthogonality gates, zero handling and wide transpose parity. Fixed missing 2×3 SVD button label. Updated modular source and inlined standalone HTML in lockstep. Added structural `tests/test_matrix_svd_rectangular_condition.py` and mandatory Chromium `tests/smoke_matrix_svd_rectangular_condition.py` with independent 80-digit rational-rotation references, near-rank-one rank1/2 boundaries, extreme valid scales, invalid inputs, editor transfer and mobile viewports. Direct exact-source V8 numerical checks passed nine rotated 3×2 matrices and corresponding 2×3 transposes; worst small singular value relative error ~7.4e-5, maximum reconstruction residual ~2.1e-16. An initial direct test at scale 1e12 exceeded the documented 1e12 **entry** bound; corrected the high-scale reference to 1e11 without weakening the near-rank-one assertions. Full unit/browser CI on exact candidate is pending; **do not merge until verified green**. No force, new branches or protection bypass. Hourly task remains enabled.
+
+### NEXT FIVE — acceptance tests and dependencies
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Release rectangular SVD cutoff/condition diagnostics | Exact-head unit + mandatory Chromium CI green, 80-digit near-rank-one rank/condition/reconstruction oracle, 2×3 transpose parity, ordinary PR review/merge, main Quality and Pages confirmation. | DEV / CI PENDING |
+| 2 | Verify PR #89 production | Main exact SHA Quality and Pages build success; hosted 3×3 SVD cutoff/condition UI, editor transfer, mobile/no runtime errors. | ACCESS BLOCKED |
+| 3 | Rectangular SVD rank-boundary precision | Probe ratios immediately above/below 1e-12 with 80+ digit independent oracle, rank warnings and safe instability behavior, mobile regression. | TODO |
+| 4 | Rectangular SVD/pseudoinverse consistency | 3×2 and 2×3 full/rank-deficient references, four Moore–Penrose identities, condition/rank parity, UI integration. | TODO |
+| 5 | Hosted Data Tables and Graph QA | CSV/TSV/JSON preview Cancel/Escape rollback, graph numerical roots/fractions, keyboard focus, mobile and no browser errors. | ACCESS BLOCKED |
+
 ## 2026-10-29 — PR #89 Quality green, normal merge; production Pages still unverified
 
 **Feature ledger: MERGED SOURCE / PRODUCTION NOT VERIFIED.** 3×3 Jacobi SVD now exposes the absolute relative-rank cutoff and condition assessment (rank deficient, well/moderately/ill-conditioned), and calculates condition number from normalized singular values to avoid avoidable overflow/underflow. Matrix UI shows both diagnostics without changing 2×2 or rectangular SVD. Added structural `tests/test_matrix_svd_3x3_condition.py` (including `node --check` source syntax guard) and mandatory Chromium `tests/smoke_matrix_svd_3x3_condition.py` with independent 75-digit rational-rotation reference, 1e-12/1/1e12 scaling, rank cutoff boundaries, zero/invalid matrices, reconstruction, orthogonality, Equation Editor transfer and mobile layouts. Direct exact-source V8 checks passed 300 deterministic rotated matrices (maximum reconstruction residual ~1.16e-15, orthogonality ~9.94e-15) plus analytic cases.

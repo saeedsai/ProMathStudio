@@ -552,7 +552,7 @@ function pseudoinverse(A){
 }
 function format(x){
  if(!Number.isFinite(x))throw Error('Result exceeded finite floating-point range.');
- if(Math.abs(x)<1e-13)return '0';
+ if(x===0)return '0';
  return Number(x.toPrecision(12)).toString();
 }
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}

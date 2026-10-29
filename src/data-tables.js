@@ -74,6 +74,12 @@
       <label>Import CSV / TSV / JSON<input id="dt-import" type="file" accept=".csv,.tsv,.json,text/csv,application/json"></label>
       <button id="dt-export-csv" class="secondary" type="button">↓ Export CSV</button><button id="dt-export-source-csv" class="secondary" type="button" title="Export original cell text and formulas. External spreadsheet applications may execute formulas in this CSV.">↓ Export formulas CSV</button><button id="dt-export-tsv" class="secondary" type="button" title="Export calculated values as tab-separated text; text containing commas, semicolons or tabs is safely quoted.">↓ Export TSV</button><button id="dt-export-json" class="secondary" type="button">↓ Export JSON</button>
       <button id="dt-send-graph" class="primary" type="button">↗ Show in graphs</button></div>
+      <section id="dt-import-preview" hidden tabindex="-1" role="group" aria-label="Review Data Tables import" style="border:1px solid #dbe4f3;border-radius:10px;padding:12px;margin-top:10px">
+        <p id="dt-import-preview-summary" role="status"></p>
+        <p id="dt-import-preview-schema" class="graph-data-muted"></p>
+        <div style="overflow-x:auto;max-width:100%"><table id="dt-import-preview-sample" class="dt-sheet" aria-label="First three imported rows"></table></div>
+        <div class="data-toolbar"><button id="dt-import-confirm" class="primary" type="button">Create table</button><button id="dt-import-cancel" class="secondary" type="button">Cancel import</button></div>
+      </section>
       <details id="dt-advanced"><summary>Advanced dataset preview / X, Y, Z mapping</summary></details></section></div>`;
   // The library is a catalog, not an evaluator: insert only, never run code.
   const dataLibrary = [
@@ -746,14 +752,75 @@
     // CSV and project JSON remain available for workbooks with repeated headers.
     if(new Set(t.columns).size!==t.columns.length)throw Error('JSON export requires unique column headers; rename duplicates before exporting.');
     const rows=evaluated(t);download(t.name+'.json',JSON.stringify(rows.map(row=>Object.fromEntries(t.columns.map((h,i)=>[h,row[i]]))),null,2),'application/json');}));
-  $('dt-import').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{
-    if(file.size>MAX_BYTES)throw Error('Import file exceeds 1 MB.');if(!/\.(csv|tsv|json)$/i.test(file.name))throw Error('Choose CSV, TSV or JSON.');
-    const text=await file.text(),decoder=window.MathStudio.graphData;
-    // One-column tabular imports are valid sheets, but never XY graph datasets.
-    const options={allowSingleColumn:true,delimiterHint:/\.tsv$/i.test(file.name)?'\t':','};
-    const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text,options):decoder.parseCSV(text,options);
-    const t=makeTable(file.name.replace(/\.(csv|tsv|json)$/i,''),tbl.headers,tbl.rows);notify('Imported '+file.name+': '+t.rows.length+' rows.');
-  }catch(e){notify('Import failed: '+e.message,true);}finally{event.target.value='';}});
+  // Parse and validate first. A sheet is created only after explicit confirmation.
+  // Imported strings are rendered as text nodes, never interpreted as HTML.
+  let pendingTableImport=null;
+  const tableImportPreview=$('dt-import-preview');
+  function closeTableImportPreview(){
+    pendingTableImport=null;
+    tableImportPreview.hidden=true;
+    $('dt-import-preview-sample').replaceChildren();
+  }
+  function renderTableImportPreview(fileName,tbl){
+    const headers=tbl.headers,rows=tbl.rows;
+    $('dt-import-preview-summary').textContent='Ready to import '+fileName+': '+rows.length+' rows, '+headers.length+' columns.';
+    const duplicates=headers.filter((name,index)=>headers.indexOf(name)!==index);
+    const blankHeaders=headers.filter(name=>!String(name).trim());
+    $('dt-import-preview-schema').textContent='Columns: '+headers.join(' · ')+
+      (duplicates.length?' Warning: duplicate column labels.':'')+
+      (blankHeaders.length?' Warning: blank column labels.':'');
+    const sample=$('dt-import-preview-sample'),head=el('thead'),body=el('tbody');
+    const headerRow=el('tr');
+    for(const header of headers)headerRow.append(el('th',{},header));
+    head.append(headerRow);
+    for(const row of rows.slice(0,3)){
+      const tr=el('tr');
+      for(const cell of row)tr.append(el('td',{},cell==null?'':String(cell)));
+      body.append(tr);
+    }
+    sample.replaceChildren(head,body);
+    tableImportPreview.hidden=false;
+    tableImportPreview.focus();
+  }
+  $('dt-import-cancel').addEventListener('click',()=>{
+    closeTableImportPreview();notify('Import canceled; tables unchanged.');
+    $('dt-import').focus();
+  });
+  tableImportPreview.addEventListener('keydown',event=>{
+    if(event.key!=='Escape'||tableImportPreview.hidden)return;
+    event.preventDefault();closeTableImportPreview();
+    notify('Import canceled; tables unchanged.');
+    $('dt-import').focus();
+  });
+  $('dt-import-confirm').addEventListener('click',()=>{
+    if(!pendingTableImport)return;
+    try{
+      const {name,fileName,tbl}=pendingTableImport;
+      const t=makeTable(name,tbl.headers,tbl.rows);
+      closeTableImportPreview();
+      notify('Imported '+fileName+': '+t.rows.length+' rows.');
+      $('dt-import').focus();
+    }catch(error){notify('Import failed: '+error.message,true);}
+  });
+  $('dt-import').addEventListener('change',async event=>{
+    const file=event.target.files?.[0];if(!file)return;
+    closeTableImportPreview();
+    try{
+      if(file.size>MAX_BYTES)throw Error('Import file exceeds 1 MB.');
+      if(!/\.(csv|tsv|json)$/i.test(file.name))throw Error('Choose CSV, TSV or JSON.');
+      const text=await file.text(),decoder=window.MathStudio.graphData;
+      // One-column tabular imports are valid sheets, but never XY graph datasets.
+      const options={allowSingleColumn:true,delimiterHint:/\.tsv$/i.test(file.name)?'\t':','};
+      const tbl=/\.json$/i.test(file.name)?decoder.parseJSON(text,options):decoder.parseCSV(text,options);
+      if(!Array.isArray(tbl.headers)||!Array.isArray(tbl.rows)||!tbl.headers.length||
+         tbl.headers.length>MAX_COLUMNS||tbl.rows.length>MAX_ROWS)
+        throw Error('Invalid table dimensions.');
+      pendingTableImport={name:file.name.replace(/\.(csv|tsv|json)$/i,''),fileName:file.name,tbl};
+      renderTableImportPreview(file.name,tbl);
+      notify('Review the table preview before creating a sheet.');
+    }catch(error){closeTableImportPreview();notify('Import failed: '+error.message,true);}
+    finally{event.target.value='';}
+  });
   // Existing chart-data importer is now in the Data Tables tab. Imports there also create a sheet.
   $('graph-data-file').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{if(file.size>MAX_BYTES)throw Error('File too large');const text=await file.text();const tbl=/\.json$/i.test(file.name)?window.MathStudio.graphData.parseJSON(text):window.MathStudio.graphData.parseCSV(text);makeTable(file.name.replace(/\.[^.]+$/,''),tbl.headers,tbl.rows);}catch(e){notify('Import failed: '+e.message,true);}});
   function chartColumns(){const t=tables.find(x=>x.id===$('dt-graph-table').value)||active();if(!t)return;const opts=t.columns.map((h,i)=>[i,h]);

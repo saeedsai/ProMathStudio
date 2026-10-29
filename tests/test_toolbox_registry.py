@@ -1,5 +1,8 @@
 """Regression tests for deterministic, planning-only toolbox catalog registry."""
 import importlib.util
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -38,6 +41,94 @@ class ToolboxRegistryTests(unittest.TestCase):
         self.assertEqual(result[0]["section"], "Group A")
         self.assertEqual(result[1]["section"], "Group B")
         self.assertTrue(all(item["status"] == "planned-unverified" for item in result))
+
+    def test_escaped_markdown_pipe_preserves_description(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            (folder / "catalog.md").write_text(
+                "| Feature | Description |\n|---|---|\n"
+                "| Filter | Accept A \\| B without splitting the cell |\n",
+                encoding="utf-8",
+            )
+            with patch.object(registry, "DOCS", folder):
+                entries = registry.parse_catalog("sample", "catalog.md")
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["title"], "Filter")
+        self.assertEqual(entries[0]["description"], "Accept A | B without splitting the cell")
+
+    def test_alignment_delimiters_are_not_catalog_features(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            (folder / "catalog.md").write_text(
+                "| Feature | Description |\n"
+                "| :--- | ---: |\n"
+                "| :-----: | :------: |\n"
+                "| FFT | Transform samples |\n",
+                encoding="utf-8",
+            )
+            with patch.object(registry, "DOCS", folder):
+                entries = registry.parse_catalog("sample", "catalog.md")
+        self.assertEqual([item["title"] for item in entries], ["FFT"])
+
+    def test_textual_summary_rows_are_not_features(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            (folder / "catalog.md").write_text(
+                "| Feature | Description |\n"
+                "|---|---|\n"
+                "| Total | See summary below |\n"
+                "| Grand total | Eleven planned areas |\n"
+                "| Count | Various disciplines |\n"
+                "| FFT | Frequency spectrum analysis |\n",
+                encoding="utf-8",
+            )
+            with patch.object(registry, "DOCS", folder):
+                entries = registry.parse_catalog("sample", "catalog.md")
+        self.assertEqual([item["title"] for item in entries], ["FFT"])
+
+    def test_alias_review_only_cross_catalog_and_is_deterministic(self):
+        entries = [
+            {"id": "a1", "catalog": "control", "title": "FFT"},
+            {"id": "a2", "catalog": "control", "title": "FFT"},
+            {"id": "b1", "catalog": "signals", "title": "FFT"},
+            {"id": "c1", "catalog": "signals", "title": "Filter"},
+            {"id": "c2", "catalog": "signals", "title": "Filter"},
+        ]
+        sample = {
+            "entries": entries,
+            "aliasCandidates": [
+                {"normalizedTitle": "fft", "ids": ["a1", "a2", "b1"]},
+                {"normalizedTitle": "filter", "ids": ["c1", "c2"]},
+            ],
+        }
+        rows = registry.alias_review_rows(sample)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["catalogs"], ["control", "signals"])
+        self.assertEqual(rows[0]["reviewStatus"], "manual-review-required")
+        report = registry.alias_review_markdown(sample)
+        self.assertEqual(report, registry.alias_review_markdown(sample))
+        self.assertIn("Cross-catalog review groups: 1", report)
+        self.assertIn("No solver IDs or runtime aliases are created", report)
+        self.assertNotIn("## filter", report)
+
+    def test_alias_review_json_cli_matches_registry_and_is_stable(self):
+        command = [sys.executable, str(SCRIPT), "--alias-review-json"]
+        first = subprocess.run(command, capture_output=True, text=True, check=True)
+        second = subprocess.run(command, capture_output=True, text=True, check=True)
+        self.assertEqual(first.stdout, second.stdout)
+        payload = json.loads(first.stdout)
+        self.assertEqual(payload["status"], "manual-review-required")
+        self.assertEqual(payload["groups"], registry.alias_review_rows(registry.build()))
+        self.assertTrue(all(group["reviewStatus"] == "manual-review-required"
+                            for group in payload["groups"]))
+
+    def test_alias_review_formats_are_mutually_exclusive(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--alias-review", "--alias-review-json"],
+            capture_output=True, text=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Choose only one alias review output format", result.stderr)
 
     def test_catalogs_are_present_and_registry_deterministic(self):
         for filename in registry.CATALOGS.values():

@@ -2,6 +2,7 @@
 
 - Data Tables preserves built-in `SUM`, `COUNT`, `MEDIAN`, `AVERAGE`, `AVG`, `MIN`, `MAX` and `IF` semantics even when imported/saved custom-function names collide. Nonreserved custom functions continue to compose with aggregates.
 - Overflowing sums now report `#NUM!` instead of silently returning zero. Finite averages are accumulated with scaled terms to avoid unnecessary intermediate overflow. Invalid custom-function numerical evaluation produces a spreadsheet `#VALUE` error instead of a generic `#ERR` display; existing explicit `#...` errors are retained.
+- Corrected the custom numeric evaluation bridge to bind already-parsed numbers directly, avoiding incorrect reinterpretation of scientific notation (for example `1e308`) as mathematical variables. Added large/small exponent reference tests to the structural and Chromium regression suites.
 - Added structural `tests/test_sheet_numeric_hardening.py` and mandatory Chromium `tests/smoke_sheet_numeric_hardening.py` with numerical, collision, lazy-IF, workbook round-trip and responsive checks. **Status: implemented on `dev`; CI/PR/main/Pages verification pending.**
 
 ## Merged — Transactional CSV / TSV / JSON import preview (2026-10-29, PR #75; Pages verification pending)

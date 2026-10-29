@@ -5482,6 +5482,9 @@ function validate(A){
   throw Error('Matrix must be rectangular with 2 or 3 columns.');
  return A.map((row,r)=>row.map((entry,c)=>{
   if(entry===null||typeof entry==='boolean'||String(entry).trim()==='')throw Error('Enter a number in row '+(r+1)+', column '+(c+1)+'.');
+  // Matrix input accepts decimal/scientific notation, not JS numeric prefixes (0x, 0b, 0o).
+  if(typeof entry==='string'&&!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(entry.trim()))
+   throw Error('Matrix entries must use decimal or scientific notation.');
   const value=Number(entry);
   if(!Number.isFinite(value)||Math.abs(value)>MAX_ENTRY)throw Error('Matrix entries must be finite numbers with magnitude at most 1e12.');
   return value;
@@ -6137,8 +6140,7 @@ send.addEventListener('click',()=>{
 });
 rebuild();rebuildSecond();rebuildRhs();
 M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,calculate};
-})();
-</script>
+})();</script>
 <script id="promath-ode-tools">
 /* ProMathStudio: bounded, offline scalar first-order IVP solver (classical RK4).
    Uses the existing safe numeric AST evaluator, not eval or user code. */

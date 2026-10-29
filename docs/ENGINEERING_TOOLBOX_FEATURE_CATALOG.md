@@ -1,3 +1,5 @@
+**Control Theory:** [181-feature comprehensive catalog](CONTROL_THEORY_TOOLBOX_FEATURE_LIST.md) covering classical, modern, digital, robust, nonlinear, predictive, identification and simulation capabilities. It is cross-disciplinary and not counted as 181 additional unique tools.
+
 # Engineering Toolboxes — Future Feature Catalog
 
 **Status: PLANNED / NOT IMPLEMENTED BY THIS CHANGE.** Derived from six user-supplied Markdown feature lists (2026-10-29). This catalog stores **feature names and short descriptions only**, not instructions, implementation plans, code, technology choices or launch sequences. Sections are broad feature families; each original source also contains finer-grained subfeatures that must be preserved during subsequent detailed backlog ingestion. Existing capabilities require independent audit before marking any item implemented. The separate 19-item electrical/electronics backlog and control-theory roadmap remain active references; deduplicate overlapping functionality when implementing, without dropping requested scope.

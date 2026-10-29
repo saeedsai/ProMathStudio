@@ -57,6 +57,9 @@ def parse_catalog(key, filename):
         cells = [re.sub(r"\\([|\\])", r"\1", cell.strip()) for cell in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
         if len(cells) < 2:
             continue
+        # Ignore Markdown alignment rows, including :--- and ---: variants.
+        if all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+            continue
         title, description = cells[:2]
         if normalized_title(title) in {"feature", "tool", "capability", "name", "category", "area", "discipline", "toolbox"}:
             continue

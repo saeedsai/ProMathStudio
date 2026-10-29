@@ -1,3 +1,7 @@
+## Unified roadmap
+
+Read [Unified Master Implementation Plan](docs/UNIFIED_MASTER_IMPLEMENTATION_PLAN.md) for deduplicated feature accounting, shared math/data/graph engines, phased UI and toolbox delivery, validation gates and conditional schedule estimates. Keep Control Theory visible as a separate cross-disciplinary selection. Preserve current CI and release safeguards.
+
 ## Cross-discipline catalog and toolbox reuse
 
 Read [Additional Engineering Toolbox Candidates](docs/ADDITIONAL_ENGINEERING_TOOLBOX_CANDIDATES.md) when prioritizing new disciplines. The five approved planned toolboxes are [Statistics](docs/STATISTICS_ENGINEERING_TOOLBOX_FEATURE_LIST.md), [Data Science](docs/DATA_SCIENCE_TOOLBOX_FEATURE_LIST.md), [Materials & Alloys](docs/MATERIALS_METALLURGY_ALLOYS_TOOLBOX_FEATURE_LIST.md), [Structural Engineering](docs/STRUCTURAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md) and [AI & Machine Learning](docs/AI_MACHINE_LEARNING_TOOLBOX_FEATURE_LIST.md). Candidate disciplines are not approved implementations. Use canonical solver IDs, reusable data pipelines, unit-aware calculations, shared visualization and source-backed status labels. Never count overlapping toolbox catalog entries as unique implemented features or silently claim full audit coverage. Keep numerical correctness, regression, performance and accessible navigation gates intact.

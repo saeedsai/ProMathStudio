@@ -1,3 +1,17 @@
+## 2026-10-29 09:15 CET — PR #83 merged after verified Chromium and structural QA
+
+**Feature ledger: MERGED / PAGES NOT YET VERIFIED.** Matrix input now rejects JavaScript-specific hexadecimal/binary/octal prefixes and malformed numeric strings, accepts signed decimal/scientific notation, and keeps finite/magnitude guards. Standalone/module parity restored with required newline. Added `tests/test_matrix_decimal_input.py` and mandatory `tests/smoke_matrix_decimal_input.py`. First [PR Quality 40839293729](https://github.com/saeedsai/ProMathStudio/actions/runs/40839293729) failed seven structural bundle parity assertions because of a missing trailing newline; repaired without weakening assertions. Final exact-head [PR Quality 40839418058](https://github.com/saeedsai/ProMathStudio/actions/runs/40839418058) **passed 96/96 steps** at `7c5b292737a273f515ab94a99fedcce84b0da0e9`. Reviewed seven-file diff and zero unresolved review threads. Ordinary expected-SHA [PR #83](https://github.com/saeedsai/ProMathStudio/pull/83) merge succeeded at **main `43cc4e68cd58e3d035235cda8e47e4087da4f66e`**, then dev was safely fast-forwarded to main without force. Main push Quality, Pages deployment and independent hosted interactive QA remain **unverified** because the connector exposes only PR-triggered runs and direct website/DNS access is unavailable. Do not claim Pages deployed until evidence is obtained. Branch protection remains unconfigured. Only dev/main branches verified.
+
+### NEXT FIVE — explicit acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Confirm PR #83 production | Verify exact main SHA Quality and GitHub Pages success; hosted matrix numeric UI and mobile if access becomes available. | MERGED / PAGES UNVERIFIED |
+| 2 | Rotated near-dependent 3×3 pseudoinverse | Independent high-precision oracle, rank/scale, all Moore–Penrose residuals and instability rejection in Chromium. | TODO |
+| 3 | 3×3 SVD diagnostics | Rank0–3 singular vectors, reconstruction/orthogonality numeric references, Equation transfer and responsive UI. | TODO |
+| 4 | Hosted import preview QA | CSV/TSV/JSON preview, Cancel/Escape rollback, schema warnings, mobile and no browser errors. | ACCESS BLOCKED |
+| 5 | Hosted spreadsheet/graph QA | Nested functions, overflow, 2D/3D root/fraction/factorial, invalid inputs, focus/mobile. | ACCESS BLOCKED |
+
 ## 2026-10-29 09:05 CET — PR #83 matrix validation QA diagnosis and recovery
 
 **Status: OPEN PR / CI RECHECK PENDING; NOT DEPLOYED.** Added `tests/smoke_matrix_decimal_input.py` and registered it as a mandatory Chromium Quality step, covering hexadecimal/binary/octal and malformed rejection, signed/scientific acceptance, matrix UI error recovery and 390/768/1280 responsive layouts. Source change and tests are on `dev`, PR [#83](https://github.com/saeedsai/ProMathStudio/pull/83). First PR [Quality 40839293729](https://github.com/saeedsai/ProMathStudio/actions/runs/40839293729) failed at structural step (seven existing standalone parity assertions): inline matrix bundle was missing the required trailing newline. Restored `src/matrix-tools.js` + newline in `index.html`, and aligned the new parity test with that established invariant. Final repair checkpoint `e8cf76a265946ce37da273aa1ed34b27bf172dec`. Recheck exact-head Quality and PR CI before any merge. GitHub clone DNS unavailable; no local browser execution. Main remains `505e44eb64a71a66d5c53e17d8c9184ec08b0b02` pending safe release.

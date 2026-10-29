@@ -1,3 +1,8 @@
+## Dev checkpoint — Matrix decimal-only validation and browser regression (2026-10-29)
+
+- Reject JavaScript-only hexadecimal/binary/octal numeric prefixes and malformed string entries in matrix validation, while accepting signed decimal/scientific notation and preserving finite/magnitude bounds.
+- Synchronize standalone HTML and module, add structural parity test and mandatory Chromium regression for direct API validation, UI rejection/recovery and responsive layouts. Release pending exact-head Quality and PR checks; no deployment claim.
+
 ## Released via PR #82 — 3×3 condition-risk diagnostics (2026-10-29)
 
 - Matrix Calculator now exposes scientific-notation pseudoinverse singular values, the absolute numerical rank cutoff and a bounded 3×3 conditioning advisory (well/moderate/ill-conditioned or rank deficient), retaining strict instability rejection and Equation transfer. Corrected the UI cutoff label before merging.

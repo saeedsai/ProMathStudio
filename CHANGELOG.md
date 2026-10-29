@@ -1,3 +1,8 @@
+## PR #86 merged — Shared 3×3 SVD pseudoinverse and rotated oracle QA (2026-10-29)
+
+- Consolidated 3×3 Moore–Penrose pseudoinverse onto the validated 3×3 Jacobi SVD and preserved rank cutoff, condition diagnostics and four identity gates. Added independent 65-digit Decimal rational-rotation/scaling oracle, invalid-input, Equation transfer and responsive Chromium regression.
+- First PR [Quality 40854024353](https://github.com/saeedsai/ProMathStudio/actions/runs/40854024353) failed a structural test requiring the removed duplicate Jacobi loop; corrected it to assert shared SVD convergence and pseudoinverse identity gates. Final exact-head [Quality 40854136591](https://github.com/saeedsai/ProMathStudio/actions/runs/40854136591) passed 100/100 steps at `8f5652a860b02023d0a18c82796d4dd25cfef1ae`. [PR #86](https://github.com/saeedsai/ProMathStudio/pull/86) merged at main `2846feb0ccc97dfc7cc7892c8e90d53f707d0aa3`; dev fast-forwarded without force. Main Quality and Pages/hosted verification remain unavailable; do not mark production deployed.
+
 ## Dev candidate — Rotated 3×3 pseudoinverse stability and shared SVD (2026-10-29)
 
 - Reuse the validated one-sided Jacobi 3×3 SVD (`U`, `S`, `V`) when computing the 3×3 Moore–Penrose pseudoinverse, removing a duplicated singular-vector iteration while preserving the relative 1e-12 rank cutoff, condition advisory and all four Moore–Penrose residual gates.

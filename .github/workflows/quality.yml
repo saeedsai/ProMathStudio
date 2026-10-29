@@ -182,6 +182,8 @@ jobs:
         run: python tests/smoke_matrix_svd_3x3.py
       - name: Thin 3x2 SVD rank, reference, orthogonality and browser regression
         run: python tests/smoke_matrix_svd_3x2.py
+      - name: Wide 2x3 SVD reference, transpose parity and responsive browser regression
+        run: python tests/smoke_matrix_svd_2x3.py
       - name: Moore-Penrose 2x2 pseudoinverse reference and browser regression
         run: python tests/smoke_matrix_pseudoinverse.py
       - name: Rectangular 3x2 Moore-Penrose pseudoinverse numerical and browser regression

@@ -5820,6 +5820,42 @@ function leastSquares(A,b){
  if(normalResidual>1e-8)throw Error('Least-squares solution failed its orthogonality check.');
  return {solution,residual,relativeResidual,normalResidual,rank:n};
 }
+/* Weighted least squares for three observations and two parameters.
+   Positive observation weights express relative confidence. Reuse the existing
+   QR-based least-squares kernel; do not form ill-conditioned normal equations. */
+function weightedLeastSquares(A,b,weights){
+ A=validate(A);
+ const m=A.length,n=A[0].length;
+ if(m!==3||n!==2)throw Error('Weighted least squares requires a 3×2 matrix.');
+ if(!Array.isArray(b)||b.length!==m)throw Error('Right-hand side b must contain 3 values.');
+ if(!Array.isArray(weights)||weights.length!==m)throw Error('Weights must contain 3 positive values.');
+ const rhs=b.map((v,i)=>{
+  if(v===null||typeof v==='boolean'||String(v).trim()==='')throw Error('Invalid right-hand side at row '+(i+1)+'.');
+  const x=Number(v);if(!Number.isFinite(x)||Math.abs(x)>MAX_ENTRY)throw Error('Right-hand side must contain finite values at most 1e12.');
+  return x;
+ });
+ const w=weights.map((v,i)=>{
+  if(v===null||typeof v==='boolean'||String(v).trim()===''||
+    typeof v==='string'&&!/^[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(v.trim()))
+   throw Error('Invalid positive weight at row '+(i+1)+'.');
+  const x=Number(v);if(!Number.isFinite(x)||x<=0||x>1e12||x<1e-12)
+   throw Error('Weights must be finite and between 1e-12 and 1e12.');
+  return x;
+ });
+ // A common positive scale factor does not change the fitted parameters.
+ const maxWeight=Math.max(...w);
+ const scales=w.map(x=>Math.sqrt(x/maxWeight));
+ const transformed=A.map((row,i)=>row.map(x=>x*scales[i]));
+ const transformedB=rhs.map((x,i)=>x*scales[i]);
+ const result=leastSquares(transformed,transformedB);
+ const errors=A.map((row,i)=>row.reduce((sum,x,j)=>sum+x*result.solution[j],0)-rhs[i]);
+ const weightedResidual=Math.hypot(...errors.map((e,i)=>e*scales[i]));
+ const weightedResidualSquared=weightedResidual*weightedResidual*maxWeight;
+ if(!Number.isFinite(weightedResidualSquared))
+  throw Error('Weighted residual exceeded finite floating-point range.');
+ return {...result,weightedResidualSquared,weightScale:maxWeight,
+  residuals:errors,weights:w.slice()};
+}
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
 const subtract=(A,B)=>binary(A,B,'subtract');
@@ -6361,7 +6397,7 @@ send.addEventListener('click',()=>{
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,svd3x2,svd2x3,svd3x3,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,weightedLeastSquares,eigenSymmetric,svd2x2,svd3x2,svd2x3,svd3x3,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,calculate};
 })();
 </script>
 <script id="promath-ode-tools">

@@ -273,7 +273,7 @@ function weightedLeastSquares(A,b,weights){
  });
  const w=weights.map((v,i)=>{
   if(v===null||typeof v==='boolean'||String(v).trim()===''||
-    typeof v==='string'&&!/^[+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?$/.test(v.trim()))
+    typeof v==='string'&&!/^[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(v.trim()))
    throw Error('Invalid positive weight at row '+(i+1)+'.');
   const x=Number(v);if(!Number.isFinite(x)||x<=0||x>1e12||x<1e-12)
    throw Error('Weights must be finite and between 1e-12 and 1e12.');

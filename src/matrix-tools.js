@@ -417,32 +417,34 @@ function pseudoinverse2x2(A){
   throw Error('Pseudoinverse failed its Moore-Penrose residual check.');
  return {matrix,rank,cutoff,residual,symmetryResidual};
 }
-/* Scaled two-column Jacobi pseudoinverse for real 3×2 matrices.
-   The relative 1e-12 cutoff admits rank-one and zero matrices; all four
-   Moore-Penrose identities are checked before exposing an answer. */
+/* Scaled pivoted QR pseudoinverse for real 3×2 matrices. The smaller singular
+   value comes from det(R)/sigmaMax(R), avoiding cancellation in nearly equal
+   columns. Reorthogonalization and all four Moore-Penrose checks protect QA. */
 function pseudoinverse3x2(A){
  A=validate(A);
  if(A.length!==3||A[0].length!==2)throw Error('Pseudoinverse requires a 3×2 real matrix.');
  const scale=Math.max(...A.flat().map(Math.abs));
- if(scale===0)return {matrix:[[0,0,0],[0,0,0]],rank:0,cutoff:0,residual:0,symmetryResidual:0};
- const c0=A.map(row=>row[0]/scale),c1=A.map(row=>row[1]/scale);
- const g00=c0.reduce((sum,x)=>sum+x*x,0),g11=c1.reduce((sum,x)=>sum+x*x,0);
- const g01=c0.reduce((sum,x,i)=>sum+x*c1[i],0);
- let co=1,si=0;
- if(g01!==0){
-  const tau=(g11-g00)/(2*g01);
-  const t=(tau<0?-1:1)/(Math.abs(tau)+Math.hypot(1,tau));
-  co=1/Math.hypot(1,t);si=t*co;
+ if(scale===0)return {matrix:[[0,0,0],[0,0,0]],rank:0,cutoff:0,conditionNumber:null,singularValues:[0,0],residual:0,symmetryResidual:0};
+ const C=A.map(row=>row.map(x=>x/scale));
+ const norms=[Math.hypot(...C.map(row=>row[0])),Math.hypot(...C.map(row=>row[1]))];
+ const first=norms[0]>=norms[1]?0:1,second=1-first;
+ const r00=norms[first],q0=C.map(row=>row[first]/r00);
+ let r01=q0.reduce((sum,x,i)=>sum+x*C[i][second],0);
+ let u1=C.map((row,i)=>row[second]-r01*q0[i]);
+ const correction=q0.reduce((sum,x,i)=>sum+x*u1[i],0);
+ u1=u1.map((x,i)=>x-correction*q0[i]);r01+=correction;
+ const r11=Math.hypot(...u1),frob2=r00*r00+r01*r01+r11*r11,det=r00*r11;
+ const sMax=Math.sqrt((frob2+Math.sqrt(Math.max(0,frob2*frob2-4*det*det)))/2);
+ const sMin=det/sMax,cutoff=1e-12*sMax,rank=sMin>cutoff?2:1;
+ let matrix;
+ if(rank===1){
+  matrix=Array.from({length:2},(_,i)=>C.map(row=>row[i]/(frob2*scale)));
+ }else{
+  const q1=u1.map(x=>x/r11);
+  matrix=Array.from({length:2},()=>Array(3).fill(0));
+  matrix[first]=q0.map((x,j)=>(x/r00-(r01/(r00*r11))*q1[j])/scale);
+  matrix[second]=q1.map(x=>x/(r11*scale));
  }
- let V=[[co,si],[-si,co]];
- let b0=c0.map((x,i)=>x*co-c1[i]*si),b1=c0.map((x,i)=>x*si+c1[i]*co);
- let s0=Math.hypot(...b0),s1=Math.hypot(...b1);
- if(s1>s0){[s0,s1]=[s1,s0];[b0,b1]=[b1,b0];V=V.map(row=>[row[1],row[0]]);}
- const cutoff=1e-12*s0,rank=1+Number(s1>cutoff);
- // A⁺ = V Σ⁺ Uᵀ, with U[:,k] = (A/scale)V[:,k]/s[k].
- // Form each term before rescaling to avoid a large unscaled Gram matrix.
- const matrix=Array.from({length:2},(_,i)=>Array.from({length:3},(_,j)=>
-  ((V[i][0]*b0[j]/(s0*s0))+(s1>cutoff?V[i][1]*b1[j]/(s1*s1):0))/scale));
  if(!matrix.flat().every(Number.isFinite))throw Error('Pseudoinverse exceeded finite floating-point range.');
  const matmul=(X,Y)=>X.map(row=>Y[0].map((_,j)=>row.reduce((sum,x,k)=>sum+x*Y[k][j],0)));
  const AAplus=matmul(A,matrix),AplusA=matmul(matrix,A);
@@ -459,11 +461,12 @@ function pseudoinverse3x2(A){
  for(let i=0;i<2;i++)for(let j=0;j<2;j++)
   symmetryResidual=Math.max(symmetryResidual,Math.abs(AplusA[i][j]-AplusA[j][i]));
  if(!Number.isFinite(residual)||!Number.isFinite(symmetryResidual)||residual>1e-8||symmetryResidual>1e-8)
-  throw Error('Pseudoinverse failed its Moore-Penrose residual check.');
- return {matrix,rank,cutoff:cutoff*scale,residual,symmetryResidual};
+  throw Error('Pseudoinverse is numerically unstable for this ill-conditioned matrix; rescale or use higher precision.');
+ return {matrix,rank,cutoff:cutoff*scale,conditionNumber:rank===2?sMax/sMin:null,
+  singularValues:[sMax*scale,sMin*scale],residual,symmetryResidual};
 }
 /* Wide 2×3 Moore–Penrose inverse via (Aᵀ)⁺ᵀ. This uses the same
-   scaled Jacobi rank cutoff and four-identity verification as 3×2. */
+   scaled QR rank cutoff and four-identity verification as 3×2. */
 function pseudoinverse2x3(A){
  A=validate(A);
  if(A.length!==2||A[0].length!==3)throw Error('Pseudoinverse requires a 2×3 real matrix.');
@@ -487,7 +490,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD supports real 2×2 A; pseudoinverse supports real 2×2, 3×2 and 2×3 A, including singular/zero matrices, with a relative 1e-12 singular-value cutoff and verified Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD supports real 2×2 A; pseudoinverse supports real 2×2, 3×2 and 2×3 A, including singular/zero matrices, with a relative 1e-12 singular-value cutoff, condition diagnostics and verified Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -579,7 +582,7 @@ function calculate(operation){
   const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares')?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
   output.textContent=operation==='pseudoinverse'?
-   'pseudoinverse: A⁺ (Moore-Penrose, relative cutoff 1e-12)\n'+rowsText(value.matrix)+'\nNumerical rank: '+value.rank+'\nRelative Moore-Penrose residual: '+format(value.residual)+'\nProjector symmetry residual: '+format(value.symmetryResidual):
+   'pseudoinverse: A⁺ (Moore-Penrose, relative cutoff 1e-12)\n'+rowsText(value.matrix)+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===undefined?'not available':value.conditionNumber===null?'rank deficient':format(value.conditionNumber))+'\nRelative Moore-Penrose residual: '+format(value.residual)+'\nProjector symmetry residual: '+format(value.symmetryResidual):
    operation==='svd'?
    'svd: A = U·diag(σ)·Vᵀ\nSingular values (descending): '+value.S.map(format).join(', ')+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===null?'undefined / outside finite range':format(value.conditionNumber))+'\nU:\n'+rowsText(value.U)+'\nV:\n'+rowsText(value.V)+'\nRelative reconstruction residual: '+format(value.residual)+'\nU orthogonality residual: '+format(value.orthogonalityU)+'\nV orthogonality residual: '+format(value.orthogonalityV):
    operation==='eigen'?

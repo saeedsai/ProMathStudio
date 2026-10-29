@@ -1,3 +1,19 @@
+## 2026-10-29 10:24 CET — PR #84 merged; small nonzero matrix display corrected on dev
+
+**Execution log:** Read current root AGENTS.md, living plan, frozen feature inventory, latest repository state and exact-head PR Quality. [PR #84](https://github.com/saeedsai/ProMathStudio/pull/84) final head `e10c768c280edd00696f59f8d81ac768982f29bd` passed [PR Quality 40846480766](https://github.com/saeedsai/ProMathStudio/actions/runs/40846480766): one passing job, 97 passing steps, no unresolved review threads, mergeable. Ordinary expected-SHA merge returned main `183421a23e943a0920bebabc76f39569c91ace92`. Fast-forwarded dev to main without force. Main Quality/Pages and hosted interactive QA remain **unverified**: GitHub connector only lists PR runs and web direct Actions/Pages returned disabled/inaccessible. No claim of production deployment.
+
+**New feature on dev / QA pending:** Matrix result formatter previously rendered every nonzero magnitude below 1e-13 as `0`; now preserves signed tiny values using 12 significant digits while normalizing true zero. Updated module and standalone bundle in sync; added mandatory Chromium browser regression `tests/smoke_matrix_small_nonzero.py` for 1e-14 transpose, editor transfer, responsive layouts and no errors. The new exact dev head has **not** yet passed full CI; do not merge or deploy it before green checks. Branch protection remains unconfigured, hourly development remains enabled.
+
+### NEXT FIVE — testable acceptance gates
+
+| Priority | Feature | Acceptance criteria | Status |
+|---:|---|---|---|
+| 1 | Small nonzero result formatting release | 1e-14 shown nonzero in UI, exact zero `0`, editor transfer, complete structural/Chromium CI, green PR, main Quality and Pages. | DEV / CI PENDING |
+| 2 | Verify #84 production | Main exact SHA Quality and Pages succeeded, hosted Ax=b decimal/scientific rejection and recovery. | UNVERIFIED |
+| 3 | Rotated 3×3 ill-conditioning | Independent high-precision oracle, rank/scale and all four Moore-Penrose identities; browser acceptance. | TODO |
+| 4 | 3×3 SVD diagnostics | Rank 0–3, singular vectors, reconstruction and orthogonality references, editor transfer. | TODO |
+| 5 | Hosted Data Tables/Graph QA | CSV/TSV/JSON transactional rollback, numerical graph templates, focus/mobile/no runtime errors. | HOSTED ACCESS BLOCKED |
+
 ## 2026-10-29 — Ax=b numeric RHS grammar correction (dev, QA pending)
 
 **Execution log:** Read AGENTS.md, frozen inventory, live ledger and recent CI evidence. Found an inconsistent remaining parser: `solve(A,b)` RHS accepted JS numeric prefixes (`0x10`, `0b10`, `0o10`) even though A had strict decimal-only validation. Implemented strict decimal/scientific grammar for string RHS before `Number`, retained signed/exponent inputs and magnitude guards, synchronized module and HTML, added mandatory dedicated Chromium test `tests/smoke_matrix_rhs_decimal.py` and workflow step. This is a dev checkpoint, **not yet QA-green, merged or deployed**. Last verified main `43cc4e68cd58e3d035235cda8e47e4087da4f66e`; production verification for #83 still pending. Do not merge until exact-head dev + PR CI green. No branch or protection changes; keep hourly task enabled.

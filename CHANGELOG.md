@@ -1,3 +1,9 @@
+## PR #88 merged — Thin wide 2×3 SVD (2026-10-29)
+
+- Added real wide 2×3 thin SVD by transposing the tested 3×2 SVD and swapping U/V factors and orthogonality diagnostics. Matrix Calculator supports rank 0–2, U(2×2), S(2), V(3×2), reconstruction, conditioning and Equation Editor transfer.
+- New structural test and mandatory Chromium regression cover independent analytic references, transpose-factor parity, zero/rank1/rank2/extreme scales, invalid input, UI factor transfer and mobile. Exact-source numeric spot checks passed 15 cases plus 200 deterministic matrix references (maximum discrepancy ~2.3e-15).
+- [PR #88](https://github.com/saeedsai/ProMathStudio/pull/88) passed [Quality 40870173410](https://github.com/saeedsai/ProMathStudio/actions/runs/40870173410) at head `3e18358831442f2455c5c8ba4a2897cc8f005394` (102/102 steps); merged via expected-head ordinary PR at main `1e0367052f38cef3c8629460a4c59d4ff3e2dd38`. Dev fast-forwarded without force. **Main push Quality, Pages publish and hosted interactive behavior remain unverified** because PR-only connector workflow visibility and blocked direct Pages/web access. Not marked production verified.
+
 ## Dev candidate — Thin wide 2×3 SVD (2026-10-29)
 
 - Added bounded real wide 2×3 thin SVD by transposing the validated 3×2 SVD, exchanging U/V factor shapes and orthogonality diagnostics. Supports ranks 0–2, singular values, conditioning, reconstruction, Matrix Calculator output and Equation Editor factor transfer. Existing square and 3×2 SVD preserved.

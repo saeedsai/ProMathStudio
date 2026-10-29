@@ -19,6 +19,11 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
         self.assertNotIn("String(Number.isFinite(x)?x:0)", SOURCE)
         self.assertIn("catch(error){throw Error(error?.message?.startsWith('#')?error.message:'#VALUE');}", SOURCE)
 
+    def test_custom_arguments_are_bound_as_numbers_not_reparsed(self):
+        self.assertIn("const env=Object.fromEntries(fn.params.map((key,i)=>[key,C(args[i])]))", HTML)
+        self.assertIn("return numeric(parseRaw(fn.expression),env).re", HTML)
+        self.assertNotIn("const expression=name+'('+args.map(v=>String(v))", HTML)
+
     def test_standalone_parity_and_browser_gate(self):
         start = HTML.index("/* ProMathStudio Data Tables workspace.")
         end = HTML.index("</script>", start)

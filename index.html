@@ -269,6 +269,68 @@
     </style>
 <style>.plot-series-colors{display:flex;flex-wrap:wrap;gap:8px;flex-basis:100%;padding:8px 0}.plot-series-choice{display:flex!important;flex-direction:row!important;align-items:center;gap:6px;border:1px solid #d9e1ef;border-radius:8px;padding:5px 8px;background:white}.plot-series-choice span{max-width:185px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.plot-series-choice input{min-width:38px;width:42px;height:33px;padding:1px}.plot-series-choice select{max-width:110px}.plot-series-choice{flex-wrap:wrap}</style>
 <style id="viz-controls-style">.graph-appearance{margin:14px 0;border:1px solid #dbe4f4;border-radius:11px;padding:12px 15px;background:#f8faff}.graph-appearance summary{cursor:pointer;font-weight:650;color:#374e81}.graph-style-options{display:flex;align-items:end;flex-wrap:wrap;gap:12px;margin:14px 0}.graph-style-options label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#536681}.graph-style-options select,.graph-style-options input{min-height:35px;padding:5px;border:1px solid #ccd8ee;border-radius:7px}.table-zoom-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:8px 0;color:#51627d;font-size:12px}.table-zoom-toolbar input{width:165px}.table-zoom-toolbar button{min-height:30px;padding:4px 9px}#table-zoom-content{zoom:1;min-width:max-content}</style>
+
+<style id="promath-computational-redesign">
+/* ProMathStudio's original computational interface; inspired by the clarity of math-first search products. */
+:root{--navy:#102331;--navy-light:#173747;--ink:#20323d;--muted:#647987;--edge:#dde6e9;--paper:#f4f8f8;--white:#fff;--accent:#157d78;--accent-light:#e5f5f2;--mint:#157d78;--shadow:0 10px 35px rgba(16,43,55,.05);--gold:#e4ad62}
+body{background:radial-gradient(ellipse 68% 380px at 75% -80px,#e6f5f1 0%,transparent 100%),var(--paper);color:var(--ink);font-size:14px}
+.shell{grid-template-columns:264px minmax(0,1fr)}
+aside{background:linear-gradient(160deg,#102e3b,#102431 68%);border-right:1px solid #234653;padding:26px 18px}
+.logo{border-radius:12px;background:linear-gradient(135deg,#ed9954,#d95f50);box-shadow:0 6px 18px #07172055}
+.brand-title{font-weight:820;letter-spacing:-.5px}.brand-caption{color:#b7d1d6;letter-spacing:1.5px}
+.sidebar-description{color:#c2d5d9}
+.eyebrow{color:#abd5d0}.palette-count{color:#b5cfce}
+#palette-search{background:#183d49;border:1px solid #4e747e;border-radius:11px;min-height:43px}
+#palette-search:focus{border-color:#83d4c3;box-shadow:0 0 0 3px #50bba633}
+.palette-nav details{background:#193c48;border-color:#355a65;border-radius:11px}
+.palette-nav summary{color:#eef8f7}
+.palette-nav details[open]{border-color:#70b4ad}
+.palette-nav .subdetails{background:#214650;border-color:#355a65}
+.palette-button{background:#284c57;border-color:#47717a;border-radius:8px}
+.palette-button:hover,.palette-button:focus-visible{background:#326a6c;border-color:#a4eee1}
+.sidebar-bottom{color:#c3d9d9}
+main{max-width:1580px;padding:30px clamp(22px,4vw,62px) 80px}
+.workspace-bar{background:white;border:1px solid var(--edge);border-radius:14px;padding:5px;box-shadow:0 3px 14px #153e4110;gap:5px}
+.workspace-tab{border-radius:10px;transition:background .15s,box-shadow .15s,color .15s;min-height:43px;font-weight:700}
+.workspace-tab.active,.workspace-tab[aria-selected="true"]{background:#e5f5f2!important;color:#126e6a!important;box-shadow:inset 0 0 0 1px #bbded8}
+.workspace-tab:hover{background:#f0f7f7}
+.workspace-subtitle{color:#6c818d;margin-top:12px}
+.topbar{padding:16px 2px 3px;margin-bottom:17px;align-items:center}
+.topbar .kicker{color:#b16c34;font-weight:800;letter-spacing:1.2px}
+.topbar h1{color:#122e3b;font-size:clamp(30px,3.2vw,43px);font-weight:830;letter-spacing:-1.5px}
+.topbar p{max-width:700px;font-size:14px;color:#657c86;line-height:1.7}
+.panel,.notebook-panel{border:1px solid #dce6e8;border-radius:16px;background:#fff;box-shadow:var(--shadow)}
+.panel-head{background:#fafdfe;padding:17px 22px;border-bottom:1px solid #e5edef}
+.panel-head .panel-title{color:#183740;font-weight:790;font-size:14px}
+.step{background:#e5f5f2;color:#136f6a;border-radius:8px}
+.primary{background:#147e78;border-color:#147e78;color:white;box-shadow:0 5px 13px #127a7626}
+.primary:hover{background:#0c6764;border-color:#0c6764}
+.secondary,.subtle-button{background:white;border-color:#d4e2e4;color:#2f525b;border-radius:10px}
+.secondary:hover,.subtle-button:hover{border-color:#80b8b0;background:#f0f9f7}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[role="tab"]:focus-visible{outline:3px solid #56bdac;outline-offset:2px}
+input,select,textarea{accent-color:#147e78}
+textarea,#calc-input{background:#fcfefe;border-color:#cbdcde;color:#18353e}
+textarea:focus,#calc-input:focus{border-color:#51a99f;box-shadow:0 0 0 4px #ddf4ef;outline:0}
+.calc-expression-wrap{border-radius:13px}
+#calc-input{min-height:57px;font-size:clamp(17px,2vw,22px)}
+.calc-result{background:linear-gradient(125deg,#eff8f6,#fafdfd)!important;border:1px solid #d1e9e2!important;border-radius:14px}
+.calc-result-label{color:#377c79}
+.calc-result-math{color:#123e43}
+.preview{background:radial-gradient(ellipse at center,#fff 30%,#f5fbf9 100%);min-height:205px}
+.preview math{color:#153b42}
+.equation-item:hover,.example:hover{background:#f7fbfa}
+.example{border-color:#dae7e7;border-radius:13px;box-shadow:0 2px 9px #1b4c5308}
+.example:hover{border-color:#79bdb2;box-shadow:0 6px 18px #1b6a5c17}
+.tip{background:#edf8f5;border-color:#cce9e1;color:#375d61}
+.tip strong{color:#175d59}
+.notebook-head h2,h2{color:#1e3e46}
+a{color:#147e78}
+a:hover{color:#0b625e}
+@media(max-width:1100px){.shell{grid-template-columns:220px minmax(0,1fr)} main{padding:25px 22px 55px}}
+@media(max-width:760px){.shell{display:block}aside{position:static;height:auto;padding:14px 15px}.brand{margin-bottom:8px}main{padding:19px 13px 52px}.workspace-bar{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}.workspace-tab{flex:0 0 auto;min-height:44px}.topbar{padding:13px 2px 2px;gap:12px}.topbar h1{font-size:30px;letter-spacing:-1px}.panel-head{padding:14px 15px}.panel-head .small-note{font-size:11px}.preview{min-height:165px}.editor-actions{gap:7px}.primary,.secondary{min-height:42px}}
+@media(max-width:440px){.topbar h1{font-size:27px}.topbar .subtle-button{font-size:12px}.workspace-tab{font-size:12px}.panel-head{flex-wrap:wrap}.calc-result-math{overflow-wrap:anywhere}}
+@media(prefers-reduced-motion:reduce){.workspace-tab,.primary,.secondary,.example{transition:none!important}}
+</style>
 </head>
 <body>
 <div class="shell">

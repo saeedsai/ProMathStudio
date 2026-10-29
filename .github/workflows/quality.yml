@@ -36,6 +36,8 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Browser smoke tests (local functions, no SymPy CDN)
         run: python tests/smoke_browser.py
+      - name: Control-theory browser numerical and responsive regression
+        run: python tests/smoke_control_theory.py
       - name: Task-first workspace browser regression
         run: python tests/smoke_workspace_tasks.py
       - name: Per-workspace task restoration browser regression

@@ -35,6 +35,7 @@ const r=roots([1,3,2]).map(p=>p[0]).sort((a,b)=>a-b);
 assert(Math.abs(r[0]+2)<1e-6 && Math.abs(r[1]+1)<1e-6);
 assert.throws(()=>coefficients('1, Infinity'));
 assert.throws(()=>coefficients('0 1 2'));
+for(const id of ['ct-num','ct-den','ct-gain','ct-mode','ct-output','ct-status']) document.getElementById(id);
 elements['ct-num'].value='1';
 elements['ct-den'].value='1, 1';
 elements['ct-gain'].value='1';

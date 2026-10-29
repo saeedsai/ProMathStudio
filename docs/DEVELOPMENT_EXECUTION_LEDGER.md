@@ -4,11 +4,15 @@ Baseline: 158 present (63 bounded complete, 95 partial), 166 gap/improvement opp
 
 | ID | Feature | Status | Evidence |
 |---|---|---|---|
-| MATH-ODE-RK45-TIME-RESOLUTION-004 | Large-epoch representable-step and exact-endpoint RK45 integration | Implemented on dev; exact-head CI and PR/Pages pending | src/ode-tools.js, index.html, tests/test_ode_rk45_endpoint.py, tests/smoke_ode_rk45_endpoint.py |
+| MATH-MATRIX-WLS-UI-001 | Interactive weighted QR least-squares for 3×2 real matrices | Implemented on dev; exact-head CI/PR/Pages pending | src/matrix-tools.js, index.html, tests/smoke_matrix_weighted_least_squares.py, .github/workflows/quality.yml |\n| MATH-ODE-RK45-TIME-RESOLUTION-004 | Large-epoch representable-step and exact-endpoint RK45 integration | Implemented on dev; exact-head CI and PR/Pages pending | src/ode-tools.js, index.html, tests/test_ode_rk45_endpoint.py, tests/smoke_ode_rk45_endpoint.py |
 | MATH-ODE-RK4-BACKWARD-001 | Backward scalar RK4 initial-value problems | Released via PR #91; main and Pages Quality green at f5ce020595ec0c0d8e6dcbae4a8301afaf505535 | src/ode-tools.js, index.html, tests/test_ode_backward.py, tests/smoke_ode_backward.py |
 | MATH-ODE-RK45-BACKWARD-002 | Backward scalar adaptive RK45 initial-value problems | PR #92 merged at 04886109013b08cde9e312933a8b74ab842406be; dev/PR CI green, Pages workflow succeeded, main Quality pending at checkpoint | src/ode-tools.js, index.html, tests/test_ode_rk45_backward.py, tests/smoke_ode_rk45_backward.py |
 
 | MATH-ODE-RK4-SYSTEM-BACKWARD-003 | Backward coupled RK4 two-state IVPs | Implemented on dev; exact-head CI/PR/Pages pending | src/ode-tools.js, index.html, tests/test_ode_system_backward.py, tests/smoke_ode_system_backward.py |
+
+## 2026-10-29 — Weighted least-squares UI execution checkpoint
+
+Read root contract, living plan, frozen inventory and GitHub Quality. Pre-change dev `581070060867f2e5302ce665e3ef6ee5dcbafc86`, main `5d7ddaae6a5ec3b6696afd84ecc5d660d63f271d`, no open PRs; prior exact dev Quality [40931054692](https://github.com/saeedsai/ProMathStudio/actions/runs/40931054692) passed full unit/browser gate. Implemented editable weighted 3×2 QR fitting in matrix UI and standalone bundle, added focused browser regression and CI step. GitHub CI for the final documentation commit, dev→main PR and Pages not yet verified at checkpoint. Existing baseline counts unchanged. Next five and acceptance in hourly plan.
 
 ## 2026-10-29 execution log
 

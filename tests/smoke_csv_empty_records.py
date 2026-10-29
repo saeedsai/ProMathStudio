@@ -35,6 +35,8 @@ def main():
 
         page.locator('#dt-import').set_input_files({
             'name': 'blanks.csv', 'mimeType': 'text/csv', 'buffer': csv_text.encode()})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function('() => MathStudio.dataTables.tables.some(t => t.name === "blanks")')
         assert page.evaluate('MathStudio.dataTables.active.rows') == expected
         assert page.evaluate('MathStudio.dataTables.active.columns') == ['id', 'note']
@@ -47,6 +49,8 @@ def main():
 
         page.locator('#dt-import').set_input_files({
             'name': 'replay.csv', 'mimeType': 'text/csv', 'buffer': exported})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function('() => MathStudio.dataTables.tables.some(t => t.name === "replay")')
         assert page.evaluate('MathStudio.dataTables.active.rows') == expected
 
@@ -54,6 +58,8 @@ def main():
         page.locator('#dt-import').set_input_files({
             'name': 'tabbed.tsv', 'mimeType': 'text/tab-separated-values',
             'buffer': tsv.encode()})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function('() => MathStudio.dataTables.tables.some(t => t.name === "tabbed")')
         assert page.evaluate('MathStudio.dataTables.active.rows') == [
             ['', ''], ['', ''], ['3', '4']]

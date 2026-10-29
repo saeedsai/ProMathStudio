@@ -1,9 +1,9 @@
-## Unreleased — Spreadsheet aggregate and custom-function numeric hardening (2026-10-29)
+## Merged — Spreadsheet aggregate and custom-function numeric hardening (2026-10-29, PR #76; Pages verification pending)
 
 - Data Tables preserves built-in `SUM`, `COUNT`, `MEDIAN`, `AVERAGE`, `AVG`, `MIN`, `MAX` and `IF` semantics even when imported/saved custom-function names collide. Nonreserved custom functions continue to compose with aggregates.
 - Overflowing sums now report `#NUM!` instead of silently returning zero. Finite averages are accumulated with scaled terms to avoid unnecessary intermediate overflow. Invalid custom-function numerical evaluation produces a spreadsheet `#VALUE` error instead of a generic `#ERR` display; existing explicit `#...` errors are retained.
 - Corrected the custom numeric evaluation bridge to bind already-parsed numbers directly, avoiding incorrect reinterpretation of scientific notation (for example `1e308`) as mathematical variables. Added large/small exponent reference tests to the structural and Chromium regression suites.
-- Added structural `tests/test_sheet_numeric_hardening.py` and mandatory Chromium `tests/smoke_sheet_numeric_hardening.py` with numerical, collision, lazy-IF, workbook round-trip and responsive checks. **Status: implemented on `dev`; CI/PR/main/Pages verification pending.**
+- Added structural `tests/test_sheet_numeric_hardening.py` and mandatory Chromium `tests/smoke_sheet_numeric_hardening.py` with numerical, collision, lazy-IF, workbook round-trip and responsive checks. **Merged via [PR #76](https://github.com/saeedsai/ProMathStudio/pull/76) after exact-head [PR Quality 40804400919](https://github.com/saeedsai/ProMathStudio/actions/runs/40804400919) passed all 89 steps. `main=28fdd036677af293ea1e649fc61e370e7e0f802a`. Post-merge main Quality, Pages and hosted interaction are not independently verified; do not mark deployed yet.**
 
 ## Merged — Transactional CSV / TSV / JSON import preview (2026-10-29, PR #75; Pages verification pending)
 

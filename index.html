@@ -5869,7 +5869,7 @@ function svd3x3(A){
  if(A.length!==3||A[0].length!==3)throw Error('SVD requires a 3×3 real matrix.');
  const identity=()=>Array.from({length:3},(_,i)=>Array.from({length:3},(_,j)=>Number(i===j)));
  const scale=Math.max(...A.flat().map(Math.abs));
- if(scale===0)return {U:identity(),S:[0,0,0],V:identity(),rank:0,conditionNumber:null,residual:0,orthogonalityU:0,orthogonalityV:0};
+ if(scale===0)return {U:identity(),S:[0,0,0],V:identity(),rank:0,cutoff:0,conditionNumber:null,conditionAssessment:'rank deficient',residual:0,orthogonalityU:0,orthogonalityV:0};
  const B=A.map(row=>row.map(x=>x/scale)),V=identity();
  let converged=false;
  for(let sweep=0;sweep<64;sweep++){
@@ -5929,8 +5929,13 @@ function svd3x3(A){
  if(![...S,...U.flat(),...sortedV.flat(),residual,orthogonalityU,orthogonalityV].every(Number.isFinite)
   ||residual>1e-8||orthogonalityU>1e-8||orthogonalityV>1e-8)
   throw Error('3×3 SVD failed numerical reconstruction or orthogonality checks.');
- const conditionNumber=rank===3?S[0]/S[2]:Infinity;
- return {U,S,V:sortedV,rank,conditionNumber:Number.isFinite(conditionNumber)?conditionNumber:null,
+ // The scaled singular-value ratio avoids overflow/underflow in the
+ // condition estimate for tiny or very large, but otherwise well-scaled A.
+ const conditionNumber=rank===3?values[order[0]]/values[order[2]]:Infinity;
+ const conditionAssessment=rank<3?'rank deficient':conditionNumber>=1e8?'ill-conditioned':
+  conditionNumber>=1e4?'moderately conditioned':'well-conditioned';
+ return {U,S,V:sortedV,rank,cutoff:cutoff*scale,
+  conditionNumber:Number.isFinite(conditionNumber)?conditionNumber:null,conditionAssessment,
   residual,orthogonalityU,orthogonalityV};
 }
 /* Thin real 3×2 SVD using scaled, pivoted and reorthogonalized QR followed
@@ -6237,7 +6242,7 @@ function calculate(operation){
   output.textContent=operation==='pseudoinverse'?
    'pseudoinverse: A⁺ (Moore-Penrose, relative cutoff 1e-12)\n'+rowsText(value.matrix)+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===undefined?'not available':value.conditionNumber===null?'rank deficient':format(value.conditionNumber))+'\nSingular values: '+value.singularValues.map(x=>x.toExponential(6)).join(', ')+'\nRank cutoff (absolute): '+value.cutoff.toExponential(3)+(value.conditionAssessment===undefined?'':'\nCondition assessment: '+value.conditionAssessment)+'\nRelative Moore-Penrose residual: '+format(value.residual)+'\nProjector symmetry residual: '+format(value.symmetryResidual):
    operation==='svd'?
-   'svd: A = U·diag(σ)·Vᵀ\nSingular values (descending): '+value.S.map(format).join(', ')+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===null?'undefined / outside finite range':format(value.conditionNumber))+'\nU:\n'+rowsText(value.U)+'\nV:\n'+rowsText(value.V)+'\nRelative reconstruction residual: '+format(value.residual)+'\nU orthogonality residual: '+format(value.orthogonalityU)+'\nV orthogonality residual: '+format(value.orthogonalityV):
+   'svd: A = U·diag(σ)·Vᵀ\nSingular values (descending): '+value.S.map(format).join(', ')+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===null?'undefined / outside finite range':format(value.conditionNumber))+(value.cutoff===undefined?'':'\nRank cutoff (absolute): '+value.cutoff.toExponential(3))+(value.conditionAssessment===undefined?'':'\nCondition assessment: '+value.conditionAssessment)+'\nU:\n'+rowsText(value.U)+'\nV:\n'+rowsText(value.V)+'\nRelative reconstruction residual: +format(value.residual)+'\nU orthogonality residual: '+format(value.orthogonalityU)+'\nV orthogonality residual: '+format(value.orthogonalityV):
    operation==='eigen'?
    'eigen: symmetric A = V·diag(λ)·Vᵀ\nEigenvalues (descending): '+value.values.map(format).join(', ')+'\nEigenvectors (columns of V):\n'+rowsText(value.vectors)+'\nRelative residual: '+format(value.residual)+'\nReconstruction residual: '+format(value.reconstructionResidual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation==='lu'?

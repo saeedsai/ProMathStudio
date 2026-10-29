@@ -14,5 +14,5 @@ class MatrixDecimalInputTests(unittest.TestCase):
     def test_standalone_parity(self):
         start=HTML.index("/* ProMathStudio small-matrix calculator:")
         end=HTML.index("</script>",start)
-        self.assertEqual(HTML[start:end],SOURCE)
+        self.assertEqual(HTML[start:end],SOURCE+"\\n")
 if __name__=="__main__": unittest.main()

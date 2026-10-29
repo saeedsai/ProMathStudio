@@ -19,7 +19,10 @@ def check(a,result,rank,reference):
     assert len(u)==3 and all(len(row)==2 for row in u)
     assert len(v)==2 and all(len(row)==2 for row in v)
     for x,y in zip(s,reference):
-        assert math.isclose(x,y,rel_tol=1e-8,abs_tol=max(1e-300,1e-12*reference[0])),(a,s,reference)
+        if y==0:
+            assert abs(x)<=1e-12*reference[0],(a,s,reference)
+        else:
+            assert math.isclose(x,y,rel_tol=1e-8,abs_tol=1e-300),(a,s,reference)
     reconstruction=mul(mul(u,[[s[0],0],[0,s[1]]]),transpose(v))
     scale=max(1e-300,*(abs(x) for row in a for x in row))
     assert max(abs(reconstruction[i][j]-a[i][j])/scale for i in range(3) for j in range(2))<1e-8,(a,result)

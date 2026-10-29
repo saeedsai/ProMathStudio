@@ -81,6 +81,10 @@ def main():
                     notation = page.locator('#palette-nav button').filter(has_text='For all').first
                     assert notation.count() == 1 and notation.is_disabled()
                     assert graph.input_value() == prefix
+                    # A disabled palette item does not close the drawer. Explicitly
+                    # dismiss it before opening the next viewport's palette.
+                    page.keyboard.press('Escape')
+                    assert symbols.get_attribute('aria-expanded') == 'false'
             page.locator('[data-workspace="editor"]').click()
             symbols.click()
             search.fill('For all')

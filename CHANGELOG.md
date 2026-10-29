@@ -1,3 +1,8 @@
+## Released via PR #79 — Matrix pseudoinverse conditioning (2026-10-29)
+
+- Scaled, pivoted and reorthogonalized QR stabilizes near-dependent real 3×2/2×3 pseudoinverses, retains relative rank cutoff and Moore–Penrose checks, adds condition-number diagnostics and explicit numerical-instability rejection, and preserves 2×2 UI compatibility.
+- Structural and Chromium regressions added, with negative, scaled, rank-cutoff, wide-duality, 2×2 compatibility and mobile cases. [dev Quality 40821822571](https://github.com/saeedsai/ProMathStudio/actions/runs/40821822571), [PR Quality 40822239669](https://github.com/saeedsai/ProMathStudio/actions/runs/40822239669), [main Quality 40822624404](https://github.com/saeedsai/ProMathStudio/actions/runs/40822624404) all passed 92/92 steps; [Pages 40822624083](https://github.com/saeedsai/ProMathStudio/actions/runs/40822624083) succeeded. [PR #79](https://github.com/saeedsai/ProMathStudio/pull/79) merged to `52b58b4bd99e2237ab6ccdb097ca8bbb711e550c`. Independent hosted interaction remains unavailable.
+
 ## Implemented on dev — Matrix pseudoinverse conditioning (2026-10-29; QA pending)
 
 - Replaced cancellation-prone 3×2 Gram/Jacobi pseudoinverse with scaled pivoted QR and reorthogonalization; stable determinant-based small singular value, unchanged 1e-12 rank cutoff, Moore–Penrose checks, 2×3 transpose duality, condition diagnostics and explicit unstable-input rejection.

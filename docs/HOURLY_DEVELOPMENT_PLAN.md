@@ -1,3 +1,7 @@
+## 2026-10-29 03:05 CET — PR #76 nested-custom numeric diagnostic in progress
+
+[PR #76 Quality 40803883982](https://github.com/saeedsai/ProMathStudio/actions/runs/40803883982) passed all preceding structural and Chromium suites, then the new test found a mismatch for `SUM(TWICE(1e308),2)`. The failing assertion did not print the returned spreadsheet error, so a diagnostic-only assertion message was added in commit `dda9ff4b221d3db3ec9f1ce903ad5c0fff48a1b9` to expose the exact result without removing or weakening the case. **Release remains blocked pending diagnosis and green full QA.** NEXT FIVE acceptance gates unchanged; hourly task remains enabled.
+
 ## 2026-10-29 03:02 CET — P1-DATA-CUSTOM-COMPOSITION-HARDENING CI repair
 
 [PR #76](https://github.com/saeedsai/ProMathStudio/pull/76) [Quality 40803647086](https://github.com/saeedsai/ProMathStudio/actions/runs/40803647086) passed structural and preceding browser suites, then failed the new browser assertion: the fixture's literal first cell `'1'` correctly remains **text**, but the test expected numeric `1`. The actual computed row was `['1','#NUM!',1e308,8,'#VALUE',7]`, proving the targeted overflow, finite mean, lazy IF, invalid custom numeric and reserved-name paths had succeeded up to that assertion. Fixed the test expectation without changing production behavior or weakening any mathematical assertion in commit `8f838de8377edd15dcde57174863e699125f6247`. **Exact-head PR/CI and release verification pending.** The NEXT FIVE acceptance gates below remain unchanged; no CI or security bypass.

@@ -1,4 +1,4 @@
-## 2026-10-29 13:14 CET — PR #88 Quality green and safely merged; Pages unverified
+## 2026-10-29 — PR #88 Quality green and safely merged; Pages unverified
 
 **Feature ledger: MERGED / PRODUCTION NOT VERIFIED.** Wide 2×3 thin SVD completed on dev with U(2×2), S(2), V(3×2), rank0–2, reconstruction and orthogonality diagnostics, Matrix Calculator UI and Equation Editor factor transfer. Added `tests/test_matrix_svd_2x3.py` structural bundle parity and mandatory Chromium `tests/smoke_matrix_svd_2x3.py` with independent references, transpose parity, invalid input, scale, rank, mobile and transfer coverage. Exact-source V8 numeric checks passed 15 analytic/invalid/transpose cases plus 200 deterministic matrices (max discrepancy about 2.3e-15). Direct clone/browser execution locally was blocked by DNS; GitHub Actions ran complete structural and Chromium suite.
 

@@ -478,7 +478,7 @@ function svd3x2(A){
  if(A.length!==3||A[0].length!==2)throw Error('SVD requires a 3×2 real matrix.');
  const scale=Math.max(...A.flat().map(Math.abs));
  if(scale===0)return {U:[[1,0],[0,1],[0,0]],S:[0,0],V:[[1,0],[0,1]],
-  rank:0,conditionNumber:null,residual:0,orthogonalityU:0,orthogonalityV:0};
+  rank:0,cutoff:0,conditionNumber:null,conditionAssessment:'rank deficient',residual:0,orthogonalityU:0,orthogonalityV:0};
  const C=A.map(row=>row.map(x=>x/scale));
  const norms=[Math.hypot(...C.map(row=>row[0])),Math.hypot(...C.map(row=>row[1]))];
  const first=norms[0]>=norms[1]?0:1,second=1-first;
@@ -505,7 +505,9 @@ function svd3x2(A){
   q0[i]*factors.U[0][1]+q1[i]*factors.U[1][1]]);
  const V=Array.from({length:2},()=>[0,0]);
  V[first]=factors.V[0].slice();V[second]=factors.V[1].slice();
- const S=factors.S.map(x=>x*scale),rank=factors.rank;
+ // Rank cutoff and condition ratio use normalized QR singular values, avoiding
+ // unnecessary scale-dependent loss in the diagnostic for tiny/large inputs.
+ const S=factors.S.map(x=>x*scale),rank=factors.rank,cutoff=1e-12*factors.S[0]*scale;
  let residual=0,orthogonalityU=0,orthogonalityV=0;
  for(let i=0;i<3;i++)for(let j=0;j<2;j++){
   const reconstructed=U[i][0]*S[0]*V[j][0]+U[i][1]*S[1]*V[j][1];
@@ -521,9 +523,10 @@ function svd3x2(A){
  if(![...S,...U.flat(),...V.flat(),residual,orthogonalityU,orthogonalityV].every(Number.isFinite)
   ||residual>1e-8||orthogonalityU>1e-8||orthogonalityV>1e-8)
   throw Error('3×2 SVD failed numerical reconstruction or orthogonality checks.');
- const ratio=rank===2?S[0]/S[1]:Infinity;
- return {U,S,V,rank,conditionNumber:Number.isFinite(ratio)?ratio:null,
-  residual,orthogonalityU,orthogonalityV};
+ const ratio=rank===2?factors.S[0]/factors.S[1]:Infinity;
+ const conditionAssessment=rank<2?'rank deficient':ratio>=1e8?'ill-conditioned':ratio>=1e4?'moderately conditioned':'well-conditioned';
+ return {U,S,V,rank,cutoff,conditionNumber:Number.isFinite(ratio)?ratio:null,
+  conditionAssessment,residual,orthogonalityU,orthogonalityV};
 }
 /* Thin wide 2×3 SVD by transposing the validated 3×2 SVD.
    If Aᵀ=Uₜ·diag(S)·Vₜᵀ, then A=Vₜ·diag(S)·Uₜᵀ.
@@ -701,7 +704,7 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-qr" class="secondary">QR (A=Q·R)</button>'+
  '<button type="button" id="mat-least-squares" class="secondary">Least squares (A·x≈b)</button>'+
  '<button type="button" id="mat-eigen" class="secondary">Eigen (symmetric A)</button>'+ 
- '<button type="button" id="mat-svd" class="secondary">SVD (2×2 / 3×2 / 3×3 A)</button>'+ 
+ '<button type="button" id="mat-svd" class="secondary">SVD (2×2 / 3×2 / 2×3 / 3×3 A)</button>'+ 
  '<button type="button" id="mat-pseudoinverse" class="secondary">Pseudoinverse (2×2 / 3×2 / 2×3 / 3×3 A)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+

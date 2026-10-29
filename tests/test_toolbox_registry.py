@@ -53,6 +53,20 @@ class ToolboxRegistryTests(unittest.TestCase):
         self.assertEqual(entries[0]["title"], "Filter")
         self.assertEqual(entries[0]["description"], "Accept A | B without splitting the cell")
 
+    def test_alignment_delimiters_are_not_catalog_features(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            (folder / "catalog.md").write_text(
+                "| Feature | Description |\n"
+                "| :--- | ---: |\n"
+                "| :-----: | :------: |\n"
+                "| FFT | Transform samples |\n",
+                encoding="utf-8",
+            )
+            with patch.object(registry, "DOCS", folder):
+                entries = registry.parse_catalog("sample", "catalog.md")
+        self.assertEqual([item["title"] for item in entries], ["FFT"])
+
     def test_catalogs_are_present_and_registry_deterministic(self):
         for filename in registry.CATALOGS.values():
             self.assertTrue((registry.DOCS / filename).is_file(), filename)

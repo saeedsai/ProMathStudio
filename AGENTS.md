@@ -1,3 +1,15 @@
+## Unified roadmap
+
+Read [Unified Master Implementation Plan](docs/UNIFIED_MASTER_IMPLEMENTATION_PLAN.md) for deduplicated feature accounting, shared math/data/graph engines, phased UI and toolbox delivery, validation gates and conditional schedule estimates. Keep Control Theory visible as a separate cross-disciplinary selection. Preserve current CI and release safeguards.
+
+## Cross-discipline catalog and toolbox reuse
+
+Read [Additional Engineering Toolbox Candidates](docs/ADDITIONAL_ENGINEERING_TOOLBOX_CANDIDATES.md) when prioritizing new disciplines. The five approved planned toolboxes are [Statistics](docs/STATISTICS_ENGINEERING_TOOLBOX_FEATURE_LIST.md), [Data Science](docs/DATA_SCIENCE_TOOLBOX_FEATURE_LIST.md), [Materials & Alloys](docs/MATERIALS_METALLURGY_ALLOYS_TOOLBOX_FEATURE_LIST.md), [Structural Engineering](docs/STRUCTURAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md) and [AI & Machine Learning](docs/AI_MACHINE_LEARNING_TOOLBOX_FEATURE_LIST.md). Candidate disciplines are not approved implementations. Use canonical solver IDs, reusable data pipelines, unit-aware calculations, shared visualization and source-backed status labels. Never count overlapping toolbox catalog entries as unique implemented features or silently claim full audit coverage. Keep numerical correctness, regression, performance and accessible navigation gates intact.
+
+## Cryptography toolbox security and reuse rules
+
+Read [Cryptography & Security Toolbox Feature Catalog](docs/CRYPTOGRAPHY_SECURITY_TOOLBOX_FEATURE_LIST.md) when changing cryptographic features. Treat the toolbox as planned until audited and implemented. Prefer vetted cryptographic libraries and platform APIs; never design novel production encryption or copy primitives into discipline-specific modules. Use authenticated encryption, safe randomness, unique nonces, constant-time comparisons where relevant, secret redaction, and explicit key lifecycle handling. Require reference test vectors, invalid/tampered-input tests, interoperability tests and honest limitations before claiming a cryptographic tool secure. Preserve existing Python sandbox and offline behavior; do not silently expose keys to network services.
+
 # AGENTS.md — ProMathStudio Autonomous Hourly Development Contract
 
 This file is the durable operating instruction for the scheduled ProMathStudio developer. **Read it at the start of every run**, together with `docs/HOURLY_DEVELOPMENT_PLAN.md`, the [audited inventory](docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md), CI results, and the latest repository history. This file does not grant permissions or override security, CI, user controls or GitHub branch protection.
@@ -8,6 +20,18 @@ This file is the durable operating instruction for the scheduled ProMathStudio d
 - Each hour, select the highest-priority feasible small feature or correctness fix; implement source, tests, documentation and changelog, and **attempt** safe verified promotion/deployment. Report exactly what was committed/tested/merged/live, not imagined success.
 - Do useful dev-branch work if CI or promotion is pending. A pending release is *not* a reason to stop coding. Work in compatible small increments and keep them tested.
 - Maintain the **next five concrete upcoming features** in `docs/HOURLY_DEVELOPMENT_PLAN.md` on **every run**, with status, dependencies and acceptance tests.
+
+## Reusable engineering architecture and workspace mandate
+
+Read [Engineering Architecture and Workspace Plan](docs/ENGINEERING_ARCHITECTURE_AND_WORKSPACE_PLAN.md) and [Engineering Toolbox Feature Catalog](docs/ENGINEERING_TOOLBOX_FEATURE_CATALOG.md) when changing engineering tools, shared math, UI or file structure. The planned Engineering Toolbox is a fifth workspace with six disciplines; it must reuse the existing core rather than duplicate algorithms or action buttons.
+
+- Before adding any engineering feature, search existing implementations and catalog entries; assign one stable tool ID and one canonical solver, allowing multiple discipline links with presets.
+- Prefer pure calculation functions, explicit input/output contracts, shared units/validation/errors, reusable plots, and composition. Use classes only when state or backend polymorphism warrants them. Separate DOM/UI from math; avoid unnecessary abstractions, circular dependencies and global state.
+- Incrementally extract readable source modules and tests while preserving the existing offline self-contained `index.html`, `scripts/build.py`, source/bundle consistency, public APIs, saved projects and current navigation.
+- Reuse one contextual command bar and one source of truth for tool metadata. Never duplicate Run/Plot/Export controls, tool implementations or math kernels across engineering disciplines.
+- Refactor one bounded slice per run, with before/after numerical reference, error, keyboard/mobile and regression tests; benchmark source/bundle size and load performance rather than assuming a file split optimizes size.
+- Track planned/partial/implemented/verified states with evidence. Do not conflate the historical 158 present/166 gaps, 148 broad engineering families and 19 deferred electrical/electronics details or claim them as a deduplicated total.
+- Preserve domain assumptions, unit dimensional correctness, standards edition/jurisdiction disclaimers and engineering safety limitations. Do not ship placeholder tool actions as implemented features.
 
 ## Repository and branch policy
 - Canonical repository: `saeedsai/ProMathStudio`. Desired long-lived refs: **exactly `dev` and `main`**. `dev` is sole development branch; `main` contains only promoted and validated releases. No feature, fix, experiment, temporary or release branches. Do not force-push or rewrite published history.

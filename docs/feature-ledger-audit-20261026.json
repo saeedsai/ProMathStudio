@@ -1,0 +1,3094 @@
+{
+  "schemaVersion": 1,
+  "sourceAudit": "2026-10-26",
+  "status": "audit-import-not-current-verification",
+  "countingRules": "Audit rows are not deduplicated against engineering catalogs. Bounded-complete is not certified or fully comprehensive. Status is historical, not live.",
+  "counts": {
+    "existing": 158,
+    "gaps": 166
+  },
+  "items": [
+    {
+      "id": "audit-present-001",
+      "kind": "existing",
+      "title": "Five connected workspaces",
+      "status": "bounded-complete",
+      "scope": "Calculator, Equation Editor, Symbolic Solver, 2D/3D Graphs, Data Tables; the last tab is injected by the Data Tables module.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-002",
+      "kind": "existing",
+      "title": "Shared Working Equation hub",
+      "status": "bounded-complete",
+      "scope": "Capture an input and route expressions/results among workspaces and notebook. Not every symbolic result is executable in every destination.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-003",
+      "kind": "existing",
+      "title": "Live text-to-math preview",
+      "status": "bounded-complete",
+      "scope": "Browser MathML rendering of supported parsed notation.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-004",
+      "kind": "existing",
+      "title": "Text mathematical parser / AST",
+      "status": "partial",
+      "scope": "Arithmetic, function calls, implicit multiplication, operators and many math layouts; **not** all LaTeX, arbitrary symbolic functions, or a proof assistant.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-005",
+      "kind": "existing",
+      "title": "Arithmetic and grouping notation",
+      "status": "bounded-complete",
+      "scope": "`+ - * / ^`, parentheses, unary operators, fractions, negative/fractional powers.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-006",
+      "kind": "existing",
+      "title": "Equality and comparison notation",
+      "status": "partial",
+      "scope": "`=`, `==`, `<`, `>`, `<=`, `>=`, `!=`; display support broader than numerical solving of inequalities.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-007",
+      "kind": "existing",
+      "title": "Superscripts and subscripts",
+      "status": "bounded-complete",
+      "scope": "`x^2`, `x_1`, indexed notation.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-008",
+      "kind": "existing",
+      "title": "Roots, fractions and factorial notation",
+      "status": "bounded-complete",
+      "scope": "`sqrt`, `root`, `frac`, `!`; evaluation depends on chosen workspace.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-009",
+      "kind": "existing",
+      "title": "Greek letters and mathematical constants",
+      "status": "bounded-complete",
+      "scope": "Searchable library plus pi, e, imaginary unit, infinity notation.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-010",
+      "kind": "existing",
+      "title": "Vectors, accents, sets, logic notation",
+      "status": "partial",
+      "scope": "`vec`, hats, overlines, set operators, logical glyphs, etc.; substantial portion is **typesetting only**.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-011",
+      "kind": "existing",
+      "title": "Matrix/array/determinant notation",
+      "status": "partial",
+      "scope": "`matrix`, `pmatrix`, `array`, `vector`, `det` formatting; not a general matrix numeric/symbolic algebra UI.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-012",
+      "kind": "existing",
+      "title": "Calculus notation",
+      "status": "partial",
+      "scope": "Derivatives, partial derivatives, integrals, limits, sums and products may be typeset; computational availability differs by method.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-013",
+      "kind": "existing",
+      "title": "Piecewise/conditional notation",
+      "status": "partial",
+      "scope": "`if(condition,a,b)` works for native scalar numeric evaluation; `cases` displays piecewise forms. Not a general inequality/region solver.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-014",
+      "kind": "existing",
+      "title": "Transform notation",
+      "status": "bounded-complete",
+      "scope": "Laplace, inverse Laplace, Fourier and inverse Fourier render in editor. Computational support separately below.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-015",
+      "kind": "existing",
+      "title": "Differential-equation notation",
+      "status": "bounded-complete",
+      "scope": "Examples such as `diff(y(t),t)` and `pdiff(u(x,t),t)` in the editor.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-016",
+      "kind": "existing",
+      "title": "Searchable Symbols menu",
+      "status": "bounded-complete",
+      "scope": "Nested category/subcategory symbols; insertion targets Editor or Calculator depending on active tool.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-017",
+      "kind": "existing",
+      "title": "Searchable equation examples / reference catalog",
+      "status": "bounded-complete",
+      "scope": "General math examples and 72 additional reference physics/engineering equations in six categories. Examples are **not** physical-unit-checked simulations.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-018",
+      "kind": "existing",
+      "title": "Notebook with saved equations",
+      "status": "bounded-complete",
+      "scope": "Add, edit, delete, reopen saved formula/text entries; browser local persistence.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-019",
+      "kind": "existing",
+      "title": "MathML/LaTeX output generation",
+      "status": "partial",
+      "scope": "Good for supported AST, but not full macro compatibility/round-trip across math systems.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-020",
+      "kind": "existing",
+      "title": "Generated Python/SymPy notation",
+      "status": "partial",
+      "scope": "Useful generated code for supported expressions/solver operations; not universal correct translation of arbitrary input.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-021",
+      "kind": "existing",
+      "title": "Contextual Help, Examples, Options menus",
+      "status": "bounded-complete",
+      "scope": "Collapsible/floating UI with workspace guidance and display controls.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-022",
+      "kind": "existing",
+      "title": "Keyboard and responsive interaction",
+      "status": "partial",
+      "scope": "Editor Enter/Shift+Enter, solver Ctrl+Enter, menus and shortcuts; comprehensive mobile/assistive-tech coverage remains unverified.",
+      "section": "A. Workspace, equation editor and mathematical notation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-023",
+      "kind": "existing",
+      "title": "Real scalar arithmetic",
+      "status": "bounded-complete",
+      "scope": "Finite double-precision JavaScript numeric evaluation.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-024",
+      "kind": "existing",
+      "title": "Complex arithmetic",
+      "status": "partial",
+      "scope": "Complex addition/subtraction/multiplication/division, powers, principal roots/logs and transcendental functions; branch cuts and floating accuracy apply.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-025",
+      "kind": "existing",
+      "title": "Exponentiation and n-th roots",
+      "status": "bounded-complete",
+      "scope": "`^`, `pow`, `sqrt`, `root` within numeric domain.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-026",
+      "kind": "existing",
+      "title": "Factorials",
+      "status": "partial",
+      "scope": "Scalar factorial on supported nonnegative integers; not generalized special-function coverage.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-027",
+      "kind": "existing",
+      "title": "Trigonometry",
+      "status": "bounded-complete",
+      "scope": "`sin`, `cos`, `tan`, `cot`, `sec`, `csc`.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-028",
+      "kind": "existing",
+      "title": "Inverse trigonometry",
+      "status": "bounded-complete",
+      "scope": "`asin/arcsin`, `acos/arccos`, `atan/arctan`, and `atan2`.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-029",
+      "kind": "existing",
+      "title": "Hyperbolic functions",
+      "status": "bounded-complete",
+      "scope": "`sinh`, `cosh`, `tanh`.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-030",
+      "kind": "existing",
+      "title": "Logarithms/exponentials",
+      "status": "bounded-complete",
+      "scope": "`ln`, common/base-specific `log`, `log10`, `log2`, `exp`.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-031",
+      "kind": "existing",
+      "title": "Absolute value, norm, sign",
+      "status": "partial",
+      "scope": "Scalar modulus/norm/sign; not matrix/vector norm analysis.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-032",
+      "kind": "existing",
+      "title": "Other scalar utilities",
+      "status": "bounded-complete",
+      "scope": "`min`, `max`, `floor`, `ceil`, `round`, `mod`, `sinc`.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-033",
+      "kind": "existing",
+      "title": "Boolean/comparison and conditional numeric expressions",
+      "status": "partial",
+      "scope": "Comparisons, logical conjunction/disjunction, three-argument `if`/`piecewise`; limited boolean language.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-034",
+      "kind": "existing",
+      "title": "Constants",
+      "status": "bounded-complete",
+      "scope": "`pi`, `e`, `i`, stored `Ans`; other notation constants vary by evaluator.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-035",
+      "kind": "existing",
+      "title": "Radian/degree selector",
+      "status": "bounded-complete",
+      "scope": "Calculator trig calculation mode; graph angles remain radians.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-036",
+      "kind": "existing",
+      "title": "Numeric display modes",
+      "status": "bounded-complete",
+      "scope": "Auto, fixed/decimal, scientific and engineering notation; configurable displayed digits. Not arbitrary-precision arithmetic.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-037",
+      "kind": "existing",
+      "title": "Calculator keypad and history",
+      "status": "bounded-complete",
+      "scope": "Scientific keypad, 40 recent results, recall, clear, persistent browser history.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-038",
+      "kind": "existing",
+      "title": "User-defined scalar variables",
+      "status": "partial",
+      "scope": "Assign numeric scalars in calculator advanced panel; not a full variable/workspace/kernel language.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-039",
+      "kind": "existing",
+      "title": "Numerical first/partial derivatives",
+      "status": "partial",
+      "scope": "Central finite differences, e.g. `diff(sin(x),x,0)`; no automatic differentiation or error estimators.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-040",
+      "kind": "existing",
+      "title": "Definite integration",
+      "status": "partial",
+      "scope": "Composite Simpson quadrature (fixed number of steps, e.g. `int(x^2,x,0,3)`); no general adaptive/multidimensional integration UI.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-041",
+      "kind": "existing",
+      "title": "Finite sums",
+      "status": "partial",
+      "scope": "`sum(...,start,end)`, limited to up to 10,000 terms; not symbolic infinite summation.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-042",
+      "kind": "existing",
+      "title": "Finite products",
+      "status": "partial",
+      "scope": "`prod(...,start,end)`, same bounded integer range; not symbolic infinite products.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-043",
+      "kind": "existing",
+      "title": "DEC/BIN/HEX input and conversion",
+      "status": "partial",
+      "scope": "Binary/hex literals and output chips; exact large *single-literal* conversion via BigInt, general safe-integer arithmetic limited near 53 bits.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-044",
+      "kind": "existing",
+      "title": "Bitwise integer functions",
+      "status": "partial",
+      "scope": "`band`, `bor`, `bxor`, `bnot`, `shl`, `shr`, with safe-integer and shift constraints.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-045",
+      "kind": "existing",
+      "title": "Calculator-to-editor/solver routing",
+      "status": "bounded-complete",
+      "scope": "Send expression/result to another workspace; unsuitable symbolic types may require selection/conversion.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-046",
+      "kind": "existing",
+      "title": "Full multistatement Python as Calculator language",
+      "status": "partial",
+      "scope": "Available **only through saved, directly called Python custom functions**, not by pasting arbitrary Python statements into main Calculator input.",
+      "section": "B. Scientific calculator and numerical math",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-047",
+      "kind": "existing",
+      "title": "Operation and engine selectors",
+      "status": "bounded-complete",
+      "scope": "Auto, offline, SymPy; user chooses variable; worker-backed CAS starts on demand.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-048",
+      "kind": "existing",
+      "title": "Polynomial expansion",
+      "status": "partial",
+      "scope": "Offline one-variable polynomial/rational cases and SymPy fallback; not arbitrary tensor/assumption-aware algebra.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-049",
+      "kind": "existing",
+      "title": "Rational simplification",
+      "status": "partial",
+      "scope": "Cancel/simplify rational expressions; exclusions from original denominators need care.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-050",
+      "kind": "existing",
+      "title": "Polynomial factorization",
+      "status": "partial",
+      "scope": "Built-in rational-polynomial scope; advanced cases depend on SymPy.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-051",
+      "kind": "existing",
+      "title": "Solving a single algebraic equation",
+      "status": "partial",
+      "scope": "Polynomial/rational and supported SymPy equation classes; no universal closed-form solver.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-052",
+      "kind": "existing",
+      "title": "Linear and quadratic equations",
+      "status": "bounded-complete",
+      "scope": "Standard supported one-variable cases, real or complex.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-053",
+      "kind": "existing",
+      "title": "Higher-degree polynomial equations",
+      "status": "partial",
+      "scope": "SymPy may yield exact radicals for low-degree cases, or `RootOf`/numerical roots for high-degree cases.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-054",
+      "kind": "existing",
+      "title": "Complex roots",
+      "status": "partial",
+      "scope": "Supported polynomial equations and principal-branch arithmetic; verify multiplicity/domain as needed.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-055",
+      "kind": "existing",
+      "title": "Trigonometric/transcendental equations",
+      "status": "partial",
+      "scope": "SymPy attempts these and may return solution sets/conditions instead of enumerated finite roots.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-056",
+      "kind": "existing",
+      "title": "Exact symbolic vs approximate roots",
+      "status": "partial",
+      "scope": "Distinct symbolic and numeric answer forms; not high-precision general numerical workbench.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-057",
+      "kind": "existing",
+      "title": "Symbolic differentiation",
+      "status": "partial",
+      "scope": "Selected-variable derivatives via built-in polynomial support or SymPy for recognized expressions.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-058",
+      "kind": "existing",
+      "title": "Symbolic indefinite integration",
+      "status": "partial",
+      "scope": "Offline polynomial integration and SymPy for supported integrands; not all antiderivatives have closed forms.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-059",
+      "kind": "existing",
+      "title": "SymPy numerical polynomial roots",
+      "status": "partial",
+      "scope": "`nroots`/supported methods, fixed settings and result limits.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-060",
+      "kind": "existing",
+      "title": "Solve a linear system of equations in UI",
+      "status": "partial",
+      "scope": "New **Solve system of equations** operation, one equation per line, comma-separated unknowns; uses SymPy `linsolve`, up to 12 equations / 10 unknown names. Shows free parameters or inconsistency. **Not** a general nonlinear symbolic system solver.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-061",
+      "kind": "existing",
+      "title": "Underdetermined symbolic linear systems",
+      "status": "partial",
+      "scope": "Returns parameterized families (e.g. `x=-2z, y=-3z`) via `linsolve`; no dedicated matrix-rank or solution-space inspection panel.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-062",
+      "kind": "existing",
+      "title": "Inconsistent linear systems",
+      "status": "bounded-complete",
+      "scope": "A “no solution” result for inconsistent `linsolve` systems.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-063",
+      "kind": "existing",
+      "title": "Forward/inverse Laplace transforms",
+      "status": "partial",
+      "scope": "SymPy transform operations with specified input/output variables; convergence/assumptions require interpretation.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-064",
+      "kind": "existing",
+      "title": "Forward/inverse Fourier transforms",
+      "status": "partial",
+      "scope": "SymPy Fourier convention `exp(-2*pi*i*k*x)`; not a numeric FFT/signal processing toolbox.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-065",
+      "kind": "existing",
+      "title": "Analytical ODE solving",
+      "status": "partial",
+      "scope": "`sympy.dsolve` for recognized classes, including basic first-order/higher-order examples. No user-defined initial/boundary conditions UI.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-066",
+      "kind": "existing",
+      "title": "Analytical PDE solving",
+      "status": "partial",
+      "scope": "`sympy.pdsolve` for supported classes (e.g. first-order transport); far from general PDE solving.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-067",
+      "kind": "existing",
+      "title": "CAS result typesetting",
+      "status": "bounded-complete",
+      "scope": "MathML, LaTeX and approximate text where present; individual result lines.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-068",
+      "kind": "existing",
+      "title": "Send/copy/save specific symbolic results",
+      "status": "partial",
+      "scope": "Notebook, Word, Latex, other workspaces; some CAS objects cannot be numerically re-evaluated in Calculator.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-069",
+      "kind": "existing",
+      "title": "Equivalent SymPy code display",
+      "status": "partial",
+      "scope": "Generates code for many operations; system solver's code panel currently contains a *placeholder comment*, not a fully executable equivalent.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-070",
+      "kind": "existing",
+      "title": "Worker isolation and operation guardrails",
+      "status": "partial",
+      "scope": "Structured AST to SymPy, limits (e.g. AST nodes/result counts/timeouts); first Pyodide download requires internet and web workers are not a blanket security guarantee.",
+      "section": "C. Symbolic algebra, equations and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-071",
+      "kind": "existing",
+      "title": "Bounded real roots of nonlinear scalar equations",
+      "status": "partial",
+      "scope": "Bracket/bisection plus sampled local Newton search; may miss tangential/oscillatory roots, discontinuities or outside-range roots.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-072",
+      "kind": "existing",
+      "title": "Initial interval and tolerance controls",
+      "status": "bounded-complete",
+      "scope": "Numeric domain, sampling and tolerance validation.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-073",
+      "kind": "existing",
+      "title": "Numerical nonlinear systems (2–3 variables)",
+      "status": "partial",
+      "scope": "Damped Newton with numerical Jacobian, user initial guesses; local convergence, not exhaustive/certified.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-074",
+      "kind": "existing",
+      "title": "Residual/iteration diagnostics",
+      "status": "bounded-complete",
+      "scope": "Reports convergence, iterations and residual within supported numeric methods.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-075",
+      "kind": "existing",
+      "title": "1D Poisson boundary-value solver",
+      "status": "partial",
+      "scope": "Finite differences for `-u''=f(x)` on interval with Dirichlet values at both ends; tridiagonal solver; not arbitrary PDE/geometry.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-076",
+      "kind": "existing",
+      "title": "1D heat initial-boundary-value solver",
+      "status": "partial",
+      "scope": "Explicit FTCS for `u_t=alpha*u_xx`, positive constant alpha, fixed Dirichlet ends, and CFL check.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-077",
+      "kind": "existing",
+      "title": "Discretization and stability validation",
+      "status": "partial",
+      "scope": "Controls for grid/time-step counts; heat CFL warning, no adaptive discretization/error certification.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-078",
+      "kind": "existing",
+      "title": "Numerical results as Data Tables",
+      "status": "bounded-complete",
+      "scope": "Generate tables with root/system or sampled Poisson/heat output as applicable.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-079",
+      "kind": "existing",
+      "title": "Graph numerical output",
+      "status": "bounded-complete",
+      "scope": "Route generated tables to 2D/3D plotting workflows.",
+      "section": "D. Numerical equation solving and numerical PDEs",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-080",
+      "kind": "existing",
+      "title": "Multiple explicit 2D curves",
+      "status": "bounded-complete",
+      "scope": "Several `y=f(x)` expressions on the same Cartesian canvas.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-081",
+      "kind": "existing",
+      "title": "Multiple explicit 3D surfaces",
+      "status": "partial",
+      "scope": "Sampled `z=f(x,y)` meshes; not full 3D symbolic/implicit surfaces.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-082",
+      "kind": "existing",
+      "title": "Constrained curve on a 3D surface",
+      "status": "partial",
+      "scope": "`y=f(x)` paired with `z=g(x,y)` highlights a parametric intersection-like trace. Not general surface-surface intersections.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-083",
+      "kind": "existing",
+      "title": "3D curve from `y=f(x)`",
+      "status": "partial",
+      "scope": "Graph can show the corresponding 3D curve with `z=0`; not general 3D parametric plotting.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-084",
+      "kind": "existing",
+      "title": "Conditional/piecewise graph expressions",
+      "status": "partial",
+      "scope": "Supported `if(condition,true,false)` forms; sampling can misrepresent jumps/discontinuities.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-085",
+      "kind": "existing",
+      "title": "Interactive axes",
+      "status": "bounded-complete",
+      "scope": "X/Y/Z min/max, panning (2D), rotation (3D), zoom, reset.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-086",
+      "kind": "existing",
+      "title": "Curve sampling and basic discontinuity handling",
+      "status": "partial",
+      "scope": "Fixed canvas sampling; singularities, steep spikes and narrow features can be missed.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-087",
+      "kind": "existing",
+      "title": "Equation-to-residual plotting",
+      "status": "bounded-complete",
+      "scope": "Transfer `f(x)=g(x)` to `y=f(x)-g(x)`. Not a true implicit curve solver.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-088",
+      "kind": "existing",
+      "title": "Graph color palettes and primary color",
+      "status": "bounded-complete",
+      "scope": "Classic, bright, pastel, monochrome, custom; background color.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-089",
+      "kind": "existing",
+      "title": "Per-equation color selection",
+      "status": "bounded-complete",
+      "scope": "Individual equation colors and legends, saved to project.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-090",
+      "kind": "existing",
+      "title": "Line patterns and weights",
+      "status": "partial",
+      "scope": "Solid/dashed/dotted, width options; per-series settings where supported; options vary by chart/dataset.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-091",
+      "kind": "existing",
+      "title": "Point marker option",
+      "status": "partial",
+      "scope": "UI offers circle/square/diamond, but imported dataset points presently remain circles in some paths.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-092",
+      "kind": "existing",
+      "title": "Import tabular graph data",
+      "status": "bounded-complete",
+      "scope": "CSV/TSV/JSON, preview, X/Y/Z mapping, local plot data persistence in project export.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-093",
+      "kind": "existing",
+      "title": "2D scatter datasets",
+      "status": "bounded-complete",
+      "scope": "Numeric columns mapped to X/Y, plot with/without functions.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-094",
+      "kind": "existing",
+      "title": "Connected line datasets",
+      "status": "bounded-complete",
+      "scope": "Connect valid X/Y coordinates in supplied row order.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-095",
+      "kind": "existing",
+      "title": "3D scatter datasets",
+      "status": "partial",
+      "scope": "X/Y/Z point cloud display; no spatial analytics/interpolation.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-096",
+      "kind": "existing",
+      "title": "Rectangular 3D grid mesh",
+      "status": "partial",
+      "scope": "Requires complete grid of X/Y coordinates; not irregular triangulation.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-097",
+      "kind": "existing",
+      "title": "Overlay datasets from multiple tables/mappings",
+      "status": "partial",
+      "scope": "**Add series** supports further 2D point/line and 3D scatter/grid series, with legends and colors; limited total extra series, not general chart composition.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-098",
+      "kind": "existing",
+      "title": "Overlay equations and measured points",
+      "status": "bounded-complete",
+      "scope": "Both data and function layers can appear on graph canvas.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-099",
+      "kind": "existing",
+      "title": "Axis auto-fit for imported data",
+      "status": "bounded-complete",
+      "scope": "Fit limits to valid plotted coordinates.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-100",
+      "kind": "existing",
+      "title": "Bar chart",
+      "status": "partial",
+      "scope": "Group by category and sum values; not stacked/grouped/multiaxis statistical charting.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-101",
+      "kind": "existing",
+      "title": "Pie chart",
+      "status": "partial",
+      "scope": "Positive category aggregates, grouping excess categories into Other; no advanced chart semantics.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-102",
+      "kind": "existing",
+      "title": "Curve fitting: linear",
+      "status": "partial",
+      "scope": "Ordinary least squares for 2D X/Y data; not robust/weighted uncertainty-aware regression.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-103",
+      "kind": "existing",
+      "title": "Curve fitting: polynomial",
+      "status": "partial",
+      "scope": "Degrees 2–6, numerical stabilizing transform; no generic degree-selection/regularization.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-104",
+      "kind": "existing",
+      "title": "Curve fitting: exponential",
+      "status": "partial",
+      "scope": "Log-transformed positive Y; objective differs from original-space nonlinear least squares.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-105",
+      "kind": "existing",
+      "title": "Curve fitting: logarithmic",
+      "status": "partial",
+      "scope": "Positive X only.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-106",
+      "kind": "existing",
+      "title": "Curve fitting: power law",
+      "status": "partial",
+      "scope": "Positive X/Y, log-space estimation.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-107",
+      "kind": "existing",
+      "title": "Curve fitting: Gaussian bell",
+      "status": "partial",
+      "scope": "Fit quadratic in log(Y), requires plausible negative quadratic curvature; not multi-peak or arbitrary nonlinear Gaussian fit.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-108",
+      "kind": "existing",
+      "title": "Curve-fit diagnostics",
+      "status": "partial",
+      "scope": "Fitted formula, R², RMSE, valid/excluded sample counts; no confidence intervals, residual diagnostics/uncertainty propagation.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-109",
+      "kind": "existing",
+      "title": "Fit-curve overlay and clear",
+      "status": "bounded-complete",
+      "scope": "Show/clear fitted model atop source data.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-110",
+      "kind": "existing",
+      "title": "PNG export",
+      "status": "bounded-complete",
+      "scope": "Image download from graph and chart canvas; raster, not SVG/vector-graphics authoring.",
+      "section": "E. Graphing, visualization, charting and fitting",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-111",
+      "kind": "existing",
+      "title": "Multiple spreadsheet-like sheets",
+      "status": "partial",
+      "scope": "Up to 20 tables, 6,000 rows and 32 columns each; 150 visible rows rendered at a time.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-112",
+      "kind": "existing",
+      "title": "Add/duplicate/rename/delete tables",
+      "status": "bounded-complete",
+      "scope": "UI and context-menu actions with confirmation for destructive actions.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-113",
+      "kind": "existing",
+      "title": "Cell, row and column editing",
+      "status": "bounded-complete",
+      "scope": "Editable headers/cells; row/column add/delete/duplicate via menus.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-114",
+      "kind": "existing",
+      "title": "Formula arithmetic and cell references",
+      "status": "partial",
+      "scope": "`=A1*B1`, grouping, numeric operators, local and cross-sheet references; **A1 is the first data row** in actual source.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-115",
+      "kind": "existing",
+      "title": "Spreadsheet aggregates",
+      "status": "partial",
+      "scope": "SUM, AVERAGE/AVG, MIN, MAX, COUNT over ranges; not Excel's complete function catalog.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-116",
+      "kind": "existing",
+      "title": "Spreadsheet conditional IF",
+      "status": "partial",
+      "scope": "Formula `IF` and comparisons; parser is intentionally limited, including nested-expression edge cases.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-117",
+      "kind": "existing",
+      "title": "User-defined formula functions in sheets",
+      "status": "partial",
+      "scope": "Named *formula* functions callable in numeric sheet formulas; Python custom functions are not supported there.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-118",
+      "kind": "existing",
+      "title": "Cycle/reference diagnostics",
+      "status": "partial",
+      "scope": "Indicates cyclic/bad references; not a full dependency-graph spreadsheet engine.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-119",
+      "kind": "existing",
+      "title": "Text search and sort",
+      "status": "bounded-complete",
+      "scope": "Across computed values; ascending/descending by chosen column.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-120",
+      "kind": "existing",
+      "title": "Per-column conditional filters",
+      "status": "partial",
+      "scope": "Contains/starts-with/equality/numeric comparisons/empty; filters hide rows without modifying underlying data. Persisted filter views are limited.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-121",
+      "kind": "existing",
+      "title": "Table display zoom",
+      "status": "bounded-complete",
+      "scope": "50–200% in 10% steps; local preference, not necessarily exported between devices.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-122",
+      "kind": "existing",
+      "title": "INNER JOIN",
+      "status": "bounded-complete",
+      "scope": "Equality join on selected keys, new table.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-123",
+      "kind": "existing",
+      "title": "LEFT/RIGHT/FULL OUTER JOIN",
+      "status": "bounded-complete",
+      "scope": "Equality joins; no arbitrary SQL join predicates.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-124",
+      "kind": "existing",
+      "title": "UNION ALL / UNION DISTINCT",
+      "status": "bounded-complete",
+      "scope": "Combine rows with same column count, distinct handling.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-125",
+      "kind": "existing",
+      "title": "INTERSECT / EXCEPT",
+      "status": "bounded-complete",
+      "scope": "Set-style operations on row values.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-126",
+      "kind": "existing",
+      "title": "CSV/TSV import",
+      "status": "partial",
+      "scope": "Headered files/local parsing, size/row/column limits.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-127",
+      "kind": "existing",
+      "title": "JSON tabular import",
+      "status": "partial",
+      "scope": "Supported records, column/rows and array layouts, not general nested JSON flattening.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-128",
+      "kind": "existing",
+      "title": "CSV/JSON sheet export",
+      "status": "bounded-complete",
+      "scope": "Active sheet's **computed values** exported; preserve formulas in project JSON.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-129",
+      "kind": "existing",
+      "title": "Data-to-graph mapping",
+      "status": "bounded-complete",
+      "scope": "Pick table, X/Y/Z columns and chart type from Graphs panel.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-130",
+      "kind": "existing",
+      "title": "Table copy/cut/paste and TSV ranges",
+      "status": "partial",
+      "scope": "UI/context menus with clipboard fallback, browser permissions and formula-reference limitations.",
+      "section": "F. Data Tables, spreadsheets and relational operations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-131",
+      "kind": "existing",
+      "title": "Named mathematical formula functions",
+      "status": "partial",
+      "scope": "Create/edit/delete 1–6 argument definitions, stored locally, listed in Symbols; recursion/nested cases and syntax can be limited.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-132",
+      "kind": "existing",
+      "title": "Formula calls from Calculator",
+      "status": "bounded-complete",
+      "scope": "Numeric argument calls in native expression evaluator; no arbitrary symbolic function algebra.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-133",
+      "kind": "existing",
+      "title": "Formula calls from Graphs/Data Tables",
+      "status": "partial",
+      "scope": "Native formula function integration; graph/worksheet parser can reject unsupported nesting/type combinations.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-134",
+      "kind": "existing",
+      "title": "Multi-line user-defined Python functions",
+      "status": "partial",
+      "scope": "Save actual Python `def`, including control flow, but direct `name(real_args)` Calculator call only. Return type restricted to finite real number; no nested expression calls.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-135",
+      "kind": "existing",
+      "title": "Pyodide Python runtime in worker",
+      "status": "partial",
+      "scope": "Browser download on first call, worker isolation, timeouts; full CDN execution not tested by offline CI.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-136",
+      "kind": "existing",
+      "title": "Python script editor for tables",
+      "status": "partial",
+      "scope": "Execute real user code on pandas DataFrames with `tables` dictionary and captured print output; not an integrated general notebook.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-137",
+      "kind": "existing",
+      "title": "pandas operations through user scripts",
+      "status": "partial",
+      "scope": "Supported when Python dependencies load: dataframe filtering/grouping/stats/joins as authored Python; **not** evidence of equivalent native UI commands.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-138",
+      "kind": "existing",
+      "title": "SymPy accessible from Data Tables Python",
+      "status": "partial",
+      "scope": "Worker exposes `sp` in table script context; results must be returned as DataFrames for table import.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-139",
+      "kind": "existing",
+      "title": "Python results imported as new tables",
+      "status": "partial",
+      "scope": "Worker import path exists for named DataFrames, with row/column caps, but live CDN/pandas round-trip is not exercised by offline CI.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-140",
+      "kind": "existing",
+      "title": "Python run/stop/timeout controls",
+      "status": "partial",
+      "scope": "On-demand execution/stop and capped output, no step debugger, persistent kernel or package manager UI.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-141",
+      "kind": "existing",
+      "title": "Python/math source security",
+      "status": "partial",
+      "scope": "Workers restrict DOM access but user-authored Python may access the network. Execute trusted scripts only.",
+      "section": "G. Custom functions, Python and automation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-142",
+      "kind": "existing",
+      "title": "Working Expression source dropdown",
+      "status": "bounded-complete",
+      "scope": "Drafts, notebook equations, recent inputs, graph expressions and solver/calculator results.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-143",
+      "kind": "existing",
+      "title": "Saved recent calculations/notebook",
+      "status": "bounded-complete",
+      "scope": "Browser localStorage; explicit delete/clear options.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-144",
+      "kind": "existing",
+      "title": "Project JSON export/import",
+      "status": "partial",
+      "scope": "Version-1 projects with expression, notebooks, calculator, graph, tables, custom functions etc.; import replaces relevant current state, size ~2 MB.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-145",
+      "kind": "existing",
+      "title": "Restore saved graph datasets/styles",
+      "status": "partial",
+      "scope": "Data series, graph appearance and main graph state; large projects may exceed import cap.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-146",
+      "kind": "existing",
+      "title": "Editable Word equation DOCX",
+      "status": "partial",
+      "scope": "Generates Office Math; editing in installed Microsoft Word not independently verified for every expression.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-147",
+      "kind": "existing",
+      "title": "Notebook Word DOCX export",
+      "status": "partial",
+      "scope": "Word document with saved equations where representable.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-148",
+      "kind": "existing",
+      "title": "LaTeX copy and `.tex` document export",
+      "status": "partial",
+      "scope": "Supported equation syntax only, not complete LaTeX packages/macros.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-149",
+      "kind": "existing",
+      "title": "MathML/rich-HTML clipboard / copy-image",
+      "status": "partial",
+      "scope": "Browser secure-context and Word/clipboard support vary.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-150",
+      "kind": "existing",
+      "title": "Copy Python snippet",
+      "status": "bounded-complete",
+      "scope": "Generated SymPy script/text, subject to coverage limits.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-151",
+      "kind": "existing",
+      "title": "Context menus",
+      "status": "partial",
+      "scope": "Cell/row/column/tab, Calculator, Editor, Solver, Graphs, Notebook; long-press and Shift+F10 supported but not full desktop-app parity.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-152",
+      "kind": "existing",
+      "title": "Tool routing to 2D/3D graphs",
+      "status": "bounded-complete",
+      "scope": "Send expression/selected result to plotting with appropriate conversion.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-153",
+      "kind": "existing",
+      "title": "Browser-only deployment",
+      "status": "bounded-complete",
+      "scope": "A single `index.html` application on GitHub Pages; no required application server for base UI.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-154",
+      "kind": "existing",
+      "title": "Offline base functionality",
+      "status": "partial",
+      "scope": "Core JS UI works without an online engine; first remote Pyodide/SymPy/pandas/Python download requires connectivity.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-155",
+      "kind": "existing",
+      "title": "Source modular maintenance",
+      "status": "partial",
+      "scope": "Several `src/*.js` modules exist but are bundled inline into the canonical ~390 kB `index.html`.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-156",
+      "kind": "existing",
+      "title": "Open-source repository and license",
+      "status": "bounded-complete",
+      "scope": "GitHub-hosted MIT source.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-157",
+      "kind": "existing",
+      "title": "Automated tests",
+      "status": "partial",
+      "scope": "Static/structural Python tests and Chromium smoke tests for multiple workspaces and embedded Python. Not an exhaustive numeric reliability suite.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-present-158",
+      "kind": "existing",
+      "title": "CI and Pages deployment",
+      "status": "bounded-complete",
+      "scope": "GitHub Actions quality workflow and GitHub Pages deployment are configured; release verification still needs live-site checks.",
+      "section": "H. Workflow, formats, portability, engineering quality",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-001",
+      "kind": "gap",
+      "title": "General nonlinear symbolic equation systems",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing; system UI currently uses linear `linsolve`.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-002",
+      "kind": "gap",
+      "title": "Numerical solution of larger nonlinear equation systems",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend; current damped Newton works only on 2–3 unknowns.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-003",
+      "kind": "gap",
+      "title": "Inequality systems and semialgebraic regions (`reduce`, `solve` inequalities)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing general solver; comparisons/plot `if` are not equivalents.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-004",
+      "kind": "gap",
+      "title": "Assumptions (real/positive/integer/domains) and branch-choice controls",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing structured assumption UI.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-005",
+      "kind": "gap",
+      "title": "Domain/range, exclusions, poles, singularities and inequalities reporting",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend; some denominator checks exist, no comprehensive domain tool.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-006",
+      "kind": "gap",
+      "title": "Substitution, elimination, isolation, collect, coefficient extraction",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing dedicated CAS operations.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-007",
+      "kind": "gap",
+      "title": "Multivariate polynomial algorithms and Groebner bases",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-008",
+      "kind": "gap",
+      "title": "Algebraic number fields and exact algebraic extensions",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing dedicated workflows.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-009",
+      "kind": "gap",
+      "title": "Multivariate systems solution classification, rank/degree/parameters",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend linear-system outputs with a proper solution-space inspector.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-010",
+      "kind": "gap",
+      "title": "Symbolic solving for complex domains with explicit domain selection",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend current SymPy behavior with controllable domains.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-011",
+      "kind": "gap",
+      "title": "Symbolic series: Taylor/Maclaurin, Laurent, Puiseux, Padé",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing computation UI; notation alone insufficient.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-012",
+      "kind": "gap",
+      "title": "Symbolic infinite sums and products",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing computational solvers.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-013",
+      "kind": "gap",
+      "title": "Limits including one-sided/multivariate limits",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing dedicated compute operation, despite notation.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-014",
+      "kind": "gap",
+      "title": "Piecewise symbolic algebra and conditions",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend numeric conditional/typesetting; no robust symbolic simplification of cases.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-015",
+      "kind": "gap",
+      "title": "Symbolic function composition/inversion and inverse functions",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing first-class tools.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-016",
+      "kind": "gap",
+      "title": "Recurrence and difference equation solvers",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-017",
+      "kind": "gap",
+      "title": "Special functions (Gamma, Beta, Bessel, Airy, elliptic, Zeta, error functions)",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing broad native library/analysis UI.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-018",
+      "kind": "gap",
+      "title": "Exact arbitrary-precision and variable-precision arithmetic",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing; base calculator is double precision.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-019",
+      "kind": "gap",
+      "title": "Interval arithmetic / certified bounds / validated numerical proofs",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-020",
+      "kind": "gap",
+      "title": "Detailed trustworthy step-by-step symbolic derivations",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing proof/step display; CAS returns results, not audited derivations.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-021",
+      "kind": "gap",
+      "title": "Equation equivalence, identity/constraint verification and counterexamples",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing structured verification tools.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-022",
+      "kind": "gap",
+      "title": "Automatic dimensional analysis and physical unit handling",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing unit-aware computations/conversions.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-023",
+      "kind": "gap",
+      "title": "Number theory, modular arithmetic, Diophantine equations",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing dedicated solvers beyond simple integer/bitwise utilities.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-024",
+      "kind": "gap",
+      "title": "Combinatorics/permutations/partitions/generating functions",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing as general computing domain.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-025",
+      "kind": "gap",
+      "title": "Tensor algebra, index notation and symbolic tensors",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing numerical/symbolic tensor operations.",
+      "section": "1. Algebra, symbolic computation and mathematical foundations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-026",
+      "kind": "gap",
+      "title": "Interactive matrix/vector calculator with editable array grids",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing (current editor formats matrix notation only).",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-027",
+      "kind": "gap",
+      "title": "Matrix arithmetic/multiplication, transpose/conjugate transpose",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing native UI.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-028",
+      "kind": "gap",
+      "title": "Determinants, inverses, traces, rank and null spaces",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing native computational UI.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-029",
+      "kind": "gap",
+      "title": "Gaussian elimination/RREF and detailed linear-system steps",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing dedicated general UI; internal small Gaussian routine is not matrix tool.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-030",
+      "kind": "gap",
+      "title": "Matrix equation solvers `Ax=b`, least-squares/pseudoinverse",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing first-class workflows.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-031",
+      "kind": "gap",
+      "title": "Eigenvalues/eigenvectors, characteristic/minimal polynomials",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing computational UI.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-032",
+      "kind": "gap",
+      "title": "SVD, QR, LU, Cholesky, Schur decompositions",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-033",
+      "kind": "gap",
+      "title": "Sparse matrices and iterative solvers (CG/GMRES)",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-034",
+      "kind": "gap",
+      "title": "Matrix functions (exponential, logarithm, sqrt)",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-035",
+      "kind": "gap",
+      "title": "Conditioning, numerical stability, residual/error estimators",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing systematic analysis.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-036",
+      "kind": "gap",
+      "title": "General vector calculus (grad/div/curl/Laplacian)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing dedicated computation UI.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-037",
+      "kind": "gap",
+      "title": "Jacobian, Hessian, directional derivatives, sensitivity analysis",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing symbolic/numeric operator UI (internal numeric Jacobian alone is not enough).",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-038",
+      "kind": "gap",
+      "title": "Large/high-performance linear algebra, GPU acceleration",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "2. Matrices and numerical linear algebra",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-039",
+      "kind": "gap",
+      "title": "Adaptive numerical quadrature with tolerances/errors",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend fixed-step Simpson integration.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-040",
+      "kind": "gap",
+      "title": "Multiple/double/triple/contour integrals",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing general numerical computation.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-041",
+      "kind": "gap",
+      "title": "Improper and oscillatory integrals",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing numeric-specialized quadrature.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-042",
+      "kind": "gap",
+      "title": "General-purpose differentiation with higher order, gradients and autodiff",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend basic finite differences.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-043",
+      "kind": "gap",
+      "title": "Root-finding algorithms selectable (Brent, secant, trust region, deflation)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend current scalar bracket/Newton heuristic.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-044",
+      "kind": "gap",
+      "title": "Certified enumeration of polynomial/interval roots",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing validated root isolation.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-045",
+      "kind": "gap",
+      "title": "Error propagation, tolerance analysis and uncertainty quantification",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-046",
+      "kind": "gap",
+      "title": "Interpolation: linear/cubic splines, PCHIP, Akima, B-splines",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing (regression is not interpolation).",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-047",
+      "kind": "gap",
+      "title": "Multidimensional/scattered interpolation, triangulation",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-048",
+      "kind": "gap",
+      "title": "Numerical integration of discrete measurement arrays",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing UI (custom scripts possible).",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-049",
+      "kind": "gap",
+      "title": "Extrapolation controls/diagnostics",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-050",
+      "kind": "gap",
+      "title": "Numerical conditioning/stiffness detection and solver comparison",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "3. Numerical methods, calculus and integral equations",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-051",
+      "kind": "gap",
+      "title": "Unconstrained scalar/multivariable minimization (`fminbnd`, `fminunc`)",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing optimization UI.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-052",
+      "kind": "gap",
+      "title": "Bound-constrained and general nonlinear programming",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-053",
+      "kind": "gap",
+      "title": "Linear programming (LP)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-054",
+      "kind": "gap",
+      "title": "Mixed-integer and integer linear programming (MILP)",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-055",
+      "kind": "gap",
+      "title": "Quadratic programming (QP) and cone programming (SOCP)",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-056",
+      "kind": "gap",
+      "title": "Constrained/unconstrained nonlinear least squares",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend six fixed regression models.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-057",
+      "kind": "gap",
+      "title": "Robust global optimizers, multistart and evolutionary methods",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-058",
+      "kind": "gap",
+      "title": "Multiobjective/Pareto optimization",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-059",
+      "kind": "gap",
+      "title": "Convex analysis and constraint feasibility reports",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-060",
+      "kind": "gap",
+      "title": "Optimization Jacobians, gradients, Hessians, scaling, termination diagnostics",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing unified system.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-061",
+      "kind": "gap",
+      "title": "Dedicated mixed-variable parameter fitting and model calibration",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-062",
+      "kind": "gap",
+      "title": "Optimal control, trajectory optimization, dynamic programming",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "4. Optimization, operations research and constrained solving",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-063",
+      "kind": "gap",
+      "title": "Numerical initial-value ODE solvers (RK4/RK45/variable-step)",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing dedicated ODE integration UI.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-064",
+      "kind": "gap",
+      "title": "Stiff ODE solvers (BDF/implicit Runge-Kutta)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-065",
+      "kind": "gap",
+      "title": "ODE systems and initial-condition interface",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Extend analytical SymPy `dsolve`; no general IVP UI.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-066",
+      "kind": "gap",
+      "title": "Numerical ODE boundary-value problems (shooting/collocation)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-067",
+      "kind": "gap",
+      "title": "Differential-algebraic equations (DAE) and index reduction",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-068",
+      "kind": "gap",
+      "title": "Event detection, discontinuities, hybrid dynamics",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-069",
+      "kind": "gap",
+      "title": "Delay differential equations and fractional-order DEs",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-070",
+      "kind": "gap",
+      "title": "Apply ODE initial/boundary conditions in symbolic result UI",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing, despite `dsolve` integration.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-071",
+      "kind": "gap",
+      "title": "Boundary conditions for symbolic PDEs and arbitrary function constraints",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-072",
+      "kind": "gap",
+      "title": "2D/3D general finite element PDE engine",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing; only 1D Poisson/heat finite difference.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-073",
+      "kind": "gap",
+      "title": "PDE geometry builder/import (STL/CAD), mesh generation/refinement",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-074",
+      "kind": "gap",
+      "title": "Neumann/Robin/mixed and curved-boundary PDE conditions",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-075",
+      "kind": "gap",
+      "title": "Nonlinear, variable-coefficient, coupled PDEs",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing general solvers.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-076",
+      "kind": "gap",
+      "title": "Reaction-diffusion, wave, Navier–Stokes equation models",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing first-class PDE templates/solvers.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-077",
+      "kind": "gap",
+      "title": "Eigenvalue PDEs and modal analysis",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-078",
+      "kind": "gap",
+      "title": "Structural mechanics/FEM, heat transfer, electromagnetics multiphysics",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing specialist workflows.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-079",
+      "kind": "gap",
+      "title": "PDE residual/error/adaptive refinement tools",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-080",
+      "kind": "gap",
+      "title": "Time-dependent simulation monitoring, checkpoints and animation",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-081",
+      "kind": "gap",
+      "title": "Block-diagram continuous/discrete dynamic simulations (Simulink-like)",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing separate modeling environment.",
+      "section": "5. Differential equations, PDEs and simulation",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-082",
+      "kind": "gap",
+      "title": "Probability distributions (PDF/CDF/quantiles/parameter fitting)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing dedicated UI; math templates alone do not compute distributions.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-083",
+      "kind": "gap",
+      "title": "Random number generation, RNG seeds and Monte Carlo apps",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing native math workflow.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-084",
+      "kind": "gap",
+      "title": "Descriptive statistics dashboard (median/variance/std/quantiles/correlation)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend basic sheet aggregates; pandas can compute when scripted.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-085",
+      "kind": "gap",
+      "title": "Covariance/correlation matrices and scatter-matrix displays",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-086",
+      "kind": "gap",
+      "title": "Confidence/prediction intervals and uncertainty bands",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing fitting inference.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-087",
+      "kind": "gap",
+      "title": "Hypothesis testing, p-values, goodness-of-fit tests",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-088",
+      "kind": "gap",
+      "title": "ANOVA/ANCOVA, experimental design (DOE)",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-089",
+      "kind": "gap",
+      "title": "Generalized linear models, multivariate/multiple regression",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing first-class modeling UI.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-090",
+      "kind": "gap",
+      "title": "Robust/weighted/nonlinear regression and outlier diagnostics",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend six predefined fitting families.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-091",
+      "kind": "gap",
+      "title": "Time-series models (ARIMA, exponential smoothing, forecasting)",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-092",
+      "kind": "gap",
+      "title": "Bayesian statistics, bootstrapping, resampling",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing native workflow.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-093",
+      "kind": "gap",
+      "title": "Multivariate analysis: PCA, ICA, factor analysis",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-094",
+      "kind": "gap",
+      "title": "Classification and regression machine learning apps",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing native workflows.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-095",
+      "kind": "gap",
+      "title": "Clustering, anomaly detection, feature engineering",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-096",
+      "kind": "gap",
+      "title": "Design-of-experiments, survival/reliability and process control",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-097",
+      "kind": "gap",
+      "title": "Neural networks and deep learning model development",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "6. Statistics, probability, uncertainty and data science",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-098",
+      "kind": "gap",
+      "title": "Discrete FFT/IFFT and sampled-signal spectrum display",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing; symbolic Fourier transform is **not** FFT.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-099",
+      "kind": "gap",
+      "title": "Digital filters (FIR/IIR), filter design and frequency response",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-100",
+      "kind": "gap",
+      "title": "Convolution/correlation, Hilbert transforms and wavelets",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing native signal processing.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-101",
+      "kind": "gap",
+      "title": "STFT, spectrogram, time–frequency analysis",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-102",
+      "kind": "gap",
+      "title": "Z-transform and inverse Z-transform",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing; only Laplace/Fourier operations are exposed.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-103",
+      "kind": "gap",
+      "title": "Discrete-time dynamical systems and transfer-function manipulation",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-104",
+      "kind": "gap",
+      "title": "Bode, Nyquist, Nichols, root-locus plots",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing control-system visualization.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-105",
+      "kind": "gap",
+      "title": "Stability (Routh–Hurwitz, poles/zeros, margins)",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing analysis tools.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-106",
+      "kind": "gap",
+      "title": "State-space models, controllability/observability",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-107",
+      "kind": "gap",
+      "title": "PID tuning, LQR, Kalman filtering and observers",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-108",
+      "kind": "gap",
+      "title": "Audio/sensor/time-series data ingestion and stream processing",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing product-level workflow.",
+      "section": "7. Signal processing, control and transforms",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-109",
+      "kind": "gap",
+      "title": "Implicit 2D curves and regions `F(x,y)=0`",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing native implicit graph engine.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-110",
+      "kind": "gap",
+      "title": "Explicit parametric 2D/3D curves/surfaces",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing general form (special 3D constrained trace is not equivalent).",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-111",
+      "kind": "gap",
+      "title": "Polar/spherical/cylindrical coordinates",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing plotting systems.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-112",
+      "kind": "gap",
+      "title": "Inequality region/shaded feasible-set plots",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-113",
+      "kind": "gap",
+      "title": "True implicit 3D isosurfaces and volume slices",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-114",
+      "kind": "gap",
+      "title": "2D contour/heatmap, vector field, quiver, streamlines",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-115",
+      "kind": "gap",
+      "title": "Histograms, box/violin plots, error bars, confidence bands",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing dedicated statistical charts.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-116",
+      "kind": "gap",
+      "title": "Logarithmic axes, dual-axis charts, subplots/facets",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing or not exposed as general UI options.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-117",
+      "kind": "gap",
+      "title": "Per-point glyph styles and complete per-series 2D/3D style parity",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend partially implemented marker choices/overlays.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-118",
+      "kind": "gap",
+      "title": "Interactive sliders for parameters/time and animation",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing generalized parameter exploration.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-119",
+      "kind": "gap",
+      "title": "Large point-cloud rendering and irregular 3D triangulation",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-120",
+      "kind": "gap",
+      "title": "Geometry construction, intersections, distances and CAD meshes",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-121",
+      "kind": "gap",
+      "title": "Scientific vector exports SVG/PDF/EPS and publication themes",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing; PNG is raster only.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-122",
+      "kind": "gap",
+      "title": "3D scene lighting/shaders/transparency and mesh diagnostics",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-123",
+      "kind": "gap",
+      "title": "Image/video processing and computer vision toolboxes",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing industry-scale domain.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-124",
+      "kind": "gap",
+      "title": "Map/geospatial plots and coordinate projections",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "8. Geometry, plotting and scientific visualization",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-125",
+      "kind": "gap",
+      "title": "XLSX/ODS import, export, formulas and styles",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing; data import supports CSV/TSV/JSON.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-126",
+      "kind": "gap",
+      "title": "SQL query editor and relational database connections",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing; current joins/unions are UI operations.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-127",
+      "kind": "gap",
+      "title": "Data frame pivot tables, group-by aggregation UI, reshaping",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing first-class UI; may be scripted in pandas.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-128",
+      "kind": "gap",
+      "title": "Excel-like full functions, lookups, dates, array formulas",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing from limited sheet evaluator.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-129",
+      "kind": "gap",
+      "title": "Automatic relative-reference rewriting when inserting/deleting/sorting rows",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Missing; explicit warning in docs.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-130",
+      "kind": "gap",
+      "title": "Spreadsheet dependency/recalculation engine and auditing",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Extend lightweight formulas/cycle errors.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-131",
+      "kind": "gap",
+      "title": "Import of HDF5, MAT, Parquet, Feather, NetCDF",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-132",
+      "kind": "gap",
+      "title": "External REST/API ingest with connector management",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing built-in data connectivity.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-133",
+      "kind": "gap",
+      "title": "Data quality profiling, missing-value imputation, outlier filtering",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing dedicated workflow.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-134",
+      "kind": "gap",
+      "title": "Dataset metadata, units, schemas, reproducible pipelines",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-135",
+      "kind": "gap",
+      "title": "Large/out-of-core data processing and streaming",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing (20×6,000×32 sheet cap).",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-136",
+      "kind": "gap",
+      "title": "Native pivot/SQL query visualization and dataflow graph",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "9. Data engineering, spreadsheets, import/export",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-137",
+      "kind": "gap",
+      "title": "Full interactive Jupyter/Live Script-style notebook with code cells",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing; saved equation notebook and table Python editor are different.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-138",
+      "kind": "gap",
+      "title": "Unified typed variables, arrays and reusable computation session",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing full programmable mathematical kernel.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-139",
+      "kind": "gap",
+      "title": "Python custom functions callable inside nested calculator formulas, graphs and spreadsheet cells",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Extend current direct Calculator-only Python calls.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-140",
+      "kind": "gap",
+      "title": "Shared symbolic/non-scalar custom functions (complex, vectors, matrices, tables)",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing general type support.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-141",
+      "kind": "gap",
+      "title": "Package/environment manager for Python, deterministic dependencies",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-142",
+      "kind": "gap",
+      "title": "Debugger/profiler, function breakpoints, performance trace",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-143",
+      "kind": "gap",
+      "title": "Versioned computation/notebook history, cross-workspace undo/redo",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing unified reproducibility.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-144",
+      "kind": "gap",
+      "title": "Parameter sweep, batch experiments, reproducible run configurations",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-145",
+      "kind": "gap",
+      "title": "Project schema migrations and robust large-project support",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Extend current JSON v1/2 MB importer.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-146",
+      "kind": "gap",
+      "title": "Server-side jobs, parallel/GPU/cloud computing",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-147",
+      "kind": "gap",
+      "title": "Multiuser projects, accounts, real-time collaboration and sync",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-148",
+      "kind": "gap",
+      "title": "Source-control-aware documents, diff/merge of notebooks",
+      "status": "planned",
+      "priority": "P2",
+      "scope": "Missing.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-149",
+      "kind": "gap",
+      "title": "Portable HTML/PDF interactive reporting",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing dedicated reporting pipeline; DOCX/LaTeX/PNG exist.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-150",
+      "kind": "gap",
+      "title": "MATLAB `.m`, MAT and Simulink `.slx` interoperability",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-151",
+      "kind": "gap",
+      "title": "MATLAB/Simulink/C/C++/CUDA code generation",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Missing.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-152",
+      "kind": "gap",
+      "title": "Unit tests property-based numerical verification/regression corpus",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Extend current smoke suite; no authoritative certified numerics corpus.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-153",
+      "kind": "gap",
+      "title": "Production-grade first-use CDN, cross-browser/mobile, accessibility security QA",
+      "status": "planned",
+      "priority": "P0",
+      "scope": "Extend existing smoke tests with end-to-end real runtime validation.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-154",
+      "kind": "gap",
+      "title": "Complete offline installation/PWA with packaged numerical runtimes",
+      "status": "planned",
+      "priority": "P1",
+      "scope": "Missing; core HTML offline but remote Python packages not bundled.",
+      "section": "10. Software engineering, collaboration and reproducibility",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-155",
+      "kind": "gap",
+      "title": "Aerospace mechanics and flight dynamics",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Aerospace Toolbox, flight dynamics, geodesy/coordinate frames",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-156",
+      "kind": "gap",
+      "title": "Robotics and autonomous systems",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Rigid-body kinematics, trajectory planning, ROS, localization/SLAM",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-157",
+      "kind": "gap",
+      "title": "Structural and mechanical engineering",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "FE stress, vibration, modal, fatigue analysis",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-158",
+      "kind": "gap",
+      "title": "Electrical/EM/RF systems",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Circuit simulation, field solving, antennas and RF design",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-159",
+      "kind": "gap",
+      "title": "Multiphysics and thermal engineering",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Coupled heat/flow/structural physical models",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-160",
+      "kind": "gap",
+      "title": "Communications/radar",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Modulation, coding, beamforming, radar detection",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-161",
+      "kind": "gap",
+      "title": "Computational finance",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Portfolio risk, derivatives, term structures",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-162",
+      "kind": "gap",
+      "title": "Bioinformatics and computational biology",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Genomic analysis, dynamical biological systems",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-163",
+      "kind": "gap",
+      "title": "Geographic/geospatial analysis",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Mapping, GIS, projections, spatial statistics",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-164",
+      "kind": "gap",
+      "title": "Computer vision and image analytics",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Filtering, segmentation, feature extraction, object detection",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-165",
+      "kind": "gap",
+      "title": "Optimization-driven vehicle/power systems",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Powertrain, battery, energy system models and controls",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    },
+    {
+      "id": "audit-gap-166",
+      "kind": "gap",
+      "title": "Cryptography/formal theorem proving",
+      "status": "planned",
+      "priority": "P3",
+      "scope": "Algebraic protocols, logic verification, theorem-proving tools",
+      "section": "11. Industry-specific scientific toolboxes (optional, high-effort ecosystem extensions)",
+      "source": "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+    }
+  ]
+}

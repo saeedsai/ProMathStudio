@@ -41,7 +41,6 @@ def main():
         # Reject invalid intervals, invalid work limits and singular/non-real values.
         invalid = [
             {"expression": "y", "t0": 1, "t1": 1, "y0": 1, "steps": 20},
-            {"expression": "y", "t0": 1, "t1": 0, "y0": 1, "steps": 20},
             {"expression": "y", "t0": 0, "t1": 1, "y0": 1, "steps": 3},
             {"expression": "y", "t0": 0, "t1": 1, "y0": 1, "steps": 1001},
             {"expression": "y", "t0": 0, "t1": 1, "y0": 1, "steps": 2.5},
@@ -87,7 +86,7 @@ def main():
         page.locator("#ode-end").fill("0")
         assert page.locator("#ode-to-table").is_disabled()
         page.locator("#ode-run").click()
-        assert "greater" in page.locator("#ode-output").inner_text().lower()
+        assert "differ" in page.locator("#ode-output").inner_text().lower()
         assert page.locator("#ode-to-graph").is_disabled()
 
         page.set_viewport_size({"width": 390, "height": 844})

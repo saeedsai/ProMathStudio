@@ -1,3 +1,187 @@
+## 2026-10-29 — Registry tests and CI generation checkpoint
+
+**Committed on dev:** [Toolbox registry unit tests](../tests/test_toolbox_registry.py) cover catalog-scoped stable IDs, title normalization, header/count filtering, section assignment, planned-only status, deterministic build and duplicate candidate consistency. [Quality workflow](../.github/workflows/quality.yml) now runs `python scripts/build_toolbox_registry.py` and `--check` before existing unit/browser tests; the Python unit discovery picks up the new tests. **Not yet completed:** committed generated JSON, cross-catalog semantic deduplication, application UI registry integration, full CI result verification, main merge or deployment. **NEXT FIVE:** (1) commit reproducible registry output and enforce freshness; (2) manually review duplicate title candidates and map shared solver IDs; (3) source/build baseline and CI status; (4) connect first existing app tool to canonical registry with regression; (5) extract and test a shared solver across two consumers. Keep mathematical P0 and ongoing ODE fixes prioritized.
+
+## 2026-10-29 — Development checkpoint: ledger CI and catalog-registry generator
+
+**Committed on dev:** `.github/workflows/quality.yml` now executes `python scripts/validate_feature_ledger.py` before the existing structural and browser regression suite, ensuring historical audit counts, priorities and IDs remain consistent. Added `scripts/build_toolbox_registry.py`, a deterministic generator for a separate *planning-only* toolbox feature registry, with stable source-derived IDs and exact normalized-title duplicate-review candidates. It explicitly does not equate matching names with equivalent algorithms or claim features implemented. **Not yet completed:** generating/committing its output, running GitHub CI, full deduplication, actual UI/solver changes or main deployment. **NEXT FIVE with acceptance:** (1) run registry generator and commit output, verify determinism via `--check`; (2) add generator tests for table parsing, duplicate detection and stable IDs; (3) baseline source/build parity and CI status; (4) migrate one existing tool to canonical registry with no UI regression; (5) extract shared numerical solver with two consumers and reference tests. Preserve concurrent ODE priorities and exact-head release gates.
+
+## 2026-10-29 — Implementation checkpoint: machine-readable audit ledger
+
+**COMMITTED ON dev:** [Historical audit ledger](feature-ledger-audit-20261026.json) imports all 158 existing features (63 bounded-complete, 95 partial) and all 166 gap items (P0 22, P1 64, P2 53, P3 27) with stable audit IDs, descriptions, sections and provenance. [Ledger validation script](../scripts/validate_feature_ledger.py) checks count distribution, uniqueness, status/priority and required metadata. **Not yet completed:** deduplication against engineering catalogs, source-code re-audit, full CI execution, production release. Next: run validator in CI, link catalog aliases, baseline existing source/modules, then implement canonical registry. This checkpoint does not claim app UI or solver changes.
+
+## 2026-10-29 — Scalar backward RK4 (dev candidate; CI pending)
+
+Added signed-step scalar RK4 for t1 < t0 with preserved forward behavior, reference/negative/UI/export tests and standalone bundle parity. Not released. See [execution ledger](DEVELOPMENT_EXECUTION_LEDGER.md).
+
+**NEXT FIVE with acceptance:** (1) Backward adaptive RK45: reference exponential and tolerance/rejection/UI tests. (2) Backward coupled RK4: reverse harmonic oscillator and table/graph tests. (3) Canonical tool registry: unique IDs, deduplicated toolbox aliases and audited feature links. (4) Source/build baseline: byte sizes, offline boot, duplicate scan and reproducible parity test. (5) Shared linear solver extraction: two consumers, reference residual and regression tests. Keep P0 corrections and green exact-head CI ahead of new scope.
+
+## 2026-10-29 — Unified master implementation plan
+
+See [Unified Master Implementation Plan](UNIFIED_MASTER_IMPLEMENTATION_PLAN.md) for the audited feature-count ledger, 16 toolbox selections including Control Theory, reusable numerical/graph/data/signal/estimation engines, mathematical gap priorities, UI design, phase estimates and verification gates. **NEXT FIVE:** deduplicated feature ledger; source/build/CI baseline; canonical tool registry; reusable contextual action bar; shared solver extraction and cross-workspace tests. Planning only; no new feature implementation or deployment is claimed.
+
+## 2026-10-29 — Five additional toolboxes and broader engineering coverage review
+
+**PLANNED ONLY; NO APP IMPLEMENTATION OR DEPLOYMENT.** Added five detailed feature catalogs: [Statistics & Statistical Engineering](STATISTICS_ENGINEERING_TOOLBOX_FEATURE_LIST.md) **80**, [Data Science & Data Engineering](DATA_SCIENCE_TOOLBOX_FEATURE_LIST.md) **90**, [Materials, Metals & Alloys](MATERIALS_METALLURGY_ALLOYS_TOOLBOX_FEATURE_LIST.md) **80**, [Structural Engineering](STRUCTURAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md) **80**, [AI & Machine Learning](AI_MACHINE_LEARNING_TOOLBOX_FEATURE_LIST.md) **80**; **410 catalog entries** total, overlapping existing mathematics and each other. Register these as separate searchable planned toolboxes **11–15** in the Engineering Toolbox workspace. Also added [22 additional candidate engineering domains](ADDITIONAL_ENGINEERING_TOOLBOX_CANDIDATES.md) for future user selection, **not approved for implementation yet**. Reuse one canonical statistics/linear algebra/optimization/data/AI/FEA/visualization core, with domain-specific schemas, models and UI. Keep current priorities and CI gates unchanged; per-feature completion statuses require an updated source/test audit.
+
+## 2026-10-29 — Electromagnetics & Electromagnetic Engineering Toolbox (future scope)
+
+**PLANNED ONLY / NO SOURCE IMPLEMENTATION.** Added [Electromagnetics Toolbox Feature Catalog](ELECTROMAGNETICS_TOOLBOX_FEATURE_LIST.md) with **163 named features in 12 categories** covering Maxwell fields, electrostatics, magnetostatics, induction, waves, transmission lines, microwave/RF, antennas, EMC/EMI, computational electromagnetics, materials/photonics, electromechanical applications and measurement. Add **Electromagnetics** as the tenth selectable toolbox in the planned Engineering Toolbox workspace. Reuse shared vector calculus, linear algebra, PDE/FEM, units, materials, plotting, signal processing, optimization and uncertainty services across physics, electrical, electronics and aerospace. This is an overlapping feature catalog, not an increment to verified unique features or completion counts. Preserve existing correctness, refactor and release priorities; no app behavior or tests changed in this documentation-only update.
+
+## 2026-10-29 — Cryptography & Security Toolbox (future scope)
+
+**PLANNED ONLY / NO CRYPTO CODE IMPLEMENTED.** Added [Cryptography & Security Toolbox Feature Catalog](CRYPTOGRAPHY_SECURITY_TOOLBOX_FEATURE_LIST.md), **145 named features in 11 categories**: number theory, randomness/key management, hashing/password security, symmetric and asymmetric cryptography, post-quantum methods, PKI, protocols, secret sharing, secure files and validation. Register **Cryptography & Security** as a ninth selectable toolbox in the Engineering Toolbox workspace. Reuse common math, encoding, files, plots, validation and export components; rely on vetted libraries rather than homemade production primitives. Protect keys and nonces, use test vectors and negative tests, and distinguish educational demos from secure tools. These entries overlap other inventories and do not change verified implementation counts or current CI/refactor/release priorities.
+
+## 2026-10-29 — Signal Engineering & Processing Toolbox (future scope)
+
+**PLANNED / NO IMPLEMENTATION IN THIS COMMIT.** Added [Signal Engineering & Processing Toolbox Feature Catalog](SIGNAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md) with **177 named features in 11 categories**: signal representations, synthesis, acquisition/decoding, editing, transforms, filtering, statistics, communications coding, detection/estimation, specialized domains and visualization/pipelines. Add a separate **Signal Engineering** selectable toolbox as the eighth discipline of the planned Engineering Toolbox workspace. Preserve all signal types (analog/digital, real/complex, multichannel and multidimensional), signal coding, reading, filtering and analysis. Use canonical shared FFT, filters, Kalman/state estimators, units, plots, import/export and project serialization across signal, GNSS, control, electrical, electronics and aerospace tools; do not duplicate implementations. Entries overlap existing catalog items and do not increase verified implemented count. No application source or CI behavior changed; existing refactor, correctness and release priorities remain active.
+
+## 2026-10-29 — GNSS, GPS, observation and positioning toolbox (future scope)
+
+**PLANNED ONLY.** Registered [GNSS, GPS, Observation and Position Estimation Toolbox](GNSS_POSITIONING_OBSERVATION_TOOLBOX_FEATURE_LIST.md) with **144 feature entries across nine groups**: signals, geodesy, observation formats, PVT estimation, RTK/PPP, INS and sensor fusion, navigation, integrity and simulation. Add **GNSS & Positioning** as a seventh selectable discipline in the planned Engineering Toolbox workspace. Share matrix solvers, Kalman filtering, coordinate transforms, control, signal processing, plotting and uncertainty libraries with existing engineering toolboxes; no duplicate engines. Feature entries are not audited as implemented and overlap other catalog counts. Preserve current CI, refactor and release priorities; no application behavior changed in this documentation-only commit.
+
+## 2026-10-29 — Expanded Control Theory Toolbox inventory
+
+**PLANNED ONLY.** Added [Control Theory Toolbox — Comprehensive Feature Catalog](CONTROL_THEORY_TOOLBOX_FEATURE_LIST.md): **181 named features in 11 groups** including modeling, time/frequency response, stability, classical/modern/digital control, robust/optimal/MPC/adaptive control, identification, safety and simulation. Names and descriptions only; no new algorithms shipped in this change. Cross-reference the shared Engineering Toolbox registry; reuse common solvers/plots across electrical, electronics, aerospace and mechanical disciplines. Do not add 181 to the historical 166 gaps or 148 engineering feature families as though disjoint. Keep current numerical correctness, CI and refactor priorities, and audit per-feature statuses before claiming completion.
+
+## 2026-10-29 — Architecture reuse, codebase refactor and Engineering Toolbox workspace (new priority track)
+
+**STATUS: SPECIFIED / NOT YET IMPLEMENTED.** User requested an organized maintainable modular codebase, shared cross-discipline computation, reusable UI, minimal duplicate buttons, accessible searchable fifth **Engineering Toolbox** workspace with Physics, Mechanical, Electrical, Electronics, Fluid Mechanics and Aerospace sections. Created [Engineering Architecture and Workspace Plan](ENGINEERING_ARCHITECTURE_AND_WORKSPACE_PLAN.md) and updated root `AGENTS.md` with mandatory reuse/refactor practices. Preserve the four current workspaces and the standalone offline bundle. Migrate incrementally with tests and benchmarked size/performance; do not assert a UI refactor has shipped. The 148 broad engineering feature families and 19 separate detailed electrical/electronics backlog entries are future scope; they overlap existing math and each other.
+
+**Counting ledger:** 26-Oct frozen audit: 63 complete within stated scope, 95 partial = 158 present capabilities; 166 gap/improvement opportunities, which may overlap partial capabilities. Engineering catalog: 148 broad feature families (Physics 27; Mechanical 24; Electrical 18; Electronics 25; Fluids 23; Aerospace 31), not 148 new unique features. 19 deferred detailed electrical/electronics entries may overlap. No verified current deduplicated total, completion percentage or per-engineering-toolbox implemented/partial counts until a tool-by-tool re-audit; do not add these categories together.
+
+**NEXT FIVE architecture work items** (see specification for full acceptance tests): (1) baseline existing modules/duplicates and bundle bytes; (2) canonical shared tool registry and discipline mapping; (3) reusable command bar with no duplicate actions; (4) fifth accessible Engineering Toolbox workspace with six searchable discipline catalogs; (5) extract first existing solver to shared pure function with numerical and UI regression. Coordinate with active P0 numerical correctness and CI release work; do not bypass or abandon existing blockers.
+
+## 2026-10-29 — Six engineering toolbox feature lists registered (planning only)
+
+**USER-SPECIFIED DEFERRED SCOPE / NO IMPLEMENTATION.** Added [Engineering Toolbox Future Feature Catalog](ENGINEERING_TOOLBOX_FEATURE_CATALOG.md), describing **148 feature families** across Physics (27), Mechanical Engineering (24), Electrical Engineering (18), Electronics Engineering (25), Fluid Mechanics (23) and Aerospace Engineering (31). Derived from the six user-provided Markdown documents; only **feature names and short descriptions** were incorporated, excluding implementation instructions, technical-stack choices, launch sequences and execution instructions. These are broad feature groups, **not an exhaustive transfer of the thousands of individual subfeatures in the originals**. The six source documents are listed by name in the catalog; their finer-grained feature lists require separate import before claiming complete ingestion. Do not mark these as built, do not change current active priorities, and preserve the existing control-theory and 19-item electrical/electronics backlog. Shared mathematics features should be cross-referenced rather than implemented redundantly. This documentation-only update does not require app test changes.
+
+## 2026-10-29 — Control root-locus branch tracking (priority feature)
+
+**Feature ledger: IMPLEMENTED ON DEV / FULL CI AND HOSTED QA PENDING / NOT RELEASED.** Replaced disconnected unordered root-locus pole clouds with 90 gain-sampled trajectories matched between adjacent gain steps using a minimum-total-displacement assignment (at most six poles). Shared axes show per-branch continuous sample paths and sampled pole markers. Added explicit rejection of improper numerator-degree models and invalid sampling ranges, and descriptive warnings that repeated roots and crossings need additional validation. This is *sampled branch tracking*, not a certified analytic root-locus solver or controller-design implementation.
+
+**Source/test commits:** `f7409b7f2a0c854d3c072b974a3271a14b034050` (source), `56c5db30145e881cb005b329923fe5126860ec3f` (reference tests), `8c742a16dbb62595a992a8c267fe6a1b1843766f` (mock initialization correction). Added `tests/test_root_locus_tracking.py` with two-pole reference G(s)=1/(s²+3s+2), complex conjugate branches at K=8, pole-zero cancellation, cubic initial poles, invalid cases, and actual canvas line/marker assertions. Directly executed the actual embedded control JS in an isolated V8 mock: 3 cubic branches × 5 points, successful UI status, 190 line segments and 180 pole markers; **this is not a replacement for GitHub's full Python + Playwright regression suite**. Observed exact test-head Quality [40897479209](https://github.com/saeedsai/ProMathStudio/actions/runs/40897479209) pending at inspection. Full exact-head CI, mobile Chromium, PR review, main Quality and GitHub Pages verification still required. Main at discovery `2c286be5cefa164ffae6c27dad48db2eba74c465`; dev has moved during the run. Preserve the two existing branches; no cleanup deletion justified.
+
+### NEXT FIVE — acceptance tests
+
+| Priority | Work item | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Verify current dev candidate and fix CI regressions | Exact-head full structural + Playwright suite green, including 390px nav and control-root-locus browser modes, no console exceptions | CI PENDING |
+| 2 | Release validated UI, complex graph and control toolbox | Inspect dev→main PR diff, pass PR checks, normal protected merge, verify main Quality and Pages with live calculator/equation/graphs/tables | BLOCKED ON QA |
+| 3 | Root-locus numerical reliability | Repeated-pole/branch-crossing continuity, pole-zero markers, gain range controls, independent high-precision references | PARTIAL |
+| 4 | Controller design | PI/PID and lead-lag reference step and frequency responses, stability margins, negative and mobile tests | TODO |
+| 5 | Feedforward / symbolic transform integration | 2-DOF feedforward and Equation Laplace/inverse handoff, finite domain guards and browser regression | TODO |
+
+## 2026-10-29 — Required browser test for Control Theory workspace
+
+**Feature ledger — REGRESSION ADDED ON DEV; RELEASE NOT VERIFIED.** Re-read AGENTS.md, frozen inventory and plan, verified dev 27 ahead of main before coding. Implemented `tests/smoke_control_theory.py`: actual Chromium interaction through the Graph workbench for Bode, Nyquist, root-locus, Routh–Hurwitz and unity feedback; checks plotted canvas, characteristic polynomial of 1/(s+1) under gain 1, rejection of zero leading denominator, mobile layouts at 390/768px, page errors, and panel visibility. Registered as a mandatory Quality step in `.github/workflows/quality.yml`. Retains `tests/test_control_numerical_reference.py` for independent numerical reference values. All source changes are regression/CI support, not additional control algorithms. Full exact-head CI and protected release not yet confirmed. The 19 deferred electrical/electronics features remain untouched.
+
+### NEXT FIVE — prioritized acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Validate Control Theory Chromium regression | Exact-head Quality green including Bode/Nyquist/Routh/root-locus/feedback interactions, 390/768 px and no JS errors | QA PENDING |
+| 2 | Verify restored mobile workspace navigation | Existing 390/768/1280 Playwright controls, no horizontal overflow, keyboard focus and drafts | QA PENDING |
+| 3 | Promote existing PR #91 safely | Review changed-file diff, full green PR checks, ordinary authorized merge only, verify exact main Quality and Pages | BLOCKED ON CI |
+| 4 | Track root-locus branches | Stable branch correspondence through gains, repeated roots and analytic 2nd/3rd-order references | TODO |
+| 5 | PID / lead-lag control design | Known reference margins, step response, invalid-domain safeguards and browser integration | TODO |
+
+## 2026-10-29 15:55 CET — Mobile workspace navigation overflow regression (current iteration)
+
+**Feature ledger:** P1 UI accessibility / mobile navigation **FIXED ON DEV, QA PENDING; NOT RELEASED**. Prior exact-head [Quality run 40896098381](https://github.com/saeedsai/ProMathStudio/actions/runs/40896098381) failed only at `tests/smoke_workspace_navigation.py` (390px width): navigation `scrollWidth > clientWidth`. Root cause: the new computation-first mobile CSS forced all four workspace tabs onto one unwrapped horizontal flex row with `overflow-x:auto`, violating existing no-horizontal-overflow keyboard-navigation acceptance. Replaced the <=760px nav layout with two equal minmax(0,1fr) grid columns, each tab width 100%, wrapping labels as needed. Preserved keyboard arrows/Home/End, focus styling and draft retention. Added new focused structural regression `tests/test_mobile_workspace_grid.py` (grid layout, no overflow style, keyboard hooks) and retained existing 390/768/1280px Playwright smoke. Direct structural inspection confirmed expected CSS and executable inline JS syntax; full Playwright and exact-head GitHub CI **not yet confirmed**. Do not merge until full required checks are green.
+
+**Progress snapshot (audited baseline 2026-10-26; NOT a live re-audit):** 158 existing capabilities = **63 C** complete within narrow stated scope + **95 P** partial; **166** additional missing/materially incomplete opportunities = **22 P0 + 64 P1 + 53 P2 + 27 P3**. These are two separate inventories: the 166 opportunities are not 166 missing features on top of 158 and often overlap partial capabilities. Additional **19** electrical/electronics deferred features are registered in the separate future backlog, not implemented and not included in baseline. Recent dev-only control theory/complex graph/UI changes do not automatically increase released counts without full QA, CI, merge and Pages verification. A new current-state audit is required to reclassify any of the frozen baseline.
+
+**Execution log:** At discovery `dev=b0eb3798ffa1d378f0d1d6a85b7eef539d2e0b54`, `main=2c286be5cefa164ffae6c27dad48db2eba74c465` (dev 22 ahead / 0 behind; branches dev/main only). Prior exact dev Quality failed mobile navigation; browser smoke failed at 390px, whereas unit/structural and preceding smoke steps passed. This iteration source commit `e5c98d28940fcd29d92456ea37dd47f589f8ed58`, focused test commit `fbb24b32c542e4bd6b6756971909be7d628158d0`. Full new exact-head CI pending, main and Pages unchanged. No branch cleanup needed (only dev/main); no tracked stale files proven safe to remove. PR review and release gate remain required.
+
+### NEXT FIVE — current priorities and acceptance tests
+
+| Priority | Work item | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Confirm mobile navigation fix | Exact-head Quality green; 390/768/1280px Playwright: no nav overflow, arrow/Home/End focus, correct activation, drafts preserved, no console errors | DEV / CI PENDING |
+| 2 | Control-theory numerical reference validation | Bode G(s)=1/(s+1) −3.0103 dB at ω=1; Nyquist ±ω conjugacy; stable/unstable Routh first column; unity-feedback polynomial and browser rendering | TODO |
+| 3 | Safe promotion and hosted verification | Green exact dev and PR checks, inspect diff, normal dev→main PR merge, main Quality + Pages status and hosted calculator/equation/graph/data tests | BLOCKED ON QA |
+| 4 | Root-locus branch tracking | Continuous pole matching across gain, reference second/third-order poles and repeated-root warnings; numerical and browser regression | TODO |
+| 5 | PID / lead-lag controller design | Finite and valid transfer-function input checks, reference PI/PID/lead/lag frequency/step response and stability diagnostics; offline and browser tests | TODO |
+
+## 2026-10-29 — New deferred electrical/electronics toolbox backlog (planning only)
+
+**USER-SPECIFIED FUTURE WORK / NOT STARTED.** Registered all **19** features from the supplied Full Feature, Tool, and Option Implementation Matrix in [docs/ELECTRICAL_ELECTRONICS_FUTURE_BACKLOG.md](ELECTRICAL_ELECTRONICS_FUTURE_BACKLOG.md): foundational circuit laws and mesh tools (4), AC/waves/RF (4), industrial power and regulatory systems (4), semiconductors/board-level electronics (5), and technical references/exports (2). Each entry includes its mathematical engine, GUI options and schematic/interactive graphics, with later validation requirements. **No source implementation or tests were requested or made for these features.** This is additional future scope, not an update to the frozen 166-gap/95-partial inventory and not a change to the current next-five development priorities. Begin only following separate user authorization.
+
+## 2026-10-29 — Recovery: HTML export / script parsing and root-locus sample integrity
+
+**Execution ledger: FIXED ON DEV; CI NOT YET VERIFIED.** Exact PR #91 head previously failed GitHub [Quality 40894821384](https://github.com/saeedsai/ProMathStudio/actions/runs/40894821384) at browser smoke: `Failed to execute 'write' on 'Document': Invalid or unexpected token`. Traced to inserting the complex/control script blocks at the *first* `</body>` occurrence, which was inside a quoted HTML export literal in the application's main JS. Restored the export string and moved both blocks immediately before the document's last `</body>`. Fresh parse checks using V8 `new Function` succeeded on every inline executable script. Added mandatory `tests/test_inline_script_boundaries.py` with Node `--check` over all inline scripts, boundary assertions, and exact uniqueness checks. Corrected root-locus rendering from misleading continuous lines between unordered sampled roots to discrete markers, retaining its explicitly sampled scope. Full structural and browser regression CI remains required; no main release or Pages verification claimed.
+
+### NEXT FIVE — acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Validate recovered browser startup | Exact-head full Quality green, exported HTML literal, calculator/editor/graph smoke and zero page errors | DEV / CI PENDING |
+| 2 | Test control transfer functions numerically | Bode 1/(s+1) −3.0103 dB at ω=1, Nyquist symmetry, stable/unstable Routh and closed-loop coefficient tests, mobile Chromium | TODO |
+| 3 | Review and promote PR #91 | Green required PR checks, changed-file review, normal dev→main merge, verify exact main Quality and Pages | BLOCKED ON CI |
+| 4 | Root-locus branch tracking | Continuous pole matching and repeated-root controls, reference roots for 2nd/3rd order examples, browser graph | TODO |
+| 5 | PID and lead-lag controller design | Validated PI/PID response and margins, gain limits, negative cases, feedback/feedforward integration | TODO |
+
+## 2026-10-29 — Control theory SISO toolbox (requested new scope)
+
+**Ledger: IMPLEMENTED ON DEV; CI and browser QA pending; NOT DEPLOYED.** Added a collapsible continuous-time SISO Transfer Function workbench under Graphs for polynomial numerator/denominator (descending powers, degree ≤ 6), finite gain, Bode magnitude in dB with phase end-point diagnostics, Nyquist locus, sampled unity-feedback root locus, Routh–Hurwitz array and first-column sign-change count, and negative unity feedback closed-loop frequency response. Invalid/nonfinite/high-order inputs rejected; Nyquist poles/encirclement and special Routh rows need analyst confirmation, and root-locus line segments currently connect sample order rather than tracked branches. **This is bounded numerical exploratory analysis, not a MATLAB Control System Toolbox replacement.** `tests/test_control_theory_toolbox.py` covers required UI/modes, guardrails, existing graph/complex graph coexistence, and responsive CSS. Existing PR #91 redesign/complex graph CI previously failed in browser smoke; investigate before any PR merge. No direct main push.
+
+### NEXT FIVE — acceptance tests
+
+| Priority | Scope | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Stabilize control toolbox + browser CI | Validate Routh for stable/unstable/boundary polynomials, closed-loop coefficient ordering, Bode 1/(s+1) reference (−3.0103 dB at 1 rad/s), Nyquist ±ω symmetry, responsive Chromium, no runtime errors | DEV / CI PENDING |
+| 2 | Fix existing browser smoke regression | Diagnose prior PR #91 browser smoke failure, repair root cause without weakening assertions; full exact-head quality green | BLOCKED |
+| 3 | Root locus numerics | Root tracking by pole proximity, accurate gain labeling, repeated-root convergence tests, zero/pole markers | TODO |
+| 4 | Controller design | Proportional, PI, PID and lead/lag design with validated time/frequency margins and step-response tests | TODO |
+| 5 | Feedforward and Laplace | 2-DOF feedforward block modeling, symbolic Laplace/inverse bridge to Equation, validated transfer routing; hosted Pages confirmation | TODO |
+
+## 2026-10-29 — Complex-number graph workbench (dev candidate)
+
+**Feature ledger: IMPLEMENTED ON DEV / CI PENDING; NOT DEPLOYED.** User requested complex numbers in both 2D and 3D graphs. Added an independent collapsible complex visualization section inside the existing Graph workspace. 2D uses Argand axes Re(f(z)), Im(f(z)), marking the selected complex number's image; 3D renders an isometric sampled |f(z)| magnitude surface over Re(z), Im(z) in [-3,3]. Presets: f(z)=z, z², 1/z (singularity omitted) and exp(z). Numeric controls Re(z)/Im(z), finite input bounds, status/output diagnostics, mobile layout, and defensive nonfinite/overflow rejection. Preserved original real 2D/3D graphs and imported data workflow. Added structural regression `tests/test_complex_graph.py`. The 3D plot is a canvas projection, not a WebGL rotational 3D renderer; heights are clipped at 8 and singularities omitted. Exact-head full CI, browser smoke, PR merge and production Pages verification remain pending.
+
+### NEXT FIVE — acceptance tests
+
+| Priority | Feature | Acceptance criteria | Status |
+|---:|---|---|---|
+| 1 | Verify complex graph and redesign | Full exact-head CI, 2D Argand/square/inverse/exp and 3D surface browser tests, responsive layout, no runtime errors; review PR and merge only if green. | DEV / CI PENDING |
+| 2 | Confirm GitHub Pages production | Exact main push Quality and Pages deployment, hosted complex visualization + original workstations on desktop/mobile. | ACCESS BLOCKED |
+| 3 | Expand complex graph 3D interactions | Rotatable zoomable surface, axes and legend, regression for singularities and scale limits. | TODO |
+| 4 | Complex graph function parser | Safe supported expression grammar for z with precedence, complex arithmetic, unsupported function rejection, numerical reference tests. | TODO |
+| 5 | Rectangular SVD near-cutoff reliability | 80+ digit independent oracle, rank1/rank2, residuals, responsive browser UI. | TODO |
+
+## 2026-10-29 — Computation-first interface refresh (user-requested priority)
+
+**Feature ledger: IMPLEMENTED ON DEV; REQUIRED CI / BROWSER QA / DEPLOYMENT PENDING.** User requested a one-shot visual and usability refresh inspired by Wolfram|Alpha. Added an original teal/ivory/amber visual design in the existing standalone `index.html`: clearer workstation tabs, differentiated math inputs and answer surfaces, consolidated visual hierarchy, sidebar math search and palette treatment, consistent buttons/cards, keyboard focus rings, reduced-motion accommodation and 760/440px responsive layout. All existing controls and navigation hooks remain; do not describe this as supporting Wolfram|Alpha natural-language queries or engines. Structural regression `tests/test_computation_first_ui.py` checks redesign uniqueness, workstation hooks, responsive and accessibility coverage. Full browser and required CI are pending. No `main` change has been made; Pages not verified. This design work was prioritized by explicit user request over the previous matrix backlog.
+
+### NEXT FIVE — concrete features and acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Release redesigned interface | Full exact-head CI, structural/browser smoke, desktop and 390px mobile navigation/input/answers, no console exceptions; normal dev→main PR, main Quality and Pages check | DEV / QA PENDING |
+| 2 | Verify hosted release | Confirm exact deployed SHA, Pages publish, calculator/equation/graphs/data tables and mobile keyboard use without console errors | ACCESS BLOCKED |
+| 3 | Rectangular SVD near-cutoff reliability | Independent 80+ digit oracle around cutoff; rank1/rank2 references, orthogonality/reconstruction, Chromium | TODO |
+| 4 | Rectangular SVD/pseudoinverse agreement | Rank0/1/2 3×2/2×3, four Moore–Penrose identities, UI numeric parity | TODO |
+| 5 | Graph & Data Tables usability | Import cancel rollback, graph roots/fractions, responsive displays, no runtime errors | TODO |
+
+## 2026-10-29 15 CET — PR #90 Quality green, ordinary merge; Pages unverified
+
+**Feature ledger: MERGED SOURCE / PRODUCTION NOT VERIFIED.** Rectangular 3×2 and 2×3 SVD now expose a scale-safe absolute numerical rank cutoff and conditioning advisory; 3×2 uses normalized QR singular values for condition ratio, while 2×3 inherits transpose-equivalent diagnostics. The Matrix SVD button now names all four supported sizes. Existing numerical reconstruction/orthogonality gates and Equation Editor factor transfer remain intact. Structural `tests/test_matrix_svd_rectangular_condition.py` and mandatory Chromium `tests/smoke_matrix_svd_rectangular_condition.py` cover 80-digit rotated near-rank-one references, three valid scales, rank0/1/2, condition categories, transpose parity, invalid inputs, UI transfer and responsive layouts. Direct exact-source V8 numerical checks passed nine near-rank-one matrices plus **500 deterministic matrices** (max relative reconstruction residual ~6.77e-16, max orthogonality ~6.66e-16). The new 1e12 high-scale reference initially exceeded the per-entry validation bound and was corrected to 1e11 before PR CI.
+
+**CI/release evidence:** [PR #90](https://github.com/saeedsai/ProMathStudio/pull/90) exact head `5b4f623a5ebc6a8048d4a9dcbc5459e840f6974f` passed [Quality 40888207291](https://github.com/saeedsai/ProMathStudio/actions/runs/40888207291): **104/104 successful workflow steps**, zero failures and no unresolved review threads. Reviewed seven-file diff, mergeable and unchanged expected head/base. Ordinary expected-head PR merge succeeded at **main `2c286be5cefa164ffae6c27dad48db2eba74c465`**. Dev safely fast-forwarded to main without force, before subsequent documentation-only updates. Branch enumeration (including pagination) returned exactly dev/main; no obsolete branch cleanup needed.
+
+**Production blocker:** The connector only enumerates PR-triggered workflow runs; exact main-push Quality and Pages build/publish cannot be retrieved. Main combined commit statuses returned no statuses, and direct GitHub Actions and Pages URLs were inaccessible. Live hosted functionality remains **unverified**, not released by the Definition of Done. Branch protection remains unconfirmed; no security/CI bypass. Hourly task remains enabled.
+
+### NEXT FIVE — acceptance gates and dependencies
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Verify PR #90 production | Exact main SHA Quality and Pages publish success; hosted 3×2/2×3 rank cutoff, condition advisory, Equation transfer, mobile/no runtime errors. | ACCESS BLOCKED |
+| 2 | Rectangular SVD near-cutoff reliability | 80+ digit independent oracle around 1e-12 rank boundary, robust rank warnings or rejection if ambiguous, reconstruction/orthogonality and Chromium tests. | TODO |
+| 3 | Rectangular SVD/pseudoinverse consistency | 3×2 and 2×3 rank0/1/2, four Moore–Penrose identities, rank/condition parity, numerical references, UI. | TODO |
+| 4 | 3×3 SVD near-cutoff reliability | Rotated rank2/3 at multiple scales, orthogonality and reconstruction, condition-risk warnings, browser regression. | TODO |
+| 5 | Hosted Data Tables and Graph QA | CSV/TSV/JSON transactional preview rollback, 2D/3D roots/fractions, keyboard/mobile and zero runtime errors. | ACCESS BLOCKED |
+
 ## 2026-10-29 15:03 CET — Rectangular SVD cutoff/condition diagnostics and near-rank-one regression
 
 **Execution log / discovery:** Read root AGENTS.md, live development plan, frozen 26-Oct audit and latest exact-head [PR #89 Quality 40878671063](https://github.com/saeedsai/ProMathStudio/actions/runs/40878671063), which completed successfully (103/103 steps). Verified `main` at `aab6236604f0716487a56bf2d0d9ec56e4713d90`; `dev` started two documentation commits ahead; no open PR. The GitHub connector only exposes PR-triggered CI runs, not main push Quality/Pages deployment, so production remains **unverified**.

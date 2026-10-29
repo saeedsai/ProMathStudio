@@ -18,11 +18,11 @@ function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  expression=String(expression).trim();
  if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
  t0=finite(t0,'Initial time');t1=finite(t1,'End time');y0=finite(y0,'Initial y');
- if(!(t1>t0))throw Error('End time must be greater than initial time (forward integration only).');
+ if(t1===t0)throw Error('End time must differ from initial time.');
  steps=finite(steps,'Time steps');
  if(!Number.isInteger(steps)||steps<4||steps>1000)throw Error('Time steps must be an integer from 4 to 1000.');
  const h=(t1-t0)/steps;
- if(!Number.isFinite(h)||h<=0)throw Error('Invalid integration step size.');
+ if(!Number.isFinite(h)||h===0)throw Error('Invalid integration step size.');
  const f=(t,y)=>bounded(M.numerical.evaluate(expression,{t:bounded(t,'Time'),y:bounded(y,'State')}),'Derivative');
  let y=y0;const rows=[];
  for(let i=0;i<=steps;i++){
@@ -37,7 +37,7 @@ function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  }
  return {type:'ode-rk4',columns:['t','y'],rows,steps,h,
   method:'Classical fourth-order Runge–Kutta (RK4)',
-  note:'Scalar first-order y\u2032=f(t,y), y(t0)=y0; fixed steps, forward only. Accuracy depends on smoothness and step size. Not an adaptive/stiff ODE solver.'};
+  note:'Scalar first-order y\u2032=f(t,y), y(t0)=y0; fixed steps, forward or backward. Accuracy depends on smoothness and step size. Not an adaptive/stiff ODE solver.'};
 }
 
 function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=1000}={}){

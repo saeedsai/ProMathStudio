@@ -1,3 +1,8 @@
+## Implemented on dev — 2×2 pseudoinverse condition diagnostics (2026-10-29; QA pending)
+
+- Reuse scaled 2×2 SVD to return descending singular values and finite condition numbers only at numerical full rank, with null/rank-deficient diagnostics for zero and singular matrices, consistent with rectangular pseudoinverse results.
+- Added structural and mandatory Chromium regressions for numerical references, relative rank cutoff, negative inputs, editor transfer and responsive UI; kept `index.html` synchronized. Release requires exact dev/PR/main Quality and Pages verification.
+
 ## Released via PR #79 — Matrix pseudoinverse conditioning (2026-10-29)
 
 - Scaled, pivoted and reorthogonalized QR stabilizes near-dependent real 3×2/2×3 pseudoinverses, retains relative rank cutoff and Moore–Penrose checks, adds condition-number diagnostics and explicit numerical-instability rejection, and preserves 2×2 UI compatibility.

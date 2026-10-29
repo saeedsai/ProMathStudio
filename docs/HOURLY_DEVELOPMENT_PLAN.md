@@ -1,3 +1,17 @@
+## 2026-10-29 06:29 CET — P1-MATRIX-2X2-CONDITION-DIAGNOSTICS checkpoint
+
+**Feature ledger: IMPLEMENTED ON DEV / QA PENDING.** The highest-priority 3×3 pseudoinverse needs a separately validated numerical algorithm; instead delivered the next feasible bounded correctness gap. The real 2×2 pseudoinverse now returns descending SVD singular values and finite condition number only for numerical full rank (null for rank deficient or zero), matching the existing 3×2/2×3 API. UI displays “rank deficient” instead of “not available” for singular matrices. Preserves relative 1e-12 cutoff, four Moore–Penrose identities, Equation transfer and existing matrix operations. New structural and mandatory Chromium tests cover condition 1, 3, 1e10, rank1, zero, near-cutoff, invalid inputs, editor transfer and 390/768/1280px. Existing conditioning regression updated, modular and bundled source synchronized. Initial dev `dcc3a57f032253b9556a7d19107bb45d63e0e6c4`, main `52b58b4bd99e2237ab6ccdb097ca8bbb711e550c`. [Previous dev Quality 40823035083](https://github.com/saeedsai/ProMathStudio/actions/runs/40823035083), [main Quality 40822624404](https://github.com/saeedsai/ProMathStudio/actions/runs/40822624404) and [Pages 40822624083](https://github.com/saeedsai/ProMathStudio/actions/runs/40822624083) succeeded. Exact new-head CI, PR, main Quality, Pages and hosted interaction remain release gates. Local GitHub checkout DNS unavailable. Only dev/main; branch protection unconfigured; no bypass or unverified file deletion. Frozen 166-gap/95-partial baseline and hourly task retained.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-MATRIX-2X2-CONDITION-DIAGNOSTICS QA/release | Exact dev/PR CI including new numerical/browser tests, reviewed diff, SHA-checked PR merge, main Quality and Pages, hosted QA if accessible. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-MATRIX-PSEUDOINVERSE-3X3 feasibility | Rank0/1/2/3 independent numerical oracles, scale and near-singular handling, four identities, UI/editor/mobile tests; implement only after stability review. | TODO |
+| 3 | P1-DATA-IMPORT-PREVIEW hosted QA | CSV/TSV/JSON schema warnings, Cancel/Escape no mutation, Create, focus and 390px console-free. | PAGES SUCCESS / HOSTED QA PENDING |
+| 4 | P1-DATA-CUSTOM-COMPOSITION hosted QA | 1e308 argument, SUM overflow #NUM!, reserved built-ins, nested functions, persistence and mobile. | PAGES SUCCESS / HOSTED QA PENDING |
+| 5 | P1-GRAPH-PALETTE-VALIDITY hosted QA | 2D/3D root/fraction/factorial, zero division, notation gating, focus and mobile. | PAGES SUCCESS / HOSTED QA PENDING |
+
 ## 2026-10-29 06 CET — P1-MATRIX-NUMERICAL-CONDITIONING RELEASED via PR #79
 
 **Feature ledger: RELEASED FOR BOUNDED 3×2 / 2×3 SCOPE (Pages workflow verified; hosted interaction unavailable).** The prior Gram/Jacobi method could lose the small singular direction for nearly equal columns. Scaled, pivoted QR with reorthogonalization now preserves the inverse for structured near-dependent 1e-8/1e-10 cases, derives the small singular value from det(R)/sigmaMax, keeps the 1e-12 relative rank cutoff and all four Moore–Penrose checks, and rejects unstable matrices with an explicit message. Wide 2×3 shares transpose duality. Full-rank 3×2/2×3 condition number is displayed; existing 2×2 UI remains functional without condition metadata. Source and bundled index synchronized.

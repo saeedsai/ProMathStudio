@@ -5861,7 +5861,7 @@ function svd2x2(A){
 function pseudoinverse2x2(A){
  A=validate(A);
  if(A.length!==2||A[0].length!==2)throw Error('Pseudoinverse requires a 2×2 real matrix.');
- const {U,S,V,rank}=svd2x2(A);
+ const {U,S,V,rank,conditionNumber}=svd2x2(A);
  const cutoff=1e-12*S[0];
  const reciprocal=S.map(value=>value>cutoff?1/value:0);
  const matrix=Array.from({length:2},(_,i)=>Array.from({length:2},(_,j)=>
@@ -5883,7 +5883,9 @@ function pseudoinverse2x2(A){
  }
  if(!Number.isFinite(residual)||!Number.isFinite(symmetryResidual)||residual>1e-8||symmetryResidual>1e-8)
   throw Error('Pseudoinverse failed its Moore-Penrose residual check.');
- return {matrix,rank,cutoff,residual,symmetryResidual};
+ // Report finite conditioning only when both singular directions pass the rank cutoff.
+ return {matrix,rank,cutoff,conditionNumber:rank===2?conditionNumber:null,
+  singularValues:S.slice(),residual,symmetryResidual};
 }
 /* Scaled pivoted QR pseudoinverse for real 3×2 matrices. The smaller singular
    value comes from det(R)/sigmaMax(R), avoiding cancellation in nearly equal

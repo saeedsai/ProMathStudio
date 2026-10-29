@@ -1,3 +1,5 @@
+**Cryptography & Security (ninth planned discipline):** [145-feature cryptography catalog](CRYPTOGRAPHY_SECURITY_TOOLBOX_FEATURE_LIST.md), including cryptographic mathematics, hashes, keys, encryption, digital signatures, PKI, protocols, post-quantum and validation. Reuse shared services; no production primitives from scratch.
+
 **Signal Engineering & Processing (eighth planned discipline):** [177-feature signal catalog](SIGNAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md) covering signal types, synthesis, acquisition, reading/decoding, coding, filtering, transforms, statistics, detection and visualization. Share algorithms with Control, GNSS, Electronics and other disciplines.
 
 **GNSS & Positioning (seventh planned discipline):** [144-feature GPS, observation and position-estimation catalog](GNSS_POSITIONING_OBSERVATION_TOOLBOX_FEATURE_LIST.md). Covers GNSS measurements, geodesy, precise positioning, sensor fusion, integrity and simulation; shares underlying mathematics with the six existing engineering disciplines.

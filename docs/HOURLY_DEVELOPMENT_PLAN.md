@@ -1,3 +1,19 @@
+## 2026-10-29 13:14 CET — PR #88 Quality green and safely merged; Pages unverified
+
+**Feature ledger: MERGED / PRODUCTION NOT VERIFIED.** Wide 2×3 thin SVD completed on dev with U(2×2), S(2), V(3×2), rank0–2, reconstruction and orthogonality diagnostics, Matrix Calculator UI and Equation Editor factor transfer. Added `tests/test_matrix_svd_2x3.py` structural bundle parity and mandatory Chromium `tests/smoke_matrix_svd_2x3.py` with independent references, transpose parity, invalid input, scale, rank, mobile and transfer coverage. Exact-source V8 numeric checks passed 15 analytic/invalid/transpose cases plus 200 deterministic matrices (max discrepancy about 2.3e-15). Direct clone/browser execution locally was blocked by DNS; GitHub Actions ran complete structural and Chromium suite.
+
+**CI/CD and release:** [PR #88](https://github.com/saeedsai/ProMathStudio/pull/88) exact head `3e18358831442f2455c5c8ba4a2897cc8f005394` [Quality 40870173410](https://github.com/saeedsai/ProMathStudio/actions/runs/40870173410) **success, 102/102 steps**, no failed jobs. Reviewed seven-file diff, no unresolved review threads, mergeable at expected base `c6d5f4efc7367ccaceb7bb912a883faf83b18989`. Ordinary expected-SHA merge returned **main `1e0367052f38cef3c8629460a4c59d4ff3e2dd38`**. Safely fast-forwarded dev to main without force; enumeration confirmed only `dev` and `main`, no cleanup required. GitHub connector returns PR-only workflow runs and no Pages deployment endpoints; direct hosted Pages and Actions web requests were inaccessible. Exact main Quality, Pages publishing and hosted interactive behavior are **not independently verified**. Branch protection remains not confirmed; no bypass. Recurring hourly task remains enabled.
+
+### NEXT FIVE — concrete features and acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Verify PR #88 production | Confirm exact main SHA Quality and Pages deployment; hosted 2×3 SVD U/S/V, factor transfer and mobile. | ACCESS BLOCKED |
+| 2 | 3×3 SVD extreme-conditioning safeguards | Rotated high/low scales, cutoff boundaries, independent singular-value reference, reconstruction/orthogonality, unstable rejection where needed. | TODO |
+| 3 | Rectangular SVD near-rank1 stability | 3×2 and 2×3 rotated near-dependent references with 60+ digit oracle; rank and residual/orthogonality, responsive UI. | TODO |
+| 4 | Rectangular SVD condition diagnostics | Explicit finite/undefined condition and rank-cutoff presentation for 2×3/3×2; invalid and zero-rank references, editor transfer and mobile. | TODO |
+| 5 | Hosted Data Tables and Graph QA | CSV/TSV/JSON preview cancel/rollback, numerical graph templates, keyboard focus, mobile, no page errors. | HOSTED ACCESS BLOCKED |
+
 ## 2026-10-29 13:01 CET — Wide 2×3 SVD (dev candidate; CI pending)
 
 **Execution log:** Read root `AGENTS.md`, current ledger, frozen 26-Oct-2026 MATLAB gap audit, live GitHub branch/PR state and latest [PR #87 Quality 40862593177](https://github.com/saeedsai/ProMathStudio/actions/runs/40862593177) (101/101 steps successful). Starting main `c6d5f4efc7367ccaceb7bb912a883faf83b18989`, dev two documentation commits ahead; no open PR. Main Quality, Pages and hosted interactive QA remain **unverified** due to GitHub connector PR-only workflow run visibility and disabled DNS from container; do not claim production release. No other branches created or protections bypassed.

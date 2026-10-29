@@ -1,3 +1,9 @@
+## 2026-10-29 — Machine-readable alias review (dev QA)
+
+**New feature:** `python scripts/build_toolbox_registry.py --alias-review-json` emits deterministic JSON for cross-discipline title-overlap reviews. This is planning-only data; no solver aliases or unverified implementations are activated. Markdown and JSON review flags are mutually exclusive with a clear CLI error. Two focused regressions validate CLI JSON parity/determinism and flag rejection. **Status:** dev source/test committed; exact-head Quality and Pages release pending.
+
+**NEXT FIVE:** (1) verify current dev exact-head Quality including registry tests, build check and browser smoke; (2) regenerate stale registry JSON if changed, preserving audit distinctions; (3) shared linear solver reused in two UI flows with reference residual and singular tests; (4) RK45 singularity/overflow diagnostics with disabled export UX; (5) contextual action deduplication with mobile/keyboard checks. Release only via green dev/PR and Pages.
+
 ## 2026-10-29 — Cross-catalog alias review CLI (dev QA)
 
 **New feature:** `python scripts/build_toolbox_registry.py --alias-review` prints a deterministic Markdown queue of identical normalized feature titles occurring in *different* discipline catalogs, with source feature IDs and manual-review-required labels. Same-catalog duplicates are excluded. It never merges solvers or claims numerical equivalence. Focused regression: `test_alias_review_only_cross_catalog_and_is_deterministic`. **Status:** source and regression committed on dev, exact-head CI not yet green, main and Pages not updated.

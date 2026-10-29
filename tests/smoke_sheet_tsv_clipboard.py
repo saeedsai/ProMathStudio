@@ -20,6 +20,8 @@ def main():
         page.locator('#dt-import').set_input_files({
             'name': 'clipboard_tsv.csv', 'mimeType': 'text/csv',
             'buffer': b'a,b,c,d\n1,2,3,4\n5,6,7,8\n9,10,11,12\n13,14,15,16\n'})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function("() => MathStudio.dataTables.active.name === 'clipboard_tsv'")
         menu = page.locator('#workspace-context-menu')
 

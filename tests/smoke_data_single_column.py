@@ -16,6 +16,8 @@ def upload(page, filename, payload):
         'buffer': payload.encode('utf-8') if isinstance(payload, str) else payload,
     })
     stem = filename.rsplit('.', 1)[0]
+    page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+    page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
     page.wait_for_function(
         '(name) => MathStudio.dataTables.tables.some(t => t.name === name)', arg=stem)
     return page.evaluate('MathStudio.dataTables.active')

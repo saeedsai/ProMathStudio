@@ -18,8 +18,12 @@ def main():
   page.evaluate("""() => {MathStudio.dataTables.active.rows[0][2]='=C1';}""")
   assert page.evaluate('MathStudio.dataTables.calculate()[0][2]')=='#CYCLE'
   page.locator('#dt-import').set_input_files({'name':'orders.csv','mimeType':'text/csv','buffer':b'id,sku,amount\n1,A,10\n2,B,25\n3,C,15\n'})
+  page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+  page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
   page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="orders")')
   page.locator('#dt-import').set_input_files({'name':'products.json','mimeType':'application/json','buffer':json.dumps([{'id':1,'name':'alpha','price':2},{'id':2,'name':'beta','price':5}]).encode()})
+  page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+  page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
   page.wait_for_function('()=>MathStudio.dataTables.tables.some(t=>t.name==="products")')
   # The Combine menu contains native selects. Set their values through DOM
   # without relying on Chromium rendering of the OS-native dropdown popup.

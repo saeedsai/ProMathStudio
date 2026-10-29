@@ -1,7 +1,13 @@
-## In QA — Rectangular 3×2 Moore–Penrose pseudoinverse (2026-10-29)
+## Unreleased — Transactional CSV / TSV / JSON import preview (2026-10-29)
+
+- Data Tables now validates a selected file before creating any sheet. A keyboard-focusable preview shows file name, row/column counts, column labels, duplicate/blank header warnings and up to three safely escaped sample rows. **Create table** commits; **Cancel import** or Escape discards the preview without changing the workbook.
+- Existing CSV/TSV/JSON parser limits, one-column support, Unicode, formulas and graph XY validation are preserved. New mandatory Chromium `tests/smoke_data_import_preview.py` and structural `tests/test_data_import_preview.py` added; existing import smoke tests updated for explicit confirmation.
+- **Release status: implemented on `dev`, not deployed.** Exact-head CI, PR CI, main Quality and GitHub Pages verification remain required before release.
+
+## Released — Rectangular 3×2 Moore–Penrose pseudoinverse (2026-10-29, PR #74)
 
 - Matrix calculator now supports real 3×2 A⁺ in addition to the existing 2×2 implementation, including rank-deficient and zero matrices. Scaled two-column Jacobi rotation, relative 1e-12 singular-value cutoff, finite-result guard and four Moore–Penrose identity residual checks. Output is 2×3 and transfers to Equation. 2×3/3×3 remain out of scope.
-- Added mandatory browser `tests/smoke_matrix_pseudoinverse_rectangular.py` and structural `tests/test_matrix_pseudoinverse_rectangular.py` with numerical oracles, least-norm solution, input validation, 2×2 regression and mobile widths. **Pending dev/PR/main/Pages verification; not deployed yet.**
+- Added mandatory browser `tests/smoke_matrix_pseudoinverse_rectangular.py` and structural `tests/test_matrix_pseudoinverse_rectangular.py` with numerical oracles, least-norm solution, input validation, 2×2 regression and mobile widths. **Released through [PR #74](https://github.com/saeedsai/ProMathStudio/pull/74):** dev [Quality 40791715101](https://github.com/saeedsai/ProMathStudio/actions/runs/40791715101) and PR [Quality 40792223068](https://github.com/saeedsai/ProMathStudio/actions/runs/40792223068) passed 87/87 steps; main [Quality 40792656828](https://github.com/saeedsai/ProMathStudio/actions/runs/40792656828) passed and [Pages 40792656403](https://github.com/saeedsai/ProMathStudio/actions/runs/40792656403) succeeded for `f8e254d94a1ae599437d7e0231754dce46dcd8f1`. Hosted interactive verification unavailable.
 - Confirmed previous PR #73 post-merge [main Quality 40784717225](https://github.com/saeedsai/ProMathStudio/actions/runs/40784717225) passed and [Pages 40784715846](https://github.com/saeedsai/ProMathStudio/actions/runs/40784715846) succeeded for main `a226b3be`; hosted interactive verification unavailable.
 
 ## Merged to main — Full saved-snippet source inspection (2026-10-28, PR #73; Pages verification pending)

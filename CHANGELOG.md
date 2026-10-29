@@ -1,3 +1,19 @@
+### PR #89 CI recovery checkpoint (2026-10-29)
+
+- Initial [PR Quality 40878422463](https://github.com/saeedsai/ProMathStudio/actions/runs/40878422463) failed the existing browser smoke because the new SVD diagnostic output concatenation omitted a closing JavaScript string quote. Fixed the source and standalone bundle, and strengthened the new structural test to run `node --check` on the matrix module so this syntax regression is caught before Chromium. No assertions or security gates were disabled. Exact repaired-head CI is pending.
+
+## Dev candidate — Scale-safe 3×3 SVD condition diagnostics (2026-10-29)
+
+- Extended the 3×3 SVD result with the relative numerical rank cutoff expressed in original input units and an explicit rank-deficient / well-conditioned / moderately conditioned / ill-conditioned assessment. Condition number now uses scaled singular values before multiplying by matrix magnitude to avoid avoidable overflow or underflow in the estimate. Zero-matrix diagnostics remain finite and explicit.
+- Matrix Calculator displays the 3×3 SVD rank cutoff and condition assessment alongside U, S, V and reconstruction/orthogonality residuals; other SVD sizes preserve their existing presentation.
+- Added `tests/test_matrix_svd_3x3_condition.py` and mandatory Chromium `tests/smoke_matrix_svd_3x3_condition.py` with 75-digit independent rational-rotation references at scales 1e-12/1/1e12, cutoff boundary cases, invalid input, factor transfer, mobile and no page errors. Module/standalone parity preserved. Pending exact-head PR Quality and production verification; no deployment claim.
+
+## PR #88 merged — Thin wide 2×3 SVD (2026-10-29)
+
+- Added real wide 2×3 thin SVD by transposing the tested 3×2 SVD and swapping U/V factors and orthogonality diagnostics. Matrix Calculator supports rank 0–2, U(2×2), S(2), V(3×2), reconstruction, conditioning and Equation Editor transfer.
+- New structural test and mandatory Chromium regression cover independent analytic references, transpose-factor parity, zero/rank1/rank2/extreme scales, invalid input, UI factor transfer and mobile. Exact-source numeric spot checks passed 15 cases plus 200 deterministic matrix references (maximum discrepancy ~2.3e-15).
+- [PR #88](https://github.com/saeedsai/ProMathStudio/pull/88) passed [Quality 40870173410](https://github.com/saeedsai/ProMathStudio/actions/runs/40870173410) at head `3e18358831442f2455c5c8ba4a2897cc8f005394` (102/102 steps); merged via expected-head ordinary PR at main `1e0367052f38cef3c8629460a4c59d4ff3e2dd38`. Dev fast-forwarded without force. **Main push Quality, Pages publish and hosted interactive behavior remain unverified** because PR-only connector workflow visibility and blocked direct Pages/web access. Not marked production verified.
+
 ## Dev candidate — Thin wide 2×3 SVD (2026-10-29)
 
 - Added bounded real wide 2×3 thin SVD by transposing the validated 3×2 SVD, exchanging U/V factor shapes and orthogonality diagnostics. Supports ranks 0–2, singular values, conditioning, reconstruction, Matrix Calculator output and Equation Editor factor transfer. Existing square and 3×2 SVD preserved.

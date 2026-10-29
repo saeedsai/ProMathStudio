@@ -16,7 +16,9 @@ class RK45EndpointSource(unittest.TestCase):
         self.assertIn("const quantum=timeResolution(t,direction)", adaptive)
         self.assertIn("h=nextT-t", adaptive)
         self.assertIn("t=nextT", adaptive)
-        self.assertIn("if(Math.abs(h)<=quantum)throw Error", adaptive)
+        self.assertIn("if(Math.abs(h)<=quantum)throw progressError", adaptive)
+        self.assertIn("const progressError=reason=>Error", adaptive)
+        self.assertIn("Adaptive step size underflow at current time resolution", adaptive)
         self.assertNotIn("Math.abs(t1-t)<=Math.max(", adaptive)
 
     def test_node_syntax(self):

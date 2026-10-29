@@ -1,3 +1,9 @@
+## Dev candidate — Scale-safe 3×3 SVD condition diagnostics (2026-10-29)
+
+- Extended the 3×3 SVD result with the relative numerical rank cutoff expressed in original input units and an explicit rank-deficient / well-conditioned / moderately conditioned / ill-conditioned assessment. Condition number now uses scaled singular values before multiplying by matrix magnitude to avoid avoidable overflow or underflow in the estimate. Zero-matrix diagnostics remain finite and explicit.
+- Matrix Calculator displays the 3×3 SVD rank cutoff and condition assessment alongside U, S, V and reconstruction/orthogonality residuals; other SVD sizes preserve their existing presentation.
+- Added `tests/test_matrix_svd_3x3_condition.py` and mandatory Chromium `tests/smoke_matrix_svd_3x3_condition.py` with 75-digit independent rational-rotation references at scales 1e-12/1/1e12, cutoff boundary cases, invalid input, factor transfer, mobile and no page errors. Module/standalone parity preserved. Pending exact-head PR Quality and production verification; no deployment claim.
+
 ## PR #88 merged — Thin wide 2×3 SVD (2026-10-29)
 
 - Added real wide 2×3 thin SVD by transposing the tested 3×2 SVD and swapping U/V factors and orthogonality diagnostics. Matrix Calculator supports rank 0–2, U(2×2), S(2), V(3×2), reconstruction, conditioning and Equation Editor transfer.

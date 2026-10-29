@@ -1,3 +1,9 @@
+## Unreleased — Transactional CSV / TSV / JSON import preview (2026-10-29)
+
+- Data Tables now validates a selected file before creating any sheet. A keyboard-focusable preview shows file name, row/column counts, column labels, duplicate/blank header warnings and up to three safely escaped sample rows. **Create table** commits; **Cancel import** or Escape discards the preview without changing the workbook.
+- Existing CSV/TSV/JSON parser limits, one-column support, Unicode, formulas and graph XY validation are preserved. New mandatory Chromium `tests/smoke_data_import_preview.py` and structural `tests/test_data_import_preview.py` added; existing import smoke tests updated for explicit confirmation.
+- **Release status: implemented on `dev`, not deployed.** Exact-head CI, PR CI, main Quality and GitHub Pages verification remain required before release.
+
 ## Released — Rectangular 3×2 Moore–Penrose pseudoinverse (2026-10-29, PR #74)
 
 - Matrix calculator now supports real 3×2 A⁺ in addition to the existing 2×2 implementation, including rank-deficient and zero matrices. Scaled two-column Jacobi rotation, relative 1e-12 singular-value cutoff, finite-result guard and four Moore–Penrose identity residual checks. Output is 2×3 and transfers to Equation. 2×3/3×3 remain out of scope.

@@ -44,7 +44,7 @@ class ToolboxRegistryTests(unittest.TestCase):
             folder = Path(temp)
             (folder / "catalog.md").write_text(
                 "| Feature | Description |\n|---|---|\n"
-                "| Filter | Accept A \| B without splitting the cell |\n",
+                "| Filter | Accept A \\| B without splitting the cell |\n",
                 encoding="utf-8",
             )
             with patch.object(registry, "DOCS", folder):

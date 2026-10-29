@@ -1,3 +1,17 @@
+## 2026-10-29 11:04 CET — PR #86 verified green and merged; Pages still unverified
+
+**Feature ledger: MERGED / PRODUCTION NOT VERIFIED.** Initial [PR Quality 40854024353](https://github.com/saeedsai/ProMathStudio/actions/runs/40854024353) failed a stale structural assertion for the intentionally removed duplicate Jacobi loop; repaired structural checks to validate the shared `svd3x3` convergence/reconstruction/orthogonality and the caller's rank cutoff and four Moore–Penrose identity checks. Final exact PR head `8f5652a860b02023d0a18c82796d4dd25cfef1ae` [Quality 40854136591](https://github.com/saeedsai/ProMathStudio/actions/runs/40854136591) completed **success, 100/100 steps** including new rotated 65-digit Decimal oracle browser regression and all previous tests. Reviewed seven changed files and zero unresolved review threads. [PR #86](https://github.com/saeedsai/ProMathStudio/pull/86) ordinary expected-SHA merge returned **main `2846feb0ccc97dfc7cc7892c8e90d53f707d0aa3`**. Fast-forwarded dev to main without force. No other branches changed. Exact main push Quality and GitHub Pages publishing/hosted behavior remain **unverified** because connector lists PR-triggered runs only and web/Pages fetch is disabled. The merged implementation is not marked production deployed. Keep hourly task enabled; continue next feature even with Pages verification blocked.
+
+### NEXT FIVE — explicit acceptance tests
+
+| Priority | Feature | Acceptance criteria | Status |
+|---:|---|---|---|
+| 1 | Verify PR #86 production | Main SHA Quality, Pages publish and hosted rotated 3×3 pseudoinverse desktop/mobile all verified. | ACCESS BLOCKED |
+| 2 | Rectangular 3×2 SVD | U/S/V rank 0–2, reconstruction/orthogonality independent reference, UI transfer and responsive Chromium. | TODO |
+| 3 | Wide 2×3 SVD | Transposed 3×2 factor parity, rank 0–2, reconstruction/orthogonality and browser regression. | TODO |
+| 4 | 3×3 SVD extreme-conditioning safety | Rotated scale extremes, stable rejection of unsupported conditioning, rank cutoff and residual reference tests. | TODO |
+| 5 | Hosted Data Tables/Graph QA | CSV/TSV/JSON preview rollback, numerical graph roots/fractions, keyboard/mobile, zero console errors. | ACCESS BLOCKED |
+
 ## 2026-10-29 11:00 CET — PR #86 first Quality failure diagnosed and fixed
 
 **QA execution log:** [PR #86](https://github.com/saeedsai/ProMathStudio/pull/86) initial exact-head `d392e1f8785901f1bd467f7a2ef82577ecb17624` [Quality run 40854024353](https://github.com/saeedsai/ProMathStudio/actions/runs/40854024353) failed the structural `tests/test_matrix_pseudoinverse_3x3.py` assertion requiring the old *duplicate* `sweep<64` rotation loop inside `pseudoinverse3x3`. The implementation intentionally delegates to validated `svd3x3`. Corrected the structural test to assert Jacobi convergence/reconstruction/orthogonality within `svd3x3` and require the shared-SVD call, rank cutoff and all four pseudoinverse identity checks in the caller. No mathematical assertions were removed. Repair commit `1996ad4f54edcaa9f12263acf1731244dfbe093c`; new exact-head full CI and Chromium remain pending. PR must not merge until green. Main unchanged `6c20f36a263d7e673f99a021cd5b05a3f5a26644`; Pages unverified. NEXT FIVE remain as immediately below.

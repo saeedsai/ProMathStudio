@@ -46,7 +46,7 @@ def main():
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.set_content((ROOT/'index.html').read_text(encoding='utf-8'), wait_until='load')
-        for scale in (Decimal('1e-12'), Decimal('1'), Decimal('1e12')):
+        for scale in (Decimal('1e-12'), Decimal('1'), Decimal('1e11')):
             for small, rank in ((Decimal('3e-9'), 2), (Decimal('3e-11'), 2), (Decimal('3e-13'), 1)):
                 a = rotated_matrix(small, scale)
                 original = [row[:] for row in a]

@@ -1,3 +1,17 @@
+## 2026-10-29 10:36 CET — 3×3 SVD PR #85 first CI diagnosed and test navigation repaired
+
+**QA execution log:** Exact PR #85 head `3fa40bd3f9a1dcf0bdf9976e0db93d2472e40303` [Quality 40850284532](https://github.com/saeedsai/ProMathStudio/actions/runs/40850284532) completed **failure**, with only new `tests/smoke_matrix_svd_3x3.py` failing at line 71 (`#mat-svd` not visible after Equation transfer). Reviewed complete GitHub job log; 2×2 SVD and preceding regression steps passed. Root cause was the new test remaining in Equation workspace after the successful SVD factor transfer; restored Calculator/Matrix workspace before responsive visibility checks. Regression test correction committed on dev, no assertions removed. Exact new head must pass complete Quality before PR merge. Main still `183421a23e943a0920bebabc76f39569c91ace92`; Pages/main push checks still not independently accessible. Keep hourly schedule active.
+
+### NEXT FIVE — acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | PR #85 SVD and tiny-nonzero QA recovery | New exact-head CI 98+ steps all green including rank 0–3, Equation return, mobile, 2×2 regression; inspect PR and merge only when green. | FIX COMMITTED / CI PENDING |
+| 2 | Production verification | Main SHA Quality, Pages build/publish and hosted matrix/SVD UI confirmed. | ACCESS BLOCKED |
+| 3 | Rotated near-dependent 3×3 pseudoinverse | High-precision independent reference, all Moore–Penrose identities and instability guard. | TODO |
+| 4 | Rectangular 3×2 and 2×3 SVD | U/S/V, rank 0–2, reconstruction, orthogonality, factor transfer and mobile. | TODO |
+| 5 | Hosted Data Tables and Graph QA | CSV/TSV/JSON rollback, 2D/3D numerical templates, keyboard and responsive QA. | ACCESS BLOCKED |
+
 ## 2026-10-29 10:28 CET — 3×3 Jacobi SVD added while PR #85 Quality was running
 
 **Execution log:** Re-read root AGENTS.md, living plan, frozen 26-Oct feature inventory, current PR #85 and exact-head CI. PR #85 at `0677115f199dd6affa858edada30db6041afb2bc` had [Quality 40849820919](https://github.com/saeedsai/ProMathStudio/actions/runs/40849820919) **in progress** at inspection; no green release claim. Prior PR #84 was merged on main `183421a23e943a0920bebabc76f39569c91ace92`; its main Quality and Pages remain unverified. Because CI was pending, continued compatible development on dev: implemented 3×3 one-sided Jacobi SVD with U/S/V, rank 0–3 and reconstruction/orthogonality checks, orthogonal completion for null singular directions, UI/editor integration, standalone bundle parity, mandatory new `tests/smoke_matrix_svd_3x3.py` regression and CI step. Both source changes (tiny nonzero formatting and 3×3 SVD) remain **DEV / QA PENDING**. Do not merge until latest exact-head PR Quality succeeds; re-evaluate PR #85 head and review. No branch protection bypass or extra branches; hourly task remains enabled.

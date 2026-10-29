@@ -1,3 +1,9 @@
+## Dev checkpoint — Preserve tiny nonzero matrix results (2026-10-29)
+
+- Preserve true nonzero matrix values below 1e-13 in result formatting rather than silently displaying them as zero; retain exact numeric zero as `0` and existing 12-significant-digit formatting.
+- Synchronize `src/matrix-tools.js` and standalone `index.html`; add mandatory Chromium `tests/smoke_matrix_small_nonzero.py` covering 1e-14 transpose, result transfer, 390/768/1280 viewports and no page errors. Exact-head CI and PR release pending.
+- [PR #84](https://github.com/saeedsai/ProMathStudio/pull/84) merged after [PR Quality 40846480766](https://github.com/saeedsai/ProMathStudio/actions/runs/40846480766) succeeded (97 steps); merged main `183421a23e943a0920bebabc76f39569c91ace92`; GitHub Pages verification still pending.
+
 ## Dev candidate — Ax=b RHS decimal validation (2026-10-29)
 
 - Align right-hand-side vector input for Matrix Calculator solve(A,b) with the existing strict decimal/scientific matrix-entry grammar; reject JavaScript-only 0x/0b/0o forms and malformed inputs, retaining finite limits.

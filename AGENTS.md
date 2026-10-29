@@ -1,3 +1,7 @@
+## Cryptography toolbox security and reuse rules
+
+Read [Cryptography & Security Toolbox Feature Catalog](docs/CRYPTOGRAPHY_SECURITY_TOOLBOX_FEATURE_LIST.md) when changing cryptographic features. Treat the toolbox as planned until audited and implemented. Prefer vetted cryptographic libraries and platform APIs; never design novel production encryption or copy primitives into discipline-specific modules. Use authenticated encryption, safe randomness, unique nonces, constant-time comparisons where relevant, secret redaction, and explicit key lifecycle handling. Require reference test vectors, invalid/tampered-input tests, interoperability tests and honest limitations before claiming a cryptographic tool secure. Preserve existing Python sandbox and offline behavior; do not silently expose keys to network services.
+
 # AGENTS.md — ProMathStudio Autonomous Hourly Development Contract
 
 This file is the durable operating instruction for the scheduled ProMathStudio developer. **Read it at the start of every run**, together with `docs/HOURLY_DEVELOPMENT_PLAN.md`, the [audited inventory](docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md), CI results, and the latest repository history. This file does not grant permissions or override security, CI, user controls or GitHub branch protection.

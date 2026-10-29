@@ -224,6 +224,8 @@ jobs:
         run: python tests/smoke_python_compose.py
       - name: RK4 initial-value solver numeric and UI regression
         run: python tests/smoke_ode.py
+      - name: Backward scalar RK4 reference and UI regression
+        run: python tests/smoke_ode_backward.py
       - name: Adaptive RK45 numerical and UI regression
         run: python tests/smoke_ode_adaptive.py
       - name: Coupled two-state RK4 reference and UI regression

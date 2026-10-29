@@ -1,3 +1,9 @@
+## 2026-10-29 — Scalar backward RK4 (dev candidate; CI pending)
+
+Added signed-step scalar RK4 for t1 < t0 with preserved forward behavior, reference/negative/UI/export tests and standalone bundle parity. Not released. See [execution ledger](DEVELOPMENT_EXECUTION_LEDGER.md).
+
+**NEXT FIVE with acceptance:** (1) Backward adaptive RK45: reference exponential and tolerance/rejection/UI tests. (2) Backward coupled RK4: reverse harmonic oscillator and table/graph tests. (3) Canonical tool registry: unique IDs, deduplicated toolbox aliases and audited feature links. (4) Source/build baseline: byte sizes, offline boot, duplicate scan and reproducible parity test. (5) Shared linear solver extraction: two consumers, reference residual and regression tests. Keep P0 corrections and green exact-head CI ahead of new scope.
+
 ## 2026-10-29 — Unified master implementation plan
 
 See [Unified Master Implementation Plan](UNIFIED_MASTER_IMPLEMENTATION_PLAN.md) for the audited feature-count ledger, 16 toolbox selections including Control Theory, reusable numerical/graph/data/signal/estimation engines, mathematical gap priorities, UI design, phase estimates and verification gates. **NEXT FIVE:** deduplicated feature ledger; source/build/CI baseline; canonical tool registry; reusable contextual action bar; shared solver extraction and cross-workspace tests. Planning only; no new feature implementation or deployment is claimed.

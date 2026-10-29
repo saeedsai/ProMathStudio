@@ -1,8 +1,15 @@
-## Unreleased — Transactional CSV / TSV / JSON import preview (2026-10-29)
+## Unreleased — Spreadsheet aggregate and custom-function numeric hardening (2026-10-29)
+
+- Data Tables preserves built-in `SUM`, `COUNT`, `MEDIAN`, `AVERAGE`, `AVG`, `MIN`, `MAX` and `IF` semantics even when imported/saved custom-function names collide. Nonreserved custom functions continue to compose with aggregates.
+- Overflowing sums now report `#NUM!` instead of silently returning zero. Finite averages are accumulated with scaled terms to avoid unnecessary intermediate overflow. Invalid custom-function numerical evaluation produces a spreadsheet `#VALUE` error instead of a generic `#ERR` display; existing explicit `#...` errors are retained.
+- Corrected the custom numeric evaluation bridge to bind already-parsed numbers directly, avoiding incorrect reinterpretation of scientific notation (for example `1e308`) as mathematical variables. Added large/small exponent reference tests to the structural and Chromium regression suites.
+- Added structural `tests/test_sheet_numeric_hardening.py` and mandatory Chromium `tests/smoke_sheet_numeric_hardening.py` with numerical, collision, lazy-IF, workbook round-trip and responsive checks. **Status: implemented on `dev`; CI/PR/main/Pages verification pending.**
+
+## Merged — Transactional CSV / TSV / JSON import preview (2026-10-29, PR #75; Pages verification pending)
 
 - Data Tables now validates a selected file before creating any sheet. A keyboard-focusable preview shows file name, row/column counts, column labels, duplicate/blank header warnings and up to three safely escaped sample rows. **Create table** commits; **Cancel import** or Escape discards the preview without changing the workbook.
 - Existing CSV/TSV/JSON parser limits, one-column support, Unicode, formulas and graph XY validation are preserved. New mandatory Chromium `tests/smoke_data_import_preview.py` and structural `tests/test_data_import_preview.py` added; existing import smoke tests updated for explicit confirmation.
-- **Release status: implemented on `dev`, not deployed.** Exact-head CI, PR CI, main Quality and GitHub Pages verification remain required before release.
+- **Release status: merged to `main` after 88/88 PR Quality steps; post-merge main Quality and GitHub Pages verification pending.** Do not mark deployed until those checks are observed.
 
 ## Released — Rectangular 3×2 Moore–Penrose pseudoinverse (2026-10-29, PR #74)
 

@@ -597,12 +597,15 @@
     while(true){
       let changed=false;
       expr=String(expr).replace(customPattern,(all,name,body)=>{
-        const fn=window.MathStudio.customFunctions?.find(name);
+        // Built-in spreadsheet functions cannot be shadowed by restored custom names.
+        const fn=/^(?:IF|SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)$/i.test(name)?null:window.MathStudio.customFunctions?.find(name);
         if(!fn)return all;
         const args=splitArgs(body);
         if(args.length!==fn.params.length||args.some(arg=>!arg.trim()))throw Error('#ARGS');
         const values=args.map(part=>compute(part,t,stack));
-        const result=window.MathStudio.customFunctions.evaluate(name,values);
+        let result;
+        try{result=window.MathStudio.customFunctions.evaluate(name,values);}
+        catch(error){throw Error(error?.message?.startsWith('#')?error.message:'#VALUE');}
         if(!Number.isFinite(result))throw Error('#VALUE');
         changed=true;
         return String(result);
@@ -631,12 +634,24 @@
         if(!nums.length)throw Error('#NUM!');
         const ordered=nums.slice().sort((a,b)=>a-b),mid=Math.floor(ordered.length/2);
         x=ordered.length%2?ordered[mid]:ordered[mid-1]/2+ordered[mid]/2;
+      }else if(upper==='AVERAGE'||upper==='AVG'){
+        // Scale finite terms before accumulation so a finite mean cannot
+        // overflow merely because its unscaled intermediate sum would.
+        x=nums.length?nums.reduce((a,b)=>a+b/nums.length,0):0;
+      }else if(upper==='SUM'){
+        x=nums.reduce((a,b)=>a+b,0);
+      }else if(upper==='COUNT'){
+        x=nums.length;
+      }else if(upper==='MIN'){
+        x=nums.length?Math.min(...nums):0;
       }else{
-        x=upper==='SUM'?nums.reduce((a,b)=>a+b,0):upper==='COUNT'?nums.length:upper==='AVERAGE'||upper==='AVG'?(nums.reduce((a,b)=>a+b,0)/(nums.length||1)):upper==='MIN'?Math.min(...nums):Math.max(...nums);
+        x=nums.length?Math.max(...nums):0;
       }
+      // An overflowing aggregate is an error, never a plausible zero.
+      if(!Number.isFinite(x))throw Error('#NUM!');
       // Emit a scalar token, not '(scalar)': parenthesized intermediate values
       // would prevent the next innermost-first pass from matching outer calls.
-      return String(Number.isFinite(x)?x:0);
+      return String(x);
         });
       }
       if(!changed)break;

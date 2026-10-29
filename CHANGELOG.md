@@ -1,3 +1,9 @@
+## PR #87 merged — Thin 3×2 SVD (2026-10-29)
+
+- New thin real 3×2 SVD with pivoted scaled QR, twice-reorthogonalized Q and shared 2×2 factorization; reports U(3×2), S(2), V(2×2), numerical rank 0–2, conditioning, reconstruction and orthogonality. Matrix Calculator and Equation Editor factor transfer support 3×2; existing square SVD paths retained.
+- Mandatory Chromium regression checks independent analytic singular-value references including rank-deficient and extreme-scale cases, invalid inputs, UI transfer and mobile layouts. The regression uses a relative rank cutoff only for zero singular-value roundoff, and strict relative checks for nonzero singular values.
+- [PR #87](https://github.com/saeedsai/ProMathStudio/pull/87) passed exact-head [Quality 40862593177](https://github.com/saeedsai/ProMathStudio/actions/runs/40862593177) (101/101 steps) at `889c54ce1b21b5e22b311afc614f10784182910b` and merged ordinarily to main `c6d5f4efc7367ccaceb7bb912a883faf83b18989`. Main push Quality, Pages publish and hosted behavior remain **unverified**; do not mark deployed.
+
 ## Dev candidate — Thin 3×2 SVD diagnostics (2026-10-29)
 
 - Added thin real 3×2 SVD with scaled pivoted QR, twice-reorthogonalized columns, and existing 2×2 SVD factorization. Exposes U (3×2), two singular values, V (2×2), rank 0–2, condition number, reconstruction and orthogonality diagnostics; retains existing 2×2 and 3×3 paths.

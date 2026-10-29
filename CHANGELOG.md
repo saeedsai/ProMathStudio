@@ -1,3 +1,8 @@
+## PR #90 merged — Rectangular SVD conditioning and cutoff (2026-10-29)
+
+- [PR #90](https://github.com/saeedsai/ProMathStudio/pull/90) merged normally at main `2c286be5cefa164ffae6c27dad48db2eba74c465` after exact-head [PR Quality 40888207291](https://github.com/saeedsai/ProMathStudio/actions/runs/40888207291) passed **104/104 steps** at `5b4f623a5ebc6a8048d4a9dcbc5459e840f6974f`. Dev fast-forwarded without force. Main Quality, Pages publishing and hosted behavior remain unverified.
+- Added 3×2/2×3 SVD absolute rank cutoff and condition assessment, scale-safe normalized condition ratio, and corrected UI size label. New structural/Chromium tests cover 80-digit near-rank-one references, transpose parity, invalid inputs, factor transfer and mobile. Direct V8 QA passed 500 deterministic matrices in addition to nine near-rank-one cases.
+
 ## Dev candidate — Rectangular SVD numerical-rank cutoff and conditioning (2026-10-29)
 
 - Added scale-safe absolute numerical-rank cutoff and explicit condition assessment (rank deficient / well / moderately / ill-conditioned) to thin 3×2 SVD and transposed wide 2×3 SVD. Condition-number ratio is computed from normalized QR singular values to avoid avoidable scale-dependent rounding; zero matrices report rank-deficient diagnostics.

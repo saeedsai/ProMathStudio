@@ -9,7 +9,7 @@ HTML=(ROOT/'index.html').read_text(encoding='utf-8')
 class RectangularPseudoinverseStructure(unittest.TestCase):
     def test_numeric_guards_and_dispatch(self):
         body=SRC[SRC.index('function pseudoinverse3x2(A){'):SRC.index('function pseudoinverse(A){')]
-        for token in ('1e-12*s0','tripleA','triplePlus','symmetryResidual','Number.isFinite','rank=1+Number'):
+        for token in ('1e-12*sMax','sMin>cutoff?2:1','tripleA','triplePlus','symmetryResidual','Number.isFinite','const correction='):
             self.assertIn(token,body)
         self.assertNotIn('eval(',body)
         self.assertIn("operation==='pseudoinverse'?pseudoinverse(A)",SRC)

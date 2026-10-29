@@ -1,3 +1,5 @@
+**Control Theory Toolbox:** [181-feature comprehensive control catalog](CONTROL_THEORY_TOOLBOX_FEATURE_LIST.md). The control toolbox is a shared cross-discipline category and must use canonical registry IDs and reusable solvers.
+
 # ProMathStudio — Reusable Architecture and Engineering Workspace Specification
 
 **Status:** Approved future refactor and UI work; **not implemented by this documentation commit**. Preserve all existing user-facing features, offline operation and the standalone `index.html` distribution. Adopt incrementally with behavior-preserving automated tests; no large untested rewrite.

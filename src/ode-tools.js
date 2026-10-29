@@ -44,20 +44,20 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  expression=String(expression).trim();
  if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
  t0=finite(t0,'Initial time');t1=finite(t1,'End time');y0=finite(y0,'Initial y');
- if(!(t1>t0))throw Error('End time must be greater than initial time (forward integration only).');
+ if(t1===t0)throw Error('End time must differ from initial time.');
  tolerance=finite(tolerance,'Tolerance');
  if(tolerance<1e-12||tolerance>1e-2)throw Error('Tolerance must be between 1e-12 and 1e-2.');
  maxSteps=finite(maxSteps,'Maximum attempts');
  if(!Number.isInteger(maxSteps)||maxSteps<4||maxSteps>10000)throw Error('Maximum attempts must be an integer from 4 to 10000.');
- const span=t1-t0;
- if(!Number.isFinite(span)||span<=0)throw Error('Invalid integration interval.');
+ const span=t1-t0, direction=Math.sign(span);
+ if(!Number.isFinite(span)||!direction)throw Error('Invalid integration interval.');
  const f=(t,y)=>bounded(M.numerical.evaluate(expression,{t:bounded(t,'Time'),y:bounded(y,'State')}),'Derivative');
  let t=t0,y=y0,h=span/20,attempts=0,rejected=0,accepted=0;
  const rows=[[t,y]];
- while(t<t1){
+ while(direction*(t1-t)>0){
   if(attempts>=maxSteps)throw Error('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit.');
-  h=Math.min(h,t1-t);
-  if(!(h>0)||t+h===t)throw Error('Adaptive step size underflow; shorten the interval or relax tolerance.');
+  h=direction*Math.min(Math.abs(h),Math.abs(t1-t));
+  if(!(direction*h>0)||t+h===t)throw Error('Adaptive step size underflow; shorten the interval or relax tolerance.');
   attempts++;
   const k1=f(t,y);
   const k2=f(t+h/5,y+h*k1/5);
@@ -71,7 +71,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   const error=Math.abs(y5-y4),scale=tolerance*(1+Math.max(Math.abs(y),Math.abs(y5)));
   if(error<=scale){
    t=bounded(t+h,'Time');
-   if(t1-t<=Math.max(Number.EPSILON*Math.abs(t1)*2,span*1e-14))t=t1;
+   if(Math.abs(t1-t)<=Math.max(Number.EPSILON*Math.max(Math.abs(t1),Math.abs(t))*2,Math.abs(span)*1e-14))t=t1;
    y=y5;rows.push([t,y]);accepted++;
   }else rejected++;
   const factor=error===0?5:Math.max(0.2,Math.min(5,0.9*Math.pow(scale/error,0.2)));
@@ -79,7 +79,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  }
  return {type:'ode-rk45',columns:['t','y'],rows,steps:accepted,attempts,rejected,tolerance,
   method:'Adaptive Dormand–Prince Runge–Kutta 5(4) (RK45)',
-  note:'Scalar first-order y\u2032=f(t,y), forward only. Local error controlled; not stiff, vector-valued or globally error-certified.'};
+  note:'Scalar first-order y\u2032=f(t,y), forward or backward. Local error controlled; not stiff, vector-valued or globally error-certified.'};
 }
 
 

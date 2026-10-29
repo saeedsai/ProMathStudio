@@ -1,3 +1,21 @@
+## 2026-10-29 15:xx CET — PR #90 Quality green, ordinary merge; Pages unverified
+
+**Feature ledger: MERGED SOURCE / PRODUCTION NOT VERIFIED.** Rectangular 3×2 and 2×3 SVD now expose a scale-safe absolute numerical rank cutoff and conditioning advisory; 3×2 uses normalized QR singular values for condition ratio, while 2×3 inherits transpose-equivalent diagnostics. The Matrix SVD button now names all four supported sizes. Existing numerical reconstruction/orthogonality gates and Equation Editor factor transfer remain intact. Structural `tests/test_matrix_svd_rectangular_condition.py` and mandatory Chromium `tests/smoke_matrix_svd_rectangular_condition.py` cover 80-digit rotated near-rank-one references, three valid scales, rank0/1/2, condition categories, transpose parity, invalid inputs, UI transfer and responsive layouts. Direct exact-source V8 numerical checks passed nine near-rank-one matrices plus **500 deterministic matrices** (max relative reconstruction residual ~6.77e-16, max orthogonality ~6.66e-16). The new 1e12 high-scale reference initially exceeded the per-entry validation bound and was corrected to 1e11 before PR CI.
+
+**CI/release evidence:** [PR #90](https://github.com/saeedsai/ProMathStudio/pull/90) exact head `5b4f623a5ebc6a8048d4a9dcbc5459e840f6974f` passed [Quality 40888207291](https://github.com/saeedsai/ProMathStudio/actions/runs/40888207291): **104/104 successful workflow steps**, zero failures and no unresolved review threads. Reviewed seven-file diff, mergeable and unchanged expected head/base. Ordinary expected-head PR merge succeeded at **main `2c286be5cefa164ffae6c27dad48db2eba74c465`**. Dev safely fast-forwarded to main without force, before subsequent documentation-only updates. Branch enumeration (including pagination) returned exactly dev/main; no obsolete branch cleanup needed.
+
+**Production blocker:** The connector only enumerates PR-triggered workflow runs; exact main-push Quality and Pages build/publish cannot be retrieved. Main combined commit statuses returned no statuses, and direct GitHub Actions and Pages URLs were inaccessible. Live hosted functionality remains **unverified**, not released by the Definition of Done. Branch protection remains unconfirmed; no security/CI bypass. Hourly task remains enabled.
+
+### NEXT FIVE — acceptance gates and dependencies
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Verify PR #90 production | Exact main SHA Quality and Pages publish success; hosted 3×2/2×3 rank cutoff, condition advisory, Equation transfer, mobile/no runtime errors. | ACCESS BLOCKED |
+| 2 | Rectangular SVD near-cutoff reliability | 80+ digit independent oracle around 1e-12 rank boundary, robust rank warnings or rejection if ambiguous, reconstruction/orthogonality and Chromium tests. | TODO |
+| 3 | Rectangular SVD/pseudoinverse consistency | 3×2 and 2×3 rank0/1/2, four Moore–Penrose identities, rank/condition parity, numerical references, UI. | TODO |
+| 4 | 3×3 SVD near-cutoff reliability | Rotated rank2/3 at multiple scales, orthogonality and reconstruction, condition-risk warnings, browser regression. | TODO |
+| 5 | Hosted Data Tables and Graph QA | CSV/TSV/JSON transactional preview rollback, 2D/3D roots/fractions, keyboard/mobile and zero runtime errors. | ACCESS BLOCKED |
+
 ## 2026-10-29 15:03 CET — Rectangular SVD cutoff/condition diagnostics and near-rank-one regression
 
 **Execution log / discovery:** Read root AGENTS.md, live development plan, frozen 26-Oct audit and latest exact-head [PR #89 Quality 40878671063](https://github.com/saeedsai/ProMathStudio/actions/runs/40878671063), which completed successfully (103/103 steps). Verified `main` at `aab6236604f0716487a56bf2d0d9ec56e4713d90`; `dev` started two documentation commits ahead; no open PR. The GitHub connector only exposes PR-triggered CI runs, not main push Quality/Pages deployment, so production remains **unverified**.

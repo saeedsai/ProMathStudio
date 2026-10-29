@@ -1,3 +1,12 @@
+## Implemented on dev — Real 3×3 pseudoinverse (2026-10-29; QA pending)
+
+- Added scaled one-sided Jacobi SVD for rank 0–3 real 3×3 Moore–Penrose pseudoinverse, four identity residual checks, finite condition diagnostics, explicit instability rejection, Equation transfer and self-contained bundle parity. Added structural and mandatory Chromium numerical/reference/responsive regression; release awaits exact dev/PR/main Quality and Pages.
+
+## Released via PR #80 — 2×2 pseudoinverse condition diagnostics (2026-10-29)
+
+- Real 2×2 pseudoinverse now reports SVD singular values and finite condition numbers for full-rank matrices, null/rank-deficient diagnostics otherwise, retaining Moore–Penrose residual checks and editor transfer.
+- [dev Quality 40823856638](https://github.com/saeedsai/ProMathStudio/actions/runs/40823856638), [PR Quality 40824282111](https://github.com/saeedsai/ProMathStudio/actions/runs/40824282111), [main Quality 40824722141](https://github.com/saeedsai/ProMathStudio/actions/runs/40824722141) and [post-merge dev Quality 40824732449](https://github.com/saeedsai/ProMathStudio/actions/runs/40824732449) all passed 93/93 steps. [Pages 40824721525](https://github.com/saeedsai/ProMathStudio/actions/runs/40824721525) succeeded for `main=4e30e9882270689e119aba67e0eceb0f7404bc23`; independent hosted interaction unavailable.
+
 ## Implemented on dev — 2×2 pseudoinverse condition diagnostics (2026-10-29; QA pending)
 
 - Reuse scaled 2×2 SVD to return descending singular values and finite condition numbers only at numerical full rank, with null/rank-deficient diagnostics for zero and singular matrices, consistent with rectangular pseudoinverse results.

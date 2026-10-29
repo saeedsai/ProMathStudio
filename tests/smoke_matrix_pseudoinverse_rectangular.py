@@ -57,7 +57,7 @@ def main():
         p=page.evaluate('(a)=>MathStudio.matrixTools.pseudoinverse(a).matrix',dependent)
         assert close(mul(p,[[1],[2],[3]]),[[1/5],[2/5]])
         for a,phrase in (
-            ([[1,0,0],[0,1,0],[0,0,1]],'2×2, 3×2 or 2×3'),
+            ([[1,0,0],[0,'',0],[0,0,1]],'Enter a number'),
             ([[1,''],[0,1],[1,1]],'Enter a number'),
             ([[1,True],[0,1],[1,1]],'Enter a number'),
             ([[1e13,0],[0,1],[1,1]],'finite'),

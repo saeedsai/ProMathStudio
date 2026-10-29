@@ -16,8 +16,8 @@ class WidePseudoinverseStructure(unittest.TestCase):
             self.assertIn(fragment,body)
         self.assertNotIn('eval(',body)
         self.assertIn('return pseudoinverse2x3(A)',SRC)
-        self.assertIn('pseudoinverse3x2,pseudoinverse2x3,pseudoinverse',SRC)
-        self.assertIn('Pseudoinverse (2×2 / 3×2 / 2×3 A)',SRC)
+        self.assertIn('pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse',SRC)
+        self.assertIn('Pseudoinverse (2×2 / 3×2 / 2×3 / 3×3 A)',SRC)
 
     def test_standalone_module_parity(self):
         start = HTML.index('/* ProMathStudio small-matrix calculator:')

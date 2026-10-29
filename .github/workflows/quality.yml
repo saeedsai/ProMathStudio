@@ -188,6 +188,8 @@ jobs:
         run: python tests/smoke_matrix_conditioning.py
       - name: Matrix 2x2 pseudoinverse conditioning and responsive UI regression
         run: python tests/smoke_matrix_2x2_condition.py
+      - name: Matrix 3x3 Jacobi pseudoinverse reference and responsive UI regression
+        run: python tests/smoke_matrix_pseudoinverse_3x3.py
       - name: Offline radix-2 FFT numerical, UI, table and graph regression
         run: python tests/smoke_fft.py
       - name: FFT physical-frequency Hz and sample-rate UI regression

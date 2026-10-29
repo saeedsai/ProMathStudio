@@ -55,7 +55,7 @@ def main():
         p=page.evaluate('(a)=>MathStudio.matrixTools.pseudoinverse(a).matrix',a)
         assert close(mul(p,[[1],[2]]),[[0],[1],[1]]) # minimum-norm exact solution
         for a,phrase in (
-            ([[1,0,0],[0,1,0],[0,0,1]],'2×2, 3×2 or 2×3'),
+            ([[1,0,0],[0,'',0],[0,0,1]],'Enter a number'),
             ([[1,'',0],[0,1,0]],'Enter a number'),
             ([[1,True,0],[0,1,0]],'Enter a number'),
             ([[1e13,0,0],[0,1,0]],'finite'),

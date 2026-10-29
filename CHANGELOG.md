@@ -1,3 +1,9 @@
+## Implemented on dev — Graph Symbols numeric root, fraction and factorial (2026-10-29; QA pending)
+
+- The Graph Symbols palette now enables existing numeric AST templates **Nth root** (`root(3,x)`), **Fraction** (`frac(a,b)`) and **Factorial** (`5!`) in both 2D and 3D Graph. Fraction placeholders must be replaced with graph variables or constants; root is real only on supported domains. Equation-only notation remains disabled in Graph and available in Equation.
+- Added `tests/test_graph_palette_expansion.py` for whitelist/numeric grammar/CI coverage and mandatory Chromium `tests/smoke_graph_palette_expansion.py` for numeric reference values (cube root 8=2, 7/2=3.5, 5!=120), zero-division rejection, 2D/3D insertion and plotting, focus, notation gating and 390/768/1280px layouts. Source is in standalone `index.html`; no modular graph source exists. No new evaluator or arbitrary code execution.
+- **Release status: committed to `dev`; exact-head CI, PR, main Quality, Pages and hosted QA remain pending.** Local GitHub clone and direct hosted verification are blocked by DNS/disabled fetch. Do not claim Released until all release gates pass.
+
 ## Merged — Spreadsheet aggregate and custom-function numeric hardening (2026-10-29, PR #76; Pages verification pending)
 
 - Data Tables preserves built-in `SUM`, `COUNT`, `MEDIAN`, `AVERAGE`, `AVG`, `MIN`, `MAX` and `IF` semantics even when imported/saved custom-function names collide. Nonreserved custom functions continue to compose with aggregates.

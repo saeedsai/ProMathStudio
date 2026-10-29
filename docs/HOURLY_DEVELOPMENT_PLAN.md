@@ -1,3 +1,9 @@
+## 2026-10-29 — Backward coupled RK4 implementation candidate
+
+Signed-step coupled two-state RK4 supports decreasing time with retained forward behavior and ordered Data Tables/Graph export. New static, reference, invalid-input, Chromium UI/mobile and source/bundle tests are in CI. **Status:** implemented on dev; exact-head CI, PR and Pages verification pending.
+
+**NEXT FIVE with acceptance tests:** (1) RK45 endpoint/underflow diagnostics: large-epoch, tiny-span and rejected-step tests; (2) canonical toolbox registry: stable IDs, manually reviewed aliases and deterministic tests; (3) reproducible source/bundle baseline: repeated build parity and offline smoke; (4) shared linear solver: two consumers, residual and singular matrix checks; (5) ODE domain/overflow errors: singular references, disabled exports and mobile error UI. Preserve P0 and green exact-head CI gates.
+
 ## 2026-10-29 — Backward scalar adaptive RK45 (dev QA candidate)
 
 **Implementation:** Signed-direction Dormand–Prince RK45 supports decreasing t intervals, retains tolerance-controlled rejection and forward integration, and keeps Data Tables/Graphs output ordered along integration time. **Acceptance:** analytic reverse exponential and nonautonomous reference, tolerance refinement, rejected steps, invalid inputs, UI/table/graph/mobile tests and source/bundle parity. New `tests/test_ode_rk45_backward.py` and `tests/smoke_ode_rk45_backward.py` are wired into Quality. **Status:** implementation prepared; exact-head CI/PR/Pages not yet verified.

@@ -6456,11 +6456,11 @@ function solveSystem({expression='z',expressionZ='-y',t0=0,t1=1,y0=0,z0=1,steps=
   throw Error('Enter both dy/dt and dz/dt expressions (1–1,000 characters each).');
  t0=finite(t0,'Initial time');t1=finite(t1,'End time');
  y0=finite(y0,'Initial y');z0=finite(z0,'Initial z');
- if(!(t1>t0))throw Error('End time must be greater than initial time (forward integration only).');
+ if(t1===t0)throw Error('End time must differ from initial time.');
  steps=finite(steps,'Time steps');
  if(!Number.isInteger(steps)||steps<4||steps>1000)throw Error('Time steps must be an integer from 4 to 1000.');
  const h=(t1-t0)/steps;
- if(!Number.isFinite(h)||h<=0)throw Error('Invalid integration step size.');
+ if(!Number.isFinite(h)||h===0)throw Error('Invalid integration step size.');
  const f=(t,y,z)=>{
   const variables={t:bounded(t,'Time'),y:bounded(y,'State y'),z:bounded(z,'State z')};
   return [
@@ -6482,7 +6482,7 @@ function solveSystem({expression='z',expressionZ='-y',t0=0,t1=1,y0=0,z0=1,steps=
  }
  return {type:'ode-rk4-system',columns:['t','y','z'],rows,steps,h,
   method:'Coupled two-state classical Runge–Kutta (RK4)',
-  note:'Two real first-order equations y\u2032=f(t,y,z), z\u2032=g(t,y,z); fixed-step forward IVP only. Not adaptive, stiff or error-certified.'};
+  note:'Two real first-order equations y\u2032=f(t,y,z), z\u2032=g(t,y,z); fixed-step forward or backward IVP. Not adaptive, stiff or error-certified.'};
 }
 
 const area=document.createElement('details');area.id='ode-details';

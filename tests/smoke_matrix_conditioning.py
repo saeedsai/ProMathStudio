@@ -37,6 +37,14 @@ def main():
         assert 'numerically unstable' in unstable,unstable
         invalid=page.evaluate('(a)=>{try{MathStudio.matrixTools.pseudoinverse(a);return ""}catch(e){return e.message}}',[[1e13,0],[0,1],[0,0]])
         assert 'finite' in invalid,invalid
+        # Existing 2x2 API has no condition number: preserve its rank-one UI.
+        page.locator('[data-workspace="calculator"]').click()
+        page.locator('#workspace-task-select').select_option('matrix')
+        for i,value in enumerate(['1','2','2','4']):
+            page.locator('#mat-grid input').nth(i).fill(value)
+        page.locator('#mat-pseudoinverse').click()
+        prior=page.locator('#mat-result').inner_text()
+        assert 'Numerical rank: 1' in prior and 'Condition number: not available' in prior,prior
         page.locator('[data-workspace="calculator"]').click()
         page.locator('#workspace-task-select').select_option('matrix')
         page.locator('#mat-rows').select_option('3')

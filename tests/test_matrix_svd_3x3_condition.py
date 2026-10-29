@@ -1,5 +1,6 @@
 """3x3 SVD scale-safe conditioning and bundled-source invariants."""
 import unittest
+import subprocess
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -21,6 +22,11 @@ class MatrixSVD3x3ConditionTests(unittest.TestCase):
     def test_ui_displays_rank_cutoff_and_condition_risk(self):
         self.assertIn("'\\nRank cutoff (absolute): '+value.cutoff.toExponential(3)",SOURCE)
         self.assertIn("'\\nCondition assessment: '+value.conditionAssessment",SOURCE)
+    def test_matrix_module_parses_as_javascript(self):
+        # Catch broken UI string concatenation before the expensive Chromium stage.
+        check=subprocess.run(['node','--check',str(ROOT/'src/matrix-tools.js')],capture_output=True,text=True)
+        self.assertEqual(check.returncode,0,check.stderr)
+
     def test_standalone_parity(self):
         start=HTML.index('/* ProMathStudio small-matrix calculator:')
         end=HTML.index('</script>',start)

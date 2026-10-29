@@ -1,3 +1,9 @@
+## 2026-10-29 — Cross-catalog alias review CLI (dev QA)
+
+**New feature:** `python scripts/build_toolbox_registry.py --alias-review` prints a deterministic Markdown queue of identical normalized feature titles occurring in *different* discipline catalogs, with source feature IDs and manual-review-required labels. Same-catalog duplicates are excluded. It never merges solvers or claims numerical equivalence. Focused regression: `test_alias_review_only_cross_catalog_and_is_deterministic`. **Status:** source and regression committed on dev, exact-head CI not yet green, main and Pages not updated.
+
+**NEXT FIVE acceptance:** (1) verify exact-head Quality and inspect failed job logs; (2) repair registry JSON drift if build --check fails; (3) reusable linear solver with two UI consumers and reference residual/singular tests; (4) RK45 singular derivative and overflow diagnostics with disabled-export checks; (5) contextual action bar deduplication preserving mobile keyboard commands. Release only after green exact-head dev and PR checks and verified Pages.
+
 ## 2026-10-29 — Catalog summary metadata exclusion (dev QA)
 
 **Feature:** Planning registry parser now excludes textual total/subtotal/count rows even when their descriptions are prose, preventing inflated planned-tool counts. Regression `test_textual_summary_rows_are_not_features` verifies the exclusion and retention of real FFT entries. **Status:** source and test committed on dev; exact-head CI pending. If the committed generated registry changes, regenerate its JSON with `python scripts/build_toolbox_registry.py` before release. No production claim.

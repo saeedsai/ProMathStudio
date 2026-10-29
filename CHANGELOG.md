@@ -1,3 +1,9 @@
+## Unreleased — Spreadsheet aggregate and custom-function numeric hardening (2026-10-29)
+
+- Data Tables preserves built-in `SUM`, `COUNT`, `MEDIAN`, `AVERAGE`, `AVG`, `MIN`, `MAX` and `IF` semantics even when imported/saved custom-function names collide. Nonreserved custom functions continue to compose with aggregates.
+- Overflowing sums now report `#NUM!` instead of silently returning zero. Finite averages are accumulated with scaled terms to avoid unnecessary intermediate overflow. Invalid custom-function numerical evaluation produces a spreadsheet `#VALUE` error instead of a generic `#ERR` display; existing explicit `#...` errors are retained.
+- Added structural `tests/test_sheet_numeric_hardening.py` and mandatory Chromium `tests/smoke_sheet_numeric_hardening.py` with numerical, collision, lazy-IF, workbook round-trip and responsive checks. **Status: implemented on `dev`; CI/PR/main/Pages verification pending.**
+
 ## Merged — Transactional CSV / TSV / JSON import preview (2026-10-29, PR #75; Pages verification pending)
 
 - Data Tables now validates a selected file before creating any sheet. A keyboard-focusable preview shows file name, row/column counts, column labels, duplicate/blank header warnings and up to three safely escaped sample rows. **Create table** commits; **Cancel import** or Escape discards the preview without changing the workbook.

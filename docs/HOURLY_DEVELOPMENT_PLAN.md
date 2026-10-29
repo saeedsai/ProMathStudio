@@ -1,3 +1,19 @@
+## 2026-10-29 — Control root-locus branch tracking (priority feature)
+
+**Feature ledger: IMPLEMENTED ON DEV / FULL CI AND HOSTED QA PENDING / NOT RELEASED.** Replaced disconnected unordered root-locus pole clouds with 90 gain-sampled trajectories matched between adjacent gain steps using a minimum-total-displacement assignment (at most six poles). Shared axes show per-branch continuous sample paths and sampled pole markers. Added explicit rejection of improper numerator-degree models and invalid sampling ranges, and descriptive warnings that repeated roots and crossings need additional validation. This is *sampled branch tracking*, not a certified analytic root-locus solver or controller-design implementation.
+
+**Source/test commits:** `f7409b7f2a0c854d3c072b974a3271a14b034050` (source), `56c5db30145e881cb005b329923fe5126860ec3f` (reference tests), `8c742a16dbb62595a992a8c267fe6a1b1843766f` (mock initialization correction). Added `tests/test_root_locus_tracking.py` with two-pole reference G(s)=1/(s²+3s+2), complex conjugate branches at K=8, pole-zero cancellation, cubic initial poles, invalid cases, and actual canvas line/marker assertions. Directly executed the actual embedded control JS in an isolated V8 mock: 3 cubic branches × 5 points, successful UI status, 190 line segments and 180 pole markers; **this is not a replacement for GitHub's full Python + Playwright regression suite**. Observed exact test-head Quality [40897479209](https://github.com/saeedsai/ProMathStudio/actions/runs/40897479209) pending at inspection. Full exact-head CI, mobile Chromium, PR review, main Quality and GitHub Pages verification still required. Main at discovery `2c286be5cefa164ffae6c27dad48db2eba74c465`; dev has moved during the run. Preserve the two existing branches; no cleanup deletion justified.
+
+### NEXT FIVE — acceptance tests
+
+| Priority | Work item | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Verify current dev candidate and fix CI regressions | Exact-head full structural + Playwright suite green, including 390px nav and control-root-locus browser modes, no console exceptions | CI PENDING |
+| 2 | Release validated UI, complex graph and control toolbox | Inspect dev→main PR diff, pass PR checks, normal protected merge, verify main Quality and Pages with live calculator/equation/graphs/tables | BLOCKED ON QA |
+| 3 | Root-locus numerical reliability | Repeated-pole/branch-crossing continuity, pole-zero markers, gain range controls, independent high-precision references | PARTIAL |
+| 4 | Controller design | PI/PID and lead-lag reference step and frequency responses, stability margins, negative and mobile tests | TODO |
+| 5 | Feedforward / symbolic transform integration | 2-DOF feedforward and Equation Laplace/inverse handoff, finite domain guards and browser regression | TODO |
+
 ## 2026-10-29 — Required browser test for Control Theory workspace
 
 **Feature ledger — REGRESSION ADDED ON DEV; RELEASE NOT VERIFIED.** Re-read AGENTS.md, frozen inventory and plan, verified dev 27 ahead of main before coding. Implemented `tests/smoke_control_theory.py`: actual Chromium interaction through the Graph workbench for Bode, Nyquist, root-locus, Routh–Hurwitz and unity feedback; checks plotted canvas, characteristic polynomial of 1/(s+1) under gain 1, rejection of zero leading denominator, mobile layouts at 390/768px, page errors, and panel visibility. Registered as a mandatory Quality step in `.github/workflows/quality.yml`. Retains `tests/test_control_numerical_reference.py` for independent numerical reference values. All source changes are regression/CI support, not additional control algorithms. Full exact-head CI and protected release not yet confirmed. The 19 deferred electrical/electronics features remain untouched.

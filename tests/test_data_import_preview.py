@@ -21,6 +21,7 @@ class DataImportPreviewTests(unittest.TestCase):
     def test_escape_and_cancel_discard_pending_data(self):
         self.assertIn("tableImportPreview.addEventListener('keydown'", SOURCE)
         self.assertIn("event.key!=='Escape'", SOURCE)
+        self.assertIn("event.stopPropagation();closeTableImportPreview()", SOURCE)
         self.assertIn("pendingTableImport=null;", SOURCE)
         self.assertIn("sample.replaceChildren(head,body)", SOURCE)
 

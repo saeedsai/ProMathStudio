@@ -5791,6 +5791,57 @@ function pseudoinverse2x2(A){
   throw Error('Pseudoinverse failed its Moore-Penrose residual check.');
  return {matrix,rank,cutoff,residual,symmetryResidual};
 }
+/* Scaled two-column Jacobi pseudoinverse for real 3×2 matrices.
+   The relative 1e-12 cutoff admits rank-one and zero matrices; all four
+   Moore-Penrose identities are checked before exposing an answer. */
+function pseudoinverse3x2(A){
+ A=validate(A);
+ if(A.length!==3||A[0].length!==2)throw Error('Pseudoinverse requires a 3×2 real matrix.');
+ const scale=Math.max(...A.flat().map(Math.abs));
+ if(scale===0)return {matrix:[[0,0,0],[0,0,0]],rank:0,cutoff:0,residual:0,symmetryResidual:0};
+ const c0=A.map(row=>row[0]/scale),c1=A.map(row=>row[1]/scale);
+ const g00=c0.reduce((sum,x)=>sum+x*x,0),g11=c1.reduce((sum,x)=>sum+x*x,0);
+ const g01=c0.reduce((sum,x,i)=>sum+x*c1[i],0);
+ let co=1,si=0;
+ if(g01!==0){
+  const tau=(g11-g00)/(2*g01);
+  const t=(tau<0?-1:1)/(Math.abs(tau)+Math.hypot(1,tau));
+  co=1/Math.hypot(1,t);si=t*co;
+ }
+ let V=[[co,si],[-si,co]];
+ let b0=c0.map((x,i)=>x*co-c1[i]*si),b1=c0.map((x,i)=>x*si+c1[i]*co);
+ let s0=Math.hypot(...b0),s1=Math.hypot(...b1);
+ if(s1>s0){[s0,s1]=[s1,s0];[b0,b1]=[b1,b0];V=V.map(row=>[row[1],row[0]]);}
+ const cutoff=1e-12*s0,rank=1+Number(s1>cutoff);
+ // A⁺ = V Σ⁺ Uᵀ, with U[:,k] = (A/scale)V[:,k]/s[k].
+ // Form each term before rescaling to avoid a large unscaled Gram matrix.
+ const matrix=Array.from({length:2},(_,i)=>Array.from({length:3},(_,j)=>
+  ((V[i][0]*b0[j]/(s0*s0))+(s1>cutoff?V[i][1]*b1[j]/(s1*s1):0))/scale));
+ if(!matrix.flat().every(Number.isFinite))throw Error('Pseudoinverse exceeded finite floating-point range.');
+ const matmul=(X,Y)=>X.map(row=>Y[0].map((_,j)=>row.reduce((sum,x,k)=>sum+x*Y[k][j],0)));
+ const AAplus=matmul(A,matrix),AplusA=matmul(matrix,A);
+ const tripleA=matmul(AAplus,A),triplePlus=matmul(AplusA,matrix);
+ const normA=Math.max(Number.MIN_VALUE,...A.flat().map(Math.abs));
+ const normPlus=Math.max(Number.MIN_VALUE,...matrix.flat().map(Math.abs));
+ let residual=0,symmetryResidual=0;
+ for(let i=0;i<3;i++)for(let j=0;j<2;j++){
+  residual=Math.max(residual,Math.abs(tripleA[i][j]-A[i][j])/normA,
+   Math.abs(triplePlus[j][i]-matrix[j][i])/normPlus);
+ }
+ for(let i=0;i<3;i++)for(let j=0;j<3;j++)
+  symmetryResidual=Math.max(symmetryResidual,Math.abs(AAplus[i][j]-AAplus[j][i]));
+ for(let i=0;i<2;i++)for(let j=0;j<2;j++)
+  symmetryResidual=Math.max(symmetryResidual,Math.abs(AplusA[i][j]-AplusA[j][i]));
+ if(!Number.isFinite(residual)||!Number.isFinite(symmetryResidual)||residual>1e-8||symmetryResidual>1e-8)
+  throw Error('Pseudoinverse failed its Moore-Penrose residual check.');
+ return {matrix,rank,cutoff:cutoff*scale,residual,symmetryResidual};
+}
+function pseudoinverse(A){
+ A=validate(A);
+ if(A.length===2&&A[0].length===2)return pseudoinverse2x2(A);
+ if(A.length===3&&A[0].length===2)return pseudoinverse3x2(A);
+ throw Error('Pseudoinverse requires a 2×2 or 3×2 real matrix.');
+}
 function format(x){
  if(!Number.isFinite(x))throw Error('Result exceeded finite floating-point range.');
  if(Math.abs(x)<1e-13)return '0';
@@ -5799,7 +5850,7 @@ function format(x){
 function notation(result){return typeof result==='number'?format(result):'matrix('+result.map(row=>'['+row.map(format).join(',')+']').join(',')+')';}
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
- '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD and pseudoinverse support real 2×2 A (including singular/zero matrices); pseudoinverse uses a relative 1e-12 singular-value cutoff and verifies Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
+ '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A. Eigenanalysis requires symmetric square A. SVD supports real 2×2 A; pseudoinverse supports real 2×2 and 3×2 A, including singular/zero matrices, with a relative 1e-12 singular-value cutoff and verified Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
  '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
@@ -5821,7 +5872,7 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<button type="button" id="mat-least-squares" class="secondary">Least squares (A·x≈b)</button>'+
  '<button type="button" id="mat-eigen" class="secondary">Eigen (symmetric A)</button>'+ 
  '<button type="button" id="mat-svd" class="secondary">SVD (2×2 A)</button>'+ 
- '<button type="button" id="mat-pseudoinverse" class="secondary">Pseudoinverse (2×2 A)</button>'+
+ '<button type="button" id="mat-pseudoinverse" class="secondary">Pseudoinverse (2×2 / 3×2 A)</button>'+
  '<button type="button" id="mat-rref" class="secondary">RREF (A)</button>'+ 
  '<button type="button" id="mat-rank" class="secondary">Rank (A)</button>'+
  '<label>LU factor for editor <select id="mat-lu-factor"><option value="L">L</option><option value="U">U</option><option value="P">P</option></select></label>'+ 
@@ -5886,7 +5937,7 @@ function calculate(operation){
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?svd2x2(A):operation==='pseudoinverse'?pseudoinverse2x2(A):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?svd2x2(A):operation==='pseudoinverse'?pseudoinverse(A):multiply(A,readSecond());
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares')?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
@@ -5914,7 +5965,7 @@ send.addEventListener('click',()=>{
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
 rebuild();rebuildSecond();rebuildRhs();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,pseudoinverse2x2,notation,read,readSecond,readRhs,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,eigenSymmetric,svd2x2,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse,notation,read,readSecond,readRhs,calculate};
 })();
 </script>
 <script id="promath-ode-tools">

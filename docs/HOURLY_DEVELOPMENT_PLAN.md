@@ -1,3 +1,37 @@
+## 2026-10-29 11:00 CET — PR #86 first Quality failure diagnosed and fixed
+
+**QA execution log:** [PR #86](https://github.com/saeedsai/ProMathStudio/pull/86) initial exact-head `d392e1f8785901f1bd467f7a2ef82577ecb17624` [Quality run 40854024353](https://github.com/saeedsai/ProMathStudio/actions/runs/40854024353) failed the structural `tests/test_matrix_pseudoinverse_3x3.py` assertion requiring the old *duplicate* `sweep<64` rotation loop inside `pseudoinverse3x3`. The implementation intentionally delegates to validated `svd3x3`. Corrected the structural test to assert Jacobi convergence/reconstruction/orthogonality within `svd3x3` and require the shared-SVD call, rank cutoff and all four pseudoinverse identity checks in the caller. No mathematical assertions were removed. Repair commit `1996ad4f54edcaa9f12263acf1731244dfbe093c`; new exact-head full CI and Chromium remain pending. PR must not merge until green. Main unchanged `6c20f36a263d7e673f99a021cd5b05a3f5a26644`; Pages unverified. NEXT FIVE remain as immediately below.
+
+## 2026-10-29 10:58 CET — Rotated 3×3 pseudoinverse SVD consolidation (dev candidate)
+
+**Execution log / feature ledger:** Read root AGENTS.md, frozen 26-Oct inventory, living plan, latest merged PR #85 Quality 40850954000 (99 successful steps at `92600e3c37b6cdacbc8ff8507237d314b90fdbbb`), current branches and open PRs. Main `6c20f36a263d7e673f99a021cd5b05a3f5a26644`, dev was 2 documentation commits ahead, no open PRs. Production main Quality, Pages publishing and hosted behavior remain **unverified** (PR-only workflow connector; no accessible live hosted browser). No unrelated branch cleanup needed.
+
+**Implementation on dev / QA pending:** Consolidated 3×3 pseudoinverse onto the already residual-checked Jacobi `svd3x3` factors, removing its duplicated rotation loop without changing 1e-12 relative cutoff, diagnostics or the four Moore–Penrose identity gates. Synchronized `src/matrix-tools.js` and inline `index.html`; added `tests/smoke_matrix_pseudoinverse_rotated.py` with 65-digit Decimal independent rational-rotation reference matrices (rank-2 near-dependence at 1, 1e-6, 1e6 scales; rank-3 1e6 condition), four identities, invalid inputs, Equation transfer, responsive layouts and page-error assertion. Registered mandatory CI step. This is not yet a released feature; inspect exact-head CI and repair any failures before PR promotion. Recurring task remains enabled; no security or branch bypass.
+
+### NEXT FIVE — explicit acceptance tests
+
+| Priority | Feature | Acceptance criteria | Status |
+|---:|---|---|---|
+| 1 | Rotated 3×3 pseudoinverse QA and release | Independent Decimal oracles, rank/scale, all Moore–Penrose identities, full structural + browser suite and exact-head PR green; merge and verify Pages. | DEV / QA PENDING |
+| 2 | Verify production PR #85 and new release | Main Quality at merge SHA, Pages publish, hosted SVD 3×3 and tiny nonzero values on desktop/mobile. | ACCESS BLOCKED |
+| 3 | Rectangular 3×2 SVD diagnostics | Rank 0–2, U/S/V reconstruction and orthogonality oracle, Equation factor transfer and browser QA. | TODO |
+| 4 | Wide 2×3 SVD diagnostics | Transpose-consistent singular vectors, zero/rank-deficient references, editor transfer and mobile regression. | TODO |
+| 5 | Hosted Data Tables/Graph QA | CSV/TSV/JSON preview rollback, roots/fractions/graph numerical tests, keyboard/mobile and zero console errors. | ACCESS BLOCKED |
+
+## 2026-10-29 10:43 CET — PR #85 green, merged; Pages verification outstanding
+
+**Feature ledger: MERGED / PRODUCTION UNVERIFIED.** Exact PR head `92600e3c37b6cdacbc8ff8507237d314b90fdbbb` passed [PR Quality 40850954000](https://github.com/saeedsai/ProMathStudio/actions/runs/40850954000) with all 99 workflow steps successful (including 3×3 SVD rank 0–3, matrix tiny-nonzero UI and existing regression suite). Seven changed files reviewed; no unresolved PR review threads. [PR #85](https://github.com/saeedsai/ProMathStudio/pull/85) ordinary expected-SHA merge returned **main `6c20f36a263d7e673f99a021cd5b05a3f5a26644`**; dev was fast-forwarded to that merge commit without force. GitHub PR reports merged and branches identical at verification. Main push Quality and Pages publish/hosted behavior are **not verified**: GitHub connector returns PR-triggered workflow runs only, main commit has no visible runs, direct Actions web access is disabled and Pages URL inaccessible from web tool. Never call this production-deployed without proof. Branch search confirmed only `dev` and `main`; no cleanup needed. The scheduled development task stays enabled.
+
+### NEXT FIVE — scoped acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Production verify PR #85 | Exact main SHA Quality, Pages publish, hosted SVD 3×3 and tiny-nonzero result on desktop/mobile. | ACCESS BLOCKED / MERGED |
+| 2 | Rotated near-dependent 3×3 pseudoinverse | High-precision independent oracle, rank/scale and all four Moore–Penrose residual checks, instability rejection. | TODO |
+| 3 | Rectangular 3×2 SVD | U/S/V, rank 0–2, independent reconstruction and orthogonality references, UI factor transfer and mobile. | TODO |
+| 4 | Wide 2×3 SVD | Transposed decomposition reference, zero/rank-deficient cases, transfer and browser QA. | TODO |
+| 5 | Hosted Data Tables and Graph QA | CSV/TSV/JSON transactional preview rollback, numerical graph roots/fractions, keyboard/mobile and no browser errors. | HOSTED ACCESS BLOCKED |
+
 ## 2026-10-29 10:36 CET — 3×3 SVD PR #85 first CI diagnosed and test navigation repaired
 
 **QA execution log:** Exact PR #85 head `3fa40bd3f9a1dcf0bdf9976e0db93d2472e40303` [Quality 40850284532](https://github.com/saeedsai/ProMathStudio/actions/runs/40850284532) completed **failure**, with only new `tests/smoke_matrix_svd_3x3.py` failing at line 71 (`#mat-svd` not visible after Equation transfer). Reviewed complete GitHub job log; 2×2 SVD and preceding regression steps passed. Root cause was the new test remaining in Equation workspace after the successful SVD factor transfer; restored Calculator/Matrix workspace before responsive visibility checks. Regression test correction committed on dev, no assertions removed. Exact new head must pass complete Quality before PR merge. Main still `183421a23e943a0920bebabc76f39569c91ace92`; Pages/main push checks still not independently accessible. Keep hourly schedule active.

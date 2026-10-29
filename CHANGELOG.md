@@ -1,3 +1,12 @@
+## Dev candidate — Rotated 3×3 pseudoinverse stability and shared SVD (2026-10-29)
+
+- Reuse the validated one-sided Jacobi 3×3 SVD (`U`, `S`, `V`) when computing the 3×3 Moore–Penrose pseudoinverse, removing a duplicated singular-vector iteration while preserving the relative 1e-12 rank cutoff, condition advisory and all four Moore–Penrose residual gates.
+- Add mandatory Chromium `tests/smoke_matrix_pseudoinverse_rotated.py` with independent 65-digit Decimal rational-rotation references, scaled rank-2 and rank-3 examples, four Moore–Penrose identities, validation failures, Equation transfer and responsive UI. Source module and standalone HTML remain synchronized. Release awaits exact-head Quality and PR checks; no Pages claim.
+
+## PR #85 merged — 3×3 SVD and tiny nonzero matrix formatting (2026-10-29)
+
+- [PR #85](https://github.com/saeedsai/ProMathStudio/pull/85) merged at `6c20f36a263d7e673f99a021cd5b05a3f5a26644` after exact-head [PR Quality 40850954000](https://github.com/saeedsai/ProMathStudio/actions/runs/40850954000) passed all 99 steps. Fixed new SVD browser test navigation without weakening assertions. 3×3 rank 0–3, reconstruction/orthogonality and mobile/factor transfer covered. GitHub Pages production verification still outstanding.
+
 ## 3×3 SVD QA correction (2026-10-29)
 
 - Initial exact-head [PR #85 Quality 40850284532](https://github.com/saeedsai/ProMathStudio/actions/runs/40850284532) failed only the new 3×3 SVD Chromium regression at its responsive visibility check: the test had transferred to Equation Editor and did not return to Calculator. Corrected the test to restore the Matrix workspace before checking viewport visibility, retaining all assertions. New exact-head CI is pending; no production claim.

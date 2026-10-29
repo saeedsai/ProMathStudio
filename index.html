@@ -6030,36 +6030,15 @@ function pseudoinverse3x3(A){
  if(A.length!==3||A[0].length!==3)throw Error('Pseudoinverse requires a 3×3 real matrix.');
  const scale=Math.max(...A.flat().map(Math.abs));
  if(scale===0)return {matrix:Array.from({length:3},()=>[0,0,0]),rank:0,cutoff:0,conditionNumber:null,conditionAssessment:'rank deficient',singularValues:[0,0,0],residual:0,symmetryResidual:0};
- const B=A.map(row=>row.map(x=>x/scale));
- const V=Array.from({length:3},(_,i)=>Array.from({length:3},(_,j)=>Number(i===j)));
- let converged=false;
- for(let sweep=0;sweep<64;sweep++){
-  let changed=false;
-  for(let p=0;p<2;p++)for(let q=p+1;q<3;q++){
-   let aa=0,bb=0,ab=0;
-   for(let i=0;i<3;i++){aa+=B[i][p]*B[i][p];bb+=B[i][q]*B[i][q];ab+=B[i][p]*B[i][q];}
-   if(aa===0||bb===0||Math.abs(ab)<=1e-14*Math.sqrt(aa)*Math.sqrt(bb))continue;
-   changed=true;
-   const tau=(bb-aa)/(2*ab),t=(tau<0?-1:1)/(Math.abs(tau)+Math.hypot(1,tau));
-   const c=1/Math.hypot(1,t),s=c*t;
-   for(let i=0;i<3;i++){
-    const bp=B[i][p],bq=B[i][q],vp=V[i][p],vq=V[i][q];
-    B[i][p]=c*bp-s*bq;B[i][q]=s*bp+c*bq;
-    V[i][p]=c*vp-s*vq;V[i][q]=s*vp+c*vq;
-   }
-  }
-  if(!changed){converged=true;break;}
- }
- if(!converged)throw Error('3×3 pseudoinverse Jacobi SVD did not converge.');
- const values=Array.from({length:3},(_,j)=>Math.hypot(...B.map(row=>row[j])));
- const order=[0,1,2].sort((i,j)=>values[j]-values[i]||i-j);
- const singularValues=order.map(i=>values[i]*scale),cutoff=1e-12*values[order[0]];
- const rank=order.filter(j=>values[j]>cutoff).length;
- const matrix=Array.from({length:3},()=>[0,0,0]);
- for(const k of order){
-  const s=values[k];if(s<=cutoff)continue;
-  for(let i=0;i<3;i++)for(let j=0;j<3;j++)matrix[i][j]+=(V[i][k]/s)*(B[j][k]/s)/scale;
- }
+ // Reuse the independently residual-checked 3×3 Jacobi SVD instead of
+ // maintaining a second, potentially divergent singular-vector iteration.
+ const {U,S,V,rank,conditionNumber}=svd3x3(A);
+ const cutoff=1e-12*S[0];
+ const matrix=Array.from({length:3},(_,i)=>Array.from({length:3},(_,j)=>{
+  let value=0;
+  for(let k=0;k<3;k++)if(S[k]>cutoff)value+=(V[i][k]/S[k])*U[j][k];
+  return value;
+ }));
  if(!matrix.flat().every(Number.isFinite))throw Error('Pseudoinverse exceeded finite floating-point range.');
  const matmul=(X,Y)=>X.map(row=>Y[0].map((_,j)=>row.reduce((sum,x,k)=>sum+x*Y[k][j],0)));
  const AAplus=matmul(A,matrix),AplusA=matmul(matrix,A);
@@ -6075,12 +6054,12 @@ function pseudoinverse3x3(A){
  }
  if(!Number.isFinite(residual)||!Number.isFinite(symmetryResidual)||residual>1e-8||symmetryResidual>1e-8)
   throw Error('Pseudoinverse is numerically unstable for this ill-conditioned 3×3 matrix; rescale or use higher precision.');
- const ratio=rank===3?values[order[0]]/values[order[2]]:Infinity;
+ const ratio=rank===3?conditionNumber:Infinity;
  // Advisory only: a full-rank but large condition number amplifies rounding.
  // Do not weaken the four Moore-Penrose identity gates to accept unstable inputs.
  const conditionAssessment=rank<3?'rank deficient':ratio>=1e8?'ill-conditioned':ratio>=1e4?'moderately conditioned':'well-conditioned';
- return {matrix,rank,cutoff:cutoff*scale,conditionNumber:Number.isFinite(ratio)?ratio:null,
-  singularValues,conditionAssessment,residual,symmetryResidual};
+ return {matrix,rank,cutoff,conditionNumber:rank===3?conditionNumber:null,
+  singularValues:S.slice(),conditionAssessment,residual,symmetryResidual};
 }
 function pseudoinverse(A){
  A=validate(A);

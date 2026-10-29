@@ -1,6 +1,6 @@
 # Matrix calculator (bounded native functionality)
 
-ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, **LU (P·A=L·U)**, **QR (A=Q·R)**, **Least squares (A·x≈b)**, or **SVD (2×2 A)**. Binary operations use independently sized Matrix B.
+ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, **LU (P·A=L·U)**, **QR (A=Q·R)**, **Least squares (A·x≈b)**, **SVD (2×2 A)**, or **Pseudoinverse (2×2 / 3×2 A)**. Binary operations use independently sized Matrix B.
 
 ## Operations and examples
 
@@ -54,3 +54,7 @@ General-dimension arrays, larger/weighted least-squares and underdetermined syst
 ## Real 2×2 singular-value decomposition (dev candidate)
 
 **SVD (2×2 A)** computes A=U·diag(σ)·Vᵀ for a finite real 2×2 matrix, including rank-deficient and zero matrices. Singular values are nonnegative and descending. The method scales entries before a one-sided Jacobi rotation, uses the determinant to recover a small singular value without cancellation, and returns orthonormal U/V, reconstruction/orthogonality residuals, and a **numerical** rank at a relative 1e-12 cutoff. A null condition number means singular or not representable as a finite number; a tiny but nonzero singular value may still be reported even if the numerical rank is 1. Example A=[[1,2],[3,4]] has singular values approximately 5.464985704219 and 0.365966190626. The SVD factor selector transfers U, singular values as a column, or V to Equation Editor. This is not general-size/complex SVD or a pseudoinverse. Browser regression: `tests/smoke_matrix_svd.py`. Release pending exact-head CI/PR/main/Pages verification.
+
+## Rectangular 3×2 Moore–Penrose pseudoinverse
+
+**Pseudoinverse (2×2 / 3×2 A)** also supports tall real 3×2 matrices, including full-rank, rank-one and all-zero inputs. It returns a 2×3 matrix A⁺, numerical rank, and residual diagnostics for all four Moore–Penrose identities. A scaled two-column Jacobi rotation and relative 1e-12 singular-value cutoff avoid squaring the condition number through unscaled normal equations. For A=`[[1,0],[0,1],[1,1]]`, A⁺=`[[2/3,-1/3,1/3],[-1/3,2/3,1/3]]`; multiplying A⁺ by b=`[1,2,4]` yields the least-squares x=`[4/3,7/3]`. Rank-deficient A=`[[1,2],[2,4],[3,6]]` yields A⁺=`[[1,2,3],[2,4,6]]/70`, giving the minimum-norm solution. Near-singular inputs that fail the numerical identity checks are rejected rather than silently accepted. Wide 2×3 and 3×3 pseudoinverses remain out of scope. Test: `tests/smoke_matrix_pseudoinverse_rectangular.py`.

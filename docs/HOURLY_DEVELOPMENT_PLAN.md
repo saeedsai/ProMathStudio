@@ -1,3 +1,7 @@
+## 2026-10-29 — Implementation checkpoint: machine-readable audit ledger
+
+**COMMITTED ON dev:** [Historical audit ledger](feature-ledger-audit-20261026.json) imports all 158 existing features (63 bounded-complete, 95 partial) and all 166 gap items (P0 22, P1 64, P2 53, P3 27) with stable audit IDs, descriptions, sections and provenance. [Ledger validation script](../scripts/validate_feature_ledger.py) checks count distribution, uniqueness, status/priority and required metadata. **Not yet completed:** deduplication against engineering catalogs, source-code re-audit, full CI execution, production release. Next: run validator in CI, link catalog aliases, baseline existing source/modules, then implement canonical registry. This checkpoint does not claim app UI or solver changes.
+
 ## 2026-10-29 — Scalar backward RK4 (dev candidate; CI pending)
 
 Added signed-step scalar RK4 for t1 < t0 with preserved forward behavior, reference/negative/UI/export tests and standalone bundle parity. Not released. See [execution ledger](DEVELOPMENT_EXECUTION_LEDGER.md).

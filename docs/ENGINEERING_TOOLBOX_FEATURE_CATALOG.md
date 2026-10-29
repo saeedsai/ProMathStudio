@@ -1,3 +1,5 @@
+**Signal Engineering & Processing (eighth planned discipline):** [177-feature signal catalog](SIGNAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md) covering signal types, synthesis, acquisition, reading/decoding, coding, filtering, transforms, statistics, detection and visualization. Share algorithms with Control, GNSS, Electronics and other disciplines.
+
 **GNSS & Positioning (seventh planned discipline):** [144-feature GPS, observation and position-estimation catalog](GNSS_POSITIONING_OBSERVATION_TOOLBOX_FEATURE_LIST.md). Covers GNSS measurements, geodesy, precise positioning, sensor fusion, integrity and simulation; shares underlying mathematics with the six existing engineering disciplines.
 
 **Control Theory:** [181-feature comprehensive catalog](CONTROL_THEORY_TOOLBOX_FEATURE_LIST.md) covering classical, modern, digital, robust, nonlinear, predictive, identification and simulation capabilities. It is cross-disciplinary and not counted as 181 additional unique tools.

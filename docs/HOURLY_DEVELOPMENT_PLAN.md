@@ -1,3 +1,17 @@
+## 2026-10-29 09:05 CET — PR #83 matrix validation QA diagnosis and recovery
+
+**Status: OPEN PR / CI RECHECK PENDING; NOT DEPLOYED.** Added `tests/smoke_matrix_decimal_input.py` and registered it as a mandatory Chromium Quality step, covering hexadecimal/binary/octal and malformed rejection, signed/scientific acceptance, matrix UI error recovery and 390/768/1280 responsive layouts. Source change and tests are on `dev`, PR [#83](https://github.com/saeedsai/ProMathStudio/pull/83). First PR [Quality 40839293729](https://github.com/saeedsai/ProMathStudio/actions/runs/40839293729) failed at structural step (seven existing standalone parity assertions): inline matrix bundle was missing the required trailing newline. Restored `src/matrix-tools.js` + newline in `index.html`, and aligned the new parity test with that established invariant. Final repair checkpoint `e8cf76a265946ce37da273aa1ed34b27bf172dec`. Recheck exact-head Quality and PR CI before any merge. GitHub clone DNS unavailable; no local browser execution. Main remains `505e44eb64a71a66d5c53e17d8c9184ec08b0b02` pending safe release.
+
+### NEXT FIVE — acceptance gates
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Release matrix validation PR #83 | Full structural + mandatory Chromium + PR Quality green, reviewed diff, ordinary PR merge, main Quality and Pages successful. | PR OPEN / QA PENDING |
+| 2 | Rotated near-dependent 3×3 pseudoinverse | High-precision independent oracle, rank/scale/MP residual, unstable rejection and browser regression. | TODO |
+| 3 | 3×3 SVD diagnostics | Rank0–3 singular vectors, reconstruction and orthogonality references, mobile UI. | TODO |
+| 4 | Hosted import preview QA | CSV/TSV/JSON preview, Cancel/Escape rollback, schema warnings, mobile. | HOSTED QA BLOCKED |
+| 5 | Hosted spreadsheet/graph QA | Nested custom functions, overflow, 2D/3D root/fraction/factorial, accessibility. | HOSTED QA BLOCKED |
+
 ## 2026-10-29 09 CET — Matrix numeric-input validation hardening (dev checkpoint)
 
 **DEV ONLY / QA PENDING.** Fixed a matrix-input inconsistency: JavaScript `Number()` previously accepted hexadecimal/binary/octal string literals (e.g. `0x10`) even though the UI expects decimal or scientific notation. String entries now require an explicit decimal/scientific grammar before finite/magnitude checks; numeric inputs and ordinary decimal/exponent entries remain supported. Added `tests/test_matrix_decimal_input.py` for the validation contract and standalone parity, and synchronized `src/matrix-tools.js` into `index.html`. Exact-head CI and browser regression are not yet confirmed, so **do not merge or claim deployed**. Previous main SHA `505e44eb64a71a66d5c53e17d8c9184ec08b0b02`. Keep recurring task active.

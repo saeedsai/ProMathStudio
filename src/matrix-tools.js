@@ -484,7 +484,7 @@ function pseudoinverse3x3(A){
  A=validate(A);
  if(A.length!==3||A[0].length!==3)throw Error('Pseudoinverse requires a 3×3 real matrix.');
  const scale=Math.max(...A.flat().map(Math.abs));
- if(scale===0)return {matrix:Array.from({length:3},()=>[0,0,0]),rank:0,cutoff:0,conditionNumber:null,singularValues:[0,0,0],residual:0,symmetryResidual:0};
+ if(scale===0)return {matrix:Array.from({length:3},()=>[0,0,0]),rank:0,cutoff:0,conditionNumber:null,conditionAssessment:'rank deficient',singularValues:[0,0,0],residual:0,symmetryResidual:0};
  const B=A.map(row=>row.map(x=>x/scale));
  const V=Array.from({length:3},(_,i)=>Array.from({length:3},(_,j)=>Number(i===j)));
  let converged=false;
@@ -531,8 +531,11 @@ function pseudoinverse3x3(A){
  if(!Number.isFinite(residual)||!Number.isFinite(symmetryResidual)||residual>1e-8||symmetryResidual>1e-8)
   throw Error('Pseudoinverse is numerically unstable for this ill-conditioned 3×3 matrix; rescale or use higher precision.');
  const ratio=rank===3?values[order[0]]/values[order[2]]:Infinity;
+ // Advisory only: a full-rank but large condition number amplifies rounding.
+ // Do not weaken the four Moore-Penrose identity gates to accept unstable inputs.
+ const conditionAssessment=rank<3?'rank deficient':ratio>=1e8?'ill-conditioned':ratio>=1e4?'moderately conditioned':'well-conditioned';
  return {matrix,rank,cutoff:cutoff*scale,conditionNumber:Number.isFinite(ratio)?ratio:null,
-  singularValues,residual,symmetryResidual};
+  singularValues,conditionAssessment,residual,symmetryResidual};
 }
 function pseudoinverse(A){
  A=validate(A);
@@ -642,7 +645,7 @@ function calculate(operation){
   const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares')?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
   output.textContent=operation==='pseudoinverse'?
-   'pseudoinverse: A⁺ (Moore-Penrose, relative cutoff 1e-12)\n'+rowsText(value.matrix)+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===undefined?'not available':value.conditionNumber===null?'rank deficient':format(value.conditionNumber))+'\nRelative Moore-Penrose residual: '+format(value.residual)+'\nProjector symmetry residual: '+format(value.symmetryResidual):
+   'pseudoinverse: A⁺ (Moore-Penrose, relative cutoff 1e-12)\n'+rowsText(value.matrix)+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===undefined?'not available':value.conditionNumber===null?'rank deficient':format(value.conditionNumber))+'\nSingular values: '+value.singularValues.map(x=>x.toExponential(6)).join(', ')+'\nRelative rank cutoff: '+value.cutoff.toExponential(3)+(value.conditionAssessment===undefined?'':'\nCondition assessment: '+value.conditionAssessment)+'\nRelative Moore-Penrose residual: '+format(value.residual)+'\nProjector symmetry residual: '+format(value.symmetryResidual):
    operation==='svd'?
    'svd: A = U·diag(σ)·Vᵀ\nSingular values (descending): '+value.S.map(format).join(', ')+'\nNumerical rank: '+value.rank+'\nCondition number: '+(value.conditionNumber===null?'undefined / outside finite range':format(value.conditionNumber))+'\nU:\n'+rowsText(value.U)+'\nV:\n'+rowsText(value.V)+'\nRelative reconstruction residual: '+format(value.residual)+'\nU orthogonality residual: '+format(value.orthogonalityU)+'\nV orthogonality residual: '+format(value.orthogonalityV):
    operation==='eigen'?

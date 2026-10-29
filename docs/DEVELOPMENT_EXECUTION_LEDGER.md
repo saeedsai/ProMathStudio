@@ -4,6 +4,7 @@ Baseline: 158 present (63 bounded complete, 95 partial), 166 gap/improvement opp
 
 | ID | Feature | Status | Evidence |
 |---|---|---|---|
+| MATH-ODE-RK45-TIME-RESOLUTION-004 | Large-epoch representable-step and exact-endpoint RK45 integration | Implemented on dev; exact-head CI and PR/Pages pending | src/ode-tools.js, index.html, tests/test_ode_rk45_endpoint.py, tests/smoke_ode_rk45_endpoint.py |
 | MATH-ODE-RK4-BACKWARD-001 | Backward scalar RK4 initial-value problems | Released via PR #91; main and Pages Quality green at f5ce020595ec0c0d8e6dcbae4a8301afaf505535 | src/ode-tools.js, index.html, tests/test_ode_backward.py, tests/smoke_ode_backward.py |
 | MATH-ODE-RK45-BACKWARD-002 | Backward scalar adaptive RK45 initial-value problems | PR #92 merged at 04886109013b08cde9e312933a8b74ab842406be; dev/PR CI green, Pages workflow succeeded, main Quality pending at checkpoint | src/ode-tools.js, index.html, tests/test_ode_rk45_backward.py, tests/smoke_ode_rk45_backward.py |
 
@@ -22,3 +23,7 @@ Pre-change dev/main `f5ce020595ec0c0d8e6dcbae4a8301afaf505535`. Exact baseline [
 ## 2026-10-29 — Reverse coupled RK4 checkpoint
 
 Pre-change dev/main `04886109013b08cde9e312933a8b74ab842406be` after PR #92 merged. Dev and PR Quality at previous head `133e0d4a2561e31c58c49a56206b5620d13b40d2` passed; Pages workflow for `04886109013b08cde9e312933a8b74ab842406be` succeeded; main Quality was still running. Implemented reverse coupled RK4 with new static/Chromium regression, updated source and standalone, preserved forward checks, added CI step. Local V8 numerical source checks passed: oscillator errors 5.296e-7, 1.977e-9, 7.631e-12, reverse polynomial [0,-4.7610027899269713e-17,1.6108925530441487e-17]. Exact candidate CI and promotion still require verification.
+
+## 2026-10-29 — RK45 time-resolution execution checkpoint
+
+Read AGENTS.md, current plan, frozen 2026-10-26 audit, CI and open PRs. Pre-change dev/main `4dc28d966905431c91f8a242752a01a3755ee138`; [dev Quality 40920561431](https://github.com/saeedsai/ProMathStudio/actions/runs/40920561431), [main Quality 40920539776](https://github.com/saeedsai/ProMathStudio/actions/runs/40920539776) and [Pages 40920539516](https://github.com/saeedsai/ProMathStudio/actions/runs/40920539516) passed; open PR count zero. Fixed representable-step underflow and endpoint snapping in scalar RK45; added static and browser numerical/UI regression. Direct V8 source checks: 1-ULP and large-epoch forward/reverse constant-derivative errors below 3e-16, ordinary exponential errors below 1e-10, stiff 1-ULP underflow correctly diagnosed. Full unit/Chromium CI and release verification pending at checkpoint. See top of hourly plan for NEXT FIVE.

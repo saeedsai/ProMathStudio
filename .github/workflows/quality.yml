@@ -184,6 +184,8 @@ jobs:
         run: python tests/smoke_matrix_pseudoinverse_rectangular.py
       - name: Wide 2x3 Moore-Penrose pseudoinverse numerical and browser regression
         run: python tests/smoke_matrix_pseudoinverse_wide.py
+      - name: Matrix near-dependent QR pseudoinverse and conditioning regression
+        run: python tests/smoke_matrix_conditioning.py
       - name: Offline radix-2 FFT numerical, UI, table and graph regression
         run: python tests/smoke_fft.py
       - name: FFT physical-frequency Hz and sample-rate UI regression

@@ -1,3 +1,8 @@
+## Implemented on dev — Matrix pseudoinverse conditioning (2026-10-29; QA pending)
+
+- Replaced cancellation-prone 3×2 Gram/Jacobi pseudoinverse with scaled pivoted QR and reorthogonalization; stable determinant-based small singular value, unchanged 1e-12 rank cutoff, Moore–Penrose checks, 2×3 transpose duality, condition diagnostics and explicit unstable-input rejection.
+- Added structural and mandatory Chromium regressions for nearly coincident columns, scaled/zero/rank-deficient/invalid cases, wide transpose, numerical oracles and responsive UI. Await exact-head dev/PR/main Quality and Pages verification.
+
 ## Released via PR #78 — Wide 2×3 matrix pseudoinverse (2026-10-29)
 
 - Matrix Calculator supports real wide 2×3 pseudoinverse using transpose duality of the existing scaled 3×2 Jacobi method; preserves the relative 1e-12 singular-value cutoff, rank 0/1/2 cases, four Moore–Penrose identity residuals, input validation, editor transfer and offline operation. Previous 2×2 and 3×2 paths remain available.

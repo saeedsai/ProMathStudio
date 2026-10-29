@@ -343,7 +343,7 @@ a:hover{color:#0b625e}
 #complex-canvas{display:block;width:100%;height:auto;aspect-ratio:2/1;background:white;border:1px solid #dce7e7;border-radius:12px}
 @media(max-width:760px){.complex-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.complex-workbench{padding:12px}#complex-canvas{aspect-ratio:3/2}}
 </style>
-</head>
+<style id="control-theory-style">.control-theory-toolbox{background:#f7fbfa;border:1px solid #b9dcd6;border-radius:13px;padding:16px;margin:15px 0}.control-theory-toolbox summary{font-weight:800;color:#176f69;cursor:pointer}.control-theory-toolbox p{color:#56717a;font-size:12px}.ct-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:13px 0}.ct-grid label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700}.ct-grid input,.ct-grid select{width:100%;min-width:0;border:1px solid #bdcfcd;border-radius:8px;padding:10px;color:#183840;background:white}.ct-actions{display:flex;align-items:center;gap:10px;margin-bottom:12px}#ct-status{font-size:12px}#ct-canvas{width:100%;height:auto;border:1px solid #d9e4e2;background:white;border-radius:10px}#ct-output{padding:13px;background:#eaf4f1;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:9px;font-size:12px;line-height:1.6}@media(max-width:760px){.ct-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:420px){.ct-grid{grid-template-columns:1fr}}</style></head>
 <body>
 <div class="shell">
   <aside aria-label="Math symbol palette">
@@ -439,7 +439,15 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
     <section class="panel" id="data-panel" aria-label="Data tables"></section>
     <section class="panel" id="graph-panel" aria-label="2D and 3D function graphs">
       <div class="panel-head"><div class="panel-title"><span class="step">01</span> Interactive graphing <span class="cas-label">Canvas 2D / 3D</span></div><span class="small-note">Drag to move or rotate · Scroll to zoom</span></div>
-      <div class="graph-wrap">
+      <div class="graph-wrap"><details id="control-theory-toolbox" class="control-theory-toolbox">
+<summary>Control Theory Toolbox · Bode, Nyquist, Root Locus, Routh–Hurwitz</summary>
+<p>Continuous-time SISO transfer functions with real polynomial coefficients, highest power first. Frequency is in rad/s. This is a numerical analysis workspace, not a certified stability tool.</p>
+<div class="ct-grid"><label>Numerator coefficients<input id="ct-num" value="1" aria-label="Transfer function numerator coefficients"></label><label>Denominator coefficients<input id="ct-den" value="1, 3, 2" aria-label="Transfer function denominator coefficients"></label><label>Gain K<input id="ct-gain" type="number" value="1" step="any"></label><label>Analysis<select id="ct-mode"><option value="bode">Bode magnitude and phase</option><option value="nyquist">Nyquist complex response</option><option value="root">Root locus (unity feedback)</option><option value="routh">Routh–Hurwitz</option><option value="feedback">Closed-loop feedback</option></select></label></div>
+<div class="ct-actions"><button type="button" class="primary" id="ct-run">Analyze system</button><span id="ct-status" role="status" aria-live="polite">Ready</span></div>
+<canvas id="ct-canvas" width="900" height="390" role="img" aria-label="Control theory plot"></canvas>
+<pre id="ct-output" aria-live="polite"></pre>
+<p class="small-note">Bode/Nyquist sample ω = 0.01–1000 rad/s. Root locus samples 0 ≤ K ≤ 100. Feedback uses T(s)=KG(s)/(1+KG(s)), unity negative feedback. Feedforward design, compensator tuning and symbolic Laplace transforms are planned extensions.</p>
+</details>
 <details id="complex-graph-workbench" class="complex-workbench">
   <summary>Complex numbers · 2D Argand plane &amp; 3D magnitude surface</summary>
   <p class="small-note">Plot a complex number z = a + bi in 2D, or visualize |f(z)| over the complex plane in 3D. Separate from real-valued equation plots.</p>
@@ -1629,7 +1637,36 @@ root.addEventListener('toggle',()=>{if(root.open)render();});
 window.ProMathComplexGraph={evaluate:calc,render};
 })();
 </script>
-</body></html>';
+<script id="promath-control-theory">
+(function(){
+'use strict';
+const by=id=>document.getElementById(id),canvas=by('ct-canvas'),ctx=canvas.getContext('2d');
+function coefficients(text){const v=text.split(/[ ,;]+/).filter(Boolean).map(Number);if(!v.length||v.length>7||v.some(x=>!Number.isFinite(x)||Math.abs(x)>1e8)||v[0]===0)throw Error('Use 1–7 finite coefficients, first coefficient nonzero, |value| ≤ 1e8.');return v;}
+function pad(a,n){return Array(n-a.length).fill(0).concat(a);}
+function add(a,b){const n=Math.max(a.length,b.length),x=pad(a,n),y=pad(b,n);return x.map((v,i)=>v+y[i]);}
+function mul(a,k){return a.map(v=>v*k);}
+function evalPoly(poly,re,im){let x=0,y=0;for(const c of poly){const next=x*re-y*im+c;y=x*im+y*re;x=next;}return [x,y];}
+function div(a,b){const d=b[0]*b[0]+b[1]*b[1];return d>1e-25?[(a[0]*b[0]+a[1]*b[1])/d,(a[1]*b[0]-a[0]*b[1])/d]:[NaN,NaN];}
+function response(n,d,k,w){const z=div(evalPoly(n,0,w),evalPoly(d,0,w));return z.map(v=>v*k);}
+function routh(p){let c=p.slice();const n=c.length-1,size=Math.ceil(c.length/2),rows=Array.from({length:n+1},()=>Array(size).fill(0));
+for(let j=0;j<size;j++){rows[0][j]=c[2*j]||0;if(n)rows[1][j]=c[2*j+1]||0;}
+let degenerate=false;for(let i=2;i<=n;i++){if(rows[i-1].every(x=>Math.abs(x)<1e-11)){degenerate=true;const power=n-(i-2);for(let j=0;j<size;j++)rows[i-1][j]=rows[i-2][j]*(power-2*j);}if(Math.abs(rows[i-1][0])<1e-11){rows[i-1][0]=1e-9;degenerate=true;}for(let j=0;j<size-1;j++)rows[i][j]=(rows[i-1][0]*rows[i-2][j+1]-rows[i-2][0]*rows[i-1][j+1])/rows[i-1][0];}
+const first=rows.map(r=>r[0]);const changes=first.slice(1).reduce((n,x,i)=>n+(x*first[i]<0?1:0),0);return {rows,first,changes,degenerate};}
+function roots(poly){let p=poly.slice();while(p.length>1&&Math.abs(p[0])<1e-12)p.shift();const degree=p.length-1;if(!degree)return [];const norm=p.map(v=>v/p[0]),radius=1+Math.max(...norm.slice(1).map(Math.abs));let z=Array.from({length:degree},(_,i)=>[radius*Math.cos(2*Math.PI*(i+.2)/degree),radius*Math.sin(2*Math.PI*(i+.2)/degree)]);
+for(let iteration=0;iteration<160;iteration++){let delta=0;for(let i=0;i<degree;i++){let den=[1,0];for(let j=0;j<degree;j++)if(i!==j){const a=z[i][0]-z[j][0],b=z[i][1]-z[j][1];den=[den[0]*a-den[1]*b,den[0]*b+den[1]*a];}const step=div(evalPoly(norm,...z[i]),den);if(!Number.isFinite(step[0]))continue;const length=Math.hypot(...step);delta=Math.max(delta,length);z[i]=[z[i][0]-step[0],z[i][1]-step[1]];}if(delta<1e-9)break;}return z;}
+function draw(points,xlabel,ylabel){const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);const finite=points.filter(p=>p.every(Number.isFinite));if(!finite.length)return;const xs=finite.map(p=>p[0]),ys=finite.map(p=>p[1]);let xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);const dx=Math.max(xmax-xmin,1e-4),dy=Math.max(ymax-ymin,1e-4);xmin-=dx*.08;xmax+=dx*.08;ymin-=dy*.08;ymax+=dy*.08;const X=x=>55+(x-xmin)/(xmax-xmin)*(w-90),Y=y=>h-45-(y-ymin)/(ymax-ymin)*(h-85);ctx.strokeStyle='#dde8ea';ctx.lineWidth=1;for(let i=0;i<=5;i++){ctx.beginPath();ctx.moveTo(55+i*(w-90)/5,20);ctx.lineTo(55+i*(w-90)/5,h-45);ctx.moveTo(55,20+i*(h-85)/5);ctx.lineTo(w-35,20+i*(h-85)/5);ctx.stroke();}ctx.strokeStyle='#157e78';ctx.lineWidth=2;ctx.beginPath();finite.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));ctx.stroke();ctx.fillStyle='#25464f';ctx.font='14px system-ui';ctx.fillText(xlabel,w/2,h-12);ctx.fillText(ylabel,15,25);}
+function analyze(){try{const n=coefficients(by('ct-num').value),d=coefficients(by('ct-den').value),k=Number(by('ct-gain').value);if(!Number.isFinite(k)||Math.abs(k)>1e6)throw Error('Gain must be finite and bounded.');const mode=by('ct-mode').value,closed=add(d,mul(n,k));let pts=[],message='G(s) = '+n.join(', ')+' / ('+d.join(', ')+'); gain '+k+'.\n';const samples=Array.from({length:220},(_,i)=>Math.pow(10,-2+5*i/219));
+if(mode==='bode'){pts=samples.map(w=>{const z=response(n,d,k,w);return [Math.log10(w),20*Math.log10(Math.hypot(...z))];});const phases=samples.map(w=>Math.atan2(response(n,d,k,w)[1],response(n,d,k,w)[0])*180/Math.PI);message+='Bode magnitude (dB) vs log10(ω). Phase samples: '+phases[0].toFixed(2)+'° → '+phases.at(-1).toFixed(2)+'° (wrapped).';draw(pts,'log10(ω rad/s)','Gain (dB)');}
+else if(mode==='nyquist'){pts=samples.map(w=>response(n,d,k,w));pts=pts.concat(pts.slice().reverse().map(p=>[p[0],-p[1]]));message+='Nyquist frequency response for ±ω; critical point is (-1,0). Stability must be confirmed with open-loop RHP pole count.';draw(pts,'Re G(jω)','Im G(jω)');}
+else if(mode==='root'){pts=Array.from({length:90},(_,i)=>roots(add(d,mul(n,100*i/89)))).flat();message+='Root-locus samples for K from 0 to 100; points are joined by sample order, not tracked by pole branch. Verify branches near repeated roots.';draw(pts,'Real pole','Imaginary pole');}
+else if(mode==='routh'){const result=routh(d);message+='Routh table:\n'+result.rows.map(row=>row.map(x=>Number(x.toPrecision(6))).join('    ')).join('\n')+'\nSign changes in first column: '+result.changes+(result.degenerate?' (special zero-row/pivot case; inspect separately)':'')+'.';draw(result.first.map((v,i)=>[i,v]),'Routh row','First-column value');}
+else{const r=routh(closed);pts=samples.map(w=>{const z=div(evalPoly(mul(n,k),0,w),evalPoly(closed,0,w));return [Math.log10(w),20*Math.log10(Math.hypot(...z))];});message+='Unity negative feedback: T(s) = K N(s) / [D(s)+K N(s)]\nCharacteristic polynomial: '+closed.join(', ')+'\nRouth sign changes: '+r.changes+(r.degenerate?' (special-case caveat)':'')+'.';draw(pts,'log10(ω rad/s)','Closed-loop dB');}
+by('ct-output').textContent=message;by('ct-status').textContent='Analysis completed for supported continuous-time SISO model.';}
+catch(e){by('ct-status').textContent=e.message;by('ct-output').textContent='No valid result.';ctx.clearRect(0,0,canvas.width,canvas.height);}}
+by('ct-run').addEventListener('click',analyze);
+window.ProMathControlTheory={coefficients,routh,roots,response,analyze};
+})();
+</script></body></html>';
     try{
       if(window.ClipboardItem&&navigator.clipboard?.write&&window.isSecureContext){
         await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([currentResult.tex],{type:'text/plain'})})]);

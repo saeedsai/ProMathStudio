@@ -96,6 +96,8 @@ jobs:
         run: python tests/smoke_json_record_schema.py
       - name: Single-column CSV TSV JSON Data Tables and strict Graph XY browser regression
         run: python tests/smoke_data_single_column.py
+      - name: Data Tables CSV TSV JSON import preview, confirmation and rollback regression
+        run: python tests/smoke_data_import_preview.py
       - name: Indexed Data Tables join ordering, limits and rollback regression
         run: python tests/smoke_data_join_index.py
       - name: Spreadsheet structural reference regression

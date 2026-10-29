@@ -1,3 +1,5 @@
+**Seventh discipline — GNSS & Positioning:** [144-feature catalog](GNSS_POSITIONING_OBSERVATION_TOOLBOX_FEATURE_LIST.md). Add GNSS/GPS/observation/position estimation as a selectable Engineering Toolbox discipline. Reuse shared geodesy, matrix/optimization, state-estimation, signal-processing and visualization services; never duplicate Kalman filters or coordinate transforms. Existing six disciplines remain.
+
 **Control Theory Toolbox:** [181-feature comprehensive control catalog](CONTROL_THEORY_TOOLBOX_FEATURE_LIST.md). The control toolbox is a shared cross-discipline category and must use canonical registry IDs and reusable solvers.
 
 # ProMathStudio — Reusable Architecture and Engineering Workspace Specification

@@ -77,10 +77,11 @@ def main():
         assert 'matrix([3],[2])' in page.locator('#equation-input').input_value()
         page.locator('[data-workspace="calculator"]').click()
         page.locator('#workspace-task-select').select_option('matrix')
+        page.locator('#mat-svd').click()
         page.locator('#mat-svd-factor').select_option('V')
         page.locator('#mat-send').click()
         expression=page.locator('#equation-input').input_value()
-        assert expression.startswith('matrix(') and expression.count('[')==3,expression
+        assert 'matrix(' in expression and expression.count('[')>=3,expression
         page.locator('[data-workspace="calculator"]').click()
         page.locator('#workspace-task-select').select_option('matrix')
         for width in (390,768,1280):

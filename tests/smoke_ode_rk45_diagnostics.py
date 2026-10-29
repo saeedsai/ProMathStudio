@@ -37,8 +37,23 @@ def main():
             assert fragment in message and ", y=" in message, message
             assert page.locator("#ode-to-table").is_disabled()
             assert page.locator("#ode-to-graph").is_disabled()
+        # A completed solve must not remain exportable after the attempt budget fails.
         page.locator("#ode-expression").fill("y")
         page.locator("#ode-initial").fill("1")
+        page.locator("#ode-end").fill("10")
+        page.locator("#ode-tolerance").fill("0.000000000001")
+        page.locator("#ode-max-steps").fill("4")
+        page.locator("#ode-run").click()
+        exhausted = page.locator("#ode-output").inner_text()
+        for fragment in ("exceeded maximum attempts", "attempts=4/4",
+                         "accepted=", "rejected=", "target=", "tolerance="):
+            assert fragment in exhausted, exhausted
+        assert page.locator("#ode-to-table").is_disabled()
+        assert page.locator("#ode-to-graph").is_disabled()
+        # Recovery must restore the normal forward reference and export actions.
+        page.locator("#ode-end").fill("1")
+        page.locator("#ode-tolerance").fill("0.0000001")
+        page.locator("#ode-max-steps").fill("1000")
         page.locator("#ode-run").click()
         result = page.evaluate("MathStudio.odeTools.solveAdaptive({expression:'y',t0:0,t1:1,y0:1,tolerance:1e-10})")
         assert abs(result["rows"][-1][1] - math.e) < 1e-8

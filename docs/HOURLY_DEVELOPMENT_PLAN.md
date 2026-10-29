@@ -1,3 +1,19 @@
+## 2026-10-29 02:56 CET — P1-DATA-CUSTOM-COMPOSITION-HARDENING implemented on dev; QA pending
+
+**Feature ledger: IMPLEMENTED ON DEV / NOT RELEASED.** Spreadsheet built-ins (SUM, AVERAGE, AVG, MIN, MAX, COUNT, MEDIAN and lazy IF) retain precedence over conflicting custom function names restored from saved projects; normal custom functions still compose with nested aggregates. A finite AVERAGE uses scaled accumulation to avoid intermediate overflow, whereas an overflowing SUM reports `#NUM!` rather than silently displaying zero. Custom numeric evaluation exceptions become `#VALUE` unless already carrying a spreadsheet error code. Existing blank-range behavior and depth limit are preserved. Synchronized `src/data-tables.js` and standalone `index.html`; added `tests/test_sheet_numeric_hardening.py` and mandatory Chromium `tests/smoke_sheet_numeric_hardening.py` (reserved-name collisions, finite 1e308 reference, overflow, lazy IF, nested custom, saved workbook round-trip, 390/768/1280px). Updated Quality workflow and changelog.
+
+**Execution log:** Began with `dev=dd689d3d4f11e2acc2646a71b0942457239510e0`, `main=e2f39e7381c21ded36db3c69bd042d788e8ab72d`, no open PR, only dev/main branches. Previous [PR #75 Quality 40798946906](https://github.com/saeedsai/ProMathStudio/actions/runs/40798946906) confirmed successful (88 steps). Post-merge main Quality and Pages for #75 remain unverified because the connected commit-workflow lookup only exposes PR runs and public GitHub/Pages access and container git clone fail DNS/disabled fetch. Source commits: `3267b582277c9f267535a90dd0bbb038f4729606` and `dbce858943693ba1282e54124c17b4b198bf2b30`; test commits `ddd522af0eecae5fa4fd730323801e731731f1a1` and `7cfd4d83d5b2e48093fc79b94dfe8eb1af535f6c`; CI registration `7b12c2147474d0b2d01578277fbf0819e21c29f8`; changelog `4936ab38104c7b5be68ea894a6ec7dc4bbe48e0e`. **Full structural and Chromium execution, exact-head dev/PR CI, main Quality and Pages are pending. Do not merge or mark released without verified gates.** No protected refs or CI bypassed; no demonstrably obsolete tracked files deleted. Historical 166-gap/95-partial baseline and hourly task remain active.
+
+### NEXT FIVE — concrete acceptance gates
+
+| Priority | Feature | Acceptance tests and dependencies | Status |
+|---:|---|---|---|
+| 1 | P1-DATA-CUSTOM-COMPOSITION-HARDENING release QA | Structural + mandatory Chromium pass, finite 1e308 mean, overflowing sum error, restored reserved-name precedence, lazy IF, workbook persistence, responsive widths; exact dev/PR/main/Pages gates. | DEV IMPLEMENTED / QA PENDING |
+| 2 | P1-DATA-IMPORT-PREVIEW-VALIDATION post-merge verification | Confirm #75 main Quality, Pages and hosted CSV/TSV/JSON preview/cancel/confirm keyboard flow without mutation. | MERGED / DEPLOYMENT UNVERIFIED |
+| 3 | P1-GRAPH-PALETTE-VALIDITY-EXPANSION | Additional executable 2D/3D numeric templates, Equation-only disabled notation, caret/focus and mobile numeric reference tests. | TODO |
+| 4 | P1-MATRIX-PSEUDOINVERSE-2X3 | Wide full/rank1/zero matrix reference, transpose duality, all four Moore–Penrose identities, least-norm solve and responsive UI. | TODO |
+| 5 | P1-MATRIX-NUMERICAL-CONDITIONING | Near-dependent 3×2 cases, relative threshold tests, scaled numerical oracles, explicit unstable-case handling and browser QA. | TODO |
+
 ## 2026-10-29 02:17 CET — P1-DATA-IMPORT-PREVIEW-VALIDATION merged via PR #75; deployment verification pending
 
 **Feature ledger: MERGED TO MAIN / NOT YET VERIFIED DEPLOYED.** Data Tables now previews parsed CSV/TSV/JSON schemas, row/column counts, duplicate/blank header warnings and three text-only sample rows. Explicit Create table commits; Cancel/Escape leave workbook unchanged and restore focus. Synchronized standalone/module. Structural and mandatory Chromium test added, eight legacy import browser suites updated, no parser contract weakened.

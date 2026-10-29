@@ -1,3 +1,17 @@
+## 2026-10-29 — Control theory SISO toolbox (requested new scope)
+
+**Ledger: IMPLEMENTED ON DEV; CI and browser QA pending; NOT DEPLOYED.** Added a collapsible continuous-time SISO Transfer Function workbench under Graphs for polynomial numerator/denominator (descending powers, degree ≤ 6), finite gain, Bode magnitude in dB with phase end-point diagnostics, Nyquist locus, sampled unity-feedback root locus, Routh–Hurwitz array and first-column sign-change count, and negative unity feedback closed-loop frequency response. Invalid/nonfinite/high-order inputs rejected; Nyquist poles/encirclement and special Routh rows need analyst confirmation, and root-locus line segments currently connect sample order rather than tracked branches. **This is bounded numerical exploratory analysis, not a MATLAB Control System Toolbox replacement.** `tests/test_control_theory_toolbox.py` covers required UI/modes, guardrails, existing graph/complex graph coexistence, and responsive CSS. Existing PR #91 redesign/complex graph CI previously failed in browser smoke; investigate before any PR merge. No direct main push.
+
+### NEXT FIVE — acceptance tests
+
+| Priority | Scope | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Stabilize control toolbox + browser CI | Validate Routh for stable/unstable/boundary polynomials, closed-loop coefficient ordering, Bode 1/(s+1) reference (−3.0103 dB at 1 rad/s), Nyquist ±ω symmetry, responsive Chromium, no runtime errors | DEV / CI PENDING |
+| 2 | Fix existing browser smoke regression | Diagnose prior PR #91 browser smoke failure, repair root cause without weakening assertions; full exact-head quality green | BLOCKED |
+| 3 | Root locus numerics | Root tracking by pole proximity, accurate gain labeling, repeated-root convergence tests, zero/pole markers | TODO |
+| 4 | Controller design | Proportional, PI, PID and lead/lag design with validated time/frequency margins and step-response tests | TODO |
+| 5 | Feedforward and Laplace | 2-DOF feedforward block modeling, symbolic Laplace/inverse bridge to Equation, validated transfer routing; hosted Pages confirmation | TODO |
+
 ## 2026-10-29 — Complex-number graph workbench (dev candidate)
 
 **Feature ledger: IMPLEMENTED ON DEV / CI PENDING; NOT DEPLOYED.** User requested complex numbers in both 2D and 3D graphs. Added an independent collapsible complex visualization section inside the existing Graph workspace. 2D uses Argand axes Re(f(z)), Im(f(z)), marking the selected complex number's image; 3D renders an isometric sampled |f(z)| magnitude surface over Re(z), Im(z) in [-3,3]. Presets: f(z)=z, z², 1/z (singularity omitted) and exp(z). Numeric controls Re(z)/Im(z), finite input bounds, status/output diagnostics, mobile layout, and defensive nonfinite/overflow rejection. Preserved original real 2D/3D graphs and imported data workflow. Added structural regression `tests/test_complex_graph.py`. The 3D plot is a canvas projection, not a WebGL rotational 3D renderer; heights are clipped at 8 and singularities omitted. Exact-head full CI, browser smoke, PR merge and production Pages verification remain pending.

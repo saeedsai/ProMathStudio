@@ -54,7 +54,7 @@ def parse_catalog(key, filename):
             section = line[3:].strip()
         if not line.startswith("|") or line.startswith("|---"):
             continue
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        cells = [re.sub(r"\\\\([|\\\\])", r"\\1", cell.strip()) for cell in re.split(r"(?<!\\\\)\\|", line.strip().strip("|"))]
         if len(cells) < 2:
             continue
         title, description = cells[:2]

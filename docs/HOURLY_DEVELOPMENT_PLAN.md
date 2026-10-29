@@ -1,3 +1,17 @@
+## 2026-10-29 09 CET — Matrix numeric-input validation hardening (dev checkpoint)
+
+**DEV ONLY / QA PENDING.** Fixed a matrix-input inconsistency: JavaScript `Number()` previously accepted hexadecimal/binary/octal string literals (e.g. `0x10`) even though the UI expects decimal or scientific notation. String entries now require an explicit decimal/scientific grammar before finite/magnitude checks; numeric inputs and ordinary decimal/exponent entries remain supported. Added `tests/test_matrix_decimal_input.py` for the validation contract and standalone parity, and synchronized `src/matrix-tools.js` into `index.html`. Exact-head CI and browser regression are not yet confirmed, so **do not merge or claim deployed**. Previous main SHA `505e44eb64a71a66d5c53e17d8c9184ec08b0b02`. Keep recurring task active.
+
+### NEXT FIVE with acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Matrix decimal input QA/release | Browser rejects 0x/0b/0o and accepts 1e-6, -0.5, +2; unit, Chromium, PR/main Quality and Pages green. | DEV COMMITTED / QA PENDING |
+| 2 | Rotated 3×3 near-dependent stability | Independent high-precision oracle, rank cutoff, Moore–Penrose residual and scale tests. | TODO |
+| 3 | 3×3 SVD diagnostics | Reconstruction and orthogonality numeric reference tests, accessible UI. | TODO |
+| 4 | Hosted Data Tables import QA | CSV/TSV/JSON preview, cancellation, malformed rollback and mobile tests. | TODO |
+| 5 | Hosted custom-function/graph QA | Numeric overflow, nested functions, graph symbols, focus and responsive tests. | TODO |
+
 ## 2026-10-29 08 CET — P1-MATRIX-3X3-CONDITION-ADVISORY RELEASED via PR #82
 
 **Feature ledger: RELEASED FOR BOUNDED REAL 3×3 CONDITION-RISK DIAGNOSTICS (Pages workflow verified; hosted interactive QA unavailable).** The Matrix Calculator now reports scientific-notation singular values, correctly labeled **absolute** rank cutoff and a condition-risk advisory: well-conditioned κ<1e4, moderately conditioned 1e4≤κ<1e8, ill-conditioned κ≥1e8, or rank deficient (numerical rank <3). Advisory thresholds are heuristics, not a promise of accuracy; the original scaled Jacobi SVD and four Moore–Penrose checks still reject unstable inverses. Existing 2×2, 3×2, 2×3, 3×3 workflows and Equation transfer preserved. Modular `src/matrix-tools.js` and standalone `index.html` synchronized.

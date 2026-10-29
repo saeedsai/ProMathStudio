@@ -19,6 +19,8 @@ def main():
         page.locator('#dt-import').set_input_files({
             'name': 'filter_alignment.csv', 'mimeType': 'text/csv',
             'buffer': b'id,category,amount\n1,red,10\n2,blue,20\n3,red,30\n4,blue,40\n'})
+        page.wait_for_function("() => !document.querySelector('#dt-import-preview').hidden")
+        page.locator('#dt-import-confirm').evaluate('(e) => e.click()')
         page.wait_for_function("() => MathStudio.dataTables.active.name === 'filter_alignment'")
         page.get_by_role('button', name='Filter rows', exact=True).click()
         page.locator('#dt-filter-column').select_option('1')

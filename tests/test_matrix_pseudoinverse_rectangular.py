@@ -13,7 +13,7 @@ class RectangularPseudoinverseStructure(unittest.TestCase):
             self.assertIn(token,body)
         self.assertNotIn('eval(',body)
         self.assertIn("operation==='pseudoinverse'?pseudoinverse(A)",SRC)
-        self.assertIn('pseudoinverse3x2,pseudoinverse,notation',SRC)
+        self.assertIn('pseudoinverse3x2,pseudoinverse2x3,pseudoinverse,notation',SRC)
     def test_standalone_parity(self):
         start=HTML.index('/* ProMathStudio small-matrix calculator:')
         end=HTML.index('</script>',start)

@@ -331,6 +331,18 @@ a:hover{color:#0b625e}
 @media(max-width:440px){.topbar h1{font-size:27px}.topbar .subtle-button{font-size:12px}.workspace-tab{font-size:12px}.panel-head{flex-wrap:wrap}.calc-result-math{overflow-wrap:anywhere}}
 @media(prefers-reduced-motion:reduce){.workspace-tab,.primary,.secondary,.example{transition:none!important}}
 </style>
+<style id="complex-graph-style">
+.complex-workbench{padding:15px 18px;margin:12px 0 20px;border:1px solid #cce2dc;border-radius:13px;background:#f7fcfa}
+.complex-workbench>summary{font-weight:780;color:#1b706a;cursor:pointer;font-size:15px}
+.complex-workbench p{margin:12px 0}
+.complex-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.complex-controls label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:650;color:#31545a}
+.complex-controls input,.complex-controls select{width:100%;min-width:0;padding:10px;border:1px solid #bfd7d5;border-radius:9px;background:#fff;color:#24434b}
+.complex-actions{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:12px}
+#complex-status{font-size:12px;color:#45636b}
+#complex-canvas{display:block;width:100%;height:auto;aspect-ratio:2/1;background:white;border:1px solid #dce7e7;border-radius:12px}
+@media(max-width:760px){.complex-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.complex-workbench{padding:12px}#complex-canvas{aspect-ratio:3/2}}
+</style>
 </head>
 <body>
 <div class="shell">
@@ -428,6 +440,19 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
     <section class="panel" id="graph-panel" aria-label="2D and 3D function graphs">
       <div class="panel-head"><div class="panel-title"><span class="step">01</span> Interactive graphing <span class="cas-label">Canvas 2D / 3D</span></div><span class="small-note">Drag to move or rotate · Scroll to zoom</span></div>
       <div class="graph-wrap">
+<details id="complex-graph-workbench" class="complex-workbench">
+  <summary>Complex numbers · 2D Argand plane &amp; 3D magnitude surface</summary>
+  <p class="small-note">Plot a complex number z = a + bi in 2D, or visualize |f(z)| over the complex plane in 3D. Separate from real-valued equation plots.</p>
+  <div class="complex-controls">
+    <label for="complex-real">Real part (Re z)<input id="complex-real" type="number" value="2" step="any"></label>
+    <label for="complex-imag">Imaginary part (Im z)<input id="complex-imag" type="number" value="3" step="any"></label>
+    <label for="complex-view">View<select id="complex-view"><option value="2d">2D · Argand plane</option><option value="3d">3D · |f(z)| surface</option></select></label>
+    <label for="complex-function">Complex function<select id="complex-function"><option value="identity">f(z) = z</option><option value="square">f(z) = z²</option><option value="inverse">f(z) = 1/z</option><option value="exp">f(z) = exp(z)</option></select></label>
+  </div>
+  <div class="complex-actions"><button id="complex-plot" type="button" class="primary">Plot complex graph</button><span id="complex-status" role="status" aria-live="polite">Ready</span></div>
+  <canvas id="complex-canvas" width="900" height="450" role="img" aria-label="Complex-number visualization"></canvas>
+  <p id="complex-detail" class="small-note">2D axes: horizontal real, vertical imaginary. 3D axes: Re(z), Im(z), |f(z)|.</p>
+</details>
         <div class="graph-mode-row"><div class="graph-mode-switch" role="group" aria-label="Graph dimensions"><button class="graph-mode active" type="button" data-graph-mode="2d">2D · y = f(x)</button><button class="graph-mode" type="button" data-graph-mode="3d">3D · z=f(x,y), y=f(x)</button></div><button class="secondary small" type="button" id="graph-show-axes">Axes &amp; grid</button><button class="secondary small" type="button" id="graph-pan-toggle" aria-pressed="false" hidden>Pan 3D: off</button><button class="secondary small" type="button" id="graph-import">Use current equation</button></div>
         <label for="graph-input" class="graph-input-label">Functions <span id="graph-hint">One y=f(x) per line. Compare several functions.</span></label>
         <textarea id="graph-input" rows="4" spellcheck="false">y = sin(x)
@@ -1542,7 +1567,69 @@ def _ms_system(job_text):
   async function copyWord(){
     if(!currentResult){showToast('Type an equation first');return;}
     const xml=new XMLSerializer().serializeToString(mathElement(currentResult.ast));
-    const html='<!DOCTYPE html><html><body><div style="font-family:Cambria Math,serif;font-size:20pt">'+xml+'</div></body></html>';
+    const html='<!DOCTYPE html><html><body><div style="font-family:Cambria Math,serif;font-size:20pt">'+xml+'</div><script id="promath-complex-graph">
+(function(){
+'use strict';
+const root=document.getElementById('complex-graph-workbench');
+if(!root)return;
+const get=id=>document.getElementById(id);
+const canvas=get('complex-canvas'),ctx=canvas.getContext('2d');
+const calc=(a,b,kind)=>{
+ if(kind==='square')return [a*a-b*b,2*a*b];
+ if(kind==='inverse'){const d=a*a+b*b;return d>1e-16?[a/d,-b/d]:[NaN,NaN];}
+ if(kind==='exp'){const m=Math.exp(a);return [m*Math.cos(b),m*Math.sin(b)];}
+ return [a,b];
+};
+const valid=(a,b)=>Number.isFinite(a)&&Number.isFinite(b);
+function render(){
+ const a=Number(get('complex-real').value),b=Number(get('complex-imag').value);
+ if(!get('complex-real').value.trim()||!get('complex-imag').value.trim()||!valid(a,b)||Math.abs(a)>1e6||Math.abs(b)>1e6){
+ get('complex-status').textContent='Enter finite real and imaginary values (absolute value ≤ 1,000,000).';return;
+ }
+ const kind=get('complex-function').value,mode=get('complex-view').value;
+ const result=calc(a,b,kind);
+ if(!valid(...result)){get('complex-status').textContent='Function undefined or overflows at this point.';return;}
+ const w=canvas.width,h=canvas.height;
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
+ ctx.font='15px system-ui,sans-serif';ctx.lineWidth=1;
+ if(mode==='2d'){
+ const bound=Math.max(4,Math.abs(a)*1.25,Math.abs(b)*1.25,Math.abs(result[0])*1.25,Math.abs(result[1])*1.25);
+ const scale=Math.min((w-110)/(bound*2),(h-80)/(bound*2)),cx=w/2,cy=h/2;
+ ctx.strokeStyle='#e6eef0';
+ for(let t=-4;t<=4;t++){const v=t*bound/4;ctx.beginPath();ctx.moveTo(cx+v*scale,20);ctx.lineTo(cx+v*scale,h-20);ctx.moveTo(30,cy-v*scale);ctx.lineTo(w-30,cy-v*scale);ctx.stroke();}
+ ctx.strokeStyle='#597b82';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(30,cy);ctx.lineTo(w-25,cy);ctx.moveTo(cx,20);ctx.lineTo(cx,h-25);ctx.stroke();
+ ctx.fillStyle='#385d66';ctx.fillText('Re',w-50,cy-12);ctx.fillText('Im',cx+12,24);
+ const x=cx+result[0]*scale,y=cy-result[1]*scale;
+ ctx.strokeStyle='#188b81';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.stroke();
+ ctx.fillStyle='#ec824f';ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#27444b';ctx.fillText('f(z)',Math.min(w-50,x+12),Math.max(20,y-12));
+ }else{
+ const range=3,steps=26,mag=(x,y)=>{const v=calc(x,y,kind);return valid(...v)?Math.min(8,Math.hypot(...v)):NaN;};
+ const project=(x,y,v)=>[w/2+(x-y)*52,h*.68+(x+y)*21-v*26];
+ ctx.lineWidth=1;ctx.strokeStyle='#8ebfb8';
+ for(let axis=0;axis<2;axis++)for(let i=0;i<=steps;i++){
+ const fixed=-range+2*range*i/steps;ctx.beginPath();let started=false;
+ for(let j=0;j<=steps;j++){const variable=-range+2*range*j/steps;const x=axis?variable:fixed,y=axis?fixed:variable;const m=mag(x,y);
+ if(!Number.isFinite(m)){started=false;continue;}const [px,py]=project(x,y,m);
+ if(!started){ctx.moveTo(px,py);started=true;}else ctx.lineTo(px,py);}
+ ctx.stroke();
+ }
+ const [px,py]=project(a,b,Math.min(8,Math.hypot(...result)));
+ if(Math.abs(a)<=range&&Math.abs(b)<=range){ctx.fillStyle='#e77843';ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fill();}
+ ctx.fillStyle='#27444b';ctx.fillText('Re(z) →',w*.72,h*.86);ctx.fillText('Im(z) →',w*.22,h*.86);ctx.fillText('|f(z)| ↑',w*.51,30);
+ }
+ const fmt=n=>Number(n.toPrecision(6));
+ get('complex-status').textContent='Plotted '+(mode==='2d'?'Argand point':'magnitude surface')+'.';
+ get('complex-detail').textContent='z = '+fmt(a)+(b<0?' − ':' + ')+fmt(Math.abs(b))+'i; f(z) = '+fmt(result[0])+(result[1]<0?' − ':' + ')+fmt(Math.abs(result[1]))+'i; |f(z)| = '+fmt(Math.hypot(...result))+'. 3D surface domain: Re, Im ∈ [−3, 3]; height clipped to 8.';
+}
+get('complex-plot').addEventListener('click',render);
+get('complex-view').addEventListener('change',render);
+get('complex-function').addEventListener('change',render);
+root.addEventListener('toggle',()=>{if(root.open)render();});
+window.ProMathComplexGraph={evaluate:calc,render};
+})();
+</script>
+</body></html>';
     try{
       if(window.ClipboardItem&&navigator.clipboard?.write&&window.isSecureContext){
         await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([currentResult.tex],{type:'text/plain'})})]);

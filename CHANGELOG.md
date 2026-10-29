@@ -1,3 +1,13 @@
+## Implemented on dev — 3×3 matrix condition-risk diagnostics (2026-10-29; release QA pending)
+
+- Display scientific-notation singular values and numerical rank cutoff for matrix pseudoinverses; classify real 3×3 results as well-conditioned, moderately conditioned, ill-conditioned or rank deficient. Preserve the strict Moore–Penrose stability rejection and Equation transfer. Add independent rotated numerical oracle, scaled/near-dependent/invalid tests, structural parity and mandatory Chromium/mobile regression.
+- Exact dev/PR/main Quality and Pages release gates remain pending; no production claim before verification.
+
+## Released via PR #81 — Real 3×3 pseudoinverse (2026-10-29)
+
+- Scaled one-sided Jacobi SVD supports bounded real 3×3 rank0–3 Moore–Penrose inverse, finite full-rank condition number, relative rank cutoff, four identity checks, invalid/unstable rejection, Equation transfer and offline standalone HTML. New structural and mandatory Chromium numerical/browser regression; previous 2×2/3×2/2×3 behavior preserved.
+- [dev Quality 40826768921](https://github.com/saeedsai/ProMathStudio/actions/runs/40826768921), [PR Quality 40827183706](https://github.com/saeedsai/ProMathStudio/actions/runs/40827183706), [main Quality 40827675167](https://github.com/saeedsai/ProMathStudio/actions/runs/40827675167), [post-merge dev Quality 40827684515](https://github.com/saeedsai/ProMathStudio/actions/runs/40827684515) passed 94/94 steps; [Pages 40827674436](https://github.com/saeedsai/ProMathStudio/actions/runs/40827674436) succeeded for `main=128e578683e4f13960db6b3dd42f59c0add43ab5`. Independent hosted interaction unavailable.
+
 ## Implemented on dev — Real 3×3 pseudoinverse (2026-10-29; QA pending)
 
 - Added scaled one-sided Jacobi SVD for rank 0–3 real 3×3 Moore–Penrose pseudoinverse, four identity residual checks, finite condition diagnostics, explicit instability rejection, Equation transfer and self-contained bundle parity. Added structural and mandatory Chromium numerical/reference/responsive regression; release awaits exact dev/PR/main Quality and Pages.

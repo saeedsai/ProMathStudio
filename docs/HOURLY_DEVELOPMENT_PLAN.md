@@ -1,3 +1,14 @@
+## 2026-10-29 — Weighted least-squares matrix UI (MATH-MATRIX-WLS-UI-001)
+
+**Implemented on dev; release pending:** The existing QR-based bounded 3×2 weighted least-squares engine now has an actual user-facing matrix-calculator operation, three editable positive relative observation weights (default 1), weighted residual diagnostics, error/recovery feedback, and Equation Editor transfer of fitted coefficients. The standalone `index.html` was synchronized. New `tests/smoke_matrix_weighted_least_squares.py` checks the analytical reference A=[[1,0],[1,1],[1,2]], b=[1,2,9], weights=[1,1,0.01] => x=[33/35,41/35], weighted SSE=12/35, invalid zero weight, wrong matrix dimensions, stale-send invalidation, editor routing, mobile visibility and page errors. Registered the browser regression in Quality. No claim of arbitrary N×M, automatic unit conversion or production deployment.
+
+**NEXT FIVE (status, dependencies, acceptance):**
+1. **P0 — Exact-head weighted UI QA and safe PR release (in QA).** Dependency: GitHub Actions. Acceptance: structural/unittest, full Chromium Quality, source/bundle reproducibility, PR required checks and Pages verification at exact main SHA; fix real failures rather than skipping checks.
+2. **P0 — Weighted LS input hardening and numeric scale stress (planned).** Dependency: stable 3×2 QR API. Acceptance: explicit decimal-only b validation, positive finite weights, scaled A/b, rank-deficient/near-singular fixtures, no NaN/Infinity and no stale editor export.
+3. **P0 — Shared linear-system solver across matrix and engineering workspaces (planned).** Dependency: canonical stable solver ID and shared math service. Acceptance: two real consumers reuse one kernel, 2×2/3×3 reference residuals, singular/inconsistent negative tests, unit/graph round-trip.
+4. **P0 — RK45 singular derivative/overflow diagnostics (planned).** Dependency: existing ODE solver. Acceptance: domain failure and overflow errors surfaced without stale table/export, forward/backward analytic reference, browser/mobile tests.
+5. **P1 — Contextual matrix action grouping without feature loss (planned).** Dependency: current matrix UI. Acceptance: no duplicate Run/Send controls, all matrix operations keyboard-accessible on 390px mobile, full browser regression and saved project compatibility.
+
 ## 2026-10-29 — Machine-readable alias review (dev QA)
 
 **New feature:** `python scripts/build_toolbox_registry.py --alias-review-json` emits deterministic JSON for cross-discipline title-overlap reviews. This is planning-only data; no solver aliases or unverified implementations are activated. Markdown and JSON review flags are mutually exclusive with a clear CLI error. Two focused regressions validate CLI JSON parity/determinism and flag rejection. **Status:** dev source/test committed; exact-head Quality and Pages release pending.

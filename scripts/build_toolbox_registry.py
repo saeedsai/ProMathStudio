@@ -108,11 +108,56 @@ def build():
     }
 
 
+
+def alias_review_rows(registry):
+    """Return cross-catalog title matches for human review, never solver aliases."""
+    by_id = {item["id"]: item for item in registry["entries"]}
+    rows = []
+    for candidate in registry["aliasCandidates"]:
+        matches = [by_id[fid] for fid in candidate["ids"]]
+        catalogs = sorted({item["catalog"] for item in matches})
+        if len(catalogs) < 2:
+            continue
+        rows.append({
+            "normalizedTitle": candidate["normalizedTitle"],
+            "catalogs": catalogs,
+            "featureIds": candidate["ids"],
+            "reviewStatus": "manual-review-required",
+        })
+    return rows
+
+
+def alias_review_markdown(registry):
+    """Deterministic, readable review queue for overlapping discipline catalogs."""
+    rows = alias_review_rows(registry)
+    lines = [
+        "# Engineering toolbox title overlaps — manual review",
+        "",
+        "Matching titles are not evidence of equivalent numerical algorithms.",
+        "No solver IDs or runtime aliases are created by this report.",
+        "",
+        f"Cross-catalog review groups: {len(rows)}",
+        "",
+    ]
+    for row in rows:
+        lines.append(f"## {row['normalizedTitle']}")
+        lines.append("")
+        lines.append("Catalogs: " + ", ".join(row["catalogs"]))
+        lines.append("Review status: manual-review-required")
+        lines.extend("- `" + fid + "`" for fid in row["featureIds"])
+        lines.append("")
+    return "\n".join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--alias-review", action="store_true", help="Print cross-catalog title matches for manual review")
     args = parser.parse_args()
     registry = build()
+    if args.alias_review:
+        print(alias_review_markdown(registry))
+        return
     encoded = json.dumps(registry, indent=2, ensure_ascii=False) + "\n"
     if args.check:
         if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != encoded:

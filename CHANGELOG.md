@@ -1,3 +1,9 @@
+## PR #89 merged — 3×3 SVD conditioning and rank-cutoff diagnostics (2026-10-29)
+
+- Released to `main` through ordinary expected-head [PR #89](https://github.com/saeedsai/ProMathStudio/pull/89), merge commit `aab6236604f0716487a56bf2d0d9ec56e4713d90`, after exact-head [PR Quality 40878671063](https://github.com/saeedsai/ProMathStudio/actions/runs/40878671063) passed **103/103 steps** at `622273b630ef07f8a658f26c714bb44d41ade416` (all successful, zero unresolved review threads). Dev fast-forwarded without force.
+- Initial PR CI failed from malformed JS diagnostic text; repaired the quote and added a `node --check` structural regression before merging. Existing 3×3 SVD reconstruction and orthogonality gates remain unchanged. Scale-safe condition estimate, cutoff and risk advisory are now present in merged source.
+- Main push Quality, GitHub Pages deployment and live hosted behavior are **not independently verified**: available connector exposes PR-triggered runs only, and direct Pages/Actions web fetch is disabled. Do not mark production deployed until confirmed.
+
 ### PR #89 CI recovery checkpoint (2026-10-29)
 
 - Initial [PR Quality 40878422463](https://github.com/saeedsai/ProMathStudio/actions/runs/40878422463) failed the existing browser smoke because the new SVD diagnostic output concatenation omitted a closing JavaScript string quote. Fixed the source and standalone bundle, and strengthened the new structural test to run `node --check` on the matrix module so this syntax regression is caught before Chromium. No assertions or security gates were disabled. Exact repaired-head CI is pending.

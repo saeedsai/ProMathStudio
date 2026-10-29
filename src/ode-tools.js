@@ -56,7 +56,14 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  if(!Number.isInteger(maxSteps)||maxSteps<4||maxSteps>10000)throw Error('Maximum attempts must be an integer from 4 to 10000.');
  const span=t1-t0, direction=Math.sign(span);
  if(!Number.isFinite(span)||!direction)throw Error('Invalid integration interval.');
- const f=(t,y)=>bounded(M.numerical.evaluate(expression,{t:bounded(t,'Time'),y:bounded(y,'State')}),'Derivative');
+ const f=(t,y,stage)=>{
+  try{
+   return bounded(M.numerical.evaluate(expression,{t:bounded(t,'Time'),y:bounded(y,'State')}),'Derivative');
+  }catch(error){
+   throw Error('RK45 '+stage+' derivative failed at t='+Number(t).toPrecision(10)+
+    ', y='+Number(y).toPrecision(10)+': '+(error?.message||String(error)));
+  }
+ };
  let t=t0,y=y0,h=span/20,attempts=0,rejected=0,accepted=0;
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
@@ -71,14 +78,14 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   h=nextT-t;
   if(!(direction*h>0))throw Error('Adaptive step size underflow at current time resolution; rescale time or relax tolerance.');
   attempts++;
-  const k1=f(t,y);
-  const k2=f(t+h/5,y+h*k1/5);
-  const k3=f(t+3*h/10,y+h*(3*k1/40+9*k2/40));
-  const k4=f(t+4*h/5,y+h*(44*k1/45-56*k2/15+32*k3/9));
-  const k5=f(t+8*h/9,y+h*(19372*k1/6561-25360*k2/2187+64448*k3/6561-212*k4/729));
-  const k6=f(t+h,y+h*(9017*k1/3168-355*k2/33+46732*k3/5247+49*k4/176-5103*k5/18656));
+  const k1=f(t,y,'k1');
+  const k2=f(t+h/5,y+h*k1/5,'k2');
+  const k3=f(t+3*h/10,y+h*(3*k1/40+9*k2/40),'k3');
+  const k4=f(t+4*h/5,y+h*(44*k1/45-56*k2/15+32*k3/9),'k4');
+  const k5=f(t+8*h/9,y+h*(19372*k1/6561-25360*k2/2187+64448*k3/6561-212*k4/729),'k5');
+  const k6=f(t+h,y+h*(9017*k1/3168-355*k2/33+46732*k3/5247+49*k4/176-5103*k5/18656),'k6');
   const y5=bounded(y+h*(35*k1/384+500*k3/1113+125*k4/192-2187*k5/6784+11*k6/84),'State');
-  const k7=f(t+h,y5);
+  const k7=f(t+h,y5,'k7');
   const y4=bounded(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State');
   const error=Math.abs(y5-y4),scale=tolerance*(1+Math.max(Math.abs(y),Math.abs(y5)));
   if(error<=scale){

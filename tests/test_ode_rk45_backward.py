@@ -17,7 +17,11 @@ class BackwardAdaptiveRK45(unittest.TestCase):
             "function solveSystem(", 1)[0]
         self.assertIn("direction=Math.sign(span)", adaptive)
         self.assertIn("while(direction*(t1-t)>0)", adaptive)
-        self.assertIn("h=direction*Math.min(Math.abs(h),Math.abs(t1-t))", adaptive)
+        self.assertIn("h=direction*Math.min(Math.abs(h),Math.abs(remaining))", adaptive)
+        self.assertIn("const remaining=t1-t", adaptive)
+        self.assertIn("const quantum=timeResolution(t,direction)", adaptive)
+        self.assertIn("h=nextT-t", adaptive)
+        self.assertIn("if(Math.abs(h)<=quantum)throw Error", adaptive)
         self.assertIn("if(t1===t0)throw Error", adaptive)
         self.assertIn("forward or backward", adaptive)
 

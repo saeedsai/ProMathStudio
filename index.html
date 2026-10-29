@@ -2242,7 +2242,16 @@ def _ms_system(job_text):
     }
     return assertFinite(v);
   }
-  window.MathStudio.customFunctions.evaluate=(name,args)=>{const expression=name+'('+args.map(v=>String(v)).join(',')+')';return numeric(parseRaw(expression)).re;};
+  // Bind numeric arguments directly: converting 1e308 to source text would
+  // misparse scientific notation as a variable in the notation parser.
+  window.MathStudio.customFunctions.evaluate=(name,args)=>{
+    const fn=window.MathStudio.customFunctions.find(name);
+    if(!fn)throw Error('Unknown custom function.');
+    if(!Array.isArray(args)||args.length!==fn.params.length)throw Error('#ARGS');
+    if(fn.type==='python')throw Error('Python functions run asynchronously.');
+    const env=Object.fromEntries(fn.params.map((key,i)=>[key,C(args[i])]));
+    return numeric(parseRaw(fn.expression),env).re;
+  };
   function formatScalar(n, digits=12){
     if(!Number.isFinite(n))return String(n);
     if(Math.abs(n)<1e-13)return '0';

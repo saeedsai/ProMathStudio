@@ -1,3 +1,9 @@
+## Dev candidate — 3×3 real SVD diagnostics (2026-10-29)
+
+- Added a bounded real 3×3 one-sided Jacobi SVD to Matrix Calculator (alongside existing 2×2), returning sorted singular values, U/V, numerical rank, condition number when full rank, and verified reconstruction/orthogonality residuals. Rank-deficient cases use orthogonal null-space completion; no dynamic evaluation or external libraries.
+- Preserved SVD factor transfer to Equation and updated UI descriptions. Synchronized `src/matrix-tools.js` and bundled `index.html`. Added mandatory Chromium numerical/UI regression `tests/smoke_matrix_svd_3x3.py` for rank 0–3, scaled, rotated, ill-conditioned and invalid inputs, factor transfer and mobile layouts.
+- This is a **dev candidate** only until exact-head PR Quality and production Pages verification are complete. It shares the current `dev`→`main` PR with the preceding tiny nonzero display correction.
+
 ## Dev checkpoint — Preserve tiny nonzero matrix results (2026-10-29)
 
 - Preserve true nonzero matrix values below 1e-13 in result formatting rather than silently displaying them as zero; retain exact numeric zero as `0` and existing 12-significant-digit formatting.

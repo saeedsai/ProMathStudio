@@ -1,3 +1,17 @@
+## 2026-10-29 — Computation-first interface refresh (user-requested priority)
+
+**Feature ledger: IMPLEMENTED ON DEV; REQUIRED CI / BROWSER QA / DEPLOYMENT PENDING.** User requested a one-shot visual and usability refresh inspired by Wolfram|Alpha. Added an original teal/ivory/amber visual design in the existing standalone `index.html`: clearer workstation tabs, differentiated math inputs and answer surfaces, consolidated visual hierarchy, sidebar math search and palette treatment, consistent buttons/cards, keyboard focus rings, reduced-motion accommodation and 760/440px responsive layout. All existing controls and navigation hooks remain; do not describe this as supporting Wolfram|Alpha natural-language queries or engines. Structural regression `tests/test_computation_first_ui.py` checks redesign uniqueness, workstation hooks, responsive and accessibility coverage. Full browser and required CI are pending. No `main` change has been made; Pages not verified. This design work was prioritized by explicit user request over the previous matrix backlog.
+
+### NEXT FIVE — concrete features and acceptance tests
+
+| Priority | Feature | Acceptance tests | Status |
+|---:|---|---|---|
+| 1 | Release redesigned interface | Full exact-head CI, structural/browser smoke, desktop and 390px mobile navigation/input/answers, no console exceptions; normal dev→main PR, main Quality and Pages check | DEV / QA PENDING |
+| 2 | Verify hosted release | Confirm exact deployed SHA, Pages publish, calculator/equation/graphs/data tables and mobile keyboard use without console errors | ACCESS BLOCKED |
+| 3 | Rectangular SVD near-cutoff reliability | Independent 80+ digit oracle around cutoff; rank1/rank2 references, orthogonality/reconstruction, Chromium | TODO |
+| 4 | Rectangular SVD/pseudoinverse agreement | Rank0/1/2 3×2/2×3, four Moore–Penrose identities, UI numeric parity | TODO |
+| 5 | Graph & Data Tables usability | Import cancel rollback, graph roots/fractions, responsive displays, no runtime errors | TODO |
+
 ## 2026-10-29 15 CET — PR #90 Quality green, ordinary merge; Pages unverified
 
 **Feature ledger: MERGED SOURCE / PRODUCTION NOT VERIFIED.** Rectangular 3×2 and 2×3 SVD now expose a scale-safe absolute numerical rank cutoff and conditioning advisory; 3×2 uses normalized QR singular values for condition ratio, while 2×3 inherits transpose-equivalent diagnostics. The Matrix SVD button now names all four supported sizes. Existing numerical reconstruction/orthogonality gates and Equation Editor factor transfer remain intact. Structural `tests/test_matrix_svd_rectangular_condition.py` and mandatory Chromium `tests/smoke_matrix_svd_rectangular_condition.py` cover 80-digit rotated near-rank-one references, three valid scales, rank0/1/2, condition categories, transpose parity, invalid inputs, UI transfer and responsive layouts. Direct exact-source V8 numerical checks passed nine near-rank-one matrices plus **500 deterministic matrices** (max relative reconstruction residual ~6.77e-16, max orthogonality ~6.66e-16). The new 1e12 high-scale reference initially exceeded the per-entry validation bound and was corrected to 1e11 before PR CI.

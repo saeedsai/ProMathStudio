@@ -66,6 +66,9 @@ def main():
         page.locator('#mat-svd-factor').select_option('S')
         page.locator('#mat-send').click()
         assert 'matrix([3],[2],[1])' in page.locator('#equation-input').input_value()
+        # Equation transfer changes workspace; return to Matrix before visibility checks.
+        page.locator('[data-workspace="calculator"]').click()
+        page.locator('#workspace-task-select').select_option('matrix')
         for width in (390,768,1280):
             page.set_viewport_size({'width':width,'height':850})
             assert page.locator('#mat-svd').is_visible()

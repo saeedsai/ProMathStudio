@@ -1,3 +1,16 @@
+## 2026-10-30 — RK45 bounded stage-overflow recovery (MATH-ODE-RK45-OVERFLOW-035)
+
+**Implemented on dev; full exact-head CI/Pages pending.** Adaptive scalar Dormand–Prince RK45 now retries bounded intermediate-stage state/derivative overflow by halving the attempted step, counting the retry as a rejection within the existing attempt budget. A step-independent k1 failure and non-overflow syntax/domain errors still fail immediately; exhausted floating-point time resolution raises contextual progress error. Retains original local-error acceptance, max-attempt bounds and forward/backward integration. Reports stage-overflow retry count in result and UI; source and offline HTML synchronized. Focused Node/Python numerical regression covers forward/backward guarded exponential, smooth control, rejection accounting and invalid k1; new mandatory Chromium regression covers a real -3000*y workload, recovery, disabled stale exports and 390px viewport. Direct isolated V8 tests passed: forward and backward 4 overflow retries each, 334 accepted, 18 rejected, terminal |y|<1e-8; -3000*y 1 overflow retry, 971 attempts, 939 accepted, 32 rejected. Full Python/Chromium CI not yet verified. Historical 166 gaps and 95 partial features remain baseline counts.
+
+**NEXT FIVE concrete features (priority / acceptance tests):**
+1. **P0 — Verify exact-head RK45 CI and repair failures.** Python structural/unit suite and all Chromium smoke tests green for precise dev SHA, including source/bundle parity, RK45 progress and new overflow cases; no weakened gates.
+2. **P0 — Safe release and Pages verification.** With exact dev Quality and PR checks/approvals green, inspect diff, merge dev→main by ordinary PR, confirm new main Quality, Pages deploy and hosted critical path when possible; no direct main push.
+3. **P1 — Control transient x1/x2 plot handoff.** Reuse Data Tables/Graphs chart pipeline; verify both state series, timestamps, disabled stale export, keyboard and 390px viewport; no duplicate plotting kernel.
+4. **P1 — RK45 overflow underflow and pathological domain tests.** Verify near-ULP forward/backward failure context, attempt budget, nonrecoverable k1, invalid expressions and finite-state numerical reference in Node and Chromium.
+5. **P1 — Saved-project Matrix/Graph/Table compatibility.** v1/v2 round-trip fixtures, malformed import atomic rollback, focus restoration and 390px Chromium tests.
+
+**Execution checkpoint:** initial dev/main 220f7641f1358ea3fc706c5334c6c7d7493bef52 (identical); direct V8 reference checks passed; exact final dev SHA, CI/PR/Pages to be checked. No obsolete branch deletion without verified containment/protection checks.
+
 ## 2026-10-30 — Control RK4 transient convergence (CONTROL-TRANSIENT-CONVERGENCE-034)
 
 **Implemented on dev, CI pending.** Compare base two-state RK4 endpoint against a 2N-step refined run, displaying maximum absolute endpoint difference. Refinement only attempted for N<=500 to retain solver limit (1000); when unavailable, preserve original trajectory and Data Tables export. This is a convergence diagnostic, not a global error bound. The existing coupled ODE solver and offline bundle are reused. Added focused structural parity tests and extended Chromium browser regression for N=500/501, invalidation, export and mobile.

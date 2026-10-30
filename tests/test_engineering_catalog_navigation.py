@@ -10,7 +10,7 @@ class EngineeringCatalogTests(unittest.TestCase):
   self.assertIn('("promath-engineering-catalog", "src/engineering-catalog.js")',(ROOT/'scripts/build.py').read_text(encoding='utf-8'))
   self.assertIn("engineering:$('engineering-panel')",html)
   self.assertIn("mode==='engineering'?['engineering']",html)
-  self.assertIn("id:'matrix.solve.real.small'",src) if False else self.assertIn("'matrix.solve.real.small'",src)
+  self.assertIn("'matrix.solve.real.small'",src)
   self.assertIn("'fluids.pipe.network'",src)
   self.assertNotIn('eval(',src)
  @unittest.skipUnless(shutil.which('node'),'Node.js required')

@@ -1008,8 +1008,39 @@ send.addEventListener('click',()=>{
  try{M.bridge.transfer('editor',notation(last.operation==='rref'?last.value.matrix:(last.operation==='solve'||last.operation==='leastSquares'||last.operation==='weightedLeastSquares')?last.value.solution.map(x=>[x]):last.operation==='lu'?last.value[document.getElementById('mat-lu-factor').value]:last.operation==='qr'?last.value[document.getElementById('mat-qr-factor').value]:last.operation==='eigen'?(document.getElementById('mat-eigen-factor').value==='values'?last.value.values.map(x=>[x]):last.value.vectors):last.operation==='svd'?(document.getElementById('mat-svd-factor').value==='S'?last.value.S.map(x=>[x]):last.value[document.getElementById('mat-svd-factor').value]):last.operation==='pseudoinverse'?last.value.matrix:last.value),{source:'matrix calculator'});}
  catch(error){output.classList.add('error');output.textContent=error.message;}
 });
+// Persist editable Matrix drafts in project backups without recomputing stale results.
+function exportState(){
+ const dimension=id=>Number(document.getElementById(id).value);
+ const values=container=>[...container.querySelectorAll('input')].map(input=>input.value);
+ return {rows:dimension('mat-rows'),cols:dimension('mat-cols'),
+  bRows:dimension('mat-b-rows'),bCols:dimension('mat-b-cols'),
+  a:values(grid),b:values(gridB),rhs:values(rhsGrid),weights:values(weightGrid)};
+}
+function restoreState(state){
+ if(state===undefined||state===null)return; // Older projects did not save Matrix drafts.
+ const dim=key=>state[key];
+ if(!state||typeof state!=='object'||Array.isArray(state)||
+    !['rows','cols','bRows','bCols'].every(key=>[2,3].includes(dim(key))))
+  throw Error('Invalid saved Matrix dimensions.');
+ const numericDraft=value=>typeof value==='string'&&value.length<=80&&
+  (value===''||/^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?$/.test(value));
+ for(const [key,length] of [['a',state.rows*state.cols],['b',state.bRows*state.bCols],
+    ['rhs',state.rows],['weights',state.rows]]){
+  if(!Array.isArray(state[key])||state[key].length!==length||!state[key].every(numericDraft))
+   throw Error('Invalid saved Matrix '+key+' entries.');
+ }
+ // Validate everything before replacing any DOM input. Rebuilds only refocus a
+ // cell when that grid owned focus, never when another editor was active.
+ for(const [id,value] of [['mat-rows',state.rows],['mat-cols',state.cols],
+   ['mat-b-rows',state.bRows],['mat-b-cols',state.bCols]])
+  document.getElementById(id).value=String(value);
+ rebuild();rebuildSecond();rebuildRhs();rebuildWeights();
+ for(const [container,key] of [[grid,'a'],[gridB,'b'],[rhsGrid,'rhs'],[weightGrid,'weights']])
+  [...container.querySelectorAll('input')].forEach((input,i)=>{input.value=state[key][i];});
+ invalidate();
+}
 rebuild();rebuildSecond();rebuildRhs();rebuildWeights();
-M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,weightedLeastSquares,eigenSymmetric,svd2x2,svd3x2,svd2x3,svd3x3,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,readWeights,calculate};
+M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,weightedLeastSquares,eigenSymmetric,svd2x2,svd3x2,svd2x3,svd3x3,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,readWeights,calculate,exportState,restoreState};
 M.matrixTools.conditionInfinity=conditionInfinity;
 M.engineeringSolvers=engineeringSolvers;
 })();

@@ -14,7 +14,8 @@ class RK45StageOverflowTests(unittest.TestCase):
         embedded = html.split('<script id="promath-ode-tools">\n', 1)[1].split("</script>", 1)[0].rstrip("\n")
         self.assertEqual(source, embedded)
         self.assertIn("stageOverflowRejected", source)
-        self.assertIn("message.includes('RK45 k1 derivative failed')", source)
+        self.assertIn("error?.code!=='RK45_STAGE_BOUND'", source)
+        self.assertIn("error.stage==='k1'", source)
         self.assertIn("h*=0.5;", source)
 
     @unittest.skipUnless(shutil.which("node"), "Node.js required")

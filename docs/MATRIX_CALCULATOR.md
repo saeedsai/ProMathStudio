@@ -68,3 +68,8 @@ General-dimension arrays, larger/weighted least-squares and underdetermined syst
 ## Condition-number sensitivity guidance
 
 Solve Ax=b and Inverse now show a heuristic warning when κ∞(A) ≥ 1e8 for supported real 2×2/3×3 matrices. This is a practical binary64 sensitivity warning threshold, not a strict mathematical boundary. A=diag(1e-9,1e9) has κ∞=1e18 and is flagged; A=I has κ∞=1 and is not flagged. A small residual or normwise backward error measures how well the computed solution satisfies the supplied equations, not guaranteed forward accuracy for an ill-conditioned matrix. Values below the threshold are **not** accuracy-certified. The shared scaled-pivot solver, singular checks and Equation Editor transfer are unchanged. Reference, threshold, invalid-input, standalone and browser/mobile regressions: `tests/test_matrix_condition_guidance.py` and `tests/smoke_matrix_condition_guidance.py`.
+
+
+## Contextual Equation Editor transfer controls
+
+The Matrix Calculator now separates operation buttons from the result-transfer action row. LU, QR, symmetric Eigen and SVD factor/output selectors appear **only after a successful result of the corresponding operation**; the other three selectors stay hidden. Editing an input, changing dimensions, or producing an invalid/singular result hides every factor selector and disables stale result transfer. This is a presentation change, not a new numerical algorithm: all 16 matrix operations, saved input values, factor choices, keyboard focus, and Equation Editor transfer remain available. The transfer button stays visible and disabled until a successful calculation. Regression coverage: `tests/test_matrix_contextual_transfer.py`, `tests/smoke_matrix_contextual_transfer.py`.

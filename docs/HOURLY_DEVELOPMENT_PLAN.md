@@ -1,3 +1,16 @@
+## 2026-10-30 — RK45 difficult-workload rejection advisory (MATH-ODE-RK45-WORKLOAD-030)
+
+**Implemented on dev, exact-head QA pending.** Adaptive scalar RK45 now records the longest consecutive rejection streak, includes it in attempt-exhaustion diagnostics, and warns after at least five rejected steps or a streak of three. This is a workload/accuracy advisory, **not** a stiffness diagnosis or global-error guarantee; numerical integration and accepted/rejected step decisions are unchanged. The UI warning disappears on successful smooth reruns and stale export actions remain disabled after errors. Source and standalone HTML synchronized; focused Node/Python forward/backward -100/+100 exponential references, invalid-input and exhaustion tests, plus mandatory Chromium 390px/stale-export recovery regression added. The existing historical inventory counts remain frozen.
+
+**NEXT FIVE (status, dependencies, acceptance tests):**
+1. **P1 — Exact-head RK45 workload QA and safe release (in progress).** Structural/unit suite, Chromium desktop/390px and project/browser regressions green on exact dev SHA; PR checks green, ordinary dev-to-main merge, main Quality and Pages confirmed.
+2. **P1 — Engineering Toolbox Control/GNSS/Signals catalog QA (in progress).** Confirm nine unique disciplines, truthful planned actions, keyboard search, responsive layout, no duplicated numerical kernels; fix any CI regressions.
+3. **P1 — Control transient response (planned).** Reuse bounded numerical ODE backend for 2-state xdot=−Ax+b; analytical reference trajectories, singular/invalid inputs, stale result and mobile tests.
+4. **P1 — RK45 stage overflow recovery (planned).** Safely retry bounded stage overflows with reduced step only when mathematically appropriate; forward/backward stiff-like analytic references, bounded retry exhaustion, preserve domain-error messages.
+5. **P1 — Saved-project compatibility (planned).** Legacy Matrix/Graph/Table imports, atomic rollback, keyboard focus and 390px browser round-trips.
+
+**Execution checkpoint:** Started dev 3a5bc90bcfdada223fef88470bf5c2af2f87ecac, main 56d5eaebec9e15f2dcbeb9a36f1e1a9180cee313, no open PR; earlier CI pending. Exact new SHA, QA and deployment status require verification. No branch creation, CI bypass or cleanup without evidence.
+
 ## 2026-10-30 — Engineering catalog Control/GNSS/Signals expansion (UI-ENGINEERING-CATALOG-029)
 
 **Implemented on dev, QA pending:** Expanded the searchable Engineering Toolbox discipline selector from six to nine by adding Control Theory, GNSS Positioning and Signal Engineering. The existing bounded Control equilibrium adapter remains available; the new GNSS least-squares, signal spectral and Control frequency workflows are explicitly labeled planned, without runnable actions or duplicate solver implementations. Preserved the original six disciplines and offline index.html. Added focused Node/Python registry-uniqueness/source-bundle test and updated mandatory Chromium search/status/mobile regression. No algorithm equivalence or completion claims.

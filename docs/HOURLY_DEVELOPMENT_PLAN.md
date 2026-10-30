@@ -1,3 +1,16 @@
+## 2026-10-30 — Cross-discipline Control equilibrium (ARCH-CONTROL-EQUILIBRIUM-020)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** Bounded real 2×2/3×3 Control state equilibrium for ẋ = −A·x + b uses the same `matrix.solve.real.small` scaled-pivot solver as Matrix Calculator. No duplicate elimination. Displays residual and backward error, clears stale output, rejects singular/inconsistent inputs. Existence does not establish stability; no unit checking. Added `tests/test_control_equilibrium.py` numerical/negative/bundle parity and mandatory Chromium `tests/smoke_control_equilibrium.py` desktop/mobile/recovery. Previous registry release PR #110 passed dev/main Quality and Pages at `08da4b37bd9f9f1655399ca774b146edc7bd24c8`.
+
+**NEXT FIVE (priority, dependencies, acceptance tests):**
+1. **P1 — Engineering Toolbox searchable navigation (planned).** Canonical registry; six-discipline search/filter, honest implemented/planned status, keyboard/390px Chromium tests, no fake actions.
+2. **P1 — RK45 difficult-problem robustness (planned).** Adaptive diagnostics; forward/backward references, underflow/attempt exhaustion, stale-export recovery and mobile tests.
+3. **P1 — Matrix saved-project focus round-trip (planned).** Focus restoration; saved dimensions/drafts, no selector focus hijack, project/mobile browser tests.
+4. **P1 — Registry contracts and diagnostics (planned).** Shared consumers; typed dimensions/assumptions, structured errors, condition guidance, immutability, invalid/reference tests.
+5. **P1 — Control equilibrium stability guidance (planned).** Bounded eigen analysis; stable/unstable/marginal references, assumptions and browser recovery.
+
+**Execution log (2026-10-30):** Baseline dev/main `08da4b37bd9f9f1655399ca774b146edc7bd24c8`; green main/dev Quality and Pages, no open PR, two unprotected branches. Source/bundle, new tests, CI, ledger, plan and changelog updated; exact candidate CI/PR/deployment pending. Frozen 166 gaps/95 partial remain unchanged.
+
 ## 2026-10-30 — Canonical bounded Matrix solver registry (ARCH-ENGINEERING-SOLVER-REGISTRY-019)
 
 **Implemented on dev; exact-head CI, PR promotion and Pages pending.** Added immutable source-backed runtime registry \`MathStudio.engineeringSolvers\` with stable unique IDs for real 2×2/3×3 Ax=b and inverse, strict input contract validation, and direct reuse of the existing scaled-pivot numerical kernels. The two actual Matrix UI operation consumers route through registry execution; future cross-discipline toolbox UI remains planned, not falsely marked implemented. New numerical/schema/duplicate-ID/standalone regression \`tests/test_engineering_solver_registry.py\` and Chromium two-consumer/singular-recovery/mobile regression \`tests/smoke_engineering_solver_registry.py\` are mandatory CI. Baseline dev/main \`fb286f3f54cffb609aec1d49861efdbd4b879458\`, Quality and Pages green. Historical 166 gaps/95 partial unchanged.

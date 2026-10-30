@@ -1,3 +1,7 @@
+## Control equilibrium shared solver
+
+The Control Theory panel in Graphs now solves ẋ = −A·x + b for the bounded 2×2/3×3 real model, calling the same `matrix.solve.real.small` solver as Matrix Calculator. For A=[[2,0],[0,3]], b=[4,9], x*=[2,3]. It reports row-relative/absolute residual and infinity-norm backward error; singular or inconsistent systems have no unique equilibrium. Equilibrium existence does not establish stability; no unit checking is performed.
+
 ## Canonical bounded solver registry (first runtime slice)
 
 The Matrix Calculator exposes a source-backed registry through \`MathStudio.engineeringSolvers\`: \`list()\`, \`get(id)\`, and \`execute(id, inputs)\`. Two stable solver IDs are \`matrix.solve.real.small\` (inputs \`{A,b}\`) and \`matrix.inverse.real.small\` (input \`{A}\`). Both visible Matrix buttons now execute through the registry, which delegates to the **existing** scaled-pivot solve/inverse functions; there is no second elimination kernel. Metadata includes stable IDs, status, mathematical discipline, required input names and result descriptions. Unknown IDs, missing/unexpected inputs and numerical invalidities are rejected, and metadata is immutable. This initial registry is available **only in the Matrix Calculator**; it does not claim an Engineering Toolbox workspace or cross-discipline UI is implemented. The supported domain remains finite real 2×2/3×3 square matrices and existing residual/singularity limitations. Tests: \`tests/test_engineering_solver_registry.py\` and \`tests/smoke_engineering_solver_registry.py\`.

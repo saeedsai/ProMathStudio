@@ -446,6 +446,17 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
 <div class="ct-actions"><button type="button" class="primary" id="ct-run">Analyze system</button><span id="ct-status" role="status" aria-live="polite">Ready</span></div>
 <canvas id="ct-canvas" width="900" height="390" role="img" aria-label="Control theory plot"></canvas>
 <pre id="ct-output" aria-live="polite"></pre>
+<details id="ct-equilibrium" class="ct-equilibrium">
+<summary>State equilibrium · real 2×2 / 3×3 (shared solver)</summary>
+<p>For the continuous-time model ẋ = −A·x + b with constant forcing, solve A·x* = b. A unique equilibrium does not establish stability. Values are dimensionless; no unit conversion is performed.</p>
+<div class="ct-equilibrium-fields">
+<label>State dimension<select id="ct-eq-size"><option value="2">2</option><option value="3">3</option></select></label>
+<label>Matrix A (semicolon-separated rows)<textarea id="ct-eq-matrix" rows="3" spellcheck="false">2, 0; 0, 3</textarea></label>
+<label>Forcing b (comma-separated values)<textarea id="ct-eq-forcing" rows="3" spellcheck="false">4, 9</textarea></label>
+</div>
+<div class="ct-actions"><button type="button" class="primary" id="ct-eq-run">Find equilibrium</button><span id="ct-eq-status" role="status" aria-live="polite">Ready</span></div>
+<pre id="ct-eq-output" aria-live="polite">No current result.</pre>
+</details>
 <p class="small-note">Bode/Nyquist sample ω = 0.01–1000 rad/s. Root locus samples 0 ≤ K ≤ 100. Feedback uses T(s)=KG(s)/(1+KG(s)), unity negative feedback. Feedforward design, compensator tuning and symbolic Laplace transforms are planned extensions.</p>
 </details>
 <details id="complex-graph-workbench" class="complex-workbench">
@@ -5928,11 +5939,11 @@ function conditionGuidance(k){
   'Below the 1e8 sensitivity warning threshold; this does not certify numerical accuracy.';
 }
 /* Canonical bounded engineering solver registry. Metadata is source-backed: these
-   operations are available in Matrix Calculator, not yet in discipline workspaces.
+   operations are shared by Matrix Calculator and bounded Control equilibrium.
    The UI and future adapters use these IDs instead of copying math kernels. */
 const engineeringSolverDefinitions=[
  {id:'matrix.solve.real.small',title:'Solve A·x=b',status:'implemented',
-  disciplines:['mathematics'],inputs:['A','b'],result:'solution with residual diagnostics',
+  disciplines:['mathematics','control-theory'],inputs:['A','b'],result:'solution with residual diagnostics',
   run:({A,b})=>solve(A,b)},
  {id:'matrix.inverse.real.small',title:'Inverse of A',status:'implemented',
   disciplines:['mathematics'],inputs:['A'],result:'inverse matrix',
@@ -7928,6 +7939,61 @@ catch(e){by('ct-status').textContent=e.message;by('ct-output').textContent='No v
 by('ct-run').addEventListener('click',analyze);
 window.ProMathControlTheory={coefficients,routh,roots,response,assignRoots,rootLocus,analyze};
 })();
+</script>
+<script id="promath-control-equilibrium">
+/* Control equilibrium xdot = -A*x + b; shared scaled-pivot Matrix solver. */
+(()=>{'use strict';
+const studio=window.MathStudio,root=document.getElementById('ct-equilibrium');
+if(!root||!studio||!studio.engineeringSolvers)return;
+const by=id=>document.getElementById(id);
+const size=by('ct-eq-size'),matrix=by('ct-eq-matrix'),forcing=by('ct-eq-forcing');
+const status=by('ct-eq-status'),output=by('ct-eq-output');
+function values(text,count,label){
+ if(typeof text!=='string'||text.length>512)throw Error(label+' input is too long.');
+ const raw=text.trim(),parts=raw.includes(',')?raw.split(',').map(x=>x.trim()):raw.split(/\s+/);
+ if(parts.length!==count||parts.some(x=>!x))throw Error(label+' requires exactly '+count+' values.');
+ return parts;
+}
+function parseMatrix(text,n){
+ if(typeof text!=='string'||text.length>512)throw Error('Matrix A input is too long.');
+ if(n!==2&&n!==3)throw Error('State dimension must be 2 or 3.');
+ const rows=text.trim().split(/\s*;\s*|\n+/);
+ if(rows.length!==n)throw Error('Matrix A requires exactly '+n+' rows.');
+ return rows.map((row,i)=>values(row,n,'Matrix A row '+(i+1)));
+}
+function solveEquilibrium(A,b){
+ return studio.engineeringSolvers.execute('matrix.solve.real.small',{A,b});
+}
+function invalidate(){
+ status.textContent='Inputs changed; recompute equilibrium.';
+ output.textContent='No current result.';
+}
+function calculate(){
+ try{
+  const n=Number(size.value);
+  if(n!==2&&n!==3)throw Error('State dimension must be 2 or 3.');
+  const result=solveEquilibrium(parseMatrix(matrix.value,n),values(forcing.value,n,'Forcing b'));
+  const fmt=x=>Number(x.toPrecision(10)).toString();
+  output.textContent='Equilibrium x* = ['+result.solution.map(fmt).join(', ')+']\n'+
+   'Maximum row-relative residual: '+fmt(result.residual)+'\n'+
+   'Maximum absolute residual: '+fmt(result.absoluteResidual)+'\n'+
+   'Normwise backward error (infinity norm): '+fmt(result.normwiseBackwardError);
+  status.textContent='Equilibrium computed for '+n+' states.';
+  return result;
+ }catch(error){
+  output.textContent='No valid equilibrium.';
+  status.textContent=error.message;
+  return null;
+ }
+}
+for(const control of [size,matrix,forcing]){
+ control.addEventListener('input',invalidate);
+ control.addEventListener('change',invalidate);
+}
+by('ct-eq-run').addEventListener('click',calculate);
+studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate});
+})();
+
 </script>
 </body>
 </html>

@@ -459,6 +459,18 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
 <pre id="ct-eq-output" aria-live="polite">No current result.</pre>
 <div class="ct-actions"><button type="button" id="ct-eq-stability-run">Analyze stability (symmetric A)</button><span id="ct-eq-stability-status" role="status" aria-live="polite">Ready</span></div>
 <pre id="ct-eq-stability-output" aria-live="polite">No current stability result.</pre>
+<details id="ct-eq-transient">
+<summary>Two-state transient response · shared fixed-step RK4</summary>
+<p>Simulate ẋ = −A·x + b with a real 2×2 matrix and constant forcing. Uses the existing coupled ODE solver; not a stiff solver or global-error guarantee. Compare different step counts.</p>
+<div class="ct-equilibrium-fields">
+<label>Initial state x(t₀), two values<input id="ct-eq-initial" value="0, 0" spellcheck="false"></label>
+<label>Initial time t₀<input id="ct-eq-t0" type="number" step="any" value="0"></label>
+<label>End time t₁<input id="ct-eq-t1" type="number" step="any" value="1"></label>
+<label>RK4 steps (4–1000)<input id="ct-eq-steps" type="number" min="4" max="1000" step="1" value="80"></label>
+</div>
+<div class="ct-actions"><button type="button" id="ct-eq-transient-run">Simulate trajectory</button><button type="button" id="ct-eq-transient-table" disabled>Save trajectory to Data Tables</button><span id="ct-eq-transient-status" role="status" aria-live="polite">Ready</span></div>
+<pre id="ct-eq-transient-output" aria-live="polite">No current trajectory.</pre>
+</details>
 </details>
 <p class="small-note">Bode/Nyquist sample ω = 0.01–1000 rad/s. Root locus samples 0 ≤ K ≤ 100. Feedback uses T(s)=KG(s)/(1+KG(s)), unity negative feedback. Feedforward design, compensator tuning and symbolic Laplace transforms are planned extensions.</p>
 </details>
@@ -8109,11 +8121,68 @@ function calculateStability(){
   return null;
  }
 }
+/* Bounded two-state trajectory; use the existing safe coupled RK4 engine. */
+function numericValues(parts,label){
+ return parts.map((part,i)=>{
+  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(part))
+   throw Error(label+' value '+(i+1)+' must be decimal or scientific notation.');
+  const n=Number(part);
+  if(!Number.isFinite(n)||Math.abs(n)>1e12)
+   throw Error(label+' value '+(i+1)+' must be finite with magnitude at most 1e12.');
+  return n;
+ });
+}
+let lastTransient=null;
+const transientStatus=by('ct-eq-transient-status'),transientOutput=by('ct-eq-transient-output');
+const transientTable=by('ct-eq-transient-table');
+function simulateTransient(A,b,x0,t0=0,t1=1,steps=80){
+ if(!Array.isArray(A)||A.length!==2||A.some(row=>!Array.isArray(row)||row.length!==2))
+  throw Error('Transient response requires a 2×2 matrix A.');
+ if(!Array.isArray(b)||b.length!==2||!Array.isArray(x0)||x0.length!==2)
+  throw Error('Transient response requires two forcing and initial-state values.');
+ if(!studio.odeTools?.solveSystem)throw Error('Shared coupled ODE solver is unavailable.');
+ const a=A.map((row,i)=>numericValues(row.map(String),'Matrix A row '+(i+1)));
+ const forcing=numericValues(b.map(String),'Forcing b');
+ const initial=numericValues(x0.map(String),'Initial state');
+ const expr=i=>'-('+a[i][0]+')*y-('+a[i][1]+')*z+('+forcing[i]+')';
+ return studio.odeTools.solveSystem({expression:expr(0),expressionZ:expr(1),
+  t0,t1,y0:initial[0],z0:initial[1],steps});
+}
+function calculateTransient(){
+ try{
+  if(Number(size.value)!==2)throw Error('Transient response currently supports exactly two states.');
+  const A=parseMatrix(matrix.value,2),b=values(forcing.value,2,'Forcing b');
+  const x0=values(by('ct-eq-initial').value,2,'Initial state');
+  lastTransient=simulateTransient(A,b,x0,by('ct-eq-t0').value,
+   by('ct-eq-t1').value,by('ct-eq-steps').value);
+  const fmt=n=>Number(n.toPrecision(10)).toString();
+  const end=lastTransient.rows.at(-1);
+  transientOutput.textContent='Coupled RK4 · '+lastTransient.steps+' fixed steps, '+
+   lastTransient.rows.length+' trajectory samples\n'+
+   'x('+fmt(end[0])+') ≈ ['+fmt(end[1])+', '+fmt(end[2])+']\n'+
+   'First samples (t, x1, x2):\n'+lastTransient.rows.slice(0,5)
+    .map(row=>row.map(fmt).join(', ')).join('\n')+'\n'+
+   'Fixed-step RK4 is not stiff or globally error-certified. Compare step counts for convergence.';
+  transientStatus.textContent='Two-state trajectory computed.';
+  transientTable.disabled=false;
+  return lastTransient;
+ }catch(error){
+  lastTransient=null;
+  if(transientTable)transientTable.disabled=true;
+  if(transientOutput)transientOutput.textContent='No current trajectory.';
+  if(transientStatus)transientStatus.textContent=error.message;
+  return null;
+ }
+}
 function invalidate(){
  status.textContent='Inputs changed; recompute equilibrium.';
  output.textContent='No current result.';
  stabilityStatus.textContent='Inputs changed; recompute stability.';
  stabilityOutput.textContent='No current stability result.';
+ lastTransient=null;
+ if(transientTable)transientTable.disabled=true;
+ if(transientStatus)transientStatus.textContent='Inputs changed; recompute trajectory.';
+ if(transientOutput)transientOutput.textContent='No current trajectory.';
 }
 function calculate(){
  try{
@@ -8139,9 +8208,21 @@ for(const control of [size,matrix,forcing]){
 }
 by('ct-eq-run').addEventListener('click',calculate);
 by('ct-eq-stability-run').addEventListener('click',calculateStability);
-studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate,analyzeStability,calculateStability});
+by('ct-eq-transient-run')?.addEventListener('click',calculateTransient);
+for(const id of ['ct-eq-initial','ct-eq-t0','ct-eq-t1','ct-eq-steps']){
+ const control=by(id);
+ control?.addEventListener('input',invalidate);
+ control?.addEventListener('change',invalidate);
+}
+transientTable?.addEventListener('click',()=>{
+ try{
+  if(!lastTransient)throw Error('Compute a trajectory before exporting.');
+  studio.dataTables.importData({headers:['t','x1','x2'],rows:lastTransient.rows},'CONTROL_TRANSIENT');
+  studio.advanced.mode('data');
+ }catch(error){transientStatus.textContent=error.message;}
+});
+studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate,analyzeStability,calculateStability,simulateTransient,calculateTransient});
 })();
-
 </script>
 <script id="promath-engineering-catalog">
 /* Searchable Engineering Toolbox: route to existing tested tools, never duplicate solvers. */

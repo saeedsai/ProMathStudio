@@ -1,5 +1,7 @@
 # Matrix calculator (bounded native functionality)
 
+Matrix A is the primary labeled section. Matrix B, right-hand side b and observation weights w are independently collapsible using mouse or keyboard. Initially expanded for compatibility, they preserve input drafts while collapsed and automatically reopen when a selected operation needs them. All 16 operations and Equation Editor transfer remain available.
+
 ProMathStudio offers a small **real-valued matrix calculator** inside the **Calculator** workspace. Open **Matrix calculator · 2×2 / 3×3**, choose 2 or 3 rows and columns, edit the numeric grid, then select **Determinant**, **Transpose**, **Inverse**, **A + B**, **A − B**, or **A × B**, **RREF (A)**, **Rank (A)**, **Solve A·x=b**, **LU (P·A=L·U)**, **QR (A=Q·R)**, **Least squares (A·x≈b)**, **SVD (2×2 A)**, or **Pseudoinverse (2×2 / 3×2 A)**. Binary operations use independently sized Matrix B.
 
 ## Operations and examples

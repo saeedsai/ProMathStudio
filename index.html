@@ -6317,17 +6317,17 @@ function notation(result){return typeof result==='number'?format(result):'matrix
 const area=el('details',{id:'matrix-tools',class:'matrix-tools'});
 area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<p class="small-note">Real-number matrices (2 or 3 rows/columns). Determinant and inverse require a square A; transpose, RREF/rank and binary arithmetic support rectangular shapes. LU requires a full-rank square A; QR requires rows ≥ columns and independent columns. Least squares requires a full-rank tall 3×2 A; weighted least squares also accepts three positive relative observation weights (1e-12 to 1e12). Eigenanalysis requires symmetric square A. SVD supports real 2×2, 3×2, 2×3 and 3×3 A; pseudoinverse supports real 2×2, 3×2, 2×3 and 3×3 A, including singular/zero matrices, with a relative 1e-12 singular-value cutoff, condition diagnostics and verified Moore–Penrose residuals. SVD reports U, singular values and V with reconstruction/orthogonality residuals. Results display about 12 significant digits.</p>'+
- '<div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
+ '<section class="matrix-input-section" aria-label="Matrix A inputs"><h3>Matrix A</h3><div class="matrix-controls"><label>Rows <select id="mat-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>Columns <select id="mat-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
- '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div>'+
- '<p class="small-note">Right-hand side b (for A·x=b or least squares)</p>'+
- '<div id="mat-rhs-grid" class="matrix-grid" aria-label="Right-hand side b entries"></div>'+
- '<p class="small-note">Observation weights w (weighted least squares, 3 positive values; default 1 each)</p>'+
- '<div id="mat-weight-grid" class="matrix-grid" aria-label="Observation weights"></div>'+
- '<p class="small-note">Matrix B (for addition, subtraction and multiplication)</p>'+
+ '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div></section>'+
+ '<details id="mat-rhs-section" class="matrix-input-section matrix-optional-input" open><summary>Right-hand side b (solve and least squares)</summary>'+
+ '<div id="mat-rhs-grid" class="matrix-grid" aria-label="Right-hand side b entries"></div></details>'+
+ '<details id="mat-weight-section" class="matrix-input-section matrix-optional-input" open><summary>Observation weights w (weighted least squares)</summary><p class="small-note">3 positive values, default 1 each</p>'+
+ '<div id="mat-weight-grid" class="matrix-grid" aria-label="Observation weights"></div></details>'+
+ '<details id="mat-b-section" class="matrix-input-section matrix-optional-input" open><summary>Matrix B (addition, subtraction and multiplication)</summary>'+
  '<div class="matrix-controls"><label>B rows <select id="mat-b-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
  '<label>B columns <select id="mat-b-cols"><option value="2">2</option><option value="3">3</option></select></label></div>'+
- '<div id="mat-b-grid" class="matrix-grid" aria-label="Matrix B entries"></div>'+
+ '<div id="mat-b-grid" class="matrix-grid" aria-label="Matrix B entries"></div></details>'+
  '<div class="matrix-actions"><button type="button" id="mat-det" class="secondary">Determinant</button>'+
  '<button type="button" id="mat-transpose" class="secondary">Transpose</button>'+
  '<button type="button" id="mat-inverse" class="secondary">Inverse</button>'+
@@ -6354,7 +6354,7 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
 panel.append(area);
 const style=el('style',{},'.matrix-tools{border-top:1px solid #dfe5f0;padding:13px 20px 16px}.matrix-tools summary{cursor:pointer;font-weight:700;color:#304cbb}'+
  '.matrix-controls,.matrix-actions,.matrix-result-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.matrix-result-actions [hidden]{display:none}.matrix-controls label{display:grid;gap:3px;font-size:13px}'+
- '.matrix-grid{display:grid;gap:7px;max-width:340px}.matrix-grid input{min-width:0;width:100%;padding:9px;border:1px solid #cdd8ec;border-radius:6px;text-align:center}'+
+ '.matrix-input-section{margin:12px 0;padding:10px 12px;border:1px solid #dfe5f0;border-radius:8px;min-width:0}.matrix-input-section h3{font-size:14px;margin:0 0 6px}.matrix-optional-input>summary{font-size:14px}.matrix-optional-input[open]>summary{margin-bottom:9px}.matrix-grid{display:grid;gap:7px;max-width:340px}.matrix-grid input{min-width:0;width:100%;padding:9px;border:1px solid #cdd8ec;border-radius:6px;text-align:center}'+
  '#mat-result{background:#f7f9ff;border:1px solid #dfe5f0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:8px}'+
  '#mat-result.error{color:#af2842;background:#fff5f5}');
 document.head.append(style);
@@ -6417,7 +6417,14 @@ function readSecond(){
  const rows=Number(document.getElementById('mat-b-rows').value),cols=Number(document.getElementById('mat-b-cols').value);
  return validate(Array.from({length:rows},(_,r)=>Array.from({length:cols},(_,c)=>gridB.querySelector('[data-row="'+r+'"][data-col="'+c+'"]').value)));
 }
+function revealRequiredInputs(operation){
+ const required=operation==='add'||operation==='subtract'||operation==='multiply'?['mat-b-section']:
+  operation==='weightedLeastSquares'?['mat-rhs-section','mat-weight-section']:
+  operation==='solve'||operation==='leastSquares'?['mat-rhs-section']:[];
+ for(const id of required)document.getElementById(id).open=true;
+}
 function calculate(operation){
+ revealRequiredInputs(operation);
  try{
   const A=read(),value=operation==='determinant'?determinant(A):
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):

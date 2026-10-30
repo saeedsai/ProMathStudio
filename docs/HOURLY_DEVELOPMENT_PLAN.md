@@ -1,3 +1,11 @@
+## 2026-10-30 — Engineering catalog Control/GNSS/Signals expansion (UI-ENGINEERING-CATALOG-029)
+
+**Implemented on dev, QA pending:** Expanded the searchable Engineering Toolbox discipline selector from six to nine by adding Control Theory, GNSS Positioning and Signal Engineering. The existing bounded Control equilibrium adapter remains available; the new GNSS least-squares, signal spectral and Control frequency workflows are explicitly labeled planned, without runnable actions or duplicate solver implementations. Preserved the original six disciplines and offline index.html. Added focused Node/Python registry-uniqueness/source-bundle test and updated mandatory Chromium search/status/mobile regression. No algorithm equivalence or completion claims.
+
+**NEXT FIVE acceptance:** (1) complete exact-head Quality including full Python + Chromium, fix regression if failed, then ordinary dev-to-main PR / main Quality / Pages; (2) RK45 near-stiff forward/backward analytical, attempt limit and disabled-export browser checks; (3) Control transient response through shared ODE with 2-state numerical trajectory references and browser recovery; (4) expand source-backed catalog for remaining approved disciplines, truthful planned states, stable IDs and mobile keyboard tests; (5) Matrix project compatibility round-trip and focus preservation, legacy import and mobile test.
+
+**Execution baseline:** dev c2f6fcfe0546527c28768f0acdc2e9cb4e7a7434, main 56d5eaebec9e15f2dcbeb9a36f1e1a9180cee313; previous exact-head Quality was in progress. No open PR. Current commit verification and deployment pending. Historic inventory frozen.
+
 ## 2026-10-30 — Engineering solver shape validation (ARCH-ENGINEERING-SHAPE-CODES-028)
 
 **Implemented on dev, exact-head QA pending:** Canonical Matrix solve/inverse registry now checks A is a 2x2 or 3x3 square array and matching b length before numerical dispatch. Structured codes INVALID_MATRIX_SHAPE and INVALID_VECTOR_LENGTH aid cross-toolbox adapters while leaving underlying scalar and singular error checks in place. Standalone HTML synchronized; regression tests test_engineering_solver_shapes.py added and previous contract test updated to require the new error code. Existing Control equilibrium and Matrix operations still reuse the same numerical kernels. Release requires exact-head CI and ordinary dev-to-main PR.

@@ -2,6 +2,12 @@
 
 Current entries and the **Next five features** queue are kept here (newest first). Older execution entries are in [archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md](archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md); the frozen baseline is the [audited inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md).
 
+## 2026-10-30 — RK45 stage-overflow bounded recovery (MATH-ODE-RK45-STAGE-OVERFLOW-035)
+
+**Implemented on the working branch; exact-head Quality, PR and Pages NOT yet verified.** Adaptive scalar RK45 now treats finite magnitude overflow (>1e12 or ±Infinity) in stages k2–k7 or the 5th/4th-order states as a rejected attempt: step is quartered and retried, counted in `stageOverflowRetries`, within the existing attempt limit and time-resolution floor. k1 overflow and NaN/evaluator domain errors stay fatal. Genuine blow-up (y′=y²) still ends with an attempt-exhaustion error naming the retries. Not a stiffness solver or accuracy certificate. Tests: `tests/test_ode_rk45_stage_overflow.py` (forward/backward ±1e5 references, blow-up, domain error, parity); local Chromium ODE smokes and 185 unit tests passed. Repo cleanup: older log moved to `docs/archive/`, stale QA report removed, generated registry ignored.
+
+**NEXT FIVE:** (1) exact-head Quality for this branch, PR to main, main Quality and Pages; (2) Control x1/x2 plot handoff via Data Tables/Graphs with keyboard/mobile/invalidation tests; (3) Matrix/Graph/Table project v1/v2 round-trips, rollback and focus tests; (4) Engineering catalog source-backed expansion with unique IDs; (5) surface `stageOverflowRetries` in the ODE UI with a browser assertion.
+
 ## 2026-10-30 — Control RK4 transient convergence (CONTROL-TRANSIENT-CONVERGENCE-034)
 
 **Implemented on dev, CI pending.** Compare base two-state RK4 endpoint against a 2N-step refined run, displaying maximum absolute endpoint difference. Refinement only attempted for N<=500 to retain solver limit (1000); when unavailable, preserve original trajectory and Data Tables export. This is a convergence diagnostic, not a global error bound. The existing coupled ODE solver and offline bundle are reused. Added focused structural parity tests and extended Chromium browser regression for N=500/501, invalidation, export and mobile.

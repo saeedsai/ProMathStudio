@@ -1,3 +1,14 @@
+## 2026-10-30 — Matrix grid keyboard navigation (UI-MATRIX-GRID-KEYBOARD-016)
+
+**Implemented on dev; exact-head CI, PR promotion and Pages pending.** Added arrow-key focus navigation within the Matrix A, Matrix B, RHS and weight numeric grids, including 2×2/3×3 and single-column cases. Boundaries prevent native number stepping; Tab, modified shortcuts, typing, drafts, algorithms and 16 operations remain unchanged. New direct Node/standalone-parity regression `tests/test_matrix_grid_keyboard.py` and mandatory Chromium `tests/smoke_matrix_grid_keyboard.py` cover all four grids, boundaries, keyboard and 390px mobile.
+
+**NEXT FIVE (priority, dependency, acceptance tests):**
+1. **P1 — Canonical engineering solver registry (planned).** Dependency: existing validated Matrix/Control kernels and engineering architecture. Acceptance: stable unique solver IDs, honest implemented/partial status, schema validation, two genuine consumers and numerical/reference/browser tests.
+2. **P1 — Cross-discipline linear solver reuse (planned).** Dependency: canonical registry. Acceptance: Matrix and Control/Engineering share one scaled-pivot kernel, 2×2/3×3 residual and singular reference tests, standalone parity.
+3. **P1 — RK45 difficult-problem robustness (planned).** Dependency: existing adaptive diagnostics. Acceptance: stiff-but-finite forward/backward references, ULP/attempt exhaustion, stale-export recovery and mobile regression.
+4. **P1 — Engineering Toolbox navigation (planned).** Dependency: solver metadata. Acceptance: searchable discipline/tool catalog with accurate statuses, keyboard focus, 390px responsive layout, no fake functional actions.
+5. **P1 — Matrix grid accessibility follow-up (planned).** Dependency: new arrow navigation. Acceptance: screen-reader row/column announcements, keyboard focus across resize/disclosures, saved-project round-trip and no value changes.
+
 ## 2026-10-30 — Matrix input-context grouping (UI-MATRIX-INPUT-GROUPS-015)
 
 **Implemented on dev; exact-head CI and promotion pending.** Matrix A is a labeled primary section. B, RHS b and weights w are keyboard-operable disclosure sections, initially expanded for existing workflows. Collapsing retains drafts; selecting an operation reopens its needed inputs. Preserves all 16 operations, numeric APIs, transfer and offline behavior. Added `tests/test_matrix_input_sections.py` (structural, parity and numerical) and mandatory Chromium `tests/smoke_matrix_input_sections.py` (keyboard, drafts, invalidity, mobile).

@@ -53,9 +53,9 @@ def main():
             '(el) => document.activeElement === el')
 
         # Restoring from elsewhere must never steal keyboard focus.
-        page.locator('#cas-variable').focus()
+        page.locator('#workspace-task-select').focus()
         page.evaluate('MathStudio.matrixTools.restoreState(MathStudio.matrixTools.exportState())')
-        assert page.evaluate('document.activeElement.id') == 'cas-variable'
+        assert page.evaluate('document.activeElement.id') == 'workspace-task-select'
 
         page.locator('#mat-rows').select_option('2')
         page.locator('#mat-cols').select_option('3')

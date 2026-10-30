@@ -18,6 +18,7 @@ def main():
                          wait_until="load")
         page.locator('[data-workspace="editor"]').click()
         page.locator("#ode-details").evaluate("(el) => el.open = true")
+        page.locator("#ode-method").select_option("rk4-system")
         page.locator("#ode-expression").fill("1")
         page.locator("#ode-system-derivative").fill("-y")
         page.locator("#ode-initial").fill("0")

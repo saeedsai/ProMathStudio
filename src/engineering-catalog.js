@@ -4,12 +4,16 @@ const M=window.MathStudio,host=document.getElementById('engineering-panel'),bar=
 if(!M?.advanced?.mode||!host||!bar)return;
 const disciplines=Object.freeze([
  ['physics','Physics'],['mechanical','Mechanical engineering'],['electrical','Electrical engineering'],
- ['electronics','Electronics engineering'],['fluids','Fluid mechanics'],['aerospace','Aerospace engineering']
+ ['electronics','Electronics engineering'],['fluids','Fluid mechanics'],['aerospace','Aerospace engineering'],
+ ['control','Control Theory'],['gnss','GNSS positioning'],['signals','Signal engineering']
 ].map(([id,title])=>Object.freeze({id,title})));
 const raw=[
  ['matrix.solve.real.small','Small real linear systems','Solve 2×2 or 3×3 Ax=b using the shared scaled-pivot Matrix solver.','physics mechanical electrical electronics fluids aerospace','matrix linear algebra','calculator','matrix'],
- ['control.equilibrium.real.small','Control state equilibrium','Solve ẋ=−Ax+b for 2 or 3 states; equilibrium does not prove stability.','mechanical electrical electronics aerospace','control steady-state','graph','ct-equilibrium'],
+ ['control.equilibrium.real.small','Control state equilibrium','Solve ẋ=−Ax+b for 2 or 3 states; equilibrium does not prove stability.','mechanical electrical electronics aerospace control','control steady-state','graph','ct-equilibrium'],
  ['ode.ivp.scalar','Scalar ODE initial-value solver','Run existing RK4 or adaptive RK45; not a stiff solver.','physics mechanical fluids aerospace','ode rk45 integration','editor','ode'],
+ ['gnss.positioning.least.squares','GNSS least-squares positioning','GNSS satellite-position observations and coordinate-frame handling are not yet implemented.','gnss','gnss positioning navigation'],
+ ['signals.spectral.analysis','Signal spectral analysis','Dedicated sampling/windowing/spectrum workflow is not yet implemented.','signals electronics','fft spectral frequency'],
+ ['control.frequency.response','Control frequency response','Bode and frequency response analysis is not yet implemented.','control electrical','bode control stability'],
  ['thermal.cycle.analysis','Thermodynamic cycle analysis','Cycle efficiency calculations are not yet implemented.','physics mechanical','thermal energy'],
  ['structures.beam.deflection','Beam deflection and stress','Structural loading workflows are not yet implemented.','mechanical aerospace','beam mechanics'],
  ['circuits.network.analysis','Circuit network analysis','General nodal circuit analysis is not yet implemented.','electrical electronics','circuit kirchhoff'],
@@ -45,13 +49,13 @@ style.textContent='#engineering-panel .eng-filters,#eng-results{display:grid;gri
  '@media(max-width:440px){#engineering-panel .eng-filters,#eng-results{grid-template-columns:minmax(0,1fr)}}';
 document.head.append(style);
 host.innerHTML='<div class="panel-head"><div class="panel-title">Engineering Toolbox</div></div>'+
- '<p>Search six engineering disciplines. Available tools open existing workflows; planned tools have no runnable actions. Units and engineering certification are not provided by this catalog.</p>'+
+ '<p>Search nine engineering disciplines. Available tools open existing workflows; planned tools have no runnable actions. Units and engineering certification are not provided by this catalog.</p>'+
  '<div class="eng-filters"><label>Discipline<select id="eng-discipline"></select></label>'+
  '<label>Search tools<input id="eng-search" type="search" autocomplete="off" placeholder="Name or keyword"></label></div>'+
  '<p id="eng-status" role="status" aria-live="polite"></p><div id="eng-results" aria-label="Engineering tool results"></div>';
 const select=document.getElementById('eng-discipline'),search=document.getElementById('eng-search');
 const status=document.getElementById('eng-status'),results=document.getElementById('eng-results');
-for(const [id,title] of [['','All six disciplines'],...disciplines.map(d=>[d.id,d.title])]){
+for(const [id,title] of [['','All nine disciplines'],...disciplines.map(d=>[d.id,d.title])]){
  const opt=document.createElement('option');opt.value=id;opt.textContent=title;select.append(opt);
 }
 function openTool(t){

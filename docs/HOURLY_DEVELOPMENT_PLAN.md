@@ -1,3 +1,11 @@
+## 2026-10-30 — Graph project duplicate headers (DATA-GRAPH-HEADER-IDENTITY-040)
+
+**Implemented on dev; Quality pending.** Reject duplicate Graph dataset header names during import before mutation, preserving valid data, row order and v1/v2 project migration. Added tests/test_graph_project_header_identity.py and Chromium atomic rollback cases in tests/smoke_project_schema.py. Offline HTML synchronized. Concurrent Data Table name validation commits preserved.
+
+**NEXT FIVE acceptance:** (1) Green exact-head Python/Chromium Quality including graph/table project imports. (2) Ordinary dev→main PR, green checks, main Quality and Pages deployment. (3) Graph and Data Table v1/v2 mobile round-trip and focus restoration. (4) RK45 near-ULP time monotonicity numerical references and error recovery. (5) Engineering Toolbox metadata/routing with accurate statuses and keyboard/mobile tests.
+
+**Execution:** Started dev 863e00b917b4fa64e57d0fd5196214367605feab, main 220f7641f1358ea3fc706c5334c6c7d7493bef52. Previous dev Quality 41119433137 passed; new changes awaiting exact-head Quality. Historical 166/95 frozen baseline unchanged.
+
 ## 2026-10-30 — Saved Data Tables name identity (DATA-PROJECT-TABLE-NAMES-039)
 
 **Implemented on dev, exact-head CI/Pages pending.** Project migration rejects blank or whitespace-only table names and names equivalent after trimming and lowercasing. Valid original display names are preserved, including v1/v2 migration. Source and offline index synced. Added test_project_table_name_identity.py (numeric/identity/negative cases) and smoke_project_schema.py browser rollback cases. Direct isolated JS cases and bundle parity passed; full Python/Chromium not yet independently verified.

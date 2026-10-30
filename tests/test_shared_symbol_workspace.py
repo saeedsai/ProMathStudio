@@ -9,7 +9,7 @@ class SharedSymbolWorkspaceTests(unittest.TestCase):
         for workspace in ("editor","calculator","solver","graph"):
             self.assertIn("body.ws-"+workspace+" #quick-symbols",HTML)
     def test_workspace_classes_follow_central_navigation(self):
-        self.assertIn("for(const workspace of ['editor','calculator','solver','graph','data'])",HTML)
+        self.assertIn("for(const workspace of ['editor','calculator','solver','graph','data','engineering'])",HTML)
         self.assertIn("document.body.classList.toggle('ws-'+workspace,mode===workspace)",HTML)
         self.assertIn("setAttribute('aria-expanded',String(next))",HTML)
         self.assertIn("if(wasOpen){e.preventDefault();$('quick-symbols').focus();}",HTML)

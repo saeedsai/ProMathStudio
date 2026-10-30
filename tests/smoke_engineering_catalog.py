@@ -56,6 +56,11 @@ def main():
    assert page.locator('#engineering-panel').is_visible()
    assert page.locator('.workspace-bar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1'),width
    assert page.locator('#engineering-panel').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1'),width
+  # A session restored to Engineering must activate the dynamically appended tab.
+  page.evaluate("sessionStorage.setItem('mathstudio-mode','engineering')")
+  page.set_content((ROOT/'index.html').read_text(encoding='utf-8'),wait_until='load')
+  assert page.locator('[data-workspace="engineering"]').get_attribute('aria-current')=='page'
+  assert page.locator('#engineering-panel').is_visible()
   assert not errors,errors
   browser.close()
  print('PASS Engineering Toolbox search, six disciplines, honest statuses and routes')

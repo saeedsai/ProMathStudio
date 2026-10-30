@@ -85,4 +85,6 @@ function render(){
 }
 select.addEventListener('change',render);search.addEventListener('input',render);render();
 M.engineeringCatalog=Object.freeze({disciplines,tools,filter});
+// The saved mode may have been restored before this late-added tab existed.
+if(M.advanced.currentMode()==='engineering')M.advanced.mode('engineering');
 })();

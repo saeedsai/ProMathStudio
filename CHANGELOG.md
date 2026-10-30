@@ -1,3 +1,4 @@
+- Saved-project Data Tables names now reject blanks and whitespace/case-equivalent duplicates without modifying valid display names. Regression tests committed; release QA pending.
 - Saved-project Matrix draft validation rejects overflowed scientific notation and values exceeding the 1e12 solver bound in A/B/RHS/weights, while preserving v1/v2 and empty drafts (DATA-PROJECT-MATRIX-FINITE-038; dev QA pending).
 - RK45 now distinguishes recoverable bounded intermediate-stage overflow using explicit error tags instead of message text, reports the last affected stage, and rejects nonfinite derivative/domain failures without unsafe retries (dev QA pending).
 - 2026-10-30 (CONTROL-TRANSIENT-PLOT-036, dev QA): Control two-state RK4 trajectory now has a contextual Graphs action plotting both x1(t) and x2(t) through the existing Data Tables/Graph Data pipeline; adds Node contract and Chromium/mobile/keyboard regressions. Full CI and deployment pending.

@@ -5927,6 +5927,55 @@ function conditionGuidance(k){
   'High sensitivity (κ∞ ≥ 1e8): small input changes may strongly affect the result; a small residual does not certify accuracy.':
   'Below the 1e8 sensitivity warning threshold; this does not certify numerical accuracy.';
 }
+/* Canonical bounded engineering solver registry. Metadata is source-backed: these
+   operations are available in Matrix Calculator, not yet in discipline workspaces.
+   The UI and future adapters use these IDs instead of copying math kernels. */
+const engineeringSolverDefinitions=[
+ {id:'matrix.solve.real.small',title:'Solve A·x=b',status:'implemented',
+  disciplines:['mathematics'],inputs:['A','b'],result:'solution with residual diagnostics',
+  run:({A,b})=>solve(A,b)},
+ {id:'matrix.inverse.real.small',title:'Inverse of A',status:'implemented',
+  disciplines:['mathematics'],inputs:['A'],result:'inverse matrix',
+  run:({A})=>inverse(A)}
+];
+const engineeringSolverMap=Object.create(null);
+for(const definition of engineeringSolverDefinitions){
+ const {id,title,status,disciplines,inputs,result,run}=definition;
+ if(typeof id!=='string'||!/^[a-z]+(?:\.[a-z]+)+$/.test(id)||
+    Object.prototype.hasOwnProperty.call(engineeringSolverMap,id))
+  throw Error('Invalid or duplicate engineering solver ID.');
+ if(typeof title!=='string'||!title||status!=='implemented'||
+    !Array.isArray(disciplines)||!disciplines.length||
+    !disciplines.every(x=>typeof x==='string'&&x.length>0)||
+    !Array.isArray(inputs)||!inputs.length||
+    new Set(inputs).size!==inputs.length||
+    !inputs.every(x=>typeof x==='string'&&/^[A-Za-z][A-Za-z0-9]*$/.test(x))||
+    typeof result!=='string'||!result||typeof run!=='function')
+  throw Error('Invalid engineering solver metadata.');
+ const metadata=Object.freeze({id,title,status,
+  disciplines:Object.freeze(disciplines.slice()),
+  inputs:Object.freeze(inputs.slice()),result});
+ engineeringSolverMap[id]=Object.freeze({metadata,run});
+}
+const engineeringSolvers=Object.freeze({
+ list:()=>Object.freeze(Object.values(engineeringSolverMap).map(item=>item.metadata)),
+ get:id=>Object.prototype.hasOwnProperty.call(engineeringSolverMap,id)?
+  engineeringSolverMap[id].metadata:null,
+ execute:(id,params)=>{
+  const item=Object.prototype.hasOwnProperty.call(engineeringSolverMap,id)?
+   engineeringSolverMap[id]:null;
+  if(!item)throw Error('Unknown engineering solver ID.');
+  if(!params||typeof params!=='object'||Array.isArray(params))
+   throw Error('Engineering solver inputs must be an object.');
+  for(const key of item.metadata.inputs)
+   if(!Object.prototype.hasOwnProperty.call(params,key))
+    throw Error('Missing engineering solver input: '+key+'.');
+  for(const key of Object.keys(params))
+   if(!item.metadata.inputs.includes(key))
+    throw Error('Unexpected engineering solver input: '+key+'.');
+  return item.run(params);
+ }
+});
 /* Jacobi rotations for bounded real symmetric 2x2/3x3 matrices. Columns of
    vectors are orthonormal eigenvectors; eigenvalues are descending. */
 function eigenSymmetric(A){
@@ -6485,9 +6534,9 @@ function calculate(operation){
  revealRequiredInputs(operation);
  try{
   const A=read(),value=operation==='determinant'?determinant(A):
-   operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
+   operation==='transpose'?transpose(A):operation==='inverse'?engineeringSolvers.execute('matrix.inverse.real.small',{A}):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
-   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='weightedLeastSquares'?weightedLeastSquares(A,readRhs(),readWeights()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?(A.length===2&&A[0].length===3?svd2x3(A):A.length===3&&A[0].length===2?svd3x2(A):A.length===3?svd3x3(A):svd2x2(A)):operation==='pseudoinverse'?pseudoinverse(A):multiply(A,readSecond());
+   operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?engineeringSolvers.execute('matrix.solve.real.small',{A,b:readRhs()}):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='weightedLeastSquares'?weightedLeastSquares(A,readRhs(),readWeights()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?(A.length===2&&A[0].length===3?svd2x3(A):A.length===3&&A[0].length===2?svd3x2(A):A.length===3?svd3x3(A):svd2x2(A)):operation==='pseudoinverse'?pseudoinverse(A):multiply(A,readSecond());
   let conditionLabel='';
   if(operation==='solve'||operation==='inverse'){
    try{
@@ -6525,6 +6574,7 @@ send.addEventListener('click',()=>{
 rebuild();rebuildSecond();rebuildRhs();rebuildWeights();
 M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,weightedLeastSquares,eigenSymmetric,svd2x2,svd3x2,svd2x3,svd3x3,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,readWeights,calculate};
 M.matrixTools.conditionInfinity=conditionInfinity;
+M.engineeringSolvers=engineeringSolvers;
 })();
 </script>
 <script id="promath-ode-tools">

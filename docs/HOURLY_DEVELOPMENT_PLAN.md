@@ -1,3 +1,22 @@
+**2026-10-30 browser navigation contract repair:** Dev Quality [41046168378](https://github.com/saeedsai/ProMathStudio/actions/runs/41046168378) passed all structural/unit checks and earlier browser suites but the combined Equation smoke still asserted exactly four workspace tabs. Updated it to assert five while preserving Equation/Symbolic functional checks. Scanned other navigation-specific smoke tests for the same assumption. New exact-head CI pending.
+
+**2026-10-30 browser-fixture repair:** Dev Quality [41045941038](https://github.com/saeedsai/ProMathStudio/actions/runs/41045941038) passed all 163 structural/unit tests and all browser steps before the new Engineering smoke's final restored-session fixture. The test attempted `sessionStorage` from an opaque `about:blank` origin, which Chromium correctly denies. The regression now serves the same standalone HTML from a Playwright-intercepted local test origin, sets session state and reloads without external network. No production security restriction was bypassed. Exact new CI required.
+
+**2026-10-30 CI correction for UI-ENGINEERING-CATALOG-021:** Dev Quality [41045811685](https://github.com/saeedsai/ProMathStudio/actions/runs/41045811685) ran 163 structural/unit tests with one failure: the existing shared-symbol workspace structural assertion hard-coded five old mode names. Updated the assertion to require all six internal modes including the new Engineering workspace (not a weakened check), and added a restored-session tab activation fix with a Chromium regression. Exact new dev CI pending.
+
+## 2026-10-30 — Engineering Toolbox searchable shell (UI-ENGINEERING-CATALOG-021)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** Added fifth workspace with six approved discipline filters and a searchable canonical catalog. Three existing bounded workflows (Matrix solve, Control equilibrium, scalar ODE) link to original editors; six planned examples are visibly unavailable without fake actions. Existing four workspaces, drafts, offline bundle and solver implementations are preserved. Added `tests/test_engineering_catalog_navigation.py`, mandatory Chromium `tests/smoke_engineering_catalog.py`, and updated workspace keyboard regression. Baseline dev/main `177dba3398ca694b98f55a973c593a18351b31b1`; PR #111 Quality and Pages green. Full 16-discipline catalog, favorites and per-tool forms remain planned.
+
+**NEXT FIVE (priority, dependencies, acceptance tests):**
+1. **P1 — RK45 difficult-problem robustness (planned).** Adaptive solver; forward/backward references, underflow/attempt exhaustion, stale-export recovery and mobile tests.
+2. **P1 — Matrix saved-project focus round-trip (planned).** Project schema and focus restoration; saved dimensions/drafts, no selector focus hijack, browser round-trip.
+3. **P1 — Registry contracts and diagnostics (planned).** Matrix/Control consumers; typed dimensions, assumptions, structured errors, invalid/reference and immutability tests.
+4. **P1 — Control equilibrium stability guidance (planned).** Bounded stable/unstable/marginal references, explicit caveats and browser recovery.
+5. **P1 — Engineering catalog expansion (planned).** Source-backed Control/GNSS/Signals and other approved disciplines; unique IDs, truthful statuses and mobile/keyboard tests.
+
+**Execution log (2026-10-30):** Starting dev/main `177dba3398ca694b98f55a973c593a18351b31b1`, no open PR, both unprotected, previous Quality/Pages green. New navigation module, standalone bundle, router, tests, CI, changelog and roadmap prepared. Exact candidate CI/PR/deployment pending; historical 166 gaps/95 partial unchanged.
+
 **2026-10-30 CI fixture repair:** Exact dev Quality [41037669610](https://github.com/saeedsai/ProMathStudio/actions/runs/41037669610) failed only in new direct Node regression because its UI mock changed A to singular but retained b=[4,9], making the system correctly *inconsistent* rather than singular. Corrected fixture to b=[3,6] for singular and restored b=[4,9] for recovery; retained separate explicit inconsistent-system assertion. All other 160 unit tests passed; new exact-head full CI required. No numerical solver or validation assertions weakened.
 
 ## 2026-10-30 — Cross-discipline Control equilibrium (ARCH-CONTROL-EQUILIBRIUM-020)

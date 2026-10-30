@@ -67,6 +67,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  let t=t0,y=y0,h=span/20,attempts=0,rejected=0,accepted=0;
  let minAcceptedStep=Infinity,maxAcceptedStep=0,maxAcceptedErrorRatio=0;
  let maxRejectedErrorRatio=0,minRejectedStep=Infinity,resolutionLimitedAttempts=0;
+ let stageTimeCollisionAttempts=0,stageTimeCollisionAcceptedSteps=0;
  // Include the last representable time and accepted/rejected work in failure reports.
  // This is deliberately a diagnostic only: it does not change RK45 step selection.
  const progressError=reason=>Error(reason+'; at t='+t.toPrecision(16)+
@@ -75,7 +76,8 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   ', rejected='+rejected+', tolerance='+tolerance+
   (rejected?', max rejected local-error ratio='+maxRejectedErrorRatio.toPrecision(6)+
    ', smallest rejected |Δt|='+minRejectedStep.toPrecision(8):'')+
-  ', time-resolution-limited attempts='+resolutionLimitedAttempts+'.');
+  ', time-resolution-limited attempts='+resolutionLimitedAttempts+
+  ', collapsed-stage attempts='+stageTimeCollisionAttempts+'.');
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
   if(attempts>=maxSteps)throw progressError('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit');
@@ -88,6 +90,11 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   if(direction*(nextT-t1)>0)nextT=t1;
   h=nextT-t;
   if(!(direction*h>0))throw progressError('Adaptive step size underflow at current time resolution; rescale time or relax tolerance');
+  // Fractional Dormand–Prince stages may round back to t even when t+h advances.
+  // Keep the numerical result but flag this loss of representable stage times.
+  const stageTimesCollapsed=(t+h/5===t||t+3*h/10===t||
+   t+4*h/5===t||t+8*h/9===t);
+  if(stageTimesCollapsed)stageTimeCollisionAttempts++;
   attempts++;
   const k1=f(t,y,'k1');
   const k2=f(t+h/5,y+h*k1/5,'k2');
@@ -108,6 +115,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    maxAcceptedErrorRatio=Math.max(maxAcceptedErrorRatio,errorRatio);
    t=nextT;
    y=y5;rows.push([t,y]);accepted++;
+   if(stageTimesCollapsed)stageTimeCollisionAcceptedSteps++;
   }else{
    rejected++;
    maxRejectedErrorRatio=Math.max(maxRejectedErrorRatio,errorRatio);
@@ -120,6 +128,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  return {type:'ode-rk45',columns:['t','y'],rows,steps:accepted,attempts,rejected,tolerance,
   minAcceptedStep,maxAcceptedStep,maxAcceptedErrorRatio,maxRejectedErrorRatio,
   minRejectedStep:rejected?minRejectedStep:null,resolutionLimitedAttempts,
+  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,
   method:'Adaptive Dormand–Prince Runge–Kutta 5(4) (RK45)',
   note:'Scalar first-order y\u2032=f(t,y), forward or backward. Local error controlled; not stiff, vector-valued or globally error-certified.'};
 }
@@ -212,7 +221,9 @@ function run(){
    last.maxAcceptedErrorRatio.toPrecision(5)+
    (last.rejected?', max rejected local-error ratio '+last.maxRejectedErrorRatio.toPrecision(5)+
     ', smallest rejected |Δt| '+last.minRejectedStep.toPrecision(5):'')+
-   (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:''):
+   (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:'')+
+   (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+
+    ' accepted steps had RK45 stage times rounded to current t; rescale time for reliable accuracy':''):
    'Δt='+last.h.toPrecision(8);
   const endState='y('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+
    (last.type==='ode-rk4-system'?', z ≈ '+end[2].toPrecision(12):'');

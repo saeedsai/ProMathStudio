@@ -5691,16 +5691,24 @@ function solve(A,b){
   solution[i]=value/rows[i][i];
   if(!Number.isFinite(solution[i]))throw Error('Solution exceeded finite floating-point range.');
  }
- let residual=0;
+ let residual=0,absoluteResidual=0;
  for(let i=0;i<n;i++){
   const actual=A[i].reduce((sum,a,j)=>sum+a*solution[j],0);
   const denominator=Math.abs(rhs[i])+A[i].reduce((sum,a,j)=>sum+Math.abs(a)*Math.abs(solution[j]),0);
-  const error=Math.abs(actual-rhs[i])/Math.max(denominator,Number.MIN_VALUE);
+  const absoluteError=Math.abs(actual-rhs[i]);
+  const error=absoluteError/Math.max(denominator,Number.MIN_VALUE);
   if(!Number.isFinite(error))throw Error('Solution residual exceeded finite floating-point range.');
   residual=Math.max(residual,error);
+  absoluteResidual=Math.max(absoluteResidual,absoluteError);
  }
  if(residual>1e-8)throw Error('Solution failed its numerical residual check.');
- return {solution,residual,rank:n};
+ // Normwise backward error in the infinity norm: ||Ax-b||inf /
+ // (||A||inf * ||x||inf + ||b||inf). This is NOT a condition estimate.
+ const normA=Math.max(...A.map(row=>row.reduce((sum,x)=>sum+Math.abs(x),0)));
+ const normX=Math.max(...solution.map(Math.abs)),normB=Math.max(...rhs.map(Math.abs));
+ const normwiseBackwardError=absoluteResidual/Math.max(Number.MIN_VALUE,normA*normX+normB);
+ if(!Number.isFinite(normwiseBackwardError))throw Error('Solution diagnostics exceeded finite floating-point range.');
+ return {solution,residual,rank:n,absoluteResidual,normwiseBackwardError};
 }
 /* Doolittle P*A=L*U with scaled partial row pivoting and row-relative
    reconstruction verification; no input mutation or external dependencies. */
@@ -6405,7 +6413,7 @@ function calculate(operation){
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
    'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
-   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual):'');
+   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual):'');
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }

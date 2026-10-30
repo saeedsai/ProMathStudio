@@ -1,3 +1,9 @@
+## 2026-10-30 — Engineering multiword search (UI-ENGINEERING-MULTIWORD-032)
+
+**Implemented on dev; exact-head CI and release pending.** Catalog search now matches whitespace-separated query terms in any order across tool title, description, ID, tags and readable discipline names. No catalog statuses or runnable actions changed. Source and offline bundle synchronized. Added tests/test_engineering_multiword_search.py covering reference matches, negatives, empty query and source/bundle parity. Full Python and Chromium Quality, PR checks, main Quality and Pages must be verified before release.
+
+**NEXT FIVE with acceptance tests:** (1) exact-head Quality and PR #117 check/merge safety; full Python+Chromium green and verified Pages; (2) Control two-state transient response using shared numerical ODE with analytical forward/backward and browser/mobile recovery; (3) RK45 stage overflow recovery with bounded numerical failure references and stale export; (4) Matrix/Graph/Table project round-trip and focus preservation including legacy imports; (5) engineering catalog source-backed Control/GNSS/Signals/Statistics expansion, unique IDs and 390px keyboard tests.
+
 ## 2026-10-30 — Search Engineering tools by readable discipline name (UI-ENGINEERING-SEARCH-031)
 
 **Implemented on dev; exact-head QA pending.** Engineering Toolbox search now matches full user-facing discipline names (for example “Aerospace engineering” and “GNSS positioning”) as well as canonical tool IDs, titles, descriptions and tags. This is navigation only; planned entries remain unimplemented and never obtain fake Run actions. Offline bundle synchronized. Added direct source/bundle regression and extended Chromium search and planned-action checks. Do not claim released before exact-head development/PR CI, main Quality and Pages.

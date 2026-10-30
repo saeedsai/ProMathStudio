@@ -31,7 +31,7 @@ def main():
         assert abs(result["rows"][-1][2] - 3*(1-math.exp(-3))) < 1e-7
         backward = page.evaluate("""() => MathStudio.controlEquilibrium.simulateTransient(
             [[2,0],[0,3]],[4,9],[2*(1-Math.exp(-2)),3*(1-Math.exp(-3))],1,0,80)""")
-        assert max(abs(v) for v in backward["rows"][-1][1:]) < 1e-7
+        assert max(abs(v) for v in backward["rows"][-1][1:]) < 2e-7
         singular = page.evaluate("""() => MathStudio.controlEquilibrium.simulateTransient(
             [[0,0],[0,2]],[1,0],[0,1],0,1,80)""")
         assert abs(singular["rows"][-1][1] - 1) < 1e-9

@@ -1,3 +1,4 @@
+- Graph saved-project import rejects blank and case/whitespace-equivalent duplicate dataset headers without modifying valid names, preserving v1/v2 and mixed-cell round trips (dev QA pending).
 - RK45 now guards strictly advancing accepted time samples and reports accepted machine-resolution time steps for near-ULP intervals. No global accuracy certification; dev CI pending.
 - 2026-10-30 (DATA-GRAPH-HEADER-IDENTITY-040, dev QA): Reject duplicate Graph dataset column headers on project import, preserving valid v1/v2 data and atomic rollback; focused Node and browser regressions. CI/Pages pending.
 - Saved-project Data Tables names now reject blanks and whitespace/case-equivalent duplicates without modifying valid display names. Regression tests committed; release QA pending.

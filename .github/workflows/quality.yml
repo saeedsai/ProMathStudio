@@ -188,6 +188,8 @@ jobs:
         run: python tests/smoke_matrix_lu.py
       - name: Contextual matrix result transfer and mobile regression
         run: python tests/smoke_matrix_contextual_transfer.py
+      - name: Matrix input sections, drafts and mobile browser regression
+        run: python tests/smoke_matrix_input_sections.py
       - name: Matrix thin QR decomposition regression
         run: python tests/smoke_matrix_qr.py
       - name: Matrix least-squares numeric and UI regression

@@ -1,3 +1,14 @@
+## 2026-10-30 — Matrix input-context grouping (UI-MATRIX-INPUT-GROUPS-015)
+
+**Implemented on dev; exact-head CI and promotion pending.** Matrix A is a labeled primary section. B, RHS b and weights w are keyboard-operable disclosure sections, initially expanded for existing workflows. Collapsing retains drafts; selecting an operation reopens its needed inputs. Preserves all 16 operations, numeric APIs, transfer and offline behavior. Added `tests/test_matrix_input_sections.py` (structural, parity and numerical) and mandatory Chromium `tests/smoke_matrix_input_sections.py` (keyboard, drafts, invalidity, mobile).
+
+**NEXT FIVE (priority, dependency, acceptance tests):**
+1. **P0 — Input grouping QA/release (in QA).** Dependency: exact dev head. Acceptance: full unit/Chromium, bundle parity, PR checks, main Quality and exact Pages deployment.
+2. **P1 — Canonical engineering solver registry (planned).** Dependency: scaled-pivot solver. Acceptance: stable unique IDs, schema/status validation, two real consumers and navigation/reference tests.
+3. **P1 — Cross-discipline linear solver reuse (planned).** Dependency: registry. Acceptance: Matrix and Control/Engineering share one kernel; 2×2/3×3 residual/singular/browser tests.
+4. **P1 — RK45 difficult-problem robustness (planned).** Dependency: adaptive diagnostics. Acceptance: stiff-but-finite forward/backward reference, attempt/ULP underflow, stale-export recovery and mobile tests.
+5. **P1 — Matrix grid keyboard movement (planned).** Dependency: input grouping. Acceptance: arrow navigation, accessible labels, 2×2/3×3 and mobile regression.
+
 ## 2026-10-30 — Contextual Matrix result transfer (UI-MATRIX-CONTEXT-014)
 
 **Implemented on dev; exact-head QA and promotion pending.** Separated all 16 matrix operation buttons from a contextual Equation Editor transfer row. LU, QR, Eigen and SVD factor selectors appear only for the corresponding successful calculation; invalid input or editing hides all selectors and disables stale transfer. The existing factor values and public math APIs are preserved. New structural/standalone regression `tests/test_matrix_contextual_transfer.py` and mandatory Chromium operation-switching, transfer, keyboard, singular-recovery and 390px mobile regression `tests/smoke_matrix_contextual_transfer.py`. Baseline dev/main `9d4e71d3afe742815caec8b603f021054a97841b`, exact baseline Quality and Pages green. Historical 166 gaps/95 partial unchanged.

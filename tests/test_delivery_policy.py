@@ -15,7 +15,10 @@ class DeliveryPolicyTests(unittest.TestCase):
         for required in ("dev", "main", "next five", "regression", "Pages",
                          "security", "PR", "CI", "CD"):
             self.assertIn(required.lower(), agent.lower(), required)
+        archive = (ROOT / "docs/archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md").read_text(encoding="utf-8")
         self.assertIn("Next five features", plan)
+        self.assertIn("NEXT FIVE", plan)
+        plan = plan + archive
         for feature_id in ("P0-SYMBOLIC-SYSTEMS", "P0-MATRIX-UI",
                            "P0-NUMERIC-ODE", "P0-CUSTOM-PY-COMPOSE",
                            "P0-SHEET-REFERENCE"):

@@ -13,7 +13,7 @@ def main():
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.set_content((ROOT / 'index.html').read_text(encoding='utf-8'), wait_until='load')
-        assert page.locator('.workspace-bar button[data-workspace]').count() == 4
+        assert page.locator('.workspace-bar button[data-workspace]').count() == 5  # Engineering is the fifth workspace
         assert page.locator('[data-workspace="solver"]').count() == 0
         assert page.locator('[data-workspace="editor"]').inner_text().strip().endswith('Equation')
         for selector in ('#equation-input','#preview','#symbolic-panel','#cas-operation',

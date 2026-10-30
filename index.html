@@ -8178,7 +8178,8 @@ function filter(discipline='',query=''){
  if(discipline&&!valid.has(discipline))return [];
  const q=String(query).trim().toLocaleLowerCase();
  return tools.filter(t=>(!discipline||t.disciplines.includes(discipline))&&
- (!q||[t.id,t.title,t.description,t.tags].join(' ').toLocaleLowerCase().includes(q)));
+ (!q||[t.id,t.title,t.description,t.tags,...t.disciplines.map(id=>disciplines.find(d=>d.id===id).title)]
+  .join(' ').toLocaleLowerCase().includes(q)));
 }
 const tab=document.createElement('button');tab.type='button';tab.className='workspace-tab';
 tab.dataset.workspace='engineering';tab.textContent='⚙ Engineering Toolbox';

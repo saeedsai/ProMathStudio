@@ -53,12 +53,14 @@ assert.throws(()=>api.solve([[true,0],[0,1]],[1,1]),/Enter a number/);
 nodes['ct-eq-run'].events.click();
 assert.match(nodes['ct-eq-output'].textContent,/Equilibrium x\* = \[2, 3\]/);
 nodes['ct-eq-matrix'].value='1,2;2,4';
+nodes['ct-eq-forcing'].value='3,6';
 nodes['ct-eq-matrix'].events.input();
 assert.equal(nodes['ct-eq-output'].textContent,'No current result.');
 nodes['ct-eq-run'].events.click();
 assert.equal(nodes['ct-eq-output'].textContent,'No valid equilibrium.');
 assert.match(nodes['ct-eq-status'].textContent,/Singular/);
 nodes['ct-eq-matrix'].value='2,0;0,3';
+nodes['ct-eq-forcing'].value='4,9';
 nodes['ct-eq-run'].events.click();
 assert.match(nodes['ct-eq-output'].textContent,/Equilibrium x\* = \[2, 3\]/);
 """

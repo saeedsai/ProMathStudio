@@ -64,11 +64,25 @@ def main():
         page.set_viewport_size({"width": 390, "height": 844})
         assert run.is_visible()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth+1")
+        plot = page.locator("#ct-eq-transient-plot")
+        assert plot.is_enabled()
+        plot.click()
+        assert "Plotted x1(t) and x2(t)" in page.locator("#ct-eq-transient-status").inner_text()
+        assert page.evaluate("MathStudio.advanced.currentMode()") == "graph"
+        assert page.evaluate("MathStudio.dataTables.tables.some(t => t.name.startsWith('CONTROL_TRANSIENT'))")
+        state = page.evaluate("MathStudio.graphData.getState()")
+        assert state["style"] == "line" and state["y"] == "1"
+        assert len(state["extra"]) == 1 and state["extra"][0]["mapping"]["y"] == 2
+        page.locator("#ct-eq-t1").fill("2")
+        assert plot.is_disabled()
+        plot.evaluate("(b) => { b.disabled = false; b.click(); }")
+        assert "Compute a trajectory before plotting" in page.locator("#ct-eq-transient-status").inner_text()
+        run.click()
         page.locator("#ct-eq-transient-table").click()
         assert page.evaluate("MathStudio.advanced.currentMode()") == "data"
         assert not errors, errors
         browser.close()
-    print("PASS Control transient forward/backward, singular, errors, export, mobile")
+    print("PASS Control transient forward/backward, singular, errors, export, plot handoff, mobile")
 
 
 if __name__ == "__main__":

@@ -71,7 +71,7 @@ function numericValues(parts,label){
 }
 let lastTransient=null;
 const transientStatus=by('ct-eq-transient-status'),transientOutput=by('ct-eq-transient-output');
-const transientTable=by('ct-eq-transient-table');
+const transientTable=by('ct-eq-transient-table'),transientPlot=by('ct-eq-transient-plot');
 function simulateTransient(A,b,x0,t0=0,t1=1,steps=80){
  if(!Array.isArray(A)||A.length!==2||A.some(row=>!Array.isArray(row)||row.length!==2))
   throw Error('Transient response requires a 2×2 matrix A.');
@@ -114,11 +114,11 @@ function calculateTransient(){
    convergence+'\n'+
    'Fixed-step RK4 is not stiff or globally error-certified. Compare step counts for convergence.';
   transientStatus.textContent='Two-state trajectory computed.';
-  transientTable.disabled=false;
+  transientTable.disabled=false;if(transientPlot)transientPlot.disabled=false;
   return lastTransient;
  }catch(error){
   lastTransient=null;
-  if(transientTable)transientTable.disabled=true;
+  if(transientTable)transientTable.disabled=true;if(transientPlot)transientPlot.disabled=true;
   if(transientOutput)transientOutput.textContent='No current trajectory.';
   if(transientStatus)transientStatus.textContent=error.message;
   return null;
@@ -130,7 +130,7 @@ function invalidate(){
  stabilityStatus.textContent='Inputs changed; recompute stability.';
  stabilityOutput.textContent='No current stability result.';
  lastTransient=null;
- if(transientTable)transientTable.disabled=true;
+ if(transientTable)transientTable.disabled=true;if(transientPlot)transientPlot.disabled=true;
  if(transientStatus)transientStatus.textContent='Inputs changed; recompute trajectory.';
  if(transientOutput)transientOutput.textContent='No current trajectory.';
 }
@@ -169,6 +169,20 @@ transientTable?.addEventListener('click',()=>{
   if(!lastTransient)throw Error('Compute a trajectory before exporting.');
   studio.dataTables.importData({headers:['t','x1','x2'],rows:lastTransient.rows},'CONTROL_TRANSIENT');
   studio.advanced.mode('data');
+ }catch(error){transientStatus.textContent=error.message;}
+});
+by('ct-eq-transient-plot')?.addEventListener('click',()=>{
+ try{
+  if(!lastTransient)throw Error('Compute a trajectory before plotting.');
+  // Reuse the Data Tables line-chart pipeline: x1(t) first, then x2(t) as an overlay series.
+  const table=studio.dataTables.importData({headers:['t','x1','x2'],rows:lastTransient.rows},'CONTROL_TRANSIENT');
+  const pick=(id,value)=>{const e=by(id);e.value=String(value);};
+  pick('dt-graph-table',table.id);pick('dt-chart-type','line');
+  by('dt-graph-table').dispatchEvent(new Event('change'));
+  pick('dt-graph-x',0);pick('dt-graph-y',1);
+  studio.dataTables.plot();
+  pick('dt-graph-y',2);by('dt-add-series').click();
+  transientStatus.textContent='Plotted x1(t) and x2(t) in Graphs.';
  }catch(error){transientStatus.textContent=error.message;}
 });
 studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate,analyzeStability,calculateStability,simulateTransient,calculateTransient});

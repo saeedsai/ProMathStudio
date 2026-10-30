@@ -2,6 +2,12 @@
 
 Current entries and the **Next five features** queue are kept here (newest first). Older execution entries are in [archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md](archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md); the frozen baseline is the [audited inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md).
 
+## 2026-10-30 — Control trajectory plot handoff (CONTROL-TRANSIENT-PLOT-036)
+
+**Implemented on the working branch; exact-head CI not yet verified.** New "Plot x1(t), x2(t)" action beside the Control trajectory export saves the current trajectory to Data Tables and plots x1(t) with x2(t) as an overlay through the existing Data Tables line-chart pipeline (no new graph engine). Disabled until a trajectory exists and on any input change. `tests/smoke_control_transient.py` asserts the two graph series, mode, stale-state disabling, the no-trajectory guard, 390px layout and no page errors; passed locally in Chromium.
+
+**NEXT FIVE:** (1) exact-head Quality, PR to main, main Quality and Pages; (2) Matrix/Graph/Table project v1/v2 round-trips, rollback and focus tests; (3) show `stageOverflowRetries` in the ODE UI; (4) Engineering catalog source-backed expansion; (5) docs subfolder reorganization with link checker.
+
 ## 2026-10-30 — RK45 stage-overflow bounded recovery (MATH-ODE-RK45-STAGE-OVERFLOW-035)
 
 **Implemented on the working branch; exact-head Quality, PR and Pages NOT yet verified.** Adaptive scalar RK45 now treats finite magnitude overflow (>1e12 or ±Infinity) in stages k2–k7 or the 5th/4th-order states as a rejected attempt: step is quartered and retried, counted in `stageOverflowRetries`, within the existing attempt limit and time-resolution floor. k1 overflow and NaN/evaluator domain errors stay fatal. Genuine blow-up (y′=y²) still ends with an attempt-exhaustion error naming the retries. Not a stiffness solver or accuracy certificate. Tests: `tests/test_ode_rk45_stage_overflow.py` (forward/backward ±1e5 references, blow-up, domain error, parity); local Chromium ODE smokes and 185 unit tests passed. Repo cleanup: older log moved to `docs/archive/`, stale QA report removed, generated registry ignored.

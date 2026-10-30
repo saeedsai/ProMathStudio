@@ -198,3 +198,8 @@ In **Graphs → Control Theory → State equilibrium → Two-state transient res
 **RK45 overflow classification (dev QA pending):** Adaptive RK45 retries bounded intermediate state/finite-derivative overflow by reducing the step, but does not retry nonfinite derivatives, untagged parser/domain errors, or failures at the initial k1 stage. Diagnostics identify the last bounded stage and include it in attempt-limit failures. This is not a stiff solver and does not guarantee global accuracy.
 
 **RK45 near-machine-resolution grid (dev QA pending):** The adaptive scalar RK45 solver checks each accepted timestamp advances in the requested direction. It counts accepted steps progressing by only one representable floating-point time increment and warns users to rescale the time variable and check convergence. This complements stage-time collision reporting; neither diagnostic is a certified global error bound.
+
+
+## Fixed-step RK4 floating-point time resolution (development QA pending)
+
+Scalar and coupled RK4 use a requested fixed step count. At large absolute times or extremely short intervals, IEEE-754 rounding can make adjacent output timestamps identical or collapse an RK4 midpoint stage onto an endpoint. These inputs are now rejected with guidance to reduce the step count or rescale the time variable, rather than returning misleading sampled trajectories. Example: from `t0=999999999999.9999` to `t1=1000000000000` with four fixed steps cannot resolve the intermediate stages. A wider interval such as `t0=999999999999.999` with four steps is representable. This is a time-grid safety check, not an error bound, stiff-system detector or guarantee of global RK4 accuracy.

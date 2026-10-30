@@ -13,7 +13,8 @@ class EngineeringDisciplineLabelSearchTests(unittest.TestCase):
         bundled = html.split(marker, 1)[1].split("</script>", 1)[0].rstrip("\n")
         self.assertEqual(bundled, source.rstrip("\n"))
         self.assertIn("...t.disciplines.map(id=>disciplines.find(d=>d.id===id).title)", source)
-        self.assertIn("toLocaleLowerCase().includes(q)", source)
+        self.assertIn("terms.every(term=>", source)
+        self.assertIn("toLocaleLowerCase().includes(term)", source)
         self.assertIn("['aerospace','Aerospace engineering']", source)
         self.assertIn("['gnss','GNSS positioning']", source)
 

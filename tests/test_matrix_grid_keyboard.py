@@ -16,7 +16,8 @@ class MatrixKeyboardGridTests(unittest.TestCase):
         self.assertEqual(html[start:html.index("</script>", start)], src + "\n")
         self.assertIn("for(const container of [grid,gridB,rhsGrid,weightGrid])enableMatrixArrowNavigation(container)", src)
         self.assertIn("event.preventDefault();", src)
-        self.assertIn("event.altKey||event.ctrlKey||event.metaKey||event.shiftKey", src)
+        self.assertIn("event.altKey||event.metaKey||event.shiftKey", src)
+        self.assertIn("(arrow&&event.ctrlKey)", src)
         for label in ("Right-hand side b row", "Observation weight row"):
             self.assertIn("'data-col':'0','aria-label':'" + label, src)
 

@@ -1,3 +1,14 @@
+## 2026-10-30 — Matrix Home/End navigation (UI-MATRIX-HOME-END-017)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** Home/End jump to first/last column in the active row; Ctrl+Home/End jump to first/last cell of Matrix A/B/RHS/weight grids. Matrix A cell labels now identify matrix and coordinates. No numeric values, algorithms, Tab/arrow shortcuts or standalone offline behavior change. Added direct Node/standalone and Chromium mobile tests.
+
+**NEXT FIVE (priority, dependency, acceptance tests):**
+1. **P1 — Canonical runtime engineering solver registry (planned).** Existing Matrix/Control kernels; stable IDs, honest status/schema, two real consumers, reference/browser tests.
+2. **P1 — Cross-discipline linear solver reuse (planned).** Registry; shared scaled-pivot kernel in Matrix and Control, 2×2/3×3 residual/singular/standalone tests.
+3. **P1 — RK45 difficult-problem robustness (planned).** Existing diagnostics; forward/backward references, ULP/attempt exhaustion, stale-export recovery, mobile.
+4. **P1 — Engineering Toolbox navigation (planned).** Registry; searchable honest statuses, keyboard and 390px mobile, no fake actions.
+5. **P1 — Matrix resize focus accessibility (planned).** Grid keyboard navigation; focus preservation on rebuild, 2×2/3×3 and project regressions.
+
 ## 2026-10-30 — Matrix grid keyboard navigation (UI-MATRIX-GRID-KEYBOARD-016)
 
 **Implemented on dev; exact-head CI, PR promotion and Pages pending.** Added arrow-key focus navigation within the Matrix A, Matrix B, RHS and weight numeric grids, including 2×2/3×3 and single-column cases. Boundaries prevent native number stepping; Tab, modified shortcuts, typing, drafts, algorithms and 16 operations remain unchanged. New direct Node/standalone-parity regression `tests/test_matrix_grid_keyboard.py` and mandatory Chromium `tests/smoke_matrix_grid_keyboard.py` cover all four grids, boundaries, keyboard and 390px mobile.

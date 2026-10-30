@@ -77,3 +77,8 @@ Solve Ax=b and Inverse now show a heuristic warning when κ∞(A) ≥ 1e8 for su
 ## Contextual Equation Editor transfer controls
 
 The Matrix Calculator now separates operation buttons from the result-transfer action row. LU, QR, symmetric Eigen and SVD factor/output selectors appear **only after a successful result of the corresponding operation**; the other three selectors stay hidden. Editing an input, changing dimensions, or producing an invalid/singular result hides every factor selector and disables stale result transfer. This is a presentation change, not a new numerical algorithm: all 16 matrix operations, saved input values, factor choices, keyboard focus, and Equation Editor transfer remain available. The transfer button stays visible and disabled until a successful calculation. Regression coverage: `tests/test_matrix_contextual_transfer.py`, `tests/smoke_matrix_contextual_transfer.py`.
+
+
+## Home/End matrix keyboard navigation
+
+Within Matrix A, Matrix B, RHS b and weights w numeric grids, Home/End move to the first/last column of the current row; Ctrl+Home/End move to the first/last cell of that same grid. Values do not change and navigation does not cross grids. Existing arrow keys, Tab and modified arrow shortcuts remain native. Matrix A accessible cell labels include its name and row/column. Tests: `tests/test_matrix_home_end.py`, `tests/smoke_matrix_home_end.py`. Full screen-reader certification is not claimed.

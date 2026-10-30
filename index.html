@@ -6368,16 +6368,25 @@ function matrixArrowTarget(row,col,rows,cols,key){
  const r=row+delta[0],c=col+delta[1];
  return r>=0&&r<rows&&c>=0&&c<cols?[r,c]:null;
 }
+function matrixHomeEndTarget(row,col,rows,cols,key,ctrl){
+ if(![row,col,rows,cols].every(Number.isInteger)||rows<1||cols<1||
+  row<0||row>=rows||col<0||col>=cols)return null;
+ if(key==='Home')return ctrl?[0,0]:[row,0];
+ if(key==='End')return ctrl?[rows-1,cols-1]:[row,cols-1];
+ return null;
+}
 function enableMatrixArrowNavigation(container){
  container.addEventListener('keydown',event=>{
-  if(!(event.target instanceof HTMLInputElement)||
-   (event.key!=='ArrowUp'&&event.key!=='ArrowDown'&&event.key!=='ArrowLeft'&&event.key!=='ArrowRight')||
-   event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||event.isComposing)return;
+  const arrow=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key);
+  if(!(event.target instanceof HTMLInputElement)||(!arrow&&event.key!=='Home'&&event.key!=='End')||
+   event.altKey||event.metaKey||event.shiftKey||event.isComposing||(arrow&&event.ctrlKey))return;
   const inputs=[...container.querySelectorAll('input[data-row][data-col]')];
   if(!inputs.includes(event.target))return;
   const rows=Math.max(...inputs.map(input=>Number(input.dataset.row)))+1;
   const cols=Math.max(...inputs.map(input=>Number(input.dataset.col)))+1;
-  const target=matrixArrowTarget(Number(event.target.dataset.row),Number(event.target.dataset.col),rows,cols,event.key);
+  const row=Number(event.target.dataset.row),col=Number(event.target.dataset.col);
+  const target=arrow?matrixArrowTarget(row,col,rows,cols,event.key):
+   matrixHomeEndTarget(row,col,rows,cols,event.key,event.ctrlKey);
   // Number inputs otherwise increment on vertical arrows; boundaries must not edit values.
   event.preventDefault();
   if(target)container.querySelector('[data-row="'+target[0]+'"][data-col="'+target[1]+'"]')?.focus();
@@ -6390,7 +6399,7 @@ function rebuild(){
  grid.style.gridTemplateColumns='repeat('+cols+', minmax(0, 1fr))';grid.replaceChildren();
  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
   const value=old.find(x=>x.r===r&&x.c===c)?.value;
-  const cell=el('input',{type:'number',step:'any','data-row':String(r),'data-col':String(c),'aria-label':'Matrix row '+(r+1)+' column '+(c+1)});
+  const cell=el('input',{type:'number',step:'any','data-row':String(r),'data-col':String(c),'aria-label':'Matrix A row '+(r+1)+' column '+(c+1)});
   cell.value=value===undefined?(r===c?'1':'0'):value;cell.addEventListener('input',invalidate);grid.append(cell);
  }
  invalidate();

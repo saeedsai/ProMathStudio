@@ -57,7 +57,7 @@ assert.equal(nodes['ct-eq-transient-plot'].disabled,false);
 nodes['ct-eq-transient-plot'].click();
 assert.equal(mode,'graph');assert.equal(clearCount,1);
 assert.equal(imported.name,'CONTROL_TRANSIENT');
-assert.deepEqual(imported.table.headers,['t','x1','x2']);
+assert.equal(Array.from(imported.table.headers).join(','),'t,x1,x2');
 assert.equal(imported.table.rows.length,2);
 assert.equal(nodes['dt-graph-table'].value,'sheet-7');
 assert.equal(graph.extra[0].mapping.y,2);

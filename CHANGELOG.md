@@ -1,3 +1,4 @@
+- RK45 now guards strictly advancing accepted time samples and reports accepted machine-resolution time steps for near-ULP intervals. No global accuracy certification; dev CI pending.
 - 2026-10-30 (DATA-GRAPH-HEADER-IDENTITY-040, dev QA): Reject duplicate Graph dataset column headers on project import, preserving valid v1/v2 data and atomic rollback; focused Node and browser regressions. CI/Pages pending.
 - Saved-project Data Tables names now reject blanks and whitespace/case-equivalent duplicates without modifying valid display names. Regression tests committed; release QA pending.
 - Saved-project Matrix draft validation rejects overflowed scientific notation and values exceeding the 1e12 solver bound in A/B/RHS/weights, while preserving v1/v2 and empty drafts (DATA-PROJECT-MATRIX-FINITE-038; dev QA pending).

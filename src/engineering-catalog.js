@@ -30,10 +30,10 @@ const tools=Object.freeze(raw.map(([id,title,description,domains,tags,mode,targe
 }));
 function filter(discipline='',query=''){
  if(discipline&&!valid.has(discipline))return [];
- const q=String(query).trim().toLocaleLowerCase();
+ const terms=String(query).trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
  return tools.filter(t=>(!discipline||t.disciplines.includes(discipline))&&
- (!q||[t.id,t.title,t.description,t.tags,...t.disciplines.map(id=>disciplines.find(d=>d.id===id).title)]
-  .join(' ').toLocaleLowerCase().includes(q)));
+ (!terms.length||terms.every(term=>[t.id,t.title,t.description,t.tags,...t.disciplines.map(id=>disciplines.find(d=>d.id===id).title)]
+  .join(' ').toLocaleLowerCase().includes(term))));
 }
 const tab=document.createElement('button');tab.type='button';tab.className='workspace-tab';
 tab.dataset.workspace='engineering';tab.textContent='⚙ Engineering Toolbox';

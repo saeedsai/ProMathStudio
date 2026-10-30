@@ -61,6 +61,18 @@ def main():
         page.locator("#ct-eq-size").select_option("2")
         run.click()
         assert page.locator("#ct-eq-transient-table").is_enabled()
+        plot = page.locator("#ct-eq-transient-plot")
+        assert plot.is_enabled()
+        plot.click()
+        state = page.evaluate("MathStudio.graphData.getState()")
+        assert state["headers"] == ["t", "x1", "x2"], state
+        assert len(state["points"]) == 81, state
+        assert len(state["extra"]) == 1, state
+        assert state["extra"][0]["mapping"]["x"] == 0, state
+        assert state["extra"][0]["mapping"]["y"] == 2, state
+        assert state["extra"][0]["mapping"]["style"] == "line", state
+        assert abs(state["points"][-1]["y"] - result["rows"][-1][1]) < 1e-9
+        assert "Plotted x1(t) and x2(t)" in page.locator("#ct-eq-transient-status").inner_text()
         page.set_viewport_size({"width": 390, "height": 844})
         assert run.is_visible()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth+1")

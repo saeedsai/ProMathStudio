@@ -1,3 +1,11 @@
+## 2026-10-30 — Table import finite numeric validation (DATA-PROJECT-TABLE-FINITE-024)
+
+**Implemented on dev; release pending.** Project schema now rejects nonfinite numeric cells in imported Data Tables (including JSON number overflow such as 1e999), preserving finite values, strings, booleans, null and v1→v2 migration. Standalone index synchronized. New direct Node/Python regression validates input boundaries, invalid types, legacy migration, source/bundle parity; existing Chromium project-import smoke now validates atomic rollback on overflowed table data. Exact-head full Quality and PR/Page gates required.
+
+**NEXT FIVE:** (1) finish exact-head Quality and fix any project import browser failure; acceptance full Python and Chromium smoke green; (2) saved Matrix project focus round-trip; acceptance no focus hijack, dimensions/drafts restored, mobile; (3) canonical registry structured solver contracts; acceptance two consumers, errors, immutability; (4) bounded Control stability guidance; acceptance stable/unstable/marginal numerical references and UI recovery; (5) Engineering catalog expansion; acceptance stable IDs, honest states, keyboard/mobile tests.
+
+**Execution:** Starting dev d8327c659b6e9d5475d5914d0e82136a2f68cc7a, main fe62e706571a04237f919d775a9dfcddccb70d76. Previous dev Quality 41051089378 in progress; no open PR. New feature tests and docs committed, exact CI and Pages pending. Historical inventory unchanged.
+
 ## 2026-10-30 — Graph dataset primitive-cell validation (DATA-PROJECT-GRAPH-CELLS-023)
 
 **Implemented on dev; QA and release pending.** Project-schema migration now rejects nonprimitive graph cells (including objects and arrays) and nonfinite numeric graph cells, while preserving bounded primitive strings, finite numbers, booleans and null, as well as legacy v1 migration. The self-contained HTML was synchronized. Added direct Node/Python regression `tests/test_project_graph_dataset_cells.py` including negative/positive cases and standalone parity. Full exact-head CI, browser regressions and Pages verification required before release. Historical inventory remains frozen.

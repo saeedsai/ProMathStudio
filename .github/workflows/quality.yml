@@ -176,6 +176,8 @@ jobs:
         run: python tests/smoke_matrix_rref.py
       - name: Matrix Ax=b linear-system regression
         run: python tests/smoke_matrix_solve.py
+      - name: Matrix Ax=b backward error, singular recovery and mobile regression
+        run: python tests/smoke_matrix_solve_backward_error.py
       - name: Shared scaled-pivot matrix inverse, UI recovery and mobile regression
         run: python tests/smoke_matrix_shared_solve_inverse.py
       - name: Matrix pivoted LU decomposition regression

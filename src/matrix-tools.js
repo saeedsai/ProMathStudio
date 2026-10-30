@@ -128,16 +128,24 @@ function solve(A,b){
   solution[i]=value/rows[i][i];
   if(!Number.isFinite(solution[i]))throw Error('Solution exceeded finite floating-point range.');
  }
- let residual=0;
+ let residual=0,absoluteResidual=0;
  for(let i=0;i<n;i++){
   const actual=A[i].reduce((sum,a,j)=>sum+a*solution[j],0);
   const denominator=Math.abs(rhs[i])+A[i].reduce((sum,a,j)=>sum+Math.abs(a)*Math.abs(solution[j]),0);
-  const error=Math.abs(actual-rhs[i])/Math.max(denominator,Number.MIN_VALUE);
+  const absoluteError=Math.abs(actual-rhs[i]);
+  const error=absoluteError/Math.max(denominator,Number.MIN_VALUE);
   if(!Number.isFinite(error))throw Error('Solution residual exceeded finite floating-point range.');
   residual=Math.max(residual,error);
+  absoluteResidual=Math.max(absoluteResidual,absoluteError);
  }
  if(residual>1e-8)throw Error('Solution failed its numerical residual check.');
- return {solution,residual,rank:n};
+ // Normwise backward error in the infinity norm: ||Ax-b||inf /
+ // (||A||inf * ||x||inf + ||b||inf). This is NOT a condition estimate.
+ const normA=Math.max(...A.map(row=>row.reduce((sum,x)=>sum+Math.abs(x),0)));
+ const normX=Math.max(...solution.map(Math.abs)),normB=Math.max(...rhs.map(Math.abs));
+ const normwiseBackwardError=absoluteResidual/Math.max(Number.MIN_VALUE,normA*normX+normB);
+ if(!Number.isFinite(normwiseBackwardError))throw Error('Solution diagnostics exceeded finite floating-point range.');
+ return {solution,residual,rank:n,absoluteResidual,normwiseBackwardError};
 }
 /* Doolittle P*A=L*U with scaled partial row pivoting and row-relative
    reconstruction verification; no input mutation or external dependencies. */
@@ -337,6 +345,16 @@ function inverse(A){
  const residual=Math.max(...A.map((row,i)=>row.map((_,j)=>Math.abs(row.reduce((sum,x,k)=>sum+x*result[k][j],0)-Number(i===j)))).flat());
  if(!Number.isFinite(residual)||residual>1e-7)throw Error('Matrix inversion failed its numerical residual check.');
  return result;
+}
+/* Exact infinity-norm condition number for bounded full-rank real matrices.
+   Reuse the scaled-pivot inverse; this is not a residual-based estimate. */
+function conditionInfinity(A){
+ A=validate(A);requireSquare(A);
+ const inv=inverse(A);
+ const normInf=matrix=>Math.max(...matrix.map(row=>row.reduce((sum,x)=>sum+Math.abs(x),0)));
+ const value=normInf(A)*normInf(inv);
+ if(!Number.isFinite(value))throw Error('Condition number exceeded finite floating-point range.');
+ return value;
 }
 /* Jacobi rotations for bounded real symmetric 2x2/3x3 matrices. Columns of
    vectors are orthonormal eigenvectors; eigenvalues are descending. */
@@ -829,6 +847,11 @@ function calculate(operation){
    operation==='transpose'?transpose(A):operation==='inverse'?inverse(A):
    operation==='add'?add(A,readSecond()):operation==='subtract'?subtract(A,readSecond()):
    operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='weightedLeastSquares'?weightedLeastSquares(A,readRhs(),readWeights()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?(A.length===2&&A[0].length===3?svd2x3(A):A.length===3&&A[0].length===2?svd3x2(A):A.length===3?svd3x3(A):svd2x2(A)):operation==='pseudoinverse'?pseudoinverse(A):multiply(A,readSecond());
+  let conditionLabel='';
+  if(operation==='solve'||operation==='inverse'){
+   try{conditionLabel='\nInfinity-norm condition number: '+format(conditionInfinity(A));}
+   catch(error){conditionLabel='\nInfinity-norm condition number: unavailable ('+error.message+')';}
+  }
   last={operation,value};output.classList.remove('error');
   const display=operation==='rref'?value.matrix:(operation==='solve'||operation==='leastSquares'||operation==='weightedLeastSquares')?value.solution.map(x=>[x]):value;
   const rowsText=rows=>rows.map(row=>'[ '+row.map(format).join('   ')+' ]').join('\n');
@@ -842,7 +865,7 @@ function calculate(operation){
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
    'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
-   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual):'');
+   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual):'')+conditionLabel;
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;output.classList.add('error');output.textContent=error.message;return null;}
 }
@@ -857,4 +880,5 @@ send.addEventListener('click',()=>{
 });
 rebuild();rebuildSecond();rebuildRhs();rebuildWeights();
 M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,weightedLeastSquares,eigenSymmetric,svd2x2,svd3x2,svd2x3,svd3x3,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,readWeights,calculate};
+M.matrixTools.conditionInfinity=conditionInfinity;
 })();

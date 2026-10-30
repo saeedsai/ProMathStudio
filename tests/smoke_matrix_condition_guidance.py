@@ -39,6 +39,8 @@ def main():
         assert "Condition guidance: High sensitivity" in page.locator("#mat-result").inner_text()
         for i, v in enumerate(["1", "2", "2", "4"]):
             cells.nth(i).fill(v)
+        for i, v in enumerate(["3", "6"]):
+            rhs.nth(i).fill(v)
         page.locator("#mat-solve").click()
         assert "Singular" in page.locator("#mat-result").inner_text()
         assert page.locator("#mat-send").is_disabled()

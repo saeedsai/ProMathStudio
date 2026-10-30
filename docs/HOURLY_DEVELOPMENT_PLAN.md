@@ -1,3 +1,16 @@
+## 2026-10-30 — Matrix saved-project draft round-trip (UI-MATRIX-PROJECT-ROUNDTRIP-025)
+
+**Implemented on dev; exact-head QA and release pending.** Project backups now include the existing Matrix calculator's A/B dimensions, editable cells, RHS and observation-weight drafts. Schema validates dimensions (2–3), exact cell counts, bounded decimal/scientific or blank input strings *before* import mutation. Matrix restore invalidates stale computed results and preserves focus only for the previously active grid; legacy projects without Matrix state still import. The standalone HTML was synchronized with the source. Added direct Node/Python schema and source/bundle regression `tests/test_matrix_project_state.py`, Chromium desktop/390px round-trip, focus, malformed-import rollback regression `tests/smoke_matrix_project_state.py`, and mandatory Quality workflow step.
+
+**NEXT FIVE (priority, dependencies, acceptance tests):**
+1. **P1 — Exact-head QA and release recovery (in progress).** Diagnose latest Quality for all Matrix/project cases, fix root causes; acceptance green full unit + Chromium and PR gates at exact SHA, then verified main/Pages.
+2. **P1 — Canonical registry structured contracts (planned).** Reuse Matrix/Control solver metadata; typed dimensions, explicit assumptions, immutable numerical references, invalid-input errors and both UI consumers.
+3. **P1 — Control equilibrium stability guidance (planned).** Bounded stable/unstable/marginal eigenvalue references, explicit equilibrium-is-not-stability caveat, UI error recovery/mobile.
+4. **P1 — Engineering catalog expansion (planned).** Unique source-backed Control/GNSS/Signals entries, truthful availability labels, search, keyboard and 390px checks.
+5. **P1 — RK45 difficult-problem robustness (planned).** Near-stiff forward/backward reference, attempt exhaustion and stage-resolution warnings, stale-export recovery/browser regression.
+
+**Execution checkpoint (2026-10-30):** Baseline dev `f54de0de31f75c5fa0d5f641af746330c405cf33`, main `fe62e706571a04237f919d775a9dfcddccb70d76`; no open PR, only dev/main branches (unprotected). New source, browser and unit regressions committed; exact candidate CI, PR and Pages require confirmation. Historical 166 gap/95 partial audit unchanged.
+
 ## 2026-10-30 — Table import finite numeric validation (DATA-PROJECT-TABLE-FINITE-024)
 
 **Implemented on dev; release pending.** Project schema now rejects nonfinite numeric cells in imported Data Tables (including JSON number overflow such as 1e999), preserving finite values, strings, booleans, null and v1→v2 migration. Standalone index synchronized. New direct Node/Python regression validates input boundaries, invalid types, legacy migration, source/bundle parity; existing Chromium project-import smoke now validates atomic rollback on overflowed table data. Exact-head full Quality and PR/Page gates required.

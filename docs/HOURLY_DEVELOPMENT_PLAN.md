@@ -1,3 +1,16 @@
+## 2026-10-30 — RK45 floating-point stage-time precision (MATH-ODE-RK45-STAGE-RESOLUTION-022)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** Count RK45 attempts and accepted steps whose intermediate Dormand–Prince time stages round to current time, and warn users to rescale large absolute times. Numerical kernel and step acceptance unchanged; warning does not certify global accuracy. Added direct Node/Python numerical, boundary, backward and failure tests, plus mandatory Chromium desktop/mobile, stale-export recovery and no-pageerror regression. Baseline dev/main `309ffbd40136cf1e86e4ff9a2c69d17ff6eeb47c`, PR #112 main/dev Quality and Pages green, no open PR. Both branches unprotected.
+
+**NEXT FIVE (priority, dependencies, acceptance tests):**
+1. **P1 — Matrix saved-project focus round-trip (planned).** Project persistence and Matrix grid focus; save/load dimensions, drafts, no focus hijack, browser/mobile tests.
+2. **P1 — Registry contracts and diagnostics (planned).** Matrix/Control shared solver; typed dimensions, assumptions, structured errors, invalid/reference and immutability tests.
+3. **P1 — Control equilibrium stability guidance (planned).** Bounded eigenvalue analysis; stable/unstable/marginal references, explicit assumptions and browser recovery.
+4. **P1 — Engineering catalog expansion (planned).** Source-backed Control/GNSS/Signals catalog with unique IDs, truthful availability, keyboard and 390px tests.
+5. **P1 — RK45 difficult-problem robustness follow-up (planned).** Near-stiff finite references, error-ratio/attempt exhaustion and stage-resolution warning consistency; forward/backward and stale-export regressions.
+
+**Execution log (2026-10-30):** Source, standalone bundle, new unit/browser regressions, mandatory CI, numerical guide, changelog and ledger updated for precision warning. Exact commit SHA, CI, PR, main and Pages require verification; historical 166 gaps/95 partial unchanged.
+
 **2026-10-30 browser navigation contract repair:** Dev Quality [41046168378](https://github.com/saeedsai/ProMathStudio/actions/runs/41046168378) passed all structural/unit checks and earlier browser suites but the combined Equation smoke still asserted exactly four workspace tabs. Updated it to assert five while preserving Equation/Symbolic functional checks. Scanned other navigation-specific smoke tests for the same assumption. New exact-head CI pending.
 
 **2026-10-30 browser-fixture repair:** Dev Quality [41045941038](https://github.com/saeedsai/ProMathStudio/actions/runs/41045941038) passed all 163 structural/unit tests and all browser steps before the new Engineering smoke's final restored-session fixture. The test attempted `sessionStorage` from an opaque `about:blank` origin, which Chromium correctly denies. The regression now serves the same standalone HTML from a Playwright-intercepted local test origin, sets session state and reloads without external network. No production security restriction was bypassed. Exact new CI required.

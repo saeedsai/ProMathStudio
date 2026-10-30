@@ -1,3 +1,14 @@
+## 2026-10-30 — Matrix project finite draft validation (DATA-PROJECT-MATRIX-FINITE-038)
+
+**Implemented on dev; exact-head CI and production pending.** Matrix project migration now rejects scientific-notation drafts that parse to nonfinite values (e.g. 1e999) or exceed the existing Matrix solver's 1e12 magnitude bound (e.g. 1e13). Applies to A, B, RHS and weights, preserving empty drafts, bounded decimals/scientific notation, v1→v2 migration and atomic import preflight. Source and offline HTML are synchronized. Added tests/test_matrix_project_finite_drafts.py with Node v1/v2 boundary, nonfinite/oversize and bundle parity coverage; extended tests/smoke_matrix_project_state.py with four 390px invalid-import rollback cases. Isolated predicate assertions (18) and source/offline parity passed; complete repository unit and Chromium suites could not run locally because repository checkout and browser executable were unavailable. Exact-head GitHub push CI results not exposed by connector. Do not claim release.
+
+**NEXT FIVE concrete priorities, dependencies and acceptance tests:**
+1. **P0 — Exact-head dev CI and failure repair (pending).** Obtain GitHub Quality run for precise dev SHA, verify all Python unit and Chromium smoke jobs (including finite Matrix drafts and prior RK45/Control cases), inspect failed logs, fix root causes without weakening tests.
+2. **P0 — Verified PR promotion and Pages (blocked on #1).** Open/reuse dev→main PR only when checks can be verified, inspect diff, reviews and protections; merge via ordinary PR only with required checks/approvals, verify main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Saved-project Graph/Data Tables v1/v2 round-trip.** Preserve column types and sample order, reject malformed/nonfinite nested cells before any mutation; Node and Chromium rollback/focus/mobile tests.
+4. **P1 — RK45 near-ULP time-grid correctness.** Forward/backward monotone sample times, no duplicate samples, stage-collision warnings and exhaustion context; analytical references and 390px stale-export tests.
+5. **P1 — Engineering catalog canonical solver routing.** Approved source-backed entries, unique IDs and truthful planned status; desktop/mobile keyboard and offline parity tests, no duplicate solver engines.
+
 **QA repair:** Updated the pre-existing RK45 workload failure-context regression for the additional bounded-overflow count field; all four targeted Node numerical snippets passed in isolated V8. No production release without full exact-head CI.
 
 ## 2026-10-30 — RK45 structured overflow classification and stage diagnostics (MATH-ODE-RK45-OVERFLOW-CLASSIFICATION-037)

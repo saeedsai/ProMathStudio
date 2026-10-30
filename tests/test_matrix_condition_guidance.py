@@ -23,7 +23,7 @@ assert.match(conditionGuidance(1e8-1),/Below the 1e8/);
 assert.match(conditionGuidance(1e8),/High sensitivity/);
 const A=[[1e-9,0],[0,1e9]],rhs=[2e-9,3e9];
 const snapshot=JSON.stringify([A,rhs]);
-assert.equal(conditionInfinity(A),1e18);
+assert(Math.abs(conditionInfinity(A)-1e18)/1e18<1e-12,'scaled condition within binary64 tolerance');
 assert.match(conditionGuidance(conditionInfinity(A)),/small residual does not certify accuracy/);
 const x=solve(A,rhs).solution;
 assert(Math.abs(x[0]-2)<1e-12&&Math.abs(x[1]-3)<1e-12);

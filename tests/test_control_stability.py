@@ -11,9 +11,9 @@ class ControlStabilityTests(unittest.TestCase):
     def test_standalone_parity(self):
         source = (ROOT / 'src/control-equilibrium.js').read_text(encoding='utf-8')
         html = (ROOT / 'index.html').read_text(encoding='utf-8')
-        tag = '<script id="promath-control-equilibrium">\\n'
+        tag = '<script id="promath-control-equilibrium">\n'
         start = html.index(tag) + len(tag)
-        self.assertEqual(html[start:html.index('</script>', start)], source + '\\n')
+        self.assertEqual(html[start:html.index('</script>', start)], source + '\n')
         self.assertIn('id="ct-eq-stability-run"', html)
         self.assertIn('studio.matrixTools.eigenSymmetric(A)', source)
 

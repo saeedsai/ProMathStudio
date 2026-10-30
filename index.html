@@ -8078,11 +8078,11 @@ function calculateStability(){
   if(n!==2&&n!==3)throw Error('State dimension must be 2 or 3.');
   const result=analyzeStability(parseMatrix(matrix.value,n));
   const fmt=x=>Number(x.toPrecision(10)).toString();
-  stabilityOutput.textContent='Perturbation stability: '+result.classification+'\\n'+
-   'Eigenvalues of A: ['+result.eigenvalues.map(fmt).join(', ')+']\\n'+
-   'Eigenanalysis residual: '+fmt(result.residual)+'\\n'+
-   'Near-zero tolerance: '+fmt(result.tolerance)+'\\n'+
-   'Only real symmetric 2×2/3×3 A is supported. Constant b does not change perturbation eigenvalues.\\n'+
+  stabilityOutput.textContent='Perturbation stability: '+result.classification+'\n'+
+   'Eigenvalues of A: ['+result.eigenvalues.map(fmt).join(', ')+']\n'+
+   'Eigenanalysis residual: '+fmt(result.residual)+'\n'+
+   'Near-zero tolerance: '+fmt(result.tolerance)+'\n'+
+   'Only real symmetric 2×2/3×3 A is supported. Constant b does not change perturbation eigenvalues.\n'+
    'Equilibrium existence/uniqueness is not established by stability analysis. '+
    'Marginal means an exact zero eigenvalue; near-zero modes are indeterminate.';
   stabilityStatus.textContent='Symmetric-system stability analyzed for '+n+' states.';

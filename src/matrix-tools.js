@@ -1023,7 +1023,7 @@ function restoreState(state){
     !['rows','cols','bRows','bCols'].every(key=>[2,3].includes(dim(key))))
   throw Error('Invalid saved Matrix dimensions.');
  const numericDraft=value=>typeof value==='string'&&value.length<=80&&
-  (value===''||/^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?$/.test(value));
+  (value===''||/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value));
  for(const [key,length] of [['a',state.rows*state.cols],['b',state.bRows*state.bCols],
     ['rhs',state.rows],['weights',state.rows]]){
   if(!Array.isArray(state[key])||state[key].length!==length||!state[key].every(numericDraft))

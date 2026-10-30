@@ -6771,7 +6771,8 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    ', smallest rejected |Δt|='+minRejectedStep.toPrecision(8):'')+
   ', time-resolution-limited attempts='+resolutionLimitedAttempts+
   ', collapsed-stage attempts='+stageTimeCollisionAttempts+
-  ', longest rejection streak='+maxConsecutiveRejected+'.');
+  ', longest rejection streak='+maxConsecutiveRejected+
+  ', bounded stage-overflow retries='+stageOverflowRejected+'.');
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
   if(attempts>=maxSteps)throw progressError('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit');
@@ -6809,6 +6810,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    if(!message.includes('became non-finite or exceeded magnitude 1e12')||
       message.includes('RK45 k1 derivative failed'))throw error;
    rejected++;stageOverflowRejected++;consecutiveRejected++;
+   minRejectedStep=Math.min(minRejectedStep,Math.abs(h));
    maxConsecutiveRejected=Math.max(maxConsecutiveRejected,consecutiveRejected);
    if(Math.abs(h)<=quantum)throw progressError('Adaptive stage overflow at current time resolution; rescale state or shorten the interval');
    h*=0.5;
@@ -6935,6 +6937,7 @@ function run(){
    last.maxAcceptedErrorRatio.toPrecision(5)+
    (last.rejected?', max rejected local-error ratio '+last.maxRejectedErrorRatio.toPrecision(5)+
     ', smallest rejected |Δt| '+last.minRejectedStep.toPrecision(5):'')+
+   (last.stageOverflowRejected?', bounded stage-overflow retries '+last.stageOverflowRejected:'')+
    (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:'')+
    (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+
     ' accepted steps had RK45 stage times rounded to current t; rescale time for reliable accuracy':'')+

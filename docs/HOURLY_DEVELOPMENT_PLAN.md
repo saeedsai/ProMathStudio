@@ -1,3 +1,9 @@
+## 2026-10-30 — Control RK4 transient convergence (CONTROL-TRANSIENT-CONVERGENCE-034)
+
+**Implemented on dev, CI pending.** Compare base two-state RK4 endpoint against a 2N-step refined run, displaying maximum absolute endpoint difference. Refinement only attempted for N<=500 to retain solver limit (1000); when unavailable, preserve original trajectory and Data Tables export. This is a convergence diagnostic, not a global error bound. The existing coupled ODE solver and offline bundle are reused. Added focused structural parity tests and extended Chromium browser regression for N=500/501, invalidation, export and mobile.
+
+**NEXT FIVE:** (1) exact-dev Quality: all Python and Chromium checks green at precise head, fix failures; (2) PR #117: verify PR approvals/checks and ordinary merge, main Quality and Pages; (3) RK45 stage overflow: bounded forward/backward numerical and underflow browser tests; (4) Control x1/x2 plot handoff via Data Tables/Graphs: samples, keyboard/mobile and invalidation tests; (5) Matrix/Graph/Table project compatibility: v1/v2 round-trips, rollback and focus tests.
+
 **2026-10-30 CI repair checkpoint:** [Quality 41085865243](https://github.com/saeedsai/ProMathStudio/actions/runs/41085865243) failed 2 of 182 unit tests due solely to Control source/bundle trailing newline mismatch; new Control numerical tests passed. Restored expected exact bundle spacing and preserved disclosure-summary-first semantics. Exact-head full CI, PR/main Quality and Pages still required; no release claimed.
 
 ## 2026-10-30 — Control transient RK4 and Engineering search CI repair (CONTROL-TRANSIENT-TWO-STATE-033)

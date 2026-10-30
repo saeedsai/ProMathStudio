@@ -178,6 +178,8 @@ jobs:
         run: python tests/smoke_matrix_solve.py
       - name: Matrix Ax=b backward error, singular recovery and mobile regression
         run: python tests/smoke_matrix_solve_backward_error.py
+      - name: Matrix infinity-norm condition diagnostics in solve and inverse
+        run: python tests/smoke_matrix_condition_infinity.py
       - name: Shared scaled-pivot matrix inverse, UI recovery and mobile regression
         run: python tests/smoke_matrix_shared_solve_inverse.py
       - name: Matrix pivoted LU decomposition regression

@@ -55,9 +55,12 @@
           set.headers.length < 1 || set.headers.length > 32 || set.rows.length > 6000)
         fail('graph dataset dimensions exceed limits.');
       // Column selectors require unambiguous names in restored graph datasets.
-      if (set.headers.every(h => typeof h === 'string') &&
-          new Set(set.headers).size !== set.headers.length)
-        fail('graph dataset has duplicate column names.');
+      if (set.headers.every(h => typeof h === 'string')) {
+        const identities = set.headers.map(h => h.trim().toLowerCase());
+        if (identities.some(h => !h)) fail('graph dataset has blank column names.');
+        if (new Set(identities).size !== identities.length)
+          fail('graph dataset has duplicate column names.');
+      }
       if (set.headers.some(h => typeof h !== 'string' || h.length > 8000) ||
           set.rows.some(row => !Array.isArray(row) || row.length !== set.headers.length ||
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||

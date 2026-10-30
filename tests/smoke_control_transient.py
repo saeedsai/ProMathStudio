@@ -51,6 +51,7 @@ def main():
         assert abs(singular["rows"][-1][2] - math.exp(-2)) < 1e-7
         page.locator("#ct-eq-matrix").fill("0x10,0;0,1")
         assert page.locator("#ct-eq-transient-table").is_disabled()
+        assert page.locator("#ct-eq-transient-plot").is_disabled()
         run.click()
         assert "decimal or scientific" in page.locator("#ct-eq-transient-status").inner_text()
         assert "No current trajectory" in page.locator("#ct-eq-transient-output").inner_text()
@@ -61,6 +62,7 @@ def main():
         page.locator("#ct-eq-size").select_option("2")
         run.click()
         assert page.locator("#ct-eq-transient-table").is_enabled()
+        assert page.locator("#ct-eq-transient-plot").is_enabled()
         plot = page.locator("#ct-eq-transient-plot")
         assert plot.is_enabled()
         plot.focus()

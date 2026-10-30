@@ -56,7 +56,9 @@
         fail('graph dataset dimensions exceed limits.');
       if (set.headers.some(h => typeof h !== 'string' || h.length > 8000) ||
           set.rows.some(row => !Array.isArray(row) || row.length !== set.headers.length ||
-            row.some(cell => String(cell ?? '').length > 8000))) fail('graph dataset has invalid cells.');
+            row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
+              (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
+        fail('graph dataset has invalid cells.');
     }
     if (data.customFunctions !== undefined) {
       if (!Array.isArray(data.customFunctions) || data.customFunctions.length > 60) fail('custom function limit is 60.');

@@ -19,6 +19,11 @@ function timeResolution(t,direction){
  while(t+direction*delta===t)delta*=2;
  return Math.abs((t+direction*delta)-t);
 }
+function rk4TimeGrid(t,next,h){
+ const direction=Math.sign(h), midpoint=t+h/2;
+ if(!(direction*(next-t)>0)||midpoint===t||midpoint===next)
+  throw Error('Fixed-step RK4 time resolution is insufficient: output times or midpoint stages collapse; use fewer steps or rescale time.');
+}
 function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  expression=String(expression).trim();
  if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
@@ -32,6 +37,7 @@ function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  let y=y0;const rows=[];
  for(let i=0;i<=steps;i++){
   const t=bounded(i===steps?t1:t0+i*h,'Time');
+  if(i<steps)rk4TimeGrid(t,bounded(i+1===steps?t1:t0+(i+1)*h,'Time'),h);
   rows.push([t,y]);
   if(i===steps)break;
   const k1=f(t,y);
@@ -195,6 +201,7 @@ function solveSystem({expression='z',expressionZ='-y',t0=0,t1=1,y0=0,z0=1,steps=
  let y=y0,z=z0;const rows=[];
  for(let i=0;i<=steps;i++){
   const t=bounded(i===steps?t1:t0+i*h,'Time');
+  if(i<steps)rk4TimeGrid(t,bounded(i+1===steps?t1:t0+(i+1)*h,'Time'),h);
   rows.push([t,y,z]);
   if(i===steps)break;
   const k1=f(t,y,z);

@@ -60,7 +60,7 @@ for(const [id,params,code] of [
  ['matrix.solve.real.small',{A:[[1,2],[2,4]],b:[3,6]},'SOLVER_REJECTED'],
  ['matrix.solve.real.small',{A:[[1,2],[2,4]],b:[3,7]},'SOLVER_REJECTED'],
  ['matrix.solve.real.small',{A:[[1,0],[0,1]],b:[Infinity,1]},'SOLVER_REJECTED'],
- ['matrix.inverse.real.small',{A:[[1,2,3],[4,5,6]]},'SOLVER_REJECTED']
+ ['matrix.inverse.real.small',{A:[[1,2,3],[4,5,6]]},'INVALID_MATRIX_SHAPE']
 ]){
  const result=registry.executeResult(id,params);
  assert.equal(result.ok,false,id);assert(Object.isFrozen(result));

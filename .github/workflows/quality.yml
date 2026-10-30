@@ -250,6 +250,8 @@ jobs:
         run: python tests/smoke_ode_rk45_diagnostics.py
       - name: RK45 accepted-step range, local error and recovery browser regression
         run: python tests/smoke_ode_rk45_step_quality.py
+      - name: RK45 rejected-step diagnostics, recovery and responsive browser regression
+        run: python tests/smoke_ode_rk45_rejected_quality.py
       - name: Coupled two-state RK4 reference and UI regression
         run: python tests/smoke_ode_system.py
       - name: Backward coupled RK4 numerical and browser regression

@@ -24,6 +24,19 @@ def main():
         run = page.locator("#ct-eq-transient-run")
         run.click()
         assert "trajectory samples" in page.locator("#ct-eq-transient-output").inner_text()
+        output = page.locator("#ct-eq-transient-output")
+        assert "RK4 step-doubling |x_N - x_2N|∞:" in output.inner_text()
+        # A finer trajectory should agree more closely on smooth linear systems.
+        page.locator("#ct-eq-steps").fill("500")
+        run.click()
+        assert "RK4 step-doubling |x_N - x_2N|∞:" in output.inner_text()
+        page.locator("#ct-eq-steps").fill("501")
+        run.click()
+        assert "Step-doubling comparison unavailable" in output.inner_text()
+        assert page.locator("#ct-eq-transient-table").is_enabled()
+        page.locator("#ct-eq-steps").fill("80")
+        run.click()
+
         result = page.evaluate("""() => MathStudio.controlEquilibrium.simulateTransient(
             [[2,0],[0,3]],[4,9],[0,0],0,1,80)""")
         assert len(result["rows"]) == 81

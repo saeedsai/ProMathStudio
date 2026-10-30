@@ -830,7 +830,25 @@ function enableMatrixArrowNavigation(container){
  });
 }
 for(const container of [grid,gridB,rhsGrid,weightGrid])enableMatrixArrowNavigation(container);
+// Restore focus only when a numeric cell was focused before a grid rebuild.
+// Clamping to the new dimensions keeps keyboard users inside the surviving grid.
+function matrixResizeFocusTarget(row,col,rows,cols){
+ if(![row,col,rows,cols].every(Number.isInteger)||rows<1||cols<1||row<0||col<0)return null;
+ return [Math.min(row,rows-1),Math.min(col,cols-1)];
+}
+function matrixGridFocusPosition(container){
+ const active=document.activeElement;
+ if(!(active instanceof HTMLInputElement)||!container.contains(active))return null;
+ const row=Number(active.dataset.row),col=Number(active.dataset.col);
+ return Number.isInteger(row)&&Number.isInteger(col)?[row,col]:null;
+}
+function restoreMatrixGridFocus(container,position,rows,cols){
+ if(!position)return;
+ const target=matrixResizeFocusTarget(position[0],position[1],rows,cols);
+ if(target)container.querySelector('[data-row="'+target[0]+'"][data-col="'+target[1]+'"]')?.focus();
+}
 function rebuild(){
+ const focused=matrixGridFocusPosition(grid);
  const old=[...grid.querySelectorAll('input')].map(input=>({r:Number(input.dataset.row),c:Number(input.dataset.col),value:input.value}));
  const rows=Number(document.getElementById('mat-rows').value),cols=Number(document.getElementById('mat-cols').value);
  grid.style.gridTemplateColumns='repeat('+cols+', minmax(0, 1fr))';grid.replaceChildren();
@@ -839,9 +857,11 @@ function rebuild(){
   const cell=el('input',{type:'number',step:'any','data-row':String(r),'data-col':String(c),'aria-label':'Matrix A row '+(r+1)+' column '+(c+1)});
   cell.value=value===undefined?(r===c?'1':'0'):value;cell.addEventListener('input',invalidate);grid.append(cell);
  }
+ restoreMatrixGridFocus(grid,focused,rows,cols);
  invalidate();
 }
 function rebuildSecond(){
+ const focused=matrixGridFocusPosition(gridB);
  const old=[...gridB.querySelectorAll('input')].map(input=>({r:Number(input.dataset.row),c:Number(input.dataset.col),value:input.value}));
  const rows=Number(document.getElementById('mat-b-rows').value),cols=Number(document.getElementById('mat-b-cols').value);
  gridB.style.gridTemplateColumns='repeat('+cols+', minmax(0, 1fr))';gridB.replaceChildren();
@@ -850,9 +870,11 @@ function rebuildSecond(){
   const cell=el('input',{type:'number',step:'any','data-row':String(r),'data-col':String(c),'aria-label':'Matrix B row '+(r+1)+' column '+(c+1)});
   cell.value=value===undefined?(r===c?'1':'0'):value;cell.addEventListener('input',invalidate);gridB.append(cell);
  }
+ restoreMatrixGridFocus(gridB,focused,rows,cols);
  invalidate();
 }
 function rebuildRhs(){
+ const focused=matrixGridFocusPosition(rhsGrid);
  const old=[...rhsGrid.querySelectorAll('input')].map(input=>input.value);
  const rows=Number(document.getElementById('mat-rows').value);
  rhsGrid.style.gridTemplateColumns='minmax(0, 1fr)';rhsGrid.replaceChildren();
@@ -860,9 +882,11 @@ function rebuildRhs(){
   const cell=el('input',{type:'number',step:'any','data-row':String(r),'data-col':'0','aria-label':'Right-hand side b row '+(r+1)});
   cell.value=old[r]===undefined?'0':old[r];cell.addEventListener('input',invalidate);rhsGrid.append(cell);
  }
+ restoreMatrixGridFocus(rhsGrid,focused,rows,1);
  invalidate();
 }
 function rebuildWeights(){
+ const focused=matrixGridFocusPosition(weightGrid);
  const old=[...weightGrid.querySelectorAll('input')].map(input=>input.value);
  const rows=Number(document.getElementById('mat-rows').value);
  weightGrid.style.gridTemplateColumns='minmax(0, 1fr)';weightGrid.replaceChildren();
@@ -870,6 +894,7 @@ function rebuildWeights(){
   const cell=el('input',{type:'number',step:'any',min:'1e-12',max:'1e12','data-row':String(r),'data-col':'0','aria-label':'Observation weight row '+(r+1)});
   cell.value=old[r]===undefined?'1':old[r];cell.addEventListener('input',invalidate);weightGrid.append(cell);
  }
+ restoreMatrixGridFocus(weightGrid,focused,rows,1);
  invalidate();
 }
 function readWeights(){return [...weightGrid.querySelectorAll('input')].map(input=>input.value);}

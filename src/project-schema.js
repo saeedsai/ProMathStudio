@@ -60,6 +60,18 @@
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
     }
+    if (data.matrix !== undefined && data.matrix !== null) {
+      const matrix = data.matrix;
+      if (!record(matrix) || !['rows','cols','bRows','bCols'].every(key => [2,3].includes(matrix[key])))
+        fail('saved Matrix dimensions must be 2 or 3.');
+      const numericDraft = value => typeof value === 'string' && value.length <= 80 &&
+        (value === '' || /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value));
+      for (const [key, size] of [['a',matrix.rows*matrix.cols],['b',matrix.bRows*matrix.bCols],
+        ['rhs',matrix.rows],['weights',matrix.rows]]) {
+        if (!Array.isArray(matrix[key]) || matrix[key].length !== size || !matrix[key].every(numericDraft))
+          fail('saved Matrix ' + key + ' entries are invalid.');
+      }
+    }
     if (data.customFunctions !== undefined) {
       if (!Array.isArray(data.customFunctions) || data.customFunctions.length > 60) fail('custom function limit is 60.');
       for (const fn of data.customFunctions) {

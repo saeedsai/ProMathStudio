@@ -200,6 +200,8 @@ jobs:
         run: python tests/smoke_matrix_home_end.py
       - name: Matrix grid rebuild focus preservation and mobile regression
         run: python tests/smoke_matrix_resize_focus.py
+      - name: Matrix saved-project round-trip, focus and mobile regression
+        run: python tests/smoke_matrix_project_state.py
       - name: Canonical engineering solver registry, UI consumers and mobile regression
         run: python tests/smoke_engineering_solver_registry.py
       - name: Matrix thin QR decomposition regression

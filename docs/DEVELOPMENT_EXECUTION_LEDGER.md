@@ -27,7 +27,7 @@ Baseline: 158 present (63 bounded complete, 95 partial), 166 gap/improvement opp
 
 ## 2026-10-30 — Matrix Home/End execution checkpoint
 
-Read AGENTS, hourly plan, frozen inventory, architecture and latest CI. Pre-change dev/main `f7e18c810bdc410064d029eff1636ea4aedc1353`; synchronized dev Quality [41012914775](https://github.com/saeedsai/ProMathStudio/actions/runs/41012914775) green. No open PRs. Implemented bounded Home/End keyboard focus behavior across four grids, Matrix A labels, new Node and mandatory Chromium tests, standalone parity, docs and roadmap. Local checkout blocked by github.com DNS failure; exact-head CI, PR/main Quality and Pages pending. Historical 166 gaps/95 partial unchanged. No unsafe cleanup.
+Read AGENTS, hourly plan, frozen inventory, architecture and latest CI. Pre-change dev/main `f7e18c810bdc410064d029eff1636ea4aedc1353`; synchronized dev Quality [41012914775](https://github.com/saeedsai/ProMathStudio/actions/runs/41012914775) green. No open PRs. Implemented bounded Home/End keyboard focus behavior across four grids, Matrix A labels, new Node and mandatory Chromium tests, standalone parity, docs and roadmap. Initial exact-head Quality [41017716561](https://github.com/saeedsai/ProMathStudio/actions/runs/41017716561) failed a legacy structural assertion that expected Ctrl to be blocked for every key. Updated that test to assert Ctrl+Arrow remains blocked while Ctrl+Home/End is supported, preserving coverage. Local checkout blocked by github.com DNS failure; rerun exact-head CI, PR/main Quality and Pages pending. Historical 166 gaps/95 partial unchanged. No unsafe cleanup.
 
 ## 2026-10-30 — Matrix grid keyboard navigation execution checkpoint
 

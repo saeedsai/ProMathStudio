@@ -459,6 +459,19 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
 <pre id="ct-eq-output" aria-live="polite">No current result.</pre>
 <div class="ct-actions"><button type="button" id="ct-eq-stability-run">Analyze stability (symmetric A)</button><span id="ct-eq-stability-status" role="status" aria-live="polite">Ready</span></div>
 <pre id="ct-eq-stability-output" aria-live="polite">No current stability result.</pre>
+<details id="ct-eq-transient">
+<summary>Two-state transient response · shared fixed-step RK4</summary>
+<style>#ct-eq-transient .ct-equilibrium-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px}#ct-eq-transient .ct-equilibrium-fields label{display:flex;flex-direction:column;min-width:0}#ct-eq-transient input{width:100%;min-width:0;box-sizing:border-box}#ct-eq-transient pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<p>Simulate ẋ = −A·x + b with a real 2×2 matrix and constant forcing. Uses the existing coupled ODE solver; not a stiff solver or global-error guarantee. Compare different step counts.</p>
+<div class="ct-equilibrium-fields">
+<label>Initial state x(t₀), two values<input id="ct-eq-initial" value="0, 0" spellcheck="false"></label>
+<label>Initial time t₀<input id="ct-eq-t0" type="number" step="any" value="0"></label>
+<label>End time t₁<input id="ct-eq-t1" type="number" step="any" value="1"></label>
+<label>RK4 steps (4–1000)<input id="ct-eq-steps" type="number" min="4" max="1000" step="1" value="80"></label>
+</div>
+<div class="ct-actions"><button type="button" id="ct-eq-transient-run">Simulate trajectory</button><button type="button" id="ct-eq-transient-table" disabled>Save trajectory to Data Tables</button><span id="ct-eq-transient-status" role="status" aria-live="polite">Ready</span></div>
+<pre id="ct-eq-transient-output" aria-live="polite">No current trajectory.</pre>
+</details>
 </details>
 <p class="small-note">Bode/Nyquist sample ω = 0.01–1000 rad/s. Root locus samples 0 ≤ K ≤ 100. Feedback uses T(s)=KG(s)/(1+KG(s)), unity negative feedback. Feedforward design, compensator tuning and symbolic Laplace transforms are planned extensions.</p>
 </details>
@@ -6022,6 +6035,14 @@ const engineeringSolvers=Object.freeze({
   for(const key of Object.keys(params))
    if(!item.metadata.inputs.includes(key))
     throw engineeringInputError('UNEXPECTED_INPUT','Unexpected engineering solver input: '+key+'.');
+  // Enforce documented dimensions before dispatch, without duplicating scalar validation.
+  const A=params.A;
+  if(!Array.isArray(A)||![2,3].includes(A.length)||
+     A.some(row=>!Array.isArray(row)||row.length!==A.length))
+   throw engineeringInputError('INVALID_MATRIX_SHAPE','Engineering solver A must be a square 2x2 or 3x3 matrix.');
+  if(item.metadata.inputs.includes('b')&&
+     (!Array.isArray(params.b)||params.b.length!==A.length))
+   throw engineeringInputError('INVALID_VECTOR_LENGTH','Engineering solver b must match the number of matrix rows.');
   return item.run(params);
  },
  /* Nonthrowing integration contract for Engineering Toolbox adapters.
@@ -6739,6 +6760,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  let minAcceptedStep=Infinity,maxAcceptedStep=0,maxAcceptedErrorRatio=0;
  let maxRejectedErrorRatio=0,minRejectedStep=Infinity,resolutionLimitedAttempts=0;
  let stageTimeCollisionAttempts=0,stageTimeCollisionAcceptedSteps=0;
+ let consecutiveRejected=0,maxConsecutiveRejected=0;
  // Include the last representable time and accepted/rejected work in failure reports.
  // This is deliberately a diagnostic only: it does not change RK45 step selection.
  const progressError=reason=>Error(reason+'; at t='+t.toPrecision(16)+
@@ -6748,7 +6770,8 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   (rejected?', max rejected local-error ratio='+maxRejectedErrorRatio.toPrecision(6)+
    ', smallest rejected |Δt|='+minRejectedStep.toPrecision(8):'')+
   ', time-resolution-limited attempts='+resolutionLimitedAttempts+
-  ', collapsed-stage attempts='+stageTimeCollisionAttempts+'.');
+  ', collapsed-stage attempts='+stageTimeCollisionAttempts+
+  ', longest rejection streak='+maxConsecutiveRejected+'.');
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
   if(attempts>=maxSteps)throw progressError('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit');
@@ -6780,6 +6803,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   const errorRatio=error/scale;
   if(!Number.isFinite(errorRatio))throw progressError('RK45 local-error estimate is not finite');
   if(errorRatio<=1){
+   consecutiveRejected=0;
    const acceptedStep=Math.abs(h);
    minAcceptedStep=Math.min(minAcceptedStep,acceptedStep);
    maxAcceptedStep=Math.max(maxAcceptedStep,acceptedStep);
@@ -6789,6 +6813,8 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    if(stageTimesCollapsed)stageTimeCollisionAcceptedSteps++;
   }else{
    rejected++;
+   consecutiveRejected++;
+   maxConsecutiveRejected=Math.max(maxConsecutiveRejected,consecutiveRejected);
    maxRejectedErrorRatio=Math.max(maxRejectedErrorRatio,errorRatio);
    minRejectedStep=Math.min(minRejectedStep,Math.abs(h));
    if(Math.abs(h)<=quantum)throw progressError('Adaptive step size underflow at current time resolution; rescale time or relax tolerance');
@@ -6799,7 +6825,9 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  return {type:'ode-rk45',columns:['t','y'],rows,steps:accepted,attempts,rejected,tolerance,
   minAcceptedStep,maxAcceptedStep,maxAcceptedErrorRatio,maxRejectedErrorRatio,
   minRejectedStep:rejected?minRejectedStep:null,resolutionLimitedAttempts,
-  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,
+  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,maxConsecutiveRejected,
+  rejectionWarning:rejected>=5||maxConsecutiveRejected>=3?
+   'Repeated RK45 step rejections: verify accuracy with tighter tolerance or a stiff-capable solver; rejection alone does not diagnose stiffness.':null,
   method:'Adaptive Dormand–Prince Runge–Kutta 5(4) (RK45)',
   note:'Scalar first-order y\u2032=f(t,y), forward or backward. Local error controlled; not stiff, vector-valued or globally error-certified.'};
 }
@@ -6894,7 +6922,8 @@ function run(){
     ', smallest rejected |Δt| '+last.minRejectedStep.toPrecision(5):'')+
    (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:'')+
    (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+
-    ' accepted steps had RK45 stage times rounded to current t; rescale time for reliable accuracy':''):
+    ' accepted steps had RK45 stage times rounded to current t; rescale time for reliable accuracy':'')+
+   (last.rejectionWarning?', warning: '+last.rejectionWarning:''):
    'Δt='+last.h.toPrecision(8);
   const endState='y('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+
    (last.type==='ode-rk4-system'?', z ≈ '+end[2].toPrecision(12):'');
@@ -8093,11 +8122,81 @@ function calculateStability(){
   return null;
  }
 }
+/* Bounded two-state trajectory; use the existing safe coupled RK4 engine. */
+function numericValues(parts,label){
+ return parts.map((part,i)=>{
+  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(part))
+   throw Error(label+' value '+(i+1)+' must be decimal or scientific notation.');
+  const n=Number(part);
+  if(!Number.isFinite(n)||Math.abs(n)>1e12)
+   throw Error(label+' value '+(i+1)+' must be finite with magnitude at most 1e12.');
+  return n;
+ });
+}
+let lastTransient=null;
+const transientStatus=by('ct-eq-transient-status'),transientOutput=by('ct-eq-transient-output');
+const transientTable=by('ct-eq-transient-table');
+function simulateTransient(A,b,x0,t0=0,t1=1,steps=80){
+ if(!Array.isArray(A)||A.length!==2||A.some(row=>!Array.isArray(row)||row.length!==2))
+  throw Error('Transient response requires a 2×2 matrix A.');
+ if(!Array.isArray(b)||b.length!==2||!Array.isArray(x0)||x0.length!==2)
+  throw Error('Transient response requires two forcing and initial-state values.');
+ if(!studio.odeTools?.solveSystem)throw Error('Shared coupled ODE solver is unavailable.');
+ const a=A.map((row,i)=>numericValues(row.map(String),'Matrix A row '+(i+1)));
+ const forcing=numericValues(b.map(String),'Forcing b');
+ const initial=numericValues(x0.map(String),'Initial state');
+ const expr=i=>'-('+a[i][0]+')*y-('+a[i][1]+')*z+('+forcing[i]+')';
+ return studio.odeTools.solveSystem({expression:expr(0),expressionZ:expr(1),
+  t0,t1,y0:initial[0],z0:initial[1],steps});
+}
+function calculateTransient(){
+ try{
+  if(Number(size.value)!==2)throw Error('Transient response currently supports exactly two states.');
+  const A=parseMatrix(matrix.value,2),b=values(forcing.value,2,'Forcing b');
+  const x0=values(by('ct-eq-initial').value,2,'Initial state');
+  lastTransient=simulateTransient(A,b,x0,by('ct-eq-t0').value,
+   by('ct-eq-t1').value,by('ct-eq-steps').value);
+  const fmt=n=>Number(n.toPrecision(10)).toString();
+  const end=lastTransient.rows.at(-1);
+  // Step-doubling diagnostic, not a certified global error bound.
+  let convergence='Step-doubling comparison unavailable (more than 500 base steps).';
+  if(lastTransient.steps<=500){
+   try{
+    const finer=simulateTransient(A,b,x0,by('ct-eq-t0').value,
+     by('ct-eq-t1').value,lastTransient.steps*2);
+    const fineEnd=finer.rows.at(-1);
+    const discrepancy=Math.max(Math.abs(end[1]-fineEnd[1]),Math.abs(end[2]-fineEnd[2]));
+    convergence='RK4 step-doubling |x_N - x_2N|∞: '+fmt(discrepancy)+
+     ' (diagnostic only; not a global error bound).';
+   }catch(error){convergence='Step-doubling comparison unavailable: '+error.message;}
+  }
+  transientOutput.textContent='Coupled RK4 · '+lastTransient.steps+' fixed steps, '+
+   lastTransient.rows.length+' trajectory samples\n'+
+   'x('+fmt(end[0])+') ≈ ['+fmt(end[1])+', '+fmt(end[2])+']\n'+
+   'First samples (t, x1, x2):\n'+lastTransient.rows.slice(0,5)
+    .map(row=>row.map(fmt).join(', ')).join('\n')+'\n'+
+   convergence+'\n'+
+   'Fixed-step RK4 is not stiff or globally error-certified. Compare step counts for convergence.';
+  transientStatus.textContent='Two-state trajectory computed.';
+  transientTable.disabled=false;
+  return lastTransient;
+ }catch(error){
+  lastTransient=null;
+  if(transientTable)transientTable.disabled=true;
+  if(transientOutput)transientOutput.textContent='No current trajectory.';
+  if(transientStatus)transientStatus.textContent=error.message;
+  return null;
+ }
+}
 function invalidate(){
  status.textContent='Inputs changed; recompute equilibrium.';
  output.textContent='No current result.';
  stabilityStatus.textContent='Inputs changed; recompute stability.';
  stabilityOutput.textContent='No current stability result.';
+ lastTransient=null;
+ if(transientTable)transientTable.disabled=true;
+ if(transientStatus)transientStatus.textContent='Inputs changed; recompute trajectory.';
+ if(transientOutput)transientOutput.textContent='No current trajectory.';
 }
 function calculate(){
  try{
@@ -8123,7 +8222,20 @@ for(const control of [size,matrix,forcing]){
 }
 by('ct-eq-run').addEventListener('click',calculate);
 by('ct-eq-stability-run').addEventListener('click',calculateStability);
-studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate,analyzeStability,calculateStability});
+by('ct-eq-transient-run')?.addEventListener('click',calculateTransient);
+for(const id of ['ct-eq-initial','ct-eq-t0','ct-eq-t1','ct-eq-steps']){
+ const control=by(id);
+ control?.addEventListener('input',invalidate);
+ control?.addEventListener('change',invalidate);
+}
+transientTable?.addEventListener('click',()=>{
+ try{
+  if(!lastTransient)throw Error('Compute a trajectory before exporting.');
+  studio.dataTables.importData({headers:['t','x1','x2'],rows:lastTransient.rows},'CONTROL_TRANSIENT');
+  studio.advanced.mode('data');
+ }catch(error){transientStatus.textContent=error.message;}
+});
+studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate,analyzeStability,calculateStability,simulateTransient,calculateTransient});
 })();
 
 </script>
@@ -8134,12 +8246,16 @@ const M=window.MathStudio,host=document.getElementById('engineering-panel'),bar=
 if(!M?.advanced?.mode||!host||!bar)return;
 const disciplines=Object.freeze([
  ['physics','Physics'],['mechanical','Mechanical engineering'],['electrical','Electrical engineering'],
- ['electronics','Electronics engineering'],['fluids','Fluid mechanics'],['aerospace','Aerospace engineering']
+ ['electronics','Electronics engineering'],['fluids','Fluid mechanics'],['aerospace','Aerospace engineering'],
+ ['control','Control Theory'],['gnss','GNSS positioning'],['signals','Signal engineering']
 ].map(([id,title])=>Object.freeze({id,title})));
 const raw=[
  ['matrix.solve.real.small','Small real linear systems','Solve 2×2 or 3×3 Ax=b using the shared scaled-pivot Matrix solver.','physics mechanical electrical electronics fluids aerospace','matrix linear algebra','calculator','matrix'],
- ['control.equilibrium.real.small','Control state equilibrium','Solve ẋ=−Ax+b for 2 or 3 states; equilibrium does not prove stability.','mechanical electrical electronics aerospace','control steady-state','graph','ct-equilibrium'],
+ ['control.equilibrium.real.small','Control state equilibrium','Solve ẋ=−Ax+b for 2 or 3 states; equilibrium does not prove stability.','mechanical electrical electronics aerospace control','control steady-state','graph','ct-equilibrium'],
  ['ode.ivp.scalar','Scalar ODE initial-value solver','Run existing RK4 or adaptive RK45; not a stiff solver.','physics mechanical fluids aerospace','ode rk45 integration','editor','ode'],
+ ['gnss.positioning.least.squares','GNSS least-squares positioning','GNSS satellite-position observations and coordinate-frame handling are not yet implemented.','gnss','gnss positioning navigation'],
+ ['signals.spectral.analysis','Signal spectral analysis','Dedicated sampling/windowing/spectrum workflow is not yet implemented.','signals electronics','fft spectral frequency'],
+ ['control.frequency.response','Control frequency response','Bode and frequency response analysis is not yet implemented.','control electrical','bode control stability'],
  ['thermal.cycle.analysis','Thermodynamic cycle analysis','Cycle efficiency calculations are not yet implemented.','physics mechanical','thermal energy'],
  ['structures.beam.deflection','Beam deflection and stress','Structural loading workflows are not yet implemented.','mechanical aerospace','beam mechanics'],
  ['circuits.network.analysis','Circuit network analysis','General nodal circuit analysis is not yet implemented.','electrical electronics','circuit kirchhoff'],
@@ -8156,9 +8272,10 @@ const tools=Object.freeze(raw.map(([id,title,description,domains,tags,mode,targe
 }));
 function filter(discipline='',query=''){
  if(discipline&&!valid.has(discipline))return [];
- const q=String(query).trim().toLocaleLowerCase();
+ const terms=String(query).trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
  return tools.filter(t=>(!discipline||t.disciplines.includes(discipline))&&
- (!q||[t.id,t.title,t.description,t.tags].join(' ').toLocaleLowerCase().includes(q)));
+ (!terms.length||terms.every(term=>[t.id,t.title,t.description,t.tags,...t.disciplines.map(id=>disciplines.find(d=>d.id===id).title)]
+  .join(' ').toLocaleLowerCase().includes(term))));
 }
 const tab=document.createElement('button');tab.type='button';tab.className='workspace-tab';
 tab.dataset.workspace='engineering';tab.textContent='⚙ Engineering Toolbox';
@@ -8175,13 +8292,13 @@ style.textContent='#engineering-panel .eng-filters,#eng-results{display:grid;gri
  '@media(max-width:440px){#engineering-panel .eng-filters,#eng-results{grid-template-columns:minmax(0,1fr)}}';
 document.head.append(style);
 host.innerHTML='<div class="panel-head"><div class="panel-title">Engineering Toolbox</div></div>'+
- '<p>Search six engineering disciplines. Available tools open existing workflows; planned tools have no runnable actions. Units and engineering certification are not provided by this catalog.</p>'+
+ '<p>Search nine engineering disciplines. Available tools open existing workflows; planned tools have no runnable actions. Units and engineering certification are not provided by this catalog.</p>'+
  '<div class="eng-filters"><label>Discipline<select id="eng-discipline"></select></label>'+
  '<label>Search tools<input id="eng-search" type="search" autocomplete="off" placeholder="Name or keyword"></label></div>'+
  '<p id="eng-status" role="status" aria-live="polite"></p><div id="eng-results" aria-label="Engineering tool results"></div>';
 const select=document.getElementById('eng-discipline'),search=document.getElementById('eng-search');
 const status=document.getElementById('eng-status'),results=document.getElementById('eng-results');
-for(const [id,title] of [['','All six disciplines'],...disciplines.map(d=>[d.id,d.title])]){
+for(const [id,title] of [['','All nine disciplines'],...disciplines.map(d=>[d.id,d.title])]){
  const opt=document.createElement('option');opt.value=id;opt.textContent=title;select.append(opt);
 }
 function openTool(t){

@@ -18,10 +18,34 @@ def main():
    return {ids:c.tools.map(t=>t.id),disciplines:c.disciplines.map(d=>d.id),
     available:c.tools.filter(t=>t.status==='available').map(t=>t.id)}
   }""")
-  assert len(catalog['disciplines'])==6,catalog
+  assert len(catalog['disciplines'])==9,catalog
   assert len(set(catalog['ids']))==len(catalog['ids'])
   assert 'matrix.solve.real.small' in catalog['available']
   assert page.locator('#eng-results article').count()==len(catalog['ids'])
+  for discipline, tool_id in [('gnss','gnss.positioning.least.squares'),
+                              ('signals','signals.spectral.analysis'),
+                              ('control','control.frequency.response')]:
+   page.locator('#eng-discipline').select_option(discipline)
+   page.locator('#eng-search').fill(tool_id.split('.')[0])
+   card=page.locator('#eng-results article[data-tool-id="'+tool_id+'"]')
+   assert card.count()==1,tool_id
+   assert card.locator('button').count()==0,'Planned feature must not open a fake tool'
+   assert 'planned' in card.inner_text().lower()
+  page.locator('#eng-search').fill('')
+  # Readable discipline labels are searchable, not just terse IDs or tool titles.
+  page.locator('#eng-discipline').select_option('')
+  page.locator('#eng-search').fill('Aerospace engineering')
+  assert page.locator('#eng-results article').count()>0
+  assert page.locator('#eng-results article[data-tool-id="matrix.solve.real.small"]').count()==1
+  # Multiword search matches all tokens independently of their order.
+  page.locator('#eng-search').fill('equilibrium control')
+  assert page.locator('#eng-results article[data-tool-id="control.equilibrium.real.small"]').count()==1
+  page.locator('#eng-search').fill('control orbit')
+  assert page.locator('#eng-results article').count()==0
+  page.locator('#eng-search').fill('GNSS positioning')
+  assert page.locator('#eng-results article[data-tool-id="gnss.positioning.least.squares"]').count()==1
+  assert page.locator('#eng-results article button').count()==0
+  page.locator('#eng-search').fill('')
   page.locator('#eng-discipline').select_option('fluids')
   page.locator('#eng-search').fill('pipe')
   assert page.locator('#eng-results article').count()==1
@@ -66,5 +90,5 @@ def main():
   assert page.locator('#engineering-panel').is_visible()
   assert not errors,errors
   browser.close()
- print('PASS Engineering Toolbox search, six disciplines, honest statuses and routes')
+ print('PASS Engineering Toolbox search, nine disciplines, honest statuses and routes')
 if __name__=='__main__':main()

@@ -58,11 +58,81 @@ function calculateStability(){
   return null;
  }
 }
+/* Bounded two-state trajectory; use the existing safe coupled RK4 engine. */
+function numericValues(parts,label){
+ return parts.map((part,i)=>{
+  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(part))
+   throw Error(label+' value '+(i+1)+' must be decimal or scientific notation.');
+  const n=Number(part);
+  if(!Number.isFinite(n)||Math.abs(n)>1e12)
+   throw Error(label+' value '+(i+1)+' must be finite with magnitude at most 1e12.');
+  return n;
+ });
+}
+let lastTransient=null;
+const transientStatus=by('ct-eq-transient-status'),transientOutput=by('ct-eq-transient-output');
+const transientTable=by('ct-eq-transient-table');
+function simulateTransient(A,b,x0,t0=0,t1=1,steps=80){
+ if(!Array.isArray(A)||A.length!==2||A.some(row=>!Array.isArray(row)||row.length!==2))
+  throw Error('Transient response requires a 2×2 matrix A.');
+ if(!Array.isArray(b)||b.length!==2||!Array.isArray(x0)||x0.length!==2)
+  throw Error('Transient response requires two forcing and initial-state values.');
+ if(!studio.odeTools?.solveSystem)throw Error('Shared coupled ODE solver is unavailable.');
+ const a=A.map((row,i)=>numericValues(row.map(String),'Matrix A row '+(i+1)));
+ const forcing=numericValues(b.map(String),'Forcing b');
+ const initial=numericValues(x0.map(String),'Initial state');
+ const expr=i=>'-('+a[i][0]+')*y-('+a[i][1]+')*z+('+forcing[i]+')';
+ return studio.odeTools.solveSystem({expression:expr(0),expressionZ:expr(1),
+  t0,t1,y0:initial[0],z0:initial[1],steps});
+}
+function calculateTransient(){
+ try{
+  if(Number(size.value)!==2)throw Error('Transient response currently supports exactly two states.');
+  const A=parseMatrix(matrix.value,2),b=values(forcing.value,2,'Forcing b');
+  const x0=values(by('ct-eq-initial').value,2,'Initial state');
+  lastTransient=simulateTransient(A,b,x0,by('ct-eq-t0').value,
+   by('ct-eq-t1').value,by('ct-eq-steps').value);
+  const fmt=n=>Number(n.toPrecision(10)).toString();
+  const end=lastTransient.rows.at(-1);
+  // Step-doubling diagnostic, not a certified global error bound.
+  let convergence='Step-doubling comparison unavailable (more than 500 base steps).';
+  if(lastTransient.steps<=500){
+   try{
+    const finer=simulateTransient(A,b,x0,by('ct-eq-t0').value,
+     by('ct-eq-t1').value,lastTransient.steps*2);
+    const fineEnd=finer.rows.at(-1);
+    const discrepancy=Math.max(Math.abs(end[1]-fineEnd[1]),Math.abs(end[2]-fineEnd[2]));
+    convergence='RK4 step-doubling |x_N - x_2N|∞: '+fmt(discrepancy)+
+     ' (diagnostic only; not a global error bound).';
+   }catch(error){convergence='Step-doubling comparison unavailable: '+error.message;}
+  }
+  transientOutput.textContent='Coupled RK4 · '+lastTransient.steps+' fixed steps, '+
+   lastTransient.rows.length+' trajectory samples\n'+
+   'x('+fmt(end[0])+') ≈ ['+fmt(end[1])+', '+fmt(end[2])+']\n'+
+   'First samples (t, x1, x2):\n'+lastTransient.rows.slice(0,5)
+    .map(row=>row.map(fmt).join(', ')).join('\n')+'\n'+
+   convergence+'\n'+
+   'Fixed-step RK4 is not stiff or globally error-certified. Compare step counts for convergence.';
+  transientStatus.textContent='Two-state trajectory computed.';
+  transientTable.disabled=false;
+  return lastTransient;
+ }catch(error){
+  lastTransient=null;
+  if(transientTable)transientTable.disabled=true;
+  if(transientOutput)transientOutput.textContent='No current trajectory.';
+  if(transientStatus)transientStatus.textContent=error.message;
+  return null;
+ }
+}
 function invalidate(){
  status.textContent='Inputs changed; recompute equilibrium.';
  output.textContent='No current result.';
  stabilityStatus.textContent='Inputs changed; recompute stability.';
  stabilityOutput.textContent='No current stability result.';
+ lastTransient=null;
+ if(transientTable)transientTable.disabled=true;
+ if(transientStatus)transientStatus.textContent='Inputs changed; recompute trajectory.';
+ if(transientOutput)transientOutput.textContent='No current trajectory.';
 }
 function calculate(){
  try{
@@ -88,5 +158,18 @@ for(const control of [size,matrix,forcing]){
 }
 by('ct-eq-run').addEventListener('click',calculate);
 by('ct-eq-stability-run').addEventListener('click',calculateStability);
-studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate,analyzeStability,calculateStability});
+by('ct-eq-transient-run')?.addEventListener('click',calculateTransient);
+for(const id of ['ct-eq-initial','ct-eq-t0','ct-eq-t1','ct-eq-steps']){
+ const control=by(id);
+ control?.addEventListener('input',invalidate);
+ control?.addEventListener('change',invalidate);
+}
+transientTable?.addEventListener('click',()=>{
+ try{
+  if(!lastTransient)throw Error('Compute a trajectory before exporting.');
+  studio.dataTables.importData({headers:['t','x1','x2'],rows:lastTransient.rows},'CONTROL_TRANSIENT');
+  studio.advanced.mode('data');
+ }catch(error){transientStatus.textContent=error.message;}
+});
+studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate,analyzeStability,calculateStability,simulateTransient,calculateTransient});
 })();

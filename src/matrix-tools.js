@@ -428,6 +428,14 @@ const engineeringSolvers=Object.freeze({
   for(const key of Object.keys(params))
    if(!item.metadata.inputs.includes(key))
     throw engineeringInputError('UNEXPECTED_INPUT','Unexpected engineering solver input: '+key+'.');
+  // Enforce documented dimensions before dispatch, without duplicating scalar validation.
+  const A=params.A;
+  if(!Array.isArray(A)||![2,3].includes(A.length)||
+     A.some(row=>!Array.isArray(row)||row.length!==A.length))
+   throw engineeringInputError('INVALID_MATRIX_SHAPE','Engineering solver A must be a square 2x2 or 3x3 matrix.');
+  if(item.metadata.inputs.includes('b')&&
+     (!Array.isArray(params.b)||params.b.length!==A.length))
+   throw engineeringInputError('INVALID_VECTOR_LENGTH','Engineering solver b must match the number of matrix rows.');
   return item.run(params);
  },
  /* Nonthrowing integration contract for Engineering Toolbox adapters.

@@ -42,9 +42,11 @@ Choose **Coupled two-state RK4** in the ODE panel. Enter `dy/dt=f(t,y,z)` and `d
 
 ## Adaptive first-order IVP (offline RK45)
 
-In the same **First-order ODE initial-value problem** panel, choose **Adaptive RK45**. Enter the derivative, initial/final time, initial value, tolerance (1e-12 to 1e-2), and maximum integration attempts (4–10,000). The Dormand–Prince embedded Runge–Kutta 5(4) method accepts or rejects candidate steps based on a scaled local error estimate and reports accepted/rejected counts. The output is sampled at accepted time points, not at uniformly spaced intervals.
+In the same **First-order ODE initial-value problem** panel, choose **Adaptive RK45**. Enter the derivative, initial/final time (forward or backward), initial value, tolerance (1e-12 to 1e-2), and maximum integration attempts (4–10,000). The Dormand–Prince embedded Runge–Kutta 5(4) method accepts or rejects candidate steps based on a scaled local error estimate. It reports accepted/rejected counts, the **minimum and maximum accepted absolute time-step sizes** and the **maximum accepted local-error ratio** (embedded error divided by the solver's scaled tolerance). This ratio is bounded by 1 for accepted steps and is **not** a certified global error bound.
 
-Example: dy/dt=y, t0=0, t1=1, y0=1, tolerance 1e-9 approximates e. Tighter tolerance normally increases the number of accepted steps and improves the reference result, but is not a global error guarantee. Both Data Tables and Graphs handoffs work with the variable-step output. Failed attempts, invalid tolerances, non-finite values and step-size underflow produce errors instead of partial exports. **Scope:** real scalar forward IVPs only; no stiff ODE guarantee, event handling, systems, backward integration or globally certified accuracy. RK4 remains the default and its fixed-step behavior is unchanged. See tests/smoke_ode_adaptive.py.
+Example: dy/dt=y, t0=0, t1=1, y0=1, tolerance 1e-10 approximates e. For backward integration, use t0=1, t1=0, y0=e to approximate 1. The accepted-step range helps show adaptation; it is not a convergence proof. Both Data Tables and Graphs handoffs work with the nonuniform, signed-direction output. Invalid derivatives, invalid tolerances, non-finite values, attempt exhaustion and time-resolution underflow produce explicit errors and disable stale exports.
+
+**Scope:** real scalar forward/backward nonstiff IVPs only; no stiff ODE guarantee, event handling, coupled adaptive systems or globally certified accuracy. RK4 remains the default. See `tests/test_ode_rk45_step_quality.py` and `tests/smoke_ode_rk45_step_quality.py`.
 
 ## Adaptive Simpson quadrature (offline, bounded)
 

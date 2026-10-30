@@ -35,6 +35,7 @@ def main():
         assert migrated['tables'] == original['tables'], 'legacy table data changed'
 
         def rejected(candidate):
+            graph_before = page.evaluate('window.MathStudio.bridge.export().graph')
             page.locator('#hub-status').evaluate("el => el.textContent = ''")
             upload(page, candidate)
             page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
@@ -42,6 +43,7 @@ def main():
             assert current['working'] == migrated['working']
             assert [i['raw'] for i in current['notebook']] == ['x+1']
             assert current['tables'] == migrated['tables']
+            assert current['graph'] == graph_before, 'invalid import mutated graph state'
 
         rejected(dict(legacy, version=99, working='WRONG'))
         rejected(dict(legacy, working='WRONG', notebook=[{'raw': 42}]))

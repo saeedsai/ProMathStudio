@@ -1,3 +1,16 @@
+## 2026-10-30 — Canonical bounded Matrix solver registry (ARCH-ENGINEERING-SOLVER-REGISTRY-019)
+
+**Implemented on dev; exact-head CI, PR promotion and Pages pending.** Added immutable source-backed runtime registry \`MathStudio.engineeringSolvers\` with stable unique IDs for real 2×2/3×3 Ax=b and inverse, strict input contract validation, and direct reuse of the existing scaled-pivot numerical kernels. The two actual Matrix UI operation consumers route through registry execution; future cross-discipline toolbox UI remains planned, not falsely marked implemented. New numerical/schema/duplicate-ID/standalone regression \`tests/test_engineering_solver_registry.py\` and Chromium two-consumer/singular-recovery/mobile regression \`tests/smoke_engineering_solver_registry.py\` are mandatory CI. Baseline dev/main \`fb286f3f54cffb609aec1d49861efdbd4b879458\`, Quality and Pages green. Historical 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority, dependency, acceptance tests):**
+1. **P1 — Cross-discipline linear solver consumer (planned).** Dependency: canonical Matrix registry. Acceptance: genuine Control/Engineering caller reuses scaled-pivot solve with 2×2/3×3 residual, singular, metadata, browser and standalone parity tests.
+2. **P1 — Engineering Toolbox searchable navigation (planned).** Dependency: registry metadata. Acceptance: honest implemented/planned labels, six discipline filters, accessible keyboard search and 390px mobile smoke; no fake executable tools.
+3. **P1 — RK45 difficult-problem robustness (planned).** Dependency: current adaptive diagnostics. Acceptance: forward/backward analytic references, underflow and attempt-limit failures, stale-export recovery and mobile test.
+4. **P1 — Matrix saved-project focus round-trip (planned).** Dependency: UI-MATRIX-RESIZE-FOCUS-018. Acceptance: restored dimensions/drafts and keyboard focus without hijacking selector focus, Chromium project round-trip and 390px checks.
+5. **P1 — Registry schema and numerical diagnostics expansion (planned).** Dependency: current two IDs. Acceptance: typed dimensions, explicit units/assumptions, stable error codes, condition/residual metadata, immutable references and invalid-input tests.
+
+**Execution log (2026-10-30):** Baseline main/dev fb286f3f54cffb609aec1d49861efdbd4b879458; dev/main Quality and Pages successful via PR #109. Added two live registry consumers, tests, docs and changelog. Exact new commit and deployment gates pending; branch protection remains disabled.
+
 ## 2026-10-30 — Matrix grid resize focus preservation (UI-MATRIX-RESIZE-FOCUS-018)
 
 **Implemented on dev; exact-head CI, PR promotion and Pages pending.** Rebuilding a numeric Matrix A/B/RHS/weight grid restores focus to the previously edited cell or clamps to the nearest surviving cell on shrink. Selector-initiated resizes retain selector focus; surviving drafts, numeric APIs, all 16 operations, keyboard shortcuts and offline standalone behavior are unchanged. New Node/standalone regression `tests/test_matrix_resize_focus.py` and mandatory Chromium desktop/390px mobile regression `tests/smoke_matrix_resize_focus.py` cover all four grids, focus clamping, values, invalidation and page errors.

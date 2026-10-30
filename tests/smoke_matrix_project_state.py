@@ -69,6 +69,16 @@ def main():
         assert restored == saved['matrix'], (restored, saved['matrix'])
         assert page.locator('#mat-grid [data-row="2"][data-col="1"]').input_value() == '2.5'
 
+        # Recovered drafts compute the expected transpose; a subsequent project
+        # restore must invalidate the stale transferable result.
+        page.locator('#mat-grid [data-row="0"][data-col="0"]').fill('1')
+        assert page.evaluate("MathStudio.matrixTools.calculate('transpose').value") == [
+            [1, 0, 0], [0, 1, 2.5]]
+        assert not page.locator('#mat-send').is_disabled()
+        upload(page, saved)
+        page.wait_for_function("() => document.querySelector('#mat-send').disabled")
+        assert page.evaluate('MathStudio.matrixTools.exportState()') == restored
+
         # Invalid schema must be rejected before mutating any Matrix drafts.
         invalid = json.loads(json.dumps(saved))
         invalid['matrix']['rows'] = 4

@@ -3152,7 +3152,8 @@ self.onmessage=async ({data})=>{
         names.add(name);
         if (table.columns.some(col => typeof col !== 'string' || col.length > 80) ||
             table.rows.some(row => !Array.isArray(row) || row.length !== table.columns.length ||
-              row.some(cell => !['string', 'number', 'boolean'].includes(typeof cell) && cell !== null || String(cell ?? '').length > 8000)))
+              row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
+                (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
           fail('table contains invalid rows or cells.');
       }
     }

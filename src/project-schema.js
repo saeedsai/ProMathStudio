@@ -91,7 +91,9 @@
             table.columns.length < 1 || table.columns.length > 32 || table.rows.length > 6000)
           fail('table dimensions exceed limits.');
         short(table.name, 48, 'table name');
-        const name = table.name.toLowerCase();
+        // Trim only for identity checks: preserve the user's original display name.
+        const name = table.name.trim().toLowerCase();
+        if (!name) fail('table name must not be blank.');
         if (names.has(name)) fail('duplicate table names.');
         names.add(name);
         if (table.columns.some(col => typeof col !== 'string' || col.length > 80) ||

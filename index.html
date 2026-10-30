@@ -6515,12 +6515,16 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  };
  let t=t0,y=y0,h=span/20,attempts=0,rejected=0,accepted=0;
  let minAcceptedStep=Infinity,maxAcceptedStep=0,maxAcceptedErrorRatio=0;
+ let maxRejectedErrorRatio=0,minRejectedStep=Infinity,resolutionLimitedAttempts=0;
  // Include the last representable time and accepted/rejected work in failure reports.
  // This is deliberately a diagnostic only: it does not change RK45 step selection.
  const progressError=reason=>Error(reason+'; at t='+t.toPrecision(16)+
   ', target='+t1.toPrecision(16)+', attempted step='+h.toPrecision(8)+
   '; attempts='+attempts+'/'+maxSteps+', accepted='+accepted+
-  ', rejected='+rejected+', tolerance='+tolerance+'.');
+  ', rejected='+rejected+', tolerance='+tolerance+
+  (rejected?', max rejected local-error ratio='+maxRejectedErrorRatio.toPrecision(6)+
+   ', smallest rejected |Δt|='+minRejectedStep.toPrecision(8):'')+
+  ', time-resolution-limited attempts='+resolutionLimitedAttempts+'.');
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
   if(attempts>=maxSteps)throw progressError('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit');
@@ -6529,7 +6533,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   if(!(direction*h>0))throw progressError('Adaptive step size underflow; shorten the interval or relax tolerance');
   const quantum=timeResolution(t,direction);
   let nextT=t+h;
-  if(nextT===t)nextT=t+direction*quantum;
+  if(nextT===t){nextT=t+direction*quantum;resolutionLimitedAttempts++;}
   if(direction*(nextT-t1)>0)nextT=t1;
   h=nextT-t;
   if(!(direction*h>0))throw progressError('Adaptive step size underflow at current time resolution; rescale time or relax tolerance');
@@ -6544,22 +6548,27 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   const k7=f(t+h,y5,'k7');
   const y4=bounded(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State');
   const error=Math.abs(y5-y4),scale=tolerance*(1+Math.max(Math.abs(y),Math.abs(y5)));
-  if(error<=scale){
+  const errorRatio=error/scale;
+  if(!Number.isFinite(errorRatio))throw progressError('RK45 local-error estimate is not finite');
+  if(errorRatio<=1){
    const acceptedStep=Math.abs(h);
    minAcceptedStep=Math.min(minAcceptedStep,acceptedStep);
    maxAcceptedStep=Math.max(maxAcceptedStep,acceptedStep);
-   maxAcceptedErrorRatio=Math.max(maxAcceptedErrorRatio,error/scale);
+   maxAcceptedErrorRatio=Math.max(maxAcceptedErrorRatio,errorRatio);
    t=nextT;
    y=y5;rows.push([t,y]);accepted++;
   }else{
    rejected++;
+   maxRejectedErrorRatio=Math.max(maxRejectedErrorRatio,errorRatio);
+   minRejectedStep=Math.min(minRejectedStep,Math.abs(h));
    if(Math.abs(h)<=quantum)throw progressError('Adaptive step size underflow at current time resolution; rescale time or relax tolerance');
   }
   const factor=error===0?5:Math.max(0.2,Math.min(5,0.9*Math.pow(scale/error,0.2)));
   h=bounded(h*factor,'Step size');
  }
  return {type:'ode-rk45',columns:['t','y'],rows,steps:accepted,attempts,rejected,tolerance,
-  minAcceptedStep,maxAcceptedStep,maxAcceptedErrorRatio,
+  minAcceptedStep,maxAcceptedStep,maxAcceptedErrorRatio,maxRejectedErrorRatio,
+  minRejectedStep:rejected?minRejectedStep:null,resolutionLimitedAttempts,
   method:'Adaptive Dormand–Prince Runge–Kutta 5(4) (RK45)',
   note:'Scalar first-order y\u2032=f(t,y), forward or backward. Local error controlled; not stiff, vector-valued or globally error-certified.'};
 }
@@ -6649,7 +6658,11 @@ function run(){
   const detail=last.type==='ode-rk45'?'accepted '+last.steps+', rejected '+last.rejected+
    ', tolerance '+last.tolerance+', accepted |Δt| '+last.minAcceptedStep.toPrecision(5)+
    '–'+last.maxAcceptedStep.toPrecision(5)+', max accepted local-error ratio '+
-   last.maxAcceptedErrorRatio.toPrecision(5):'Δt='+last.h.toPrecision(8);
+   last.maxAcceptedErrorRatio.toPrecision(5)+
+   (last.rejected?', max rejected local-error ratio '+last.maxRejectedErrorRatio.toPrecision(5)+
+    ', smallest rejected |Δt| '+last.minRejectedStep.toPrecision(5):'')+
+   (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:''):
+   'Δt='+last.h.toPrecision(8);
   const endState='y('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+
    (last.type==='ode-rk4-system'?', z ≈ '+end[2].toPrecision(12):'');
   $('ode-output').textContent=last.method+'\n'+last.rows.length+' output rows; '+detail+

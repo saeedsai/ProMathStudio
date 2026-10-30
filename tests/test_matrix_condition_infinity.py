@@ -59,7 +59,8 @@ console.log('PASS exact infinity-norm condition references, scaling, singularity
         self.assertIn("function conditionInfinity(A)", source)
         self.assertIn("operation==='solve'||operation==='inverse'", source)
         self.assertIn("Infinity-norm condition number:", source)
-        self.assertIn("inverse,conditionInfinity,add", source)
+        self.assertIn("M.matrixTools={validate,determinant,transpose,inverse,add", source)
+        self.assertIn("pseudoinverse,conditionInfinity,notation", source)
 
 
 if __name__ == "__main__":

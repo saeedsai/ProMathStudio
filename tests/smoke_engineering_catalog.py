@@ -37,6 +37,11 @@ def main():
   page.locator('#eng-search').fill('Aerospace engineering')
   assert page.locator('#eng-results article').count()>0
   assert page.locator('#eng-results article[data-tool-id="matrix.solve.real.small"]').count()==1
+  # Multiword search matches all tokens independently of their order.
+  page.locator('#eng-search').fill('equilibrium control')
+  assert page.locator('#eng-results article[data-tool-id="control.equilibrium.real.small"]').count()==1
+  page.locator('#eng-search').fill('control orbit')
+  assert page.locator('#eng-results article').count()==0
   page.locator('#eng-search').fill('GNSS positioning')
   assert page.locator('#eng-results article[data-tool-id="gnss.positioning.least.squares"]').count()==1
   assert page.locator('#eng-results article button').count()==0

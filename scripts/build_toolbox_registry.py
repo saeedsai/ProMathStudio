@@ -19,16 +19,16 @@ DOCS = ROOT / "docs"
 OUTPUT = DOCS / "toolbox-feature-registry.json"
 CATALOGS = {
     "physics-mechanical-electrical-electronics-fluids-aerospace": "ENGINEERING_TOOLBOX_FEATURE_CATALOG.md",
-    "control": "CONTROL_THEORY_TOOLBOX_FEATURE_LIST.md",
-    "gnss": "GNSS_POSITIONING_OBSERVATION_TOOLBOX_FEATURE_LIST.md",
-    "signals": "SIGNAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md",
-    "cryptography": "CRYPTOGRAPHY_SECURITY_TOOLBOX_FEATURE_LIST.md",
-    "electromagnetics": "ELECTROMAGNETICS_TOOLBOX_FEATURE_LIST.md",
-    "statistics": "STATISTICS_ENGINEERING_TOOLBOX_FEATURE_LIST.md",
-    "data-science": "DATA_SCIENCE_TOOLBOX_FEATURE_LIST.md",
-    "materials": "MATERIALS_METALLURGY_ALLOYS_TOOLBOX_FEATURE_LIST.md",
-    "structures": "STRUCTURAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md",
-    "ai": "AI_MACHINE_LEARNING_TOOLBOX_FEATURE_LIST.md",
+    "control": "toolboxes/CONTROL_THEORY_TOOLBOX_FEATURE_LIST.md",
+    "gnss": "toolboxes/GNSS_POSITIONING_OBSERVATION_TOOLBOX_FEATURE_LIST.md",
+    "signals": "toolboxes/SIGNAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md",
+    "cryptography": "toolboxes/CRYPTOGRAPHY_SECURITY_TOOLBOX_FEATURE_LIST.md",
+    "electromagnetics": "toolboxes/ELECTROMAGNETICS_TOOLBOX_FEATURE_LIST.md",
+    "statistics": "toolboxes/STATISTICS_ENGINEERING_TOOLBOX_FEATURE_LIST.md",
+    "data-science": "toolboxes/DATA_SCIENCE_TOOLBOX_FEATURE_LIST.md",
+    "materials": "toolboxes/MATERIALS_METALLURGY_ALLOYS_TOOLBOX_FEATURE_LIST.md",
+    "structures": "toolboxes/STRUCTURAL_ENGINEERING_TOOLBOX_FEATURE_LIST.md",
+    "ai": "toolboxes/AI_MACHINE_LEARNING_TOOLBOX_FEATURE_LIST.md",
 }
 
 

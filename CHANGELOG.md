@@ -1,3 +1,4 @@
+- 2026-10-30 (DOCS-REORG-037, unreleased): Toolbox feature lists and candidate/backlog catalogs moved to docs/toolboxes/; AGENTS.md, registry script and cross-links updated; no broken Markdown links.
 - 2026-10-30 (CONTROL-TRANSIENT-PLOT-036, unreleased): Control two-state trajectory can be plotted as x1(t)/x2(t) in Graphs via the existing Data Tables line chart; stale inputs disable the action.
 - 2026-10-30 (MATH-ODE-RK45-STAGE-OVERFLOW-035, unreleased): Adaptive RK45 retries with a quartered step when an intermediate stage overflows 1e12 (reported as `stageOverflowRetries`), bounded by the attempt limit; k1 overflow and domain errors remain fatal. Repo cleanup: historical plan log archived under docs/archive, stale QA report removed.
 - Control transient RK4 now reports optional step-doubling endpoint difference for up to 500 base steps, retaining original export and honest non-certified accuracy warning (dev QA pending).

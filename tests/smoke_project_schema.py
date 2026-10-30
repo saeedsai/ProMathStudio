@@ -48,6 +48,18 @@ def main():
         bad_tables = {'version': 1, 'selected': 'sheet-1', 'tables': [
             {'id': 'sheet-1', 'name': 'Data1', 'columns': ['A', 'B'], 'rows': [['1']]}]}
         rejected(dict(legacy, working='WRONG', tables=bad_tables))
+        # Tables whose identifiers differ only by surrounding spaces cannot
+        # be safely restored as distinct named tables.
+        def named_table(table_id, name):
+            return {'id': table_id, 'name': name, 'columns': ['A'], 'rows': [[1]]}
+        rejected(dict(legacy, working='WRONG', tables={
+            'version': 1, 'selected': 'sheet-1', 'tables': [
+                named_table('sheet-1', 'Data1'),
+                named_table('sheet-2', ' data1 ')]}))
+        rejected(dict(legacy, working='WRONG', tables={
+            'version': 1, 'selected': 'sheet-1', 'tables': [
+                named_table('sheet-1', '   ')]}))
+
         bad_graph = dict(legacy, working='WRONG', graph={
             'dataset': {'headers': ['time', 'value'], 'rows': [[0, {'unexpected': 1}]]}})
         rejected(bad_graph)

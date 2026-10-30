@@ -23,10 +23,12 @@ def main():
         page.locator("#ode-run").click()
         output = page.locator("#ode-output").inner_text()
         assert "bounded stage-overflow retries" in output, output
+        assert "last bounded stage" in output, output
         result = page.evaluate("""() => MathStudio.odeTools.solveAdaptive({
             expression:'-3000*y',t0:0,t1:1,y0:1,tolerance:1e-7,maxSteps:1000
         })""")
         assert result["stageOverflowRejected"] >= 1, result
+        assert result["lastOverflowStage"] in {"k2","k3","k4","k5","k6","k7","y5","y4"}, result
         assert result["attempts"] == result["steps"] + result["rejected"], result
         assert abs(result["rows"][-1][1]) < 1e-6, result
         assert page.locator("#ode-to-table").is_enabled()

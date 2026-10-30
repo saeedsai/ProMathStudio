@@ -160,7 +160,7 @@
     @media(max-width:760px){.cas-wrap{padding:14px}.cas-toolbar{gap:8px}.cas-field{min-width:160px}.cas-field.variable{max-width:90px;min-width:83px;flex-basis:83px}.cas-equation-math math{font-size:25px}}
     @media(max-width:410px){.cas-field{min-width:100%;max-width:100%}.cas-field.variable{min-width:88px;flex-basis:88px}.cas-examples-label{align-items:start;flex-direction:column}}
 
-    /* Four focused mathematical workspaces */
+    /* Five focused mathematical workspaces */
     .workspace-bar{display:flex;flex-wrap:wrap;gap:7px;padding:0 0 15px;position:relative;z-index:1}
     .workspace-tab{background:white;border:1px solid var(--edge);color:#52617a;padding:11px 17px;border-radius:11px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 6px #111a2b08}
     .workspace-tab.active{color:#354bc9;border-color:#9fb0ff;background:#eef1ff;box-shadow:0 0 0 1px #bfcbff55}
@@ -437,6 +437,7 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
       <div class="python-wrap"><div class="python-label">SymPy code generated from your equation (abstract functions remain symbolic until defined)</div><pre id="python-output" class="python-output" aria-live="polite"># Write an expression above to generate Python code.</pre></div>
     </section>
     <section class="panel" id="data-panel" aria-label="Data tables"></section>
+    <section class="panel" id="engineering-panel" aria-label="Engineering Toolbox"></section>
     <section class="panel" id="graph-panel" aria-label="2D and 3D function graphs">
       <div class="panel-head"><div class="panel-title"><span class="step">01</span> Interactive graphing <span class="cas-label">Canvas 2D / 3D</span></div><span class="small-note">Drag to move or rotate · Scroll to zoom</span></div>
       <div class="graph-wrap"><details id="control-theory-toolbox" class="control-theory-toolbox">
@@ -2375,7 +2376,7 @@ def _ms_system(job_text):
   }
 
   // Navigation — one active work area at a time, preserving notebook and input state.
-  const modeDescriptions={calculator:'Scientific calculator · real and complex arithmetic · history.',editor:'Write, preview, export and symbolically solve equations using CAS + SymPy.',solver:'Expand, factor, solve, differentiate and integrate using built-in algebra or SymPy.',graph:'Explore mathematical plots and data-driven charts.',data:'Edit multiple tables, formulas, joins and unions.'};
+  const modeDescriptions={calculator:'Scientific calculator · real and complex arithmetic · history.',editor:'Write, preview, export and symbolically solve equations using CAS + SymPy.',solver:'Expand, factor, solve, differentiate and integrate using built-in algebra or SymPy.',graph:'Explore mathematical plots and data-driven charts.',data:'Edit multiple tables, formulas, joins and unions.',engineering:'Search engineering disciplines and open available shared tools.'};
   const topbar=document.querySelector('.topbar');
   const sharedEditor=document.querySelector('section[aria-label="Equation input"]');
   const sharedPreview=document.querySelector('section[aria-label="Live math preview"]');
@@ -2384,7 +2385,7 @@ def _ms_system(job_text):
   const examplesSection=$('examples');
   const notebook=$('notebook');
   const tip=$('grouping-tip');
-  const panels={calculator:$('calculator-panel'),editor:sharedEditor,preview:sharedPreview,solver:$('symbolic-panel'),python:pythonSection,graph:$('graph-panel'),data:$('data-panel'),notebook,notebookTitle,examples:examplesSection,tip};
+  const panels={calculator:$('calculator-panel'),editor:sharedEditor,preview:sharedPreview,solver:$('symbolic-panel'),python:pythonSection,graph:$('graph-panel'),data:$('data-panel'),engineering:$('engineering-panel'),notebook,notebookTitle,examples:examplesSection,tip};
   let activeMode='editor';
   function changeMode(mode){
     if(!modeDescriptions[mode])return;
@@ -2395,14 +2396,14 @@ def _ms_system(job_text):
     for(const b of document.querySelectorAll('[data-workspace]')){
       b.classList.toggle('active',b.dataset.workspace===mode);b.setAttribute('aria-current',b.dataset.workspace===mode?'page':'false');
     }
-    const show=new Set(mode==='calculator'?['calculator']:mode==='graph'?['graph']:mode==='data'?['data']:['editor','preview','solver','python','notebook','notebookTitle','examples','tip']);
+    const show=new Set(mode==='calculator'?['calculator']:mode==='graph'?['graph']:mode==='data'?['data']:mode==='engineering'?['engineering']:['editor','preview','solver','python','notebook','notebookTitle','examples','tip']);
     for(const [key,el] of Object.entries(panels))el?.classList.toggle('workspace-hidden',!show.has(key));
     topbar.classList.toggle('workspace-hidden',mode!=='editor');
     $('workspace-subtitle').textContent=modeDescriptions[mode];
-    document.title='Math Studio Pro — '+({calculator:'Advanced Calculator',editor:'Equation',solver:'Equation',graph:'2D / 3D Graph Generator',data:'Data Tables'}[mode]);
-    const sidebar=document.querySelector('aside');sidebar.classList.toggle('ws-secondary',mode==='calculator'||mode==='graph'||mode==='data'); document.querySelector('.shell').classList.toggle('no-symbol-sidebar',mode==='calculator'||mode==='graph'||mode==='data');
+    document.title='Math Studio Pro — '+({calculator:'Advanced Calculator',editor:'Equation',solver:'Equation',graph:'2D / 3D Graph Generator',data:'Data Tables',engineering:'Engineering Toolbox'}[mode]);
+    const sidebar=document.querySelector('aside');sidebar.classList.toggle('ws-secondary',mode==='calculator'||mode==='graph'||mode==='data'||mode==='engineering'); document.querySelector('.shell').classList.toggle('no-symbol-sidebar',mode==='calculator'||mode==='graph'||mode==='data'||mode==='engineering');
     // Keep the visual workspace state in sync for clicks, restored sessions and API navigation.
-    for(const workspace of ['editor','calculator','solver','graph','data'])document.body.classList.toggle('ws-'+workspace,mode===workspace);
+    for(const workspace of ['editor','calculator','solver','graph','data','engineering'])document.body.classList.toggle('ws-'+workspace,mode===workspace);
     try{sessionStorage.setItem('mathstudio-mode',mode)}catch{}
     if(mode==='graph')requestAnimationFrame(()=>drawGraph());
     if(mode==='calculator')$('calc-input').focus({preventScroll:true});
@@ -7751,6 +7752,7 @@ const tasks={
  calculator:[['basic','Calculate','Type an expression and press Calculate.'],['matrix','Matrices','Choose a matrix operation.','#matrix-tools'],['variables','Variables','Set named values for calculations.','#calc-variable-panel'],['precision','High precision','Exact decimals and 16–80 digit division.','#precision-details'],['settings','Number settings','Change angles and number display.','#ui-calc-settings'],['history','History','See previous results and examples.','#ui-calc-history']],
  editor:[['basic','Write or solve equation','Write, preview or symbolically solve an expression.'],['examples','Try examples','Select an example to insert.','#examples'],['notebook','My equations','Reopen saved equations.','#notebook'],['python','Python code','Show the generated SymPy code.','#ui-editor-python'],['numerical','Numerical methods','Roots, integrals, systems and PDEs.','#num-details'],['ode','ODE initial values','Solve initial-value differential equations.','#ode-details'],['assumptions','Assumptions','Configure variable restrictions.','#ui-solver-assumptions']],
  graph:[['basic','Plot functions','Enter functions and plot in 2D or 3D.'],['table','Plot table data','Select data, axes and chart type.','#ui-graph-table'],['axes','Axis limits','Adjust visible coordinate ranges.','#ui-graph-axes'],['appearance','Appearance','Choose colors and line styles.','#graph-appearance']],
+ engineering:[['basic','Browse engineering tools','Search disciplines and open existing tested workflows.']],
  data:[['basic','Edit table','Edit cells directly, or use a context menu.'],['filter','Filter and sort','Show row filters and sorting.','#data-menu-navigation > details:nth-child(2)'],['combine','Combine tables','Join, union or compare tables.','#data-menu-navigation > details:nth-child(3)'],['files','Import / Export','Open spreadsheet file actions.','#data-menu-navigation > details:nth-child(4)'],['python','Python','Run your own analysis code in the worker.','#data-menu-navigation > details:nth-child(5)']]
 };
 const guide=document.createElement('section');guide.id='workspace-task-guide';guide.setAttribute('aria-label','Choose a workspace task');
@@ -7994,6 +7996,96 @@ by('ct-eq-run').addEventListener('click',calculate);
 studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate});
 })();
 
+</script>
+<script id="promath-engineering-catalog">
+/* Searchable Engineering Toolbox: route to existing tested tools, never duplicate solvers. */
+(()=>{'use strict';
+const M=window.MathStudio,host=document.getElementById('engineering-panel'),bar=document.querySelector('.workspace-bar');
+if(!M?.advanced?.mode||!host||!bar)return;
+const disciplines=Object.freeze([
+ ['physics','Physics'],['mechanical','Mechanical engineering'],['electrical','Electrical engineering'],
+ ['electronics','Electronics engineering'],['fluids','Fluid mechanics'],['aerospace','Aerospace engineering']
+].map(([id,title])=>Object.freeze({id,title})));
+const raw=[
+ ['matrix.solve.real.small','Small real linear systems','Solve 2×2 or 3×3 Ax=b using the shared scaled-pivot Matrix solver.','physics mechanical electrical electronics fluids aerospace','matrix linear algebra','calculator','matrix'],
+ ['control.equilibrium.real.small','Control state equilibrium','Solve ẋ=−Ax+b for 2 or 3 states; equilibrium does not prove stability.','mechanical electrical electronics aerospace','control steady-state','graph','ct-equilibrium'],
+ ['ode.ivp.scalar','Scalar ODE initial-value solver','Run existing RK4 or adaptive RK45; not a stiff solver.','physics mechanical fluids aerospace','ode rk45 integration','editor','ode'],
+ ['thermal.cycle.analysis','Thermodynamic cycle analysis','Cycle efficiency calculations are not yet implemented.','physics mechanical','thermal energy'],
+ ['structures.beam.deflection','Beam deflection and stress','Structural loading workflows are not yet implemented.','mechanical aerospace','beam mechanics'],
+ ['circuits.network.analysis','Circuit network analysis','General nodal circuit analysis is not yet implemented.','electrical electronics','circuit kirchhoff'],
+ ['electronics.digital.logic','Digital logic simulation','Digital logic timing is not yet implemented.','electronics','logic digital'],
+ ['fluids.pipe.network','Pipe network pressure loss','Pipe network calculations are not yet implemented.','fluids mechanical','hydraulic pipe'],
+ ['aerospace.orbit.propagation','Orbital propagation','Orbit propagation is not yet implemented.','aerospace physics','orbit spaceflight']
+];
+const ids=new Set(),valid=new Set(disciplines.map(d=>d.id));
+const tools=Object.freeze(raw.map(([id,title,description,domains,tags,mode,target])=>{
+ const disciplineIds=Object.freeze(domains.split(' ')),status=mode?'available':'planned';
+ if(ids.has(id)||disciplineIds.some(d=>!valid.has(d))||Boolean(mode)!==Boolean(target))throw Error('Invalid Engineering catalog: '+id);
+ ids.add(id);
+ return Object.freeze({id,title,description,disciplines:disciplineIds,tags,status,route:mode?Object.freeze({mode,target}):null});
+}));
+function filter(discipline='',query=''){
+ if(discipline&&!valid.has(discipline))return [];
+ const q=String(query).trim().toLocaleLowerCase();
+ return tools.filter(t=>(!discipline||t.disciplines.includes(discipline))&&
+ (!q||[t.id,t.title,t.description,t.tags].join(' ').toLocaleLowerCase().includes(q)));
+}
+const tab=document.createElement('button');tab.type='button';tab.className='workspace-tab';
+tab.dataset.workspace='engineering';tab.textContent='⚙ Engineering Toolbox';
+tab.addEventListener('click',()=>M.advanced.mode('engineering'));bar.append(tab);
+const style=document.createElement('style');
+style.textContent='#engineering-panel .eng-filters,#eng-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0}'+
+ '#engineering-panel label{display:flex;flex-direction:column;gap:5px;font-weight:700}'+
+ '#engineering-panel input,#engineering-panel select{width:100%;min-width:0;box-sizing:border-box;padding:10px;border:1px solid #c2cfdb;border-radius:9px}'+
+ '#engineering-panel .eng-card{min-width:0;border:1px solid #d8e4e8;border-radius:12px;padding:13px;overflow-wrap:anywhere}'+
+ '#engineering-panel .eng-card h3{font-size:15px;margin:6px 0}'+
+ '#engineering-panel .eng-card p,#eng-status{font-size:12px;color:#536879}'+
+ '#engineering-panel .eng-card button{min-height:40px;padding:8px 12px;border:1px solid #29817b;border-radius:9px;background:#e6f5f2;color:#174b48;cursor:pointer}'+
+ '#engineering-panel .eng-card button:focus-visible{outline:3px solid #29817b;outline-offset:2px}'+
+ '@media(max-width:440px){#engineering-panel .eng-filters,#eng-results{grid-template-columns:minmax(0,1fr)}}';
+document.head.append(style);
+host.innerHTML='<div class="panel-head"><div class="panel-title">Engineering Toolbox</div></div>'+
+ '<p>Search six engineering disciplines. Available tools open existing workflows; planned tools have no runnable actions. Units and engineering certification are not provided by this catalog.</p>'+
+ '<div class="eng-filters"><label>Discipline<select id="eng-discipline"></select></label>'+
+ '<label>Search tools<input id="eng-search" type="search" autocomplete="off" placeholder="Name or keyword"></label></div>'+
+ '<p id="eng-status" role="status" aria-live="polite"></p><div id="eng-results" aria-label="Engineering tool results"></div>';
+const select=document.getElementById('eng-discipline'),search=document.getElementById('eng-search');
+const status=document.getElementById('eng-status'),results=document.getElementById('eng-results');
+for(const [id,title] of [['','All six disciplines'],...disciplines.map(d=>[d.id,d.title])]){
+ const opt=document.createElement('option');opt.value=id;opt.textContent=title;select.append(opt);
+}
+function openTool(t){
+ if(t.status!=='available')return;
+ M.advanced.mode(t.route.mode);
+ requestAnimationFrame(()=>{
+  if(t.route.target==='ct-equilibrium'){
+   document.getElementById('control-theory-toolbox').open=true;
+   const panel=document.getElementById('ct-equilibrium');panel.open=true;
+   panel.querySelector('summary').focus({preventScroll:true});
+  }else M.workspaceTasks?.select(t.route.target,true);
+ });
+}
+function render(){
+ const matches=filter(select.value,search.value);results.replaceChildren();
+ for(const t of matches){
+  const card=document.createElement('article');card.className='eng-card';card.dataset.toolId=t.id;
+  const label=document.createElement('strong');label.textContent=t.status==='available'?'Available in existing workspace':'Planned · not implemented';
+  const heading=document.createElement('h3');heading.textContent=t.title;
+  const description=document.createElement('p');description.textContent=t.description;
+  card.append(label,heading,description);
+  if(t.status==='available'){
+   const button=document.createElement('button');button.type='button';button.textContent='Open existing tool';
+   button.addEventListener('click',()=>openTool(t));card.append(button);
+  }else{const note=document.createElement('span');note.textContent='No runnable tool yet';card.append(note);}
+  results.append(card);
+ }
+ const available=matches.filter(t=>t.status==='available').length;
+ status.textContent=matches.length+' unique tools · '+available+' available · '+(matches.length-available)+' planned';
+ if(!matches.length){const empty=document.createElement('p');empty.textContent='No matching tools. Try another search.';results.append(empty);}
+}
+select.addEventListener('change',render);search.addEventListener('input',render);render();
+M.engineeringCatalog=Object.freeze({disciplines,tools,filter});
+})();
 </script>
 </body>
 </html>

@@ -22,6 +22,7 @@ modules = [
     ("promath-project-schema", "src/project-schema.js"),
     ("promath-precision-tools", "src/precision-tools.js"),
     ("promath-workspace-tasks", "src/workspace-tasks.js"),
+    ("promath-engineering-catalog", "src/engineering-catalog.js"),
 ]
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'

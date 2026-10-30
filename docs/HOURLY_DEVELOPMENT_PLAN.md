@@ -1,3 +1,16 @@
+## 2026-10-30 — Engineering Toolbox searchable shell (UI-ENGINEERING-CATALOG-021)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** Added fifth workspace with six approved discipline filters and a searchable canonical catalog. Three existing bounded workflows (Matrix solve, Control equilibrium, scalar ODE) link to original editors; six planned examples are visibly unavailable without fake actions. Existing four workspaces, drafts, offline bundle and solver implementations are preserved. Added `tests/test_engineering_catalog_navigation.py`, mandatory Chromium `tests/smoke_engineering_catalog.py`, and updated workspace keyboard regression. Baseline dev/main `177dba3398ca694b98f55a973c593a18351b31b1`; PR #111 Quality and Pages green. Full 16-discipline catalog, favorites and per-tool forms remain planned.
+
+**NEXT FIVE (priority, dependencies, acceptance tests):**
+1. **P1 — RK45 difficult-problem robustness (planned).** Adaptive solver; forward/backward references, underflow/attempt exhaustion, stale-export recovery and mobile tests.
+2. **P1 — Matrix saved-project focus round-trip (planned).** Project schema and focus restoration; saved dimensions/drafts, no selector focus hijack, browser round-trip.
+3. **P1 — Registry contracts and diagnostics (planned).** Matrix/Control consumers; typed dimensions, assumptions, structured errors, invalid/reference and immutability tests.
+4. **P1 — Control equilibrium stability guidance (planned).** Bounded stable/unstable/marginal references, explicit caveats and browser recovery.
+5. **P1 — Engineering catalog expansion (planned).** Source-backed Control/GNSS/Signals and other approved disciplines; unique IDs, truthful statuses and mobile/keyboard tests.
+
+**Execution log (2026-10-30):** Starting dev/main `177dba3398ca694b98f55a973c593a18351b31b1`, no open PR, both unprotected, previous Quality/Pages green. New navigation module, standalone bundle, router, tests, CI, changelog and roadmap prepared. Exact candidate CI/PR/deployment pending; historical 166 gaps/95 partial unchanged.
+
 **2026-10-30 CI fixture repair:** Exact dev Quality [41037669610](https://github.com/saeedsai/ProMathStudio/actions/runs/41037669610) failed only in new direct Node regression because its UI mock changed A to singular but retained b=[4,9], making the system correctly *inconsistent* rather than singular. Corrected fixture to b=[3,6] for singular and restored b=[4,9] for recovery; retained separate explicit inconsistent-system assertion. All other 160 unit tests passed; new exact-head full CI required. No numerical solver or validation assertions weakened.
 
 ## 2026-10-30 — Cross-discipline Control equilibrium (ARCH-CONTROL-EQUILIBRIUM-020)

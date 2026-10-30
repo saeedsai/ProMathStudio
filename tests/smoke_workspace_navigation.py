@@ -19,7 +19,7 @@ def main():
         nav = page.locator('.workspace-bar')
         buttons = nav.locator('button[data-workspace]')
         assert nav.get_attribute('role') == 'navigation'
-        assert buttons.count() == 4  # Equation combines editor and solver; Data Tables is injected.
+        assert buttons.count() == 5  # Equation combines editor and solver; Data Tables and Engineering are injected.
         assert page.locator('#workspace-subtitle').get_attribute('aria-live') == 'polite'
         assert page.locator('[data-workspace="editor"]').get_attribute('aria-current') == 'page'
 
@@ -37,16 +37,18 @@ def main():
         page.keyboard.press('ArrowRight')
         assert focused() == 'data'
         page.keyboard.press('ArrowRight')
+        assert focused() == 'engineering', 'Right arrow reaches Engineering'
+        page.keyboard.press('ArrowRight')
         assert focused() == 'calculator', 'Right arrow wraps around'
         page.keyboard.press('ArrowLeft')
-        assert focused() == 'data', 'Left arrow wraps around'
+        assert focused() == 'engineering', 'Left arrow wraps around'
         page.keyboard.press('Home')
         assert focused() == 'calculator'
         page.keyboard.press('End')
-        assert focused() == 'data'
+        assert focused() == 'engineering'
         page.keyboard.press('Enter')
-        assert current() == 'data'
-        assert page.locator('#data-panel').is_visible()
+        assert current() == 'engineering'
+        assert page.locator('#engineering-panel').is_visible()
         assert page.locator('#workspace-subtitle').inner_text().strip()
 
         page.locator('[data-workspace="graph"]').focus()
@@ -68,10 +70,10 @@ def main():
             page.set_viewport_size({'width': width, 'height': 850})
             page.locator('[data-workspace="editor"]').focus()
             page.keyboard.press('End')
-            assert focused() == 'data', width
+            assert focused() == 'engineering', width
             page.keyboard.press('ArrowRight')
             assert focused() == 'calculator', width
-            assert buttons.count() == 4
+            assert buttons.count() == 5
             assert nav.evaluate('(e) => e.scrollWidth <= e.clientWidth + 1'), width
         assert not errors, errors
         browser.close()

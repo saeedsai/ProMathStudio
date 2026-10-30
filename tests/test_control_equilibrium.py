@@ -25,7 +25,7 @@ const matrix=fs.readFileSync('src/matrix-tools.js','utf8');
 const kernel=matrix.slice(matrix.indexOf('const limit=3,MAX_ENTRY=1e12;'),matrix.indexOf('/* Jacobi rotations'));
 const registry=new Function(kernel+';return engineeringSolvers;')();
 const nodes=Object.create(null);
-for(const id of ['ct-equilibrium','ct-eq-size','ct-eq-matrix','ct-eq-forcing','ct-eq-status','ct-eq-output','ct-eq-run'])
+for(const id of ['ct-equilibrium','ct-eq-size','ct-eq-matrix','ct-eq-forcing','ct-eq-status','ct-eq-output','ct-eq-run','ct-eq-stability-run','ct-eq-stability-status','ct-eq-stability-output'])
  nodes[id]={value:'',textContent:'',events:{},addEventListener(k,fn){this.events[k]=fn;}};
 nodes['ct-eq-size'].value='2';
 nodes['ct-eq-matrix'].value='2,0;0,3';

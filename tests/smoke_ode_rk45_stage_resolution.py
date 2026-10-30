@@ -33,6 +33,10 @@ def main():
         })''')
         assert result["stageTimeCollisionAttempts"] >= 1, result
         assert result["stageTimeCollisionAcceptedSteps"] >= 1, result
+        assert result['quantumLimitedAcceptedSteps'] >= 1, result
+        assert all(result['rows'][i][0] > result['rows'][i-1][0]
+                   for i in range(1, len(result['rows']))), result
+        assert 'one representable time increment' in output, output
         assert abs(result["rows"][-1][1] - 1/8192) < 1e-12, result
         assert page.locator("#ode-to-table").is_enabled()
         assert page.locator("#ode-to-graph").is_enabled()
@@ -48,7 +52,13 @@ def main():
         page.locator("#ode-end").fill("999999999999.9999")
         page.locator("#ode-run").click()
         assert "stage times rounded to current t" in page.locator("#ode-output").inner_text()
-        assert page.locator("#ode-to-table").is_enabled()
+        assert page.locator('#ode-to-table').is_enabled()
+        backward = page.evaluate("""() => MathStudio.odeTools.solveAdaptive({
+            expression:'1',t0:1e12,t1:1e12-1/8192,y0:0
+        })""")
+        assert backward['quantumLimitedAcceptedSteps'] >= 1
+        assert all(backward['rows'][i][0] < backward['rows'][i-1][0]
+                   for i in range(1, len(backward['rows']))), backward
         page.set_viewport_size({"width": 390, "height": 844})
         assert page.locator("#ode-output").is_visible()
         assert not errors, errors

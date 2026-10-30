@@ -63,7 +63,8 @@ def main():
         assert page.locator("#ct-eq-transient-table").is_enabled()
         plot = page.locator("#ct-eq-transient-plot")
         assert plot.is_enabled()
-        plot.click()
+        plot.focus()
+        page.keyboard.press('Enter')
         state = page.evaluate("MathStudio.graphData.getState()")
         assert state["headers"] == ["t", "x1", "x2"], state
         assert len(state["points"]) == 81, state

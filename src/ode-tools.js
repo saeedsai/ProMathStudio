@@ -65,6 +65,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   }
  };
  let t=t0,y=y0,h=span/20,attempts=0,rejected=0,accepted=0;
+ let minAcceptedStep=Infinity,maxAcceptedStep=0,maxAcceptedErrorRatio=0;
  // Include the last representable time and accepted/rejected work in failure reports.
  // This is deliberately a diagnostic only: it does not change RK45 step selection.
  const progressError=reason=>Error(reason+'; at t='+t.toPrecision(16)+
@@ -95,6 +96,10 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   const y4=bounded(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State');
   const error=Math.abs(y5-y4),scale=tolerance*(1+Math.max(Math.abs(y),Math.abs(y5)));
   if(error<=scale){
+   const acceptedStep=Math.abs(h);
+   minAcceptedStep=Math.min(minAcceptedStep,acceptedStep);
+   maxAcceptedStep=Math.max(maxAcceptedStep,acceptedStep);
+   maxAcceptedErrorRatio=Math.max(maxAcceptedErrorRatio,error/scale);
    t=nextT;
    y=y5;rows.push([t,y]);accepted++;
   }else{
@@ -105,6 +110,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   h=bounded(h*factor,'Step size');
  }
  return {type:'ode-rk45',columns:['t','y'],rows,steps:accepted,attempts,rejected,tolerance,
+  minAcceptedStep,maxAcceptedStep,maxAcceptedErrorRatio,
   method:'Adaptive Dormand–Prince Runge–Kutta 5(4) (RK45)',
   note:'Scalar first-order y\u2032=f(t,y), forward or backward. Local error controlled; not stiff, vector-valued or globally error-certified.'};
 }
@@ -192,7 +198,9 @@ function run(){
   $('ode-output').classList.remove('error');
   const end=last.rows[last.rows.length-1];
   const detail=last.type==='ode-rk45'?'accepted '+last.steps+', rejected '+last.rejected+
-   ', tolerance '+last.tolerance:'Δt='+last.h.toPrecision(8);
+   ', tolerance '+last.tolerance+', accepted |Δt| '+last.minAcceptedStep.toPrecision(5)+
+   '–'+last.maxAcceptedStep.toPrecision(5)+', max accepted local-error ratio '+
+   last.maxAcceptedErrorRatio.toPrecision(5):'Δt='+last.h.toPrecision(8);
   const endState='y('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+
    (last.type==='ode-rk4-system'?', z ≈ '+end[2].toPrecision(12):'');
   $('ode-output').textContent=last.method+'\n'+last.rows.length+' output rows; '+detail+

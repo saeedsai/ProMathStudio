@@ -460,8 +460,8 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
 <div class="ct-actions"><button type="button" id="ct-eq-stability-run">Analyze stability (symmetric A)</button><span id="ct-eq-stability-status" role="status" aria-live="polite">Ready</span></div>
 <pre id="ct-eq-stability-output" aria-live="polite">No current stability result.</pre>
 <details id="ct-eq-transient">
-<style>#ct-eq-transient .ct-equilibrium-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px}#ct-eq-transient .ct-equilibrium-fields label{display:flex;flex-direction:column;min-width:0}#ct-eq-transient input{width:100%;min-width:0;box-sizing:border-box}#ct-eq-transient pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
 <summary>Two-state transient response · shared fixed-step RK4</summary>
+<style>#ct-eq-transient .ct-equilibrium-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px}#ct-eq-transient .ct-equilibrium-fields label{display:flex;flex-direction:column;min-width:0}#ct-eq-transient input{width:100%;min-width:0;box-sizing:border-box}#ct-eq-transient pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
 <p>Simulate ẋ = −A·x + b with a real 2×2 matrix and constant forcing. Uses the existing coupled ODE solver; not a stiff solver or global-error guarantee. Compare different step counts.</p>
 <div class="ct-equilibrium-fields">
 <label>Initial state x(t₀), two values<input id="ct-eq-initial" value="0, 0" spellcheck="false"></label>

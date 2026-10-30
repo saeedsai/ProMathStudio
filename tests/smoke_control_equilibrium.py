@@ -1,0 +1,52 @@
+"""Control equilibrium browser reference, negative and 390px mobile regression."""
+from pathlib import Path
+import os
+from playwright.sync_api import sync_playwright
+ROOT=Path(__file__).resolve().parents[1]
+def main():
+ with sync_playwright() as pw:
+  browser=pw.chromium.launch(headless=True,executable_path=os.getenv('CHROMIUM_PATH') or None,args=['--no-sandbox'])
+  page=browser.new_page(viewport={'width':1280,'height':850})
+  errors=[]
+  page.on('pageerror',lambda e:errors.append(str(e)))
+  page.set_content((ROOT/'index.html').read_text(encoding='utf-8'),wait_until='load')
+  page.locator('[data-workspace="graph"]').click()
+  page.locator('#control-theory-toolbox').evaluate('(e)=>e.open=true')
+  detail=page.locator('#ct-equilibrium')
+  detail.evaluate('(e)=>e.open=true')
+  page.locator('#ct-eq-run').click()
+  assert 'Equilibrium x* = [2, 3]' in page.locator('#ct-eq-output').inner_text()
+  assert 'Maximum row-relative residual' in page.locator('#ct-eq-output').inner_text()
+  page.locator('#ct-eq-size').select_option('3')
+  page.locator('#ct-eq-matrix').fill('2,0,0;0,3,0;0,0,4')
+  page.locator('#ct-eq-forcing').fill('4,9,16')
+  page.locator('#ct-eq-run').click()
+  assert 'Equilibrium x* = [2, 3, 4]' in page.locator('#ct-eq-output').inner_text()
+  page.locator('#ct-eq-size').select_option('2')
+  page.locator('#ct-eq-matrix').fill('1,2;2,4')
+  page.locator('#ct-eq-forcing').fill('3,6')
+  assert 'No current result' in page.locator('#ct-eq-output').inner_text()
+  page.locator('#ct-eq-run').click()
+  assert 'Singular' in page.locator('#ct-eq-status').inner_text()
+  assert 'No valid equilibrium' in page.locator('#ct-eq-output').inner_text()
+  page.locator('#ct-eq-forcing').fill('3,7')
+  page.locator('#ct-eq-run').click()
+  assert 'Inconsistent' in page.locator('#ct-eq-status').inner_text()
+  page.locator('#ct-eq-matrix').fill('1,0;0,0x10')
+  page.locator('#ct-eq-run').click()
+  assert 'decimal or scientific' in page.locator('#ct-eq-status').inner_text()
+  page.locator('#ct-eq-matrix').fill('2,0;0,3')
+  page.locator('#ct-eq-forcing').fill('4,9')
+  page.locator('#ct-eq-run').click()
+  assert 'Equilibrium x* = [2, 3]' in page.locator('#ct-eq-output').inner_text()
+  page.locator('#ct-mode').select_option('routh')
+  page.locator('#ct-run').click()
+  assert 'completed' in page.locator('#ct-status').inner_text()
+  page.set_viewport_size({'width':390,'height':844})
+  assert detail.is_visible()
+  assert page.locator('#ct-eq-run').is_visible()
+  assert page.evaluate('document.documentElement.scrollWidth <= innerWidth+1')
+  assert not errors,errors
+  browser.close()
+ print('PASS Control equilibrium 2x2/3x3, errors, recovery and 390px mobile')
+if __name__=='__main__':main()

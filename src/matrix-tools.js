@@ -365,11 +365,11 @@ function conditionGuidance(k){
   'Below the 1e8 sensitivity warning threshold; this does not certify numerical accuracy.';
 }
 /* Canonical bounded engineering solver registry. Metadata is source-backed: these
-   operations are available in Matrix Calculator, not yet in discipline workspaces.
+   operations are shared by Matrix Calculator and bounded Control equilibrium.
    The UI and future adapters use these IDs instead of copying math kernels. */
 const engineeringSolverDefinitions=[
  {id:'matrix.solve.real.small',title:'Solve A·x=b',status:'implemented',
-  disciplines:['mathematics'],inputs:['A','b'],result:'solution with residual diagnostics',
+  disciplines:['mathematics','control-theory'],inputs:['A','b'],result:'solution with residual diagnostics',
   run:({A,b})=>solve(A,b)},
  {id:'matrix.inverse.real.small',title:'Inverse of A',status:'implemented',
   disciplines:['mathematics'],inputs:['A'],result:'inverse matrix',

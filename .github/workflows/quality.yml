@@ -46,6 +46,8 @@ jobs:
         run: python tests/smoke_control_theory.py
       - name: Control equilibrium shared solver and mobile regression
         run: python tests/smoke_control_equilibrium.py
+      - name: Control stability symmetric eigenvalue and mobile regression
+        run: python tests/smoke_control_stability.py
       - name: Engineering Toolbox searchable catalog, routing and mobile regression
         run: python tests/smoke_engineering_catalog.py
       - name: Task-first workspace browser regression

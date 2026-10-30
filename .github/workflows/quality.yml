@@ -178,6 +178,8 @@ jobs:
         run: python tests/smoke_visual_options.py
       - name: RK45 difficult-workload advisory, recovery and mobile regression
         run: python tests/smoke_ode_rk45_workload.py
+      - name: RK45 bounded-stage overflow and mobile recovery regression
+        run: python tests/smoke_ode_rk45_stage_overflow.py
       - name: Matrix calculator numeric and UI regression
         run: python tests/smoke_matrix.py
       - name: Matrix binary arithmetic regression

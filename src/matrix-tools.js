@@ -316,22 +316,25 @@ function determinant(A){
  }
  return sign*result;
 }
+/* Inverse is a set of A·x=e_j solves. Reuse the same scaled-pivot
+   numerical kernel and residual safeguards as the visible Ax=b operation;
+   avoid maintaining a second Gauss-Jordan elimination implementation. */
 function inverse(A){
- A=validate(A);requireSquare(A);const n=A.length;
- const maximum=Math.max(...A.flat().map(Math.abs));if(maximum===0)throw Error('Singular matrix: inverse does not exist.');
- const tolerance=1e-12*maximum;
- const B=A.map((row,i)=>row.concat(Array.from({length:n},(_,j)=>Number(i===j))));
+ A=validate(A);requireSquare(A);
+ const n=A.length;
+ const result=Array.from({length:n},()=>Array(n).fill(0));
  for(let col=0;col<n;col++){
-  let pivot=col;for(let r=col+1;r<n;r++)if(Math.abs(B[r][col])>Math.abs(B[pivot][col]))pivot=r;
-  if(Math.abs(B[pivot][col])<=tolerance)throw Error('Singular or nearly singular matrix: inverse is not reliable.');
-  if(pivot!==col)[B[pivot],B[col]]=[B[col],B[pivot]];
-  const scale=B[col][col];for(let j=0;j<2*n;j++)B[col][j]/=scale;
-  for(let r=0;r<n;r++){if(r===col)continue;const factor=B[r][col];
-   for(let j=0;j<2*n;j++)B[r][j]-=factor*B[col][j];
+  const rhs=Array.from({length:n},(_,i)=>Number(i===col));
+  let column;
+  try{column=solve(A,rhs).solution;}
+  catch(error){
+   if(/^(?:Inconsistent system|Singular or nearly singular system)/.test(error.message))
+    throw Error('Singular or nearly singular matrix: inverse does not exist.');
+   throw error;
   }
+  for(let row=0;row<n;row++)result[row][col]=column[row];
  }
- const result=B.map(row=>row.slice(n));
- const residual=Math.max(...A.map((row,i)=>row.map((_,j)=>Math.abs(row.reduce((sum,x,k)=>sum+x*result[k][j],0)-(i===j?1:0)))).flat());
+ const residual=Math.max(...A.map((row,i)=>row.map((_,j)=>Math.abs(row.reduce((sum,x,k)=>sum+x*result[k][j],0)-Number(i===j)))).flat());
  if(!Number.isFinite(residual)||residual>1e-7)throw Error('Matrix inversion failed its numerical residual check.');
  return result;
 }

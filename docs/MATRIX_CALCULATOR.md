@@ -19,6 +19,8 @@ ProMathStudio offers a small **real-valued matrix calculator** inside the **Calc
 
 **Solve A·x=b** uses a separate right-hand-side vector b (one entry per row of square A). Example: A=`[[1,2],[3,4]]`, b=`[5,11]` gives x=`[1,2]` with a row-relative residual. Scaled pivoting and singularity tests apply; inconsistent systems report no solution and singular/near-singular systems report no unique solution. This bounded 2×2/3×3 real solver is not least squares. Send its column-vector solution to Equation Editor. Tests: `tests/smoke_matrix_solve.py`.
 
+**Shared inverse solver:** The inverse now solves `A·x=e_j` for each identity column using the same scaled-partial-pivot kernel as **Solve A·x=b**, rather than a separate Gauss–Jordan implementation. For example, `A=[[1e-9,0],[0,1e9]]` has inverse `[[1e9,0],[0,1e-9]]`: independent rows are retained despite large differences in scale. Exact and near-singular matrices are rejected; both operations remain bounded to 2×2/3×3 real inputs and use floating-point residual checks. See `tests/test_matrix_shared_solve_inverse.py` and `tests/smoke_matrix_shared_solve_inverse.py`.
+
 **Send result to Equation Editor** transfers a scalar or a `matrix([row],[row])` mathematical representation for further presentation/notation. This is **not** a general-purpose matrix algebra parser in the scientific Calculator input.
 
 ## RREF and rank (bounded real matrices)
@@ -41,7 +43,7 @@ The **RREF (A)** action computes reduced row-echelon form and displays the numer
 
 - Real numbers only, dimension 2×2, 2×3, 3×2 or 3×3. No complex matrices, vectors, general sparse matrices or arbitrary large matrix dimensions.
 - Determinant and inverse require square matrices. Transpose supports rectangular matrices. Addition/subtraction require equal dimensions; multiplication requires A columns = B rows.
-- Uses browser double precision, Gaussian elimination with partial row pivoting, Gauss–Jordan inverse and an inverse residual check. The inverse rejects exact and near singular matrices based on a scaled tolerance; it is not a condition-number-certified solver.
+- Uses browser double precision and one shared scaled-partial-pivot Ax=b solver for both direct linear-system solutions and the inverse (solving against identity columns), with independent inverse residual verification. The inverse rejects exact and near singular matrices based on a scaled tolerance; it is not a condition-number-certified solver.
 - Nonempty finite numeric grid values required; magnitude cap `1e12` per entry. No arbitrary-precision exact rational arithmetic.
 - Result display is rounded to approximately 12 significant digits; avoid making safety-critical engineering conclusions without independent validation.
 - No Pyodide or network dependency for these native matrix operations. No automatic project backup/persistence of the transient matrix grid in this first release.

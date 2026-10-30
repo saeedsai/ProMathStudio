@@ -1,3 +1,16 @@
+## 2026-10-30 — Graph dataset primitive-cell validation (DATA-PROJECT-GRAPH-CELLS-023)
+
+**Implemented on dev; QA and release pending.** Project-schema migration now rejects nonprimitive graph cells (including objects and arrays) and nonfinite numeric graph cells, while preserving bounded primitive strings, finite numbers, booleans and null, as well as legacy v1 migration. The self-contained HTML was synchronized. Added direct Node/Python regression `tests/test_project_graph_dataset_cells.py` including negative/positive cases and standalone parity. Full exact-head CI, browser regressions and Pages verification required before release. Historical inventory remains frozen.
+
+**NEXT FIVE (priority, dependencies, acceptance):**
+1. **P1 — Saved-project Matrix focus round-trip:** Restore dimensions and drafts without focus hijacking; Chromium keyboard/mobile and project round-trip regressions.
+2. **P1 — Canonical registry structured contracts:** Matrix and Control consumers, dimension/assumption errors and immutable numerical reference tests.
+3. **P1 — Control stability guidance:** Stable/unstable/marginal eigenvalue references, explicit equilibrium-is-not-stability warning and UI error-recovery tests.
+4. **P1 — Engineering catalog expansion:** Unique source-backed Control/GNSS/Signals entries with truthful availability, search, keyboard and 390px checks.
+5. **P1 — RK45 difficult problems:** Near-stiff forward/backward numerical references, rejection exhaustion, stage-resolution warnings and stale-export browser recovery.
+
+**Execution checkpoint:** Baseline dev/main `fe62e706571a04237f919d775a9dfcddccb70d76` (PR #113 merged, Pages success, post-merge Quality in progress). Source and test committed; exact final dev/main SHAs and Quality/Pages results not yet known for this change.
+
 ## 2026-10-30 — RK45 floating-point stage-time precision (MATH-ODE-RK45-STAGE-RESOLUTION-022)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** Count RK45 attempts and accepted steps whose intermediate Dormand–Prince time stages round to current time, and warn users to rescale large absolute times. Numerical kernel and step acceptance unchanged; warning does not certify global accuracy. Added direct Node/Python numerical, boundary, backward and failure tests, plus mandatory Chromium desktop/mobile, stale-export recovery and no-pageerror regression. Baseline dev/main `309ffbd40136cf1e86e4ff9a2c69d17ff6eeb47c`, PR #112 main/dev Quality and Pages green, no open PR. Both branches unprotected.

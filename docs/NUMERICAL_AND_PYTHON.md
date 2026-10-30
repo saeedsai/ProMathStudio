@@ -190,3 +190,5 @@ In **Graphs → Control Theory → State equilibrium → Two-state transient res
 
 
 **Control RK4 convergence (dev QA pending):** Two-state transient output compares the fixed-step RK4 endpoint with a 2N-step endpoint for N<=500. Shows the maximum absolute difference as a diagnostic, not as a certified global accuracy bound. If refinement cannot run, original simulation and Data Tables export remain available. The method is not stiff-capable.
+
+**RK45 bounded intermediate overflow recovery (dev QA pending):** When a later Dormand–Prince stage exceeds the solver's finite state/derivative bound, RK45 may halve the attempted step and retry within its existing maximum-attempt limit. Initial k1 failures and unrelated invalid expressions still fail immediately. The output reports bounded stage-overflow retries and includes these in rejected attempts. Repeated retries are not proof of stiffness, and recovery does not certify global error or make the method stiff-capable.

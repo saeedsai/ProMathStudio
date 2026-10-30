@@ -6779,6 +6779,7 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  let minAcceptedStep=Infinity,maxAcceptedStep=0,maxAcceptedErrorRatio=0;
  let maxRejectedErrorRatio=0,minRejectedStep=Infinity,resolutionLimitedAttempts=0;
  let stageTimeCollisionAttempts=0,stageTimeCollisionAcceptedSteps=0;
+ let quantumLimitedAcceptedSteps=0;
  let consecutiveRejected=0,maxConsecutiveRejected=0,stageOverflowRejected=0,lastOverflowStage=null;
  // Include the last representable time and accepted/rejected work in failure reports.
  // This is deliberately a diagnostic only: it does not change RK45 step selection.
@@ -6843,6 +6844,9 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    minAcceptedStep=Math.min(minAcceptedStep,acceptedStep);
    maxAcceptedStep=Math.max(maxAcceptedStep,acceptedStep);
    maxAcceptedErrorRatio=Math.max(maxAcceptedErrorRatio,errorRatio);
+   // Never publish duplicate or non-monotone times to Data Tables/Graphs.
+   if(!(direction*(nextT-t)>0))throw progressError('RK45 accepted time grid failed to advance');
+   if(Math.abs(nextT-t)<=quantum)quantumLimitedAcceptedSteps++;
    t=nextT;
    y=y5;rows.push([t,y]);accepted++;
    if(stageTimesCollapsed)stageTimeCollisionAcceptedSteps++;
@@ -6860,7 +6864,8 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  return {type:'ode-rk45',columns:['t','y'],rows,steps:accepted,attempts,rejected,tolerance,
   minAcceptedStep,maxAcceptedStep,maxAcceptedErrorRatio,maxRejectedErrorRatio,
   minRejectedStep:rejected?minRejectedStep:null,resolutionLimitedAttempts,
-  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,maxConsecutiveRejected,stageOverflowRejected,lastOverflowStage,
+  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,quantumLimitedAcceptedSteps,
+  maxConsecutiveRejected,stageOverflowRejected,lastOverflowStage,
   rejectionWarning:rejected>=5||maxConsecutiveRejected>=3?
    'Repeated RK45 step rejections: verify accuracy with tighter tolerance or a stiff-capable solver; rejection alone does not diagnose stiffness.':null,
   method:'Adaptive Dormand–Prince Runge–Kutta 5(4) (RK45)',
@@ -6958,6 +6963,8 @@ function run(){
    (last.stageOverflowRejected?', bounded stage-overflow retries '+last.stageOverflowRejected+
     ', last bounded stage '+last.lastOverflowStage:'')+
    (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:'')+
+   (last.quantumLimitedAcceptedSteps?', warning: '+last.quantumLimitedAcceptedSteps+
+    ' accepted time steps advanced by only one representable time increment; rescale time and verify convergence':'')+
    (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+
     ' accepted steps had RK45 stage times rounded to current t; rescale time for reliable accuracy':'')+
    (last.rejectionWarning?', warning: '+last.rejectionWarning:''):

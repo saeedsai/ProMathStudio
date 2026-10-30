@@ -94,11 +94,24 @@ function calculateTransient(){
    by('ct-eq-t1').value,by('ct-eq-steps').value);
   const fmt=n=>Number(n.toPrecision(10)).toString();
   const end=lastTransient.rows.at(-1);
+  // Step-doubling diagnostic, not a certified global error bound.
+  let convergence='Step-doubling comparison unavailable (more than 500 base steps).';
+  if(lastTransient.steps<=500){
+   try{
+    const finer=simulateTransient(A,b,x0,by('ct-eq-t0').value,
+     by('ct-eq-t1').value,lastTransient.steps*2);
+    const fineEnd=finer.rows.at(-1);
+    const discrepancy=Math.max(Math.abs(end[1]-fineEnd[1]),Math.abs(end[2]-fineEnd[2]));
+    convergence='RK4 step-doubling |x_N - x_2N|∞: '+fmt(discrepancy)+
+     ' (diagnostic only; not a global error bound).';
+   }catch(error){convergence='Step-doubling comparison unavailable: '+error.message;}
+  }
   transientOutput.textContent='Coupled RK4 · '+lastTransient.steps+' fixed steps, '+
    lastTransient.rows.length+' trajectory samples\n'+
    'x('+fmt(end[0])+') ≈ ['+fmt(end[1])+', '+fmt(end[2])+']\n'+
    'First samples (t, x1, x2):\n'+lastTransient.rows.slice(0,5)
     .map(row=>row.map(fmt).join(', ')).join('\n')+'\n'+
+   convergence+'\n'+
    'Fixed-step RK4 is not stiff or globally error-certified. Compare step counts for convergence.';
   transientStatus.textContent='Two-state trajectory computed.';
   transientTable.disabled=false;

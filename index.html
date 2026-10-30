@@ -5959,6 +5959,21 @@ function conditionGuidance(k){
 /* Canonical bounded engineering solver registry. Metadata is source-backed: these
    operations are shared by Matrix Calculator and bounded Control equilibrium.
    The UI and future adapters use these IDs instead of copying math kernels. */
+/* Typed, immutable public input contracts. They describe the actual bounded
+   numerical kernel; units remain the caller's responsibility. */
+const engineeringInputSchemas=Object.freeze({
+ A:Object.freeze({kind:'matrix',rows:Object.freeze([2,3]),columns:'rows',
+  scalar:'finite-real',maxMagnitude:MAX_ENTRY}),
+ b:Object.freeze({kind:'vector',length:'A.rows',
+  scalar:'finite-real',maxMagnitude:MAX_ENTRY})
+});
+const engineeringAssumptions=Object.freeze([
+ 'A must be full rank for a unique result',
+ 'Input units must be physically consistent; units are not checked'
+]);
+function engineeringInputError(code,message){
+ const error=Error(message);error.code=code;return error;
+}
 const engineeringSolverDefinitions=[
  {id:'matrix.solve.real.small',title:'Solve A·x=b',status:'implemented',
   disciplines:['mathematics','control-theory'],inputs:['A','b'],result:'solution with residual diagnostics',
@@ -5978,12 +5993,15 @@ for(const definition of engineeringSolverDefinitions){
     !disciplines.every(x=>typeof x==='string'&&x.length>0)||
     !Array.isArray(inputs)||!inputs.length||
     new Set(inputs).size!==inputs.length||
-    !inputs.every(x=>typeof x==='string'&&/^[A-Za-z][A-Za-z0-9]*$/.test(x))||
+    !inputs.every(x=>typeof x==='string'&&/^[A-Za-z][A-Za-z0-9]*$/.test(x)&&
+      Object.prototype.hasOwnProperty.call(engineeringInputSchemas,x))||
     typeof result!=='string'||!result||typeof run!=='function')
   throw Error('Invalid engineering solver metadata.');
  const metadata=Object.freeze({id,title,status,
   disciplines:Object.freeze(disciplines.slice()),
-  inputs:Object.freeze(inputs.slice()),result});
+  inputs:Object.freeze(inputs.slice()),
+  inputSchema:Object.freeze(Object.fromEntries(inputs.map(key=>[key,engineeringInputSchemas[key]]))),
+  assumptions:engineeringAssumptions,result});
  engineeringSolverMap[id]=Object.freeze({metadata,run});
 }
 const engineeringSolvers=Object.freeze({
@@ -5993,16 +6011,27 @@ const engineeringSolvers=Object.freeze({
  execute:(id,params)=>{
   const item=Object.prototype.hasOwnProperty.call(engineeringSolverMap,id)?
    engineeringSolverMap[id]:null;
-  if(!item)throw Error('Unknown engineering solver ID.');
+  if(!item)throw engineeringInputError('UNKNOWN_SOLVER','Unknown engineering solver ID.');
   if(!params||typeof params!=='object'||Array.isArray(params))
-   throw Error('Engineering solver inputs must be an object.');
+   throw engineeringInputError('INVALID_INPUT_OBJECT','Engineering solver inputs must be an object.');
   for(const key of item.metadata.inputs)
    if(!Object.prototype.hasOwnProperty.call(params,key))
-    throw Error('Missing engineering solver input: '+key+'.');
+    throw engineeringInputError('MISSING_INPUT','Missing engineering solver input: '+key+'.');
   for(const key of Object.keys(params))
    if(!item.metadata.inputs.includes(key))
-    throw Error('Unexpected engineering solver input: '+key+'.');
+    throw engineeringInputError('UNEXPECTED_INPUT','Unexpected engineering solver input: '+key+'.');
   return item.run(params);
+ },
+ /* Nonthrowing integration contract for Engineering Toolbox adapters.
+    Keep execute() and its existing errors unchanged for current UI callers. */
+ executeResult:(id,params)=>{
+  try{return Object.freeze({ok:true,value:engineeringSolvers.execute(id,params)});}
+  catch(error){
+   return Object.freeze({ok:false,error:Object.freeze({
+    code:error&&typeof error.code==='string'?error.code:'SOLVER_REJECTED',
+    message:error instanceof Error?error.message:String(error)
+   })});
+  }
  }
 });
 /* Jacobi rotations for bounded real symmetric 2x2/3x3 matrices. Columns of

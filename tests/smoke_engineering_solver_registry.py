@@ -20,11 +20,25 @@ def main():
         metadata = page.evaluate("""() => {
           const r=MathStudio.engineeringSolvers;
           return {ids:r.list().map(x=>x.id),unknown:r.get('__proto__'),
-                  result:r.execute('matrix.solve.real.small',{A:[[2,1],[1,3]],b:[5,7]}).solution};
+                  result:r.execute('matrix.solve.real.small',{A:[[2,1],[1,3]],b:[5,7]}).solution,
+                  schema:r.get('matrix.solve.real.small').inputSchema,
+                  immutable:Object.isFrozen(r.get('matrix.solve.real.small').inputSchema.A.rows),
+                  missing:r.executeResult('matrix.solve.real.small',{A:[[1,0],[0,1]]}),
+                  singular:r.executeResult('matrix.solve.real.small',
+                    {A:[[1,2],[2,4]],b:[3,6]}),
+                  inverse:r.executeResult('matrix.inverse.real.small',
+                    {A:[[2,0],[0,4]]})};
         }""")
         assert metadata["ids"] == ["matrix.solve.real.small", "matrix.inverse.real.small"]
         assert metadata["unknown"] is None
         assert abs(metadata["result"][0] - 1.6) < 1e-12
+        assert metadata["schema"]["A"]["rows"] == [2, 3]
+        assert metadata["schema"]["b"]["length"] == "A.rows"
+        assert metadata["immutable"]
+        assert metadata["missing"]["error"]["code"] == "MISSING_INPUT"
+        assert metadata["singular"]["error"]["code"] == "SOLVER_REJECTED"
+        assert metadata["inverse"]["ok"]
+        assert abs(metadata["inverse"]["value"][1][1] - 0.25) < 1e-12
 
         matrix = page.locator("#mat-grid input")
         for i, value in enumerate(["2", "1", "1", "3"]):

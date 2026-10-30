@@ -1,3 +1,16 @@
+## 2026-10-30 — Matrix grid resize focus preservation (UI-MATRIX-RESIZE-FOCUS-018)
+
+**Implemented on dev; exact-head CI, PR promotion and Pages pending.** Rebuilding a numeric Matrix A/B/RHS/weight grid restores focus to the previously edited cell or clamps to the nearest surviving cell on shrink. Selector-initiated resizes retain selector focus; surviving drafts, numeric APIs, all 16 operations, keyboard shortcuts and offline standalone behavior are unchanged. New Node/standalone regression `tests/test_matrix_resize_focus.py` and mandatory Chromium desktop/390px mobile regression `tests/smoke_matrix_resize_focus.py` cover all four grids, focus clamping, values, invalidation and page errors.
+
+**NEXT FIVE (priority, dependency, acceptance tests):**
+1. **P1 — Canonical runtime engineering solver registry (planned).** Dependency: validated Matrix/Control kernels. Acceptance: stable unique IDs, schema/status validation, two real consumers, numerical reference and browser tests.
+2. **P1 — Cross-discipline linear solver reuse (planned).** Dependency: registry. Acceptance: shared scaled-pivot kernel in Matrix and Control/Engineering, 2×2/3×3 residual, singular and standalone tests.
+3. **P1 — RK45 difficult-problem robustness (planned).** Dependency: adaptive diagnostics. Acceptance: forward/backward references, underflow/attempt exhaustion, stale-export recovery and mobile test.
+4. **P1 — Engineering Toolbox navigation (planned).** Dependency: registry. Acceptance: searchable discipline/tool catalog with accurate statuses, keyboard and 390px mobile, no fake actions.
+5. **P1 — Matrix resize and project accessibility follow-up (planned).** Dependency: focus restoration. Acceptance: saved-project round-trip, disclosure focus, assistive labels and keyboard/mobile tests.
+
+**Execution log (2026-10-30):** Baseline dev/main `f0e60ba59b37fa62570d936c1da5f0ba85ebe546` (green dev/main Quality and Pages, PR #108). Implemented and source/bundle parity checked focus restoration plus new Node and Chromium regressions; exact dev commit and release evidence recorded after CI. GitHub reports dev/main unprotected; hosted browser verification may be unavailable.
+
 ## 2026-10-30 — Matrix Home/End navigation (UI-MATRIX-HOME-END-017)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** Home/End jump to first/last column in the active row; Ctrl+Home/End jump to first/last cell of Matrix A/B/RHS/weight grids. Matrix A cell labels now identify matrix and coordinates. No numeric values, algorithms, Tab/arrow shortcuts or standalone offline behavior change. Added direct Node/standalone and Chromium mobile tests.

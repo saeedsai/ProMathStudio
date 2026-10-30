@@ -5919,6 +5919,14 @@ function conditionInfinity(A){
  if(!Number.isFinite(value))throw Error('Condition number exceeded finite floating-point range.');
  return value;
 }
+/* A heuristic warning, not a forward-error guarantee or a residual. */
+function conditionGuidance(k){
+ if(typeof k!=='number'||!Number.isFinite(k)||k<1)
+  throw Error('Condition guidance requires a finite condition number >= 1.');
+ return k>=1e8?
+  'High sensitivity (κ∞ ≥ 1e8): small input changes may strongly affect the result; a small residual does not certify accuracy.':
+  'Below the 1e8 sensitivity warning threshold; this does not certify numerical accuracy.';
+}
 /* Jacobi rotations for bounded real symmetric 2x2/3x3 matrices. Columns of
    vectors are orthonormal eigenvectors; eigenvalues are descending. */
 function eigenSymmetric(A){
@@ -6412,7 +6420,10 @@ function calculate(operation){
    operation==='rref'?rref(A):operation==='rank'?matrixRank(A):operation==='solve'?solve(A,readRhs()):operation==='lu'?lu(A):operation==='qr'?qr(A):operation==='leastSquares'?leastSquares(A,readRhs()):operation==='weightedLeastSquares'?weightedLeastSquares(A,readRhs(),readWeights()):operation==='eigen'?eigenSymmetric(A):operation==='svd'?(A.length===2&&A[0].length===3?svd2x3(A):A.length===3&&A[0].length===2?svd3x2(A):A.length===3?svd3x3(A):svd2x2(A)):operation==='pseudoinverse'?pseudoinverse(A):multiply(A,readSecond());
   let conditionLabel='';
   if(operation==='solve'||operation==='inverse'){
-   try{conditionLabel='\nInfinity-norm condition number: '+format(conditionInfinity(A));}
+   try{
+    const k=conditionInfinity(A);
+    conditionLabel='\nInfinity-norm condition number: '+format(k)+'\nCondition guidance: '+conditionGuidance(k);
+   }
    catch(error){conditionLabel='\nInfinity-norm condition number: unavailable ('+error.message+')';}
   }
   last={operation,value};output.classList.remove('error');

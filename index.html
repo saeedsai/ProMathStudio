@@ -3149,7 +3149,8 @@ self.onmessage=async ({data})=>{
       if (!record(matrix) || !['rows','cols','bRows','bCols'].every(key => [2,3].includes(matrix[key])))
         fail('saved Matrix dimensions must be 2 or 3.');
       const numericDraft = value => typeof value === 'string' && value.length <= 80 &&
-        (value === '' || /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value));
+        (value === '' || (/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value) &&
+          Number.isFinite(Number(value)) && Math.abs(Number(value)) <= 1e12));
       for (const [key, size] of [['a',matrix.rows*matrix.cols],['b',matrix.bRows*matrix.bCols],
         ['rhs',matrix.rows],['weights',matrix.rows]]) {
         if (!Array.isArray(matrix[key]) || matrix[key].length !== size || !matrix[key].every(numericDraft))

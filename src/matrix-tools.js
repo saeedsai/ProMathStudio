@@ -791,12 +791,36 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
 panel.append(area);
 const style=el('style',{},'.matrix-tools{border-top:1px solid #dfe5f0;padding:13px 20px 16px}.matrix-tools summary{cursor:pointer;font-weight:700;color:#304cbb}'+
  '.matrix-controls,.matrix-actions,.matrix-result-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.matrix-result-actions [hidden]{display:none}.matrix-controls label{display:grid;gap:3px;font-size:13px}'+
- '.matrix-input-section{margin:12px 0;padding:10px 12px;border:1px solid #dfe5f0;border-radius:8px;min-width:0}.matrix-input-section h3{font-size:14px;margin:0 0 6px}.matrix-optional-input>summary{font-size:14px}.matrix-optional-input[open]>summary{margin-bottom:9px}.matrix-grid{display:grid;gap:7px;max-width:340px}.matrix-grid input{min-width:0;width:100%;padding:9px;border:1px solid #cdd8ec;border-radius:6px;text-align:center}'+
+ '.matrix-input-section{margin:12px 0;padding:10px 12px;border:1px solid #dfe5f0;border-radius:8px;min-width:0}.matrix-input-section h3{font-size:14px;margin:0 0 6px}.matrix-optional-input>summary{font-size:14px}.matrix-optional-input[open]>summary{margin-bottom:9px}.matrix-grid{display:grid;gap:7px;max-width:340px}.matrix-grid input{min-width:0;width:100%;padding:9px;border:1px solid #cdd8ec;border-radius:6px;text-align:center}.matrix-grid input:focus-visible{outline:2px solid #304cbb;outline-offset:2px}'+
  '#mat-result{background:#f7f9ff;border:1px solid #dfe5f0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:8px}'+
  '#mat-result.error{color:#af2842;background:#fff5f5}');
 document.head.append(style);
 const grid=document.getElementById('mat-grid'),gridB=document.getElementById('mat-b-grid'),rhsGrid=document.getElementById('mat-rhs-grid'),weightGrid=document.getElementById('mat-weight-grid'),output=document.getElementById('mat-result'),send=document.getElementById('mat-send');
 let last=null;
+/* Arrow navigation is local to each grid; typing, Tab and modified shortcuts stay native. */
+function matrixArrowTarget(row,col,rows,cols,key){
+ const delta=key==='ArrowUp'?[-1,0]:key==='ArrowDown'?[1,0]:
+  key==='ArrowLeft'?[0,-1]:key==='ArrowRight'?[0,1]:null;
+ if(!delta||![row,col,rows,cols].every(Number.isInteger)||rows<1||cols<1)return null;
+ const r=row+delta[0],c=col+delta[1];
+ return r>=0&&r<rows&&c>=0&&c<cols?[r,c]:null;
+}
+function enableMatrixArrowNavigation(container){
+ container.addEventListener('keydown',event=>{
+  if(!(event.target instanceof HTMLInputElement)||
+   (event.key!=='ArrowUp'&&event.key!=='ArrowDown'&&event.key!=='ArrowLeft'&&event.key!=='ArrowRight')||
+   event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||event.isComposing)return;
+  const inputs=[...container.querySelectorAll('input[data-row][data-col]')];
+  if(!inputs.includes(event.target))return;
+  const rows=Math.max(...inputs.map(input=>Number(input.dataset.row)))+1;
+  const cols=Math.max(...inputs.map(input=>Number(input.dataset.col)))+1;
+  const target=matrixArrowTarget(Number(event.target.dataset.row),Number(event.target.dataset.col),rows,cols,event.key);
+  // Number inputs otherwise increment on vertical arrows; boundaries must not edit values.
+  event.preventDefault();
+  if(target)container.querySelector('[data-row="'+target[0]+'"][data-col="'+target[1]+'"]')?.focus();
+ });
+}
+for(const container of [grid,gridB,rhsGrid,weightGrid])enableMatrixArrowNavigation(container);
 function rebuild(){
  const old=[...grid.querySelectorAll('input')].map(input=>({r:Number(input.dataset.row),c:Number(input.dataset.col),value:input.value}));
  const rows=Number(document.getElementById('mat-rows').value),cols=Number(document.getElementById('mat-cols').value);
@@ -824,7 +848,7 @@ function rebuildRhs(){
  const rows=Number(document.getElementById('mat-rows').value);
  rhsGrid.style.gridTemplateColumns='minmax(0, 1fr)';rhsGrid.replaceChildren();
  for(let r=0;r<rows;r++){
-  const cell=el('input',{type:'number',step:'any','aria-label':'Right-hand side b row '+(r+1)});
+  const cell=el('input',{type:'number',step:'any','data-row':String(r),'data-col':'0','aria-label':'Right-hand side b row '+(r+1)});
   cell.value=old[r]===undefined?'0':old[r];cell.addEventListener('input',invalidate);rhsGrid.append(cell);
  }
  invalidate();
@@ -834,7 +858,7 @@ function rebuildWeights(){
  const rows=Number(document.getElementById('mat-rows').value);
  weightGrid.style.gridTemplateColumns='minmax(0, 1fr)';weightGrid.replaceChildren();
  for(let r=0;r<rows;r++){
-  const cell=el('input',{type:'number',step:'any',min:'1e-12',max:'1e12','aria-label':'Observation weight row '+(r+1)});
+  const cell=el('input',{type:'number',step:'any',min:'1e-12',max:'1e12','data-row':String(r),'data-col':'0','aria-label':'Observation weight row '+(r+1)});
   cell.value=old[r]===undefined?'1':old[r];cell.addEventListener('input',invalidate);weightGrid.append(cell);
  }
  invalidate();

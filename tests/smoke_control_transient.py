@@ -51,6 +51,7 @@ def main():
         assert abs(singular["rows"][-1][2] - math.exp(-2)) < 1e-7
         page.locator("#ct-eq-matrix").fill("0x10,0;0,1")
         assert page.locator("#ct-eq-transient-table").is_disabled()
+        assert page.locator("#ct-eq-transient-plot").is_disabled()
         run.click()
         assert "decimal or scientific" in page.locator("#ct-eq-transient-status").inner_text()
         assert "No current trajectory" in page.locator("#ct-eq-transient-output").inner_text()
@@ -61,28 +62,28 @@ def main():
         page.locator("#ct-eq-size").select_option("2")
         run.click()
         assert page.locator("#ct-eq-transient-table").is_enabled()
+        assert page.locator("#ct-eq-transient-plot").is_enabled()
+        plot = page.locator("#ct-eq-transient-plot")
+        assert plot.is_enabled()
+        plot.focus()
+        page.keyboard.press('Enter')
+        state = page.evaluate("MathStudio.graphData.getState()")
+        assert state["headers"] == ["t", "x1", "x2"], state
+        assert len(state["points"]) == 81, state
+        assert len(state["extra"]) == 1, state
+        assert state["extra"][0]["mapping"]["x"] == 0, state
+        assert state["extra"][0]["mapping"]["y"] == 2, state
+        assert state["extra"][0]["mapping"]["style"] == "line", state
+        assert abs(state["points"][-1]["y"] - result["rows"][-1][1]) < 1e-9
+        assert "Plotted x1(t) and x2(t)" in page.locator("#ct-eq-transient-status").inner_text()
         page.set_viewport_size({"width": 390, "height": 844})
         assert run.is_visible()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth+1")
-        plot = page.locator("#ct-eq-transient-plot")
-        assert plot.is_enabled()
-        plot.click()
-        assert "Plotted x1(t) and x2(t)" in page.locator("#ct-eq-transient-status").inner_text()
-        assert page.evaluate("MathStudio.advanced.currentMode()") == "graph"
-        assert page.evaluate("MathStudio.dataTables.tables.some(t => t.name.startsWith('CONTROL_TRANSIENT'))")
-        state = page.evaluate("MathStudio.graphData.getState()")
-        assert state["style"] == "line" and state["y"] == "1"
-        assert len(state["extra"]) == 1 and state["extra"][0]["mapping"]["y"] == 2
-        page.locator("#ct-eq-t1").fill("2")
-        assert plot.is_disabled()
-        plot.evaluate("(b) => { b.disabled = false; b.click(); }")
-        assert "Compute a trajectory before plotting" in page.locator("#ct-eq-transient-status").inner_text()
-        run.click()
         page.locator("#ct-eq-transient-table").click()
         assert page.evaluate("MathStudio.advanced.currentMode()") == "data"
         assert not errors, errors
         browser.close()
-    print("PASS Control transient forward/backward, singular, errors, export, plot handoff, mobile")
+    print("PASS Control transient forward/backward, singular, errors, export, mobile")
 
 
 if __name__ == "__main__":

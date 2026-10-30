@@ -190,3 +190,16 @@ In **Graphs → Control Theory → State equilibrium → Two-state transient res
 
 
 **Control RK4 convergence (dev QA pending):** Two-state transient output compares the fixed-step RK4 endpoint with a 2N-step endpoint for N<=500. Shows the maximum absolute difference as a diagnostic, not as a certified global accuracy bound. If refinement cannot run, original simulation and Data Tables export remain available. The method is not stiff-capable.
+
+**RK45 bounded intermediate overflow recovery (dev QA pending):** When a later Dormand–Prince stage exceeds the solver's finite state/derivative bound, RK45 may halve the attempted step and retry within its existing maximum-attempt limit. Initial k1 failures and unrelated invalid expressions still fail immediately. The output reports bounded stage-overflow retries and includes these in rejected attempts. Repeated retries are not proof of stiffness, and recovery does not certify global error or make the method stiff-capable.
+
+**Control two-state trajectory plots (dev QA pending):** After simulating a two-state xdot=-Ax+b trajectory, choose Plot both states in Graphs. The existing Data Tables and Graph Data services render x1(t) and x2(t) as two line series against time, without duplicating numerical or plotting kernels. Editing inputs invalidates both export actions. The original fixed-step RK4 accuracy and stiffness limitations still apply.
+
+**RK45 overflow classification (dev QA pending):** Adaptive RK45 retries bounded intermediate state/finite-derivative overflow by reducing the step, but does not retry nonfinite derivatives, untagged parser/domain errors, or failures at the initial k1 stage. Diagnostics identify the last bounded stage and include it in attempt-limit failures. This is not a stiff solver and does not guarantee global accuracy.
+
+**RK45 near-machine-resolution grid (dev QA pending):** The adaptive scalar RK45 solver checks each accepted timestamp advances in the requested direction. It counts accepted steps progressing by only one representable floating-point time increment and warns users to rescale the time variable and check convergence. This complements stage-time collision reporting; neither diagnostic is a certified global error bound.
+
+
+## Fixed-step RK4 floating-point time resolution (development QA pending)
+
+Scalar and coupled RK4 use a requested fixed step count. At large absolute times or extremely short intervals, IEEE-754 rounding can make adjacent output timestamps identical or collapse an RK4 midpoint stage onto an endpoint. These inputs are now rejected with guidance to reduce the step count or rescale the time variable, rather than returning misleading sampled trajectories. Example: from `t0=999999999999.9999` to `t1=1000000000000` with four fixed steps cannot resolve the intermediate stages. A wider interval such as `t0=999999999999.999` with four steps is representable. This is a time-grid safety check, not an error bound, stiff-system detector or guarantee of global RK4 accuracy.

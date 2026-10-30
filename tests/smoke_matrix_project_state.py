@@ -86,6 +86,20 @@ def main():
         page.wait_for_function(
             "() => document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
         assert page.evaluate('MathStudio.matrixTools.exportState()') == restored
+
+        # Scientific notation can be syntactically valid yet overflow to Infinity,
+        # or exceed the Matrix solver's 1e12 bound. Both must roll back atomically.
+        for field, invalid_value in [('a', '1e999'), ('b', '-1e999'),
+                                     ('rhs', '1e13'), ('weights', '-1e13')]:
+            invalid = json.loads(json.dumps(saved))
+            invalid['matrix'][field][0] = invalid_value
+            page.locator('#hub-status').evaluate("(el) => el.textContent = 'Awaiting import'")
+            upload(page, invalid)
+            page.wait_for_function(
+                "() => document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
+            assert page.evaluate('MathStudio.matrixTools.exportState()') == restored
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth+1")
+
         assert not errors, errors
         browser.close()
     print('PASS: Matrix project round-trip, invalid drafts, focus and mobile')

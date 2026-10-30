@@ -42,7 +42,7 @@ assert.equal(smooth.rejected,0);assert.equal(smooth.maxConsecutiveRejected,0);
 assert.equal(smooth.rejectionWarning,null);
 assert(Math.abs(smooth.rows.at(-1)[1]-1)<1e-12);
 assert.throws(()=>solve({expression:'stiff',t0:0,t1:1,y0:1,tolerance:1e-12,maxSteps:4}),
- /longest rejection streak=\d+\./);
+ /longest rejection streak=\d+, bounded stage-overflow retries=0\./);
 assert.throws(()=>solve({expression:'invalid',t0:0,t1:1,y0:1}),/derivative failed/);
 console.log('PASS RK45 workload advisory and forward/backward references');
 """

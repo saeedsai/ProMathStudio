@@ -66,7 +66,9 @@ def main():
         bad_graph['graph']['dataset']['rows'][0][1] = [1, 2]
         rejected(bad_graph)
         # Duplicate graph headers are ambiguous for column selection.
-        for names in (['time', 'time'], ['value', 'value']):
+        for names in (['time', 'time'], ['value', 'value'],
+                      [' Time ', 'time'], ['value', ' VALUE '],
+                      ['time', ' '], ['', 'value']):
             rejected(dict(legacy, working='WRONG', graph={
                 'dataset': {'headers': names, 'rows': [[0, 2], [1, 3]]}}))
         good_graph = dict(legacy, working='x+1', graph={

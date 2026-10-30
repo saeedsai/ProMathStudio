@@ -1,3 +1,37 @@
+## 2026-10-30 — Matrix saved-project draft round-trip (UI-MATRIX-PROJECT-ROUNDTRIP-025)
+
+**Implemented on dev; exact-head QA and release pending.** Project backups now include the existing Matrix calculator's A/B dimensions, editable cells, RHS and observation-weight drafts. Schema validates dimensions (2–3), exact cell counts, bounded decimal/scientific or blank input strings *before* import mutation. Matrix restore invalidates stale computed results and preserves focus only for the previously active grid; legacy projects without Matrix state still import. The standalone HTML was synchronized with the source. Added direct Node/Python schema and source/bundle regression `tests/test_matrix_project_state.py`, Chromium desktop/390px round-trip, focus, malformed-import rollback regression `tests/smoke_matrix_project_state.py`, and mandatory Quality workflow step.
+
+**NEXT FIVE (priority, dependencies, acceptance tests):**
+1. **P1 — Exact-head QA and release recovery (in progress).** Diagnose latest Quality for all Matrix/project cases, fix root causes; acceptance green full unit + Chromium and PR gates at exact SHA, then verified main/Pages.
+2. **P1 — Canonical registry structured contracts (planned).** Reuse Matrix/Control solver metadata; typed dimensions, explicit assumptions, immutable numerical references, invalid-input errors and both UI consumers.
+3. **P1 — Control equilibrium stability guidance (planned).** Bounded stable/unstable/marginal eigenvalue references, explicit equilibrium-is-not-stability caveat, UI error recovery/mobile.
+4. **P1 — Engineering catalog expansion (planned).** Unique source-backed Control/GNSS/Signals entries, truthful availability labels, search, keyboard and 390px checks.
+5. **P1 — RK45 difficult-problem robustness (planned).** Near-stiff forward/backward reference, attempt exhaustion and stage-resolution warnings, stale-export recovery/browser regression.
+
+**Execution checkpoint (2026-10-30):** Baseline dev `f54de0de31f75c5fa0d5f641af746330c405cf33`, main `fe62e706571a04237f919d775a9dfcddccb70d76`; no open PR, only dev/main branches (unprotected). New source, browser and unit regressions committed; exact candidate CI, PR and Pages require confirmation. Historical 166 gap/95 partial audit unchanged.
+
+## 2026-10-30 — Table import finite numeric validation (DATA-PROJECT-TABLE-FINITE-024)
+
+**Implemented on dev; release pending.** Project schema now rejects nonfinite numeric cells in imported Data Tables (including JSON number overflow such as 1e999), preserving finite values, strings, booleans, null and v1→v2 migration. Standalone index synchronized. New direct Node/Python regression validates input boundaries, invalid types, legacy migration, source/bundle parity; existing Chromium project-import smoke now validates atomic rollback on overflowed table data. Exact-head full Quality and PR/Page gates required.
+
+**NEXT FIVE:** (1) finish exact-head Quality and fix any project import browser failure; acceptance full Python and Chromium smoke green; (2) saved Matrix project focus round-trip; acceptance no focus hijack, dimensions/drafts restored, mobile; (3) canonical registry structured solver contracts; acceptance two consumers, errors, immutability; (4) bounded Control stability guidance; acceptance stable/unstable/marginal numerical references and UI recovery; (5) Engineering catalog expansion; acceptance stable IDs, honest states, keyboard/mobile tests.
+
+**Execution:** Starting dev d8327c659b6e9d5475d5914d0e82136a2f68cc7a, main fe62e706571a04237f919d775a9dfcddccb70d76. Previous dev Quality 41051089378 in progress; no open PR. New feature tests and docs committed, exact CI and Pages pending. Historical inventory unchanged.
+
+## 2026-10-30 — Graph dataset primitive-cell validation (DATA-PROJECT-GRAPH-CELLS-023)
+
+**Implemented on dev; QA and release pending.** Project-schema migration now rejects nonprimitive graph cells (including objects and arrays) and nonfinite numeric graph cells, while preserving bounded primitive strings, finite numbers, booleans and null, as well as legacy v1 migration. The self-contained HTML was synchronized. Added direct Node/Python regression `tests/test_project_graph_dataset_cells.py` including negative/positive cases and standalone parity. Full exact-head CI, browser regressions and Pages verification required before release. Historical inventory remains frozen.
+
+**NEXT FIVE (priority, dependencies, acceptance):**
+1. **P1 — Saved-project Matrix focus round-trip:** Restore dimensions and drafts without focus hijacking; Chromium keyboard/mobile and project round-trip regressions.
+2. **P1 — Canonical registry structured contracts:** Matrix and Control consumers, dimension/assumption errors and immutable numerical reference tests.
+3. **P1 — Control stability guidance:** Stable/unstable/marginal eigenvalue references, explicit equilibrium-is-not-stability warning and UI error-recovery tests.
+4. **P1 — Engineering catalog expansion:** Unique source-backed Control/GNSS/Signals entries with truthful availability, search, keyboard and 390px checks.
+5. **P1 — RK45 difficult problems:** Near-stiff forward/backward numerical references, rejection exhaustion, stage-resolution warnings and stale-export browser recovery.
+
+**Execution checkpoint:** Baseline dev/main `fe62e706571a04237f919d775a9dfcddccb70d76` (PR #113 merged, Pages success, post-merge Quality in progress). Source and test committed; exact final dev/main SHAs and Quality/Pages results not yet known for this change.
+
 ## 2026-10-30 — RK45 floating-point stage-time precision (MATH-ODE-RK45-STAGE-RESOLUTION-022)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** Count RK45 attempts and accepted steps whose intermediate Dormand–Prince time stages round to current time, and warn users to rescale large absolute times. Numerical kernel and step acceptance unchanged; warning does not certify global accuracy. Added direct Node/Python numerical, boundary, backward and failure tests, plus mandatory Chromium desktop/mobile, stale-export recovery and no-pageerror regression. Baseline dev/main `309ffbd40136cf1e86e4ff9a2c69d17ff6eeb47c`, PR #112 main/dev Quality and Pages green, no open PR. Both branches unprotected.

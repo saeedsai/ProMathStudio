@@ -48,6 +48,26 @@ def main():
         bad_tables = {'version': 1, 'selected': 'sheet-1', 'tables': [
             {'id': 'sheet-1', 'name': 'Data1', 'columns': ['A', 'B'], 'rows': [['1']]}]}
         rejected(dict(legacy, working='WRONG', tables=bad_tables))
+        bad_graph = dict(legacy, working='WRONG', graph={
+            'dataset': {'headers': ['time', 'value'], 'rows': [[0, {'unexpected': 1}]]}})
+        rejected(bad_graph)
+        bad_graph['graph']['dataset']['rows'][0][1] = [1, 2]
+        rejected(bad_graph)
+        good_graph = dict(legacy, working='x+1', graph={
+            'dataset': {'headers': ['time', 'value'], 'rows': [[0, 2], [1, None]]}})
+        upload(page, good_graph)
+        page.wait_for_function("window.MathStudio.bridge.export().graph.dataset.rows.length === 2")
+        assert page.evaluate("window.MathStudio.bridge.export().graph.dataset.rows[1][1]") is None
+
+        # Nonfinite table numeric values are rejected during schema validation.
+        # JSON itself cannot encode Infinity, but JSON.parse may receive 1e999,
+        # which becomes Infinity before the project schema sees it.
+        nonfinite = dict(legacy, working='WRONG')
+        nonfinite['tables'] = {'version': 1, 'selected': 'sheet-1', 'tables': [
+            {'id': 'sheet-1', 'name': 'Data1', 'columns': ['A'], 'rows': [[float('inf')]]}]}
+        raw_nonfinite = json.dumps(nonfinite).replace('Infinity', '1e999').encode('utf-8')
+        rejected(raw_nonfinite)
+
         upload(page, b' ' * 2_000_001)
         page.wait_for_function("document.querySelector('#hub-status').textContent.includes('exceeds 2 MB')")
         assert page.evaluate('window.MathStudio.bridge.export().working') == 'x+1'

@@ -32,6 +32,15 @@ def main():
    assert card.locator('button').count()==0,'Planned feature must not open a fake tool'
    assert 'planned' in card.inner_text().lower()
   page.locator('#eng-search').fill('')
+  # Readable discipline labels are searchable, not just terse IDs or tool titles.
+  page.locator('#eng-discipline').select_option('')
+  page.locator('#eng-search').fill('Aerospace engineering')
+  assert page.locator('#eng-results article').count()>0
+  assert page.locator('#eng-results article[data-tool-id="matrix.solve.real.small"]').count()==1
+  page.locator('#eng-search').fill('GNSS positioning')
+  assert page.locator('#eng-results article[data-tool-id="gnss.positioning.least.squares"]').count()==1
+  assert page.locator('#eng-results article button').count()==0
+  page.locator('#eng-search').fill('')
   page.locator('#eng-discipline').select_option('fluids')
   page.locator('#eng-search').fill('pipe')
   assert page.locator('#eng-results article').count()==1

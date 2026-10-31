@@ -8,7 +8,7 @@ const fitArea=document.createElement('section');fitArea.id='curve-fit-tools';fit
 fitArea.innerHTML=`<div class="fit-head"><strong>Curve fitting</strong><span>Fit selected numeric X / Y columns</span></div>
 <div class="data-toolbar"><label>Model<select id="fit-model"><option value="none">No fit</option><option value="linear">Linear y=a+bx</option><option value="poly">Polynomial</option><option value="exp">Exponential y=a exp(bx)</option><option value="log">Logarithmic y=a+b ln(x)</option><option value="power">Power y=a x^b</option><option value="gaussian">Gaussian bell curve</option></select></label>
 <label id="fit-degree-wrap" hidden>Polynomial degree<select id="fit-degree"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label>
-<button type="button" class="primary" id="fit-run">Fit and show on graph</button><button type="button" class="secondary" id="fit-clear">Clear fit curve</button></div>
+<button type="button" class="primary" id="fit-run">Fit and show on graph</button><button type="button" class="secondary" id="fit-export" disabled>Export residuals CSV</button><button type="button" class="secondary" id="fit-clear">Clear fit curve</button></div>
 <div class="fit-result" id="fit-result" role="status">Select a numeric table and a fit model.</div>`;
 graphic.insertAdjacentElement('afterend',fitArea);
 $('fit-model').addEventListener('change',()=>{$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';});
@@ -61,12 +61,19 @@ function analyze(points,model,degree=2){
   formula=model==='log'?'('+fmt(coeffs[0])+')+('+fmt(coeffs[1])+')*ln(x)':'exp('+fmt(coeffs[0])+')*x^('+fmt(coeffs[1])+')';
   predict=x=>model==='log'?coeffs[0]+coeffs[1]*Math.log(x):Math.exp(coeffs[0])*Math.pow(x,coeffs[1]);
  }
- const mean=ys.reduce((a,b)=>a+b,0)/ys.length;let ss=0,total=0;
- for(let i=0;i<ys.length;i++){const estimate=predict(xs[i]);if(!Number.isFinite(estimate))throw Error('Numerical overflow in fitted model.');ss+=(ys[i]-estimate)**2;total+=(ys[i]-mean)**2;}
+ const mean=ys.reduce((a,b)=>a+b,0)/ys.length;let ss=0,total=0,absoluteError=0;
+ const residuals=[];
+ for(let i=0;i<ys.length;i++){
+  const estimate=predict(xs[i]);if(!Number.isFinite(estimate))throw Error('Numerical overflow in fitted model.');
+  const residual=ys[i]-estimate;if(!Number.isFinite(residual))throw Error('Numerical overflow in fitting residual.');
+  ss+=residual**2;total+=(ys[i]-mean)**2;absoluteError+=Math.abs(residual);
+  residuals.push([xs[i],ys[i],estimate,residual]);
+ }
+ if(!Number.isFinite(ss)||!Number.isFinite(total)||!Number.isFinite(absoluteError))throw Error('Numerical overflow in fitting diagnostics.');
  const r2=total>0?1-ss/total:(ss<1e-15?1:0);
- return {model,degree,formula,coefficients:coeffs,r2,rmse:Math.sqrt(ss/ys.length),used:ys.length,excluded:points.length-ys.length};
+ return {model,degree,formula,coefficients:coeffs,r2,rmse:Math.sqrt(ss/ys.length),mae:absoluteError/ys.length,sse:ss,residuals,used:ys.length,excluded:points.length-ys.length};
 }
-function fitTable(t,x,y,model,degree){const computed=studio.dataTables.calculate(t),pairs=computed.map(r=>[finite(r[x]),finite(r[y])]).filter(p=>p[0]!==null&&p[1]!==null);return analyze(pairs,model,degree);}
+function fitTable(t,x,y,model,degree){const computed=studio.dataTables.calculate(t),pairs=computed.map(r=>[finite(r[x]),finite(r[y])]);return analyze(pairs,model,degree);}
 function putFit(){try{
  const model=$('fit-model').value;if(model==='none')throw Error('Select a fitting model.');
  const kind=$('dt-chart-type').value;if(!['scatter','line'].includes(kind))throw Error('Fitting supports 2D scatter and line charts. Select one of those first.');
@@ -79,12 +86,21 @@ function putFit(){try{
  studio.dataTables.plot(); // Ensures same measurements appear as dots as well as the fitted curve.
  $('graph-input').value=[...new Set($('graph-input').value.split('\n').filter(Boolean).concat([lastEquation]))].join('\n');
  $('graph-plot').click();
- currentFit={...fit,table:table.id,x:xi,y:yi};
- const out=$('fit-result');out.textContent='y = '+fit.formula+'  |  R² = '+fit.r2.toFixed(6)+'  |  RMSE = '+fit.rmse.toPrecision(5)+'  |  n = '+fit.used+(fit.excluded?' ('+fit.excluded+' excluded)':'');out.classList.remove('error');
- }catch(err){$('fit-result').textContent=err.message;$('fit-result').classList.add('error');}
+ currentFit={...fit,table:table.id,x:xi,y:yi};$('fit-export').disabled=false;
+ const out=$('fit-result');out.textContent='y = '+fit.formula+'  |  R² = '+fit.r2.toFixed(6)+'  |  RMSE = '+fit.rmse.toPrecision(5)+'  |  MAE = '+fit.mae.toPrecision(5)+'  |  n = '+fit.used+(fit.excluded?' ('+fit.excluded+' excluded)':'');out.classList.remove('error');
+ }catch(err){currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent=err.message;$('fit-result').classList.add('error');}
 }
 $('fit-run').addEventListener('click',putFit);
-$('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-result').textContent='Fit removed; data table unchanged.';});
+for(const id of ['fit-model','fit-degree','dt-graph-table','dt-graph-x','dt-graph-y','dt-chart-type']){
+ $(id).addEventListener('change',()=>{currentFit=null;$('fit-export').disabled=true;});
+}
+$('fit-export').addEventListener('click',()=>{
+ if(!currentFit||!currentFit.residuals.length)return;
+ const csv=['x,y,predicted,residual',...currentFit.residuals.map(row=>row.map(value=>String(value)).join(','))].join('\r\n')+'\r\n';
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ const link=document.createElement('a');link.href=url;link.download='ProMathStudio_fit_residuals.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+$('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent='Fit removed; data table unchanged.';});
 studio.curveFit={analyze,fitTable,get last(){return currentFit;},get active(){return !!currentFit;},exportState:()=>({model:$('fit-model').value,degree:$('fit-degree').value,lastEquation}),restoreState:s=>{if(!s)return;$('fit-model').value=s.model||'none';$('fit-degree').value=s.degree||'2';$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';lastEquation=String(s.lastEquation||'').slice(0,2000);}};
 // Floating/sliding library and contextual help. Keep underlying semantic form controls intact.
 const css=document.createElement('style');css.textContent=`
@@ -96,7 +112,7 @@ const css=document.createElement('style');css.textContent=`
   #quick-menu{position:fixed;top:12px;right:16px;z-index:130;display:flex;gap:7px;padding:7px;background:#ffffffee;border:1px solid #dfe5f3;border-radius:12px;box-shadow:0 5px 25px #26345618;backdrop-filter:blur(10px)}
   #quick-menu button{border:0;background:#eef2ff;padding:9px 12px;border-radius:9px;font-size:12px;font-weight:750;color:#3b51ab}
   #quick-menu button:hover{background:#dbe5ff}
-  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols{display:block!important}
+  #quick-menu #quick-symbols{display:none}body.ws-editor #quick-symbols,body.ws-calculator #quick-symbols,body.ws-solver #quick-symbols,body.ws-graph #quick-symbols,body.ws-graph2d #quick-symbols,body.ws-graph3d #quick-symbols{display:block!important}
   #examples .examples{display:none}body.examples-open #examples .examples{display:grid}
   #examples{min-height:65px;scroll-margin-top:76px}
   body.examples-open #examples{position:fixed;right:0;top:65px;width:min(660px,95vw);height:calc(100vh - 75px);overflow:auto;padding:20px;background:#fff;border-radius:14px 0 0 14px;z-index:120;box-shadow:-10px 0 70px #071b3455;margin:0}
@@ -124,17 +140,18 @@ quick.innerHTML=`<button id="quick-symbols" type="button" aria-label="Open math 
 document.body.appendChild(quick);
 const options=document.createElement('section');options.className='ui-options';options.id='ui-options';options.hidden=true;options.innerHTML='<h3>Workspace display</h3><label><input type="checkbox" id="ui-history">Calculator history</label><label><input type="checkbox" id="ui-python">Show Python code</label><label><input type="checkbox" id="ui-details">Advanced explanations</label><button type="button" class="secondary" id="ui-close">Close</button>';
 document.body.appendChild(options);
-function closeMenus(){document.body.classList.remove('library-open','examples-open');options.hidden=true;}
+function closeMenus(){document.body.classList.remove('library-open','examples-open');options.hidden=true;$('quick-symbols').setAttribute('aria-expanded','false');}
 overlay.addEventListener('click',closeMenus);
-$('quick-symbols').addEventListener('click',()=>{const next=!document.body.classList.contains('library-open');closeMenus();document.body.classList.toggle('library-open',next);$('palette-search').focus();});
+$('quick-symbols').setAttribute('aria-expanded','false');
+$('quick-symbols').setAttribute('aria-controls','palette-nav');
+$('quick-symbols').addEventListener('click',()=>{const next=!document.body.classList.contains('library-open');closeMenus();document.body.classList.toggle('library-open',next);$('quick-symbols').setAttribute('aria-expanded',String(next));if(next)$('palette-search').focus();else $('quick-symbols').focus();});
 $('quick-examples').addEventListener('click',()=>{const next=!document.body.classList.contains('examples-open');closeMenus();document.body.classList.toggle('examples-open',next);if(next)$('example-category').focus();});
 $('quick-options').addEventListener('click',()=>{const next=options.hidden;closeMenus();options.hidden=!next;});
 $('quick-help').addEventListener('click',()=>{closeMenus();$('help-dialog').showModal();});
 $('ui-close').addEventListener('click',closeMenus);
 for(const [box,cls] of [['ui-history','ui-history-on'],['ui-python','ui-python-on'],['ui-details','ui-details-on']])$(''+box).addEventListener('change',e=>document.body.classList.toggle(cls,e.target.checked));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenus();});
-for(const b of document.querySelectorAll('[data-workspace]'))b.addEventListener('click',()=>{closeMenus();document.body.classList.remove('ws-editor');document.body.classList.toggle('ws-editor',b.dataset.workspace==='editor');});
-document.body.classList.add('ws-editor');
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const wasOpen=document.body.classList.contains('library-open');closeMenus();if(wasOpen){e.preventDefault();$('quick-symbols').focus();}});
+for(const b of document.querySelectorAll('[data-workspace]'))b.addEventListener('click',closeMenus);
 // Examples are in a contextual sliding drawer. Selecting one closes the drawer.
 $('examples-list').addEventListener('click',e=>{if(e.target.closest('button'))closeMenus();});
 // Compact advanced controls: hide axes settings until opened; preserve IDs.

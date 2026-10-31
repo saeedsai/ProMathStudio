@@ -1,3 +1,9 @@
+## 2026-10-31 — Engineering catalog routes for interpolation, quadrature and minimization (UI-ENGINEERING-NUMERIC-ROUTES-050)
+
+**Implemented on the working branch; dev push held until PR #122 merges; CI and release pending.** Three existing tested tools are listed as available with honest scope notes and real routing: `numerical.interpolation.1d`, `numerical.quadrature.adaptive`, `numerical.minimize.golden`. No solver or action duplicated; `smoke_engineering_catalog.py` verifies one working button per card and that `#interp-run`, `#num-run`, `#minimize-run` become visible. Releases so far: #118 `91ef7a6`, #119 `c92be4f`, #120 `794fb6e`, #121 `b67ee14` (each main Quality + Pages verified); #122 (coupled ODE diagnostic) open.
+
+**NEXT FIVE:** (1) merge PR #122 on green exact-head CI and verify main; promote this change; (2) project round-trip for Engineering search/filter state with rollback tests; (3) Python sandbox regression review (offline behaviour, invalid import cases); (4) scalar fixed-step RK4 step-doubling diagnostic parity; (5) catalog routes for remaining existing tools (curve fit, spreadsheet functions) with scope notes.
+
 ## 2026-10-31 — Coupled two-state RK4 step-doubling diagnostic (MATH-ODE-SYSTEM-CONVERGENCE-049)
 
 **Implemented locally on the working branch; not yet pushed to dev, CI and release pending.** The ODE panel's coupled two-state RK4 now reports `|x_N − x_2N|∞` from a 2N-step rerun (N≤500), matching the Control transient diagnostic. It is explicitly *not* a global error bound; above 500 steps, or if the refined time grid is unresolvable, the original valid solution is returned with the diagnostic marked unavailable. Tests: `tests/test_ode_system_convergence.py` (harmonic-oscillator forward/backward references with the 4th-order relation between diagnostic and true error, 500/501 boundary, unchanged trajectory, failure paths, huge-offset case, bundle parity) and extended Chromium `tests/smoke_ode_system.py`.

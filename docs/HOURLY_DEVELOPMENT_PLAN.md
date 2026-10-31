@@ -1,3 +1,7 @@
+## 2026-10-31 — Saved table selection validation (DATA-PROJECT-TABLE-SELECTION-044)
+
+**Implemented on the working branch; exact-head CI not yet verified.** Project schema now refuses a `tables.selected` value that is not a string naming an existing table id, so a stale selection can no longer silently restore a different sheet. Column order, mixed primitive cells, v1→v2 migration and absent-selection projects are unchanged. Tests: `tests/test_project_table_selection.py` (reference, negative, boundary, bundle parity) and Chromium `tests/smoke_project_table_selection.py` (round-trip, rollback, 390px), added to Quality. PR #118 merged to main at `91ef7a6` (head CI green); main Quality and Pages not yet confirmed at write time.
+
 # Hourly development plan — living queue
 
 Current entries and the **Next five features** queue are kept here (newest first). Older execution entries are in [archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md](archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md); the frozen baseline is the [audited inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md).

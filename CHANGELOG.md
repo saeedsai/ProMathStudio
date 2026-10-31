@@ -1,3 +1,4 @@
+- 2026-10-31 (MATH-ODE-SYSTEM-CONVERGENCE-049, unreleased): Coupled two-state RK4 reports a step-doubling endpoint difference (≤500 steps) as a diagnostic, never as a global error bound.
 - 2026-10-31 (DATA-GRAPH-ROUNDTRIP-048, unreleased): Chromium regression for Graph dataset export→import identity, mixed cell types, atomic duplicate-header rejection and 390px layout.
 - 2026-10-31 (UI-ENGINEERING-NUMERIC-ROUTES-047, unreleased): Engineering Toolbox lists existing symmetric eigen, FFT and Brent root tools as available with real routing and honest scope notes.
 - 2026-10-31 (UI-ENGINEERING-CONTROL-ROUTES-046 / MATH-ODE-RK45-NEAR-RESOLUTION-045, unreleased): Engineering Toolbox lists existing Control stability and transient tools as available with real routing; RK45 near-time-resolution reference tests added.

@@ -70,6 +70,9 @@ def main():
   assert page.locator('#control-theory-toolbox').evaluate('(e)=>e.open')
   # Existing numerical tools route to their real, visible controls.
   for tool_id, selector in [('signals.fft.1d', '#fft-run'), ('numerical.root.brent', '#brent-run'),
+                            ('numerical.interpolation.1d', '#interp-run'),
+                            ('numerical.quadrature.adaptive', '#num-run'),
+                            ('numerical.minimize.golden', '#minimize-run'),
                             ('matrix.eigen.symmetric.small', '#matrix-tools')]:
    tab.click()
    page.locator('#eng-discipline').select_option('')

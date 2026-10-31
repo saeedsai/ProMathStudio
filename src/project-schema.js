@@ -54,6 +54,13 @@
       if (!record(set) || !Array.isArray(set.headers) || !Array.isArray(set.rows) ||
           set.headers.length < 1 || set.headers.length > 32 || set.rows.length > 6000)
         fail('graph dataset dimensions exceed limits.');
+      // Column selectors require unambiguous names in restored graph datasets.
+      if (set.headers.every(h => typeof h === 'string')) {
+        const identities = set.headers.map(h => h.trim().toLowerCase());
+        if (identities.some(h => !h)) fail('graph dataset has blank column names.');
+        if (new Set(identities).size !== identities.length)
+          fail('graph dataset has duplicate column names.');
+      }
       if (set.headers.some(h => typeof h !== 'string' || h.length > 8000) ||
           set.rows.some(row => !Array.isArray(row) || row.length !== set.headers.length ||
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
@@ -65,7 +72,8 @@
       if (!record(matrix) || !['rows','cols','bRows','bCols'].every(key => [2,3].includes(matrix[key])))
         fail('saved Matrix dimensions must be 2 or 3.');
       const numericDraft = value => typeof value === 'string' && value.length <= 80 &&
-        (value === '' || /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value));
+        (value === '' || (/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value) &&
+          Number.isFinite(Number(value)) && Math.abs(Number(value)) <= 1e12));
       for (const [key, size] of [['a',matrix.rows*matrix.cols],['b',matrix.bRows*matrix.bCols],
         ['rhs',matrix.rows],['weights',matrix.rows]]) {
         if (!Array.isArray(matrix[key]) || matrix[key].length !== size || !matrix[key].every(numericDraft))
@@ -90,7 +98,9 @@
             table.columns.length < 1 || table.columns.length > 32 || table.rows.length > 6000)
           fail('table dimensions exceed limits.');
         short(table.name, 48, 'table name');
-        const name = table.name.toLowerCase();
+        // Trim only for identity checks: preserve the user's original display name.
+        const name = table.name.trim().toLowerCase();
+        if (!name) fail('table name must not be blank.');
         if (names.has(name)) fail('duplicate table names.');
         names.add(name);
         if (table.columns.some(col => typeof col !== 'string' || col.length > 80) ||

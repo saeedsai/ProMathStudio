@@ -35,6 +35,7 @@ def main():
         assert migrated['tables'] == original['tables'], 'legacy table data changed'
 
         def rejected(candidate):
+            graph_before = page.evaluate('window.MathStudio.bridge.export().graph')
             page.locator('#hub-status').evaluate("el => el.textContent = ''")
             upload(page, candidate)
             page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
@@ -42,17 +43,36 @@ def main():
             assert current['working'] == migrated['working']
             assert [i['raw'] for i in current['notebook']] == ['x+1']
             assert current['tables'] == migrated['tables']
+            assert current['graph'] == graph_before, 'invalid import mutated graph state'
 
         rejected(dict(legacy, version=99, working='WRONG'))
         rejected(dict(legacy, working='WRONG', notebook=[{'raw': 42}]))
         bad_tables = {'version': 1, 'selected': 'sheet-1', 'tables': [
             {'id': 'sheet-1', 'name': 'Data1', 'columns': ['A', 'B'], 'rows': [['1']]}]}
         rejected(dict(legacy, working='WRONG', tables=bad_tables))
+        # Tables whose identifiers differ only by surrounding spaces cannot
+        # be safely restored as distinct named tables.
+        def named_table(table_id, name):
+            return {'id': table_id, 'name': name, 'columns': ['A'], 'rows': [[1]]}
+        rejected(dict(legacy, working='WRONG', tables={
+            'version': 1, 'selected': 'sheet-1', 'tables': [
+                named_table('sheet-1', 'Data1'),
+                named_table('sheet-2', ' data1 ')]}))
+        rejected(dict(legacy, working='WRONG', tables={
+            'version': 1, 'selected': 'sheet-1', 'tables': [
+                named_table('sheet-1', '   ')]}))
+
         bad_graph = dict(legacy, working='WRONG', graph={
             'dataset': {'headers': ['time', 'value'], 'rows': [[0, {'unexpected': 1}]]}})
         rejected(bad_graph)
         bad_graph['graph']['dataset']['rows'][0][1] = [1, 2]
         rejected(bad_graph)
+        # Duplicate graph headers are ambiguous for column selection.
+        for names in (['time', 'time'], ['value', 'value'],
+                      [' Time ', 'time'], ['value', ' VALUE '],
+                      ['time', ' '], ['', 'value']):
+            rejected(dict(legacy, working='WRONG', graph={
+                'dataset': {'headers': names, 'rows': [[0, 2], [1, 3]]}}))
         good_graph = dict(legacy, working='x+1', graph={
             'dataset': {'headers': ['time', 'value'], 'rows': [[0, 2], [1, None]]}})
         upload(page, good_graph)

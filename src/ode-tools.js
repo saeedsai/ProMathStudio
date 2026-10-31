@@ -19,6 +19,11 @@ function timeResolution(t,direction){
  while(t+direction*delta===t)delta*=2;
  return Math.abs((t+direction*delta)-t);
 }
+function rk4TimeGrid(t,next,h){
+ const direction=Math.sign(h), midpoint=t+h/2;
+ if(!(direction*(next-t)>0)||midpoint===t||midpoint===next)
+  throw Error('Fixed-step RK4 time resolution is insufficient: output times or midpoint stages collapse; use fewer steps or rescale time.');
+}
 function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  expression=String(expression).trim();
  if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
@@ -32,6 +37,7 @@ function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  let y=y0;const rows=[];
  for(let i=0;i<=steps;i++){
   const t=bounded(i===steps?t1:t0+i*h,'Time');
+  if(i<steps)rk4TimeGrid(t,bounded(i+1===steps?t1:t0+(i+1)*h,'Time'),h);
   rows.push([t,y]);
   if(i===steps)break;
   const k1=f(t,y);
@@ -56,19 +62,32 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  if(!Number.isInteger(maxSteps)||maxSteps<4||maxSteps>10000)throw Error('Maximum attempts must be an integer from 4 to 10000.');
  const span=t1-t0, direction=Math.sign(span);
  if(!Number.isFinite(span)||!direction)throw Error('Invalid integration interval.');
+ function stageBound(value,label,stage){
+  if(!Number.isFinite(value)||Math.abs(value)>MAX){
+   const error=Error(label+' became non-finite or exceeded magnitude 1e12; shorten the interval or change the initial value.');
+   // A nonfinite derivative may be a domain/singularity error: never retry it.
+   error.code=label==='Derivative'&&!Number.isFinite(value)?'RK45_DOMAIN_NONFINITE':'RK45_STAGE_BOUND';
+   error.stage=stage;
+   throw error;
+  }
+  return value;
+ }
  const f=(t,y,stage)=>{
   try{
-   return bounded(M.numerical.evaluate(expression,{t:bounded(t,'Time'),y:bounded(y,'State')}),'Derivative');
+   return stageBound(M.numerical.evaluate(expression,{t:stageBound(t,'Time',stage),y:stageBound(y,'State',stage)}),'Derivative',stage);
   }catch(error){
-   throw Error('RK45 '+stage+' derivative failed at t='+Number(t).toPrecision(10)+
+   const wrapped=Error('RK45 '+stage+' derivative failed at t='+Number(t).toPrecision(10)+
     ', y='+Number(y).toPrecision(10)+': '+(error?.message||String(error)));
+   wrapped.code=error?.code;wrapped.stage=stage;
+   throw wrapped;
   }
  };
  let t=t0,y=y0,h=span/20,attempts=0,rejected=0,accepted=0;
  let minAcceptedStep=Infinity,maxAcceptedStep=0,maxAcceptedErrorRatio=0;
  let maxRejectedErrorRatio=0,minRejectedStep=Infinity,resolutionLimitedAttempts=0;
  let stageTimeCollisionAttempts=0,stageTimeCollisionAcceptedSteps=0;
- let consecutiveRejected=0,maxConsecutiveRejected=0;
+ let quantumLimitedAcceptedSteps=0;
+ let consecutiveRejected=0,maxConsecutiveRejected=0,stageOverflowRejected=0,lastOverflowStage=null;
  // Include the last representable time and accepted/rejected work in failure reports.
  // This is deliberately a diagnostic only: it does not change RK45 step selection.
  const progressError=reason=>Error(reason+'; at t='+t.toPrecision(16)+
@@ -79,7 +98,9 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    ', smallest rejected |Δt|='+minRejectedStep.toPrecision(8):'')+
   ', time-resolution-limited attempts='+resolutionLimitedAttempts+
   ', collapsed-stage attempts='+stageTimeCollisionAttempts+
-  ', longest rejection streak='+maxConsecutiveRejected+'.');
+  ', longest rejection streak='+maxConsecutiveRejected+
+  ', bounded stage-overflow retries='+stageOverflowRejected+
+  (lastOverflowStage?', last bounded stage='+lastOverflowStage:'')+'.');
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
   if(attempts>=maxSteps)throw progressError('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit');
@@ -98,15 +119,29 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    t+4*h/5===t||t+8*h/9===t);
   if(stageTimesCollapsed)stageTimeCollisionAttempts++;
   attempts++;
+  let y5,y4;
+  try{
   const k1=f(t,y,'k1');
   const k2=f(t+h/5,y+h*k1/5,'k2');
   const k3=f(t+3*h/10,y+h*(3*k1/40+9*k2/40),'k3');
   const k4=f(t+4*h/5,y+h*(44*k1/45-56*k2/15+32*k3/9),'k4');
   const k5=f(t+8*h/9,y+h*(19372*k1/6561-25360*k2/2187+64448*k3/6561-212*k4/729),'k5');
   const k6=f(t+h,y+h*(9017*k1/3168-355*k2/33+46732*k3/5247+49*k4/176-5103*k5/18656),'k6');
-  const y5=bounded(y+h*(35*k1/384+500*k3/1113+125*k4/192-2187*k5/6784+11*k6/84),'State');
+  y5=stageBound(y+h*(35*k1/384+500*k3/1113+125*k4/192-2187*k5/6784+11*k6/84),'State','y5');
   const k7=f(t+h,y5,'k7');
-  const y4=bounded(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State');
+  y4=stageBound(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State','y4');
+  }catch(error){
+   // Structured bounds tagging prevents parser/domain messages that happen to
+   // contain the same words from being mistaken for recoverable overflow.
+   if(error?.code!=='RK45_STAGE_BOUND'||error.stage==='k1')throw error;
+   lastOverflowStage=error.stage||'intermediate state';
+   rejected++;stageOverflowRejected++;consecutiveRejected++;
+   minRejectedStep=Math.min(minRejectedStep,Math.abs(h));
+   maxConsecutiveRejected=Math.max(maxConsecutiveRejected,consecutiveRejected);
+   if(Math.abs(h)<=quantum)throw progressError('Adaptive stage overflow at current time resolution; rescale state or shorten the interval');
+   h*=0.5;
+   continue;
+  }
   const error=Math.abs(y5-y4),scale=tolerance*(1+Math.max(Math.abs(y),Math.abs(y5)));
   const errorRatio=error/scale;
   if(!Number.isFinite(errorRatio))throw progressError('RK45 local-error estimate is not finite');
@@ -116,6 +151,9 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    minAcceptedStep=Math.min(minAcceptedStep,acceptedStep);
    maxAcceptedStep=Math.max(maxAcceptedStep,acceptedStep);
    maxAcceptedErrorRatio=Math.max(maxAcceptedErrorRatio,errorRatio);
+   // Never publish duplicate or non-monotone times to Data Tables/Graphs.
+   if(!(direction*(nextT-t)>0))throw progressError('RK45 accepted time grid failed to advance');
+   if(Math.abs(nextT-t)<=quantum)quantumLimitedAcceptedSteps++;
    t=nextT;
    y=y5;rows.push([t,y]);accepted++;
    if(stageTimesCollapsed)stageTimeCollisionAcceptedSteps++;
@@ -133,7 +171,8 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  return {type:'ode-rk45',columns:['t','y'],rows,steps:accepted,attempts,rejected,tolerance,
   minAcceptedStep,maxAcceptedStep,maxAcceptedErrorRatio,maxRejectedErrorRatio,
   minRejectedStep:rejected?minRejectedStep:null,resolutionLimitedAttempts,
-  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,maxConsecutiveRejected,
+  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,quantumLimitedAcceptedSteps,
+  maxConsecutiveRejected,stageOverflowRejected,lastOverflowStage,
   rejectionWarning:rejected>=5||maxConsecutiveRejected>=3?
    'Repeated RK45 step rejections: verify accuracy with tighter tolerance or a stiff-capable solver; rejection alone does not diagnose stiffness.':null,
   method:'Adaptive Dormand–Prince Runge–Kutta 5(4) (RK45)',
@@ -162,6 +201,7 @@ function solveSystem({expression='z',expressionZ='-y',t0=0,t1=1,y0=0,z0=1,steps=
  let y=y0,z=z0;const rows=[];
  for(let i=0;i<=steps;i++){
   const t=bounded(i===steps?t1:t0+i*h,'Time');
+  if(i<steps)rk4TimeGrid(t,bounded(i+1===steps?t1:t0+(i+1)*h,'Time'),h);
   rows.push([t,y,z]);
   if(i===steps)break;
   const k1=f(t,y,z);
@@ -228,7 +268,11 @@ function run(){
    last.maxAcceptedErrorRatio.toPrecision(5)+
    (last.rejected?', max rejected local-error ratio '+last.maxRejectedErrorRatio.toPrecision(5)+
     ', smallest rejected |Δt| '+last.minRejectedStep.toPrecision(5):'')+
+   (last.stageOverflowRejected?', bounded stage-overflow retries '+last.stageOverflowRejected+
+    ', last bounded stage '+last.lastOverflowStage:'')+
    (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:'')+
+   (last.quantumLimitedAcceptedSteps?', warning: '+last.quantumLimitedAcceptedSteps+
+    ' accepted time steps advanced by only one representable time increment; rescale time and verify convergence':'')+
    (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+
     ' accepted steps had RK45 stage times rounded to current t; rescale time for reliable accuracy':'')+
    (last.rejectionWarning?', warning: '+last.rejectionWarning:''):

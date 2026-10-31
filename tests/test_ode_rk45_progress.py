@@ -59,7 +59,7 @@ console.log('PASS RK45 progress diagnostics and forward/backward references');
             "</script>", 1)[0].rstrip("\n")
         self.assertEqual(source, embedded)
         self.assertIn("const progressError=", source)
-        self.assertEqual(source.count("throw progressError("), 5)
+        self.assertEqual(source.count("throw progressError("), 7)  # includes bounded stage overflow exhaustion and monotonic-grid guard
         self.assertIn("RK45 local-error estimate is not finite", source)
         self.assertIn("max rejected local-error ratio=", source)
 

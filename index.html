@@ -461,7 +461,7 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
 <pre id="ct-eq-stability-output" aria-live="polite">No current stability result.</pre>
 <details id="ct-eq-transient">
 <summary>Two-state transient response · shared fixed-step RK4</summary>
-<style>#ct-eq-transient .ct-equilibrium-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px}#ct-eq-transient .ct-equilibrium-fields label{display:flex;flex-direction:column;min-width:0}#ct-eq-transient input{width:100%;min-width:0;box-sizing:border-box}#ct-eq-transient pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<style>#ct-eq-transient .ct-equilibrium-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px}#ct-eq-transient .ct-equilibrium-fields label{display:flex;flex-direction:column;min-width:0}#ct-eq-transient input{width:100%;min-width:0;box-sizing:border-box}#ct-eq-transient pre{white-space:pre-wrap;overflow-wrap:anywhere}#ct-eq-transient .ct-actions{flex-wrap:wrap}#ct-eq-transient .ct-actions button{max-width:100%;white-space:normal}</style>
 <p>Simulate ẋ = −A·x + b with a real 2×2 matrix and constant forcing. Uses the existing coupled ODE solver; not a stiff solver or global-error guarantee. Compare different step counts.</p>
 <div class="ct-equilibrium-fields">
 <label>Initial state x(t₀), two values<input id="ct-eq-initial" value="0, 0" spellcheck="false"></label>
@@ -469,7 +469,7 @@ y = x - z</textarea><label for="cas-system-vars">Unknown variables (comma-separa
 <label>End time t₁<input id="ct-eq-t1" type="number" step="any" value="1"></label>
 <label>RK4 steps (4–1000)<input id="ct-eq-steps" type="number" min="4" max="1000" step="1" value="80"></label>
 </div>
-<div class="ct-actions"><button type="button" id="ct-eq-transient-run">Simulate trajectory</button><button type="button" id="ct-eq-transient-table" disabled>Save trajectory to Data Tables</button><span id="ct-eq-transient-status" role="status" aria-live="polite">Ready</span></div>
+<div class="ct-actions"><button type="button" id="ct-eq-transient-run">Simulate trajectory</button><button type="button" id="ct-eq-transient-table" disabled>Save trajectory to Data Tables</button><button type="button" id="ct-eq-transient-plot" disabled>Plot both states in Graphs</button><span id="ct-eq-transient-status" role="status" aria-live="polite">Ready</span></div>
 <pre id="ct-eq-transient-output" aria-live="polite">No current trajectory.</pre>
 </details>
 </details>
@@ -3138,6 +3138,13 @@ self.onmessage=async ({data})=>{
       if (!record(set) || !Array.isArray(set.headers) || !Array.isArray(set.rows) ||
           set.headers.length < 1 || set.headers.length > 32 || set.rows.length > 6000)
         fail('graph dataset dimensions exceed limits.');
+      // Column selectors require unambiguous names in restored graph datasets.
+      if (set.headers.every(h => typeof h === 'string')) {
+        const identities = set.headers.map(h => h.trim().toLowerCase());
+        if (identities.some(h => !h)) fail('graph dataset has blank column names.');
+        if (new Set(identities).size !== identities.length)
+          fail('graph dataset has duplicate column names.');
+      }
       if (set.headers.some(h => typeof h !== 'string' || h.length > 8000) ||
           set.rows.some(row => !Array.isArray(row) || row.length !== set.headers.length ||
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
@@ -3149,7 +3156,8 @@ self.onmessage=async ({data})=>{
       if (!record(matrix) || !['rows','cols','bRows','bCols'].every(key => [2,3].includes(matrix[key])))
         fail('saved Matrix dimensions must be 2 or 3.');
       const numericDraft = value => typeof value === 'string' && value.length <= 80 &&
-        (value === '' || /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value));
+        (value === '' || (/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value) &&
+          Number.isFinite(Number(value)) && Math.abs(Number(value)) <= 1e12));
       for (const [key, size] of [['a',matrix.rows*matrix.cols],['b',matrix.bRows*matrix.bCols],
         ['rhs',matrix.rows],['weights',matrix.rows]]) {
         if (!Array.isArray(matrix[key]) || matrix[key].length !== size || !matrix[key].every(numericDraft))
@@ -3174,7 +3182,9 @@ self.onmessage=async ({data})=>{
             table.columns.length < 1 || table.columns.length > 32 || table.rows.length > 6000)
           fail('table dimensions exceed limits.');
         short(table.name, 48, 'table name');
-        const name = table.name.toLowerCase();
+        // Trim only for identity checks: preserve the user's original display name.
+        const name = table.name.trim().toLowerCase();
+        if (!name) fail('table name must not be blank.');
         if (names.has(name)) fail('duplicate table names.');
         names.add(name);
         if (table.columns.some(col => typeof col !== 'string' || col.length > 80) ||
@@ -6711,6 +6721,11 @@ function timeResolution(t,direction){
  while(t+direction*delta===t)delta*=2;
  return Math.abs((t+direction*delta)-t);
 }
+function rk4TimeGrid(t,next,h){
+ const direction=Math.sign(h), midpoint=t+h/2;
+ if(!(direction*(next-t)>0)||midpoint===t||midpoint===next)
+  throw Error('Fixed-step RK4 time resolution is insufficient: output times or midpoint stages collapse; use fewer steps or rescale time.');
+}
 function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  expression=String(expression).trim();
  if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
@@ -6724,6 +6739,7 @@ function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
  let y=y0;const rows=[];
  for(let i=0;i<=steps;i++){
   const t=bounded(i===steps?t1:t0+i*h,'Time');
+  if(i<steps)rk4TimeGrid(t,bounded(i+1===steps?t1:t0+(i+1)*h,'Time'),h);
   rows.push([t,y]);
   if(i===steps)break;
   const k1=f(t,y);
@@ -6748,19 +6764,32 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  if(!Number.isInteger(maxSteps)||maxSteps<4||maxSteps>10000)throw Error('Maximum attempts must be an integer from 4 to 10000.');
  const span=t1-t0, direction=Math.sign(span);
  if(!Number.isFinite(span)||!direction)throw Error('Invalid integration interval.');
+ function stageBound(value,label,stage){
+  if(!Number.isFinite(value)||Math.abs(value)>MAX){
+   const error=Error(label+' became non-finite or exceeded magnitude 1e12; shorten the interval or change the initial value.');
+   // A nonfinite derivative may be a domain/singularity error: never retry it.
+   error.code=label==='Derivative'&&!Number.isFinite(value)?'RK45_DOMAIN_NONFINITE':'RK45_STAGE_BOUND';
+   error.stage=stage;
+   throw error;
+  }
+  return value;
+ }
  const f=(t,y,stage)=>{
   try{
-   return bounded(M.numerical.evaluate(expression,{t:bounded(t,'Time'),y:bounded(y,'State')}),'Derivative');
+   return stageBound(M.numerical.evaluate(expression,{t:stageBound(t,'Time',stage),y:stageBound(y,'State',stage)}),'Derivative',stage);
   }catch(error){
-   throw Error('RK45 '+stage+' derivative failed at t='+Number(t).toPrecision(10)+
+   const wrapped=Error('RK45 '+stage+' derivative failed at t='+Number(t).toPrecision(10)+
     ', y='+Number(y).toPrecision(10)+': '+(error?.message||String(error)));
+   wrapped.code=error?.code;wrapped.stage=stage;
+   throw wrapped;
   }
  };
  let t=t0,y=y0,h=span/20,attempts=0,rejected=0,accepted=0;
  let minAcceptedStep=Infinity,maxAcceptedStep=0,maxAcceptedErrorRatio=0;
  let maxRejectedErrorRatio=0,minRejectedStep=Infinity,resolutionLimitedAttempts=0;
  let stageTimeCollisionAttempts=0,stageTimeCollisionAcceptedSteps=0;
- let consecutiveRejected=0,maxConsecutiveRejected=0;
+ let quantumLimitedAcceptedSteps=0;
+ let consecutiveRejected=0,maxConsecutiveRejected=0,stageOverflowRejected=0,lastOverflowStage=null;
  // Include the last representable time and accepted/rejected work in failure reports.
  // This is deliberately a diagnostic only: it does not change RK45 step selection.
  const progressError=reason=>Error(reason+'; at t='+t.toPrecision(16)+
@@ -6771,7 +6800,9 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    ', smallest rejected |Δt|='+minRejectedStep.toPrecision(8):'')+
   ', time-resolution-limited attempts='+resolutionLimitedAttempts+
   ', collapsed-stage attempts='+stageTimeCollisionAttempts+
-  ', longest rejection streak='+maxConsecutiveRejected+'.');
+  ', longest rejection streak='+maxConsecutiveRejected+
+  ', bounded stage-overflow retries='+stageOverflowRejected+
+  (lastOverflowStage?', last bounded stage='+lastOverflowStage:'')+'.');
  const rows=[[t,y]];
  while(direction*(t1-t)>0){
   if(attempts>=maxSteps)throw progressError('Adaptive solver exceeded maximum attempts; relax tolerance or increase the limit');
@@ -6790,15 +6821,29 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    t+4*h/5===t||t+8*h/9===t);
   if(stageTimesCollapsed)stageTimeCollisionAttempts++;
   attempts++;
+  let y5,y4;
+  try{
   const k1=f(t,y,'k1');
   const k2=f(t+h/5,y+h*k1/5,'k2');
   const k3=f(t+3*h/10,y+h*(3*k1/40+9*k2/40),'k3');
   const k4=f(t+4*h/5,y+h*(44*k1/45-56*k2/15+32*k3/9),'k4');
   const k5=f(t+8*h/9,y+h*(19372*k1/6561-25360*k2/2187+64448*k3/6561-212*k4/729),'k5');
   const k6=f(t+h,y+h*(9017*k1/3168-355*k2/33+46732*k3/5247+49*k4/176-5103*k5/18656),'k6');
-  const y5=bounded(y+h*(35*k1/384+500*k3/1113+125*k4/192-2187*k5/6784+11*k6/84),'State');
+  y5=stageBound(y+h*(35*k1/384+500*k3/1113+125*k4/192-2187*k5/6784+11*k6/84),'State','y5');
   const k7=f(t+h,y5,'k7');
-  const y4=bounded(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State');
+  y4=stageBound(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State','y4');
+  }catch(error){
+   // Structured bounds tagging prevents parser/domain messages that happen to
+   // contain the same words from being mistaken for recoverable overflow.
+   if(error?.code!=='RK45_STAGE_BOUND'||error.stage==='k1')throw error;
+   lastOverflowStage=error.stage||'intermediate state';
+   rejected++;stageOverflowRejected++;consecutiveRejected++;
+   minRejectedStep=Math.min(minRejectedStep,Math.abs(h));
+   maxConsecutiveRejected=Math.max(maxConsecutiveRejected,consecutiveRejected);
+   if(Math.abs(h)<=quantum)throw progressError('Adaptive stage overflow at current time resolution; rescale state or shorten the interval');
+   h*=0.5;
+   continue;
+  }
   const error=Math.abs(y5-y4),scale=tolerance*(1+Math.max(Math.abs(y),Math.abs(y5)));
   const errorRatio=error/scale;
   if(!Number.isFinite(errorRatio))throw progressError('RK45 local-error estimate is not finite');
@@ -6808,6 +6853,9 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
    minAcceptedStep=Math.min(minAcceptedStep,acceptedStep);
    maxAcceptedStep=Math.max(maxAcceptedStep,acceptedStep);
    maxAcceptedErrorRatio=Math.max(maxAcceptedErrorRatio,errorRatio);
+   // Never publish duplicate or non-monotone times to Data Tables/Graphs.
+   if(!(direction*(nextT-t)>0))throw progressError('RK45 accepted time grid failed to advance');
+   if(Math.abs(nextT-t)<=quantum)quantumLimitedAcceptedSteps++;
    t=nextT;
    y=y5;rows.push([t,y]);accepted++;
    if(stageTimesCollapsed)stageTimeCollisionAcceptedSteps++;
@@ -6825,7 +6873,8 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
  return {type:'ode-rk45',columns:['t','y'],rows,steps:accepted,attempts,rejected,tolerance,
   minAcceptedStep,maxAcceptedStep,maxAcceptedErrorRatio,maxRejectedErrorRatio,
   minRejectedStep:rejected?minRejectedStep:null,resolutionLimitedAttempts,
-  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,maxConsecutiveRejected,
+  stageTimeCollisionAttempts,stageTimeCollisionAcceptedSteps,quantumLimitedAcceptedSteps,
+  maxConsecutiveRejected,stageOverflowRejected,lastOverflowStage,
   rejectionWarning:rejected>=5||maxConsecutiveRejected>=3?
    'Repeated RK45 step rejections: verify accuracy with tighter tolerance or a stiff-capable solver; rejection alone does not diagnose stiffness.':null,
   method:'Adaptive Dormand–Prince Runge–Kutta 5(4) (RK45)',
@@ -6854,6 +6903,7 @@ function solveSystem({expression='z',expressionZ='-y',t0=0,t1=1,y0=0,z0=1,steps=
  let y=y0,z=z0;const rows=[];
  for(let i=0;i<=steps;i++){
   const t=bounded(i===steps?t1:t0+i*h,'Time');
+  if(i<steps)rk4TimeGrid(t,bounded(i+1===steps?t1:t0+(i+1)*h,'Time'),h);
   rows.push([t,y,z]);
   if(i===steps)break;
   const k1=f(t,y,z);
@@ -6920,7 +6970,11 @@ function run(){
    last.maxAcceptedErrorRatio.toPrecision(5)+
    (last.rejected?', max rejected local-error ratio '+last.maxRejectedErrorRatio.toPrecision(5)+
     ', smallest rejected |Δt| '+last.minRejectedStep.toPrecision(5):'')+
+   (last.stageOverflowRejected?', bounded stage-overflow retries '+last.stageOverflowRejected+
+    ', last bounded stage '+last.lastOverflowStage:'')+
    (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:'')+
+   (last.quantumLimitedAcceptedSteps?', warning: '+last.quantumLimitedAcceptedSteps+
+    ' accepted time steps advanced by only one representable time increment; rescale time and verify convergence':'')+
    (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+
     ' accepted steps had RK45 stage times rounded to current t; rescale time for reliable accuracy':'')+
    (last.rejectionWarning?', warning: '+last.rejectionWarning:''):
@@ -8135,7 +8189,7 @@ function numericValues(parts,label){
 }
 let lastTransient=null;
 const transientStatus=by('ct-eq-transient-status'),transientOutput=by('ct-eq-transient-output');
-const transientTable=by('ct-eq-transient-table');
+const transientTable=by('ct-eq-transient-table'),transientPlot=by('ct-eq-transient-plot');
 function simulateTransient(A,b,x0,t0=0,t1=1,steps=80){
  if(!Array.isArray(A)||A.length!==2||A.some(row=>!Array.isArray(row)||row.length!==2))
   throw Error('Transient response requires a 2×2 matrix A.');
@@ -8179,10 +8233,12 @@ function calculateTransient(){
    'Fixed-step RK4 is not stiff or globally error-certified. Compare step counts for convergence.';
   transientStatus.textContent='Two-state trajectory computed.';
   transientTable.disabled=false;
+  if(transientPlot)transientPlot.disabled=false;
   return lastTransient;
  }catch(error){
   lastTransient=null;
   if(transientTable)transientTable.disabled=true;
+  if(transientPlot)transientPlot.disabled=true;
   if(transientOutput)transientOutput.textContent='No current trajectory.';
   if(transientStatus)transientStatus.textContent=error.message;
   return null;
@@ -8195,6 +8251,7 @@ function invalidate(){
  stabilityOutput.textContent='No current stability result.';
  lastTransient=null;
  if(transientTable)transientTable.disabled=true;
+ if(transientPlot)transientPlot.disabled=true;
  if(transientStatus)transientStatus.textContent='Inputs changed; recompute trajectory.';
  if(transientOutput)transientOutput.textContent='No current trajectory.';
 }
@@ -8228,11 +8285,33 @@ for(const id of ['ct-eq-initial','ct-eq-t0','ct-eq-t1','ct-eq-steps']){
  control?.addEventListener('input',invalidate);
  control?.addEventListener('change',invalidate);
 }
+function importTransient(){
+ if(!lastTransient)throw Error('Compute a trajectory before exporting.');
+ return studio.dataTables.importData({headers:['t','x1','x2'],rows:lastTransient.rows},'CONTROL_TRANSIENT');
+}
 transientTable?.addEventListener('click',()=>{
+ try{importTransient();studio.advanced.mode('data');}
+ catch(error){transientStatus.textContent=error.message;}
+});
+transientPlot?.addEventListener('click',()=>{
  try{
-  if(!lastTransient)throw Error('Compute a trajectory before exporting.');
-  studio.dataTables.importData({headers:['t','x1','x2'],rows:lastTransient.rows},'CONTROL_TRANSIENT');
-  studio.advanced.mode('data');
+  const table=importTransient();
+  studio.advanced.mode('graph');
+  by('dt-graph-table').value=table.id;
+  by('dt-graph-table').dispatchEvent(new Event('change',{bubbles:true}));
+  by('dt-chart-type').value='line';
+  by('dt-graph-x').value='0';
+  by('dt-graph-y').value='1';
+  by('dt-plot-table').click();
+  studio.graphData.clearExtra();
+  by('dt-graph-y').value='2';
+  by('dt-add-series').click();
+  const state=studio.graphData.getState();
+  if(!state||state.points.length!==lastTransient.rows.length||
+     state.extra?.length!==1||state.extra[0].mapping?.x!==0||
+     state.extra[0].mapping?.y!==2)
+   throw Error('Control trajectory graph overlay could not be verified.');
+  transientStatus.textContent='Plotted x1(t) and x2(t) in Graphs.';
  }catch(error){transientStatus.textContent=error.message;}
 });
 studio.controlEquilibrium=Object.freeze({parseMatrix,solve:solveEquilibrium,calculate,analyzeStability,calculateStability,simulateTransient,calculateTransient});

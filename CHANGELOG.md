@@ -1,3 +1,4 @@
+- 2026-10-31 (UI-ENGINEERING-NUMERIC-ROUTES-047, unreleased): Engineering Toolbox lists existing symmetric eigen, FFT and Brent root tools as available with real routing and honest scope notes.
 - 2026-10-31 (UI-ENGINEERING-CONTROL-ROUTES-046 / MATH-ODE-RK45-NEAR-RESOLUTION-045, unreleased): Engineering Toolbox lists existing Control stability and transient tools as available with real routing; RK45 near-time-resolution reference tests added.
 - 2026-10-31 (DATA-PROJECT-TABLE-SELECTION-044, unreleased): Project import rejects a saved Data Tables selection that names no table, preserving column order and mixed cell types; direct and Chromium regressions added.
 - 2026-10-30 (DOCS-REORG-037, unreleased): Toolbox feature lists and candidate/backlog catalogs moved to docs/toolboxes/; older hourly plan entries archived under docs/archive/; stale QA report removed; generated toolbox registry git-ignored. Links, AGENTS.md and registry script updated.

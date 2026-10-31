@@ -68,6 +68,16 @@ def main():
   assert page.locator('#graph-panel').is_visible()
   page.wait_for_function("document.querySelector('#ct-equilibrium').open")
   assert page.locator('#control-theory-toolbox').evaluate('(e)=>e.open')
+  # Existing numerical tools route to their real, visible controls.
+  for tool_id, selector in [('signals.fft.1d', '#fft-run'), ('numerical.root.brent', '#brent-run'),
+                            ('matrix.eigen.symmetric.small', '#matrix-tools')]:
+   tab.click()
+   page.locator('#eng-discipline').select_option('')
+   page.locator('#eng-search').fill(tool_id)
+   card = page.locator('#eng-results article[data-tool-id="' + tool_id + '"]')
+   assert card.count() == 1 and card.locator('button').count() == 1, tool_id
+   card.locator('button').click()
+   page.wait_for_function("(s) => { const e = document.querySelector(s); return e && e.getClientRects().length > 0; }", arg=selector)
   # Existing stability and transient tools route to their real panels (no duplicate solver or fake action).
   for tool_id, panel in [('control.stability.symmetric', 'ct-equilibrium'),
                          ('control.transient.two.state', 'ct-eq-transient')]:

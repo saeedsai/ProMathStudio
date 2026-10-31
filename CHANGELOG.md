@@ -2,6 +2,7 @@
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
+- 2026-10-31 (UI-ODE-A11Y-059, unreleased): ODE panel controls are at least 40px tall on mobile (were 35–37px); added an accessibility regression (names, live output, keyboard run, error announcement, touch targets).
 - 2026-10-31 (UI-CONTROL-A11Y-058, unreleased): Control Theory toolbox buttons are at least 40px tall on mobile (four were 28px); added an accessibility audit regression (names, live regions, keyboard disclosures, touch targets).
 - 2026-10-31 (ARCH-BUNDLE-PARITY-057, unreleased): Re-synced three stale source modules from the shipped bundle (no change to index.html) so a rebuild can no longer regress features, and added an all-module source/bundle parity and byte-identical rebuild test.
 - 2026-10-31 (DOCS-CHANGELOG-ARCHIVE-056, unreleased): Older release notes moved verbatim to docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md; this file keeps the recent entries.

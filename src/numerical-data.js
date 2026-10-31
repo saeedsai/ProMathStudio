@@ -154,6 +154,7 @@ const style=el('style');style.textContent=`
 .dt-action-menu{position:relative;border:1px solid #d6dff1;background:#f5f8ff;border-radius:9px}
 .dt-action-menu summary{list-style:none;cursor:pointer;padding:10px 14px;font-size:13px;font-weight:700;color:#415aab}
 .dt-action-menu summary::-webkit-details-marker{display:none}
+.dt-action-menu summary:focus-visible{outline:3px solid #93a5ed;outline-offset:2px;border-radius:8px}
 .dt-action-menu[open]{z-index:30}
 .dt-action-menu .dt-action-content{position:absolute;top:100%;left:0;z-index:35;min-width:min(440px,85vw);max-width:90vw;max-height:70vh;overflow:auto;padding:16px;border:1px solid #d8e3f3;border-radius:11px;box-shadow:0 12px 40px #24385b30;background:#fff}
 .dt-action-menu .dt-action-content .dt-box{border:none;margin:0;padding:0}
@@ -179,12 +180,37 @@ function simplifyTable(){const data=$('data-panel'),area=data.querySelector('.da
   const pythonMenu=menu('Python',el('div',{id:'python-panel'}));
   nav.append(tableMenu,filterMenu,opMenu,importMenu,pythonMenu);bar.append(nav);
   const quick=el('div',{class:'data-toolbar'});
-  const showFilter=el('button',{class:'secondary',type:'button'},'Filter rows');showFilter.addEventListener('click',()=>{filterMenu.open=true;closeOtherMenus(filterMenu);});
-  const openPython=el('button',{class:'secondary',type:'button'},'Python');openPython.addEventListener('click',()=>{pythonMenu.open=true;closeOtherMenus(pythonMenu);});
+  const showFilter=el('button',{class:'secondary',type:'button'},'Filter rows');showFilter.addEventListener('click',()=>{filterMenu.open=true;closeOtherMenus(filterMenu);filterMenu.querySelector('summary').focus();});
+  const openPython=el('button',{class:'secondary',type:'button'},'Python');openPython.addEventListener('click',()=>{pythonMenu.open=true;closeOtherMenus(pythonMenu);pythonMenu.querySelector('summary').focus();});
   quick.append(showFilter,openPython);bar.append(quick);
   area.insertBefore(bar,area.querySelector('#dt-tabs'));
   for(const m of nav.children)m.querySelector('summary').addEventListener('click',()=>{if(!m.open)closeOtherMenus(m)});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')for(const m of nav.children)m.open=false;});
+  // Traverse top-level action summaries without hijacking arrows in table inputs.
+  // Moving focus alone never opens a menu or modifies the workbook/drafts.
+  nav.addEventListener('keydown',e=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+    const summaries=[...nav.children].map(m=>m.querySelector(':scope > summary'));
+    const index=summaries.indexOf(e.target);
+    if(index<0)return;
+    e.preventDefault();
+    const next=e.key==='Home'?0:e.key==='End'?summaries.length-1:
+      (index+(e.key==='ArrowRight'?1:-1)+summaries.length)%summaries.length;
+    summaries[next].focus();
+  });
+  // Escape dismisses the active menu and returns keyboard users to its trigger.
+  // Pointer dismissal does not steal focus or discard filter/sort drafts.
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='Escape')return;
+    const opened=[...nav.children].filter(m=>m.open);
+    if(!opened.length)return;
+    const focused=opened.find(m=>m.contains(document.activeElement));
+    if(focused)e.preventDefault();
+    closeOtherMenus(null);
+    if(focused)focused.querySelector('summary').focus();
+  });
+  document.addEventListener('pointerdown',e=>{
+    if(!bar.contains(e.target))closeOtherMenus(null);
+  });
   function closeOtherMenus(except){for(const m of nav.children)if(m!==except)m.open=false;}
   return {filterContent,pythonContent:pythonMenu.querySelector('.dt-action-content'),menus:nav};
 }
@@ -199,7 +225,7 @@ function filterTable(){const t=M.dataTables.active;if(!t)return;const col=$('dt-
   const rule=filterState.byTable.get(t.id);if(!rule){$('dt-filter-report').textContent='No column filter applied.';for(const tr of $('dt-sheet').querySelectorAll('tbody tr'))tr.hidden=false;return;}
   col.value=String(rule.column);$('dt-filter-op').value=rule.op;$('dt-filter-value').value=rule.value;
   const rows=M.dataTables.calculate(t);let shown=0;
-  for(const tr of $('dt-sheet').querySelectorAll('tbody tr')){const label=tr.querySelector('th')?.textContent||'',index=Number(label)-2;
+  for(const tr of $('dt-sheet').querySelectorAll('tbody tr')){const label=tr.querySelector('th')?.textContent||'',index=Number(label)-1;
     const show=Number.isInteger(index)&&index>=0&&matches(rows[index]?.[rule.column],rule.op,rule.value);tr.hidden=!show;if(show)shown++;
   }
   $('dt-filter-report').textContent=shown+' visible rows match the column filter.';

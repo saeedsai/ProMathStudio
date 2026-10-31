@@ -1,3 +1,4 @@
+- 2026-10-31 (DOCS-LINKS-052, unreleased): Unit test fails on any broken relative Markdown link, protecting the docs reorganization.
 - 2026-10-31 (DATA-PROJECT-ENGINEERING-FILTER-051, unreleased): Projects save and restore the Engineering Toolbox discipline and search filter; invalid values are refused with rollback and legacy projects import unchanged.
 - 2026-10-31 (UI-ENGINEERING-NUMERIC-ROUTES-050, unreleased): Engineering Toolbox lists existing interpolation, adaptive quadrature and golden-section minimization tools as available with real routing and honest scope notes.
 - 2026-10-31 (MATH-ODE-SYSTEM-CONVERGENCE-049, unreleased): Coupled two-state RK4 reports a step-doubling endpoint difference (≤500 steps) as a diagnostic, never as a global error bound.

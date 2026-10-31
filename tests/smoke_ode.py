@@ -63,6 +63,8 @@ def main():
         page.locator("#ode-steps").fill("20")
         page.locator("#ode-run").click()
         assert "Runge" in page.locator("#ode-output").inner_text()
+        assert "step-doubling |x_N − x_2N|∞" in page.locator("#ode-output").inner_text()
+        assert "not a global error bound" in page.locator("#ode-output").inner_text()
         assert page.locator("#ode-to-table").is_enabled()
         assert page.locator("#ode-to-graph").is_enabled()
         before = page.evaluate("MathStudio.dataTables.tables.length")

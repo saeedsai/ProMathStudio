@@ -89,7 +89,7 @@ function render(){
   const description=document.createElement('p');description.textContent=t.description;
   card.append(label,heading,description);
   if(t.status==='available'){
-   const button=document.createElement('button');button.type='button';button.textContent='Open existing tool';
+   const button=document.createElement('button');button.type='button';button.textContent='Open existing tool';button.setAttribute('aria-label','Open existing tool: '+t.title);
    button.addEventListener('click',()=>openTool(t));card.append(button);
   }else{const note=document.createElement('span');note.textContent='No runnable tool yet';card.append(note);}
   results.append(card);

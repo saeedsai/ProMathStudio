@@ -26,6 +26,7 @@
     .dt-sheet input{width:135px;min-height:35px;border:0;background:transparent;padding:7px 10px;font:13px Consolas,monospace;color:#293750}
     .dt-sheet input:focus{outline:2px solid #667de9;background:#f0f4ff}.dt-sheet input.dt-error{background:#fff0f0;color:#bb2342}
     .dt-box{margin-top:22px;padding-top:15px;border-top:1px solid #e3e9f2}.dt-box h3{font-size:15px;margin:0 0 9px}
+    #dt-code-library input,#dt-code-library select{min-height:40px}
     .dt-graph-tools{background:#f7faff;border:1px solid #dbe4f3;border-radius:12px;padding:12px 15px;margin:14px 0}
     #dt-graph-chart{padding:12px;border:1px solid #dce4f0;border-radius:12px;margin:10px 0}#dt-graph-chart canvas{display:block;max-width:100%;height:auto}
     #dt-advanced summary{color:#415bc6;cursor:pointer;font-weight:700}#about-panel a{color:#3852b6}

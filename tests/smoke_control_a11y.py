@@ -60,9 +60,10 @@ def main():
         # 390px: no horizontal overflow, controls remain reachable, targets are tappable.
         page.set_viewport_size({'width': 390, 'height': 844})
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
-        small = page.evaluate("""() => [...document.querySelectorAll('#control-theory-toolbox button')]
-            .filter(b => b.getClientRects().length).map(b => b.getBoundingClientRect().height).filter(h => h < 40).length""")
-        assert small == 0, '%d visible buttons shorter than 40px' % small
+        small = page.evaluate("""() => [...document.querySelectorAll('#control-theory-toolbox button,#control-theory-toolbox input,#control-theory-toolbox select,#control-theory-toolbox textarea')]
+            .filter(b => b.getClientRects().length).map(b => [b.id, Math.round(b.getBoundingClientRect().height), Math.round(b.getBoundingClientRect().width)])
+            .filter(x => x[1] < 40 || x[2] < 40)""")
+        assert small == [], 'visible controls under 40px: %s' % small
         assert not errors, errors
         browser.close()
     print('PASS Control Theory accessibility: names, live regions, disclosure keyboard, mobile')

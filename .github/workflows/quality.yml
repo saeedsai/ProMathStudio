@@ -64,6 +64,8 @@ jobs:
         run: python tests/smoke_control_a11y.py
       - name: ODE panel accessibility and touch-target regression
         run: python tests/smoke_ode_a11y.py
+      - name: Data Tables Code Library accessibility and touch-target regression
+        run: python tests/smoke_data_library_a11y.py
       - name: Task-first workspace browser regression
         run: python tests/smoke_workspace_tasks.py
       - name: Per-workspace task restoration browser regression

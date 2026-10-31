@@ -3176,6 +3176,12 @@ self.onmessage=async ({data})=>{
     }
     if (data.tables) {
       if (!Array.isArray(data.tables.tables) || data.tables.tables.length > 20) fail('table count exceeds 20.');
+      // A stored selection must name a real table; otherwise restore would silently
+      // fall back to another sheet. Exports always write an existing id.
+      if (data.tables.selected !== undefined && data.tables.tables.length &&
+          (typeof data.tables.selected !== 'string' ||
+           !data.tables.tables.some(t => record(t) && t.id === data.tables.selected)))
+        fail('selected table does not exist.');
       const names = new Set();
       for (const table of data.tables.tables) {
         if (!record(table) || !Array.isArray(table.columns) || !Array.isArray(table.rows) ||
@@ -8331,6 +8337,8 @@ const disciplines=Object.freeze([
 const raw=[
  ['matrix.solve.real.small','Small real linear systems','Solve 2×2 or 3×3 Ax=b using the shared scaled-pivot Matrix solver.','physics mechanical electrical electronics fluids aerospace','matrix linear algebra','calculator','matrix'],
  ['control.equilibrium.real.small','Control state equilibrium','Solve ẋ=−Ax+b for 2 or 3 states; equilibrium does not prove stability.','mechanical electrical electronics aerospace control','control steady-state','graph','ct-equilibrium'],
+ ['control.stability.symmetric','Control symmetric stability check','Classify ẋ=−Ax+b for symmetric 2×2/3×3 A by real eigenvalues; not general nonsymmetric stability.','mechanical electrical electronics aerospace control','control stability eigenvalues','graph','ct-equilibrium'],
+ ['control.transient.two.state','Control two-state transient','Fixed-step RK4 trajectory for ẋ=−Ax+b with Data Tables and Graph handoff; not stiff or error-certified.','mechanical electrical electronics aerospace control','control transient trajectory rk4','graph','ct-eq-transient'],
  ['ode.ivp.scalar','Scalar ODE initial-value solver','Run existing RK4 or adaptive RK45; not a stiff solver.','physics mechanical fluids aerospace','ode rk45 integration','editor','ode'],
  ['gnss.positioning.least.squares','GNSS least-squares positioning','GNSS satellite-position observations and coordinate-frame handling are not yet implemented.','gnss','gnss positioning navigation'],
  ['signals.spectral.analysis','Signal spectral analysis','Dedicated sampling/windowing/spectrum workflow is not yet implemented.','signals electronics','fft spectral frequency'],
@@ -8384,9 +8392,11 @@ function openTool(t){
  if(t.status!=='available')return;
  M.advanced.mode(t.route.mode);
  requestAnimationFrame(()=>{
-  if(t.route.target==='ct-equilibrium'){
+  if(t.route.target.startsWith('ct-')){
    document.getElementById('control-theory-toolbox').open=true;
-   const panel=document.getElementById('ct-equilibrium');panel.open=true;
+   // Open the target and any enclosing disclosure panels before focusing its summary.
+   const panel=document.getElementById(t.route.target);
+   for(let node=panel;node;node=node.parentElement)if(node.tagName==='DETAILS')node.open=true;
    panel.querySelector('summary').focus({preventScroll:true});
   }else M.workspaceTasks?.select(t.route.target,true);
  });

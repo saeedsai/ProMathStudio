@@ -1,3 +1,13 @@
+## 2026-10-31 — RK45 near-resolution references and Engineering Control routes (MATH-ODE-RK45-NEAR-RESOLUTION-045, UI-ENGINEERING-CONTROL-ROUTES-046)
+
+**Implemented on dev; exact-head CI pending.** (1) `tests/test_ode_rk45_near_resolution.py` asserts original-time vs rescaled-time agreement for autonomous y′=y forward/backward at offsets up to 1e11, exact landing on the end time, monotone time grids, and counted collapsed stage times when the span approaches float time resolution (no source change; behaviour already matched). (2) Engineering catalog gains two *available* entries for existing tools — `control.stability.symmetric` and `control.transient.two.state` — routed to their real Control panels (enclosing disclosures opened, summary focused); no new solver or action. `tests/smoke_engineering_catalog.py` verifies routing, focus and truthful status. Neither is released.
+
+**NEXT FIVE:** (1) exact-head Quality for dev, then ordinary dev→main PR, main Quality and Pages; (2) Graph/Data Tables dataset round-trip: Chromium export→import identity for mixed cell types and focus at 390px; (3) show `stageOverflowRetries` and collapsed-stage counts in the ODE UI with browser assertions; (4) add catalog routes for existing FFT, Brent root and symmetric eigen tools with honest scope notes; (5) ODE system (two-state) RK45-style convergence diagnostic parity with scalar RK45.
+
+## 2026-10-31 — Saved table selection validation (DATA-PROJECT-TABLE-SELECTION-044)
+
+**Implemented on the working branch; exact-head CI not yet verified.** Project schema now refuses a `tables.selected` value that is not a string naming an existing table id, so a stale selection can no longer silently restore a different sheet. Column order, mixed primitive cells, v1→v2 migration and absent-selection projects are unchanged. Tests: `tests/test_project_table_selection.py` (reference, negative, boundary, bundle parity) and Chromium `tests/smoke_project_table_selection.py` (round-trip, rollback, 390px), added to Quality. PR #118 merged to main at `91ef7a6` (head CI green); main Quality and Pages not yet confirmed at write time.
+
 # Hourly development plan — living queue
 
 Current entries and the **Next five features** queue are kept here (newest first). Older execution entries are in [archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md](archive/HOURLY_DEVELOPMENT_LOG_ARCHIVE.md); the frozen baseline is the [audited inventory](FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md).

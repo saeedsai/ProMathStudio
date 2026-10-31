@@ -64,10 +64,24 @@ def main():
   tab.click()
   page.locator('#eng-discipline').select_option('electrical')
   page.locator('#eng-search').fill('control')
-  page.locator('#eng-results article button').click()
+  page.locator('#eng-results article[data-tool-id="control.equilibrium.real.small"] button').click()
   assert page.locator('#graph-panel').is_visible()
   page.wait_for_function("document.querySelector('#ct-equilibrium').open")
   assert page.locator('#control-theory-toolbox').evaluate('(e)=>e.open')
+  # Existing stability and transient tools route to their real panels (no duplicate solver or fake action).
+  for tool_id, panel in [('control.stability.symmetric', 'ct-equilibrium'),
+                         ('control.transient.two.state', 'ct-eq-transient')]:
+   tab.click()
+   page.locator('#eng-discipline').select_option('control')
+   page.locator('#eng-search').fill('control')
+   card = page.locator('#eng-results article[data-tool-id="' + tool_id + '"]')
+   assert card.count() == 1 and 'planned' not in card.inner_text().lower()[:40], tool_id
+   page.evaluate("()=>{const d=document.getElementById('control-theory-toolbox');d.open=false;"
+                 "for(const id of ['ct-equilibrium','ct-eq-transient'])document.getElementById(id).open=false}")
+   card.locator('button').click()
+   page.wait_for_function("document.getElementById('%s').open && document.getElementById('ct-equilibrium').open" % panel)
+   assert page.locator('#graph-panel').is_visible()
+   assert page.evaluate("document.activeElement && document.getElementById('%s').contains(document.activeElement)" % panel)
   tab.click()
   page.locator('#eng-discipline').select_option('physics')
   page.locator('#eng-search').fill('ode')

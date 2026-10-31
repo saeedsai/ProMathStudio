@@ -74,6 +74,8 @@ def main():
         page.locator("#ode-run").click()
         assert "Coupled" in page.locator("#ode-output").inner_text()
         assert "z ≈" in page.locator("#ode-output").inner_text()
+        assert "step-doubling |x_N − x_2N|∞" in page.locator("#ode-output").inner_text()
+        assert "not a global error bound" in page.locator("#ode-output").inner_text()
         before = page.evaluate("MathStudio.dataTables.tables.length")
         page.locator("#ode-to-table").click()
         assert page.evaluate("MathStudio.dataTables.tables.length") == before + 1

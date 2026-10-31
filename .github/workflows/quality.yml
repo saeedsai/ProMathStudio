@@ -56,6 +56,8 @@ jobs:
         run: python tests/smoke_project_table_selection.py
       - name: Graph dataset round-trip identity and rollback regression
         run: python tests/smoke_graph_dataset_roundtrip.py
+      - name: Engineering filter project round-trip and rollback regression
+        run: python tests/smoke_engineering_project_filter.py
       - name: Task-first workspace browser regression
         run: python tests/smoke_workspace_tasks.py
       - name: Per-workspace task restoration browser regression

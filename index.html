@@ -3151,6 +3151,12 @@ self.onmessage=async ({data})=>{
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
     }
+    if (data.engineering !== undefined && data.engineering !== null) {
+      const eng = data.engineering;
+      if (!record(eng) || typeof eng.discipline !== 'string' || !/^[a-z-]{0,32}$/.test(eng.discipline) ||
+          typeof eng.query !== 'string' || eng.query.length > 200)
+        fail('saved Engineering filter is invalid.');
+    }
     if (data.matrix !== undefined && data.matrix !== null) {
       const matrix = data.matrix;
       if (!record(matrix) || !['rows','cols','bRows','bCols'].every(key => [2,3].includes(matrix[key])))
@@ -3470,6 +3476,7 @@ self.onmessage=async ({data})=>{
     return {format:'mathstudio-project',version:2,date:new Date().toISOString(),working:state.active,origin:state.origin,
       recent:state.recent,notebook:engine.notebookBridge.list(),calculator:engine.advanced.getCalculatorState(),
       matrix:engine.matrixTools?.exportState()||null,
+      engineering:window.MathStudio.engineeringCatalog?.exportState()||null,
       solver:{expression:$('equation-input').value,variable:$('cas-variable').value,operation:$('cas-operation').value,engine:$('cas-engine').value,limitPoint:$('cas-limit-point').value,limitDirection:$('cas-limit-direction').value,odeInitialCondition:$('cas-ode-ic').value,assumptions:Object.fromEntries(['real','positive','negative','integer'].map(k=>[k,$('cas-assume-'+k).checked]))},
       graph:engine.advanced.getGraphState(),customFunctions:window.MathStudio.customFunctions?.list()||[],tables:window.MathStudio.dataTables?.exportState()||null,fit:window.MathStudio.curveFit?.exportState()||null};
   }
@@ -3480,6 +3487,7 @@ self.onmessage=async ({data})=>{
   });
   $('hub-import-project').addEventListener('click',()=>$('hub-project-file').click());
   function applyProject(data){
+    window.MathStudio.engineeringCatalog?.restoreState(data.engineering);
     engine.notebookBridge.replace(data.notebook);
     engine.advanced.restoreCalculatorState(data.calculator||{});
     window.MathStudio.matrixTools?.restoreState(data.matrix);
@@ -8440,7 +8448,15 @@ function render(){
  if(!matches.length){const empty=document.createElement('p');empty.textContent='No matching tools. Try another search.';results.append(empty);}
 }
 select.addEventListener('change',render);search.addEventListener('input',render);render();
-M.engineeringCatalog=Object.freeze({disciplines,tools,filter});
+function exportState(){return {discipline:select.value,query:search.value};}
+function restoreState(state){
+ if(state===undefined||state===null)return; // Older projects did not save the Engineering filter.
+ if(typeof state!=='object'||Array.isArray(state)||typeof state.query!=='string'||state.query.length>200||
+    typeof state.discipline!=='string'||(state.discipline!==''&&!valid.has(state.discipline)))
+  throw Error('Invalid saved Engineering filter.');
+ select.value=state.discipline;search.value=state.query;render();
+}
+M.engineeringCatalog=Object.freeze({disciplines,tools,filter,exportState,restoreState});
 // The saved mode may have been restored before this late-added tab existed.
 if(M.advanced.currentMode()==='engineering')M.advanced.mode('engineering');
 })();

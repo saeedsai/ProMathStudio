@@ -99,7 +99,15 @@ function render(){
  if(!matches.length){const empty=document.createElement('p');empty.textContent='No matching tools. Try another search.';results.append(empty);}
 }
 select.addEventListener('change',render);search.addEventListener('input',render);render();
-M.engineeringCatalog=Object.freeze({disciplines,tools,filter});
+function exportState(){return {discipline:select.value,query:search.value};}
+function restoreState(state){
+ if(state===undefined||state===null)return; // Older projects did not save the Engineering filter.
+ if(typeof state!=='object'||Array.isArray(state)||typeof state.query!=='string'||state.query.length>200||
+    typeof state.discipline!=='string'||(state.discipline!==''&&!valid.has(state.discipline)))
+  throw Error('Invalid saved Engineering filter.');
+ select.value=state.discipline;search.value=state.query;render();
+}
+M.engineeringCatalog=Object.freeze({disciplines,tools,filter,exportState,restoreState});
 // The saved mode may have been restored before this late-added tab existed.
 if(M.advanced.currentMode()==='engineering')M.advanced.mode('engineering');
 })();

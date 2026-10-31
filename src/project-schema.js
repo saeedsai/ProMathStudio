@@ -67,6 +67,12 @@
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
     }
+    if (data.engineering !== undefined && data.engineering !== null) {
+      const eng = data.engineering;
+      if (!record(eng) || typeof eng.discipline !== 'string' || !/^[a-z-]{0,32}$/.test(eng.discipline) ||
+          typeof eng.query !== 'string' || eng.query.length > 200)
+        fail('saved Engineering filter is invalid.');
+    }
     if (data.matrix !== undefined && data.matrix !== null) {
       const matrix = data.matrix;
       if (!record(matrix) || !['rows','cols','bRows','bCols'].every(key => [2,3].includes(matrix[key])))

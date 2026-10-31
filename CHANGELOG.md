@@ -1,3 +1,4 @@
+- 2026-10-31 (MATH-ODE-RK4-CONVERGENCE-055, unreleased): Scalar fixed-step RK4 reports a step-doubling endpoint difference (≤500 steps) as a diagnostic, never as a global error bound.
 - 2026-10-31 (UI-ENGINEERING-A11Y-054, unreleased): Engineering catalog buttons have unique accessible names (aria-label per tool); keyboard, focus-visibility and 390px target-size regression added.
 - 2026-10-31 (SECURITY-PYTHON-SANDBOX-053, unreleased): Structural regression for Python isolation (Worker-only, 60 s timeout, no page/network access, minimal namespace, finite-real results, pinned Pyodide) and a ban on JS eval/new Function in app code.
 - 2026-10-31 (DOCS-LINKS-052, unreleased): Unit test fails on any broken relative Markdown link, protecting the docs reorganization.

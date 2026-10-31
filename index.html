@@ -6740,7 +6740,7 @@ function rk4TimeGrid(t,next,h){
  if(!(direction*(next-t)>0)||midpoint===t||midpoint===next)
   throw Error('Fixed-step RK4 time resolution is insufficient: output times or midpoint stages collapse; use fewer steps or rescale time.');
 }
-function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
+function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={},refining=false){
  expression=String(expression).trim();
  if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
  t0=finite(t0,'Initial time');t1=finite(t1,'End time');y0=finite(y0,'Initial y');
@@ -6762,7 +6762,15 @@ function solve({expression='y',t0=0,t1=1,y0=1,steps=40}={}){
   const k4=f(t+h,y+h*k3);
   y=bounded(y+(h/6)*(k1+2*k2+2*k3+k4),'State');
  }
- return {type:'ode-rk4',columns:['t','y'],rows,steps,h,
+ // Step-doubling diagnostic (not a global error bound): compare against a 2N-step run, N<=500.
+ let convergence=null;
+ if(!refining&&steps<=500){
+  try{
+   const fine=solve({expression,t0,t1,y0,steps:steps*2},true).rows.at(-1);
+   convergence={refinedSteps:steps*2,endpointDifference:Math.abs(rows.at(-1)[1]-fine[1])};
+  }catch(refinementError){convergence=null;} // an unresolvable refined grid must not fail a valid solve
+ }
+ return {type:'ode-rk4',columns:['t','y'],rows,steps,h,convergence,
   method:'Classical fourth-order Runge–Kutta (RK4)',
   note:'Scalar first-order y\u2032=f(t,y), y(t0)=y0; fixed steps, forward or backward. Accuracy depends on smoothness and step size. Not an adaptive/stiff ODE solver.'};
 }
@@ -7004,7 +7012,7 @@ function run(){
    (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+
     ' accepted steps had RK45 stage times rounded to current t; rescale time for reliable accuracy':'')+
    (last.rejectionWarning?', warning: '+last.rejectionWarning:''):
-   'Δt='+last.h.toPrecision(8)+(last.type==='ode-rk4-system'?(last.convergence?
+   'Δt='+last.h.toPrecision(8)+(last.type==='ode-rk4-system'||last.type==='ode-rk4'?(last.convergence?
     '; RK4 step-doubling |x_N − x_2N|∞ '+last.convergence.endpointDifference.toPrecision(5)+
     ' (diagnostic only, not a global error bound)':'; step-doubling unavailable (more than 500 steps or unresolvable refined grid)'):'');
   const endState='y('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+

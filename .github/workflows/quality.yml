@@ -74,6 +74,8 @@ jobs:
         run: python tests/smoke_data_library_a11y.py
       - name: Data Tables toolbar 40px touch targets and keyboard regression
         run: python tests/smoke_data_toolbar_a11y.py
+      - name: Extracted table zoom accessibility, keyboard and mobile regression
+        run: python tests/smoke_visual_controls_module.py
       - name: Graph axis and dataset import touch targets regression
         run: python tests/smoke_graph_controls_a11y.py
       - name: Task-first workspace browser regression

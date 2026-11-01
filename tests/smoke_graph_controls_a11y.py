@@ -29,10 +29,15 @@ def main():
         page.locator('[data-workspace="graph"]').click()
         # Task-first UI keeps axis ranges in a collapsed advanced disclosure.
         axes = page.locator("#graph-controls-collapsible")
-        summary = axes.locator("summary")
+        summary = page.locator("#graph-controls-collapsible > summary")
         summary.focus()
         page.keyboard.press("Enter")
         assert axes.evaluate("(e) => e.open")
+        nested_axes = page.locator("#ui-graph-axes")
+        nested_summary = page.locator("#ui-graph-axes > summary")
+        nested_summary.focus()
+        page.keyboard.press("Enter")
+        assert nested_axes.evaluate("(e) => e.open")
         for width in (390, 768, 1280):
             page.set_viewport_size({"width": width, "height": 844})
             result = audit(page, '#graph-panel .graph-controls input')

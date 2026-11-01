@@ -170,6 +170,8 @@ jobs:
         run: python tests/smoke_precision_large_quotient.py
       - name: Numerical solver, filtering and Python worker smoke
         run: python tests/smoke_numerical_data.py
+      - name: Numerical Methods keyboard, live error and responsive touch-target regression
+        run: python tests/smoke_numerical_a11y.py
       - name: Adaptive Simpson quadrature numeric and UI regression
         run: python tests/smoke_quadrature_adaptive.py
       - name: Linear interpolation reference and browser integration regression

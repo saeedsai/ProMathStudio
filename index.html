@@ -3848,8 +3848,8 @@ self.onmessage=async ({data})=>{
   const colIndex = s => {let n=0;for(const c of s.toUpperCase())n=n*26+c.charCodeAt(0)-64;return n-1;};
   const css = `
     .data-inner{padding:20px}.data-toolbar{display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin:12px 0}
-    .data-toolbar button{font-size:12px;min-height:37px}.data-toolbar label{display:flex;flex-direction:column;gap:5px;font-weight:650;font-size:12px;color:#51617d}
-    .data-toolbar input,.data-toolbar select{border:1px solid #d3dbec;border-radius:8px;padding:9px;background:white;color:#26334f;max-width:230px}
+    .data-toolbar button{font-size:12px;min-height:40px}.data-toolbar label{display:flex;flex-direction:column;gap:5px;font-weight:650;font-size:12px;color:#51617d}
+    .data-toolbar input,.data-toolbar select{min-height:40px;box-sizing:border-box;border:1px solid #d3dbec;border-radius:8px;padding:9px;background:white;color:#26334f;max-width:230px}
     .dt-tabs{display:flex;gap:5px;overflow-x:auto;border-bottom:1px solid #dce3f0;margin:14px 0 0;padding-bottom:6px}
     .dt-tab{background:#f7f9ff;color:#465977;border:1px solid #d3dff1;border-radius:8px;padding:10px 15px;white-space:nowrap}
     .dt-tab.active{background:#eaf0ff;border-color:#718ce7;color:#304cbb;font-weight:800}
@@ -3860,6 +3860,7 @@ self.onmessage=async ({data})=>{
     .dt-sheet input:focus{outline:2px solid #667de9;background:#f0f4ff}.dt-sheet input.dt-error{background:#fff0f0;color:#bb2342}
     .dt-box{margin-top:22px;padding-top:15px;border-top:1px solid #e3e9f2}.dt-box h3{font-size:15px;margin:0 0 9px}
     #dt-code-library input,#dt-code-library select{min-height:40px}
+    #graph-panel .graph-controls input,#dt-advanced .graph-data-grid select,#dt-advanced .graph-data-grid button,#dt-advanced .graph-data-grid input[type=file]{min-height:40px;box-sizing:border-box}
     .dt-graph-tools{background:#f7faff;border:1px solid #dbe4f3;border-radius:12px;padding:12px 15px;margin:14px 0}
     #dt-graph-chart{padding:12px;border:1px solid #dce4f0;border-radius:12px;margin:10px 0}#dt-graph-chart canvas{display:block;max-width:100%;height:auto}
     #dt-advanced summary{color:#415bc6;cursor:pointer;font-weight:700}#about-panel a{color:#3852b6}
@@ -6508,8 +6509,8 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<pre id="mat-result" role="status" aria-live="polite">Enter matrix values and choose an operation.</pre>';
 panel.append(area);
 const style=el('style',{},'.matrix-tools{border-top:1px solid #dfe5f0;padding:13px 20px 16px}.matrix-tools summary{cursor:pointer;font-weight:700;color:#304cbb}'+
- '.matrix-controls,.matrix-actions,.matrix-result-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.matrix-result-actions [hidden]{display:none}.matrix-controls label{display:grid;gap:3px;font-size:13px}'+
- '.matrix-input-section{margin:12px 0;padding:10px 12px;border:1px solid #dfe5f0;border-radius:8px;min-width:0}.matrix-input-section h3{font-size:14px;margin:0 0 6px}.matrix-optional-input>summary{font-size:14px}.matrix-optional-input[open]>summary{margin-bottom:9px}.matrix-grid{display:grid;gap:7px;max-width:340px}.matrix-grid input{min-width:0;width:100%;padding:9px;border:1px solid #cdd8ec;border-radius:6px;text-align:center}.matrix-grid input:focus-visible{outline:2px solid #304cbb;outline-offset:2px}'+
+ '.matrix-controls,.matrix-actions,.matrix-result-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.matrix-controls select,.matrix-actions button,.matrix-result-actions button{min-height:40px}.matrix-result-actions [hidden]{display:none}.matrix-controls label{display:grid;gap:3px;font-size:13px}'+
+ '.matrix-input-section{margin:12px 0;padding:10px 12px;border:1px solid #dfe5f0;border-radius:8px;min-width:0}.matrix-input-section h3{font-size:14px;margin:0 0 6px}.matrix-optional-input>summary{font-size:14px}.matrix-optional-input[open]>summary{margin-bottom:9px}.matrix-grid{display:grid;gap:7px;max-width:340px}.matrix-grid input{min-width:0;width:100%;min-height:40px;box-sizing:border-box;padding:9px;border:1px solid #cdd8ec;border-radius:6px;text-align:center}.matrix-grid input:focus-visible{outline:2px solid #304cbb;outline-offset:2px}'+
  '#mat-result{background:#f7f9ff;border:1px solid #dfe5f0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:8px}'+
  '#mat-result.error{color:#af2842;background:#fff5f5}');
 document.head.append(style);

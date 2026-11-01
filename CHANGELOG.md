@@ -2,6 +2,8 @@
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
+- 2026-11-01 (UI-ENGINEERING-A11Y-067, dev QA pending): Engineering Toolbox search and discipline filters now have 40px minimum touch targets and visible keyboard focus; added responsive 390/768/1280 Chromium live-status/QR-route regression, structural parity guard and required Quality step.
+
 - 2026-11-01 (ENG-CATALOG-QR-066, dev QA pending): Engineering Toolbox adds one canonical QR factorization route to the existing real 2×2/3×2/3×3 Matrix solver, focusing the existing operation without duplicate math. Added structural parity and responsive Chromium numerical/rank/shape/keyboard regressions, mandatory Quality step; production release not yet verified.
 
 - 2026-11-01 (ENG-CATALOG-LU-065, dev QA pending): Engineering Toolbox now links to the existing LU factorization (2×2/3×3 real, scaled pivoting) via one canonical route with focused operation button. Added singular-input/recovery and numerical residual Chromium regression, structural source parity test and required Quality step; no duplicate solver.

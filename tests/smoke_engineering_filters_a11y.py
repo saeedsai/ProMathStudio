@@ -32,6 +32,8 @@ def main():
             }""")
             assert all(f['height'] >= 39.5 and f['visible'] and f['named']
                        and not f['overflow'] for f in filters), (width, filters)
+            # Establish keyboard modality before checking :focus-visible.
+            page.keyboard.press('Tab')
             for field in ('eng-discipline', 'eng-search'):
                 page.locator('#' + field).focus()
                 outline = page.locator('#' + field).evaluate(

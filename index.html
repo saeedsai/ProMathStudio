@@ -4920,9 +4920,9 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   lo=finite(lo);hi=finite(hi);if(!(hi>lo))throw Error('Root search requires max > min.');
   samples=intRange(samples,20,1600,'Samples');tolerance=finite(tolerance);if(tolerance<=0||tolerance>0.01)throw Error('Tolerance must be between 0 and 0.01.');
   const f=x=>{try{return eqValue(expression,{[variable]:x});}catch{return NaN;}};
-  const found=[],h=(hi-lo)/samples;
+  const found=[],sampled=[],h=(hi-lo)/samples;
   for(let k=0;k<=samples;k++){
-    const x=lo+k*h,y=f(x);if(Number.isFinite(y)&&Math.abs(y)<=tolerance)found.push(x);
+    const x=lo+k*h,y=f(x);sampled.push(y);if(Number.isFinite(y)&&Math.abs(y)<=tolerance)found.push(x);
     if(k===0)continue;
     let a=x-h,b=x,fa=f(a),fb=y;
     if(!Number.isFinite(fa)||!Number.isFinite(fb)||fa*fb>=0)continue;
@@ -4933,6 +4933,16 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
       if(fa*fm<0){b=mid;fb=fm;}else{a=mid;fa=fm;}
     }
     const root=(a+b)/2,fr=f(root);if(Number.isFinite(fr)&&Math.abs(fr)<=tolerance)found.push(root);
+  }
+  // A constant sampled residual is not evidence of hundreds of isolated roots.
+  // Two off-grid probes reduce the risk of aliasing a periodic function.
+  if(sampled.every(y=>Number.isFinite(y)&&y===sampled[0])&&
+     [Math.SQRT1_2,Math.sqrt(3)/3].every(t=>f(lo+(hi-lo)*t)===sampled[0])){
+    const zero=sampled[0]===0;
+    return {type:'roots',variable,expression,roots:[],residuals:[],maxResidual:null,
+      domain:[lo,hi],samples,tolerance,rootStatus:zero?'sampled-zero-plateau':'sampled-nonzero-plateau',
+      note:zero?'The sampled function is identically zero, including off-grid probes; zeros may be non-isolated. No discrete roots are certified.':
+        'The sampled function is constant and nonzero, including off-grid probes. A small residual alone does not certify a root.'};
   }
   // Damped Newton seeds help locate tangential roots without sign changes.
   for(let k=0;k<=samples;k+=Math.max(1,Math.floor(samples/50))){
@@ -5210,7 +5220,7 @@ function runNumerical(){clearRootErrors();try{
     else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
   }
   lastNumeric=result;$('num-output').classList.remove('error');
-  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):'(none detected)'}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\n${result.note}`:
+  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\n${result.note}`:
     result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
     result.type==='system'?`Converged: ${result.converged}\n${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('\n')}\nResidual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}\n${result.note}`:
       `${result.method}\n${result.rows.length} output rows\n${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'\n':''}${result.note}`;

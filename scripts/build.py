@@ -11,6 +11,7 @@ modules = [
     ("promath-numerical-data", "src/numerical-data.js"),
     ("promath-interpolation-tools", "src/interpolation-tools.js"),
     ("promath-context-actions", "src/context-actions.js"),
+    ("promath-visual-controls", "src/visual-controls.js"),
     ("promath-matrix-tools", "src/matrix-tools.js"),
     ("promath-control-equilibrium", "src/control-equilibrium.js"),
     ("promath-ode-tools", "src/ode-tools.js"),

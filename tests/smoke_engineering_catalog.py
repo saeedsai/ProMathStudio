@@ -57,7 +57,10 @@ def main():
   assert 'No matching tools' in page.locator('#eng-results').inner_text()
   page.locator('#eng-search').fill('matrix')
   page.locator('#calc-input').evaluate('(e)=>e.value="7+5"')
-  page.locator('#eng-results article button').click()
+  # Explicitly select the original linear-system route; other Matrix tools may match the search.
+  original=page.locator('#eng-results article[data-tool-id="matrix.solve.real.small"]')
+  assert original.count()==1 and original.locator('button').count()==1
+  original.locator('button').click()
   assert page.locator('#calculator-panel').is_visible()
   page.wait_for_function("document.querySelector('#matrix-tools').open")
   assert page.locator('#calc-input').input_value()=='7+5'

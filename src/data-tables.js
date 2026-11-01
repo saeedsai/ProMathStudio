@@ -15,8 +15,8 @@
   const colIndex = s => {let n=0;for(const c of s.toUpperCase())n=n*26+c.charCodeAt(0)-64;return n-1;};
   const css = `
     .data-inner{padding:20px}.data-toolbar{display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin:12px 0}
-    .data-toolbar button{font-size:12px;min-height:37px}.data-toolbar label{display:flex;flex-direction:column;gap:5px;font-weight:650;font-size:12px;color:#51617d}
-    .data-toolbar input,.data-toolbar select{border:1px solid #d3dbec;border-radius:8px;padding:9px;background:white;color:#26334f;max-width:230px}
+    .data-toolbar button{font-size:12px;min-height:40px}.data-toolbar label{display:flex;flex-direction:column;gap:5px;font-weight:650;font-size:12px;color:#51617d}
+    .data-toolbar input,.data-toolbar select{min-height:40px;box-sizing:border-box;border:1px solid #d3dbec;border-radius:8px;padding:9px;background:white;color:#26334f;max-width:230px}
     .dt-tabs{display:flex;gap:5px;overflow-x:auto;border-bottom:1px solid #dce3f0;margin:14px 0 0;padding-bottom:6px}
     .dt-tab{background:#f7f9ff;color:#465977;border:1px solid #d3dff1;border-radius:8px;padding:10px 15px;white-space:nowrap}
     .dt-tab.active{background:#eaf0ff;border-color:#718ce7;color:#304cbb;font-weight:800}

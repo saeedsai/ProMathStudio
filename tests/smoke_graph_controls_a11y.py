@@ -54,6 +54,12 @@ def main():
         assert page.locator("#graph-status").inner_text().strip()
 
         page.locator('[data-workspace="data"]').click()
+        # The dataset importer lives inside the task-first Files menu.
+        files_menu = page.locator("#data-menu-navigation > details").nth(3)
+        files_summary = files_menu.locator(":scope > summary")
+        files_summary.focus()
+        page.keyboard.press("Enter")
+        assert files_menu.evaluate("(e) => e.open")
         advanced = page.locator("#dt-advanced")
         if not advanced.evaluate("(e) => e.open"):
             page.locator("#dt-advanced > summary").focus()

@@ -2,6 +2,8 @@
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
+- 2026-11-01 (ENG-CATALOG-LU-065, dev QA pending): Engineering Toolbox now links to the existing LU factorization (2×2/3×3 real, scaled pivoting) via one canonical route with focused operation button. Added singular-input/recovery and numerical residual Chromium regression, structural source parity test and required Quality step; no duplicate solver.
+
 - 2026-11-01 (UI-NUMERICAL-A11Y-064, dev QA pending): Numerical Methods controls now use 40px minimum touch targets and live result/error announcements; responsive keyboard/error-recovery Chromium smoke and source parity test added. PR #133 for earlier accessibility slices merged; final production verification pending.
 - 2026-11-01 (UI-MATRIX-A11Y-063, dev QA pending): Matrix calculator selectors, buttons and input grids now use 40px minimum touch targets, with responsive keyboard/browser regression and offline source parity coverage.
 - 2026-11-01 (UI-GRAPH-A11Y-062, dev QA pending): Graph axes and advanced dataset import controls now have 40px minimum touch targets; added source/bundle parity and responsive Chromium keyboard/accessibility tests, registered in Quality.

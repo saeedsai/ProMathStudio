@@ -2,6 +2,7 @@
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
+- 2026-11-01 (MATH-ROOT-PLATEAU-071, implemented on dev; CI/release pending): Classifies sampled zero/nonzero scalar residual plateaus instead of reporting hundreds of false discrete roots. Uses two off-grid probes, conservative non-isolation messaging, source/bundle parity, new structural and Chromium regression tests, and a mandatory Quality step. Does not claim global constancy or root completeness.
 - 2026-11-01 (UI-ZOOM-MODULE-070, implemented on dev; QA/release pending): Extracted table zoom controller into reusable src/visual-controls.js with offline build parity; the range slider now announces its current percentage through aria-valuetext. Added structural and Chromium keyboard, clamp and responsive regression gates.
 - 2026-11-01 (MATH-ROOT-RESIDUAL-069, implemented on dev; CI/release pending): Scalar root search now requires a finite absolute residual at or below requested tolerance after rounding, rejects false roots across small finite jumps, preserves tiny nonzero candidates and reports maximum absolute residual. Added source/bundle structural regression and Chromium smooth/tangential/jump/tiny-root/UI tests; registered required Quality step.
 

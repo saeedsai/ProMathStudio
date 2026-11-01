@@ -5161,7 +5161,7 @@ const panel=el('section',{id:'numerical-panel'});if(M.advanced.currentMode()!=='
 $('symbolic-panel').after(panel);
 // Progressive disclosure: a selected numerical method reveals only its required inputs.
 const numMode=$('num-method'),defaults={scalar:'sin(x)-x/2=0',system:'x^2+y^2=5; x-y=1',poisson:'pi^2*sin(pi*x)',heat:'sin(pi*x)',quadrature:'sin(x)'};
-const visMap={scalar:['num-expression','num-variable','num-start','num-end'],system:['num-expression','num-variable','num-guess'],poisson:['num-expression','num-start','num-end','num-nx','num-left','num-right'],heat:['num-expression','num-start','num-end','num-nx','num-nt','num-time','num-alpha','num-left','num-right'],quadrature:['num-expression','num-start','num-end','num-tolerance','num-budget']};
+const visMap={scalar:['num-expression','num-variable','num-start','num-end','num-tolerance'],system:['num-expression','num-variable','num-guess'],poisson:['num-expression','num-start','num-end','num-nx','num-left','num-right'],heat:['num-expression','num-start','num-end','num-nx','num-nt','num-time','num-alpha','num-left','num-right'],quadrature:['num-expression','num-start','num-end','num-tolerance','num-budget']};
 let lastMethod='scalar';
 function showMethod(){const mode=numMode.value;
   const active=new Set(visMap[mode]||[]);
@@ -5181,15 +5181,29 @@ function showMethod(){const mode=numMode.value;
 numMode.addEventListener('change',()=>{showMethod();$('num-to-table').disabled=true;$('num-to-graph').disabled=true;lastNumeric=null;});showMethod();
 const casToolbar=$('cas-run')?.parentElement;if(casToolbar){const open=el('button',{type:'button',class:'secondary',id:'num-open'},'Numerical methods / PDE');open.addEventListener('click',()=>{M.advanced.mode('solver');$('num-details').open=true;panel.scrollIntoView({block:'start',behavior:'smooth'});});casToolbar.append(open);}
 let lastNumeric=null;const failure=(e)=>{const node=$('num-output');node.textContent=e.message;node.classList.add('error');};
-function runNumerical(){try{
+// Root-only validation announces the error and focuses the relevant field.
+const rootFieldIds=['num-start','num-end','num-tolerance'];
+const clearRootErrors=()=>{for(const id of rootFieldIds){$(id).removeAttribute('aria-invalid');$(id).removeAttribute('aria-describedby');}};
+const invalidRoot=(id,message)=>{const field=$(id);field.setAttribute('aria-invalid','true');field.setAttribute('aria-describedby','num-output');field.focus();throw Error(message);};
+const rootNumber=(id,label)=>{const raw=$(id).value.trim();if(!raw||!Number.isFinite(Number(raw)))invalidRoot(id,label+' must be a finite number.');return Number(raw);};
+for(const id of rootFieldIds)$(id).addEventListener('input',()=>{$(id).removeAttribute('aria-invalid');$(id).removeAttribute('aria-describedby');});
+function runNumerical(){clearRootErrors();try{
   const mode=$('num-method').value,expr=$('num-expression').value,v=$('num-variable').value;
-  const a=finite($('num-start').value),b=finite($('num-end').value),nx=$('num-nx').value,left=$('num-left').value,right=$('num-right').value;
-  let result;
-  if(mode==='scalar')result=scalarRoots(expr,v,a,b);
-  else if(mode==='system')result=systemRoots(expr,v,$('num-guess').value);
-  else if(mode==='poisson')result=poisson1D({a,b,nx,source:expr,left,right});
-  else if(mode==='quadrature')result=adaptiveSimpson({expression:expr,a,b,tolerance:$('num-tolerance').value,maxEvaluations:$('num-budget').value});
-  else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
+  const nx=$('num-nx').value,left=$('num-left').value,right=$('num-right').value;
+  let a,b,result;
+  if(mode==='scalar'){
+    a=rootNumber('num-start','Domain start');b=rootNumber('num-end','Domain end');
+    if(!(b>a))invalidRoot('num-end','Root search requires max > min.');
+    const tolerance=rootNumber('num-tolerance','Tolerance');
+    if(tolerance<=0||tolerance>0.01)invalidRoot('num-tolerance','Tolerance must be greater than 0 and at most 0.01.');
+    result=scalarRoots(expr,v,a,b,{tolerance});
+  }else if(mode==='system')result=systemRoots(expr,v,$('num-guess').value);
+  else{
+    a=finite($('num-start').value,'Domain start');b=finite($('num-end').value,'Domain end');
+    if(mode==='poisson')result=poisson1D({a,b,nx,source:expr,left,right});
+    else if(mode==='quadrature')result=adaptiveSimpson({expression:expr,a,b,tolerance:$('num-tolerance').value,maxEvaluations:$('num-budget').value});
+    else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
+  }
   lastNumeric=result;$('num-output').classList.remove('error');
   $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):'(none detected)'}\n${result.note}`:
     result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
@@ -8413,7 +8427,8 @@ tab.addEventListener('click',()=>M.advanced.mode('engineering'));bar.append(tab)
 const style=document.createElement('style');
 style.textContent='#engineering-panel .eng-filters,#eng-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0}'+
  '#engineering-panel label{display:flex;flex-direction:column;gap:5px;font-weight:700}'+
- '#engineering-panel input,#engineering-panel select{width:100%;min-width:0;box-sizing:border-box;padding:10px;border:1px solid #c2cfdb;border-radius:9px}'+
+ '#engineering-panel input,#engineering-panel select{width:100%;min-width:0;min-height:40px;box-sizing:border-box;padding:10px;border:1px solid #c2cfdb;border-radius:9px}'+
+ '#engineering-panel input:focus-visible,#engineering-panel select:focus-visible{outline:3px solid #29817b;outline-offset:2px}'+
  '#engineering-panel .eng-card{min-width:0;border:1px solid #d8e4e8;border-radius:12px;padding:13px;overflow-wrap:anywhere}'+
  '#engineering-panel .eng-card h3{font-size:15px;margin:6px 0}'+
  '#engineering-panel .eng-card p,#eng-status{font-size:12px;color:#536879}'+

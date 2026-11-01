@@ -2,6 +2,8 @@
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
+- 2026-11-01 (MATH-ROOT-RESIDUAL-069, implemented on dev; CI/release pending): Scalar root search now requires a finite absolute residual at or below requested tolerance after rounding, rejects false roots across small finite jumps, preserves tiny nonzero candidates and reports maximum absolute residual. Added source/bundle structural regression and Chromium smooth/tangential/jump/tiny-root/UI tests; registered required Quality step.
+
 - 2026-11-01 (MATH-ROOT-VALIDATION-068, dev QA pending): Scalar nonlinear roots expose a configurable tolerance (0 < tolerance ≤ 0.01) with focused, announced invalid-field feedback and recovery; nonlinear systems ignore hidden scalar domain fields. Added source parity and reference-root/negative/keyboard Chromium regressions; release not yet verified.
 
 - 2026-11-01 (UI-ENGINEERING-A11Y-067, dev QA pending): Engineering Toolbox search and discipline filters now have 40px minimum touch targets and visible keyboard focus; added responsive 390/768/1280 Chromium live-status/QR-route regression, structural parity guard and required Quality step.

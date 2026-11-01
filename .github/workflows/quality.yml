@@ -184,6 +184,8 @@ jobs:
         run: python tests/smoke_numerical_root_validation.py
       - name: Scalar root discontinuity rejection and residual diagnostics regression
         run: python tests/smoke_scalar_root_residuals.py
+      - name: Scalar root constant plateau classification and recovery regression
+        run: python tests/smoke_scalar_root_plateaus.py
       - name: Adaptive Simpson quadrature numeric and UI regression
         run: python tests/smoke_quadrature_adaptive.py
       - name: Linear interpolation reference and browser integration regression

@@ -2,6 +2,7 @@
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
+- 2026-11-01 (UI-MATRIX-A11Y-063, dev QA pending): Matrix calculator selectors, buttons and input grids now use 40px minimum touch targets, with responsive keyboard/browser regression and offline source parity coverage.
 - 2026-11-01 (UI-GRAPH-A11Y-062, dev QA pending): Graph axes and advanced dataset import controls now have 40px minimum touch targets; added source/bundle parity and responsive Chromium keyboard/accessibility tests, registered in Quality.
 - 2026-11-01 (UI-DATA-TOOLBAR-A11Y-061, dev QA pending): Data Tables toolbar buttons, inputs and selects now use 40px minimum touch targets; added structural bundle-parity and desktop/mobile Chromium regression checks. Dense spreadsheet cells remain unchanged.
 - 2026-10-31 (UI-A11Y-TARGETS-060, unreleased): Control equilibrium/transient inputs and size select (19–21px) and the Data Tables Code Library category/search fields (19–21px) are now at least 40px tall; accessibility regressions measure all control kinds.

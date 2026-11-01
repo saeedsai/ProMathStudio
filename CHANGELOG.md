@@ -2,6 +2,7 @@
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
+- 2026-11-01 (UI-DATA-TOOLBAR-A11Y-061, dev QA pending): Data Tables toolbar buttons, inputs and selects now use 40px minimum touch targets; added structural bundle-parity and desktop/mobile Chromium regression checks. Dense spreadsheet cells remain unchanged.
 - 2026-10-31 (UI-A11Y-TARGETS-060, unreleased): Control equilibrium/transient inputs and size select (19–21px) and the Data Tables Code Library category/search fields (19–21px) are now at least 40px tall; accessibility regressions measure all control kinds.
 - 2026-10-31 (UI-ODE-A11Y-059, unreleased): ODE panel controls are at least 40px tall on mobile (were 35–37px); added an accessibility regression (names, live output, keyboard run, error announcement, touch targets).
 - 2026-10-31 (UI-CONTROL-A11Y-058, unreleased): Control Theory toolbox buttons are at least 40px tall on mobile (four were 28px); added an accessibility audit regression (names, live regions, keyboard disclosures, touch targets).

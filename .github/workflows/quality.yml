@@ -58,6 +58,8 @@ jobs:
         run: python tests/smoke_engineering_qr_route.py
       - name: Engineering SVD canonical route, rank deficiency, keyboard and responsive regression
         run: python tests/smoke_engineering_svd_route.py
+      - name: Engineering symmetric eigen route, numerical reference, keyboard and responsive regression
+        run: python tests/smoke_engineering_eigen_route.py
       - name: Saved Data Tables selection round-trip and rollback regression
         run: python tests/smoke_project_table_selection.py
       - name: Graph dataset round-trip identity and rollback regression

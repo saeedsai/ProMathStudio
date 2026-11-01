@@ -54,6 +54,8 @@ jobs:
         run: python tests/smoke_engineering_catalog.py
       - name: Engineering LU canonical routing and singular recovery browser regression
         run: python tests/smoke_engineering_lu_route.py
+      - name: Engineering QR canonical routing, numerical reference and invalid matrix browser regression
+        run: python tests/smoke_engineering_qr_route.py
       - name: Saved Data Tables selection round-trip and rollback regression
         run: python tests/smoke_project_table_selection.py
       - name: Graph dataset round-trip identity and rollback regression

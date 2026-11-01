@@ -38,8 +38,8 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
     const zero=sampled[0]===0;
     return {type:'roots',variable,expression,roots:[],residuals:[],maxResidual:null,
       domain:[lo,hi],samples,tolerance,rootStatus:zero?'sampled-zero-plateau':'sampled-nonzero-plateau',
-      note:zero?'The sampled function is identically zero, including off-grid probes; zeros may be non-isolated. No discrete roots are certified.':
-        'The sampled function is constant and nonzero, including off-grid probes. A small residual alone does not certify a root.'};
+      note:zero?'The residual is zero at all sampled and off-grid probes; non-isolated zeros are possible, but an identically zero function is not proven. No discrete roots are certified.':
+        'The residual is equal and nonzero at all sampled and off-grid probes; an exactly constant function is not proven. A small residual alone does not certify a root.'};
   }
   // Damped Newton seeds help locate tangential roots without sign changes.
   for(let k=0;k<=samples;k+=Math.max(1,Math.floor(samples/50))){

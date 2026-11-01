@@ -56,7 +56,7 @@ def main():
         page.locator('[data-workspace="data"]').click()
         advanced = page.locator("#dt-advanced")
         if not advanced.evaluate("(e) => e.open"):
-            advanced.locator("summary").focus()
+            page.locator("#dt-advanced > summary").focus()
             page.keyboard.press("Enter")
         assert advanced.evaluate("(e) => e.open")
         for width in (390, 768, 1280):

@@ -8371,6 +8371,7 @@ const disciplines=Object.freeze([
 const raw=[
  ['matrix.solve.real.small','Small real linear systems','Solve 2×2 or 3×3 Ax=b using the shared scaled-pivot Matrix solver.','physics mechanical electrical electronics fluids aerospace','matrix linear algebra','calculator','matrix'],
  ['control.equilibrium.real.small','Control state equilibrium','Solve ẋ=−Ax+b for 2 or 3 states; equilibrium does not prove stability.','mechanical electrical electronics aerospace control','control steady-state','graph','ct-equilibrium'],
+ ['matrix.lu.real.small','Small real LU factorization','Factor a nonsingular real 2×2 or 3×3 A into P·A=L·U with a reconstruction residual; singular matrices are rejected.','physics mechanical electrical electronics fluids aerospace','matrix lu factorization pivot decomposition','calculator','matrix','mat-lu'],
  ['matrix.eigen.symmetric.small','Symmetric eigenanalysis','Eigenvalues and orthonormal eigenvectors of a real symmetric 2×2 or 3×3 matrix; not a general or complex eigensolver.','physics mechanical electrical electronics aerospace','matrix eigen eigenvalues symmetric','calculator','matrix'],
  ['signals.fft.1d','One-dimensional FFT','Existing FFT workflow for sampled real data with rate and window options; not a full spectral-analysis suite.','signals electronics','fft spectrum frequency','editor','numerical'],
  ['numerical.interpolation.1d','One-dimensional interpolation','Linear, PCHIP and barycentric interpolation of tabulated samples; interpolation is not extrapolation or smoothing.','physics mechanical electrical electronics fluids aerospace signals','interpolation pchip barycentric samples','editor','numerical'],
@@ -8391,11 +8392,12 @@ const raw=[
  ['aerospace.orbit.propagation','Orbital propagation','Orbit propagation is not yet implemented.','aerospace physics','orbit spaceflight']
 ];
 const ids=new Set(),valid=new Set(disciplines.map(d=>d.id));
-const tools=Object.freeze(raw.map(([id,title,description,domains,tags,mode,target])=>{
+const tools=Object.freeze(raw.map(([id,title,description,domains,tags,mode,target,focusId])=>{
  const disciplineIds=Object.freeze(domains.split(' ')),status=mode?'available':'planned';
- if(ids.has(id)||disciplineIds.some(d=>!valid.has(d))||Boolean(mode)!==Boolean(target))throw Error('Invalid Engineering catalog: '+id);
+ if(ids.has(id)||disciplineIds.some(d=>!valid.has(d))||Boolean(mode)!==Boolean(target)||
+    (focusId&&(!mode||!target||!/^[a-z][a-z0-9-]*$/.test(focusId))))throw Error('Invalid Engineering catalog: '+id);
  ids.add(id);
- return Object.freeze({id,title,description,disciplines:disciplineIds,tags,status,route:mode?Object.freeze({mode,target}):null});
+ return Object.freeze({id,title,description,disciplines:disciplineIds,tags,status,route:mode?Object.freeze({mode,target,focusId:focusId||null}):null});
 }));
 function filter(discipline='',query=''){
  if(discipline&&!valid.has(discipline))return [];
@@ -8439,6 +8441,11 @@ function openTool(t){
    for(let node=panel;node;node=node.parentElement)if(node.tagName==='DETAILS')node.open=true;
    panel.querySelector('summary').focus({preventScroll:true});
   }else M.workspaceTasks?.select(t.route.target,true);
+  // Focus the existing canonical operation, without running it or replacing draft inputs.
+  if(t.route.focusId){
+   const control=document.getElementById(t.route.focusId);
+   if(control?.getClientRects().length)control.focus({preventScroll:true});
+  }
  });
 }
 function render(){

@@ -27,6 +27,12 @@ def main():
         page.set_content((ROOT / "index.html").read_text(encoding="utf-8"), wait_until="load")
 
         page.locator('[data-workspace="graph"]').click()
+        # Task-first UI keeps axis ranges in a collapsed advanced disclosure.
+        axes = page.locator("#graph-controls-collapsible")
+        summary = axes.locator("summary")
+        summary.focus()
+        page.keyboard.press("Enter")
+        assert axes.evaluate("(e) => e.open")
         for width in (390, 768, 1280):
             page.set_viewport_size({"width": width, "height": 844})
             result = audit(page, '#graph-panel .graph-controls input')

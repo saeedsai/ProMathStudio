@@ -4922,17 +4922,17 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   const f=x=>{try{return eqValue(expression,{[variable]:x});}catch{return NaN;}};
   const found=[],h=(hi-lo)/samples;
   for(let k=0;k<=samples;k++){
-    const x=lo+k*h,y=f(x);if(Number.isFinite(y)&&Math.abs(y)<tolerance*10)found.push(x);
+    const x=lo+k*h,y=f(x);if(Number.isFinite(y)&&Math.abs(y)<=tolerance)found.push(x);
     if(k===0)continue;
     let a=x-h,b=x,fa=f(a),fb=y;
     if(!Number.isFinite(fa)||!Number.isFinite(fb)||fa*fb>=0)continue;
     // Bisection has a convergence guarantee if the residual is continuous in the bracket.
     for(let it=0;it<maxIterations;it++){
       const mid=(a+b)/2,fm=f(mid);if(!Number.isFinite(fm))break;
-      if(Math.abs(fm)<tolerance||b-a<tolerance){a=b=mid;break;}
+      if(Math.abs(fm)<=tolerance||b-a<tolerance){a=b=mid;break;}
       if(fa*fm<0){b=mid;fb=fm;}else{a=mid;fa=fm;}
     }
-    const root=(a+b)/2,fr=f(root);if(Number.isFinite(fr)&&Math.abs(fr)<Math.sqrt(tolerance))found.push(root);
+    const root=(a+b)/2,fr=f(root);if(Number.isFinite(fr)&&Math.abs(fr)<=tolerance)found.push(root);
   }
   // Damped Newton seeds help locate tangential roots without sign changes.
   for(let k=0;k<=samples;k+=Math.max(1,Math.floor(samples/50))){
@@ -4944,11 +4944,16 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
       if(!Number.isFinite(dy)||Math.abs(dy)<1e-13)break;
       const dx=Math.max(-(hi-lo)/3,Math.min((hi-lo)/3,y/dy));x-=dx;
       if(x<lo||x>hi)break;
-      if(Math.abs(dx)<Math.max(1e-9,tolerance*3)&&Math.abs(f(x))<tolerance*10){found.push(x);break;}
+      if(Math.abs(dx)<Math.max(1e-9,tolerance*3)&&Math.abs(f(x))<=tolerance){found.push(x);break;}
     }
   }
-  const roots=dedupe(found.filter(x=>x>=lo-1e-8&&x<=hi+1e-8).map(x=>Math.abs(x)<1e-10?0:normalizeRoot(x,tolerance)),Math.sqrt(tolerance));
-  return {type:'roots',variable,expression,roots,domain:[lo,hi],samples,tolerance,note:'Real roots found within the specified interval; roots outside the interval or near discontinuities may be missed.'};
+  // A sign change alone is not a root (a jump can straddle zero). Validate
+  // each rounded candidate at the requested absolute residual tolerance.
+  const roots=dedupe(found.filter(x=>x>=lo&&x<=hi).map(x=>normalizeRoot(x,tolerance))
+    .filter(x=>Number.isFinite(f(x))&&Math.abs(f(x))<=tolerance),Math.sqrt(tolerance));
+  const residuals=roots.map(x=>Math.abs(f(x)));
+  const maxResidual=residuals.length?Math.max(...residuals):null;
+  return {type:'roots',variable,expression,roots,residuals,maxResidual,domain:[lo,hi],samples,tolerance,note:'Candidate roots satisfy the requested absolute residual tolerance; discontinuities and unbracketed roots may still be missed.'};
 }
 function gaussian(A,b){const n=b.length,rows=A.map((r,i)=>[...r,b[i]]);for(let col=0;col<n;col++){
   let pivot=col;for(let i=col+1;i<n;i++)if(Math.abs(rows[i][col])>Math.abs(rows[pivot][col]))pivot=i;
@@ -5205,7 +5210,7 @@ function runNumerical(){clearRootErrors();try{
     else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
   }
   lastNumeric=result;$('num-output').classList.remove('error');
-  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):'(none detected)'}\n${result.note}`:
+  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):'(none detected)'}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\n${result.note}`:
     result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
     result.type==='system'?`Converged: ${result.converged}\n${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('\n')}\nResidual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}\n${result.note}`:
       `${result.method}\n${result.rows.length} output rows\n${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'\n':''}${result.note}`;

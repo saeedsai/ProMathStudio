@@ -36,7 +36,7 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   if(sampled.every(y=>Number.isFinite(y)&&y===sampled[0])&&
      [Math.SQRT1_2,Math.sqrt(3)/3].every(t=>f(lo+(hi-lo)*t)===sampled[0])){
     const zero=sampled[0]===0;
-    return {type:'roots',variable,expression,roots:[],residuals:[],maxResidual:null,
+    return {type:'roots',variable,expression,roots:[],residuals:[],maxResidual:null,localSlopeMagnitudes:[],minLocalSlope:null,
       domain:[lo,hi],samples,tolerance,rootStatus:zero?'sampled-zero-plateau':'sampled-nonzero-plateau',
       note:zero?'The residual is zero at all sampled and off-grid probes; non-isolated zeros are possible, but an identically zero function is not proven. No discrete roots are certified.':
         'The residual is equal and nonzero at all sampled and off-grid probes; an exactly constant function is not proven. A small residual alone does not certify a root.'};
@@ -60,7 +60,19 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
     .filter(x=>Number.isFinite(f(x))&&Math.abs(f(x))<=tolerance),Math.sqrt(tolerance));
   const residuals=roots.map(x=>Math.abs(f(x)));
   const maxResidual=residuals.length?Math.max(...residuals):null;
-  return {type:'roots',variable,expression,roots,residuals,maxResidual,domain:[lo,hi],samples,tolerance,note:'Candidate roots satisfy the requested absolute residual tolerance; discontinuities and unbracketed roots may still be missed.'};
+  // A local finite-difference slope is only a sensitivity clue, never a
+  // certified bound on |x - trueRoot|. Avoid derivative claims at jumps.
+  const localSlopeMagnitudes=roots.map(x=>{
+    const step=Math.max(1e-5*Math.max(1,Math.abs(x)),1e-6*(hi-lo));
+    const a=Math.max(lo,x-step),b=Math.min(hi,x+step);
+    if(!(b>a))return null;
+    const fa=f(a),fb=f(b),slope=(fb-fa)/(b-a);
+    return Number.isFinite(slope)?Math.abs(slope):null;
+  });
+  const availableSlopes=localSlopeMagnitudes.filter(s=>s!==null);
+  const minLocalSlope=availableSlopes.length?Math.min(...availableSlopes):null;
+  return {type:'roots',variable,expression,roots,residuals,maxResidual,localSlopeMagnitudes,minLocalSlope,
+    domain:[lo,hi],samples,tolerance,note:'Candidate roots satisfy the requested absolute function-residual tolerance, not a certified root-position error bound. Local secant slopes are scale-dependent heuristics and can mislead near flat roots or discontinuities; unbracketed roots may still be missed.'};
 }
 function gaussian(A,b){const n=b.length,rows=A.map((r,i)=>[...r,b[i]]);for(let col=0;col<n;col++){
   let pivot=col;for(let i=col+1;i<n;i++)if(Math.abs(rows[i][col])>Math.abs(rows[pivot][col]))pivot=i;
@@ -317,7 +329,7 @@ function runNumerical(){clearRootErrors();try{
     else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
   }
   lastNumeric=result;$('num-output').classList.remove('error');
-  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\n${result.note}`:
+  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\nMinimum local secant slope magnitude (heuristic): ${result.minLocalSlope===null?'n/a':result.minLocalSlope.toExponential(3)}\n${result.note}`:
     result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
     result.type==='system'?`Converged: ${result.converged}\n${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('\n')}\nResidual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}\n${result.note}`:
       `${result.method}\n${result.rows.length} output rows\n${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'\n':''}${result.note}`;

@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted log-weight sensitivity (MATH-WLS-WEIGHT-093)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** Existing bounded real 3×2 weighted least-squares now reports each observation's local fitted-coefficient derivative with respect to log(weight), holding A, b and the other weights fixed. Reuses QR RHS response: d x / d log(w_i) = -response_i × (A_i x - b_i). Not an exact finite-weight-change prediction, statistical uncertainty or error bound. Added independent closed-form, central finite-difference, scale-invariance, exact-fit, near-rank and failure references, mandatory responsive Chromium, and standalone parity; saved-project schema unchanged.
+
+**Prior release reconciled:** [PR #160](https://github.com/saeedsai/ProMathStudio/pull/160), dev=main `477037373264c1fc23cb855c3634a114798a77a5`, [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41461521241), [dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41461543539) and [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41461520878) succeeded. Hosted interaction unverified; branches unprotected.
+
+**NEXT FIVE concrete features (priority, dependencies, acceptance tests):**
+1. **P0 — Weight-response exact-head QA/repair (in progress; depends on QR).** Independent derivative, finite-difference, weight-scale invariance, zero residual, near-rank finite-or-reject, invalid weights, source/bundle parity and Chromium keyboard/mobile/recovery at 390/768/1280 without runtime errors.
+2. **P0 — Quality-gated dev→main PR (pending CI).** Inspect exact dev SHA, diff, required checks and approvals, merge normally only when green, then verify main/dev Quality, Pages and hosted behavior when available.
+3. **P1 — Near-rank QR accuracy (planned; depends on QR).** Compare near-dependent solutions to independent references, finite backward residual or explicit rank failure, extreme positive weights and responsive recovery.
+4. **P1 — Bounded controller extraction (planned; depends on build).** Preserve standalone byte parity, saved-project round-trip, keyboard/mobile and bundle-size benchmark.
+5. **P1 — Scalar-root aliasing hardening (planned; depends on numerical solver).** Oscillatory/discontinuous reference cases, missed-root guidance, invalid input and Chromium regressions.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, living plan, frozen inventory, unified/architecture plans, latest exact-head CI and Pages. Started synchronized dev/main `477037373264c1fc23cb855c3634a114798a77a5`, no open PR. Local git clone unavailable (github.com DNS resolution). Implemented QR-reused log-weight derivative, numerical and browser tests, workflow gate, offline bundle, ledger and changelog. Exact-head CI and release verification pending.
+
 ## 2026-11-02 — Relative-weight effective count (MATH-WLS-EFFN-092)
 
 **Implemented on dev; exact-head CI/PR/Pages pending.** The bounded 3×2 weighted least-squares result reports a Kish-style relative-weight effective count, computed as (sum(w/max(w)))² / sum((w/max(w))²) to avoid overflow for permitted weights. It ranges from 1 to 3; when below 2, an advisory flags concentration on fewer than two equally weighted observations. This is descriptive weight concentration, **not** a statistically validated sample size, model residual degrees of freedom, condition number or uncertainty estimate. It never rejects otherwise valid fits. Offline standalone, keyboard controls and saved-project format are preserved.

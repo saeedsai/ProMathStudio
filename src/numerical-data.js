@@ -25,8 +25,11 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
     if(!Number.isFinite(fa)||!Number.isFinite(fb)||fa*fb>=0)continue;
     // Bisection has a convergence guarantee if the residual is continuous in the bracket.
     for(let it=0;it<maxIterations;it++){
-      const mid=(a+b)/2,fm=f(mid);if(!Number.isFinite(fm))break;
-      if(Math.abs(fm)<=tolerance||b-a<tolerance){a=b=mid;break;}
+      const mid=a+(b-a)/2,fm=f(mid);if(!Number.isFinite(fm))break;
+      if(Math.abs(fm)<=tolerance){a=b=mid;break;}
+      // A narrow x bracket is not a small function residual for a steep function.
+      // Stop only when floating-point spacing prevents further refinement.
+      if(mid===a||mid===b)break;
       if(fa*fm<0){b=mid;fb=fm;}else{a=mid;fa=fm;}
     }
     const root=(a+b)/2,fr=f(root);if(Number.isFinite(fr)&&Math.abs(fr)<=tolerance)found.push(root);

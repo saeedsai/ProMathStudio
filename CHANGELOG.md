@@ -1,6 +1,7 @@
 # Changelog
 
-- 2026-11-02 (MATH-WLS-LEVERAGE-084, dev QA pending): Weighted 3×2 least squares reports per-observation design leverage via the existing QR orthonormal basis; 104/105, 101/105, 1/21 numerical reference, scale invariance, invalid/rank failures, source/bundle parity and mandatory responsive Chromium regression. Leverage is not an outlier probability or coefficient uncertainty.
+- 2026-11-02 (MATH-WLS-RHS-085, implemented on dev; exact-head QA/release pending): Reused weighted 3×2 QR to report per-observation +1-unit RHS coefficient responses; fixed-design linear sensitivity only, not uncertainty. Adds numerical perturbation and scale-invariance references, source/bundle parity, mandatory responsive Chromium recovery regression.
+- 2026-11-02 (MATH-WLS-LEVERAGE-084, released via PR #152): Weighted 3×2 least squares reports per-observation design leverage via the existing QR orthonormal basis; 104/105, 101/105, 1/21 numerical reference, scale invariance, invalid/rank failures, source/bundle parity and mandatory responsive Chromium regression. Leverage is not an outlier probability or coefficient uncertainty.
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 

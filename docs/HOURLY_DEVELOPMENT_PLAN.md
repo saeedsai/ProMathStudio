@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted RHS independent box sensitivity (MATH-WLS-RHS-BOX-096)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** The bounded real 3×2 weighted least-squares calculator now reports the exact maximum absolute change in each fitted coefficient when all three RHS observations may independently vary by at most ±1 unit. It reuses the QR-derived RHS response (no normal-equation solver), sums its absolute coefficients and verifies all eight box corners. For A=[[1,0],[1,1],[1,2]], b=[1,2,9], weights=[1,1,0.01], the bounds are 107/105 and 68/35. This is deterministic for fixed A and weights, not a statistical confidence interval or a bound for design/weight changes.
+
+**Prior release reconciled:** [PR #163](https://github.com/saeedsai/ProMathStudio/pull/163) merged, dev=main `ef15565104ddf693ec403940ba8bc9f618fed8e4`; [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41485231835), [dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41485261929) and [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41485230375) succeeded. Hosted interaction remains independently unverified; branches are unprotected.
+
+**NEXT FIVE concrete features (priority, dependencies, acceptance tests):**
+1. **P0 — RHS box sensitivity exact-head QA and repair (in progress; depends on QR).** Analytical 107/105 and 68/35, eight independent ±1 corners, common-weight scale invariance, singular/invalid rejection, source/bundle parity and responsive Chromium 390/768/1280 keyboard/error recovery.
+2. **P0 — Quality-gated dev→main promotion (pending exact-head CI).** Confirm exact SHA, PR diff, approvals/checks, ordinary merge only when green; then verify main/dev Quality and Pages, hosted interaction when supported.
+3. **P1 — Weighted QR near-rank coefficient accuracy (planned; depends on QR).** Independent high-precision coefficients and residual/backward references at multiple near-rank separations, extreme weights and explicit rank failure; browser recovery.
+4. **P1 — Bounded UI controller extraction (planned; depends on standalone build).** Preserve byte-identical offline bundle, project round-trip, keyboard/mobile accessibility and benchmark size.
+5. **P1 — Scalar root aliasing hardening (planned; depends on root solver).** Paired oscillatory roots and discontinuities with honest sampling guidance, invalid-input and Chromium tests.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, living plan, frozen inventory, latest CI/Pages and synchronized branch heads `ef15565104ddf693ec403940ba8bc9f618fed8e4`. No open PR, exactly dev/main. Local git clone blocked by github.com DNS; connected GitHub source used. Added deterministic QR-reused RHS box sensitivity, offline bundle, analytical/eight-corner/negative and responsive Chromium tests, mandatory Quality step, ledger and changelog. V8 analytical and eight-corner checks passed before commit; exact-head CI and promotion pending. Historical 166 gaps/95 partials unchanged.
+
 ## 2026-11-02 — Weighted column-normalized design condition (MATH-WLS-COLNORM-095)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** The bounded real 3×2 weighted least-squares calculator now reports the 2-norm condition after independently normalizing both weighted design columns to unit Euclidean length. For absolute column cosine c and sine s, use the stable ratio (1+c)/s instead of subtracting nearly equal Gram eigenvalues. This geometric near-dependence measure is invariant to positive individual column rescaling and common positive weight scaling; unlike the raw spectral condition, it does not incorporate column units. It is **not** a certified coefficient-error bound or statistical uncertainty.

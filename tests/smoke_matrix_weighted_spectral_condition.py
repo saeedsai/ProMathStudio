@@ -36,6 +36,13 @@ def main():
             assert "Coefficient roundoff amplification screen" in result.inner_text()
             assert "Relative weighted squared-residual shares (rows 1–3)" in result.inner_text()
             assert "Weighted fitted values (rows 1–3)" in result.inner_text()
+            assert "Weighted normwise residual ratio" in result.inner_text()
+            assert "not a certified coefficient-error" in result.inner_text()
+            ratio = page.evaluate("() => MathStudio.matrixTools.weightedLeastSquares("
+                "[[1,0],[1,1],[1,2]],[1,2,9],[1,1,0.01]).weightedNormwiseResidualRatio")
+            reference = math.sqrt(12/35) / (
+                math.sqrt(61/20)*math.sqrt(2770)/35 + math.sqrt(581)/10)
+            assert math.isclose(ratio, reference, rel_tol=1e-11), ratio
             fitted = page.evaluate("() => MathStudio.matrixTools.weightedLeastSquares("
                 "[[1,0],[1,1],[1,2]],[1,2,9],[1,1,0.01]).fittedValues")
             assert all(math.isclose(v, ref, rel_tol=1e-10) for v, ref in

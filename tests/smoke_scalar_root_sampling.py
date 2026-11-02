@@ -23,7 +23,11 @@ def main():
 
         coarse = solve("sin(2*pi*40*x)", 20)
         fine = solve("sin(2*pi*40*x)", 800)
-        assert len(fine["roots"]) > len(coarse["roots"]) + 30, (len(coarse["roots"]), len(fine["roots"]))
+        # Midpoint probes recover more roots on the coarse grid than before.
+        # Higher sampling density must still reveal additional roots.
+        assert len(coarse["roots"]) >= 40, coarse
+        assert len(fine["roots"]) >= 80 and len(fine["roots"]) > len(coarse["roots"]), (
+            len(coarse["roots"]), len(fine["roots"]))
         assert math.isclose(coarse["sampleSpacing"], 0.05)
         assert math.isclose(fine["sampleSpacing"], 0.00125)
         assert "not globally complete" in fine["note"], fine

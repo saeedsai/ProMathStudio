@@ -1,5 +1,7 @@
 # Changelog
 
+- 2026-11-02 (MATH-WLS-LEVERAGE-084, dev QA pending): Weighted 3×2 least squares reports per-observation design leverage via the existing QR orthonormal basis; 104/105, 101/105, 1/21 numerical reference, scale invariance, invalid/rank failures, source/bundle parity and mandatory responsive Chromium regression. Leverage is not an outlier probability or coefficient uncertainty.
+
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
 - 2026-11-02 (MATH-ROOT-MIDPOINT-083, implemented on dev; exact-head CI/release pending): One bounded midpoint probe per coarse scalar-root interval reveals some paired crossings hidden by equal-sign endpoints, with independent half-bracket refinement, strict finite-residual certification, midpoint counts, offline parity and mandatory Chromium paired-root/jump/plateau/mobile regressions. Not globally exhaustive.

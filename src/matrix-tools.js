@@ -277,7 +277,13 @@ function leastSquares(A,b){
  if(![residual,relativeResidual,normalResidual].every(Number.isFinite))
   throw Error('Least-squares residual exceeded finite floating-point range.');
  if(normalResidual>1e-8)throw Error('Least-squares solution failed its orthogonality check.');
- return {solution,residual,relativeResidual,normalResidual,rank:n,qrDiagonalSpread};
+ // Diagonal of the weighted-design projection Q*Q^T: each row's leverage
+ // lies in [0,1] and the three values sum to the number of fitted columns.
+ // This is a design diagnostic, not an outlier probability or error bound.
+ const rowLeverages=Q.map(row=>row.reduce((sum,q)=>sum+q*q,0));
+ if(rowLeverages.some(x=>!Number.isFinite(x)||x< -1e-8||x>1+1e-8))
+  throw Error('Least-squares leverage failed its numerical range check.');
+ return {solution,residual,relativeResidual,normalResidual,rank:n,qrDiagonalSpread,rowLeverages};
 }
 /* Weighted least squares for three observations and two parameters.
    Positive observation weights express relative confidence. Reuse the existing
@@ -311,8 +317,9 @@ function weightedLeastSquares(A,b,weights){
  const conditioningAdvisory=(weightRatio>=1e8||result.qrDiagonalSpread>=1e8)?
   'Potential sensitivity from extreme relative weights or QR diagonal spread; test input perturbations. This is not a certified coefficient-error or uncertainty bound.':
   'QR diagonal spread is only a screening heuristic; it cannot certify a well-conditioned fit or coefficient uncertainty.';
+ const leverageGuidance='Weighted design leverage (0 to 1 per row) measures sensitivity to observation changes at fixed weights; it is not an outlier probability or a coefficient-uncertainty bound.';
  return {...result,weightedResidualSquared,weightScale:maxWeight,
-  residuals:errors,weights:w.slice(),weightRatio,conditioningAdvisory};
+  residuals:errors,weights:w.slice(),weightRatio,conditioningAdvisory,leverageGuidance};
 }
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
@@ -1040,7 +1047,7 @@ function calculate(operation){
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
    'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
-   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual)+'\nRelative weight ratio (max/min): '+format(value.weightRatio)+'\nWeighted design QR diagonal spread (heuristic): '+format(value.qrDiagonalSpread)+'\n'+value.conditioningAdvisory:'')+conditionLabel;
+   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual)+'\nRelative weight ratio (max/min): '+format(value.weightRatio)+'\nWeighted design QR diagonal spread (heuristic): '+format(value.qrDiagonalSpread)+'\nWeighted design leverage (rows 1–3): '+value.rowLeverages.map(format).join(', ')+'\n'+value.leverageGuidance+'\n'+value.conditioningAdvisory:'')+conditionLabel;
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;syncFactorSelectors(null);output.classList.add('error');output.textContent=error.message;return null;}
 }

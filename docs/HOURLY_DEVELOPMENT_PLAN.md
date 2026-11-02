@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted column-normalized design condition (MATH-WLS-COLNORM-095)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** The bounded real 3×2 weighted least-squares calculator now reports the 2-norm condition after independently normalizing both weighted design columns to unit Euclidean length. For absolute column cosine c and sine s, use the stable ratio (1+c)/s instead of subtracting nearly equal Gram eigenvalues. This geometric near-dependence measure is invariant to positive individual column rescaling and common positive weight scaling; unlike the raw spectral condition, it does not incorporate column units. It is **not** a certified coefficient-error bound or statistical uncertainty.
+
+**Prior release reconciled:** [PR #162](https://github.com/saeedsai/ProMathStudio/pull/162) merged, dev=main `9c27a104d8cd43cbf67043aabe74700b22d008ba`; [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41481062296) and [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41481060885) succeeded. [Post-merge dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41481080429) in progress at discovery; hosted interaction independently unverified; both branches unprotected.
+
+**NEXT FIVE concrete features (priority, dependencies, acceptance tests):**
+1. **P0 — Column-normalized condition exact-head QA and repair (in progress; depends on QR).** Analytic near-rank and orthogonal references, column and common-weight scale invariance, invalid/rank rejection, source/bundle parity, keyboard and Chromium 390/768/1280 recovery without runtime errors.
+2. **P0 — Quality-gated dev→main promotion (pending exact-head CI).** Verify candidate SHA, PR diff/checks/approvals, ordinary merge only when green; then verify main/dev Quality, Pages and hosted behavior when supported.
+3. **P1 — Near-rank weighted QR coefficient accuracy (planned; depends on QR).** Independent high-precision reference coefficients, residual/backward checks at several separations, extreme weights and explicit rank failure, browser recovery.
+4. **P1 — Bounded UI controller extraction (planned; depends on standalone build).** Byte-identical bundle, project round-trip, keyboard/mobile and size benchmark.
+5. **P1 — Scalar root aliasing hardening (planned; depends on numerical solver).** Oscillatory paired-root/discontinuity references, honest sampling guidance, invalid inputs and Chromium regressions.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, living plan, frozen audit, unified/engineering plans, latest branch heads and CI/Pages. Started synchronized dev/main `9c27a104d8cd43cbf67043aabe74700b22d008ba`, no open PR. Local git clone blocked by github.com DNS; used connected GitHub source. Added bounded column-normalized condition, offline bundle, focused numerical/negative and responsive Chromium tests, mandatory Quality step, plan, execution ledger and changelog. V8 analytical and scale-invariance checks passed before commit; full exact-head CI and release pending. Historical 166 gaps/95 partials unchanged.
+
 ## 2026-11-02 — Weighted design spectral condition (MATH-WLS-SPECTRAL-094)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** The bounded real 3×2 weighted least-squares fit now estimates the 2-norm condition of the weighted design sqrt(W/max(W))·A using scaled column norms and a stable cross-product, without subtracting nearly equal small Gram eigenvalues. This quantifies near-rank numerical sensitivity, but is not a certified coefficient-error bound or statistical uncertainty; it depends on parameter units and column scaling. Existing rank checks, saved projects and offline distribution remain unchanged.

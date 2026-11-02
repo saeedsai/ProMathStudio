@@ -76,6 +76,8 @@ jobs:
         run: python tests/smoke_matrix_weighted_predictions.py
       - name: Weighted retained-row independence and near-singular deletion regression
         run: python tests/smoke_matrix_weighted_retained_area.py
+      - name: Weighted column independence near-rank browser regression
+        run: python tests/smoke_matrix_weighted_column_sine.py
       - name: Saved Data Tables selection round-trip and rollback regression
         run: python tests/smoke_project_table_selection.py
       - name: Graph dataset round-trip identity and rollback regression

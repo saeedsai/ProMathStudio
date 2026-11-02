@@ -296,6 +296,8 @@ jobs:
         run: python tests/smoke_matrix_rhs_decimal.py
       - name: Weighted QR least-squares numerical, editor and responsive UI regression
         run: python tests/smoke_matrix_weighted_least_squares.py
+      - name: Weighted least-squares guidance, scale invariance, rank and accessibility regression
+        run: python tests/smoke_matrix_weighted_guidance.py
       - name: Matrix tiny nonzero numeric display and browser regression
         run: python tests/smoke_matrix_small_nonzero.py
       - name: Offline radix-2 FFT numerical, UI, table and graph regression

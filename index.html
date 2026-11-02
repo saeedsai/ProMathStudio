@@ -6522,7 +6522,7 @@ area.innerHTML='<summary>Matrix calculator · 2×2 / 3×3</summary>'+
  '<div id="mat-grid" class="matrix-grid" aria-label="Matrix A entries"></div></section>'+
  '<details id="mat-rhs-section" class="matrix-input-section matrix-optional-input" open><summary>Right-hand side b (solve and least squares)</summary>'+
  '<div id="mat-rhs-grid" class="matrix-grid" aria-label="Right-hand side b entries"></div></details>'+
- '<details id="mat-weight-section" class="matrix-input-section matrix-optional-input" open><summary>Observation weights w (weighted least squares)</summary><p class="small-note">3 positive values, default 1 each</p>'+
+ '<details id="mat-weight-section" class="matrix-input-section matrix-optional-input" open><summary>Observation weights w (weighted least squares)</summary><p id="mat-weight-guidance" class="small-note">For a real full-column-rank 3×2 matrix A, enter three positive relative weights (1e-12 to 1e12; default 1). The fit minimizes Σ wᵢ(Ax−b)ᵢ². Multiplying all weights by the same positive factor leaves the fitted parameters unchanged but scales the weighted squared residual. Weights are treated as dimensionless relative priorities, not certified inverse variances or uncertainty estimates; use consistent units for A and b.</p>'+
  '<div id="mat-weight-grid" class="matrix-grid" aria-label="Observation weights"></div></details>'+
  '<details id="mat-b-section" class="matrix-input-section matrix-optional-input" open><summary>Matrix B (addition, subtraction and multiplication)</summary>'+
  '<div class="matrix-controls"><label>B rows <select id="mat-b-rows"><option value="2">2</option><option value="3">3</option></select></label>'+
@@ -6654,7 +6654,7 @@ function rebuildWeights(){
  const rows=Number(document.getElementById('mat-rows').value);
  weightGrid.style.gridTemplateColumns='minmax(0, 1fr)';weightGrid.replaceChildren();
  for(let r=0;r<rows;r++){
-  const cell=el('input',{type:'number',step:'any',min:'1e-12',max:'1e12','data-row':String(r),'data-col':'0','aria-label':'Observation weight row '+(r+1)});
+  const cell=el('input',{type:'number',step:'any',min:'1e-12',max:'1e12','data-row':String(r),'data-col':'0','aria-label':'Observation weight row '+(r+1),'aria-describedby':'mat-weight-guidance'});
   cell.value=old[r]===undefined?'1':old[r];cell.addEventListener('input',invalidate);weightGrid.append(cell);
  }
  restoreMatrixGridFocus(weightGrid,focused,rows,1);

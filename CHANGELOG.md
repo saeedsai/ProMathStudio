@@ -1,3 +1,5 @@
+- 2026-11-02 (MATH-WLS-AREA-090, implemented on dev; CI/release pending): Added scale-independent retained-row normalized area diagnostic for weighted 3×2 leave-one-out fits, with conservative near-dependent deletion guard (≤1e-8) and explicit non-certifying guidance; analytic, singular, invalid, offline parity and mandatory responsive Chromium regressions.
+- 2026-11-02 (MATH-WLS-PREDICTION-089, released via PR #157): Verified dev=main 4921caaab9c03481f57cb95e285bbca7924b32de; main/dev Quality 41442802414/41442818112 and Pages 41442800826 passed; hosted interaction independently unverified.
 - 2026-11-02 (MATH-WLS-PREDICTION-089, implemented on dev; CI/release pending): Added weighted excluded-row predicted values using existing QR leave-one-out residuals, explicit sign convention and singular-unavailable handling; direct-refit numerical references, offline parity and mandatory responsive Chromium regression.
 - 2026-11-02 (MATH-WLS-DELETE-088, released via PR #156): Synchronized dev/main 2409311ea4d60eb7031b633aa88017427e388e8b; main/dev Quality and Pages succeeded, hosted interaction unverified.
 

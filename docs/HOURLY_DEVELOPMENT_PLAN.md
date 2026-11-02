@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted leave-one-out retained-row reliability (MATH-WLS-AREA-090)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** The 3×2 weighted least-squares panel now reports the normalized determinant magnitude (geometric area) of the two rows retained after each observation is removed. Values are in [0,1], independent of row magnitudes and weights. Deletion predictions, residuals and coefficient shifts are unavailable if the retained-row area is ≤ 1e-8, avoiding misleading near-singular results. This is a numerical screen, not a certified condition number or statistical interval. No new buttons or saved-project schema changes.
+
+**Prior release reconciled:** [PR #157](https://github.com/saeedsai/ProMathStudio/pull/157) merged with dev=main `4921caaab9c03481f57cb95e285bbca7924b32de`; [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41442802414), [post-merge dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41442818112) and [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41442800826) passed. Hosted browser interaction remains independently unverified.
+
+**NEXT FIVE concrete features (priority, dependencies, acceptance tests):**
+1. **P0 — Exact-head retained-row QA/repair (in progress).** Verify normalized-area analytic references, near-parallel 1e-9 deletion guard, singular rows, weight and row scale invariance, invalid inputs, no mutation, source/bundle parity and responsive Chromium keyboard/error recovery at 390/768/1280px without runtime errors.
+2. **P0 — Quality-gated dev→main promotion (pending exact-head green).** Inspect candidate diff and checks, open one dev→main PR, merge only after green PR Quality and required approvals, verify main/dev Quality, Pages and hosted behavior when available.
+3. **P1 — Near-rank weighted QR reliability (planned; existing solver).** Compare full-fit coefficients against independent analytic near-dependent references, check extreme weight ratios and explicit failure paths.
+4. **P1 — Bounded UI controller extraction (planned; standalone build).** Move one inline controller into src; require byte-parity rebuild, project save/reload, keyboard/mobile and bundle-size regressions.
+5. **P1 — Audited mathematical gap closure (planned; frozen inventory).** Implement one reusable numerical or symbolic capability with analytic, boundary, invalid and Chromium references.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, living plan, frozen 166-gap/95-partial inventory, architecture and exact CI/Pages. Started synchronized dev/main `4921caaab9c03481f57cb95e285bbca7924b32de`, no open PR. Implemented normalized retained-row geometry, conservative near-rank guard, standalone sync, numerical and Chromium regressions, mandatory Quality gate, changelog and ledger. Exact-head CI/PR/Pages pending. Local git network access unavailable; no force-push or bypass.
+
 ## 2026-11-02 — Weighted leave-one-out predicted observations (MATH-WLS-PREDICTION-089)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** The bounded 3×2 weighted least-squares result now displays each excluded-row prediction in original observation units as b_i plus the existing fitted-minus-observed leave-one-out residual. It reuses the QR kernel, does not add an action button, and preserves singular/high-leverage unavailable status. The guidance explains residual sign and the non-statistical interpretation. Offline HTML and saved-project schema preserved.

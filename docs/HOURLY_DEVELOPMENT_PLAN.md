@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted design column independence (MATH-WLS-SINE-091)
+
+**Implemented on dev; exact-head CI/PR/Pages pending.** The existing QR-based 3×2 weighted least-squares panel now displays the sine of the angle between weighted design columns. A normalized cross product avoids cancellation for near-parallel columns; the value is invariant under positive column rescaling and common positive weight scaling. At sine ≤ 1e-4, warn of possible coefficient sensitivity without rejecting otherwise valid fits. This is a heuristic, not a certified condition number, statistical uncertainty or error bound. Offline HTML, saved-project schema and actions remain unchanged.
+
+**Prior release reconciled:** [PR #158](https://github.com/saeedsai/ProMathStudio/pull/158), dev=main `d77714614a49b79f8086e4786e4fabc45f7abda2`; [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41446512427), [dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41446526651) and [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41446511714) passed. Hosted browser interaction not independently verified; branches remain unprotected.
+
+**NEXT FIVE concrete features (priority, dependencies, acceptance tests):**
+1. **P0 — Exact-head column-sine QA/repair (in progress).** Verify analytic reference sqrt(1.05/2.0904), 1e-4 near-parallel geometry, positive column and common weight scale invariance, singular and invalid inputs, immutability, source/bundle parity and Chromium keyboard/mobile/error recovery at 390/768/1280px without runtime errors.
+2. **P0 — Quality-gated dev→main promotion (pending CI).** Inspect exact SHA and PR diff/checks/approvals; ordinary merge only after green, then verify main/dev Quality, Pages and hosted behavior when possible.
+3. **P1 — Weighted QR near-rank accuracy (planned).** Compare nearly dependent coefficients with independent analytic references, verify finite residuals or explicit rank failure, include browser recovery.
+4. **P1 — Bounded UI controller extraction (planned).** Extract one inline controller into src, verify byte-parity offline build, project round-trip, keyboard/mobile and bundle size.
+5. **P1 — Audited numerical/symbolic gap closure (planned).** Add one reusable missing capability with analytic, boundary, invalid and Chromium references.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, plan, inventory, architecture, branch heads and latest CI/Pages. Started synchronized dev/main `d77714614a49b79f8086e4786e4fabc45f7abda2`, no open PR. Added weighted design column-sine diagnostic, new Node/structural and Chromium regressions, standalone bundle sync, mandatory Quality gate and changelog. Local git clone unavailable (DNS); exact-head CI and promotion pending.
+
 ## 2026-11-02 — Weighted leave-one-out retained-row reliability (MATH-WLS-AREA-090)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** The 3×2 weighted least-squares panel now reports the normalized determinant magnitude (geometric area) of the two rows retained after each observation is removed. Values are in [0,1], independent of row magnitudes and weights. Deletion predictions, residuals and coefficient shifts are unavailable if the retained-row area is ≤ 1e-8, avoiding misleading near-singular results. This is a numerical screen, not a certified condition number or statistical interval. No new buttons or saved-project schema changes.

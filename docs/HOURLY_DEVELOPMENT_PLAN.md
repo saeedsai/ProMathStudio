@@ -1,6 +1,21 @@
+## 2026-11-02 — Bounded midpoint subgrid root recovery (MATH-ROOT-MIDPOINT-083)
+
+**Implemented on dev; exact-head CI and release pending.** Scalar root sampling now probes one midpoint per coarse interval and bisects each finite half-interval independently, recovering some pairs of crossings hidden by equal-sign coarse endpoints. It reports midpoint probe and opposite-sign interval counts in the accessible Numerical Methods output. It retains finite-residual acceptance, discontinuity rejection, plateau classification, 20–1600 sampling bounds, offline standalone parity and saved-project compatibility. Midpoint probes cannot guarantee all roots, and additional evaluations are bounded by the configured interval count.
+
+**Last verified release:** [PR #150](https://github.com/saeedsai/ProMathStudio/pull/150), dev=main=`86aedc4d01e3f49d8be01390de23e813e2a80d64`; [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41399058668), [post-merge dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41399073563) and [Pages deployment](https://github.com/saeedsai/ProMathStudio/actions/runs/41399057924) succeeded on that previous SHA. Hosted interaction remains independently unverified. These runs do not certify MATH-ROOT-MIDPOINT-083.
+
+**NEXT FIVE concrete features (status, dependencies, acceptance tests):**
+1. **P0 — Midpoint exact-head QA/repair (pending).** Full structural/unit and mandatory Chromium at exact dev SHA, paired roots 0.21/0.24 in one coarse interval, finite-jump rejection, plateau, ordinary/tiny roots, offline parity, no page errors, keyboard and 390/768/1280px recovery.
+2. **P0 — Authorized dev→main promotion (blocked on QA).** Inspect exact diff, require green dev and PR Quality plus required approvals, ordinary PR merge, verify exact main Quality and Pages, attempt hosted critical path.
+3. **P1 — Reusable bounded UI controller extraction (planned).** Extract one remaining inline controller into src, preserve offline build parity, saved-project round-trip, keyboard/mobile behavior and measure bundle/load budget.
+4. **P1 — Weighted least-squares perturbation screening (planned).** Near-rank and extreme-weight reference tests, finite stable results or explicit failure, negative/recovery Chromium and no unsupported uncertainty claim.
+5. **P1 — Next audited mathematical gap (planned).** Implement highest-priority feasible reusable numerical/symbolic capability with reference, singularity, invalid-input and responsive Chromium regressions.
+
+**Execution checkpoint (2026-11-02 07:24 Europe/Stockholm):** Started dev=main=`86aedc4d01e3f49d8be01390de23e813e2a80d64`, no open PR, only dev/main. Read current AGENTS, living plan, frozen inventory and exact-head Quality/Pages evidence. Local GitHub DNS unavailable; connector-based atomic dev commit and GitHub Actions are the QA path. Historical 166 gaps/95 partial features remain the frozen baseline.
+
 ## 2026-11-02 — Underflow-safe scalar root bracketing (MATH-ROOT-SIGN-082)
 
-**Implemented on dev; exact-head CI and release pending.** Bisection compares signs of finite residuals directly rather than multiplying residuals, which can underflow to zero for very small nonzero function values and silently skip real roots. The existing absolute-residual gate still rejects finite jumps; no global completeness claim. Adds source/bundle parity and focused Chromium tiny-scale reference, discontinuity, keyboard/focus and 390/768/1280px recovery tests.
+**Released via PR #150 at `86aedc4d01e3f49d8be01390de23e813e2a80d64`.** Bisection compares signs of finite residuals directly rather than multiplying residuals, which can underflow to zero for very small nonzero function values and silently skip real roots. The existing absolute-residual gate still rejects finite jumps; no global completeness claim. Adds source/bundle parity and focused Chromium tiny-scale reference, discontinuity, keyboard/focus and 390/768/1280px recovery tests.
 
 **Last verified release:** [PR #149](https://github.com/saeedsai/ProMathStudio/pull/149), dev=main=`185ec735ba66354999560b5e4bef4bb395ba3692`. [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41393095448), [post-merge dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41393103474), [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41393094371) succeeded for this prior SHA; hosted interactions not independently certified.
 

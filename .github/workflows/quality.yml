@@ -194,6 +194,8 @@ jobs:
         run: python tests/smoke_scalar_root_residuals.py
       - name: Scalar root constant plateau classification and recovery regression
         run: python tests/smoke_scalar_root_plateaus.py
+      - name: Scalar root one-sided domain slope and responsive recovery regression
+        run: python tests/smoke_scalar_root_one_sided_slopes.py
       - name: Scalar root conditioning advisory and numerical/UI regression
         run: python tests/smoke_scalar_root_conditioning.py
       - name: Scalar root steep-bracket refinement, boundary and jump regression

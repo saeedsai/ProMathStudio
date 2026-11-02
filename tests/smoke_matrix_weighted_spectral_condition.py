@@ -55,6 +55,14 @@ def main():
                 "[[1,0],[1,1],[1,2]],[1,2,9],[1,1,0.01]).spectralCondition2")
             assert math.isclose(value, 2.5904639930794775, rel_tol=1e-11), value
             assert not page.evaluate("() => document.documentElement.scrollWidth > innerWidth + 1"), width
+        # Near-dependent columns with a genuine small residual must not
+        # produce a false numerical orthogonality rejection.
+        near_fit = page.evaluate("() => MathStudio.matrixTools.weightedLeastSquares("
+            "[[1,1],[1,1.00000001],[1,1.00000002]],"
+            "[1,0.99999999,0.999999982],[1,1,1])")
+        assert abs(near_fit["solution"][0] - 1.9) < 1e-6, near_fit
+        assert abs(near_fit["solution"][1] + 0.9) < 1e-6, near_fit
+        assert near_fit["normalResidual"] >= 0, near_fit
         # Exercise the near-rank warning in the real browser controller.
         for i,v in enumerate(("1","1","1","1.0000000001","1","1.0000000002")):
             page.locator("#mat-grid input").nth(i).fill(v)

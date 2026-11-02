@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted design spectral condition (MATH-WLS-SPECTRAL-094)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** The bounded real 3×2 weighted least-squares fit now estimates the 2-norm condition of the weighted design sqrt(W/max(W))·A using scaled column norms and a stable cross-product, without subtracting nearly equal small Gram eigenvalues. This quantifies near-rank numerical sensitivity, but is not a certified coefficient-error bound or statistical uncertainty; it depends on parameter units and column scaling. Existing rank checks, saved projects and offline distribution remain unchanged.
+
+**Prior release reconciled:** [PR #161](https://github.com/saeedsai/ProMathStudio/pull/161) merged; dev=main `aa49c2121c16b6b5d170e5fbd94dd44efd928375`; [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41470848664), [dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41470867553) and [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41470846607) succeeded. Hosted interaction independently unverified; branches unprotected.
+
+**NEXT FIVE concrete features (priority, dependencies, acceptance tests):**
+1. **P0 — Spectral condition exact-head QA and repair (in progress; depends on QR).** Orthogonal, weighted, near-rank, column-scaled and extreme-weight analytical references, singular/invalid rejection, source/bundle parity, keyboard and Chromium 390/768/1280 recovery without runtime errors.
+2. **P0 — Quality-gated dev→main promotion (pending exact-head CI).** Inspect exact candidate, diff and PR required checks, merge normally only when green, verify main/dev Quality and Pages deployment and hosted behavior where supported.
+3. **P1 — Weighted QR near-rank coefficient accuracy (planned; depends on QR).** Compare solutions and backward residuals against independent analytic/high-precision references at several separations, or explicit rank failure; browser recovery.
+4. **P1 — Bounded UI controller extraction (planned; depends on standalone build).** Preserve byte-identical build, project round-trip, keyboard/mobile and bundle-size benchmark.
+5. **P1 — Scalar root aliasing hardening (planned; depends on numerical solver).** Oscillatory paired-root and discontinuity references, honest sampling guidance, invalid input and Chromium tests.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, plan, frozen inventory, unified and engineering plans, exact dev/main and latest CI/Pages. Started synchronized `aa49c2121c16b6b5d170e5fbd94dd44efd928375`, no open PR, exactly two unprotected branches. Local git clone blocked by github.com DNS resolution. Implemented numerical/UI changes, source/bundle parity, analytical/negative and mandatory responsive browser regressions, living plan and changelog. Exact-head CI and release verification pending.
+
 ## 2026-11-02 — Weighted log-weight sensitivity (MATH-WLS-WEIGHT-093)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** Existing bounded real 3×2 weighted least-squares now reports each observation's local fitted-coefficient derivative with respect to log(weight), holding A, b and the other weights fixed. Reuses QR RHS response: d x / d log(w_i) = -response_i × (A_i x - b_i). Not an exact finite-weight-change prediction, statistical uncertainty or error bound. Added independent closed-form, central finite-difference, scale-invariance, exact-fit, near-rank and failure references, mandatory responsive Chromium, and standalone parity; saved-project schema unchanged.

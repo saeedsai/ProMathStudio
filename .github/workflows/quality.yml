@@ -82,6 +82,8 @@ jobs:
         run: python tests/smoke_matrix_weighted_effective_count.py
       - name: Weighted log-weight coefficient response and responsive regression
         run: python tests/smoke_matrix_weighted_log_weight.py
+      - name: Weighted spectral condition near-rank and mobile regression
+        run: python tests/smoke_matrix_weighted_spectral_condition.py
       - name: Saved Data Tables selection round-trip and rollback regression
         run: python tests/smoke_project_table_selection.py
       - name: Graph dataset round-trip identity and rollback regression

@@ -2,6 +2,7 @@
 
 Recent entries are listed here (newest first). Earlier release notes through 2026-10-29 are kept verbatim in [docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md](docs/archive/CHANGELOG_ARCHIVE_2026-10-29.md). Entries marked *unreleased* or *dev* are not yet confirmed live; see [the living plan](docs/HOURLY_DEVELOPMENT_PLAN.md) for verification evidence.
 
+- 2026-11-02 (MATH-ROOT-SAMPLING-078, implemented on dev; QA/release pending): Added configurable 20–1600 scalar root sampling intervals, grid spacing and oscillatory/even-root aliasing warnings; accessible invalid/fractional/empty-input recovery, scalar-only UI, source/bundle parity and mandatory Chromium coarse/fine numerical, plateau, jump and mobile tests. No global completeness guarantee.
 - 2026-11-02 (MATH-ROOT-BRACKET-077, implemented on dev; QA/release pending): Bisection now refines steep sign-change brackets until actual residual tolerance or floating-point resolution, rather than treating a narrow x-interval as sufficient. Preserves post-rounding residual validation and jump rejection. Adds offline source parity and mandatory Chromium steep/endpoint/smooth/tangent/jump/mobile recovery regression.
 
 - 2026-11-02 (MATH-WLS-GUIDANCE-076, implemented on dev; exact-head QA/release pending): Clarified 3×2 weighted least-squares scope, positive relative weights, common-scale invariance, units and uncertainty limitations in accessible input guidance. Added direct numerical rank/scale/negative tests and mandatory responsive Chromium guidance/recovery regression; offline standalone parity preserved.

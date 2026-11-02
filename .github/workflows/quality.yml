@@ -196,6 +196,8 @@ jobs:
         run: python tests/smoke_scalar_root_conditioning.py
       - name: Scalar root steep-bracket refinement, boundary and jump regression
         run: python tests/smoke_scalar_root_bracket_precision.py
+      - name: Scalar root sampling control, oscillatory advisory and responsive regression
+        run: python tests/smoke_scalar_root_sampling.py
       - name: Adaptive Simpson quadrature numeric and UI regression
         run: python tests/smoke_quadrature_adaptive.py
       - name: Linear interpolation reference and browser integration regression

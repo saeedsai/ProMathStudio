@@ -35,6 +35,11 @@ def main():
             assert "not a certified coefficient-error" in result.inner_text()
             assert "Coefficient roundoff amplification screen" in result.inner_text()
             assert "Relative weighted squared-residual shares (rows 1–3)" in result.inner_text()
+            assert "Weighted fitted values (rows 1–3)" in result.inner_text()
+            fitted = page.evaluate("() => MathStudio.matrixTools.weightedLeastSquares("
+                "[[1,0],[1,1],[1,2]],[1,2,9],[1,1,0.01]).fittedValues")
+            assert all(math.isclose(v, ref, rel_tol=1e-10) for v, ref in
+                zip(fitted, (33/35, 74/35, 23/7))), fitted
             shares = page.evaluate("() => MathStudio.matrixTools.weightedLeastSquares("
                 "[[1,0],[1,1],[1,2]],[1,2,9],[1,1,0.01]).weightedResidualShares")
             assert all(math.isclose(v, ref, rel_tol=1e-10) for v, ref in

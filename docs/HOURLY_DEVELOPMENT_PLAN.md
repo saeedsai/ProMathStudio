@@ -5,7 +5,7 @@
 **Last verified release:** [PR #149](https://github.com/saeedsai/ProMathStudio/pull/149), dev=main=`185ec735ba66354999560b5e4bef4bb395ba3692`. [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41393095448), [post-merge dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41393103474), [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41393094371) succeeded for this prior SHA; hosted interactions not independently certified.
 
 **NEXT FIVE concrete features (status, dependencies, acceptance tests):**
-1. **P0 — Underflow-safe bracketing exact-head QA (pending).** Full mandatory Python and Chromium at the exact dev SHA; reference `10^(-200)*(x-0.123456789)`, 1e-211 tolerance, finite jump rejection, ordinary roots, offline parity, accessible 390/768/1280px recovery and no page errors.
+1. **P0 — Underflow-safe bracketing exact-head QA (pending).** Full mandatory Python and Chromium at the exact dev SHA; reference `10^(-100)*10^(-100)*(x-0.123456789)`, 1e-211 tolerance, finite jump rejection, ordinary roots, offline parity, accessible 390/768/1280px recovery and no page errors.
 2. **P0 — Quality-gated dev→main promotion (blocked on QA).** Inspect exact diff, require green dev/PR checks and approvals, ordinary PR merge; confirm exact main Quality and Pages, attempt hosted critical path.
 3. **P1 — Bounded UI controller extraction (planned).** Extract one controller into `src/`; verify offline rebuild parity, saved-project round-trip, keyboard/mobile navigation and bundle-size budget.
 4. **P1 — Weighted least-squares perturbation screening (planned).** Near-rank and extreme-weight numerical reference tests; stable finite outputs or explicit failures, responsive UI and negative recovery.

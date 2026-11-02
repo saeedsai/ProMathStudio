@@ -24,14 +24,14 @@ def main():
 
         # The bracket's residuals are around 1e-200, but their product
         # underflows to zero in binary64. Direct sign comparison must refine it.
-        tiny = solve("10^(-200)*(x-0.123456789)")
+        tiny = solve("10^(-100)*10^(-100)*(x-0.123456789)")
         assert any(abs(root-0.123456789) < 2e-8 for root in tiny["roots"]), tiny
         assert tiny["residuals"] and all(0 <= r <= 1e-211 for r in tiny["residuals"]), tiny
         assert tiny["maxResidual"] == max(tiny["residuals"]), tiny
 
         # A tiny finite jump has opposite signs but no zero; residual validation
         # must still reject it rather than treating the sign change as a root.
-        jump = solve("10^(-200)*(x-0.12345)/sqrt((x-0.12345)^2)")
+        jump = solve("10^(-100)*10^(-100)*(x-0.12345)/sqrt((x-0.12345)^2)")
         assert jump["roots"] == [] and jump["maxResidual"] is None, jump
         regular = solve("x-0.123456789", 1e-9)
         assert any(abs(x-0.123456789) < 2e-8 for x in regular["roots"]), regular
@@ -39,7 +39,7 @@ def main():
         page.locator('[data-workspace="editor"]').click()
         page.locator("#num-details").evaluate("(el) => el.open=true")
         page.locator("#num-method").select_option("scalar")
-        page.locator("#num-expression").fill("10^(-200)*(x-0.123456789)")
+        page.locator("#num-expression").fill("10^(-100)*10^(-100)*(x-0.123456789)")
         page.locator("#num-start").fill("0")
         page.locator("#num-end").fill("1")
         page.locator("#num-samples").fill("351")

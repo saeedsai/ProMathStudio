@@ -376,3 +376,7 @@ jobs:
         run: python tests/smoke_ode_system.py
       - name: Backward coupled RK4 numerical and browser regression
         run: python tests/smoke_ode_system_backward.py
+      - name: Weighted proportional RHS box analytical and corner regression
+        run: python -m unittest discover -s tests -p 'test_matrix_weighted_rhs_percent.py'
+      - name: Weighted proportional RHS box responsive Chromium regression
+        run: python tests/smoke_matrix_weighted_rhs_percent.py

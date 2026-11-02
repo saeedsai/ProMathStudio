@@ -11,6 +11,8 @@
 4. **P1 — Weighted least-squares perturbation screening (planned).** Near-rank and extreme-weight reference tests, finite stable results or explicit failure, negative/recovery Chromium and no unsupported uncertainty claim.
 5. **P1 — Next audited mathematical gap (planned).** Implement highest-priority feasible reusable numerical/symbolic capability with reference, singularity, invalid-input and responsive Chromium regressions.
 
+**QA repair (2026-11-02):** [dev Quality 41399943211](https://github.com/saeedsai/ProMathStudio/actions/runs/41399943211) passed structural/unit and earlier Chromium steps but failed the new smoke's exact decimal text assertion: the valid 0.24 root displayed as 0.2399999976158 with residual 7.153e-11. Replaced the brittle display substring check with numeric tolerance checks on parsed displayed roots, preserving the direct reference and finite-residual tests. A new exact-head CI run is required before promotion.
+
 **Execution checkpoint (2026-11-02 07:24 Europe/Stockholm):** Started dev=main=`86aedc4d01e3f49d8be01390de23e813e2a80d64`, no open PR, only dev/main. Read current AGENTS, living plan, frozen inventory and exact-head Quality/Pages evidence. Local GitHub DNS unavailable; connector-based atomic dev commit and GitHub Actions are the QA path. Historical 166 gaps/95 partial features remain the frozen baseline.
 
 ## 2026-11-02 — Underflow-safe scalar root bracketing (MATH-ROOT-SIGN-082)

@@ -57,7 +57,11 @@ def main():
             page.keyboard.press("Enter")
             text = output.inner_text()
             assert "Midpoint probes: 20; extra opposite-sign intervals:" in text, text
-            assert "0.21" in text and "0.24" in text, text
+            # Parse displayed values numerically: a certified approximate root
+            # need not print as the exact decimal 0.24.
+            shown = [float(v.strip()) for v in text.splitlines()[0].split(":", 1)[1].split(",")]
+            for target in (0.21, 0.24):
+                assert any(abs(x-target) < 1e-5 for x in shown), (target, shown)
             assert not output.evaluate("(e) => e.classList.contains('error')"), text
             assert not page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"), width
         page.locator("#num-samples").fill("19")

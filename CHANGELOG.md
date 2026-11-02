@@ -1,5 +1,8 @@
 # Changelog
 
+- 2026-11-02 (MATH-WLS-LOO-087, implemented on dev; CI/release pending): Added weighted 3×2 QR-based leave-one-out prediction residuals and weighted PRESS, with unavailable classification for singular/high-leverage row removal; direct refit, weight scaling, offline parity and mandatory responsive Chromium regressions. No uncertainty certification.
+- 2026-11-02 (MATH-ROOT-QUARTER-086, released via PR #154): Verified synchronized dev/main 9d1fcd13b5670ffed1f70fe8eab7ab00d522118c, green main/dev Quality and successful Pages deployment; hosted interaction independently unverified.
+
 - 2026-11-02 (MATH-ROOT-QUARTER-086, implemented on dev; QA/release pending; existing sampling test updated for stronger 60-cycle density reference after initial CI failure): Bounded quarter-grid probes reduce paired-root aliasing beyond midpoint sampling, retaining strict residual checks, jump rejection and plateau behavior. Adds diagnostics, source/bundle parity and mandatory responsive Chromium regressions; not globally exhaustive.
 - 2026-11-02 (MATH-WLS-RHS-085, released via PR #153): Verified synchronized dev/main b6776a3edc25efd078e54b9fbe07b582078f22e8, green Quality and successful Pages deployment; hosted interaction unverified.
 

@@ -337,9 +337,26 @@ function weightedLeastSquares(A,b,weights){
  if(rhsResponseRows.some(row=>!row.every(Number.isFinite)))
   throw Error('Weighted RHS response exceeded finite floating-point range.');
  const rhsResponseGuidance='Each row pair is the fitted coefficient change for a +1-unit change in that observation b, holding A and weights fixed. This linear-response diagnostic is not a statistical uncertainty or error bound.';
+ // Weighted leave-one-out identity: the prediction residual for row i
+ // when it is excluded from the fit is e_i/(1-h_i), where h_i is its
+ // weighted-design leverage. Avoid misleading divisions when removal
+ // makes the two-column fit singular or floating-point cancellation dominates.
+ const looResiduals=result.rowLeverages.map((h,i)=>{
+  const remaining=1-h;
+  if(!Number.isFinite(remaining)||remaining<=1e-10)return null;
+  const predictionResidual=errors[i]/remaining;
+  return Number.isFinite(predictionResidual)?predictionResidual:null;
+ });
+ let looWeightedPress=null;
+ if(looResiduals.every(x=>x!==null)){
+  const scaledPress=Math.hypot(...looResiduals.map((x,i)=>x*scales[i]));
+  const press=scaledPress*scaledPress*maxWeight;
+  if(Number.isFinite(press))looWeightedPress=press;
+ }
+ const looGuidance='Leave-one-out prediction residuals compare each excluded observation with the fit from the other two. Unavailable means the removed-row fit is singular or too close to the floating-point leverage limit. PRESS is the weighted sum of squared leave-one-out residuals, not a statistical uncertainty estimate.';
  return {...result,weightedResidualSquared,weightScale:maxWeight,
   residuals:errors,weights:w.slice(),weightRatio,conditioningAdvisory,leverageGuidance,
-  rhsResponseRows,rhsResponseGuidance};
+  rhsResponseRows,rhsResponseGuidance,looResiduals,looWeightedPress,looGuidance};
 }
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
@@ -1067,7 +1084,7 @@ function calculate(operation){
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
    'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
-   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual)+'\nRelative weight ratio (max/min): '+format(value.weightRatio)+'\nWeighted design QR diagonal spread (heuristic): '+format(value.qrDiagonalSpread)+'\nWeighted design leverage (rows 1–3): '+value.rowLeverages.map(format).join(', ')+'\n'+value.leverageGuidance+'\nRHS +1-unit response (rows 1–3, Δx0/Δx1): '+value.rhsResponseRows.map(row=>'['+row.map(format).join(', ')+']').join('; ')+'\n'+value.rhsResponseGuidance+'\n'+value.conditioningAdvisory:'')+conditionLabel;
+   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual)+'\nRelative weight ratio (max/min): '+format(value.weightRatio)+'\nWeighted design QR diagonal spread (heuristic): '+format(value.qrDiagonalSpread)+'\nWeighted design leverage (rows 1–3): '+value.rowLeverages.map(format).join(', ')+'\n'+value.leverageGuidance+'\nRHS +1-unit response (rows 1–3, Δx0/Δx1): '+value.rhsResponseRows.map(row=>'['+row.map(format).join(', ')+']').join('; ')+'\n'+value.rhsResponseGuidance+'\nLeave-one-out prediction residuals (rows 1–3): '+value.looResiduals.map(x=>x===null?'unavailable':format(x)).join(', ')+'\nWeighted leave-one-out PRESS: '+(value.looWeightedPress===null?'unavailable':format(value.looWeightedPress))+'\n'+value.looGuidance+'\n'+value.conditioningAdvisory:'')+conditionLabel;
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;syncFactorSelectors(null);output.classList.add('error');output.textContent=error.message;return null;}
 }

@@ -84,6 +84,8 @@ jobs:
         run: python tests/smoke_matrix_weighted_log_weight.py
       - name: Weighted RHS box sensitivity exact corners and mobile regression
         run: python tests/smoke_matrix_weighted_rhs_box.py
+      - name: Weighted design singular values near-rank and mobile regression
+        run: python tests/smoke_matrix_weighted_singular_values.py
       - name: Weighted spectral condition near-rank and mobile regression
         run: python tests/smoke_matrix_weighted_spectral_condition.py
       - name: Weighted column-normalized condition and mobile regression

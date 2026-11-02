@@ -1,3 +1,20 @@
+## 2026-11-02 — Weighted design singular values (MATH-WLS-SINGULAR-097)
+
+**Implemented on dev; exact-head CI/PR/Pages pending.** The bounded 3×2 weighted least-squares calculator displays descending singular values of sqrt(w/max(w))·A, reusing existing scaled geometry and cross-product area. The smaller singular value uses a stable product identity rather than subtracting close Gram eigenvalues near rank deficiency. Common positive weight scaling leaves the values unchanged, but column units matter; not a coefficient-error or statistical uncertainty guarantee. No new action button or duplicate solver. New analytical near-rank, orthogonal, invalid-input and source/bundle tests, plus mandatory responsive Chromium keyboard/error-recovery test.
+
+**Prior release reconciliation:** [PR #164](https://github.com/saeedsai/ProMathStudio/pull/164) merged; dev=main `de6afa3de143b83ea0d3f82ef8535fe363c47b48`. [Source dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41487322617) and [PR Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41488570843) passed; [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41489685375) and [Pages deployment](https://github.com/saeedsai/ProMathStudio/actions/runs/41489684886) succeeded for merge `de6afa3de143b83ea0d3f82ef8535fe363c47b48`. Post-merge dev Quality [41489704169](https://github.com/saeedsai/ProMathStudio/actions/runs/41489704169) was cancelled, not green. Hosted interaction not independently verified; branches unprotected.
+
+**NEXT FIVE concrete features (priority, dependencies, acceptance tests):**
+1. **P0 — Near-rank QR coefficient accuracy (planned; depends on shared QR).** Independent high-precision references for 1e-4..1e-9 separations, weighted coefficients and backward residuals, explicit rank failure and Chromium recovery.
+2. **P1 — Bounded UI controller extraction (planned; depends on standalone build).** Preserve byte-identical bundle rebuild, saved-project round-trip, keyboard/mobile focus and size benchmark.
+3. **P1 — Scalar root aliasing hardening (planned; depends on root solver).** Paired oscillatory roots and discontinuity references, bounded sampling warnings, invalid-input and responsive Chromium tests.
+4. **P1 — Saved-project Matrix/Data compatibility (planned; depends on project schema).** Legacy/current fixtures, malformed nested import atomic rollback, focus and 390px browser round-trip.
+5. **P1 — Engineering canonical solver catalog (planned; depends on shared registry).** One source-backed audited tool entry with unique ID, truthful status, reused solver, no duplicate buttons, offline and mobile/keyboard tests.
+
+**Release gate:** Verify exact new dev Quality including mandatory Chromium, inspect PR diff and approvals, ordinary dev→main PR merge only if green; then main Quality, Pages and hosted behavior where possible.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, frozen inventory, living plan, architecture and latest CI/CD. Started dev=main `de6afa3de143b83ea0d3f82ef8535fe363c47b48`, only two branches, no open PR. Git clone unavailable (DNS); used connected GitHub repository. Isolated V8 near-rank/orthogonal/weight-scale references passed. Full local Python/Chromium unavailable; exact-head CI pending. Historical 166 gaps/95 partial features unchanged.
+
 ## 2026-11-02 — Weighted RHS independent box sensitivity (MATH-WLS-RHS-BOX-096)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** The bounded real 3×2 weighted least-squares calculator now reports the exact maximum absolute change in each fitted coefficient when all three RHS observations may independently vary by at most ±1 unit. It reuses the QR-derived RHS response (no normal-equation solver), sums its absolute coefficients and verifies all eight box corners. For A=[[1,0],[1,1],[1,2]], b=[1,2,9], weights=[1,1,0.01], the bounds are 107/105 and 68/35. This is deterministic for fixed A and weights, not a statistical confidence interval or a bound for design/weight changes.

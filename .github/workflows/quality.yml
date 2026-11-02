@@ -72,6 +72,8 @@ jobs:
         run: python tests/smoke_matrix_weighted_loo.py
       - name: Weighted leave-one-out coefficient influence, keyboard and mobile regression
         run: python tests/smoke_matrix_weighted_loo_shifts.py
+      - name: Weighted leave-one-out prediction direct-refit and mobile regression
+        run: python tests/smoke_matrix_weighted_predictions.py
       - name: Saved Data Tables selection round-trip and rollback regression
         run: python tests/smoke_project_table_selection.py
       - name: Graph dataset round-trip identity and rollback regression

@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted leave-one-out predicted observations (MATH-WLS-PREDICTION-089)
+
+**Implemented on dev; exact-head CI, PR and Pages pending.** The bounded 3×2 weighted least-squares result now displays each excluded-row prediction in original observation units as b_i plus the existing fitted-minus-observed leave-one-out residual. It reuses the QR kernel, does not add an action button, and preserves singular/high-leverage unavailable status. The guidance explains residual sign and the non-statistical interpretation. Offline HTML and saved-project schema preserved.
+
+**Prior release reconciled:** [PR #156](https://github.com/saeedsai/ProMathStudio/pull/156), dev=main `2409311ea4d60eb7031b633aa88017427e388e8b`; [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41435243729), [post-merge dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41435260602), [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41435242998) succeeded. Hosted interaction not independently verified; prior checks do not certify this change.
+
+**NEXT FIVE concrete features (priority, dependencies, acceptance tests):**
+1. **P0 — Predicted-value exact-head QA/repair (pending).** Direct-deletion predictions [-5,5,3], sign convention, weight scaling, singular/unavailable, invalid inputs, no input mutation, source/bundle byte parity, mandatory Chromium 390/768/1280px keyboard, recovery and no page errors.
+2. **P0 — Safe dev→main promotion (blocked on exact-head CI).** Inspect exact diff, require green dev/PR Quality and approvals, ordinary PR merge, then verify main Quality, Pages and hosted critical path if reachable.
+3. **P1 — Weighted near-rank reliability (planned; QR references).** Near-dependent 3×2 and extreme-weight tests; require independent reference agreement or explicit unavailable/failure diagnostics.
+4. **P1 — Bounded controller extraction (planned; offline baseline).** Move one inline controller into src with deterministic standalone rebuild, saved-project round-trip, keyboard/mobile and bundle-size tests.
+5. **P1 — Audited mathematical gap closure (planned; frozen inventory).** Implement a reusable missing numerical/symbolic operation with analytic reference, boundary/singular/invalid-input and Chromium tests.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, unified plan, living plan, frozen audit and latest CI/Pages; started synchronized dev/main `2409311ea4d60eb7031b633aa88017427e388e8b`, no open PR. Added source/UI, structural/Node and Chromium tests, mandatory Quality step, standalone HTML and changelog. Exact-head CI/PR/Pages pending. Historical 166 gaps/95 partial features remain frozen baseline.
+
 ## 2026-11-02 — Weighted leave-one-out coefficient influence (MATH-WLS-DELETE-088)
 
 **Implemented on dev; exact-head CI, PR and Pages pending.** For the bounded 3×2 weighted least-squares fit, show the two coefficient changes caused by removing each observation. Reuse QR RHS response and existing leave-one-out residual: Δβ_{(-i)} = (R⁻¹Qᵀ)_i × eᵢ/(1−hᵢ), with original observation scaling. An unavailable leave-one-out residual also makes the corresponding coefficient shift unavailable. This is fixed-design influence, not a confidence interval. Preserve the existing fit, offline HTML, project schema, and contextual actions.

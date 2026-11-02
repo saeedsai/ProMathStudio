@@ -1,3 +1,6 @@
+- 2026-11-02 (MATH-WLS-PREDICTION-089, implemented on dev; CI/release pending): Added weighted excluded-row predicted values using existing QR leave-one-out residuals, explicit sign convention and singular-unavailable handling; direct-refit numerical references, offline parity and mandatory responsive Chromium regression.
+- 2026-11-02 (MATH-WLS-DELETE-088, released via PR #156): Synchronized dev/main 2409311ea4d60eb7031b633aa88017427e388e8b; main/dev Quality and Pages succeeded, hosted interaction unverified.
+
 # Changelog
 
 - 2026-11-02 (MATH-WLS-DELETE-088, implemented on dev; CI/release pending): Added QR-reused weighted leave-one-out coefficient influence shifts for 3×2 fits, explicit singular-unavailable and fixed-design limitations; direct-refit/weight-scale numerical references, source/bundle parity and mandatory responsive Chromium regression.

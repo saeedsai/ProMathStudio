@@ -1,3 +1,18 @@
+## 2026-11-02 — Two-scale cusp root diagnostics (MATH-ROOT-CUSP-081)
+
+**Implemented on dev; exact-head CI and release pending.** Root diagnostics compare opposing one-sided secants at full and half step before flagging possible non-smooth cusps. Smooth tangential `x^2` is not flagged merely for opposite slopes; `abs(x)` and `sqrt(abs(x))` are screened. Per-root `localSlopeWarnings` and accessible UI count are heuristic, not differentiability certificates. Plateau metadata remains empty, one-sided domain estimates remain intact; global root completeness is not claimed.
+
+**Last verified release:** [PR #148](https://github.com/saeedsai/ProMathStudio/pull/148), dev=main=`c232baaa8ace883fd0fddf0f65a8ee61e7133ff0`. [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41387579757), [post-merge dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41387588999), [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41387579556) succeeded for prior SHA only; hosted interactions not independently certified.
+
+**NEXT FIVE concrete features (status, dependencies, acceptance tests):**
+1. **P0 — Cusp exact-head QA (pending).** Full structural and mandatory Chromium at precise dev SHA; `abs(x)`, `sqrt(abs(x))`, `x^2`, `x^4`, `sqrt(x)`, jump/plateau, offline parity, no page errors, 390/768/1280px recovery.
+2. **P0 — Quality-gated dev→main release (blocked on QA).** Inspect exact diff, green dev/PR checks and required approvals; ordinary PR merge then exact main Quality and Pages verification.
+3. **P1 — Bounded controller extraction (planned).** Modularize one UI controller with standalone rebuild, saved-project round-trip, keyboard/mobile and size budget tests.
+4. **P1 — Weighted least-squares perturbation sensitivity (planned).** Near-rank/weight-scaling references, stable results or explicit error, negative and mobile tests.
+5. **P1 — Audited numerical gap closure (planned).** Select reusable solver gap; numerical reference, singularity, invalid input and Chromium tests.
+
+**Execution checkpoint (2026-11-02 06:01 Europe/Stockholm):** Started dev=main=`c232baaa8ace883fd0fddf0f65a8ee61e7133ff0`, no open PR, prior exact-head Quality/Pages green. Read AGENTS, plan, frozen audit and current source/tests. Local git DNS unavailable; GitHub connector used for atomic dev tree/commit. Historical 166 gaps/95 partial features remain baseline.
+
 ## 2026-11-02 — One-sided real-domain root sensitivity (MATH-ROOT-ONE-SIDED-080)
 
 **Implemented on dev; exact-head CI and release pending.** Scalar root sensitivity now uses forward/backward secants where the opposite evaluation is outside the real-valued domain or at the search boundary. Per-root `localSlopeMethods` aligns with existing magnitudes, UI counts one-sided estimates, and guidance explicitly warns these are not differentiability proofs or certified root-position bounds. Constant sampled plateaus remain unclassified as discrete roots. Standalone parity and focused structural and mandatory Chromium positive/negative/mobile/recovery tests added.

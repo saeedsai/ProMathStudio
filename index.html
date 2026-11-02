@@ -6023,9 +6023,9 @@ function leastSquares(A,b){
  // When the fit residual is small, cancellation in A*x-b can inflate
  // the normalized normal-equation dot product. Allow its expected binary64
  // roundoff scale while keeping the strict 1e-8 gate for ordinary fits.
- const orthogonalityTolerance=Math.max(1e-8,
+ const orthogonalityTolerance=orthogonalityCheckSkipped?null:Math.max(1e-8,
   32*Number.EPSILON/Math.max(relativeResidual,Number.MIN_VALUE));
- if(normalResidual>orthogonalityTolerance)
+ if(!orthogonalityCheckSkipped&&normalResidual>orthogonalityTolerance)
   throw Error('Least-squares solution failed its orthogonality check.');
  const orthogonalityGuidance=orthogonalityCheckSkipped?
   'Orthogonality check not evaluated because the relative fit residual is at or below 1e-12. Near-exact fit does not certify coefficient accuracy.':

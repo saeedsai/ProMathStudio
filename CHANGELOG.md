@@ -1,6 +1,6 @@
 # Changelog
 
-- 2026-11-02 (MATH-ROOT-QUARTER-086, implemented on dev; QA/release pending): Bounded quarter-grid probes reduce paired-root aliasing beyond midpoint sampling, retaining strict residual checks, jump rejection and plateau behavior. Adds diagnostics, source/bundle parity and mandatory responsive Chromium regressions; not globally exhaustive.
+- 2026-11-02 (MATH-ROOT-QUARTER-086, implemented on dev; QA/release pending; existing sampling test updated for stronger 60-cycle density reference after initial CI failure): Bounded quarter-grid probes reduce paired-root aliasing beyond midpoint sampling, retaining strict residual checks, jump rejection and plateau behavior. Adds diagnostics, source/bundle parity and mandatory responsive Chromium regressions; not globally exhaustive.
 - 2026-11-02 (MATH-WLS-RHS-085, released via PR #153): Verified synchronized dev/main b6776a3edc25efd078e54b9fbe07b582078f22e8, green Quality and successful Pages deployment; hosted interaction unverified.
 
 - 2026-11-02 (MATH-WLS-RHS-085, implemented on dev; exact-head QA/release pending): Reused weighted 3×2 QR to report per-observation +1-unit RHS coefficient responses; fixed-design linear sensitivity only, not uncertainty. Adds numerical perturbation and scale-invariance references, source/bundle parity, mandatory responsive Chromium recovery regression.

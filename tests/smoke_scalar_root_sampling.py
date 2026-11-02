@@ -21,12 +21,16 @@ def main():
                     expr,'x',lo,hi,{tolerance:1e-9,samples})""",
                 [expr, samples, lo, hi])
 
-        coarse = solve("sin(2*pi*40*x)", 20)
-        fine = solve("sin(2*pi*40*x)", 800)
-        # Midpoint probes recover more roots on the coarse grid than before.
-        # Higher sampling density must still reveal additional roots.
+        # The new quarter-grid probes can recover all 81 roots of this
+        # 40-cycle reference even at 20 coarse intervals.
+        quarter_aligned = solve("sin(2*pi*40*x)", 20)
+        assert len(quarter_aligned["roots"]) >= 80, quarter_aligned
+        # A higher-frequency reference still aliases at coarse density.
+        # Preserve a strict fine > coarse test, rather than weakening it.
+        coarse = solve("sin(2*pi*60*x)", 20)
+        fine = solve("sin(2*pi*60*x)", 800)
         assert len(coarse["roots"]) >= 40, coarse
-        assert len(fine["roots"]) >= 80 and len(fine["roots"]) > len(coarse["roots"]), (
+        assert len(fine["roots"]) >= 120 and len(fine["roots"]) > len(coarse["roots"]), (
             len(coarse["roots"]), len(fine["roots"]))
         assert math.isclose(coarse["sampleSpacing"], 0.05)
         assert math.isclose(fine["sampleSpacing"], 0.00125)

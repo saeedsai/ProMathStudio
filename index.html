@@ -4943,7 +4943,7 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   if(sampled.every(y=>Number.isFinite(y)&&y===sampled[0])&&
      [Math.SQRT1_2,Math.sqrt(3)/3].every(t=>f(lo+(hi-lo)*t)===sampled[0])){
     const zero=sampled[0]===0;
-    return {type:'roots',variable,expression,roots:[],residuals:[],maxResidual:null,localSlopeMagnitudes:[],localSlopeMethods:[],minLocalSlope:null,
+    return {type:'roots',variable,expression,roots:[],residuals:[],maxResidual:null,localSlopeMagnitudes:[],localSlopeMethods:[],minLocalSlope:null,localSlopeWarnings:[],
       domain:[lo,hi],samples,tolerance,sampleSpacing:h,rootStatus:zero?'sampled-zero-plateau':'sampled-nonzero-plateau',
       note:(zero?'The residual is zero at all sampled and off-grid probes; non-isolated zeros are possible, but an identically zero function is not proven. No discrete roots are certified.':
         'The residual is equal and nonzero at all sampled and off-grid probes; an exactly constant function is not proven. A small residual alone does not certify a root.')+' '+samplingAdvisory};
@@ -4970,14 +4970,30 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   // A local finite-difference slope is only a sensitivity clue, never a
   // certified bound on |x - trueRoot|. Avoid derivative claims at jumps.
   const localSlopeMethods=[];
+  const localSlopeWarnings=[];
   const localSlopeMagnitudes=roots.map(x=>{
     const step=Math.max(1e-5*Math.max(1,Math.abs(x)),1e-6*(hi-lo));
     const a=Math.max(lo,x-step),b=Math.min(hi,x+step);
     const fx=f(x),fa=f(a),fb=f(b);
-    let slope=null,method='unavailable';
+    let slope=null,method='unavailable',warning='none';
     // Prefer a two-sided secant; fall back when a side is outside the real domain.
     if(a<x&&b>x&&Number.isFinite(fa)&&Number.isFinite(fb)){
       slope=(fb-fa)/(b-a);method='central';
+      // Opposite one-sided slopes also occur at smooth tangential roots.
+      // At half-step, smooth x^2 slopes shrink; |x| stays sharp and
+      // sqrt(|x|) grows sharper. This is not a differentiability proof.
+      const left=(fx-fa)/(x-a),right=(fb-fx)/(b-x);
+      const aa=x-(x-a)/2,bb=x+(b-x)/2;
+      const faa=f(aa),fbb=f(bb);
+      if(Number.isFinite(fx)&&Number.isFinite(faa)&&Number.isFinite(fbb)&&
+         Number.isFinite(left)&&Number.isFinite(right)&&left*right<0&&
+         Math.min(Math.abs(left),Math.abs(right))>1e-10){
+        const halfLeft=(fx-faa)/(x-aa),halfRight=(fbb-fx)/(bb-x);
+        if(Number.isFinite(halfLeft)&&Number.isFinite(halfRight)&&
+           halfLeft*left>0&&halfRight*right>0&&
+           Math.abs(halfLeft)>=0.7*Math.abs(left)&&
+           Math.abs(halfRight)>=0.7*Math.abs(right))warning='possible-cusp';
+      }
     }else if(b>x&&Number.isFinite(fx)&&Number.isFinite(fb)){
       slope=(fb-fx)/(b-x);method='forward';
     }else if(a<x&&Number.isFinite(fx)&&Number.isFinite(fa)){
@@ -4985,12 +5001,13 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
     }
     if(!Number.isFinite(slope)){slope=null;method='unavailable';}
     localSlopeMethods.push(method);
+    localSlopeWarnings.push(warning);
     return slope===null?null:Math.abs(slope);
   });
   const availableSlopes=localSlopeMagnitudes.filter(s=>s!==null);
   const minLocalSlope=availableSlopes.length?Math.min(...availableSlopes):null;
-  return {type:'roots',variable,expression,roots,residuals,maxResidual,localSlopeMagnitudes,localSlopeMethods,minLocalSlope,
-    domain:[lo,hi],samples,tolerance,sampleSpacing:h,note:'Candidate roots satisfy the requested absolute function-residual tolerance, not a certified root-position error bound. Local secant slopes, including one-sided estimates at domain edges, are scale-dependent heuristics, not proof of differentiability; they can mislead near flat roots or discontinuities. Unbracketed roots may still be missed.'+' '+samplingAdvisory};
+  return {type:'roots',variable,expression,roots,residuals,maxResidual,localSlopeMagnitudes,localSlopeMethods,minLocalSlope,localSlopeWarnings,
+    domain:[lo,hi],samples,tolerance,sampleSpacing:h,note:'Candidate roots satisfy the requested absolute function-residual tolerance, not a certified root-position error bound. Local secant slopes, including one-sided estimates at domain edges, are scale-dependent heuristics, not proof of differentiability; they can mislead near flat roots or discontinuities. A possible-cusp flag compares opposite one-sided secants at two scales and is not a mathematical certificate. Unbracketed roots may still be missed.'+' '+samplingAdvisory};
 }
 function gaussian(A,b){const n=b.length,rows=A.map((r,i)=>[...r,b[i]]);for(let col=0;col<n;col++){
   let pivot=col;for(let i=col+1;i<n;i++)if(Math.abs(rows[i][col])>Math.abs(rows[pivot][col]))pivot=i;
@@ -5249,7 +5266,7 @@ function runNumerical(){clearRootErrors();try{
     else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
   }
   lastNumeric=result;$('num-output').classList.remove('error');
-  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nSampling intervals: ${result.samples}; grid spacing: ${result.sampleSpacing.toExponential(3)}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\nMinimum local secant slope magnitude (heuristic): ${result.minLocalSlope===null?'n/a':result.minLocalSlope.toExponential(3)}\nOne-sided local slope estimates: ${result.localSlopeMethods.filter(method=>method==='forward'||method==='backward').length}\n${result.note}`:
+  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nSampling intervals: ${result.samples}; grid spacing: ${result.sampleSpacing.toExponential(3)}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\nMinimum local secant slope magnitude (heuristic): ${result.minLocalSlope===null?'n/a':result.minLocalSlope.toExponential(3)}\nOne-sided local slope estimates: ${result.localSlopeMethods.filter(method=>method==='forward'||method==='backward').length}\nPossible non-smooth cusp roots (heuristic): ${result.localSlopeWarnings.filter(flag=>flag==='possible-cusp').length}\n${result.note}`:
     result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
     result.type==='system'?`Converged: ${result.converged}\n${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('\n')}\nResidual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}\n${result.note}`:
       `${result.method}\n${result.rows.length} output rows\n${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'\n':''}${result.note}`;

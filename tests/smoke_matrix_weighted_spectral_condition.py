@@ -33,10 +33,25 @@ def main():
             assert not result.evaluate("(e) => e.classList.contains('error')"), result.inner_text()
             assert "Weighted design spectral condition estimate (2-norm)" in result.inner_text()
             assert "not a certified coefficient-error" in result.inner_text()
+            assert "Coefficient roundoff amplification screen" in result.inner_text()
+            assert "Relative weighted squared-residual shares (rows 1–3)" in result.inner_text()
+            shares = page.evaluate("() => MathStudio.matrixTools.weightedLeastSquares("
+                "[[1,0],[1,1],[1,2]],[1,2,9],[1,1,0.01]).weightedResidualShares")
+            assert all(math.isclose(v, ref, rel_tol=1e-10) for v, ref in
+                zip(shares, (1/105, 4/105, 100/105))), shares
             value = page.evaluate("() => MathStudio.matrixTools.weightedLeastSquares("
                 "[[1,0],[1,1],[1,2]],[1,2,9],[1,1,0.01]).spectralCondition2")
             assert math.isclose(value, 2.5904639930794775, rel_tol=1e-11), value
             assert not page.evaluate("() => document.documentElement.scrollWidth > innerWidth + 1"), width
+        # Exercise the near-rank warning in the real browser controller.
+        for i,v in enumerate(("1","1","1","1.0000000001","1","1.0000000002")):
+            page.locator("#mat-grid input").nth(i).fill(v)
+        for i,v in enumerate(("1","0.9999999999","0.9999999998")):
+            page.locator("#mat-rhs-grid input").nth(i).fill(v)
+        for i in range(3):
+            page.locator("#mat-weight-grid input").nth(i).fill("1")
+        page.locator("#mat-weighted-least-squares").click()
+        assert "Near-rank numerical warning" in page.locator("#mat-result").inner_text()
         page.locator("#mat-weight-grid input").last.fill("0")
         page.locator("#mat-weighted-least-squares").click()
         assert "Weights must be finite" in page.locator("#mat-result").inner_text()

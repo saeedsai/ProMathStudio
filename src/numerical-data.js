@@ -18,8 +18,8 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   samples=intRange(samples,20,1600,'Samples');tolerance=finite(tolerance);if(tolerance<=0||tolerance>0.01)throw Error('Tolerance must be between 0 and 0.01.');
   const f=x=>{try{return eqValue(expression,{[variable]:x});}catch{return NaN;}};
   const found=[],sampled=[],h=(hi-lo)/samples;
-  const samplingAdvisory='Uniform sampling can miss oscillations and even-multiplicity roots between grid points. One midpoint probe per interval reduces some aliasing but is not exhaustive. Increase sampling intervals or narrow the domain; these results are not globally complete.';
-  let midpointProbes=0,midpointSignReversals=0;
+  const samplingAdvisory='Uniform sampling can miss oscillations and even-multiplicity roots between grid points. Midpoint and quarter-grid probes reduce some aliasing but are not exhaustive. Increase sampling intervals or narrow the domain; these results are not globally complete.';
+  let midpointProbes=0,midpointSignReversals=0,quarterProbes=0,quarterSignReversals=0;
   // Keep the same residual-first bisection and post-rounding certification.
   // Midpoints expose some paired crossings hidden between equal-sign grid endpoints.
   const refineBracket=(left,right,leftValue,rightValue)=>{
@@ -48,8 +48,24 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
     if(Math.abs(fm)<=tolerance)found.push(mid);
     if(Number.isFinite(fa)&&Number.isFinite(fb)&&fa!==0&&fb!==0&&fm!==0&&
        Math.sign(fa)===Math.sign(fb)&&Math.sign(fa)!==Math.sign(fm))midpointSignReversals++;
-    refineBracket(a,mid,fa,fm);
-    refineBracket(mid,b,fm,fb);
+    // Two additional bounded probes reveal some paired roots hidden from
+    // the original grid and midpoint; all candidates still require a finite residual.
+    const quarterLeft=a+(mid-a)/2,quarterRight=mid+(b-mid)/2;
+    if(quarterLeft===a||quarterLeft===mid||quarterRight===mid||quarterRight===b){
+      refineBracket(a,mid,fa,fm);refineBracket(mid,b,fm,fb);continue;
+    }
+    const fql=f(quarterLeft),fqr=f(quarterRight);quarterProbes+=2;
+    if(!Number.isFinite(fql)||!Number.isFinite(fqr)){
+      refineBracket(a,mid,fa,fm);refineBracket(mid,b,fm,fb);continue;
+    }
+    if(Math.abs(fql)<=tolerance)found.push(quarterLeft);
+    if(Math.abs(fqr)<=tolerance)found.push(quarterRight);
+    const points=[a,quarterLeft,mid,quarterRight,b],values=[fa,fql,fm,fqr,fb];
+    for(let i=0;i<4;i++){
+      if(Number.isFinite(values[i])&&Number.isFinite(values[i+1])&&values[i]!==0&&values[i+1]!==0&&
+         Math.sign(values[i])!==Math.sign(values[i+1]))quarterSignReversals++;
+      refineBracket(points[i],points[i+1],values[i],values[i+1]);
+    }
   }
   // A constant sampled residual is not evidence of hundreds of isolated roots.
   // Two off-grid probes reduce the risk of aliasing a periodic function.
@@ -57,7 +73,7 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
      [Math.SQRT1_2,Math.sqrt(3)/3].every(t=>f(lo+(hi-lo)*t)===sampled[0])){
     const zero=sampled[0]===0;
     return {type:'roots',variable,expression,roots:[],residuals:[],maxResidual:null,localSlopeMagnitudes:[],localSlopeMethods:[],minLocalSlope:null,localSlopeWarnings:[],
-      domain:[lo,hi],samples,tolerance,sampleSpacing:h,midpointProbes,midpointSignReversals,rootStatus:zero?'sampled-zero-plateau':'sampled-nonzero-plateau',
+      domain:[lo,hi],samples,tolerance,sampleSpacing:h,midpointProbes,midpointSignReversals,quarterProbes,quarterSignReversals,rootStatus:zero?'sampled-zero-plateau':'sampled-nonzero-plateau',
       note:(zero?'The residual is zero at all sampled and off-grid probes; non-isolated zeros are possible, but an identically zero function is not proven. No discrete roots are certified.':
         'The residual is equal and nonzero at all sampled and off-grid probes; an exactly constant function is not proven. A small residual alone does not certify a root.')+' '+samplingAdvisory};
   }
@@ -120,7 +136,7 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   const availableSlopes=localSlopeMagnitudes.filter(s=>s!==null);
   const minLocalSlope=availableSlopes.length?Math.min(...availableSlopes):null;
   return {type:'roots',variable,expression,roots,residuals,maxResidual,localSlopeMagnitudes,localSlopeMethods,minLocalSlope,localSlopeWarnings,
-    domain:[lo,hi],samples,tolerance,sampleSpacing:h,midpointProbes,midpointSignReversals,note:'Candidate roots satisfy the requested absolute function-residual tolerance, not a certified root-position error bound. Local secant slopes, including one-sided estimates at domain edges, are scale-dependent heuristics, not proof of differentiability; they can mislead near flat roots or discontinuities. A possible-cusp flag compares opposite one-sided secants at two scales and is not a mathematical certificate. Unbracketed roots may still be missed.'+' '+samplingAdvisory};
+    domain:[lo,hi],samples,tolerance,sampleSpacing:h,midpointProbes,midpointSignReversals,quarterProbes,quarterSignReversals,note:'Candidate roots satisfy the requested absolute function-residual tolerance, not a certified root-position error bound. Local secant slopes, including one-sided estimates at domain edges, are scale-dependent heuristics, not proof of differentiability; they can mislead near flat roots or discontinuities. A possible-cusp flag compares opposite one-sided secants at two scales and is not a mathematical certificate. Unbracketed roots may still be missed.'+' '+samplingAdvisory};
 }
 function gaussian(A,b){const n=b.length,rows=A.map((r,i)=>[...r,b[i]]);for(let col=0;col<n;col++){
   let pivot=col;for(let i=col+1;i<n;i++)if(Math.abs(rows[i][col])>Math.abs(rows[pivot][col]))pivot=i;
@@ -379,7 +395,7 @@ function runNumerical(){clearRootErrors();try{
     else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
   }
   lastNumeric=result;$('num-output').classList.remove('error');
-  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nSampling intervals: ${result.samples}; grid spacing: ${result.sampleSpacing.toExponential(3)}\nMidpoint probes: ${result.midpointProbes}; extra opposite-sign intervals: ${result.midpointSignReversals}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\nMinimum local secant slope magnitude (heuristic): ${result.minLocalSlope===null?'n/a':result.minLocalSlope.toExponential(3)}\nOne-sided local slope estimates: ${result.localSlopeMethods.filter(method=>method==='forward'||method==='backward').length}\nPossible non-smooth cusp roots (heuristic): ${result.localSlopeWarnings.filter(flag=>flag==='possible-cusp').length}\n${result.note}`:
+  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nSampling intervals: ${result.samples}; grid spacing: ${result.sampleSpacing.toExponential(3)}\nMidpoint probes: ${result.midpointProbes}; extra opposite-sign intervals: ${result.midpointSignReversals}\nQuarter-grid probes: ${result.quarterProbes}; sign-changing subintervals: ${result.quarterSignReversals}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\nMinimum local secant slope magnitude (heuristic): ${result.minLocalSlope===null?'n/a':result.minLocalSlope.toExponential(3)}\nOne-sided local slope estimates: ${result.localSlopeMethods.filter(method=>method==='forward'||method==='backward').length}\nPossible non-smooth cusp roots (heuristic): ${result.localSlopeWarnings.filter(flag=>flag==='possible-cusp').length}\n${result.note}`:
     result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
     result.type==='system'?`Converged: ${result.converged}\n${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('\n')}\nResidual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}\n${result.note}`:
       `${result.method}\n${result.rows.length} output rows\n${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'\n':''}${result.note}`;

@@ -196,6 +196,8 @@ jobs:
         run: python tests/smoke_numerical_root_validation.py
       - name: Tiny scalar-root residual sign and responsive recovery regression
         run: python tests/smoke_scalar_root_sign_underflow.py
+      - name: Scalar root quarter-grid paired crossings, jumps and responsive regression
+        run: python tests/smoke_scalar_root_quarter_probes.py
       - name: Scalar root midpoint subgrid paired-root and responsive regression
         run: python tests/smoke_scalar_root_midpoint.py
       - name: Scalar root discontinuity rejection and residual diagnostics regression

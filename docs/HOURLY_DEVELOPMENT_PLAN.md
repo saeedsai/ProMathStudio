@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted per-row residual shares (MATH-WLS-SHARES-100)
+
+**Implemented on dev; exact-head CI/PR/Pages pending.** The bounded 3×2 weighted QR fit now reports each observation's share of normalized weighted squared residual (row order 1–3). Uses residuals and sqrt(w/max(w)) already computed by the solver; no new solver or button. For A=[[1,0],[1,1],[1,2]], b=[1,2,9], w=[1,1,.01], shares are [1/105,4/105,100/105]. Exact zero residual returns three zeros. Shares are invariant under common weight scaling and are **not** outlier probabilities or uncertainty estimates; near-exact fits can be dominated by floating-point roundoff. New Node analytical/near-rank/zero/invalid/immutability and source/bundle parity test; existing mandatory Chromium 390/768/1280 browser test extended with numerical and text assertions.
+
+**Release/CI checkpoint:** Prior MATH-WLS-ROUND-099 source dev Quality [41505640524](https://github.com/saeedsai/ProMathStudio/actions/runs/41505640524) passed, and [PR #167](https://github.com/saeedsai/ProMathStudio/pull/167) was opened from dev to main. PR Quality was in progress when this compatible increment was prepared; any superseded CI must be rechecked against the **new exact dev/PR head**. Do not merge until final PR checks are green. Main remains at `ea925400886e6624963539b5c034493698a3da02` at discovery. GitHub Pages deployment of this feature not yet verified.
+
+**NEXT FIVE concrete features (dependencies and acceptance tests):**
+1. **P0 — Exact-head combined release QA (in progress; dev→main).** Verify final source+bundle+Python+Chromium Quality on dev and PR, inspect approvals/diff, merge only through authorized PR and verify main Quality/Pages.
+2. **P0 — Independent near-rank QR coefficient accuracy (planned; shared QR).** High-precision reference coefficients and weighted backward residuals at 1e-4…1e-11, extreme positive weights, rank failure and mobile recovery.
+3. **P1 — Bounded UI controller extraction (planned; offline build).** Byte-identical bundle rebuild, saved-project round-trip, keyboard/mobile focus and size benchmark.
+4. **P1 — Scalar root aliasing hardening (planned; numerical roots).** Paired oscillatory roots and jump discontinuity references, bounded-sampling guidance, invalid input and Chromium tests.
+5. **P1 — Matrix/Data saved-project compatibility (planned; project schema).** Legacy/current fixture round-trip, malformed nested import atomic rollback and 390px focus retention.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, frozen audit, plan, latest diff and exact-head Quality. Existing dev `9da587e6b5ebf35c5e258f7008e099c3a2404b32` was one commit ahead of main, PRs initially none. Prior dev Quality succeeded; PR #167 opened and PR Quality started. Git clone blocked by DNS; connected GitHub and isolated V8 used. Analytical shares, common-weight scaling, zero residual, input immutability and invalid-weight checks passed in V8; full Python/Chromium requires exact-head CI. Historical 166 gaps and 95 partial features unchanged.
+
 ## 2026-11-02 — Weighted coefficient numerical-resolution screen (MATH-WLS-ROUND-099)
 
 **Implemented on dev; exact-head CI/PR/Pages pending.** Weighted 3×2 QR fit now reports κ₂(weighted design) × binary64 machine epsilon. At or above 1e-6, warn about possible coefficient digit loss and advise independent high-precision references. This is a *heuristic*, not a certified coefficient-error bound or statistical uncertainty. Reuses existing QR and spectral condition. New analytical, near-rank, common-weight scale, singular/invalid and offline-parity test; extended existing mandatory Chromium keyboard/mobile/recovery regression.

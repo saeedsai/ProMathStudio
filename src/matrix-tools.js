@@ -262,6 +262,10 @@ function leastSquares(A,b){
  const residual=Math.hypot(...errors);
  const aNorm=Math.hypot(...A.flat()),xNorm=Math.hypot(...solution),bNorm=Math.hypot(...rhs);
  const relativeResidual=residual/Math.max(Number.MIN_VALUE,bNorm+aNorm*xNorm);
+ // A QR diagonal spread is a cheap sensitivity screen, not the 2-norm
+ // condition number: off-diagonal coupling can also cause ill-conditioning.
+ const qrDiagonalSpread=Math.max(...R.map((row,i)=>Math.abs(row[i])))/
+  Math.min(...R.map((row,i)=>Math.abs(row[i])));
  // When the fit is already at rounding-error scale, normalizing by its
  // vanishing residual magnifies cancellation and gives a false rejection.
  let normalResidual=0;
@@ -273,7 +277,7 @@ function leastSquares(A,b){
  if(![residual,relativeResidual,normalResidual].every(Number.isFinite))
   throw Error('Least-squares residual exceeded finite floating-point range.');
  if(normalResidual>1e-8)throw Error('Least-squares solution failed its orthogonality check.');
- return {solution,residual,relativeResidual,normalResidual,rank:n};
+ return {solution,residual,relativeResidual,normalResidual,rank:n,qrDiagonalSpread};
 }
 /* Weighted least squares for three observations and two parameters.
    Positive observation weights express relative confidence. Reuse the existing
@@ -303,8 +307,12 @@ function weightedLeastSquares(A,b,weights){
  const weightedResidualSquared=weightedResidual*weightedResidual*maxWeight;
  if(!Number.isFinite(weightedResidualSquared))
   throw Error('Weighted residual exceeded finite floating-point range.');
+ const weightRatio=maxWeight/Math.min(...w);
+ const conditioningAdvisory=(weightRatio>=1e8||result.qrDiagonalSpread>=1e8)?
+  'Potential sensitivity from extreme relative weights or QR diagonal spread; test input perturbations. This is not a certified coefficient-error or uncertainty bound.':
+  'QR diagonal spread is only a screening heuristic; it cannot certify a well-conditioned fit or coefficient uncertainty.';
  return {...result,weightedResidualSquared,weightScale:maxWeight,
-  residuals:errors,weights:w.slice()};
+  residuals:errors,weights:w.slice(),weightRatio,conditioningAdvisory};
 }
 const matrixRank=A=>rref(A).rank;
 const add=(A,B)=>binary(A,B,'add');
@@ -1032,7 +1040,7 @@ function calculate(operation){
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
    'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
-   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual):'')+conditionLabel;
+   (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual):operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted orthogonality: '+format(value.normalResidual)+'\nRelative weight ratio (max/min): '+format(value.weightRatio)+'\nWeighted design QR diagonal spread (heuristic): '+format(value.qrDiagonalSpread)+'\n'+value.conditioningAdvisory:'')+conditionLabel;
   send.disabled=false;return last;
  }catch(error){last=null;send.disabled=true;syncFactorSelectors(null);output.classList.add('error');output.textContent=error.message;return null;}
 }

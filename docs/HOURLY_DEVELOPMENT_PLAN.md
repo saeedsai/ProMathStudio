@@ -1,3 +1,18 @@
+## 2026-11-02 — Underflow-safe scalar root bracketing (MATH-ROOT-SIGN-082)
+
+**Implemented on dev; exact-head CI and release pending.** Bisection compares signs of finite residuals directly rather than multiplying residuals, which can underflow to zero for very small nonzero function values and silently skip real roots. The existing absolute-residual gate still rejects finite jumps; no global completeness claim. Adds source/bundle parity and focused Chromium tiny-scale reference, discontinuity, keyboard/focus and 390/768/1280px recovery tests.
+
+**Last verified release:** [PR #149](https://github.com/saeedsai/ProMathStudio/pull/149), dev=main=`185ec735ba66354999560b5e4bef4bb395ba3692`. [main Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41393095448), [post-merge dev Quality](https://github.com/saeedsai/ProMathStudio/actions/runs/41393103474), [Pages](https://github.com/saeedsai/ProMathStudio/actions/runs/41393094371) succeeded for this prior SHA; hosted interactions not independently certified.
+
+**NEXT FIVE concrete features (status, dependencies, acceptance tests):**
+1. **P0 — Underflow-safe bracketing exact-head QA (pending).** Full mandatory Python and Chromium at the exact dev SHA; reference `10^(-100)*10^(-100)*(x-0.123456789)`, 1e-211 tolerance, finite jump rejection, ordinary roots, offline parity, accessible 390/768/1280px recovery and no page errors.
+2. **P0 — Quality-gated dev→main promotion (blocked on QA).** Inspect exact diff, require green dev/PR checks and approvals, ordinary PR merge; confirm exact main Quality and Pages, attempt hosted critical path.
+3. **P1 — Bounded UI controller extraction (planned).** Extract one controller into `src/`; verify offline rebuild parity, saved-project round-trip, keyboard/mobile navigation and bundle-size budget.
+4. **P1 — Weighted least-squares perturbation screening (planned).** Near-rank and extreme-weight numerical reference tests; stable finite outputs or explicit failures, responsive UI and negative recovery.
+5. **P1 — Oscillatory root subgrid diagnostics (planned).** Evaluate bounded midpoint probes against high-frequency aliasing, finite jumps and even roots; reference/negative/browser tests and explicit non-completeness messaging.
+
+**Execution checkpoint (2026-11-02 06:57 Europe/Stockholm):** Started dev=main=`185ec735ba66354999560b5e4bef4bb395ba3692`, no open PR; verified prior Quality and Pages success, read AGENTS, plan and frozen audit. Local git DNS unavailable; GitHub connector used for atomic dev commit. Frozen 166 gaps/95 partial features remain baseline.
+
 ## 2026-11-02 — Two-scale cusp root diagnostics (MATH-ROOT-CUSP-081)
 
 **Implemented on dev; exact-head CI and release pending.** Root diagnostics compare opposing one-sided secants at full and half step before flagging possible non-smooth cusps. Smooth tangential `x^2` is not flagged merely for opposite slopes; `abs(x)` and `sqrt(abs(x))` are screened. Per-root `localSlopeWarnings` and accessible UI count are heuristic, not differentiability certificates. Plateau metadata remains empty, one-sided domain estimates remain intact; global root completeness is not claimed.

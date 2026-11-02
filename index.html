@@ -4926,7 +4926,8 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
     const x=lo+k*h,y=f(x);sampled.push(y);if(Number.isFinite(y)&&Math.abs(y)<=tolerance)found.push(x);
     if(k===0)continue;
     let a=x-h,b=x,fa=f(a),fb=y;
-    if(!Number.isFinite(fa)||!Number.isFinite(fb)||fa*fb>=0)continue;
+    // Compare signs directly: multiplying two tiny finite residuals can underflow to zero.
+    if(!Number.isFinite(fa)||!Number.isFinite(fb)||fa===0||fb===0||Math.sign(fa)===Math.sign(fb))continue;
     // Bisection has a convergence guarantee if the residual is continuous in the bracket.
     for(let it=0;it<maxIterations;it++){
       const mid=a+(b-a)/2,fm=f(mid);if(!Number.isFinite(fm))break;
@@ -4934,7 +4935,7 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
       // A narrow x bracket is not a small function residual for a steep function.
       // Stop only when floating-point spacing prevents further refinement.
       if(mid===a||mid===b)break;
-      if(fa*fm<0){b=mid;fb=fm;}else{a=mid;fa=fm;}
+      if(Math.sign(fa)!==Math.sign(fm)){b=mid;fb=fm;}else{a=mid;fa=fm;}
     }
     const root=(a+b)/2,fr=f(root);if(Number.isFinite(fr)&&Math.abs(fr)<=tolerance)found.push(root);
   }

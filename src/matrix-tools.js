@@ -276,7 +276,13 @@ function leastSquares(A,b){
  }
  if(![residual,relativeResidual,normalResidual].every(Number.isFinite))
   throw Error('Least-squares residual exceeded finite floating-point range.');
- if(normalResidual>1e-8)throw Error('Least-squares solution failed its orthogonality check.');
+ // When the fit residual is small, cancellation in A*x-b can inflate
+ // the normalized normal-equation dot product. Allow its expected binary64
+ // roundoff scale while keeping the strict 1e-8 gate for ordinary fits.
+ const orthogonalityTolerance=Math.max(1e-8,
+  32*Number.EPSILON/Math.max(relativeResidual,Number.MIN_VALUE));
+ if(normalResidual>orthogonalityTolerance)
+  throw Error('Least-squares solution failed its orthogonality check.');
  // Diagonal of the weighted-design projection Q*Q^T: each row's leverage
  // lies in [0,1] and the three values sum to the number of fitted columns.
  // This is a design diagnostic, not an outlier probability or error bound.

@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted normwise residual ratio (MATH-WLS-NORMRES-102)
+
+**Implemented on dev; exact-head CI and deployment pending.** The bounded weighted 3×2 QR fit now exposes ||D(Ax-b)||₂/(||DA||F||x||₂+||Db||₂), D=diag(sqrt(w/max(w))), using the existing fitted residual and scaled design/RHS without a duplicate solver. For A=[[1,0],[1,1],[1,2]], b=[1,2,9], w=[1,1,.01], analytic ratio ≈0.11625798496246446. Positive common-weight scaling, exact and zero RHS, near-rank 1e-4..1e-10, invalid/rank-deficient and immutability covered by a new Node/Python test; standalone parity and registered 390/768/1280 Chromium numerical, keyboard and error-recovery gate extended. It is a descriptive fit-residual ratio, **not** a certified least-squares backward error, coefficient forward-error or statistical confidence bound.
+
+**Release reconciliation:** [PR #168](https://github.com/saeedsai/ProMathStudio/pull/168) exact PR-head [Quality 41525568357](https://github.com/saeedsai/ProMathStudio/actions/runs/41525568357) passed; ordinary merge SHA `5f6a7342091f1465b5fb8f417874c0b8194736e0`. Dev fast-forwarded to that main merge without force. New main Quality and Pages deployment are pending independent verification, so do not claim the hosted release is live.
+
+**NEXT FIVE concrete features (status, dependencies and acceptance tests):**
+1. **P0 — Normwise residual exact-head QA and release (in progress; weighted QR).** Full Python/Node and responsive Chromium green on final dev and PR heads, authorized ordinary merge, verify main Quality and Pages.
+2. **P0 — High-precision near-rank coefficient validation (planned; QR).** Compare coefficient and weighted residual against independent decimal/arbitrary-precision references for d=1e-4..1e-11 and extreme positive weights; reject singular inputs and document tolerance limits.
+3. **P1 — Extract one bounded UI controller (planned; offline build).** Byte-identical generated standalone, saved-project round-trip, keyboard/mobile focus and bundle-size benchmark.
+4. **P1 — Scalar root aliasing/discontinuity regression (planned; root solver).** Oscillatory paired roots, pole rejection, bounded sampling guidance and 390/768/1280 browser recovery.
+5. **P1 — Matrix/Data project schema resilience (planned; saved projects).** Legacy/current fixtures, malformed nested import atomic rollback, 390px focus retention and no data loss.
+
+**Execution log (2026-11-02 Europe/Stockholm):** Read AGENTS, living plan, frozen inventory, branch diff and PR/CI. PR #168 exact-head Quality passed and merged normally; dev fast-forwarded. Git clone unavailable due to github.com DNS, so source/test/docs changes use the authenticated GitHub connector. New analytical reference and regression registered; full Python/Chromium and exact new-head CI require GitHub Actions. Historical 166 gaps/95 partial features unchanged.
+
 ## 2026-11-02 — Weighted fitted predictions and near-rank reference checks (MATH-WLS-FITTED-101)
 
 **Implemented on dev; exact-head CI/PR/Pages pending.** The existing QR-based 3×2 weighted fit now reports predicted RHS values A·x in original observation units, sharing the exact values used for residuals (no duplicate solver). For A=[[1,0],[1,1],[1,2]], b=[1,2,9], w=[1,1,.01], fitted values are [33/35,74/35,23/7]. Independent analytic reference, common-weight invariance, near-rank d=1e-4 through 1e-11 coefficient/prediction checks, singular/invalid, immutability, standalone parity, and 390/768/1280 Chromium UI/keyboard recovery tests. Near-rank predictions can be stable while coefficients are sensitive; not a certified high-precision bound.

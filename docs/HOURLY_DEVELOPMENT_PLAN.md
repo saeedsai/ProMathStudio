@@ -1,3 +1,18 @@
+## 2026-11-02 — Weighted-design observation leverage (MATH-WLS-LEVERAGE-084)
+
+**Implemented on dev; exact-head CI/PR/Pages pending.** Reuses the existing reorthogonalized QR factor of the 3×2 weighted design to report each observation's diagonal projection leverage (Q-row squared norm). The three leverage values lie approximately in [0,1] and sum to the two fitted parameters; uniform positive weight scaling preserves them. This is a *fixed-design influence diagnostic*, not an outlier probability, coefficient uncertainty or certified conditioning bound. Existing relative weights, full-rank constraints, offline standalone build and saved-project behavior are unchanged.
+
+**Last verified deployment:** [PR #151](https://github.com/saeedsai/ProMathStudio/pull/151) merged at dev=main=`8092022f5f558ca6b9056cb86fa1cb7c2becf163`; [Pages build/deployment 41402320026](https://github.com/saeedsai/ProMathStudio/actions/runs/41402320026) succeeded. Post-merge main/dev Quality runs 41402320481/41402334929 were in progress when this change began; these previous-head runs do not certify MATH-WLS-LEVERAGE-084. Hosted interactions remain independently unverified.
+
+**NEXT FIVE concrete features (status, dependencies, acceptance tests):**
+1. **P0 — Weighted leverage exact-head QA/repair (pending).** Mandatory structural/unit and Chromium on exact dev SHA; 104/105, 101/105, 1/21 reference; leverages sum to 2, positive-scale invariance, extreme-weight finite values, rank/weight rejection, source/bundle parity, no page errors, keyboard and 390/768/1280px recovery.
+2. **P0 — Authorized dev→main promotion (blocked on QA).** Inspect exact diff, require green dev and PR Quality plus required approvals, ordinary PR merge, verify main Quality and Pages for the merge SHA, attempt hosted critical path.
+3. **P1 — Bounded UI controller extraction (planned).** Extract one inline controller into src; assert standalone build byte parity, saved-project round-trip, keyboard/mobile navigation and bundle size.
+4. **P1 — Weighted least-squares perturbation experiments (planned).** Add reference RHS perturbation comparisons, near-rank/extreme-weight failure behavior, fixed-weight leverage interpretation and accessible warnings without uncertified error bounds.
+5. **P1 — Audited mathematical gap closure (planned).** Select highest-priority reusable missing numerical/symbolic feature with reference, boundary, singularity, invalid-input and Chromium tests.
+
+**Execution checkpoint (2026-11-02 07:54 Europe/Stockholm):** Read AGENTS, living plan, frozen inventory, latest CI/Pages and dev/main heads; only dev/main, no open PR, synchronized at `8092022f5f558ca6b9056cb86fa1cb7c2becf163`. Local git DNS unavailable; connector-side numerical JS references passed. New source, standalone bundle, focused Python/Node and Chromium tests, mandatory Quality step and documentation staged for atomic dev commit. No branch protections or checks bypassed. Historical 166 gaps/95 partials remain the audit baseline.
+
 ## 2026-11-02 — Bounded midpoint subgrid root recovery (MATH-ROOT-MIDPOINT-083)
 
 **Implemented on dev; exact-head CI and release pending.** Scalar root sampling now probes one midpoint per coarse interval and bisects each finite half-interval independently, recovering some pairs of crossings hidden by equal-sign coarse endpoints. It reports midpoint probe and opposite-sign interval counts in the accessible Numerical Methods output. It retains finite-residual acceptance, discontinuity rejection, plateau classification, 20–1600 sampling bounds, offline standalone parity and saved-project compatibility. Midpoint probes cannot guarantee all roots, and additional evaluations are bounded by the configured interval count.

@@ -236,6 +236,8 @@ jobs:
         run: python tests/smoke_project_atomic_import.py
       - name: Extracted Complex Graph controller numerical, keyboard and responsive regression
         run: python tests/smoke_complex_graph_module.py
+      - name: Engineering Toolbox animations numerical, reduced-motion, keyboard and responsive regression
+        run: python tests/smoke_engineering_visuals.py
       - name: Scalar root conditioning advisory and numerical/UI regression
         run: python tests/smoke_scalar_root_conditioning.py
       - name: Scalar root steep-bracket refinement, boundary and jump regression

@@ -28,8 +28,8 @@ class BuildMarkerValidationTests(unittest.TestCase):
 
     def test_missing_closing_script_rejected_without_overwriting_index(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
-        marker = '<script id="mathstudio-data-tables">\\n'
-        html = marker + '/* truncated module */\\n'
+        marker = '<script id="mathstudio-data-tables">\n'
+        html = marker + '/* truncated module */\n'
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "scripts").mkdir()

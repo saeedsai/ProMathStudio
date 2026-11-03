@@ -124,7 +124,9 @@ function restoreState(state){
   throw Error('Invalid saved Engineering filter.');
  select.value=state.discipline;search.value=state.query;render();
 }
-M.engineeringCatalog=Object.freeze({disciplines,tools,filter,exportState,restoreState});
+// Public open-by-id lets other UI (e.g. global tool search) reuse this single routing path.
+function openById(id){const t=tools.find(x=>x.id===id);if(!t||t.status!=='available')return false;openTool(t);return true;}
+M.engineeringCatalog=Object.freeze({disciplines,tools,filter,open:openById,exportState,restoreState});
 // The saved mode may have been restored before this late-added tab existed.
 if(M.advanced.currentMode()==='engineering')M.advanced.mode('engineering');
 })();

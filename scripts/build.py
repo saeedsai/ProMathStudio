@@ -35,6 +35,7 @@ modules = [
     ("promath-engineering-simulations", "src/engineering-simulations.js"),
     ("promath-engineering-catalog", "src/engineering-catalog.js"),
     ("promath-engineering-visuals", "src/engineering-visuals.js"),
+    ("promath-tool-search", "src/tool-search.js"),
 ]
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'

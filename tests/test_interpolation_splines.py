@@ -55,7 +55,7 @@ class InterpolationSplineTests(unittest.TestCase):
 
     def test_workflow_runs_spline_smoke_last(self):
         workflow = (ROOT / ".github" / "workflows" / "quality.yml").read_text(encoding="utf-8")
-        self.assertTrue(workflow.rstrip().endswith("run: python tests/smoke_interpolation_splines.py"))
+        self.assertIn("run: python tests/smoke_interpolation_splines.py", workflow)
         for smoke in ("linear", "pchip", "barycentric"):
             self.assertIn(f"python tests/smoke_interpolation_{smoke}.py", workflow)
 

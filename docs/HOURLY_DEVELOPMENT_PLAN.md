@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-BOM-116 (dev; QA pending)
+
+**Change:** Reject UTF-8 BOM at the start of standalone JavaScript module sources before replacing embedded HTML, avoiding an unexpected encoding signature in inline scripts. Focused isolated subprocess regression checks diagnostic and byte-for-byte unchanged index. Previous exact-head PR Quality run 41669319024 succeeded at 69ff29a; new head requires its own checks. No release claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 and BUILD-BOM-116 QA/release (pending):** exact-head dev/PR Quality green including structural and browser tests; applicable protection/reviews verified; ordinary merge; main Quality and Pages success.
+2. **P0 QR rank-boundary references (planned):** independent high-precision threshold-adjacent matrices, perturbed RHS and singular rejection with tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile, saved-project round-trip and size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole/oscillation negative references, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed projects preserve prior state and v1/v2 compatibility.
+
+**Execution ledger:** Read root AGENTS, living plan, frozen inventory, dev/main comparison and PR #179; checked exact-head PR Quality 41669319024 (passed). Added BOM guard and regression to dev; new exact-head checks, release and Pages remain pending. Historical 166 gaps/95 partial features unchanged. No branch creation, force-push, bypass or deletion.
+
 ## 2026-11-03 — BUILD-EMPTY-SOURCE-115 (dev; exact-head QA pending)
 
 **Change:** Standalone builder rejects empty and whitespace-only modular JavaScript source before replacing embedded HTML. A focused isolated subprocess regression asserts diagnostic and unchanged original index for both inputs. Source commit b38e358; regression commits 01ae2dd and fixture correction 8ac8136. Previous exact-head dev Quality run 41658791993 succeeded at 9bd506ea; new commits require new CI. No merge or Pages deployment claimed.

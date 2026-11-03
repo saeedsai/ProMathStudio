@@ -411,3 +411,5 @@ jobs:
         run: python tests/smoke_statistics_tests.py
       - name: Curve overlays on the main 2D graph, project round-trip and atomic import regression
         run: python tests/smoke_graph_curves_overlay.py
+      - name: Unit-aware engineering simulation inputs browser regression
+        run: python tests/smoke_engineering_sim_units.py

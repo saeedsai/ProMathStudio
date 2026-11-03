@@ -49,8 +49,8 @@ for tag, source in modules:
         raise ValueError(f"Unexpected NUL byte in standalone module source: {source}")
     if module_source.startswith("\ufeff"):
         raise ValueError(f"Unexpected UTF-8 BOM in standalone module source: {source}")
-    if "<!--" in module_source:
-        raise ValueError(f"Unsafe HTML comment opener in module: {source}")
+    if "<!--" in module_source or "-->" in module_source:
+        raise ValueError(f"Unsafe HTML comment delimiter in module: {source}")
     if re.search(r"<script(?=[\s/>])", module_source, flags=re.IGNORECASE):
         raise ValueError(f"Unsafe script opening sequence in module: {source}")
     if "</script" in module_source.lower():

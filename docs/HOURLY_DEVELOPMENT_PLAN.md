@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-HTML-CLOSER-119 (dev; exact-head QA pending)
+
+**Change:** Reject HTML comment closing delimiters (`-->`) in inline module sources as well as opening delimiters, before rewriting standalone HTML. Direct subprocess regression checks a closing delimiter embedded in JavaScript and original HTML preservation. PR #179 was merged normally at ac3288250bee65c8f22230234f2699b6bb3bbde1 after exact-head push Quality 41698544956 and PR Quality 41698553402 succeeded at b48e800. New dev commit requires its own Quality run; local clone blocked by GitHub DNS.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 BUILD-HTML-CLOSER-119 QA/release (pending):** exact-head dev and PR Quality including structural/browser green; ordinary dev-to-main PR only after applicable gates; verify main Quality and Pages.
+2. **P0 QR rank-boundary references (planned):** high-precision near-threshold matrices, perturbed RHS, singular rejection with deterministic tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile smoke, project round-trip and bundle size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole and oscillatory negative fixtures, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed project fixture preserves state and v1/v2 compatibility.
+
+**Execution ledger:** Inspected AGENTS, living plan, frozen inventory, exact dev/main heads, PR #179 reviews, rulesets and CI. Merged PR #179 through ordinary GitHub merge and fast-forwarded dev non-force. Added comment-closer guard, negative regression, changelog and plan. Local git clone unavailable (DNS); new exact-head CI and Pages pending. Frozen 166 gaps / 95 partials unchanged. No new branches or bypass.
+
 ## 2026-11-03 — BUILD-HTML-COMMENT-118 (dev; exact-head QA pending)
 
 **Change:** Reject HTML comment openers in inline JavaScript module source before rebuilding standalone HTML. HTML script parsing treats `<!--` specially; a focused subprocess regression checks the rejection diagnostic and unchanged original index. Prior exact-head PR Quality 41689680817 passed at 5d273b3; new head needs fresh checks. Local checkout failed DNS resolution; no local suite claimed.

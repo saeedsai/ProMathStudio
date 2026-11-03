@@ -66,10 +66,10 @@ def main():
         # Every visual is linked to an available catalog tool.
         tools = page.evaluate("Object.fromEntries(MathStudio.engineeringCatalog.tools.map(t=>[t.id,t.status]))")
         visuals = page.evaluate("MathStudio.engineeringVisuals.visuals")
-        assert len(visuals) == 11 and all(tools[v["tool"]] == "available" for v in visuals), visuals
+        assert len(visuals) == 12 and all(tools[v["tool"]] == "available" for v in visuals), visuals
 
         page.locator('[data-workspace="engineering"]').click()
-        assert page.locator("#eng-results [data-visual]").count() == 11
+        assert page.locator("#eng-results [data-visual]").count() == 12
         assert page.locator("#eng-results .eng-card button[data-visual]").count() == 0
         status = page.locator("#eng-visual-status")
         assert status.get_attribute("aria-live") == "polite"

@@ -189,6 +189,26 @@ function lu(A){
  if(residual>1e-8)throw Error('LU decomposition failed its numerical reconstruction check.');
  return {P,L,U,permutation,residual};
 }
+/* Column-pivoting screen: greedy reorthogonalized Gram-Schmidt that picks, at each step, the
+   remaining column with the largest residual norm (classic column pivoting). The order and minimum
+   ratio do not depend on how the input columns were ordered (ties aside). Screening only. */
+function qrPivotScreen(A){
+ const m=A.length,n=A[0].length,cols=Array.from({length:n},(_,j)=>A.map(r=>r[j]));
+ const norms=cols.map(c=>Math.hypot(...c)),basis=[],order=[],ratios=[],left=new Set(cols.keys());
+ while(left.size){
+  let best=-1,bestSize=-1,bestRatio=0,bestVec=null;
+  for(const j of left){
+   const v=cols[j].slice();
+   for(let pass=0;pass<2;pass++)for(const q of basis){let d=0;for(let i=0;i<m;i++)d+=q[i]*v[i];for(let i=0;i<m;i++)v[i]-=d*q[i];}
+   // Classic criterion: largest absolute residual norm; report it relative to the column norm.
+   const size=Math.hypot(...v),r=norms[j]>0?size/norms[j]:0;
+   if(size>bestSize){best=j;bestSize=size;bestRatio=r;bestVec=v;}
+  }
+  left.delete(best);order.push(best+1);ratios.push(bestRatio);
+  const len=Math.hypot(...bestVec);basis.push(len>0?bestVec.map(x=>x/len):bestVec.map(()=>0));
+ }
+ return {pivotOrder:order,pivotRatios:ratios,pivotedMinRatio:Math.min(...ratios)};
+}
 /* Reorthogonalized modified Gram-Schmidt economy QR for 2<=n<=m<=3. */
 function qr(A){
  A=validate(A);
@@ -229,7 +249,8 @@ function qr(A){
   throw Error('QR decomposition failed its numerical reconstruction or orthogonality check.');
  // Near the cutoff, R's last diagonal carries roughly eps/ratio relative error.
  const rankMargin=minIndependenceRatio/tolerance;
- return {Q,R,residual,orthogonality,minIndependenceRatio,rankTolerance:tolerance,rankMargin,
+ const pivot=qrPivotScreen(A);
+ return {Q,R,residual,orthogonality,minIndependenceRatio,rankTolerance:tolerance,rankMargin,...pivot,
   rankGuidance:rankMargin<1e4?'Near rank threshold: columns are close to dependent; R and downstream solutions may carry relative errors near 1e-16/'+minIndependenceRatio.toExponential(2)+'. This is a screening heuristic, not a certified bound.':'Columns are well separated from the 1e-12 rank-rejection threshold (heuristic screen).'};
 }
 /* Shared strict RHS parsing for ordinary and weighted least squares.
@@ -1253,7 +1274,7 @@ function calculate(operation){
    'eigen: symmetric A = V·diag(λ)·Vᵀ\nEigenvalues (descending): '+value.values.map(format).join(', ')+'\nEigenvectors (columns of V):\n'+rowsText(value.vectors)+'\nRelative residual: '+format(value.residual)+'\nReconstruction residual: '+format(value.reconstructionResidual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation==='lu'?
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
-   'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality)+'\nMinimum column independence ratio: '+format(value.minIndependenceRatio)+' (rejection cutoff 1e-12; margin '+format(value.rankMargin)+'×)\n'+value.rankGuidance:
+   'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality)+'\nMinimum column independence ratio: '+format(value.minIndependenceRatio)+' (rejection cutoff 1e-12; margin '+format(value.rankMargin)+'×)\n'+value.rankGuidance+'\nColumn pivot order (screen): '+value.pivotOrder.join(', ')+'; pivoted minimum ratio '+format(value.pivotedMinRatio):
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
    (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual)+'\nOrthogonality acceptance: '+(value.orthogonalityCheckSkipped?'not evaluated (near-exact fit)':format(value.orthogonalityTolerance))+'\n'+value.orthogonalityGuidance:operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted normwise residual ratio: '+format(value.weightedNormwiseResidualRatio)+'\n'+value.weightedNormwiseResidualGuidance+'\nWeighted orthogonality: '+format(value.normalResidual)+'\nOrthogonality acceptance: '+(value.orthogonalityCheckSkipped?'not evaluated (near-exact fit)':format(value.orthogonalityTolerance))+'\n'+value.orthogonalityGuidance+'\nWeighted fitted values (rows 1–3): '+value.fittedValues.map(format).join(', ')+'\n'+value.fittedValueGuidance+'\nRelative weighted squared-residual shares (rows 1–3): '+value.weightedResidualShares.map(format).join(', ')+'\n'+value.weightedResidualShareGuidance+'\nRelative weight ratio (max/min): '+format(value.weightRatio)+'\nRelative-weight effective count (Kish-style): '+format(value.effectiveWeightCount)+'\n'+value.effectiveWeightGuidance+'\nWeighted design QR diagonal spread (heuristic): '+format(value.qrDiagonalSpread)+ '\nWeighted design column independence (sine): '+format(value.designColumnSine)+'\n'+value.designColumnGuidance+'\nWeighted design singular values (max, min; normalized relative weights): '+value.weightedDesignSingularValues.map(format).join(', ')+'\n'+value.weightedDesignSingularGuidance+'\nWeighted design spectral condition estimate (2-norm): '+(value.spectralCondition2===null?'unavailable':format(value.spectralCondition2))+'\n'+value.spectralConditionGuidance+'\nCoefficient roundoff amplification screen (kappa2 × binary64 epsilon): '+(value.coefficientRoundoffScreen===null?'unavailable':format(value.coefficientRoundoffScreen))+'\n'+value.coefficientRoundoffGuidance+'\nColumn-normalized weighted design condition (2-norm): '+(value.columnNormalizedCondition2===null?'unavailable':format(value.columnNormalizedCondition2))+'\n'+value.columnNormalizedConditionGuidance+'\nWeighted design leverage (rows 1–3): '+value.rowLeverages.map(format).join(', ')+'\n'+value.leverageGuidance+'\nRHS +1-unit response (rows 1–3, Δx0/Δx1): '+value.rhsResponseRows.map(row=>'['+row.map(format).join(', ')+']').join('; ')+'\n'+value.rhsResponseGuidance+'\nRHS ±1-unit box sensitivity (max |Δx0|, |Δx1|): '+value.rhsUnitBoxSensitivity.map(format).join(', ')+'\n'+value.rhsUnitBoxGuidance+'\nRHS independent ±1% proportional box sensitivity (max |Δx0|, |Δx1|): '+value.rhsOnePercentBoxSensitivity.map(format).join(', ')+'\n'+value.rhsOnePercentBoxGuidance+'\nLog-weight first-order coefficient responses (rows 1–3, dx0/dlogw, dx1/dlogw): '+value.logWeightResponseRows.map(row=>'['+row.map(format).join(', ')+']').join('; ')+'\n'+value.logWeightResponseGuidance+'\nLeave-one-out prediction residuals (rows 1–3): '+value.looResiduals.map(x=>x===null?'unavailable':format(x)).join(', ')+'\nLeave-one-out predictions (rows 1–3): '+value.looPredictions.map(x=>x===null?'unavailable':format(x)).join(', ')+'\nWeighted leave-one-out PRESS: '+(value.looWeightedPress===null?'unavailable':format(value.looWeightedPress))+'\n'+value.looGuidance+'\nRetained-row independence (LOO normalized area; rows 1–3): '+value.looRetainedAreas.map(format).join(', ')+'\n'+value.looRetainedGuidance+'\nLeave-one-out coefficient shifts (rows 1–3, Δx0/Δx1): '+value.looCoefficientShifts.map(row=>row===null?'unavailable':'['+row.map(format).join(', ')+']').join('; ')+'\n'+value.looCoefficientGuidance+'\n'+value.conditioningAdvisory:'')+conditionLabel;
   send.disabled=false;return last;
@@ -1302,5 +1323,6 @@ function restoreState(state){
 rebuild();rebuildSecond();rebuildRhs();rebuildWeights();
 M.matrixTools={validate,determinant,transpose,inverse,add,subtract,multiply,rref,rank:matrixRank,solve,lu,qr,leastSquares,weightedLeastSquares,eigenSymmetric,svd2x2,svd3x2,svd2x3,svd3x3,pseudoinverse2x2,pseudoinverse3x2,pseudoinverse2x3,pseudoinverse3x3,pseudoinverse,notation,read,readSecond,readRhs,readWeights,calculate,exportState,restoreState};
 M.matrixTools.conditionInfinity=conditionInfinity;
+M.matrixTools.qrPivotScreen=qrPivotScreen;
 M.engineeringSolvers=engineeringSolvers;
 })();

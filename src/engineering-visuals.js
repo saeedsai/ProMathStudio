@@ -71,7 +71,8 @@ function eigenMorph({a=2,b=1,d=1}={}){
   summary:'Symmetric A=[['+a+', '+b+'], ['+b+', '+d+']] maps the unit circle to an ellipse; eigenvalues '+e.values.map(v=>Number(v.toPrecision(6))).join(', ')+' stretch the orthogonal eigenvector directions.'};
 }
 const visuals=Object.freeze([
- {id:'beam',tool:'structures.beam.deflection',title:'Simulation · Beam deflection, moment and stress',compute:S.beam,fields:[['support','Support','simply','select',[['simply','Simply supported'],['cantilever','Cantilever (fixed left)']]],['load','Load','point','select',[['point','Point load'],['udl','Uniform load']]],['length','Span L (m)','4'],['force','Load P (kN) or w (kN/m)','10'],['position','Point-load position a (m)','2'],['modulus','E (GPa)','200'],['width','Section width b (mm)','100'],['height','Section depth h (mm)','200']]},
+ {id:'beam',tool:'structures.beam.deflection',title:'Simulation · Beam deflection, moment and stress',compute:S.beam,fields:[['support','Support','simply','select',[['simply','Simply supported'],['cantilever','Cantilever (fixed left)'],['overhang','Overhanging (pin at 0, roller at xB)']]],['load','Load','point','select',[['point','Point load'],['udl','Uniform load'],['combined','Combined: P1 + P2 + UDL']]],['length','Span L (m)','4'],['supportB','Roller position xB for overhang (m)','3'],['force','Load P1 (kN) or w (kN/m)','10'],['position','P1 position a1 (m)','2'],['force2','Combined: P2 (kN)','0'],['position2','Combined: P2 position a2 (m)','1'],['udl','Combined: UDL w (kN/m)','0'],['modulus','E (GPa)','200'],['width','Section width b (mm)','100'],['height','Section depth h (mm)','200']]},
+ {id:'vibration',tool:'mechanical.vibration.forced',title:'Simulation · Forced vibration and resonance',compute:S.vibration,fields:[['zeta','Damping ratio ζ','0.1'],['ratio','Frequency ratio r = ω/ωn','0.8'],['cycles','Forcing cycles','20']]},
  {id:'orbit',tool:'aerospace.orbit.propagation',title:'Simulation · Two-body Earth orbit',compute:S.orbit,fields:[['altitude','Periapsis altitude (km)','500'],['eccentricity','Eccentricity e','0.3'],['orbits','Orbits','1']]},
  {id:'rlc',tool:'circuits.rlc.series.transient',title:'Simulation · Series RLC step response',compute:S.rlc,fields:[['resistance','R (Ω)','4'],['inductance','L (mH)','10'],['capacitance','C (µF)','100'],['voltage','Source V (V)','12']]},
  {id:'projectile',tool:'mechanics.projectile.drag',title:'Simulation · Projectile with air drag',compute:S.projectile,fields:[['speed','Launch speed (m/s)','40'],['angle','Launch angle (°)','45'],['mass','Mass (kg)','0.145'],['diameter','Diameter (mm)','74'],['drag','Drag coefficient Cd','0.47'],['density','Air density (kg/m³)','1.225']]},
@@ -100,7 +101,7 @@ const area=document.createElement('details');area.id='eng-visuals';
 area.innerHTML='<summary>Engineering simulations &amp; animations</summary>'+
  '<p class="small-note">Physics-based engineering simulations (beam, orbit, circuit, projectile, heat) and solver animations. Each states its model assumptions; results are textbook-model estimates, not certified designs or code checks. Animations respect reduced-motion preferences.</p>'+
  '<label>Visualization<select id="eng-visual-select"></select></label><div id="eng-visual-fields"></div>'+
- '<div class="eng-visual-actions"><button type="button" id="eng-visual-run">Compute &amp; animate</button><button type="button" id="eng-visual-toggle" aria-pressed="false">Pause</button><button type="button" id="eng-visual-step">Step frame</button></div>'+
+ '<div class="eng-visual-actions"><button type="button" id="eng-visual-run">Compute &amp; animate</button><button type="button" id="eng-visual-toggle" aria-pressed="false">Pause</button><button type="button" id="eng-visual-step">Step frame</button><button type="button" id="eng-visual-table" disabled>Send data to Data Tables</button><button type="button" id="eng-visual-graph" disabled>Plot in Graphs</button><button type="button" id="eng-visual-png" disabled>Download frame (PNG)</button></div>'+
  '<canvas id="eng-visual-canvas" width="720" height="320" role="img" aria-label="Engineering animation"></canvas>'+
  '<p id="eng-visual-status" role="status" aria-live="polite">Choose a visualization and press Compute &amp; animate.</p>';
 host.append(area); // After results: keeps filter → result keyboard order.
@@ -147,15 +148,32 @@ function draw(){
   for(let i=0;i<c.x.length-1;i++){ctx.strokeStyle=heat(Math.abs(c.moment[i])/mmax*s);ctx.beginPath();ctx.moveTo(X(c.x[i]),by+s*k*c.deflection[i]);ctx.lineTo(X(c.x[i+1]),by+s*k*c.deflection[i+1]);ctx.stroke();}
   ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeStyle='#8ebfb8';ctx.beginPath();ctx.moveTo(x0,by);ctx.lineTo(x1,by);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#597b82';
-  if(c.support==='simply'){for(const x of [x0,x1]){ctx.beginPath();ctx.moveTo(x,by+5);ctx.lineTo(x-10,by+22);ctx.lineTo(x+10,by+22);ctx.closePath();ctx.fill();}}
+  if(c.support!=='cantilever'){for(const x of [x0,c.support==='overhang'?X(c.supportB):x1]){ctx.beginPath();ctx.moveTo(x,by+5);ctx.lineTo(x-10,by+22);ctx.lineTo(x+10,by+22);ctx.closePath();ctx.fill();}}
   else{ctx.fillRect(x0-16,by-40,12,80);ctx.strokeStyle='#597b82';for(let yy=by-40;yy<by+40;yy+=10){ctx.beginPath();ctx.moveTo(x0-16,yy+10);ctx.lineTo(x0-26,yy);ctx.stroke();}}
-  const sign=c.force>=0?1:-1,len=10+28*s;
-  if(c.load==='point'){const i=Math.round(c.position/c.L*200),y=by+s*k*c.deflection[i]-6;arrow(X(c.position),y-len*sign,X(c.position),y,'#ec824f');}
-  else for(let i=0;i<=200;i+=20){const y=by+s*k*c.deflection[i]-6;arrow(X(c.x[i]),y-len*sign,X(c.x[i]),y,'#ec824f');}
+  const len=10+28*s;
+  const pointLoads=c.points?c.points.map(q=>[q.a,q.P]):c.load==='point'?[[c.position,c.force]]:[];
+  for(const [pa,pp] of pointLoads){const i=Math.round(pa/c.L*200),y=by+s*k*c.deflection[i]-6,sg=pp>=0?1:-1;arrow(X(pa),y-len*sg,X(pa),y,'#ec824f');}
+  if(c.load==='udl'||c.udl)for(let i=0;i<=200;i+=20){const y=by+s*k*c.deflection[i]-6,sg=(c.udl||c.force)>=0?1:-1;arrow(X(c.x[i]),y-0.6*len*sg,X(c.x[i]),y,'#d99a2b');}
   const box=[x0,200,x1-x0,90];frameBox(...box);const my=box[1]+box[3]/2,mk=(box[3]/2-6)/mmax;
   ctx.fillStyle='rgba(83,107,232,0.25)';ctx.beginPath();ctx.moveTo(X(0),my);c.x.forEach((x,i)=>ctx.lineTo(X(x),my+s*mk*c.moment[i]));ctx.lineTo(X(c.L),my);ctx.closePath();ctx.fill();
   text('bending moment (sagging plotted downward)',box[0]+6,box[1]+14);
   text('load '+(s*100).toFixed(0)+'%: deflection '+(s*Math.abs(c.maxDeflection)*1000).toPrecision(3)+' mm, σmax '+(s*c.maxStress/1e6).toPrecision(3)+' MPa (shape exaggerated)',x0,22);
+ }else if(c.id==='vibration'){
+  const k=Math.min(c.rows.length-1,Math.round(p*(c.rows.length-1))),[tau,x]=c.rows[k],amp=Math.max(1,c.analyticAmplitude);
+  const wallX=30,rest=130,scale=70/amp,massX=wallX+rest+x*scale,cy=120,force=Math.cos(c.ratio*tau);
+  ctx.fillStyle='#597b82';ctx.fillRect(wallX-12,60,12,120);
+  ctx.strokeStyle='#385d66';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(wallX,cy);
+  for(let i=1;i<=12;i++)ctx.lineTo(wallX+(massX-wallX)*i/13,cy+(i%2?-9:9));ctx.lineTo(massX,cy);ctx.stroke();
+  ctx.fillStyle='#ec824f';ctx.fillRect(massX,cy-25,40,50);arrow(massX+40,cy,massX+40+30*force,cy,'#536be8');
+  text('F(t) = F0·cos(ωt)',20,40,'#536be8');text('x/x_static = '+x.toFixed(3),20,200);
+  const top=[300,20,400,140];frameBox(...top);
+  polyline(c.rows.map(r=>[r[0],r[1]]),[0,c.tauEnd],[-amp*1.15,amp*1.15],top,'#188b81',2,k+1);
+  text('x(τ), τ = ωn·t = '+tau.toFixed(1),top[0]+6,top[1]+14);
+  const bot=[300,180,400,120];frameBox(...bot);const ymax=Math.min(60,Math.max(...c.curve.map(q=>q[1])))*1.1;
+  polyline(c.curve,[0,3],[0,ymax],bot,'#536be8',2);
+  const mx=bot[0]+c.ratio/3*bot[2],my=bot[1]+bot[3]-Math.min(c.measuredAmplitude,ymax)/ymax*bot[3];
+  ctx.fillStyle='#ec824f';ctx.beginPath();ctx.arc(mx,my,5,0,Math.PI*2);ctx.fill();
+  text('resonance curve |X|/x_static vs r (dot: simulated)',bot[0]+6,bot[1]+14);
  }else if(c.id==='orbit'){
   const b=c.a*Math.sqrt(1-c.e*c.e),sc=Math.min(640/(2*c.a),280/(2*b)),cx=360+c.a*c.e*sc,cy=160,P=(x,y)=>[cx+x*sc,cy-y*sc];
   ctx.fillStyle='#2f6fb3';ctx.beginPath();ctx.arc(cx,cy,c.earthRadius*sc,0,Math.PI*2);ctx.fill();
@@ -271,6 +289,43 @@ function draw(){
  }
  canvas.setAttribute('aria-label',visuals.find(v=>v.id===c.id).title+': '+c.summary);
 }
+// Tabular export of the current result (headers are unique, units in names).
+function tableOf(c){
+ const f=(rows,headers,name)=>({headers,rows:rows.map(r=>r.map(v=>Number.isFinite(v)?Number(v.toPrecision(12)):v)),name});
+ switch(c.id){
+  case 'spring':return f(c.rows,['t_s','x','v'],'SIM_SPRING');
+  case 'pendulum':return f(c.rows,['t_s','theta_rad','omega_rad_s'],'SIM_PENDULUM');
+  case 'spectrum':return f(c.bins.map(b=>[b.frequency,b.amplitude]),['frequency_Hz','amplitude'],'SIM_SPECTRUM');
+  case 'bisection':return f(c.brackets.map((b,i)=>[i,b[0],b[1]]),['iteration','a','b'],'SIM_BISECTION');
+  case 'quadrature':return f(c.curve,['x','f_x'],'SIM_QUADRATURE');
+  case 'eigen':return f(c.values.map((v,j)=>[v,c.vectors[0][j],c.vectors[1][j]]),['lambda','v_x','v_y'],'SIM_EIGEN');
+  case 'beam':return f(c.x.map((x,i)=>[x,c.deflection[i]*1000,c.moment[i]/1000,c.shear[i]/1000]),['x_m','deflection_mm','moment_kNm','shear_kN'],'SIM_BEAM');
+  case 'vibration':return f(c.rows,['tau','x_per_static','dx_dtau'],'SIM_VIBRATION');
+  case 'orbit':return f(c.path,['t_s','x_km','y_km','vx_km_s','vy_km_s'],'SIM_ORBIT');
+  case 'rlc':return f(c.rows,['t_s','vC_V','i_A'],'SIM_RLC');
+  case 'projectile':return f(c.rows,['t_s','x_m','y_m','vx_m_s','vy_m_s'],'SIM_PROJECTILE');
+  case 'rod':{const last=c.frames.at(-1).values,first=c.frames[0].values;return f(last.map((T,j)=>[j*c.L/(last.length-1),first[j],T]),['x_m','T_initial_C','T_final_C'],'SIM_ROD');}
+ }
+ throw Error('No tabular export for this visual.');
+}
+function exportTable(){
+ if(!current)throw Error('Compute a simulation first.');
+ const t=tableOf(current);return M.dataTables.importData({headers:t.headers,rows:t.rows},t.name);
+}
+function plotGraph(){
+ const table=exportTable();M.advanced.mode('graph');
+ const sel=$('dt-graph-table');sel.value=table.id;sel.dispatchEvent(new Event('change',{bubbles:true}));
+ $('dt-chart-type').value=current.id==='spectrum'?'bar':'line';$('dt-graph-x').value='0';$('dt-graph-y').value='1';$('dt-plot-table').click();
+ return table;
+}
+function downloadPng(){
+ if(!current)throw Error('Compute a simulation first.');
+ const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='ProMathStudio_'+current.id+'_frame'+frame+'.png';
+ document.body.append(a);a.click();a.remove();return a.download;
+}
+const setExport=on=>{for(const id of ['eng-visual-table','eng-visual-graph','eng-visual-png'])$(id).disabled=!on;};
+for(const [id,fn,msg] of [['eng-visual-table',exportTable,'Saved simulation data to Data Tables.'],['eng-visual-graph',plotGraph,'Plotted simulation data in Graphs.'],['eng-visual-png',downloadPng,'Downloaded current frame as PNG.']])
+ $(id).addEventListener('click',()=>{try{fn();if(id==='eng-visual-table')M.advanced.mode('data');status.classList.remove('error');status.textContent=msg;}catch(e){status.classList.add('error');status.textContent='Export failed: '+e.message;}});
 function stop(){playing=false;cancelAnimationFrame(handle);toggle.textContent='Play';toggle.setAttribute('aria-pressed','true');}
 function tick(){if(!playing)return;frame=Math.min(FRAMES,frame+1);draw();if(frame>=FRAMES){stop();return;}handle=requestAnimationFrame(tick);}
 function play(){if(!current)return;if(frame>=FRAMES)frame=0;playing=true;toggle.textContent='Pause';toggle.setAttribute('aria-pressed','false');handle=requestAnimationFrame(tick);}
@@ -278,12 +333,12 @@ function run(){
  stop();
  try{
   const v=visuals.find(x=>x.id===picker.value);current=v.compute(params());status.classList.remove('error');
-  status.textContent=current.summary;
+  status.textContent=current.summary;setExport(true);
   if(reduced()){frame=FRAMES;draw();}else{frame=0;draw();play();}
- }catch(error){current=null;frame=0;draw();status.classList.add('error');status.textContent='Cannot animate: '+error.message;}
+ }catch(error){current=null;setExport(false);frame=0;draw();status.classList.add('error');status.textContent='Cannot animate: '+error.message;}
  return current;
 }
-function select(id){if(!visuals.some(v=>v.id===id))throw Error('Unknown engineering visual: '+id);area.open=true;picker.value=id;buildFields();current=null;stop();draw();}
+function select(id){if(!visuals.some(v=>v.id===id))throw Error('Unknown engineering visual: '+id);area.open=true;picker.value=id;buildFields();current=null;setExport(false);stop();draw();}
 // Catalog "Open existing tool" entry point for simulation tools: select, run, focus first input.
 function open(toolId){
  const v=visuals.find(x=>x.tool===toolId);if(!v)throw Error('No simulation for tool: '+toolId);
@@ -298,13 +353,13 @@ function decorate(){
  for(const card of document.querySelectorAll('#eng-results .eng-card')){
   const v=visuals.find(x=>x.tool===card.dataset.toolId);if(!v||card.querySelector('[data-visual]'))continue;
   const note=document.createElement('p');note.dataset.visual=v.id;note.className='eng-visual-note';
-  note.textContent='▶ Animation available: '+v.title+' (Engineering animations panel).';
+  note.textContent='▶ Animation available: '+v.title+' (Engineering simulations panel).';
   card.append(note);
  }
 }
 new MutationObserver(decorate).observe($('eng-results'),{childList:true});decorate();
 buildFields();draw();stop();
 M.engineeringVisuals=Object.freeze({visuals:visuals.map(v=>Object.freeze({id:v.id,tool:v.tool,title:v.title})),
- compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat}),
- select,open,run,play,pause:stop,frame:()=>frame,frames:FRAMES,current:()=>current});
+ compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,beamGeneral:S.beamGeneral,vibration:S.vibration,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat}),
+ select,open,run,play,pause:stop,tableOf,exportTable,plotGraph,downloadPng,frame:()=>frame,frames:FRAMES,current:()=>current});
 })();

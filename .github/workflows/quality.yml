@@ -240,6 +240,8 @@ jobs:
         run: python tests/smoke_engineering_visuals.py
       - name: Engineering simulations beam, orbit, RLC, projectile and rod reference regression
         run: python tests/smoke_engineering_simulations.py
+      - name: Forced vibration, beam superposition, simulation export and PNG regression
+        run: python tests/smoke_engineering_sim_extensions.py
       - name: Scalar root conditioning advisory and numerical/UI regression
         run: python tests/smoke_scalar_root_conditioning.py
       - name: Scalar root steep-bracket refinement, boundary and jump regression
@@ -258,6 +260,8 @@ jobs:
         run: python tests/smoke_minimize_golden.py
       - name: Brent-Dekker bracketed root regression
         run: python tests/smoke_root_brent.py
+      - name: Brent pole and jump bracket refusal regression
+        run: python tests/smoke_brent_pole_guard.py
       - name: XLSX offline export ZIP and browser regression
         run: python tests/smoke_xlsx_export.py
       - name: XLSX secure import and transactional round-trip regression
@@ -390,3 +394,16 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_matrix_weighted_rhs_percent.py'
       - name: Weighted proportional RHS box responsive Chromium regression
         run: python tests/smoke_matrix_weighted_rhs_percent.py
+
+      - name: Statistics distributions, descriptive statistics, recovery and responsive browser regression
+        run: python tests/smoke_statistics_tools.py
+      - name: Implicit, parametric and polar curves browser regression
+        run: python tests/smoke_graph_curves.py
+      - name: Optimization LP simplex and Nelder-Mead browser regression
+        run: python tests/smoke_optimization_tools.py
+      - name: Unit conversion and dimensional analysis reference, temperature and responsive browser regression
+        run: python tests/smoke_units_tools.py
+      - name: Double/triple Gauss-Kronrod and discrete integration browser regression
+        run: python tests/smoke_integration_tools.py
+      - name: Stiff TR-BDF2 implicit ODE reference, failure and responsive UI regression
+        run: python tests/smoke_stiff_ode.py

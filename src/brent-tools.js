@@ -14,14 +14,22 @@ function refine({expression='x^3-x-2',lo=1,hi=2,tolerance=1e-9,maxIterations=120
  const result=(x,residual,bracket)=>({type:'root-brent',x,residual,iterations,evaluations,bracket,method:'Brent-Dekker bracketed root refinement',note:'Requires continuity and opposite endpoint signs; not a proof of uniqueness or exhaustive search.'});
  if(fa===0)return result(a,fa,[lo,hi]);if(fb===0)return result(b,fb,[lo,hi]);
  if(Math.sign(fa)===Math.sign(fb))throw Error('Endpoints must have opposite residual signs or an exact endpoint root.');
- const scale=Math.max(1,Math.min(Math.abs(fa),Math.abs(fb)));
+ const scale=Math.max(1,Math.min(Math.abs(fa),Math.abs(fb))),endpointMax=Math.max(Math.abs(fa),Math.abs(fb));
+ // A sign change with no small residual is refused and classified: |f| growing far above the
+ // endpoint values while the bracket shrinks suggests a pole; otherwise a jump. Heuristic only.
+ const refuse=(x,magnitude)=>{
+  const where=Number(x.toPrecision(10));
+  if(!Number.isFinite(magnitude)||magnitude>10*endpointMax)
+   throw Error('Suspected pole near x ≈ '+where+': |f| grew from '+endpointMax.toExponential(2)+' at the endpoints to '+(Number.isFinite(magnitude)?magnitude.toExponential(2):'overflow')+' as the bracket shrank. No root is claimed (heuristic classification).');
+  throw Error('Suspected jump discontinuity near x ≈ '+where+': the sign change keeps a residual of '+magnitude.toExponential(2)+'. No root is claimed (heuristic classification).');
+ };
  let c=a,fc=fa,d=b-a,e=d;
  for(let it=0;it<maxIterations;it++){
   if((fb>0&&fc>0)||(fb<0&&fc<0)){c=a;fc=fa;d=e=b-a;}
   if(Math.abs(fc)<Math.abs(fb)){const oldB=b,oldFb=fb;a=oldB;b=c;c=oldB;fa=oldFb;fb=fc;fc=oldFb;}
   const tol=2*Number.EPSILON*Math.abs(b)+tolerance/2,half=(c-b)/2;
   if(Math.abs(half)<=tol||fb===0){
-   if(Math.abs(fb)>Math.sqrt(tolerance)*scale)throw Error('Bracket collapsed with a large residual; suspected discontinuity.');
+   if(Math.abs(fb)>Math.sqrt(tolerance)*scale)refuse(b,Math.min(Math.abs(fb),Math.abs(fc)));
    return result(b,fb,[Math.min(b,c),Math.max(b,c)]);
   }
   if(Math.abs(e)>=tol&&Math.abs(fa)>Math.abs(fb)){
@@ -33,7 +41,14 @@ function refine({expression='x^3-x-2',lo=1,hi=2,tolerance=1e-9,maxIterations=120
    else{d=half;e=half;}
   }else{d=half;e=half;}
   a=b;fa=fb;const step=Math.abs(d)>tol?d:(half>0?tol:-tol);
-  if(b+step===b)throw Error('Root refinement reached machine precision.');b+=step;fb=f(b);iterations=it+1;
+  if(b+step===b)throw Error('Root refinement reached machine precision.');b+=step;
+  try{fb=f(b);}catch(overflow){
+   // An undefined point (e.g. 0/0 at a step) is not growth evidence: probe both neighbours.
+   const eps=Math.max(1e-9,1e-9*Math.abs(b));let near=Infinity;
+   try{near=Math.max(Math.abs(M.numerical.evaluate(expression,{x:b-eps})),Math.abs(M.numerical.evaluate(expression,{x:b+eps})));}catch{}
+   refuse(b,near);
+  }
+  iterations=it+1;
  }
  throw Error('Root refinement iteration budget exceeded.');
 }

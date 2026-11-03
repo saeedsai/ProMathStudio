@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-UTF8-DIAGNOSTIC-125 (dev checkpoint; exact-head CI pending)
+
+**Change:** The standalone builder now identifies the offending module path when its bytes cannot be decoded as UTF-8. The focused subprocess regression writes a malformed source file, checks the diagnostic, and asserts the original standalone HTML is unchanged. No generated bundle or JavaScript runtime behavior changes. Exact-head Quality, PR review and main/Pages release remain unverified for this checkpoint.
+
+**Execution ledger:** PR #180 merged at b3313657; main advanced to eb62023d93fb90241043576193af94d14c0a49a8 while dev was 3acae09e028b741a62bd73ac20ec7477d8191e5b. Fast-forwarded dev to main without force before editing. Local Python/Chromium tests unavailable in connector-only execution; CI must validate the new commit. Historical 166 gaps / 95 partial features unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Exact-head BUILD-UTF8 QA and safe release:** all structural and Chromium Quality checks pass on the exact dev and PR heads; merge only after reviews/protections, then verify main Quality and Pages.
+2. **P1 Animation PNG export:** one contextual frame-export action, deterministic canvas PNG content and offline/keyboard/390px browser checks.
+3. **P1 Control Theory controller extraction:** byte-identical standalone rebuild, control numerical/browser regressions and project round-trip.
+4. **P1 Scalar-root pole-aware Brent handoff:** refuse possible pole brackets with explicit diagnostics and smooth-root controls.
+5. **P1 QR column-pivoting screen:** permutation-invariant near-rank 3×2/3×3 references, documented tolerances.
+
 ## 2026-11-03 — Engineering animations (ENG-VISUALS-124; user request)
 
 **Release checkpoint:** PR #181 (branch → dev) merged at 4cc0b1c; exact-head dev Quality 41712593561 and PR #180 Quality 41712600427 passed; PR #180 merged to main b3313657; Pages build 41713837001 succeeded.

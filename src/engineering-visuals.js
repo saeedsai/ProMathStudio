@@ -3,7 +3,8 @@
    a new math kernel. Illustrations, not certified engineering analyses. SPDX-License-Identifier: MIT. */
 (()=>{'use strict';
 const M=window.MathStudio,host=document.getElementById('engineering-panel');
-if(!M?.engineeringCatalog||!M?.odeTools||!M?.fftTools||!M?.numerical||!M?.matrixTools||!host)return;
+if(!M?.engineeringCatalog||!M?.engineeringSimulations||!M?.odeTools||!M?.fftTools||!M?.numerical||!M?.matrixTools||!host)return;
+const S=M.engineeringSimulations;
 const G=9.80665;
 const num=(value,label,min,max)=>{
  const text=String(value??'').trim(),n=Number(text);
@@ -70,6 +71,11 @@ function eigenMorph({a=2,b=1,d=1}={}){
   summary:'Symmetric A=[['+a+', '+b+'], ['+b+', '+d+']] maps the unit circle to an ellipse; eigenvalues '+e.values.map(v=>Number(v.toPrecision(6))).join(', ')+' stretch the orthogonal eigenvector directions.'};
 }
 const visuals=Object.freeze([
+ {id:'beam',tool:'structures.beam.deflection',title:'Simulation · Beam deflection, moment and stress',compute:S.beam,fields:[['support','Support','simply','select',[['simply','Simply supported'],['cantilever','Cantilever (fixed left)']]],['load','Load','point','select',[['point','Point load'],['udl','Uniform load']]],['length','Span L (m)','4'],['force','Load P (kN) or w (kN/m)','10'],['position','Point-load position a (m)','2'],['modulus','E (GPa)','200'],['width','Section width b (mm)','100'],['height','Section depth h (mm)','200']]},
+ {id:'orbit',tool:'aerospace.orbit.propagation',title:'Simulation · Two-body Earth orbit',compute:S.orbit,fields:[['altitude','Periapsis altitude (km)','500'],['eccentricity','Eccentricity e','0.3'],['orbits','Orbits','1']]},
+ {id:'rlc',tool:'circuits.rlc.series.transient',title:'Simulation · Series RLC step response',compute:S.rlc,fields:[['resistance','R (Ω)','4'],['inductance','L (mH)','10'],['capacitance','C (µF)','100'],['voltage','Source V (V)','12']]},
+ {id:'projectile',tool:'mechanics.projectile.drag',title:'Simulation · Projectile with air drag',compute:S.projectile,fields:[['speed','Launch speed (m/s)','40'],['angle','Launch angle (°)','45'],['mass','Mass (kg)','0.145'],['diameter','Diameter (mm)','74'],['drag','Drag coefficient Cd','0.47'],['density','Air density (kg/m³)','1.225']]},
+ {id:'rod',tool:'thermal.conduction.rod',title:'Simulation · Heat conduction in a rod',compute:S.rodHeat,fields:[['material','Material','aluminium','select',[['aluminium','Aluminium'],['copper','Copper'],['steel','Steel'],['glass','Glass'],['water','Water (still)']]],['length','Rod length (m)','0.5'],['initial','Initial temperature (°C)','20'],['left','Left end (°C)','100'],['right','Right end (°C)','20'],['duration','Duration (s)','900']]},
  {id:'spring',tool:'control.transient.two.state',title:'Mass–spring–damper step response',compute:springMassDamper,fields:[['zeta','Damping ratio ζ','0.2'],['wn','Natural frequency ωn (rad/s)','2'],['duration','Duration (s)','10']]},
  {id:'pendulum',tool:'ode.ivp.scalar',title:'Nonlinear pendulum (coupled RK4)',compute:pendulum,fields:[['theta0','Initial angle (°)','30'],['length','Length L (m)','1'],['duration','Duration (s)','6']]},
  {id:'spectrum',tool:'signals.fft.1d',title:'Two-tone signal and FFT spectrum',compute:spectrum,fields:[['f1','Frequency 1 (Hz)','5'],['a1','Amplitude 1','1'],['f2','Frequency 2 (Hz)','12'],['a2','Amplitude 2','0.5']]},
@@ -91,8 +97,8 @@ style.textContent='#eng-visuals{border:1px solid #d8e4e8;border-radius:12px;padd
  '#eng-visual-status.error{color:#a3262a}#eng-visual-status{font-size:13px;overflow-wrap:anywhere}';
 document.head.append(style);
 const area=document.createElement('details');area.id='eng-visuals';
-area.innerHTML='<summary>Engineering animations · visualize tools and equations</summary>'+
- '<p class="small-note">Animated illustrations computed by the existing tested solvers. They show qualitative behaviour and numeric estimates, not certified engineering designs. Animations respect reduced-motion preferences.</p>'+
+area.innerHTML='<summary>Engineering simulations &amp; animations</summary>'+
+ '<p class="small-note">Physics-based engineering simulations (beam, orbit, circuit, projectile, heat) and solver animations. Each states its model assumptions; results are textbook-model estimates, not certified designs or code checks. Animations respect reduced-motion preferences.</p>'+
  '<label>Visualization<select id="eng-visual-select"></select></label><div id="eng-visual-fields"></div>'+
  '<div class="eng-visual-actions"><button type="button" id="eng-visual-run">Compute &amp; animate</button><button type="button" id="eng-visual-toggle" aria-pressed="false">Pause</button><button type="button" id="eng-visual-step">Step frame</button></div>'+
  '<canvas id="eng-visual-canvas" width="720" height="320" role="img" aria-label="Engineering animation"></canvas>'+
@@ -106,13 +112,18 @@ let current=null,frame=0,playing=false,handle=0;
 const FRAMES=180;
 function buildFields(){
  const v=visuals.find(x=>x.id===picker.value);fields.replaceChildren();
- for(const [key,label,value,type] of v.fields){
+ for(const [key,label,value,type,options] of v.fields){
   const wrap=document.createElement('label');wrap.textContent=label;
-  const input=document.createElement('input');input.id='eng-visual-'+key;input.type=type||'number';input.step='any';input.value=value;input.dataset.key=key;
+  let input;
+  if(type==='select'){input=document.createElement('select');for(const [val,text] of options){const o=document.createElement('option');o.value=val;o.textContent=text;input.append(o);}}
+  else{input=document.createElement('input');input.type=type||'number';input.step='any';}
+  input.id='eng-visual-'+key;input.value=value;input.dataset.key=key;
   wrap.append(input);fields.append(wrap);
  }
 }
-function params(){return Object.fromEntries([...fields.querySelectorAll('input')].map(i=>[i.dataset.key,i.value]));}
+function params(){return Object.fromEntries([...fields.querySelectorAll('input,select')].map(i=>[i.dataset.key,i.value]));}
+const heat=t=>'hsl('+Math.round(240*(1-Math.max(0,Math.min(1,t))))+',80%,48%)';
+function arrow(x1,y1,x2,y2,color){ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();const a=Math.atan2(y2-y1,x2-x1);ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-8*Math.cos(a-0.4),y2-8*Math.sin(a-0.4));ctx.lineTo(x2-8*Math.cos(a+0.4),y2-8*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
 // Shared plotting helpers.
 function frameBox(x0,y0,w,h){ctx.strokeStyle='#e1eaee';ctx.lineWidth=1;ctx.strokeRect(x0,y0,w,h);}
 function polyline(points,xr,yr,box,color,width=2,limit=points.length){
@@ -129,7 +140,75 @@ function draw(){
  ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.font='13px system-ui,sans-serif';
  if(!current)return;
  const c=current;
- if(c.id==='spring'||c.id==='pendulum'){
+ if(c.id==='beam'){
+  const s=Math.min(1,p*1.25),x0=60,x1=660,by=100,X=x=>x0+(x1-x0)*x/c.L;
+  const dmax=Math.max(1e-300,...c.deflection.map(Math.abs)),k=55/dmax,mmax=Math.max(1e-300,...c.moment.map(Math.abs));
+  ctx.lineWidth=7;
+  for(let i=0;i<c.x.length-1;i++){ctx.strokeStyle=heat(Math.abs(c.moment[i])/mmax*s);ctx.beginPath();ctx.moveTo(X(c.x[i]),by+s*k*c.deflection[i]);ctx.lineTo(X(c.x[i+1]),by+s*k*c.deflection[i+1]);ctx.stroke();}
+  ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeStyle='#8ebfb8';ctx.beginPath();ctx.moveTo(x0,by);ctx.lineTo(x1,by);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#597b82';
+  if(c.support==='simply'){for(const x of [x0,x1]){ctx.beginPath();ctx.moveTo(x,by+5);ctx.lineTo(x-10,by+22);ctx.lineTo(x+10,by+22);ctx.closePath();ctx.fill();}}
+  else{ctx.fillRect(x0-16,by-40,12,80);ctx.strokeStyle='#597b82';for(let yy=by-40;yy<by+40;yy+=10){ctx.beginPath();ctx.moveTo(x0-16,yy+10);ctx.lineTo(x0-26,yy);ctx.stroke();}}
+  const sign=c.force>=0?1:-1,len=10+28*s;
+  if(c.load==='point'){const i=Math.round(c.position/c.L*200),y=by+s*k*c.deflection[i]-6;arrow(X(c.position),y-len*sign,X(c.position),y,'#ec824f');}
+  else for(let i=0;i<=200;i+=20){const y=by+s*k*c.deflection[i]-6;arrow(X(c.x[i]),y-len*sign,X(c.x[i]),y,'#ec824f');}
+  const box=[x0,200,x1-x0,90];frameBox(...box);const my=box[1]+box[3]/2,mk=(box[3]/2-6)/mmax;
+  ctx.fillStyle='rgba(83,107,232,0.25)';ctx.beginPath();ctx.moveTo(X(0),my);c.x.forEach((x,i)=>ctx.lineTo(X(x),my+s*mk*c.moment[i]));ctx.lineTo(X(c.L),my);ctx.closePath();ctx.fill();
+  text('bending moment (sagging plotted downward)',box[0]+6,box[1]+14);
+  text('load '+(s*100).toFixed(0)+'%: deflection '+(s*Math.abs(c.maxDeflection)*1000).toPrecision(3)+' mm, σmax '+(s*c.maxStress/1e6).toPrecision(3)+' MPa (shape exaggerated)',x0,22);
+ }else if(c.id==='orbit'){
+  const b=c.a*Math.sqrt(1-c.e*c.e),sc=Math.min(640/(2*c.a),280/(2*b)),cx=360+c.a*c.e*sc,cy=160,P=(x,y)=>[cx+x*sc,cy-y*sc];
+  ctx.fillStyle='#2f6fb3';ctx.beginPath();ctx.arc(cx,cy,c.earthRadius*sc,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#c8d6dc';ctx.setLineDash([4,4]);ctx.beginPath();ctx.ellipse(cx-c.a*c.e*sc,cy,c.a*sc,b*sc,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  const k=Math.min(c.path.length-1,Math.round(p*(c.path.length-1)));
+  ctx.strokeStyle='#188b81';ctx.lineWidth=2;ctx.beginPath();for(let i=Math.max(0,k-120);i<=k;i++){const [px,py]=P(c.path[i][1],c.path[i][2]);if(i===Math.max(0,k-120))ctx.moveTo(px,py);else ctx.lineTo(px,py);}ctx.stroke();
+  const [t,x,y,vx,vy]=c.path[k],[px,py]=P(x,y),speed=Math.hypot(vx,vy);
+  arrow(px,py,px+vx/c.vp*40,py-vy/c.vp*40,'#ec824f');ctx.fillStyle='#27444b';ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fill();
+  text('t = '+(t/60).toFixed(1)+' min, altitude '+(Math.hypot(x,y)-c.earthRadius).toFixed(0)+' km, speed '+speed.toFixed(3)+' km/s',20,22);
+  text('period '+(c.period/60).toFixed(2)+' min',20,306);
+ }else if(c.id==='rlc'){
+  const k=Math.min(c.rows.length-1,Math.round(p*(c.rows.length-1))),[t,vc,i]=c.rows[k];
+  const vmax=Math.max(1e-300,...c.rows.map(r=>Math.abs(r[1]))),imax=Math.max(1e-300,...c.rows.map(r=>Math.abs(r[2])));
+  const L0=40,T0=60,R0=280,B0=260;ctx.strokeStyle='#385d66';ctx.lineWidth=2;ctx.strokeRect(L0,T0,R0-L0,B0-T0);
+  ctx.fillStyle='#fff';ctx.fillRect(L0-6,140,12,40);ctx.fillRect(R0-6,145,12,30);ctx.fillRect(95,T0-6,60,12);ctx.fillRect(180,T0-6,70,12);
+  ctx.strokeStyle='#385d66';ctx.beginPath();ctx.moveTo(L0-14,150);ctx.lineTo(L0+14,150);ctx.moveTo(L0-7,170);ctx.lineTo(L0+7,170);ctx.stroke();text('V',L0+18,165);
+  ctx.beginPath();ctx.moveTo(95,T0);for(let j=1;j<=6;j++)ctx.lineTo(95+j*10,T0+(j%2?-8:8));ctx.lineTo(155,T0);ctx.stroke();text('R',120,T0-14);
+  ctx.beginPath();for(let j=0;j<4;j++)ctx.arc(189+j*17,T0,8.5,Math.PI,0);ctx.stroke();text('L',210,T0-14);
+  const fill=Math.abs(vc)/vmax;ctx.fillStyle=heat(fill);ctx.fillRect(R0-16,145,32,5);ctx.fillRect(R0-16,170,32,5);text('C',R0+20,165);
+  const perim=2*((R0-L0)+(B0-T0)),q=vc/vmax,dots=14;
+  for(let j=0;j<dots;j++){let d=((j/dots+q*0.5)%1+1)%1*perim;let px,py;
+   if(d<R0-L0){px=L0+d;py=T0;}else if((d-=R0-L0)<B0-T0){px=R0;py=T0+d;}else if((d-=B0-T0)<R0-L0){px=R0-d;py=B0;}else{d-=R0-L0;px=L0;py=B0-d;}
+   ctx.fillStyle='#ec824f';ctx.beginPath();ctx.arc(px,py,3.5,0,Math.PI*2);ctx.fill();}
+  const box=[320,20,380,270];frameBox(...box);
+  polyline(c.rows.map(r=>[r[0],r[1]/vmax]),[0,c.duration],[-1.1,1.1],box,'#188b81',2,k+1);
+  polyline(c.rows.map(r=>[r[0],r[2]/imax]),[0,c.duration],[-1.1,1.1],box,'#536be8',2,k+1);
+  text('vC(t) / '+vmax.toPrecision(3)+' V',box[0]+6,box[1]+14,'#188b81');text('i(t) / '+(imax*1000).toPrecision(3)+' mA',box[0]+6,box[1]+30,'#536be8');
+  text('t = '+(t*1000).toPrecision(4)+' ms, vC = '+vc.toPrecision(4)+' V, i = '+(i*1000).toPrecision(4)+' mA',20,300);
+ }else if(c.id==='projectile'){
+  const xr=Math.max(c.range,c.vacuumRange)*1.05,yr=Math.max(c.apexHeight,c.vacuumApex)*1.15,box=[40,30,650,250];
+  const sc=Math.min(box[2]/xr,box[3]/yr),P=(x,y)=>[box[0]+x*sc,box[1]+box[3]-y*sc];
+  ctx.strokeStyle='#597b82';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(box[0],box[1]+box[3]);ctx.lineTo(box[0]+box[2],box[1]+box[3]);ctx.stroke();
+  const v0=Math.hypot(c.rows[0][3],c.rows[0][4]),th=Math.atan2(c.rows[0][4],c.rows[0][3]);
+  ctx.strokeStyle='#c8d6dc';ctx.setLineDash([5,4]);ctx.beginPath();
+  for(let j=0;j<=100;j++){const x=c.vacuumRange*j/100,y=x*Math.tan(th)-9.80665*x*x/(2*v0*v0*Math.cos(th)**2);const [px,py]=P(x,Math.max(0,y));if(j)ctx.lineTo(px,py);else ctx.moveTo(px,py);}ctx.stroke();ctx.setLineDash([]);
+  const k=Math.min(c.rows.length-1,Math.round(p*(c.rows.length-1)));
+  ctx.strokeStyle='#188b81';ctx.lineWidth=2;ctx.beginPath();for(let j=0;j<=k;j++){const [px,py]=P(c.rows[j][1],c.rows[j][2]);if(j)ctx.lineTo(px,py);else ctx.moveTo(px,py);}ctx.stroke();
+  const [t,x,y,vx,vy]=c.rows[k],[px,py]=P(x,y);arrow(px,py,px+vx/v0*45,py-vy/v0*45,'#ec824f');
+  ctx.fillStyle='#27444b';ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fill();
+  text('t = '+t.toFixed(2)+' s, x = '+x.toFixed(1)+' m, y = '+y.toFixed(1)+' m, |v| = '+Math.hypot(vx,vy).toFixed(1)+' m/s',40,20);
+  text('dashed: vacuum parabola (range '+c.vacuumRange.toFixed(1)+' m)',box[0]+6,box[1]+box[3]+20);
+ }else if(c.id==='rod'){
+  const k=Math.min(c.frames.length-1,Math.round(p*(c.frames.length-1))),fr=c.frames[k],n=fr.values.length;
+  const lo=Math.min(c.T0,c.TL,c.TR),hi=Math.max(c.T0,c.TL,c.TR),span=Math.max(1e-9,hi-lo),x0=60,w=600;
+  for(let j=0;j<n;j++){ctx.fillStyle=heat((fr.values[j]-lo)/span);ctx.fillRect(x0+w*j/n,40,w/n+1,40);}
+  ctx.strokeStyle='#385d66';ctx.strokeRect(x0,40,w,40);
+  text(c.TL+' °C',x0-50,65);text(c.TR+' °C',x0+w+6,65);
+  const box=[x0,110,w,170];frameBox(...box);const xs=fr.values.map((_,j)=>j*c.L/(n-1));
+  ctx.setLineDash([4,4]);polyline(xs.map((x,j)=>[x,c.TL+(c.TR-c.TL)*j/(n-1)]),[0,c.L],[lo-span*0.05,hi+span*0.05],box,'#c8d6dc',1);ctx.setLineDash([]);
+  polyline(xs.map((x,j)=>[x,fr.values[j]]),[0,c.L],[lo-span*0.05,hi+span*0.05],box,'#e7543f',2);
+  text('T(x) at t = '+fr.time.toFixed(1)+' s (dashed: steady linear profile)',box[0]+6,box[1]+14);
+  text('centre '+fr.values[Math.floor(n/2)].toFixed(2)+' °C',x0,30);
+ }else if(c.id==='spring'||c.id==='pendulum'){
   const k=Math.min(c.rows.length-1,Math.round(p*(c.rows.length-1))),row=c.rows[k],box=[300,20,400,270];
   frameBox(...box);
   const ys=c.rows.map(r=>r[1]),yr=range(c.id==='spring'?[...ys,0,1]:ys);
@@ -205,6 +284,11 @@ function run(){
  return current;
 }
 function select(id){if(!visuals.some(v=>v.id===id))throw Error('Unknown engineering visual: '+id);area.open=true;picker.value=id;buildFields();current=null;stop();draw();}
+// Catalog "Open existing tool" entry point for simulation tools: select, run, focus first input.
+function open(toolId){
+ const v=visuals.find(x=>x.tool===toolId);if(!v)throw Error('No simulation for tool: '+toolId);
+ select(v.id);run();area.scrollIntoView({block:'nearest'});fields.querySelector('input,select')?.focus({preventScroll:true});return v.id;
+}
 picker.addEventListener('change',()=>select(picker.value));
 $('eng-visual-run').addEventListener('click',run);
 toggle.addEventListener('click',()=>{if(playing)stop();else play();});
@@ -221,6 +305,6 @@ function decorate(){
 new MutationObserver(decorate).observe($('eng-results'),{childList:true});decorate();
 buildFields();draw();stop();
 M.engineeringVisuals=Object.freeze({visuals:visuals.map(v=>Object.freeze({id:v.id,tool:v.tool,title:v.title})),
- compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph}),
- select,run,play,pause:stop,frame:()=>frame,frames:FRAMES,current:()=>current});
+ compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat}),
+ select,open,run,play,pause:stop,frame:()=>frame,frames:FRAMES,current:()=>current});
 })();

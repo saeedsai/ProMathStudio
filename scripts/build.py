@@ -25,6 +25,7 @@ modules = [
     ("promath-precision-tools", "src/precision-tools.js"),
     ("promath-workspace-tasks", "src/workspace-tasks.js"),
     ("promath-complex-graph", "src/complex-graph.js"),
+    ("promath-engineering-simulations", "src/engineering-simulations.js"),
     ("promath-engineering-catalog", "src/engineering-catalog.js"),
     ("promath-engineering-visuals", "src/engineering-visuals.js"),
 ]
@@ -44,7 +45,10 @@ for tag, source in modules:
     source_path = root / source
     if not source_path.is_file():
         raise FileNotFoundError(f"Missing standalone module source: {source}")
-    module_source = source_path.read_text(encoding="utf-8").rstrip("\n")
+    try:
+        module_source = source_path.read_text(encoding="utf-8").rstrip("\n")
+    except UnicodeDecodeError as error:
+        raise ValueError(f"Invalid UTF-8 in standalone module source: {source}") from error
     if not module_source.strip():
         raise ValueError(f"Empty standalone module source: {source}")
     if "\x00" in module_source:

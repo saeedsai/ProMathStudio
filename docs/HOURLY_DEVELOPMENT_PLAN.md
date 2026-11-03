@@ -1,3 +1,29 @@
+## 2026-11-03 — Engineering simulations with animation (ENG-SIMULATIONS-125; user request)
+
+**Release checkpoint:** ENG-VISUALS-124 released via PR #183 at main eb62023; main Quality 41717592998 and Pages 41717592382 succeeded.
+
+**Implemented on branch (QA pending):** The user clarified that "engineering animation" means engineering simulation with relevant animation. Added `src/engineering-simulations.js` with five physics simulations: beam, orbit, series RLC, projectile with drag, and rod conduction. Each states its assumptions and uses SI units. The simulations reuse the existing RK4 and FTCS solvers where they apply; a small native vector RK4 handles the four-state projectile. `structures.beam.deflection` and `aerospace.orbit.propagation` move from planned to available under their narrowed published scope; three new catalog tools were added. Tests: `tests/test_engineering_simulations.py`, `tests/smoke_engineering_simulations.py`.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release ENG-SIMULATIONS-125 (pending):** exact-head Quality, ordinary PR to main, main Quality and Pages success.
+2. **P1 Simulation export (planned):** send simulation time series to Data Tables and Graphs through the existing transfer bridge; round-trip and column-identity tests.
+3. **P1 Forced vibration and resonance sweep (planned):** harmonic forcing on the existing RK4 system; amplitude-ratio reference 1/√((1−r²)²+(2ζr)²).
+4. **P1 Beam: overhang and multiple loads by superposition (planned):** superposition references and equilibrium checks; no design-code claims.
+5. **P1 Control Theory controller extraction (planned):** byte-identical rebuild; control smokes green.
+
+## 2026-11-03 — BUILD-UTF8-DIAGNOSTIC-125 (dev checkpoint; exact-head CI pending)
+
+**Change:** The standalone builder now identifies the offending module path when its bytes cannot be decoded as UTF-8. The focused subprocess regression writes a malformed source file, checks the diagnostic, and asserts the original standalone HTML is unchanged. No generated bundle or JavaScript runtime behavior changes. Exact-head Quality, PR review and main/Pages release remain unverified for this checkpoint.
+
+**Execution ledger:** PR #180 merged at b3313657; main advanced to eb62023d93fb90241043576193af94d14c0a49a8 while dev was 3acae09e028b741a62bd73ac20ec7477d8191e5b. Fast-forwarded dev to main without force before editing. Local Python/Chromium tests unavailable in connector-only execution; CI must validate the new commit. Historical 166 gaps / 95 partial features unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Exact-head BUILD-UTF8 QA and safe release:** all structural and Chromium Quality checks pass on the exact dev and PR heads; merge only after reviews/protections, then verify main Quality and Pages.
+2. **P1 Animation PNG export:** one contextual frame-export action, deterministic canvas PNG content and offline/keyboard/390px browser checks.
+3. **P1 Control Theory controller extraction:** byte-identical standalone rebuild, control numerical/browser regressions and project round-trip.
+4. **P1 Scalar-root pole-aware Brent handoff:** refuse possible pole brackets with explicit diagnostics and smooth-root controls.
+5. **P1 QR column-pivoting screen:** permutation-invariant near-rank 3×2/3×3 references, documented tolerances.
+
 ## 2026-11-03 — Engineering animations (ENG-VISUALS-124; user request)
 
 **Release checkpoint:** PR #181 (branch → dev) merged at 4cc0b1c; exact-head dev Quality 41712593561 and PR #180 Quality 41712600427 passed; PR #180 merged to main b3313657; Pages build 41713837001 succeeded.

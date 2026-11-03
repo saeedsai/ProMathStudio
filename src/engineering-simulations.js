@@ -14,7 +14,54 @@ const G0=9.80665;
 
 /* Euler–Bernoulli prismatic beam: linear elastic, small deflection, no shear deformation.
    Deflection v is positive downward; loads act downward. Closed forms from standard tables. */
-function beam({support='simply',load='point',length=4,position=2,force=10,modulus=200,width=100,height=200}={}){
+/* Statically determinate beam by superposition-free direct integration: reactions from statics,
+   Macaulay bending moment, then EI·v'' = −M integrated twice (cumulative trapezoid, 2000 cells)
+   with support conditions. Handles combined point loads + full-span UDL and an overhang. */
+function beamGeneral({support='simply',length=4,supportB=null,loads=[],modulus=200,width=100,height=200}={}){
+ support=choice(support,['simply','cantilever','overhang'],'Support');
+ const L=num(length,'Span L (m)',0.1,200),E=num(modulus,'Elastic modulus E (GPa)',0.001,1500)*1e9;
+ const b=num(width,'Section width b (mm)',1,5000)/1000,h=num(height,'Section depth h (mm)',1,5000)/1000;
+ const xB=support==='overhang'?num(supportB,'Right support position (m)',0.05*L,0.95*L):L;
+ if(!Array.isArray(loads)||!loads.length||loads.length>8)throw Error('Provide 1–8 loads.');
+ const points=[],udl={w:0};
+ for(const load of loads){
+  if(load.type==='point')points.push({P:num(load.P,'Point load (kN)',-1e6,1e6)*1000,a:num(load.a,'Load position (m)',0,L)});
+  else if(load.type==='udl')udl.w+=num(load.w,'Distributed load w (kN/m)',-1e6,1e6)*1000;
+  else throw Error('Load type must be point or udl.');
+ }
+ const I=b*h**3/12,c=h/2,EI=E*I,n=2000,dx=L/n;
+ const F=points.reduce((s,q)=>s+q.P,0)+udl.w*L,Mo=points.reduce((s,q)=>s+q.P*q.a,0)+udl.w*L*L/2;
+ let reactions,M0=0;
+ if(support==='cantilever'){reactions={left:F,right:0,moment:-Mo};M0=-Mo;}
+ else{const RB=Mo/xB;reactions={left:F-RB,right:RB,rightAt:xB};}
+ const mac=(x,a)=>x>a?x-a:0;
+ const moment=x=>M0+reactions.left*x+(support==='cantilever'?0:reactions.right*mac(x,xB))-points.reduce((s,q)=>s+q.P*mac(x,q.a),0)-udl.w*x*x/2;
+ const shear=x=>reactions.left+(support!=='cantilever'&&x>xB?reactions.right:0)-points.reduce((s,q)=>s+(x>q.a?q.P:0),0)-udl.w*x;
+ const X=Array.from({length:n+1},(_,i)=>i*dx),Mx=X.map(moment);
+ const theta=[0],v0=[0];
+ for(let i=1;i<=n;i++){theta.push(theta[i-1]-dx*(Mx[i-1]+Mx[i])/(2*EI));v0.push(v0[i-1]+dx*(theta[i-1]+theta[i])/2);}
+ let C1=0;
+ if(support!=='cantilever'){const k=Math.min(n-1,Math.floor(xB/dx)),f=(xB-X[k])/dx,vB=v0[k]+f*(v0[k+1]-v0[k]);C1=-vB/xB;}
+ const vFine=v0.map((v,i)=>v+C1*X[i]);
+ const pick=arr=>arr.reduce((best,val,i)=>Math.abs(val)>Math.abs(best.value)?{value:val,index:i}:best,{value:0,index:0});
+ const dmax=pick(vFine),mmax=pick(Mx),stress=Math.abs(mmax.value)*c/I,stride=10;
+ const x=X.filter((_,i)=>i%stride===0);
+ return {id:'beam',support,load:'combined',L,E,I,c,EI,supportB:xB,points,udl:udl.w,x,deflection:vFine.filter((_,i)=>i%stride===0),
+  moment:Mx.filter((_,i)=>i%stride===0),shear:x.map(shear),reactions,
+  maxDeflection:dmax.value,maxDeflectionAt:X[dmax.index],maxMoment:mmax.value,maxMomentAt:X[mmax.index],maxStress:stress,
+  spanRatio:dmax.value===0?Infinity:L/Math.abs(dmax.value),method:'direct double integration (2000 cells)',
+  assumptions:'Euler–Bernoulli prismatic rectangular beam, linear elastic, small deflection, statically determinate supports; no shear deformation, buckling or code checks.',
+  summary:({simply:'Simply supported',cantilever:'Cantilever',overhang:'Overhanging'})[support]+' beam, '+points.length+' point load(s)'+(udl.w?' + UDL '+udl.w/1000+' kN/m':'')+
+   ': max deflection '+(dmax.value*1000).toPrecision(4)+' mm at x = '+X[dmax.index].toPrecision(3)+' m, max moment '+(mmax.value/1000).toPrecision(4)+' kN·m, max bending stress '+(stress/1e6).toPrecision(4)+
+   ' MPa; reactions '+(reactions.left/1000).toPrecision(4)+(support==='cantilever'?' kN, fixed-end moment '+(reactions.moment/1000).toPrecision(4)+' kN·m.':' / '+(reactions.right/1000).toPrecision(4)+' kN.')};
+}
+function beam({support='simply',load='point',length=4,position=2,force=10,modulus=200,width=100,height=200,supportB=3,force2=0,position2=1,udl=0}={}){
+ if(load==='combined'||support==='overhang'){
+  const loads=[];
+  if(load==='udl')loads.push({type:'udl',w:force});
+  else{loads.push({type:'point',P:force,a:position});if(load==='combined'){if(Number(force2))loads.push({type:'point',P:force2,a:position2});if(Number(udl))loads.push({type:'udl',w:udl});}}
+  return beamGeneral({support,length,supportB,loads,modulus,width,height});
+ }
  support=choice(support,['simply','cantilever'],'Support');load=choice(load,['point','udl'],'Load');
  const L=num(length,'Span L (m)',0.1,200);
  const E=num(modulus,'Elastic modulus E (GPa)',0.001,1500)*1e9;
@@ -156,5 +203,27 @@ function rodHeat({material='aluminium',length=0.5,initial=20,left=100,right=20,d
   assumptions:'1-D conduction, constant diffusivity, perfectly insulated sides, fixed end temperatures; explicit FTCS (CFL ≤ 0.5).',
   summary:'Rod ('+material+', α = '+MATERIALS[material]+' mm²/s, L = '+L+' m) after '+t+' s: centre '+frames.at(-1).values[nx/2].toFixed(2)+' °C; Fourier number '+fourier.toPrecision(3)+(fourier<0.5?' (not yet near steady state)':' (approaching linear steady state)')+'; CFL '+result.cfl.toFixed(3)+'.'};
 }
-M.engineeringSimulations=Object.freeze({beam,orbit,rlc,projectile,rodHeat,rk4Vector,materials:MATERIALS,constants:Object.freeze({mu:MU,earthRadius:RE,g:G0})});
+/* Harmonically forced, viscously damped SDOF oscillator m·x''+c·x'+k·x = F0·cos(ωt), from rest.
+   Dimensionless time τ = ωn·t and x in units of the static deflection F0/k, solved with the existing
+   RK4 solver: x'' + 2ζx' + x = cos(rτ). Steady amplitude and phase are least-squares fitted
+   over the final forcing period and compared with the closed-form frequency response. */
+function vibration({zeta=0.1,ratio=0.8,cycles=20}={}){
+ const z=num(zeta,'Damping ratio ζ',0.01,2),r=num(ratio,'Frequency ratio r = ω/ωn',0.05,5),n=num(cycles,'Forcing cycles',2,60);
+ const tauEnd=Math.min(n*2*Math.PI/r,300/Math.max(1,r));
+ const solved=M.odeTools.solveSystem({expression:'z',expressionZ:'cos('+r.toFixed(15)+'*t)-y-'+(2*z).toFixed(15)+'*z',t0:0,t1:tauEnd,y0:0,z0:0,steps:1000});
+ const rows=solved.rows,period=2*Math.PI/r,tail=rows.filter(([t])=>t>=tauEnd-period);
+ // Fit x ≈ A cos(rτ) + B sin(rτ) over the final period (normal equations of a 2-term basis).
+ let cc=0,ss=0,cs=0,xc=0,xs=0;
+ for(const [t,x] of tail){const co=Math.cos(r*t),si=Math.sin(r*t);cc+=co*co;ss+=si*si;cs+=co*si;xc+=x*co;xs+=x*si;}
+ const det=cc*ss-cs*cs,A=(xc*ss-xs*cs)/det,B=(xs*cc-xc*cs)/det;
+ const measured=Math.hypot(A,B),phase=Math.atan2(B,A);
+ const analytic=1/Math.sqrt((1-r*r)**2+(2*z*r)**2),analyticPhase=Math.atan2(2*z*r,1-r*r);
+ const transientLeft=Math.exp(-z*tauEnd);
+ const curve=Array.from({length:301},(_,i)=>{const q=i*3/300;return [q,1/Math.sqrt((1-q*q)**2+(2*z*q)**2)];});
+ return {id:'vibration',zeta:z,ratio:r,rows,tauEnd,measuredAmplitude:measured,measuredPhase:phase,analyticAmplitude:analytic,analyticPhase,transientLeft,curve,
+  assumptions:'Linear SDOF mass–spring–damper with viscous damping and harmonic force, starting from rest; dimensionless (x per static deflection F0/k, τ = ωn·t).',
+  summary:'Forced vibration ζ = '+z+', r = '+r+': steady amplitude '+measured.toPrecision(5)+'×static (closed form '+analytic.toPrecision(5)+'), phase lag '+(phase*180/Math.PI).toFixed(2)+
+   '° (closed form '+(analyticPhase*180/Math.PI).toFixed(2)+'°)'+(transientLeft>1e-3?'; transient not fully decayed (e^(−ζτ) = '+transientLeft.toExponential(1)+').':'.')};
+}
+M.engineeringSimulations=Object.freeze({beam,beamGeneral,vibration,orbit,rlc,projectile,rodHeat,rk4Vector,materials:MATERIALS,constants:Object.freeze({mu:MU,earthRadius:RE,g:G0})});
 })();

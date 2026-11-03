@@ -1,3 +1,38 @@
+## 2026-11-03 — Parallel batch: statistics, curves, optimization, units, multiple integrals, stiff ODE (129–134) + ENG-SIM-EXT-126, Brent pole guard 127, QR pivot 128
+
+**Releases since last entry:** PR #185 merged to main afd41a9 (simulations), with main Quality 41725388344 and Pages 41725387197 both successful.
+
+**Implemented on branch (QA pending):**
+- **Completed queue items:** forced vibration, beam combined loads and overhang, simulation Data Tables/Graph/PNG export, Control Theory module extraction, Brent pole/jump refusal and QR pivoting screen.
+- **Parallel agents:** six agents produced independent modules for these baseline gaps:
+  - probability distributions and descriptive statistics;
+  - implicit, parametric and polar curves;
+  - linear programming and Nelder–Mead;
+  - units and dimensional analysis;
+  - double/triple integrals and discrete-data integration;
+  - stiff ODE (TR-BDF2).
+- **Integration:** each module came with its own src file, unittest and smoke test; the integrator added the bundle slots and workflow steps.
+- **Status:** the frozen baseline is unchanged; these features are partial at their stated scope until released.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release this batch (pending):** exact-head Quality, ordinary PR to main, main Quality and Pages.
+2. **P1 Hypothesis tests and confidence intervals (planned):** t/χ²/proportion tests on Data Tables columns, reusing `MathStudio.statistics`; scipy-reference p-values.
+3. **P1 Polar/parametric overlay on the main 2D graph (planned):** route `graphCurves` points into the existing graph renderer; round-trip project save.
+4. **P1 Units in Engineering simulations (planned):** accept unit-suffixed inputs via `MathStudio.units`; dimension mismatch errors.
+5. **P1 Boundary-value ODE by shooting (planned):** reuse the RK4/TR-BDF2 solvers with Brent on the shooting parameter; analytic BVP references.
+## 2026-11-03 — BUILD-INDEX-UTF8-126 (dev checkpoint; exact-head QA pending)
+
+**Change:** Standalone HTML builder now identifies an invalid UTF-8 `index.html` input with an explicit path-specific diagnostic. A focused isolated subprocess regression writes invalid bytes and verifies that the original HTML is preserved byte-for-byte. No bundled runtime change.
+
+**Execution ledger:** Inspected root AGENTS, frozen inventory, living plan, dev/main and latest CI/PR/Pages. PR #185 merged engineering simulations into main `afd41a93a1fdd154f120a8380951114f0fe200f2`. Exact-head dev Quality `41724175334` passed for `9a05fcb`; Pages `41725387197` passed for main; main Quality `41725388344` was in progress at inspection. Fast-forwarded dev from `9a05fcb` to main without force. Local checkout failed DNS resolution; local unit/Chromium not executed. New exact-head CI required before release. Historical frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Exact-head BUILD-INDEX-UTF8 QA and safe release (pending):** Python structural and Chromium Quality green on exact dev and PR heads, ordinary PR with applicable review/protection checks, then main Quality and Pages confirmed.
+2. **P1 Simulation-to-Data/Graphs transfer (planned):** time series exported through existing transfer bridge with stable column names; browser round-trip and malformed-data negative tests.
+3. **P1 Forced vibration/resonance sweep (planned):** reuse RK4; verify steady-state amplitude ratio `1/sqrt((1-r²)²+(2ζr)²)` at multiple damping/frequency cases.
+4. **P1 Beam multiple loads/overhang (planned):** equilibrium and independent superposition references; preserve stated linear-elastic scope.
+5. **P1 Control Theory controller extraction (planned):** byte-identical standalone rebuild; existing control numerical/browser, keyboard and saved-project regressions green.
+
 ## 2026-11-03 — Engineering simulations with animation (ENG-SIMULATIONS-125; user request)
 
 **Release checkpoint:** ENG-VISUALS-124 released via PR #183 at main eb62023; main Quality 41717592998 and Pages 41717592382 succeeded.

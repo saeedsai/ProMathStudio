@@ -23,7 +23,7 @@ const raw=[
  ['control.stability.symmetric','Control symmetric stability check','Classify ẋ=−Ax+b for symmetric 2×2/3×3 A by real eigenvalues; not general nonsymmetric stability.','mechanical electrical electronics aerospace control','control stability eigenvalues','graph','ct-equilibrium'],
  ['control.transient.two.state','Control two-state transient','Fixed-step RK4 trajectory for ẋ=−Ax+b with Data Tables and Graph handoff; not stiff or error-certified.','mechanical electrical electronics aerospace control','control transient trajectory rk4','graph','ct-eq-transient'],
  ['ode.ivp.scalar','Scalar ODE initial-value solver','Run existing RK4 or adaptive RK45; not a stiff solver.','physics mechanical fluids aerospace','ode rk45 integration','editor','ode'],
- ['gnss.positioning.least.squares','GNSS least-squares positioning','GNSS satellite-position observations and coordinate-frame handling are not yet implemented.','gnss','gnss positioning navigation'],
+ ['gnss.positioning.least.squares','GNSS least-squares positioning','Single-epoch weighted Gauss–Newton point positioning from 4–16 given satellite ECEF positions and pseudoranges: receiver ECEF position, clock bias, residuals, sigma0, covariance, GDOP/PDOP/HDOP/VDOP/TDOP, WGS-84 latitude/longitude/height and a sky plot. No ionosphere, troposphere, relativity or Earth-rotation corrections and no ephemeris decoding.','gnss aerospace','gnss gps positioning navigation pseudorange satellite dop ecef wgs84 geodetic','editor','numerical','gnss-run'],
  ['signals.spectral.analysis','Signal spectral analysis','Dedicated sampling/windowing/spectrum workflow is not yet implemented.','signals electronics','fft spectral frequency'],
  ['control.frequency.response','Control frequency response','Bode/Nyquist sampling and stability margins for rational SISO transfer functions over 0.01–1000 rad/s: gain and phase margins with crossover frequencies, closed-loop bandwidth and resonant peak; not a full loop-shaping suite.','control electrical','bode nyquist control stability margin gain phase crossover bandwidth resonance','graph','ct-frequency'],
  ['thermal.cycle.analysis','Thermodynamic cycle analysis','Animated ideal cold-air-standard Otto, Diesel and Brayton cycles with constant specific heats: state points 1–4, heat in/out, net work, thermal efficiency against the closed form, mean effective pressure or back-work ratio, on P–v and T–s diagrams. No friction, heat loss, combustion chemistry or variable specific heats.','mechanical aerospace','thermal energy thermodynamics cycle otto diesel brayton gas turbine engine efficiency simulation','engineering','eng-visuals'],
@@ -93,6 +93,7 @@ function openTool(t){
   // Focus the existing canonical operation, without running it or replacing draft inputs.
   if(t.route.focusId){
    const control=document.getElementById(t.route.focusId);
+   for(let node=control?.parentElement;node;node=node.parentElement)if(node.tagName==='DETAILS')node.open=true;
    if(control?.getClientRects().length)control.focus({preventScroll:true});
   }
  });

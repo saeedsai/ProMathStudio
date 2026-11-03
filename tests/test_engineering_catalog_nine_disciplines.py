@@ -24,11 +24,15 @@ const fs=require('fs'),assert=require('assert');
 const source=fs.readFileSync('src/engineering-catalog.js','utf8');
 const ids=[...source.matchAll(/^ \['([a-z]+(?:\.[a-z]+)+)'/gm)].map(x=>x[1]);
 assert.equal(new Set(ids).size,ids.length,'tool IDs must be unique');
-for(const id of ['gnss.positioning.least.squares','signals.spectral.analysis','fluids.pipe.network']){
+for(const id of ['signals.spectral.analysis','electronics.digital.logic','fluids.pipe.network']){
  assert(ids.includes(id),id);
  const row=source.split('\n').find(x=>x.trimStart().startsWith("['"+id+"'"));
  assert(row && !/,'(calculator|graph|editor)'/.test(row),'planned workflows must not advertise executable route');
 }
+// GNSS positioning is implemented: it must route to the real numerical Solve control.
+const gnss=source.split('\n').find(x=>x.trimStart().startsWith("['gnss.positioning.least.squares'"));
+assert(gnss && gnss.includes("'editor','numerical','gnss-run']"),'GNSS route');
+assert(source.split('\n').some(x=>/^ \['[a-z.]+','[^']+','[^']*','[a-z ]*\bgnss\b/.test(x)),'gnss discipline keeps a tool');
 assert(source.includes("['control','Control Theory']"));
 assert(source.includes("['gnss','GNSS positioning']"));
 assert(source.includes("['signals','Signal engineering']"));

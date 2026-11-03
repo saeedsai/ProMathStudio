@@ -1,3 +1,16 @@
+## 2026-11-03 — Engineering animations (ENG-VISUALS-124; user request)
+
+**Release checkpoint:** PR #181 (branch → dev) merged at 4cc0b1c; exact-head dev Quality 41712593561 and PR #180 Quality 41712600427 passed; PR #180 merged to main b3313657; Pages build 41713837001 succeeded.
+
+**Implemented on branch (QA pending):** User asked for graphics and engineering animations for different tools and equations. Added `src/engineering-visuals.js` with six animated visuals built on existing canonical solvers (RK4 system, FFT, safe evaluator, adaptive Simpson, symmetric eigen). There are no new math kernels and no duplicate action buttons on catalog cards. Reduced motion, keyboard and mobile are covered. Tests: `tests/test_engineering_visuals.py`, `tests/smoke_engineering_visuals.py` (registered in Quality). Planned catalog tools (beam deflection, orbit, circuits) stay planned: no animation claims a new solver.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release ENG-VISUALS-124 (pending):** exact-head Quality, ordinary PR to main, main Quality and Pages success.
+2. **P1 Animation export (planned):** download the current frame as PNG from the canvas; deterministic frame test, no network.
+3. **P1 Control Theory controller extraction (planned):** move inline `promath-control-theory` script to `src/control-theory.js`; byte-identical rebuild; control smokes green.
+4. **P1 Scalar-root pole-aware Brent handoff (planned):** Brent refuses brackets classified as possible poles; tan(x) near π/2 and 1/(x−c) references.
+5. **P1 QR column pivoting screen (planned):** pivot order reported for near-dependent 3×2/3×3 inputs; permutation-invariance references.
+
 ## 2026-11-03 — Plan NEXT FIVE completion batch (MATH-ROOT-DISCONTINUITY-120, MATH-QR-RANK-BOUNDARY-121, DATA-PROJECT-ATOMIC-122, ARCH-COMPLEX-GRAPH-MODULE-123)
 
 **Ledger (implemented on session branch `claude/sharp-babbage-pqhvgr`, based on `dev` 579f7a1; exact-head CI pending):**

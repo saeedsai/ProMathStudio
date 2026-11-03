@@ -443,3 +443,5 @@ jobs:
         run: python tests/smoke_gnss_tools.py
       - name: Inequality solving and function domain analysis browser regression
         run: python tests/smoke_function_analysis.py
+      - name: Seeded random sampling (PCG32), Monte Carlo and Halton integration references and responsive browser regression
+        run: python tests/smoke_random_tools.py

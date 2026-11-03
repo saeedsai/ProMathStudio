@@ -34,6 +34,7 @@ modules = [
     ("promath-statistics-tools", "src/statistics-tools.js"),
     ("promath-uncertainty-tools", "src/uncertainty-tools.js"),
     ("promath-nonlinear-fit", "src/nonlinear-fit.js"),
+    ("promath-random-tools", "src/random-tools.js"),
     ("promath-xlsx-tools", "src/xlsx-tools.js"),
     ("promath-xlsx-import", "src/xlsx-import.js"),
     ("promath-multivariate-tools", "src/multivariate-tools.js"),

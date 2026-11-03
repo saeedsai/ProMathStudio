@@ -1,3 +1,18 @@
+## 2026-11-03 — Saved Data Tables ID collision rejection (DATA-PROJECT-ID-105)
+
+**Implemented on dev; exact-head Quality and production release pending.** Project migration now rejects duplicate present Data Tables IDs, blank/non-string IDs and IDs longer than 120 characters. Legacy projects with omitted IDs remain accepted; valid selected IDs, display names, column order and cell values are preserved without mutation. This closes ambiguous selection/formula target identity for malformed imported backups. New Node/Python regression `tests/test_project_table_id_identity.py` covers both v1/v2, positive, duplicate, malformed, legacy, source/bundle parity and input immutability. Source `src/project-schema.js` and offline `index.html` were synchronized. Full Python and browser Quality are required before release.
+
+**Prior release verification:** PR [#171](https://github.com/saeedsai/ProMathStudio/pull/171) merge `84d400394fe763928c1146102c50cd1aa4137bd4`; exact main [Quality 41557189814](https://github.com/saeedsai/ProMathStudio/actions/runs/41557189814) and [Pages 41557188535](https://github.com/saeedsai/ProMathStudio/actions/runs/41557188535) both succeeded; exact post-merge dev docs [Quality 41557224903](https://github.com/saeedsai/ProMathStudio/actions/runs/41557224903) succeeded. Independent hosted-browser interaction remains unverified.
+
+**NEXT FIVE (status, dependencies and acceptance):**
+1. **P0 DATA-PROJECT-ID-105 release QA (in progress):** exact-head Python/Node and responsive Chromium Quality green, verified ordinary dev→main PR, main Quality and Pages success.
+2. **P0 QR rank-boundary reference audit (planned; QR):** 90-digit independent coefficient/residual references across tolerance margins, RHS perturbation, singular rejection and browser smoke.
+3. **P1 bounded UI controller extraction (planned; build):** offline source parity, project round trip, keyboard focus and 390/768/1280 Chromium tests; measure bundle size.
+4. **P1 scalar-root pole and aliasing guidance (planned; root solver):** oscillatory paired roots, poles, bounded sampling warning, browser error recovery.
+5. **P1 Matrix/Data schema resilience (planned; project):** legacy/current fixtures, malformed nested imports, atomic rollback and no data loss.
+
+**Execution log:** Inspected AGENTS, living plan, frozen inventory, dev/main SHAs, open PRs and exact-head CI/Pages. Confirmed PR #171 main Quality/Pages success. Existing dev was ahead of main by docs only. Added bounded saved-table-ID validation in modular and standalone source and focused regression on dev; GitHub-hosted full Quality and Pages are pending for new head. No new branch, direct main push, force, or bypass. Historical 166 gaps and 95 partials remain frozen baseline.
+
 ## 2026-11-03 — QR acceptance release reconciliation (MATH-QR-GATE-104)
 
 **Released via [PR #171](https://github.com/saeedsai/ProMathStudio/pull/171)** after exact-head PR [Quality run 41549483017](https://github.com/saeedsai/ProMathStudio/actions/runs/41549483017) completed successfully. Merge SHA: `84d400394fe763928c1146102c50cd1aa4137bd4`. Existing `dev` safely fast-forwarded to merge SHA with non-force expected-head lease. Post-merge main Quality and Pages publishing are **not yet verified**; hosted behavior remains unverified. No additional feature implementation in this run; prioritize correctness and honest release evidence over untested source changes.

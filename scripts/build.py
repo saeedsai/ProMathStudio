@@ -31,6 +31,9 @@ for tag, source in modules:
         raise ValueError(f"Expected exactly one standalone script marker: {tag}")
     start = text.index(marker) + len(marker)
     end = text.index("</script>", start)
+    next_script = text.find("<script ", start, end)
+    if next_script != -1:
+        raise ValueError(f"Nested script opening before standalone module close: {tag}")
     original = text[start:end]
     trailing_newlines = original[len(original.rstrip("\n")):]
     module_source = (root / source).read_text(encoding="utf-8").rstrip("\n")

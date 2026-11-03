@@ -1,3 +1,16 @@
+## 2026-11-03 — Nested inline-script boundary validation (BUILD-NESTED-SCRIPT-110)
+
+**Implemented on dev; exact-head CI pending.** PR #176 exact-head PR Quality 41600054636 passed, merged normally as 3d299ae84ecc0043bc5f821b01f633e100153c68; dev fast-forwarded non-force. Builder now rejects a nested HTML script opener before the expected module closing tag, rather than replacing content across an ambiguous script boundary. Focused isolated regression asserts failure and byte-for-byte preservation of original index. Source and regression committed on dev; full Python/Chromium CI and post-merge main Quality/Pages not yet independently verified. Frozen 166 gaps/95 partials unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 BUILD-NESTED-SCRIPT-110 QA/release (pending):** focused Python and full dev/PR Quality pass on exact head, ordinary dev-to-main PR after applicable reviews/protections, main Quality and Pages verified.
+2. **P0 QR rank-boundary references (planned):** high-precision coefficients and perturbed RHS near rank cutoff; singular rejection.
+3. **P1 UI controller extraction (planned):** offline source parity, keyboard/mobile smoke, saved-project round trip and bundle-size delta.
+4. **P1 scalar-root discontinuity (planned):** pole and oscillatory negative cases, bounded sampling warning.
+5. **P1 Matrix/Data import atomicity (planned):** malformed nested fixtures preserve state; legacy v1/v2 compatibility.
+
+**Execution log:** Inspected root AGENTS, living plan, frozen inventory, main/dev comparison, PR #176, exact-head PR CI job and reviews. Merged after PR Quality success and synchronized dev. Implemented builder guard and focused regression, without creating branches or bypassing CI. Local full test suite unavailable; awaiting exact-head CI.
+
 ## 2026-11-03 — Script terminator integrity (BUILD-SCRIPT-TERMINATOR-109)
 
 **Implemented on dev; exact-head QA pending.** PR #175 exact-head PR Quality run 41593936573 passed (static and browser regression job); ordinary merge SHA 27dcda12154910d16b7170eec91c12e77ac359bc. Dev fast-forwarded non-force. Main Quality and Pages for this merge are not independently verified. Build now rejects case-insensitive embedded HTML script closing sequences in module source, which otherwise prematurely terminate inline scripts. Added focused negative regression asserting original index remains unchanged. Source and test are on dev; full new exact-head CI is pending. Historical 166 gaps / 95 partial features unchanged.

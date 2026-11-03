@@ -1,3 +1,18 @@
+## 2026-11-03 — BUILD-MISSING-SOURCE-113 and PR #178 release checkpoint
+
+**Release:** PR #178 merged normally at `1df9a6fbf69678268a937c06c39786c6a7fe3702` after exact-head PR Quality run 41640828944 passed, including structural and browser steps. No reviews recorded; GitHub accepted the ordinary merge. Dev was synchronized by non-force fast-forward. Main Quality, Pages and hosted behavior still require independent verification.
+
+**Implemented on dev; exact-head CI pending:** `scripts/build.py` now raises a descriptive `Missing standalone module source: src/data-tables.js` error when a module source is absent. Focused subprocess regression verifies nonzero exit, diagnostic and unchanged original index. Source commit `6d40a50`, regression commit `e1091b7`. No full local Python/Chromium test pass claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 BUILD-MISSING-SOURCE-113 QA/release (pending):** exact-head dev and PR Quality structural/browser checks green; applicable approvals/protections met; ordinary merge; main Quality and Pages and hosted smoke verified.
+2. **P0 QR rank boundary (planned):** independent high-precision near-threshold matrices, perturbed RHS, singular rejection and deterministic tolerances.
+3. **P1 UI controller extraction (planned):** source/offline parity, keyboard/mobile smoke, saved-project round-trip and bundle-size comparison.
+4. **P1 Scalar-root discontinuity (planned):** pole/oscillatory negative references, bounded diagnostic and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed fixtures preserve state and v1/v2 legacy round trips.
+
+**Execution ledger:** Inspected root AGENTS, living plan, frozen inventory, dev/main comparison, PR #178, exact-head successful Quality and reviews. Released verified PR via ordinary merge; added small build diagnostic and focused regression on dev. No force-push, branch creation or CI bypass. Historical 166 gaps/95 partial features remain frozen.
+
 ## 2026-11-03 — BUILD-MISSING-CLOSE-112 exact-head regression repair
 
 **CI failure:** PR #178 Quality run 41631737725 failed 1/291 structural tests at dev 907b41a1820caf76adf3316af0f45df08c1e35b1. The truncated-script fixture encoded literal backslash-n, so the marker guard fired before the missing-close guard. Fixed fixture to use real newline (commit e8f07d9); builder validation unchanged. Full exact-head CI and browser QA pending. No merge or deployment claimed. Historical 166 gaps/95 partial features frozen.

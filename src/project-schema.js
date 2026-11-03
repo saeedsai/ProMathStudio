@@ -100,7 +100,7 @@
       if (!Array.isArray(data.tables.tables) || data.tables.tables.length > 20) fail('table count exceeds 20.');
       // A stored selection must name a real table; otherwise restore would silently
       // fall back to another sheet. Exports always write an existing id.
-      if (data.tables.selected !== undefined && data.tables.tables.length &&
+      if (data.tables.selected !== undefined &&
           (typeof data.tables.selected !== 'string' ||
            !data.tables.tables.some(t => record(t) && t.id === data.tables.selected)))
         fail('selected table does not exist.');

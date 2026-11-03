@@ -1,3 +1,29 @@
+## 2026-11-03 — Repair exact-head CI regression for empty-workbook selection (DATA-PROJECT-EMPTY-SELECTION-106)
+
+**Fix committed on dev; CI rerun pending.** PR #173 Quality run 41570028815 failed during structural Python/Node regression (1 failure in 286 tests): the older `tests/test_project_table_selection.py` expected a stale selection in an empty workbook to be accepted, contradicting the new intentional rejection. Updated that existing test to assert rejection of stale and explicit null selections for both v1/v2 and acceptance of legacy missing selection; the newer focused identity regression remains in place. No production solver or schema validation was weakened. Commit `36e982f9ba01fec730f4f62423f4888e7b222e88`; exact-head new Quality and Pages not yet verified.
+
+**NEXT FIVE (status / dependencies / acceptance):**
+1. **P0 PR #173 release (blocked on exact-head CI):** rerun all structural and Chromium tests for current dev and PR head, confirm green and applicable review/protection rules, ordinary PR merge, verify main Quality and Pages.
+2. **P0 QR rank boundary references (planned; numerical core):** independent 90-digit coefficient/residual references around rank thresholds, perturbed RHS, singular rejection and responsive Chromium.
+3. **P1 bounded UI controller extraction (planned; build):** preserve offline source parity, project round trip, keyboard/mobile focus and record bundle-size delta.
+4. **P1 scalar-root discontinuity warnings (planned; root solver):** pole/oscillation and bounded-sampling tests with browser error recovery.
+5. **P1 Matrix/Data atomic import rollback (planned; project schema):** legacy/current fixtures, malformed nested data, no state loss and responsive focus.
+
+**Execution log:** Inspected root AGENTS, inventory, living plan, dev/main comparison, open PR #173 and exact-head PR CI. Read failing GitHub Actions job log and identified conflicting old regression expectation. Committed focused regression repair on existing dev, leaving validation strict. At inspection main was `6cdcb462f4be9c8d6e5fe14faa2784e6e25cfd4b`; new dev commit `36e982f9ba01fec730f4f62423f4888e7b222e88`. CI, PR merge and Pages for this head are pending; historical 166 gaps/95 partials unchanged.
+
+## 2026-11-03 — Reject stale selected sheet in empty saved workbooks (DATA-PROJECT-EMPTY-SELECTION-106)
+
+**Implemented on dev; exact-head CI/PR/Pages pending.** Project migration rejects explicit non-existent or null selected IDs even when the saved table list is empty; legacy empty workbooks without a selection remain valid. This prevents silent fallback to a different sheet after malformed backup import. Regression extends `tests/test_project_table_id_identity.py` for v1/v2, empty/nonexistent/null selection and legacy no-selection; synchronized `src/project-schema.js` and offline `index.html`. Release only after full Quality and PR checks.
+
+**NEXT FIVE (status/dependencies/acceptance):**
+1. **P0 release verification (pending):** exact-head dev and PR Quality green; ordinary dev→main PR; main Quality and Pages confirmed.
+2. **P0 QR rank boundary references (planned):** 90-digit independent coefficients and residuals around rank threshold; singular rejection and responsive Chromium.
+3. **P1 UI controller extraction (planned):** source/bundle parity, saved-project round trip, keyboard/mobile focus, bundle-size measurement.
+4. **P1 scalar-root discontinuity warnings (planned):** pole/oscillation tests, bounded-sampling caveat and browser recovery.
+5. **P1 Matrix/Data import atomic rollback (planned):** legacy/current fixtures, malformed nested data, no state loss and mobile focus.
+
+**Execution log:** Read AGENTS, frozen inventory, plan, open PR and exact-head CI. PR #172 Quality 41563684929 passed; ordinary merge 6cdcb462f4be9c8d6e5fe14faa2784e6e25cfd4b; dev safely fast-forwarded. Implemented new empty-workbook selection validation with focused regression. New exact-head CI and post-merge Pages pending. Historical 166 gaps/95 partials unchanged.
+
 ## 2026-11-03 — Saved Data Tables ID collision rejection (DATA-PROJECT-ID-105)
 
 **Implemented on dev; exact-head Quality and production release pending.** Project migration now rejects duplicate present Data Tables IDs, blank/non-string IDs and IDs longer than 120 characters. Legacy projects with omitted IDs remain accepted; valid selected IDs, display names, column order and cell values are preserved without mutation. This closes ambiguous selection/formula target identity for malformed imported backups. New Node/Python regression `tests/test_project_table_id_identity.py` covers both v1/v2, positive, duplicate, malformed, legacy, source/bundle parity and input immutability. Source `src/project-schema.js` and offline `index.html` were synchronized. Full Python and browser Quality are required before release.

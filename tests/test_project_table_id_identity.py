@@ -30,7 +30,16 @@ for(const version of [1,2]){
  const legacy=make(['sheet-1','sheet-2'],version);delete legacy.tables.tables[1].id;
  assert.strictEqual(migrate(legacy).tables.tables.length,2,'missing legacy id stays supported');
 }
-console.log('PASS unique table id validation');
+// Explicit selection of a nonexistent sheet must fail even in an empty workbook.
+for (const version of [1,2]) {
+ const empty={format:'mathstudio-project',version,notebook:[],tables:{tables:[],selected:'ghost'}};
+ assert.throws(()=>migrate(empty),/selected table does not exist/);
+ const nullSelection={...empty,tables:{tables:[],selected:null}};
+ assert.throws(()=>migrate(nullSelection),/selected table does not exist/);
+ const noSelection={...empty,tables:{tables:[]}};
+ assert.strictEqual(migrate(noSelection).tables.tables.length,0);
+}
+console.log('PASS unique table id validation and empty workbook selection');
 """
         result = subprocess.run(['node','-e',script],cwd=ROOT,capture_output=True,text=True,timeout=20)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)

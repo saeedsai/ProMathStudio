@@ -36,9 +36,15 @@ assert.strictEqual(migrate(absent).tables.tables.length,2);
 // Negative: unknown id, wrong types.
 for(const bad of ['sheet-9','',null,7,{id:'sheet-1'},['sheet-1']])
  assert.throws(()=>migrate(project(bad)),/selected table does not exist/);
-// Boundary: empty table list has nothing to select and remains accepted.
-const empty=project('sheet-1');empty.tables.tables=[];
-assert.strictEqual(migrate(empty).tables.tables.length,0);
+// Boundary: empty workbook is valid only when selection is absent; stale IDs must fail.
+for(const version of [1,2]) {
+ const empty=project('sheet-1',version);empty.tables.tables=[];
+ assert.throws(()=>migrate(empty),/selected table does not exist/);
+ delete empty.tables.selected;
+ assert.strictEqual(migrate(empty).tables.tables.length,0);
+ const explicitNull=project(null,version);explicitNull.tables.tables=[];
+ assert.throws(()=>migrate(explicitNull),/selected table does not exist/);
+}
 """
         result = subprocess.run(["node", "-e", script], cwd=ROOT,
                                 capture_output=True, text=True, timeout=30)

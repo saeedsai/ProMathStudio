@@ -27,6 +27,7 @@ modules = [
     ("promath-fft-tools", "src/fft-tools.js"),
     ("promath-brent-tools", "src/brent-tools.js"),
     ("promath-statistics-tools", "src/statistics-tools.js"),
+    ("promath-uncertainty-tools", "src/uncertainty-tools.js"),
     ("promath-xlsx-tools", "src/xlsx-tools.js"),
     ("promath-xlsx-import", "src/xlsx-import.js"),
     ("promath-project-schema", "src/project-schema.js"),

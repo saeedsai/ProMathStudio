@@ -415,3 +415,5 @@ jobs:
         run: python tests/smoke_engineering_sim_units.py
       - name: Shooting boundary-value problem references, non-unique/no-solution reporting and responsive UI regression
         run: python tests/smoke_bvp_tools.py
+      - name: Uncertainty propagation GUM linear and seeded Monte Carlo browser regression
+        run: python tests/smoke_uncertainty_tools.py

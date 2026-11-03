@@ -39,6 +39,15 @@ for (const version of [1,2]) {
  const noSelection={...empty,tables:{tables:[]}};
  assert.strictEqual(migrate(noSelection).tables.tables.length,0);
 }
+// Column selectors must be unambiguous across case and whitespace variants.
+for (const version of [1,2]) {
+ const makeColumns = columns => ({format:'mathstudio-project',version,notebook:[],tables:{tables:[{id:'t',name:'Sheet',columns,rows:[columns.map(()=>1)]}],selected:'t'}});
+ const valid=makeColumns(['A','B']); const before=JSON.stringify(valid);
+ assert.strictEqual(migrate(valid).tables.tables[0].columns[1],'B');
+ assert.strictEqual(JSON.stringify(valid),before);
+ for(const columns of [['A',' a '],['','B'],['   ','B'],['A','A']])
+  assert.throws(()=>migrate(makeColumns(columns)),/table contains invalid rows or cells/);
+}
 console.log('PASS unique table id validation and empty workbook selection');
 """
         result = subprocess.run(['node','-e',script],cwd=ROOT,capture_output=True,text=True,timeout=20)

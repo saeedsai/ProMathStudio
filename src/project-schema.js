@@ -123,7 +123,8 @@
         if (!name) fail('table name must not be blank.');
         if (names.has(name)) fail('duplicate table names.');
         names.add(name);
-        if (table.columns.some(col => typeof col !== 'string' || col.length > 80) ||
+        if (table.columns.some(col => typeof col !== 'string' || !col.trim() || col.length > 80) ||
+            new Set(table.columns.map(col => typeof col === 'string' ? col.trim().toLowerCase() : col)).size !== table.columns.length ||
             table.rows.some(row => !Array.isArray(row) || row.length !== table.columns.length ||
               row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
                 (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))

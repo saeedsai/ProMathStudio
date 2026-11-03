@@ -1,3 +1,16 @@
+## 2026-11-03 — Data Tables column identity validation (DATA-COLUMN-IDENTITY-107)
+
+**Implemented on dev, awaiting exact-head Quality and PR release.** Reject blank and case/trim-equivalent duplicate saved table column names before restoring a project. Preserve original display strings and legacy v1/v2 projects with unique columns. Focused Node/Python regression tests valid/invalid column names, both versions, source/bundle parity and input immutability. Main merge 0d9895eb68f8c7272f3730f9f247ce6b5ca70834 passed main Quality runs 41580854721/41580866391 and Pages 41580854451; hosted browser unverified.
+
+**NEXT FIVE (status / dependencies / acceptance):**
+1. **P0 DATA-COLUMN-IDENTITY-107 release (CI pending):** exact dev and PR Quality pass; ordinary dev→main PR; post-merge main Quality and Pages pass.
+2. **P0 QR rank boundaries (planned):** 90-digit independent references for coefficients/residuals and perturbed RHS near threshold; singular rejection.
+3. **P1 UI controller extraction (planned):** offline parity, keyboard/mobile smoke, project round trip, bundle-size comparison.
+4. **P1 scalar-root discontinuity (planned):** pole and oscillation negative tests, bounded-sampling caveat and browser recovery.
+5. **P1 atomic Matrix/Data import rollback (planned):** malformed nested fixtures, preserved prior state, legacy migration and responsive focus.
+
+**Execution log:** Inspected dev/main, root AGENTS, frozen inventory, plan, PRs and latest CI/Pages. Prior release main and dev were both 0d9895eb68f8c7272f3730f9f247ce6b5ca70834; main Quality and Pages passed. Added bounded column identity validation with regression, retained 166 historical gaps and 95 partial features. Full CI and new Pages pending.
+
 ## 2026-11-03 — Repair exact-head CI regression for empty-workbook selection (DATA-PROJECT-EMPTY-SELECTION-106)
 
 **Fix committed on dev; CI rerun pending.** PR #173 Quality run 41570028815 failed during structural Python/Node regression (1 failure in 286 tests): the older `tests/test_project_table_selection.py` expected a stale selection in an empty workbook to be accepted, contradicting the new intentional rejection. Updated that existing test to assert rejection of stale and explicit null selections for both v1/v2 and acceptance of legacy missing selection; the newer focused identity regression remains in place. No production solver or schema validation was weakened. Commit `36e982f9ba01fec730f4f62423f4888e7b222e88`; exact-head new Quality and Pages not yet verified.

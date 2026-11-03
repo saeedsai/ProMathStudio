@@ -27,6 +27,8 @@ modules = [
 ]
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'
+    if text.count(marker) != 1:
+        raise ValueError(f"Expected exactly one standalone script marker: {tag}")
     start = text.index(marker) + len(marker)
     end = text.index("</script>", start)
     original = text[start:end]

@@ -1,3 +1,7 @@
+## 2026-11-03 — Reject script openers in standalone module sources (dev QA pending)
+
+- BUILD-SOURCE-OPENER-114: reject mixed-case and whitespace-delimited HTML script openers inside modular JavaScript before writing standalone HTML; focused subprocess regression verifies diagnostic and atomic rollback. Exact-head Quality, PR release, main Quality and Pages pending. Historical 166 gaps/95 partial features unchanged.
+
 ## 2026-11-03 — Missing standalone module source diagnostic (dev QA pending)
 
 - BUILD-MISSING-SOURCE-113: fail with an explicit missing-source path before writing standalone HTML when a module file is absent; add subprocess regression asserting diagnostic and original-index preservation. Exact-head Quality and Pages pending.

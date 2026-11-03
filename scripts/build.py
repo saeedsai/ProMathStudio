@@ -30,6 +30,7 @@ modules = [
     ("promath-uncertainty-tools", "src/uncertainty-tools.js"),
     ("promath-xlsx-tools", "src/xlsx-tools.js"),
     ("promath-xlsx-import", "src/xlsx-import.js"),
+    ("promath-multivariate-tools", "src/multivariate-tools.js"),
     ("promath-project-schema", "src/project-schema.js"),
     ("promath-precision-tools", "src/precision-tools.js"),
     ("promath-units-tools", "src/units-tools.js"),

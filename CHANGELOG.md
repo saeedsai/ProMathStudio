@@ -1,3 +1,4 @@
+- 2026-11-03 (BUILD-INDEX-UTF8-126; dev QA pending): Standalone builder now identifies invalid UTF-8 in index.html and preserves its bytes; isolated subprocess regression checks the diagnostic and unchanged input. Exact-head Quality and release pending.
 - 2026-11-03 (ENG-SIMULATIONS-125; branch QA pending): Added engineering simulations with physics-driven animation in the renamed "Engineering simulations & animations" panel. A new DOM-free kernel module (`src/engineering-simulations.js`, SI units, stated assumptions) provides five simulations:
   - **Euler–Bernoulli beam** (`structures.beam.deflection`, now available): simply supported or cantilever, point or uniform load; deflection, moment, shear, reactions and bending stress; the animated load ramp colours the beam by moment.
   - **Two-body Earth orbit** (`aerospace.orbit.propagation`, now available): velocity-Verlet propagation checked against Kepler period, energy and angular momentum.

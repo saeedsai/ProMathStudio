@@ -1,3 +1,22 @@
+## 2026-11-03 — Plan NEXT FIVE completion batch (MATH-ROOT-DISCONTINUITY-120, MATH-QR-RANK-BOUNDARY-121, DATA-PROJECT-ATOMIC-122, ARCH-COMPLEX-GRAPH-MODULE-123)
+
+**Ledger (implemented on session branch `claude/sharp-babbage-pqhvgr`, based on `dev` 579f7a1; exact-head CI pending):**
+- **Done on branch — P0 QR rank-boundary references (MATH-QR-RANK-BOUNDARY-121):** `qr()` exposes `minIndependenceRatio`, `rankMargin` and near-threshold guidance in Calculator output. `tests/test_matrix_qr_rank_boundary.py` uses exact binary64 analytic references (c2=(1+e)c1+e(-1,0,1)) accepting e=2^-33/2^-36/2^-39, rejecting 2^-40/2^-45/singular/zero-column, plus orthogonal-complement (residual δ√6) and in-range (Δx2=δ/e) RHS perturbations with eps/ratio-scaled tolerances.
+- **Done on branch — P1 Scalar-root discontinuity (MATH-ROOT-DISCONTINUITY-120):** bounded (≤20) rejected sign-change locations, pole/jump heuristic classification, nonfinite grid-sample screening, under-resolved oscillation interval counts and `rootStatus`. `tests/smoke_scalar_root_discontinuity.py` (1/(x-0.3), 1/x, tan x, step jumps, 1600-sample tan x on [-100,100], sin(1/x), smooth controls, 390/768/1280 UI recovery) plus structural test.
+- **Done on branch — P1 Matrix/Data atomic import (DATA-PROJECT-ATOMIC-122):** stricter saved custom-function schema (duplicates, argument-less, non-distinct, type/source) and `tests/smoke_project_atomic_import.py` asserting full snapshots after 14 malformed v1/v2 fixtures and injected late-module failures; legacy v1 and v2 round trip still import. Node schema test added.
+- **Done on branch — P1 UI controller extraction (ARCH-COMPLEX-GRAPH-MODULE-123):** Complex Graph controller moved to `src/complex-graph.js`; rebuild byte-identical (0-byte bundle delta). `tests/smoke_complex_graph_module.py` covers references, keyboard, mobile, recovery and project round trip.
+- **Local evidence:** 308 structural tests OK; new and affected browser smokes (all scalar-root, QR, project schema/selection, Matrix project, Data Tables) pass with local Chromium. `smoke_project_schema.py` failed once then passed 4/4 reruns; treat as possible flake to watch in CI.
+- **P0 release of dev head 579f7a1 + this batch (pending):** requires exact-head Quality, an ordinary PR to `main`, main Quality and Pages verification.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release this batch (pending):** exact-head Quality green for the candidate, ordinary PR merge to `main`, main Quality and Pages success, hosted page loads.
+2. **P1 Control Theory controller extraction (planned):** move inline `promath-control-theory` script to `src/control-theory.js`; byte-identical rebuild, existing control smokes green, keyboard/mobile and project round trip.
+3. **P1 Scalar-root pole-aware Brent handoff (planned):** Brent refinement refuses brackets classified as possible poles with explicit diagnostic; references for tan(x) near π/2 and 1/(x-c).
+4. **P1 QR column pivoting screen (planned):** report pivoted column order for 3×2/3×3 near-dependent inputs; references with permuted columns give identical rank margin.
+5. **P2 smoke_project_schema flake investigation (planned):** reproduce the one-off failure with repeated runs; fix wait condition without weakening assertions.
+
+**Execution ledger:** Read AGENTS, plan, dev/main heads (dev 579f7a1 ahead of main ac32882 by 2 commits; PR #179 already merged). Session harness required branch `claude/sharp-babbage-pqhvgr` instead of committing directly to `dev`; noted as deviation from the two-branch policy. Frozen 166 gaps/95 partials unchanged. No force-push, bypass or deletion.
+
 ## 2026-11-03 — BUILD-HTML-CLOSER-119 (dev; exact-head QA pending)
 
 **Change:** Reject HTML comment closing delimiters (`-->`) in inline module sources as well as opening delimiters, before rewriting standalone HTML. Direct subprocess regression checks a closing delimiter embedded in JavaScript and original HTML preservation. PR #179 was merged normally at ac3288250bee65c8f22230234f2699b6bb3bbde1 after exact-head push Quality 41698544956 and PR Quality 41698553402 succeeded at b48e800. New dev commit requires its own Quality run; local clone blocked by GitHub DNS.

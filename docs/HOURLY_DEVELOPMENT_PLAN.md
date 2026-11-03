@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-MISSING-CLOSE-112 exact-head regression repair
+
+**CI failure:** PR #178 Quality run 41631737725 failed 1/291 structural tests at dev 907b41a1820caf76adf3316af0f45df08c1e35b1. The truncated-script fixture encoded literal backslash-n, so the marker guard fired before the missing-close guard. Fixed fixture to use real newline (commit e8f07d9); builder validation unchanged. Full exact-head CI and browser QA pending. No merge or deployment claimed. Historical 166 gaps/95 partial features frozen.
+
+**NEXT FIVE (status / acceptance):**
+1. **P0 PR #178 release (pending):** corrected fixture passes 291+ structural tests, dev/PR exact-head Quality and browser suites green, required reviews/protections met, ordinary merge, main Quality and Pages success.
+2. **P0 QR rank boundary (planned):** independent high-precision near-threshold matrices, perturbed RHS and singular rejection with deterministic numerical tolerances.
+3. **P1 UI controller extraction (planned):** offline bundle parity, keyboard/mobile smoke, project round-trip and size delta.
+4. **P1 Scalar-root discontinuity (planned):** poles and oscillatory counterexamples, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed fixtures preserve state, legacy v1/v2 remain compatible.
+
+**Execution log:** Read AGENTS, plan, historical inventory, dev/main comparison, open PR and exact-head failed job log; corrected focused regression on dev. No CI bypass, branch creation, force push or merge. Exact-head rerun pending.
+
 ## 2026-11-03 — BUILD-MISSING-CLOSE-112: truncated standalone module diagnostics
 
 **Implemented on dev; exact-head CI pending.** The standalone builder now reports a specific missing closing-script error instead of an unhandled substring lookup when a module block is truncated. A focused isolated Python regression asserts the diagnostic and byte-for-byte preservation of the original index. Source/test commits e6aa29653c93f362d71be7ba3464304207b7b57b and 419a8851775a4e62159c5336f5ed609a92084fba. Previous exact-head development Quality run 41624502050 succeeded at 3880cbe8bd99301e8db89a7a7572face44bbe0e3; new head requires fresh verification. No release claimed. Historical 166 gaps and 95 partial features remain frozen.

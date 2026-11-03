@@ -1,3 +1,16 @@
+## 2026-11-03 — Case-insensitive standalone nested script protection (BUILD-NESTED-CASE-111)
+
+**Implemented on dev; CI and release pending.** PR #177 exact-head dev Quality 41607093925 and PR Quality 41607109020 succeeded at dfb8fc25143ad34292b9a36a04c4c87e8367faf8; ordinary merge 57d762630046c629597c6e2daf6d11d0ab651efe; dev fast-forwarded without force. Main Quality 41606987001 and Pages 41606985903 for previous main 3d299ae84ecc0043bc5f821b01f633e100153c68 succeeded. New builder fix recognizes mixed-case, tabbed and unadorned nested script opening tags, preventing ambiguous inline module boundaries. Focused regression added on dev in e40bfa542dafff39a066775038140d8f27178e37; local clone/test blocked by DNS resolution of github.com. No full new exact-head CI pass or deployment claimed. Frozen 166 gaps/95 partials unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 BUILD-NESTED-CASE-111 QA/release (pending):** exact dev and PR Quality green including uppercase/tabbed opener regression; ordinary PR after required reviews/checks; verify main Quality and Pages.
+2. **P0 QR rank-boundary numerical references (planned):** independent high-precision threshold-adjacent matrices, perturbed RHS and singular rejection.
+3. **P1 reusable UI controller extraction (planned):** offline bundle parity, keyboard/mobile smoke, saved-project round trip and bundle-size measurement.
+4. **P1 scalar-root discontinuity (planned):** pole and oscillatory negative fixtures, bounded sampling warnings and browser recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed nested fixtures preserve existing state; legacy v1/v2 compatibility.
+
+**Execution log:** Read root AGENTS, frozen inventory, living plan, dev/main refs, PR #177, exact-head checks, reviews and rulesets. Merged green PR #177, synchronized dev non-force. Updated source and focused regression on dev; local git clone failed DNS. New CI and Pages verification pending.
+
 ## 2026-11-03 — Nested inline-script boundary validation (BUILD-NESTED-SCRIPT-110)
 
 **Implemented on dev; exact-head CI pending.** PR #176 exact-head PR Quality 41600054636 passed, merged normally as 3d299ae84ecc0043bc5f821b01f633e100153c68; dev fast-forwarded non-force. Builder now rejects a nested HTML script opener before the expected module closing tag, rather than replacing content across an ambiguous script boundary. Focused isolated regression asserts failure and byte-for-byte preservation of original index. Source and regression committed on dev; full Python/Chromium CI and post-merge main Quality/Pages not yet independently verified. Frozen 166 gaps/95 partials unchanged.

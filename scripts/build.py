@@ -4,7 +4,10 @@ import re
 
 root = Path(__file__).resolve().parents[1]
 index = root / "index.html"
-text = index.read_text(encoding="utf-8")
+try:
+    text = index.read_text(encoding="utf-8")
+except UnicodeDecodeError as error:
+    raise ValueError("Invalid UTF-8 in standalone index.html") from error
 
 modules = [
     ("mathstudio-data-tables", "src/data-tables.js"),

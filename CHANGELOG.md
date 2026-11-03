@@ -1,3 +1,4 @@
+- 2026-11-03: Standalone build rejects empty or whitespace-only module source before replacing HTML; focused rollback regression (BUILD-EMPTY-SOURCE-115; dev, QA pending).
 ## 2026-11-03 — Reject script openers in standalone module sources (dev QA pending)
 
 - BUILD-SOURCE-OPENER-114: reject mixed-case and whitespace-delimited HTML script openers inside modular JavaScript before writing standalone HTML; focused subprocess regression verifies diagnostic and atomic rollback. Exact-head Quality, PR release, main Quality and Pages pending. Historical 166 gaps/95 partial features unchanged.

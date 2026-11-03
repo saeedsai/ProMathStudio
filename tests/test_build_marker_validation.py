@@ -28,9 +28,9 @@ class BuildMarkerValidationTests(unittest.TestCase):
 
     def test_empty_module_source_rejected_without_overwriting_index(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
-        marker = '<script id="mathstudio-data-tables">\\n'
-        html = marker + '/* existing module */\\n</script>\\n'
-        for source in ('', '  \\n\\t  '):
+        marker = '<script id="mathstudio-data-tables">\n'
+        html = marker + '/* existing module */\n</script>\n'
+        for source in ('', '  \n\t  '):
             with self.subTest(source=repr(source)), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 (root / "scripts").mkdir()

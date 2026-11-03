@@ -2705,7 +2705,7 @@ self.onmessage=async ({data})=>{
   }
   function compileGraph(){
     const lines=$('graph-input').value.replace(/\\\s*\n/g,'\n').split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
-    if(!lines.length&&!window.MathStudio.graphData?.hasData())throw Error('Type a function or import a dataset to plot.');
+    if(!lines.length&&!window.MathStudio.graphData?.hasData()&&!window.MathStudio.graphOverlays?.hasOverlays(graphMode))throw Error('Type a function or import a dataset to plot.');
     if(lines.length>8)throw Error('Plot a maximum of eight equations at a time.');
     if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:plotColor(i),seriesIndex:i}));
     // In 3D, y=f(x) constrains a one-dimensional curve on each z=f(x,y) surface.
@@ -2826,6 +2826,7 @@ self.onmessage=async ({data})=>{
       ctx.stroke();ctx.setLineDash([]);
     }
     window.MathStudio.graphData?.draw(ctx,{mode:'2d',range,w,h});
+    window.MathStudio.graphOverlays?.draw(ctx,{mode:'2d',range,w,h});
   }
   function persp(x,y,z){
     const {xmin,xmax,ymin,ymax,zmin,zmax}=range;
@@ -2924,14 +2925,14 @@ self.onmessage=async ({data})=>{
     const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=f.kind==='trace'?f.color:f.color;
     const t=document.createElement('span');t.textContent=f.name;row.append(sw,t);frame.append(row);
   }
-    for(const item of window.MathStudio.graphData?.legend()||[]){
+    for(const item of [...(window.MathStudio.graphData?.legend()||[]),...(graphMode==='2d'?window.MathStudio.graphOverlays?.legend()||[]:[])]){
       const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=item.color;const t=document.createElement('span');t.textContent=item.name;row.append(sw,t);frame.append(row);
     }
   }
   function drawGraph(){if(graphCanvas.width!==w||graphCanvas.height!==h){graphCanvas.width=w;graphCanvas.height=h}if(graphMode==='3d')draw3D();else draw2D();legend();}
   function plot(){
     try{updateRange();graphExpr=compileGraph();updateSeriesColorInputs();drawGraph();
-      let hasRealSamples=!!window.MathStudio.graphData?.hasData(),hasTraceSamples=false;
+      let hasRealSamples=!!window.MathStudio.graphData?.hasData()||!!window.MathStudio.graphOverlays?.hasOverlays(graphMode),hasTraceSamples=false;
       for(const func of graphExpr){
         for(let k=0;k<=96;k++){
           const x=range.xmin+(range.xmax-range.xmin)*k/96;
@@ -2947,7 +2948,7 @@ self.onmessage=async ({data})=>{
       const traces=graphExpr.filter(f=>f.kind==='trace').length;
       const surfaces=graphExpr.filter(f=>f.kind==='surface').length;
       const summary=graphMode==='3d'&&traces?`Displaying ${surfaces} surface(s) and ${traces} constrained 3D curve(s). ${hasTraceSamples?'The bright line follows y=f(x) on z=f(x,y).':'The curve is outside the current Y/Z range; adjust graph bounds.'} Drag to rotate.`:'Displaying '+graphExpr.length+' '+(graphExpr.length===1?'function':'functions')+' in '+(graphMode==='2d'?'2D':'3D')+'. '+(graphMode==='3d'?'Drag to rotate the surface; scroll to zoom.':'Drag to pan; scroll to zoom.');
-      const added=window.MathStudio.graphData?.info();
+      const added=[window.MathStudio.graphData?.info(),graphMode==='2d'?window.MathStudio.graphOverlays?.info():''].filter(Boolean).join(' and ');
       graphMsg(hasRealSamples?(added?(graphExpr.length?summary+' ':'')+added+'. '+(graphMode==='3d'?'Drag to rotate.':'Drag to pan.') :summary):'No real-valued points in this view. A function may be complex or undefined here; adjust the domain or plot its original real-valued equation.',!hasRealSamples||traces>0&&!hasTraceSamples);
     }catch(e){graphMsg(e.message,true);}
   }
@@ -3060,7 +3061,7 @@ self.onmessage=async ({data})=>{
       $('graph-input').value=[...lines,added].join('\n');plot();
       if($('graph-status').classList.contains('error'))throw Error($('graph-status').textContent);
     },
-    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,panX3d,panY3d,dataset:window.MathStudio.graphData?.exportState()||null,appearance:getAppearance()}),
+    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,panX3d,panY3d,dataset:window.MathStudio.graphData?.exportState()||null,curves:window.MathStudio.graphOverlays?.exportState()||[],appearance:getAppearance()}),
     restoreGraphState:data=>{
       if(!data||typeof data!=='object')return;
       if(['2d','3d'].includes(data.mode))switchGraph(data.mode);
@@ -3075,6 +3076,7 @@ self.onmessage=async ({data})=>{
       if(Number.isFinite(data.panX3d))panX3d=Math.max(-5000,Math.min(5000,data.panX3d));
       if(Number.isFinite(data.panY3d))panY3d=Math.max(-5000,Math.min(5000,data.panY3d));
       if(window.MathStudio.graphData)window.MathStudio.graphData.restoreState(data.dataset??null);setAppearance(data.appearance||{});
+      window.MathStudio.graphOverlays?.restoreState(data.curves??null);
       plot();
     }
   };
@@ -3150,6 +3152,37 @@ self.onmessage=async ({data})=>{
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
+    }
+    // Main-graph curve overlays (implicit/parametric/polar definitions). Legacy projects omit
+    // the field; present definitions must match the exact shape the exporter writes.
+    if (data.graph?.curves !== undefined && data.graph.curves !== null) {
+      const curves = data.graph.curves;
+      if (!Array.isArray(curves) || curves.length > 8) fail('graph curve overlays must be a list of at most 8.');
+      const shapes = {implicit: {expression: 'text', grid: 'grid'},
+        parametric: {x: 'text', y: 'text', t0: 'bound', t1: 'bound', samples: 'samples'},
+        polar: {r: 'text', theta0: 'bound', theta1: 'bound', samples: 'samples'}};
+      const seen = new Set();
+      for (const curve of curves) {
+        if (!record(curve) || !Object.prototype.hasOwnProperty.call(shapes, curve.type)) fail('graph curve overlay type is invalid.');
+        const shape = shapes[curve.type], keys = Object.keys(curve).filter(k => k !== 'type');
+        if (keys.length !== Object.keys(shape).length || keys.some(k => !Object.prototype.hasOwnProperty.call(shape, k)))
+          fail('graph curve overlay fields are invalid.');
+        for (const [key, kind] of Object.entries(shape)) {
+          const value = curve[key];
+          const ok = kind === 'text' ? typeof value === 'string' && value.trim() !== '' && value.length <= 1500 :
+            kind === 'bound' ? typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 1e12 :
+            kind === 'grid' ? Number.isInteger(value) && value >= 4 && value <= 300 :
+            Number.isInteger(value) && value >= 2 && value <= 20000;
+          if (!ok) fail('graph curve overlay ' + key + ' is invalid.');
+        }
+        if (curve.type === 'implicit' && (curve.expression.split('=').length > 2 || /==|<=|>=|!=/.test(curve.expression)))
+          fail('graph curve overlay implicit equation must use at most one "=".');
+        if (curve.type === 'parametric' && !(curve.t1 > curve.t0)) fail('graph curve overlay t range is empty.');
+        if (curve.type === 'polar' && !(curve.theta1 > curve.theta0)) fail('graph curve overlay θ range is empty.');
+        const identity = JSON.stringify(Object.keys(shape).map(k => curve[k]).concat(curve.type));
+        if (seen.has(identity)) fail('duplicate graph curve overlays.');
+        seen.add(identity);
+      }
     }
     if (data.engineering !== undefined && data.engineering !== null) {
       const eng = data.engineering;
@@ -10108,8 +10141,119 @@ function tableOf(result){
  return {headers:['theta','r','x','y'],rows:result.points.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>[p.theta,p.r,p.x,p.y])};
 }
 
-const api={implicit,parametric,polar,draw,table:tableOf,limits:{maxGrid:MAX_GRID,maxSamples:MAX_SAMPLES}};
+/* ---------- Main 2D graph overlays ----------
+   Definitions (not computed points) are the persisted source of truth. Parametric and polar
+   samples are independent of the view; implicit contours are re-traced on the main graph's
+   visible window whenever its bounds change, so zoom and pan stay exact. */
+const MAX_OVERLAYS=8,OVERLAY_KEYS={implicit:['type','expression','grid'],parametric:['type','x','y','t0','t1','samples'],polar:['type','r','theta0','theta1','samples']};
+const OVERLAY_COLORS=['#c2410c','#7c3aed','#0f766e','#be185d','#1d4ed8','#a16207','#15803d','#9f1239'];
+function normalizeOverlay(def){
+ if(!def||typeof def!=='object'||Array.isArray(def))fail('Overlay curve definition must be an object.');
+ const keys=OVERLAY_KEYS[def.type];
+ if(!keys)fail('Overlay curve type must be implicit, parametric or polar.');
+ const extra=Object.keys(def).filter(k=>!keys.includes(k));
+ if(extra.length)fail('Overlay curve has unsupported field '+extra[0].slice(0,40)+'.');
+ const text=(v,label)=>{if(typeof v!=='string')fail(label+' must be text.');return cleanExpr(v,label);};
+ if(def.type==='implicit'){
+  const expression=text(def.expression,'Implicit equation');implicitFunction(expression);
+  return {type:'implicit',expression,grid:intIn(def.grid,MIN_GRID,MAX_GRID,'Grid cells per axis')};
+ }
+ const num=(v,label)=>{if(typeof v!=='number')fail(label+' must be a number.');return v;};
+ if(def.type==='parametric'){
+  const [t0,t1]=window2(num(def.t0,'t start'),num(def.t1,'t end'),'t');
+  return {type:'parametric',x:text(def.x,'x(t)'),y:text(def.y,'y(t)'),t0,t1,samples:sampleCount(num(def.samples,'Samples'))};
+ }
+ const [theta0,theta1]=window2(num(def.theta0,'θ start'),num(def.theta1,'θ end'),'θ');
+ return {type:'polar',r:text(def.r,'r(θ)'),theta0,theta1,samples:sampleCount(num(def.samples,'Samples'))};
+}
+const g4=v=>String(Number(v.toPrecision(4)));
+const overlayLabel=d=>d.type==='implicit'?'Implicit: '+d.expression+(d.expression.includes('=')?'':' = 0'):
+ d.type==='parametric'?'Parametric: ('+d.x+', '+d.y+'), t ∈ ['+g4(d.t0)+', '+g4(d.t1)+']':'Polar: r = '+d.r+', θ ∈ ['+g4(d.theta0)+', '+g4(d.theta1)+']';
+/* Each overlay: {def, color, fixed (view-independent result), cache:{key, lines}}. */
+let overlays=[],lastRender={window:null,overlays:[]};
+function linesOf(result){
+ if(result.type==='implicit')return result.segments.map(s=>[[s[0],s[1]],[s[2],s[3]]]);
+ return result.polylines.map(line=>line.map(p=>[p.x,p.y]));
+}
+function computeFixed(def){
+ if(def.type==='parametric')return parametric(def.x,def.y,{t0:def.t0,t1:def.t1,samples:def.samples});
+ if(def.type==='polar')return polar(def.r,{theta0:def.theta0,theta1:def.theta1,samples:def.samples});
+ return null;
+}
+function buildEntry(def,index){
+ const d=normalizeOverlay(def),fixed=computeFixed(d);
+ return {def:d,color:OVERLAY_COLORS[index%OVERLAY_COLORS.length],fixed,lines:fixed?linesOf(fixed):null,cacheKey:'',error:''};
+}
+function overlayLines(entry,range){
+ if(!entry.fixed){
+  const key=[range.xmin,range.xmax,range.ymin,range.ymax,entry.def.grid].join('|');
+  if(entry.cacheKey!==key){
+   entry.cacheKey=key;
+   try{entry.lines=linesOf(implicit(entry.def.expression,{xmin:range.xmin,xmax:range.xmax,ymin:range.ymin,ymax:range.ymax,grid:entry.def.grid}));entry.error='';}
+   catch(err){entry.lines=[];entry.error=err.message;}
+  }
+ }
+ return entry.lines||[];
+}
+/* Draw into the main graph canvas using its own view transform. Breaks never get joined:
+   each polyline starts with moveTo, and a step that leaves the visible window with a jump
+   larger than 80% of the canvas (an asymptote such as t -> 1/t) is broken too. */
+function drawOverlays(ctx,props){
+ if(!props||props.mode!=='2d'){return;}
+ const {range,w,h}=props,{xmin,xmax,ymin,ymax}=range;
+ const sx=x=>(x-xmin)/(xmax-xmin)*w,sy=y=>h-(y-ymin)/(ymax-ymin)*h;
+ const inside=(x,y)=>x>=xmin&&x<=xmax&&y>=ymin&&y<=ymax,limit=.8*Math.max(w,h);
+ const rendered=[];
+ for(const entry of overlays){
+  const lines=overlayLines(entry,range);let visible=0;
+  ctx.save();ctx.strokeStyle=entry.color;ctx.lineWidth=2.6;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash([]);ctx.beginPath();
+  for(const line of lines){
+   let prev=null;
+   for(const [x,y] of line){
+    const X=sx(x),Y=sy(y);
+    if(!Number.isFinite(X)||!Number.isFinite(Y)||Math.abs(X)>1e7||Math.abs(Y)>1e7){prev=null;continue;}
+    const inView=inside(x,y);if(inView)visible++;
+    if(!prev||(Math.hypot(X-prev.X,Y-prev.Y)>limit&&!(inView&&prev.inView)))ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+    prev={X,Y,inView};
+   }
+   if(line.length===1&&prev)ctx.lineTo(prev.X+.01,prev.Y);
+  }
+  ctx.stroke();ctx.restore();
+  rendered.push({type:entry.def.type,label:overlayLabel(entry.def),color:entry.color,polylines:lines,visiblePoints:visible,error:entry.error});
+ }
+ lastRender={window:{xmin,xmax,ymin,ymax},overlays:rendered};
+}
+const redrawMain=()=>{document.getElementById('graph-plot')?.click();};
+const overlayApi={
+ add(def){
+  if(overlays.length>=MAX_OVERLAYS)fail('A graph can show up to '+MAX_OVERLAYS+' curve overlays. Clear overlays first.');
+  const entry=buildEntry(def,overlays.length),key=JSON.stringify(entry.def);
+  if(overlays.some(o=>JSON.stringify(o.def)===key))fail('This curve is already overlaid on the main graph.');
+  overlays=overlays.concat([entry]);redrawMain();return {...entry.def};
+ },
+ clear(redraw=true){overlays=[];lastRender={window:lastRender.window,overlays:[]};if(redraw)redrawMain();},
+ count:()=>overlays.length,
+ hasOverlays:mode=>overlays.length>0&&(mode===undefined||mode==='2d'),
+ draw:drawOverlays,
+ legend:()=>overlays.map(o=>({name:overlayLabel(o.def),color:o.color})),
+ info:()=>overlays.length?overlays.length+' curve overlay'+(overlays.length===1?'':'s'):'',
+ exportState:()=>overlays.map(o=>({...o.def})),
+ /* Atomic: every definition is validated and sampled before the current list is replaced. */
+ restoreState(list){
+  if(list===null||list===undefined){overlays=[];overlayApi.onChange?.();return;}
+  if(!Array.isArray(list)||list.length>MAX_OVERLAYS)fail('Overlay curves must be a list of at most '+MAX_OVERLAYS+'.');
+  const next=list.map((def,i)=>buildEntry(def,i));
+  const keys=next.map(e=>JSON.stringify(e.def));if(new Set(keys).size!==keys.length)fail('Duplicate overlay curves.');
+  overlays=next;overlayApi.onChange?.();
+ },
+ rendered:()=>JSON.parse(JSON.stringify(lastRender)),
+ normalize:normalizeOverlay,
+ limits:{maxOverlays:MAX_OVERLAYS}
+};
+
+const api={implicit,parametric,polar,draw,table:tableOf,limits:{maxGrid:MAX_GRID,maxSamples:MAX_SAMPLES},overlays:overlayApi};
 M.graphCurves=api;
+M.graphOverlays=overlayApi;
 
 /* ---------- UI (static markup only; user text never reaches innerHTML) ---------- */
 const panel=document.getElementById('graph-panel');
@@ -10151,7 +10295,8 @@ root.innerHTML='<summary>Implicit, parametric &amp; polar curves · F(x,y)=0, (x
 '<label for="curves-samples" data-curves="parametric polar" hidden>Samples (2–20,000)<input id="curves-samples" type="number" min="2" max="20000" step="1" value="721"></label>'+
 '<label for="curves-equal" class="curves-check"><input id="curves-equal" type="checkbox" checked> Equal aspect (1:1)</label>'+
 '</div>'+
-'<div class="curves-actions"><button id="curves-plot" type="button" class="primary">Plot curve</button><button id="curves-save" type="button" class="secondary" disabled>Save points to Data Tables</button></div>'+
+'<div class="curves-actions"><button id="curves-plot" type="button" class="primary">Plot curve</button><button id="curves-save" type="button" class="secondary" disabled>Save points to Data Tables</button><button id="curves-overlay" type="button" class="secondary" aria-describedby="curves-overlay-status">Overlay on main 2D graph</button><button id="curves-overlay-clear" type="button" class="secondary" aria-describedby="curves-overlay-status" disabled>Clear overlays</button></div>'+
+'<p id="curves-overlay-status" class="small-note" role="status" aria-live="polite">No curve overlays on the main 2D graph. Implicit overlays are re-traced on the main graph\'s visible window; parametric and polar overlays use their parameter range.</p>'+
 '<p id="curves-status" role="status" aria-live="polite">Ready. Choose a curve type and press Plot curve.</p>'+
 '<canvas id="curves-canvas" width="900" height="600" role="img" aria-label="Implicit, parametric or polar curve plot (not yet plotted)"></canvas>';
 const anchor=document.getElementById('complex-graph-workbench');
@@ -10206,8 +10351,28 @@ $('curves-save').addEventListener('click',()=>{
   setStatus('Saved '+t.rows.length+' points to Data Tables as '+name+'.',false);
  }catch(err){setStatus('Error: '+err.message,true);}
 });
+/* Overlay the current definition on the main 2D graph (validated before anything changes). */
+const overlayStatus=$('curves-overlay-status');
+const setOverlayStatus=(text,error)=>{overlayStatus.textContent=text;overlayStatus.classList.toggle('curves-error',!!error);$('curves-overlay-clear').disabled=!overlayApi.count();};
+function currentDefinition(){
+ const type=$('curves-type').value,n=id=>finite($(id).value,id==='curves-samples'?'Samples':id==='curves-grid-n'?'Grid cells per axis':'Parameter bound');
+ if(type==='implicit')return {type,expression:$('curves-expr').value,grid:n('curves-grid-n')};
+ if(type==='parametric')return {type,x:$('curves-xt').value,y:$('curves-yt').value,t0:n('curves-p0'),t1:n('curves-p1'),samples:n('curves-samples')};
+ return {type,r:$('curves-r').value,theta0:n('curves-p0'),theta1:n('curves-p1'),samples:n('curves-samples')};
+}
+function overlay(){
+ try{
+  const def=overlayApi.add(currentDefinition());
+  const mode=M.advanced?.currentGraphMode?.();
+  setOverlayStatus('Overlaid '+overlayLabel(def)+' on the main graph ('+overlayApi.count()+' of '+MAX_OVERLAYS+').'+(mode==='3d'?' Switch the main graph to 2D to see overlays.':''),false);
+ }catch(err){setOverlayStatus('Overlay error: '+err.message,true);}
+}
+$('curves-overlay').addEventListener('click',overlay);
+$('curves-overlay-clear').addEventListener('click',()=>{overlayApi.clear();setOverlayStatus('Cleared all curve overlays from the main 2D graph.',false);});
+overlayApi.onChange=()=>{if(overlayApi.count())setOverlayStatus(overlayApi.count()+' curve overlay'+(overlayApi.count()===1?'':'s')+' on the main 2D graph.',false);else setOverlayStatus('No curve overlays on the main 2D graph.',false);};
 syncType();
 api.plot=plot;
+api.overlay=overlay;
 })();
 </script>
 <script id="promath-control-theory">

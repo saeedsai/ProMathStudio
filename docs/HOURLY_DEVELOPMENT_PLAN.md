@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-NUL-117 (dev; QA pending)
+
+**Change:** Reject embedded NUL in standalone module source before writing HTML. Focused subprocess regression asserts diagnostic and original-index preservation. Previous exact-head dev and PR Quality runs 41679640777 and 41679647176 passed at 1748115; new commit needs exact-head CI. Branch protection read returned 403; no merge claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 and BUILD-NUL-117 QA/release (pending):** exact-head dev and PR Quality structural/browser green; protections/reviews verified; ordinary merge; main Quality and Pages success.
+2. **P0 QR rank-boundary references (planned):** threshold-adjacent high-precision matrices, perturbed RHS, singular rejection and tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile, project round-trip and size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole/oscillation negatives, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed projects preserve prior state and v1/v2 compatibility.
+
+**Execution ledger:** Inspected root AGENTS, plan, inventory, dev/main, PR #179, reviews, latest CI and Pages. Committed NUL guard, regression, plan and changelog together. Historical 166 gaps/95 partial features unchanged. No bypass, new branch or force-push.
+
 ## 2026-11-03 — BUILD-BOM-116 (dev; QA pending)
 
 **Change:** Reject UTF-8 BOM at the start of standalone JavaScript module sources before replacing embedded HTML, avoiding an unexpected encoding signature in inline scripts. Focused isolated subprocess regression checks diagnostic and byte-for-byte unchanged index. Previous exact-head PR Quality run 41669319024 succeeded at 69ff29a; new head requires its own checks. No release claimed.

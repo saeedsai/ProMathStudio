@@ -45,6 +45,8 @@ for tag, source in modules:
     module_source = source_path.read_text(encoding="utf-8").rstrip("\n")
     if not module_source.strip():
         raise ValueError(f"Empty standalone module source: {source}")
+    if "\x00" in module_source:
+        raise ValueError(f"Unexpected NUL byte in standalone module source: {source}")
     if module_source.startswith("\ufeff"):
         raise ValueError(f"Unexpected UTF-8 BOM in standalone module source: {source}")
     if re.search(r"<script(?=[\s/>])", module_source, flags=re.IGNORECASE):

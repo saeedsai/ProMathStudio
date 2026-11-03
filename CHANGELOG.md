@@ -1,3 +1,4 @@
+- 2026-11-03 (BUILD-NUL-117, dev; QA pending): Reject NUL-containing module sources before standalone HTML write; focused rollback regression; exact-head CI pending.
 - 2026-11-03 (BUILD-BOM-116, dev; CI pending): Reject UTF-8 BOM-prefixed standalone JS modules before overwriting bundled HTML; isolated subprocess regression asserts error and unchanged original HTML. Prior PR Quality 41669319024 passed at previous dev head; new exact-head QA and Pages pending.
 - 2026-11-03: Standalone build rejects empty or whitespace-only module source before replacing HTML; focused rollback regression (BUILD-EMPTY-SOURCE-115; dev, QA pending).
 ## 2026-11-03 — Reject script openers in standalone module sources (dev QA pending)

@@ -423,3 +423,5 @@ jobs:
         run: python tests/smoke_tool_search.py
       - name: Polynomial roots (Aberth-Ehrlich), Horner, division, GCD and responsive browser regression
         run: python tests/smoke_polynomial_tools.py
+      - name: Nonlinear least-squares Levenberg–Marquardt fit references (NIST Misra1a), identifiability warnings and responsive UI regression
+        run: python tests/smoke_nonlinear_fit.py

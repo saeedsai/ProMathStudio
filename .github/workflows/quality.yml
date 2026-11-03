@@ -417,3 +417,5 @@ jobs:
         run: python tests/smoke_bvp_tools.py
       - name: Uncertainty propagation GUM linear and seeded Monte Carlo browser regression
         run: python tests/smoke_uncertainty_tools.py
+      - name: Cubic spline and Akima interpolation reference, derivative, integral and responsive browser regression
+        run: python tests/smoke_interpolation_splines.py

@@ -1,3 +1,27 @@
+## 2026-11-03 — Parallel batch 135–141 (hypothesis tests, curve overlays, simulation units, BVP shooting, uncertainty, splines, tool search)
+
+**Release checkpoint:** PR #186 into dev at 657503c, then PR #187 to main at 70fc483. Main Quality 41730966059 and Pages 41730962844 succeeded.
+
+**Implemented on branch (QA pending):**
+- **Features:** six parallel features plus a global "Find a tool" search, built at the user's request for a modular, easy-to-find UI.
+- **Integration:** branches were merged and append-only workflow conflicts resolved. Four agent tests that required their own CI step to be last now check that it is present. Locally, 388 structural tests pass.
+- **Correction:** the statistics agent corrected two of the integrator's reference values against scipy/mpmath: the one-sample t p-value is 0.0574563 and the Welch p-value is 0.1075312.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release batch 135–141 (pending):** exact-head Quality, PR to main, main Quality and Pages.
+2. **P1 Wave 3 integration (in progress, parallel agents):**
+   - polynomial roots;
+   - Levenberg–Marquardt fitting;
+   - digital filters;
+   - vector calculus;
+   - Cholesky and null space;
+   - PCA and k-means;
+   - vector and slope fields;
+   - thermodynamic cycles and DC circuits.
+3. **P1 Tool search ranking feedback (planned):** recent tools and pinned favourites in the search, kept per viewer in try/catch localStorage.
+4. **P2 Symbolic CAS gaps (blocked offline):** nonlinear symbolic systems and series need the SymPy CDN; plan an offline fallback scope.
+5. **P2 Docs (planned):** a user guide page listing every tool with an example input.
+
 ## 2026-11-03 — Parallel batch: statistics, curves, optimization, units, multiple integrals, stiff ODE (129–134) + ENG-SIM-EXT-126, Brent pole guard 127, QR pivot 128
 
 **Releases since last entry:** PR #185 merged to main afd41a9 (simulations), with main Quality 41725388344 and Pages 41725387197 both successful.

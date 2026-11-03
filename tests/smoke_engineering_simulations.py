@@ -131,7 +131,7 @@ def main():
                      "mechanics.projectile.drag", "thermal.conduction.rod", "thermal.cycle.analysis",
                      "circuits.network.analysis"):
             assert statuses[tool] == "available", tool
-        for tool in ("fluids.pipe.network", "electronics.digital.logic", "control.frequency.response"):
+        for tool in ("fluids.pipe.network", "electronics.digital.logic", "signals.spectral.analysis"):
             assert statuses[tool] == "planned", tool
         page.locator('[data-workspace="engineering"]').click()
         status = page.locator("#eng-visual-status")

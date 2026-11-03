@@ -24,7 +24,7 @@ def main():
   assert page.locator('#eng-results article').count()==len(catalog['ids'])
   for discipline, tool_id in [('gnss','gnss.positioning.least.squares'),
                               ('signals','signals.spectral.analysis'),
-                              ('control','control.frequency.response')]:
+                              ('electronics','electronics.digital.logic')]:
    page.locator('#eng-discipline').select_option(discipline)
    page.locator('#eng-search').fill(tool_id.split('.')[0])
    card=page.locator('#eng-results article[data-tool-id="'+tool_id+'"]')

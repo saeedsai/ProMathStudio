@@ -437,3 +437,5 @@ jobs:
         run: python tests/smoke_vector_fields.py
       - name: Engineering thermodynamic cycles and DC network nodal analysis browser regression
         run: python tests/smoke_engineering_thermo_circuits.py
+      - name: Control frequency-response stability margins, bandwidth, resonant peak and catalog routing browser regression
+        run: python tests/smoke_control_margins.py

@@ -425,3 +425,5 @@ jobs:
         run: python tests/smoke_polynomial_tools.py
       - name: Nonlinear least-squares Levenberg–Marquardt fit references (NIST Misra1a), identifiability warnings and responsive UI regression
         run: python tests/smoke_nonlinear_fit.py
+      - name: Digital filters, convolution, Butterworth SOS references, zero-phase filtfilt and responsive browser regression
+        run: python tests/smoke_signal_filters.py

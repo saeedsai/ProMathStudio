@@ -354,6 +354,39 @@ choose a template to insert it at the caret. Some notation is typesetting-only.
   y = 3, u_c = 0.5, expanded U = 1.0 with k = 2; a's contribution is 36 %.
 - **Export:** **Save samples summary to Data Tables** → export.
 
+### Inequalities and function domain analysis
+
+- **Where:** Equation → Numerical methods panel (`function-analysis-details`).
+- **Computes:** solution sets of f(x) <, ≤, >, ≥ or = g(x) on [a, b] as a union of intervals with correct
+  strict/non-strict endpoints, excluding poles found by the shared scalar root finder. It also reports the
+  sampled real domain, zeros, poles, local extrema, a grid-estimated range, monotonic pieces and even/odd
+  symmetry. All results are numerical estimates on a sampling grid.
+- **Example (`tests/smoke_function_analysis.py`):** `x^2-4 < 0` on [−5, 5] → (−2, 2); with `<=` → [−2, 2];
+  `sin(x) >= 0.5` on [0, 2π] → [π/6, 5π/6].
+- **Export:** **Save to Data Tables**.
+
+### Seeded random numbers and Monte Carlo integration
+
+- **Where:** Equation → Numerical methods panel (`random-details`).
+- **Computes:** PCG32-seeded samples (uniform, normal, exponential, gamma, beta, Poisson, binomial,
+  weighted discrete, permutations, sampling without replacement; up to 100,000 values, saved as columns of
+  at most 6,000 rows) and plain Monte Carlo (with standard error) or Halton quasi-Monte Carlo integration
+  over boxes in up to 6 dimensions. The same seed always gives the same output.
+- **Example (`tests/smoke_random_tools.py`):** ∫∫ x·y over the unit square ≈ 0.25 within 3 standard errors.
+- **Export:** **Save to Data Tables** for samples and integration results.
+
+### GNSS least-squares positioning
+
+- **Where:** Equation → Numerical methods panel (`gnss-details`), also opened from the Engineering
+  catalog entry `gnss.positioning.least.squares`.
+- **Computes:** a weighted Gauss–Newton single-epoch fix from 4–16 satellite ECEF positions and
+  pseudoranges. It reports receiver position, clock bias, residuals, σ0, covariance, GDOP/PDOP/HDOP/VDOP/TDOP,
+  WGS-84 latitude/longitude/height and a sky plot. There are no ionosphere, troposphere, relativity or Sagnac
+  corrections and no ephemeris decoding. Singular geometry is rejected.
+- **Example (`tests/smoke_gnss_tools.py`):** exact synthetic pseudoranges around 59.33° N, 18.06° E, 30 m
+  with a 1e-4 s clock bias recover the position to better than 1e-4 m.
+- **Export:** **Residuals to Data Tables**.
+
 ---
 
 ## 2D & 3D graphs workspace
@@ -590,9 +623,9 @@ choose a template to insert it at the caret. Some notation is typesetting-only.
 | `mechanical.vibration.forced` | Forced vibration and resonance | Available | Engineering simulations |
 | `mechanics.projectile.drag` | Projectile with air drag | Available | Engineering simulations |
 | `thermal.conduction.rod` | Heat conduction in a rod | Available | Engineering simulations |
-| `gnss.positioning.least.squares` | GNSS least-squares positioning | Planned · not implemented | — |
+| `gnss.positioning.least.squares` | GNSS least-squares positioning | Available | Equation → Numerical methods → GNSS panel |
 | `signals.spectral.analysis` | Signal spectral analysis | Planned · not implemented | — |
-| `control.frequency.response` | Control frequency response | Planned · not implemented | — (the Graphs Control Theory Toolbox has Bode/Nyquist sampling, but this catalog entry is not routed) |
+| `control.frequency.response` | Control frequency response | Available | Graphs → Control Theory Toolbox → Frequency response (`ct-frequency`): gain/phase margins, bandwidth, resonant peak |
 | `electronics.digital.logic` | Digital logic simulation | Planned · not implemented | — |
 | `fluids.pipe.network` | Pipe network pressure loss | Planned · not implemented | — |
 

@@ -1,3 +1,11 @@
+- 2026-11-03 (parallel batch 150–155; branch QA pending). Fourth round of parallel agents, plus a CI repair:
+  - **CTRL-MARGINS-150:** gain/phase margins, crossover frequencies, closed-loop bandwidth and resonant peak in a new Control Theory Frequency response panel, with crossover markers on the Bode plot. `control.frequency.response` is now available in the catalog.
+  - **GNSS-151:** weighted Gauss–Newton single-epoch positioning with clock bias, DOPs, WGS-84 coordinates and a sky plot. No atmospheric, relativistic or Sagnac corrections. `gnss.positioning.least.squares` is now available.
+  - **FUNC-ANALYSIS-152:** numerical inequality solving over intervals and function domain analysis (zeros, poles, extrema, monotonicity, symmetry), reusing the shared root finder.
+  - **RANDOM-153:** PCG32-seeded samplers, plus plain Monte Carlo and Halton quasi-Monte Carlo integration with a convergence table.
+  - **SEARCH-FAVS-154:** "Find a tool" adds Recent and Pinned tools (Alt+P to pin) and a collapsed "Browse all tools" list grouped by workspace. Preferences are stored per viewer with safe fallbacks.
+  - **DOCS-GUIDE-155:** `docs/USER_GUIDE.md` covers every tool with a worked example taken from its regression test. `tests/test_user_guide.py` fails if a panel or catalog tool is left undocumented.
+  - **CI-NUMPY-FIX:** Quality runs 41734137142/41734143560 failed because `smoke_interpolation_splines.py` imported numpy, which CI does not install. `smoke_matrix_extras.py` had the same problem. Both now use pure-Python or fixed references with unchanged tolerances.
 - 2026-11-03 (parallel batch 142–149; branch QA pending). Eight features from a third round of parallel agents:
   - **POLY-142 polynomial tools:** Aberth–Ehrlich complex roots with backward errors and multiplicity clustering, plus Horner evaluation, derivative/integral, add/multiply/divide, numerical GCD and build-from-roots.
   - **NLFIT-143 nonlinear fitting:** Levenberg–Marquardt with standard errors and t intervals, verified against NIST Misra1a, with warnings for parameters that cannot be identified.

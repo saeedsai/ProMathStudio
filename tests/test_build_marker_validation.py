@@ -46,15 +46,15 @@ class BuildMarkerValidationTests(unittest.TestCase):
 
     def test_case_insensitive_and_tabbed_nested_script_openers_are_rejected(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
-        marker = '<script id="mathstudio-data-tables">\\n'
+        marker = '<script id="mathstudio-data-tables">\n'
         for opener in ('<SCRIPT id="unexpected">', '<script\\tid="unexpected">', '<ScRiPt>'):
             with self.subTest(opener=opener), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 (root / "scripts").mkdir()
                 (root / "src").mkdir()
                 (root / "scripts/build.py").write_text(builder, encoding="utf-8")
-                (root / "src/data-tables.js").write_text("const safe = 1;\\n", encoding="utf-8")
-                html = marker + '/* original */\\n' + opener + '\\n</script>\\n'
+                (root / "src/data-tables.js").write_text("const safe = 1;\n", encoding="utf-8")
+                html = marker + '/* original */\n' + opener + '\\n</script>\\n'
                 (root / "index.html").write_text(html, encoding="utf-8")
                 result = subprocess.run(['python3', str(root / "scripts/build.py")],
                                         capture_output=True, text=True, timeout=10)

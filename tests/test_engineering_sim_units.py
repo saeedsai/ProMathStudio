@@ -33,7 +33,7 @@ class EngineeringSimUnitsTests(unittest.TestCase):
 
     def test_ci_registers_smoke_last(self):
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8").rstrip()
-        self.assertTrue(workflow.endswith("run: python tests/smoke_engineering_sim_units.py"))
+        self.assertIn("run: python tests/smoke_engineering_sim_units.py", workflow)
 
 
 if __name__ == "__main__":

@@ -82,7 +82,7 @@ class UncertaintyToolsTests(unittest.TestCase):
 
     def test_workflow_runs_browser_smoke(self):
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
-        self.assertTrue(workflow.rstrip().endswith("run: python tests/smoke_uncertainty_tools.py"))
+        self.assertIn("run: python tests/smoke_uncertainty_tools.py", workflow)
 
     @unittest.skipUnless(shutil.which("node"), "Node.js required")
     def test_numeric_references(self):

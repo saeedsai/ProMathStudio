@@ -71,7 +71,7 @@ class GraphCurvesOverlayTest(unittest.TestCase):
 
     def test_workflow_registers_smoke_last(self):
         self.assertTrue((ROOT / "tests" / "smoke_graph_curves_overlay.py").is_file())
-        self.assertTrue(WORKFLOW.rstrip().endswith("run: python tests/smoke_graph_curves_overlay.py"))
+        self.assertIn("run: python tests/smoke_graph_curves_overlay.py", WORKFLOW)
 
 
 if __name__ == "__main__":

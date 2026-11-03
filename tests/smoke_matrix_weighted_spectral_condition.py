@@ -37,6 +37,7 @@ def main():
             assert "Relative weighted squared-residual shares (rows 1–3)" in result.inner_text()
             assert "Weighted fitted values (rows 1–3)" in result.inner_text()
             assert "Weighted normwise residual ratio" in result.inner_text()
+            assert "Orthogonality acceptance: " in result.inner_text()
             assert "not a certified coefficient-error" in result.inner_text()
             ratio = page.evaluate("() => MathStudio.matrixTools.weightedLeastSquares("
                 "[[1,0],[1,1],[1,2]],[1,2,9],[1,1,0.01]).weightedNormwiseResidualRatio")
@@ -63,6 +64,9 @@ def main():
         assert abs(near_fit["solution"][0] - 1.9) < 1e-6, near_fit
         assert abs(near_fit["solution"][1] + 0.9) < 1e-6, near_fit
         assert near_fit["normalResidual"] >= 0, near_fit
+        assert not near_fit["orthogonalityCheckSkipped"], near_fit
+        assert near_fit["orthogonalityTolerance"] > 1e-8, near_fit
+        assert "relaxed" in near_fit["orthogonalityGuidance"], near_fit
         # Exercise the near-rank warning in the real browser controller.
         for i,v in enumerate(("1","1","1","1.0000000001","1","1.0000000002")):
             page.locator("#mat-grid input").nth(i).fill(v)

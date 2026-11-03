@@ -1,3 +1,16 @@
+## 2026-11-03 — Standalone build marker integrity (BUILD-MARKER-108)
+
+**Implemented on dev; exact-head Quality pending.** Ordinary PR #174 merged after development and PR Quality jobs each completed successfully (180 steps); merge SHA `1e3744f7ee6217cf2bd59c3fbbc945172686a702`. Dev fast-forwarded non-force. Main Quality/Pages and hosted behavior for that merge remain to be verified. Builder now rejects missing or duplicate module script markers instead of silently replacing the wrong embedded script; a new isolated regression checks both failures leave index unchanged. Production app bundle unchanged. Source and regression were committed separately because GitHub Contents API writes one file per commit; both are now on dev. Full repository and browser suites await exact-head CI.
+
+**NEXT FIVE (status / dependencies / acceptance):**
+1. **P0 BUILD-MARKER-108 QA/release (pending):** exact-head development and PR Quality green, ordinary dev→main PR, main Quality and Pages confirmed; missing/duplicate marker regression green.
+2. **P0 QR rank boundary references (planned; QR):** independent high-precision coefficients/residuals for threshold-adjacent matrices and perturbed RHS, plus singular rejection.
+3. **P1 UI controller extraction (planned; build):** offline rebuild parity, keyboard/mobile smoke, saved-project round trip and size delta.
+4. **P1 scalar-root discontinuity (planned; root):** pole and oscillatory counterexamples, bounded sampling warning and browser recovery.
+5. **P1 Matrix/Data import rollback (planned; schema):** malformed nested fixtures preserve prior state and legacy v1/v2 migration.
+
+**Execution log:** Read AGENTS, historical inventory, plan, PR #174 and current dev/main comparison. Verified PR Quality run 41587337661 and dev Quality run 41587326240 job success, ordinary merge and dev fast-forward. Added builder guard and isolated regression. Historical 166 gaps/95 partial features unchanged. Main release checks and new dev exact-head checks pending.
+
 ## 2026-11-03 — Data Tables column identity validation (DATA-COLUMN-IDENTITY-107)
 
 **Implemented on dev, awaiting exact-head Quality and PR release.** Reject blank and case/trim-equivalent duplicate saved table column names before restoring a project. Preserve original display strings and legacy v1/v2 projects with unique columns. Focused Node/Python regression tests valid/invalid column names, both versions, source/bundle parity and input immutability. Main merge 0d9895eb68f8c7272f3730f9f247ce6b5ca70834 passed main Quality runs 41580854721/41580866391 and Pages 41580854451; hosted browser unverified.

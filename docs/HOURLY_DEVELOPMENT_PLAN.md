@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-EMPTY-SOURCE-115 (dev; exact-head QA pending)
+
+**Change:** Standalone builder rejects empty and whitespace-only modular JavaScript source before replacing embedded HTML. A focused isolated subprocess regression asserts diagnostic and unchanged original index for both inputs. Source commit b38e358; regression commits 01ae2dd and fixture correction 8ac8136. Previous exact-head dev Quality run 41658791993 succeeded at 9bd506ea; new commits require new CI. No merge or Pages deployment claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 and BUILD-EMPTY-SOURCE-115 QA/release (pending):** full exact dev and PR Quality green for candidate SHA, applicable protections/reviews satisfied, ordinary PR merge, main Quality and Pages confirmed.
+2. **P0 QR rank-boundary references (planned):** independent high-precision near-threshold matrices, perturbed RHS, singular rejection and deterministic tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile and project round-trip regression, bundle-size comparison.
+4. **P1 Scalar-root discontinuity (planned):** pole and oscillatory negative fixtures, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed projects preserve prior state and legacy v1/v2 compatibility.
+
+**Execution ledger:** Inspected AGENTS, living plan, frozen inventory, main/dev comparison, PR #179 and successful development Quality. Added empty-source guard and direct regression to dev. New exact-head CI, PR Quality, main Quality and Pages pending. Historical 166 gaps and 95 partial features remain frozen. No new branches, force-push, CI bypass, merge or deletion.
+
 ## 2026-11-03 — BUILD-SOURCE-OPENER-114 (dev; CI pending)
 
 **Change:** Standalone builder rejects embedded HTML script opening tags in modular JS source, including mixed-case and tab-separated variants, before writing index. Focused subprocess regression checks rejection and unchanged original HTML. Previous PR #179 Quality run 41649964029 passed at 751f9d1; new dev head needs exact-head checks. Local clone unavailable (github.com DNS resolution failure). No release claimed.

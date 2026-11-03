@@ -20,12 +20,16 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   const found=[],sampled=[],h=(hi-lo)/samples;
   const samplingAdvisory='Uniform sampling can miss oscillations and even-multiplicity roots between grid points. Midpoint and quarter-grid probes reduce some aliasing but are not exhaustive. Increase sampling intervals or narrow the domain; these results are not globally complete.';
   let midpointProbes=0,midpointSignReversals=0,quarterProbes=0,quarterSignReversals=0;
+  // Rejected sign changes (poles/jumps) and multi-crossing grid intervals are bounded diagnostics.
+  const rejectedLimit=20,rejectedSignChanges=[];let rejectedSignChangeCount=0,denseOscillationIntervals=0;const denseOscillationLocations=[];
+  const recordRejected=(x,kind)=>{rejectedSignChangeCount++;if(rejectedSignChanges.length<rejectedLimit&&!rejectedSignChanges.some(r=>Math.abs(r.x-x)<=Math.max(1e-9,1e-9*Math.abs(x))))rejectedSignChanges.push({x:Number(x.toPrecision(12)),kind});};
   // Keep the same residual-first bisection and post-rounding certification.
   // Midpoints expose some paired crossings hidden between equal-sign grid endpoints.
   const refineBracket=(left,right,leftValue,rightValue)=>{
     let a=left,b=right,fa=leftValue,fb=rightValue;
     // Compare signs directly: multiplying two tiny finite residuals can underflow to zero.
     if(!Number.isFinite(fa)||!Number.isFinite(fb)||fa===0||fb===0||Math.sign(fa)===Math.sign(fb))return;
+    const initialScale=Math.min(Math.abs(fa),Math.abs(fb));
     for(let it=0;it<maxIterations;it++){
       const mid=a+(b-a)/2,fm=f(mid);if(!Number.isFinite(fm))break;
       if(Math.abs(fm)<=tolerance){a=b=mid;break;}
@@ -33,7 +37,12 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
       if(mid===a||mid===b)break;
       if(Math.sign(fa)!==Math.sign(fm)){b=mid;fb=fm;}else{a=mid;fa=fm;}
     }
-    const root=(a+b)/2,fr=f(root);if(Number.isFinite(fr)&&Math.abs(fr)<=tolerance)found.push(root);
+    const root=(a+b)/2,fr=f(root);if(Number.isFinite(fr)&&Math.abs(fr)<=tolerance){found.push(root);return;}
+    // Bisection converged on a sign change whose residual stays above tolerance.
+    // Strong growth of |f| across the shrinking bracket suggests a pole; otherwise a
+    // jump. A nonfinite probe alone (for example 0/0 at a step) is not growth evidence.
+    const finalScale=Math.min(Math.abs(fa),Math.abs(fb));
+    recordRejected(root,finalScale>10*initialScale?'possible-pole':'possible-jump');
   };
   for(let k=0;k<=samples;k++){
     const x=lo+k*h,y=f(x);sampled.push(y);
@@ -61,11 +70,25 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
     if(Math.abs(fql)<=tolerance)found.push(quarterLeft);
     if(Math.abs(fqr)<=tolerance)found.push(quarterRight);
     const points=[a,quarterLeft,mid,quarterRight,b],values=[fa,fql,fm,fqr,fb];
+    let intervalReversals=0;
+    for(let i=0;i<4;i++)if(Number.isFinite(values[i])&&Number.isFinite(values[i+1])&&values[i]!==0&&values[i+1]!==0&&
+       Math.sign(values[i])!==Math.sign(values[i+1]))intervalReversals++;
+    // Two or more crossings inside one grid interval indicate under-resolved oscillation.
+    if(intervalReversals>=2){denseOscillationIntervals++;if(denseOscillationLocations.length<rejectedLimit)denseOscillationLocations.push(Number(mid.toPrecision(12)));}
     for(let i=0;i<4;i++){
       if(Number.isFinite(values[i])&&Number.isFinite(values[i+1])&&values[i]!==0&&values[i+1]!==0&&
          Math.sign(values[i])!==Math.sign(values[i+1]))quarterSignReversals++;
       refineBracket(points[i],points[i+1],values[i],values[i+1]);
     }
+  }
+  // A nonfinite grid sample between opposite-sign finite neighbours hides a
+  // pole or jump from bisection; screen it with two inner probes.
+  for(let k=1;k<samples;k++){
+    const left=sampled[k-1],right=sampled[k+1];
+    if(Number.isFinite(sampled[k])||!Number.isFinite(left)||!Number.isFinite(right)||left===0||right===0||Math.sign(left)===Math.sign(right))continue;
+    const x=lo+k*h,innerLeft=f(x-h/4),innerRight=f(x+h/4);
+    const grows=!Number.isFinite(innerLeft)||!Number.isFinite(innerRight)||Math.min(Math.abs(innerLeft),Math.abs(innerRight))>Math.max(Math.abs(left),Math.abs(right));
+    recordRejected(x,grows?'possible-pole':'possible-jump');
   }
   // A constant sampled residual is not evidence of hundreds of isolated roots.
   // Two off-grid probes reduce the risk of aliasing a periodic function.
@@ -73,7 +96,7 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
      [Math.SQRT1_2,Math.sqrt(3)/3].every(t=>f(lo+(hi-lo)*t)===sampled[0])){
     const zero=sampled[0]===0;
     return {type:'roots',variable,expression,roots:[],residuals:[],maxResidual:null,localSlopeMagnitudes:[],localSlopeMethods:[],minLocalSlope:null,localSlopeWarnings:[],
-      domain:[lo,hi],samples,tolerance,sampleSpacing:h,midpointProbes,midpointSignReversals,quarterProbes,quarterSignReversals,rootStatus:zero?'sampled-zero-plateau':'sampled-nonzero-plateau',
+      domain:[lo,hi],samples,tolerance,sampleSpacing:h,midpointProbes,midpointSignReversals,quarterProbes,quarterSignReversals,rejectedSignChanges,rejectedSignChangeCount,denseOscillationIntervals,denseOscillationLocations,rootStatus:zero?'sampled-zero-plateau':'sampled-nonzero-plateau',
       note:(zero?'The residual is zero at all sampled and off-grid probes; non-isolated zeros are possible, but an identically zero function is not proven. No discrete roots are certified.':
         'The residual is equal and nonzero at all sampled and off-grid probes; an exactly constant function is not proven. A small residual alone does not certify a root.')+' '+samplingAdvisory};
   }
@@ -135,8 +158,10 @@ function scalarRoots(expression,variable='x',lo=-10,hi=10,{samples=350,tolerance
   });
   const availableSlopes=localSlopeMagnitudes.filter(s=>s!==null);
   const minLocalSlope=availableSlopes.length?Math.min(...availableSlopes):null;
+  const discontinuityNote=(rejectedSignChangeCount?` ${rejectedSignChangeCount} sign change(s) were rejected because the residual did not fall below tolerance (possible pole or jump; heuristic classification).`:'')+
+    (denseOscillationIntervals?` ${denseOscillationIntervals} grid interval(s) contain multiple sign changes; oscillation is under-resolved and roots there are likely incomplete.`:'');
   return {type:'roots',variable,expression,roots,residuals,maxResidual,localSlopeMagnitudes,localSlopeMethods,minLocalSlope,localSlopeWarnings,
-    domain:[lo,hi],samples,tolerance,sampleSpacing:h,midpointProbes,midpointSignReversals,quarterProbes,quarterSignReversals,note:'Candidate roots satisfy the requested absolute function-residual tolerance, not a certified root-position error bound. Local secant slopes, including one-sided estimates at domain edges, are scale-dependent heuristics, not proof of differentiability; they can mislead near flat roots or discontinuities. A possible-cusp flag compares opposite one-sided secants at two scales and is not a mathematical certificate. Unbracketed roots may still be missed.'+' '+samplingAdvisory};
+    domain:[lo,hi],samples,tolerance,sampleSpacing:h,midpointProbes,midpointSignReversals,quarterProbes,quarterSignReversals,rejectedSignChanges,rejectedSignChangeCount,denseOscillationIntervals,denseOscillationLocations,rootStatus:denseOscillationIntervals?'under-resolved-oscillation':rejectedSignChangeCount?'discontinuity-screened':'screened',note:'Candidate roots satisfy the requested absolute function-residual tolerance, not a certified root-position error bound. Local secant slopes, including one-sided estimates at domain edges, are scale-dependent heuristics, not proof of differentiability; they can mislead near flat roots or discontinuities. A possible-cusp flag compares opposite one-sided secants at two scales and is not a mathematical certificate. Unbracketed roots may still be missed.'+discontinuityNote+' '+samplingAdvisory};
 }
 function gaussian(A,b){const n=b.length,rows=A.map((r,i)=>[...r,b[i]]);for(let col=0;col<n;col++){
   let pivot=col;for(let i=col+1;i<n;i++)if(Math.abs(rows[i][col])>Math.abs(rows[pivot][col]))pivot=i;
@@ -395,7 +420,7 @@ function runNumerical(){clearRootErrors();try{
     else result=heat1D({a,b,nx,nt:$('num-nt').value,alpha:$('num-alpha').value,endTime:$('num-time').value,initial:expr,left,right});
   }
   lastNumeric=result;$('num-output').classList.remove('error');
-  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nSampling intervals: ${result.samples}; grid spacing: ${result.sampleSpacing.toExponential(3)}\nMidpoint probes: ${result.midpointProbes}; extra opposite-sign intervals: ${result.midpointSignReversals}\nQuarter-grid probes: ${result.quarterProbes}; sign-changing subintervals: ${result.quarterSignReversals}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\nMinimum local secant slope magnitude (heuristic): ${result.minLocalSlope===null?'n/a':result.minLocalSlope.toExponential(3)}\nOne-sided local slope estimates: ${result.localSlopeMethods.filter(method=>method==='forward'||method==='backward').length}\nPossible non-smooth cusp roots (heuristic): ${result.localSlopeWarnings.filter(flag=>flag==='possible-cusp').length}\n${result.note}`:
+  $('num-output').textContent=result.type==='roots'?`Roots in [${a}, ${b}]: ${result.roots.length?result.roots.join(', '):result.rootStatus==='sampled-zero-plateau'?'(non-isolated zeros possible)':result.rootStatus==='sampled-nonzero-plateau'?'(no roots certified from flat nonzero samples)':'(none detected)'}\nSampling intervals: ${result.samples}; grid spacing: ${result.sampleSpacing.toExponential(3)}\nMidpoint probes: ${result.midpointProbes}; extra opposite-sign intervals: ${result.midpointSignReversals}\nQuarter-grid probes: ${result.quarterProbes}; sign-changing subintervals: ${result.quarterSignReversals}\nMaximum absolute residual: ${result.maxResidual===null?'n/a':result.maxResidual.toExponential(3)}\nMinimum local secant slope magnitude (heuristic): ${result.minLocalSlope===null?'n/a':result.minLocalSlope.toExponential(3)}\nOne-sided local slope estimates: ${result.localSlopeMethods.filter(method=>method==='forward'||method==='backward').length}\nPossible non-smooth cusp roots (heuristic): ${result.localSlopeWarnings.filter(flag=>flag==='possible-cusp').length}\nRejected sign changes (possible pole/jump): ${result.rejectedSignChangeCount}${result.rejectedSignChanges.length?' at '+result.rejectedSignChanges.map(r=>r.x+' ('+r.kind.replace('possible-','')+')').join(', '):''}\nUnder-resolved oscillation intervals: ${result.denseOscillationIntervals}\n${result.note}`:
     result.type==='quadrature'?`${result.method}\nIntegral: ${result.value.toPrecision(13)}\nEstimated error: ${result.estimatedError.toExponential(3)}; evaluations: ${result.evaluations}; refinements: ${result.refinements}\n${result.note}`:
     result.type==='system'?`Converged: ${result.converged}\n${result.variables.map((v,i)=>v+' = '+result.values[i].toPrecision(12)).join('\n')}\nResidual: ${result.residual.toExponential(3)}; iterations: ${result.iterations}\n${result.note}`:
       `${result.method}\n${result.rows.length} output rows\n${result.type==='heat'?'CFL r='+result.cfl.toPrecision(5)+'\n':''}${result.note}`;

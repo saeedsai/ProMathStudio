@@ -2,29 +2,46 @@
 from pathlib import Path
 import math
 import os
-import numpy as np
+import bisect
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 API = "MathStudio.interpolationTools.interpolate"
 
 
+def _solve_dense(a, b):
+    """Gaussian elimination with partial pivoting (pure Python; CI has no numpy)."""
+    n = len(b)
+    m = [row[:] + [b[i]] for i, row in enumerate(a)]
+    for col in range(n):
+        piv = max(range(col, n), key=lambda r: abs(m[r][col]))
+        m[col], m[piv] = m[piv], m[col]
+        for r in range(col + 1, n):
+            f = m[r][col] / m[col][col]
+            for c in range(col, n + 1):
+                m[r][c] -= f * m[col][c]
+    x = [0.0] * n
+    for i in range(n - 1, -1, -1):
+        x[i] = (m[i][n] - sum(m[i][j] * x[j] for j in range(i + 1, n))) / m[i][i]
+    return x
+
+
 def natural_reference(xs, ys, queries):
-    """Independent second-derivative (M) formulation solved densely with numpy."""
+    """Independent second-derivative (M) formulation solved densely (pure Python)."""
     n = len(xs)
-    h = np.diff(xs)
-    a = np.zeros((n, n))
-    b = np.zeros(n)
-    a[0, 0] = a[-1, -1] = 1.0
+    h = [xs[i + 1] - xs[i] for i in range(n - 1)]
+    a = [[0.0] * n for _ in range(n)]
+    b = [0.0] * n
+    a[0][0] = a[-1][-1] = 1.0
     for i in range(1, n - 1):
-        a[i, i - 1] = h[i - 1]
-        a[i, i] = 2 * (h[i - 1] + h[i])
-        a[i, i + 1] = h[i]
+        a[i][i - 1] = h[i - 1]
+        a[i][i] = 2 * (h[i - 1] + h[i])
+        a[i][i + 1] = h[i]
         b[i] = 6 * ((ys[i + 1] - ys[i]) / h[i] - (ys[i] - ys[i - 1]) / h[i - 1])
-    m = np.linalg.solve(a, b)
+    m = _solve_dense(a, b)
     out = []
     for x in queries:
-        i = min(max(np.searchsorted(xs, x, side="right") - 1, 0), n - 2)
+        i = min(max(bisect.bisect_right(xs, x) - 1, 0), n - 2)
         hi, t0, t1 = h[i], xs[i + 1] - x, x - xs[i]
         y = (m[i] * t0 ** 3 + m[i + 1] * t1 ** 3) / (6 * hi) \
             + (ys[i] / hi - m[i] * hi / 6) * t0 + (ys[i + 1] / hi - m[i + 1] * hi / 6) * t1

@@ -1,12 +1,43 @@
-"""Matrix extras browser regression: numerical references vs numpy, failures and responsive keyboard UI."""
+"""Matrix extras browser regression: fixed numerical references (precomputed once with numpy; CI has no
+numpy), exact integer determinant/characteristic polynomial, identity checks, failures and responsive UI."""
 from pathlib import Path
 import os
-import numpy as np
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 API = "MathStudio.matrixExtras"
 
+
+
+def matmul(a, b):
+    return [[sum(a[i][k] * b[k][j] for k in range(len(b))) for j in range(len(b[0]))] for i in range(len(a))]
+
+
+def transpose(a):
+    return [list(r) for r in zip(*a)]
+
+
+def frob(a):
+    return sum(v * v for r in a for v in r) ** 0.5
+
+
+def max_abs_diff(a, b):
+    return max(abs(x - y) for ra, rb in zip(a, b) for x, y in zip(ra, rb))
+
+
+def identity(n):
+    return [[float(i == j) for j in range(n)] for i in range(n)]
+
+
+# Reference constants computed once with numpy 2.x (linalg cholesky / svd / 2-norm / cond).
+HILB_L = [[1.0, 0.0, 0.0, 0.0], [0.5, 0.28867513459481287, 0.0, 0.0],
+          [0.3333333333333333, 0.2886751345948129, 0.07453559924999305, 0.0],
+          [0.25, 0.2598076211353316, 0.11180339887498901, 0.018898223650463678]]
+A5 = [[6.0, -7.0, 5.0, -11.0, 2.0], [4.0, -4.0, 5.0, -11.0, 2.0], [6.0, -13.0, 6.0, -2.0, -4.0],
+      [-12.0, 14.0, 0.0, 7.0, -4.0], [0.0, -6.0, 9.0, -3.0, -6.0]]  # integer rank-3 product
+A5_SV = [30.843068438363595, 13.079668664310484, 11.073725522075845, 0.0, 0.0]
+A6_NORM2 = 9.275837550078808
+A6_COND = 5.27836307072968
 
 def main():
     html = (ROOT / "index.html").read_text(encoding="utf-8")
@@ -28,40 +59,39 @@ def main():
         hilbert = [[1 / (i + j + 1) for j in range(4)] for i in range(4)]
         r = call("cholesky", hilbert)
         assert r["residual"] < 1e-12, r
-        assert np.allclose(r["L"], np.linalg.cholesky(np.array(hilbert)), atol=1e-13)
+        assert max_abs_diff(r["L"], HILB_L) < 1e-13
         assert "pivot 2" in fail("cholesky", "1 2\n2 1")
         assert "symmetric" in fail("cholesky", "1 2\n3 1")
 
-        # Rank and bases on a 5x5 rank-3 matrix; compare against numpy rank and projectors.
-        rng = np.random.default_rng(7)
-        A5 = rng.integers(-3, 4, (5, 3)) @ rng.integers(-3, 4, (3, 5))
-        r = call("rank", A5.astype(float).tolist())
-        assert r["rank"] == np.linalg.matrix_rank(A5) == 3 and r["nullity"] == 2, r
-        N = np.array(r["nullBasis"])
-        Q = np.array(r["columnBasis"])
-        assert np.linalg.norm(A5 @ N) / np.linalg.norm(A5) < 1e-12
-        assert np.allclose(N.T @ N, np.eye(2), atol=1e-12) and np.allclose(Q.T @ Q, np.eye(3), atol=1e-12)
+        # Rank and bases on a 5x5 rank-3 integer matrix.
+        r = call("rank", A5)
+        assert r["rank"] == 3 and r["nullity"] == 2, r
+        N, Q = r["nullBasis"], r["columnBasis"]
+        assert frob(matmul(A5, N)) / frob(A5) < 1e-12
+        assert max_abs_diff(matmul(transpose(N), N), identity(2)) < 1e-12
+        assert max_abs_diff(matmul(transpose(Q), Q), identity(3)) < 1e-12
         # The column-space projector must leave A unchanged.
-        assert np.allclose(Q @ Q.T @ A5, A5, atol=1e-10)
-        assert np.allclose(r["singularValues"], np.linalg.svd(A5, compute_uv=False), atol=1e-10)
+        assert max_abs_diff(matmul(matmul(Q, transpose(Q)), A5), A5) < 1e-10
+        assert max(abs(a - b) for a, b in zip(r["singularValues"], A5_SV)) < 1e-10
         r = call("rank", "1 2 3\n2 4 6\n1 1 1")
-        n = np.array(r["nullBasis"])[:, 0]
-        assert r["rank"] == 2 and np.allclose(abs(n @ np.array([1, -2, 1]) / 6 ** 0.5), 1, atol=1e-12), r
+        n = [row[0] for row in r["nullBasis"]]
+        assert r["rank"] == 2 and abs(abs(n[0] - 2 * n[1] + n[2]) / 6 ** 0.5 - 1) < 1e-12, r
 
-        # Determinant of a 6x6 matrix needing pivoting, vs numpy.
-        A6 = np.array([[0, 2, 1, 0, 3, 1], [1, 0, 4, 2, 0, 1], [3, 1, 0, 1, 2, 0],
-                       [2, 5, 1, 0, 1, 4], [1, 1, 1, 3, 0, 2], [0, 4, 2, 1, 1, 0]], dtype=float)
-        r = call("determinant", A6.tolist())
-        assert abs(r["det"] - np.linalg.det(A6)) <= 1e-10 * abs(np.linalg.det(A6)), (r["det"], np.linalg.det(A6))
-        assert r["trace"] == np.trace(A6) and r["residual"] < 1e-14
+        # Determinant of a 6x6 integer matrix needing pivoting: exact integer reference.
+        A6 = [[0, 2, 1, 0, 3, 1], [1, 0, 4, 2, 0, 1], [3, 1, 0, 1, 2, 0],
+              [2, 5, 1, 0, 1, 4], [1, 1, 1, 3, 0, 2], [0, 4, 2, 1, 1, 0]]
+        r = call("determinant", A6)
+        assert abs(r["det"] - (-1693)) <= 1e-10 * 1693, r["det"]
+        assert r["trace"] == sum(A6[i][i] for i in range(6)) and r["residual"] < 1e-14
         r = call("charpoly", [[2, 1], [1, 2]])
         assert r["coefficients"] == [1, -4, 3], r
-        r = call("charpoly", A6.tolist())
-        assert np.allclose(r["coefficients"], np.poly(A6), rtol=1e-9, atol=1e-8), (r["coefficients"], np.poly(A6))
+        r = call("charpoly", A6)
+        exact = [1, 0, -38, -189, -502, -1236, -1693]
+        assert all(abs(a - b) <= 1e-9 * max(1, abs(b)) + 1e-8 for a, b in zip(r["coefficients"], exact)), r["coefficients"]
         r = call("norms", "3 0 0\n0 -5 0\n0 0 1")
         assert abs(r["two"] - 5) < 1e-13 and r["one"] == 5 and r["infinity"] == 5 and abs(r["condition2"] - 5) < 1e-12
-        r = call("norms", A6.tolist())
-        assert abs(r["two"] - np.linalg.norm(A6, 2)) < 1e-12 and abs(r["condition2"] - np.linalg.cond(A6)) < 1e-9 * np.linalg.cond(A6)
+        r = call("norms", A6)
+        assert abs(r["two"] - A6_NORM2) < 1e-12 and abs(r["condition2"] - A6_COND) < 1e-9 * A6_COND
 
         for bad, needle in [("1 2\n3", "Ragged"), ("\n".join(["1"] * 9), "At most 8 rows"),
                             ("1 2\n3 abc", "not a decimal"), ("1e400", "finite")]:

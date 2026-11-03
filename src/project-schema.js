@@ -105,10 +105,18 @@
            !data.tables.tables.some(t => record(t) && t.id === data.tables.selected)))
         fail('selected table does not exist.');
       const names = new Set();
+      const ids = new Set();
       for (const table of data.tables.tables) {
         if (!record(table) || !Array.isArray(table.columns) || !Array.isArray(table.rows) ||
             table.columns.length < 1 || table.columns.length > 32 || table.rows.length > 6000)
           fail('table dimensions exceed limits.');
+        // Legacy projects may omit ids; present ids must uniquely identify a sheet.
+        if (table.id !== undefined) {
+          if (typeof table.id !== 'string' || !table.id.trim() || table.id.length > 120)
+            fail('table id is invalid.');
+          if (ids.has(table.id)) fail('duplicate table ids.');
+          ids.add(table.id);
+        }
         short(table.name, 48, 'table name');
         // Trim only for identity checks: preserve the user's original display name.
         const name = table.name.trim().toLowerCase();

@@ -19,7 +19,7 @@ class EngineeringSimulationTests(unittest.TestCase):
         self.assertNotIn("document.", source, "kernels must stay DOM-free")
         self.assertNotIn("eval(", source)
         self.assertNotIn("new Function(", source)
-        self.assertEqual(source.count("assumptions:'"), 5, "every simulation states its model assumptions")
+        self.assertEqual(source.count("assumptions:'"), 7, "every simulation states its model assumptions")
         self.assertIn("M.odeTools.solveSystem(", source)
         self.assertIn("M.numerical.heat1D(", source)
         catalog = (ROOT / "src/engineering-catalog.js").read_text(encoding="utf-8")

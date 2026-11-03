@@ -1,3 +1,83 @@
+## 2026-11-03 — BUILD-HTML-COMMENT-118 (dev; exact-head QA pending)
+
+**Change:** Reject HTML comment openers in inline JavaScript module source before rebuilding standalone HTML. HTML script parsing treats `<!--` specially; a focused subprocess regression checks the rejection diagnostic and unchanged original index. Prior exact-head PR Quality 41689680817 passed at 5d273b3; new head needs fresh checks. Local checkout failed DNS resolution; no local suite claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 QA/release (pending):** exact-head dev/PR Quality structural and browser checks green; applicable protections/reviews verified; ordinary merge; main Quality and Pages verified.
+2. **P0 QR rank-boundary references (planned):** high-precision near-threshold references, perturbed RHS and singular rejection with tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile and saved-project round-trip with size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole and oscillatory negative cases, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed project fixtures preserve prior state and v1/v2 compatibility.
+
+**Execution ledger:** Read root AGENTS, plan, frozen inventory, branch comparison, PR #179, reviews and exact-head Quality. Added source guard and focused regression; pending new exact-head CI. Frozen 166 gaps/95 partials unchanged. No new branch, force-push, bypass, merge or deletion.
+
+## 2026-11-03 — BUILD-NUL-117 (dev; QA pending)
+
+**Change:** Reject embedded NUL in standalone module source before writing HTML. Focused subprocess regression asserts diagnostic and original-index preservation. Previous exact-head dev and PR Quality runs 41679640777 and 41679647176 passed at 1748115; new commit needs exact-head CI. Branch protection read returned 403; no merge claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 and BUILD-NUL-117 QA/release (pending):** exact-head dev and PR Quality structural/browser green; protections/reviews verified; ordinary merge; main Quality and Pages success.
+2. **P0 QR rank-boundary references (planned):** threshold-adjacent high-precision matrices, perturbed RHS, singular rejection and tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile, project round-trip and size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole/oscillation negatives, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed projects preserve prior state and v1/v2 compatibility.
+
+**Execution ledger:** Inspected root AGENTS, plan, inventory, dev/main, PR #179, reviews, latest CI and Pages. Committed NUL guard, regression, plan and changelog together. Historical 166 gaps/95 partial features unchanged. No bypass, new branch or force-push.
+
+## 2026-11-03 — BUILD-BOM-116 (dev; QA pending)
+
+**Change:** Reject UTF-8 BOM at the start of standalone JavaScript module sources before replacing embedded HTML, avoiding an unexpected encoding signature in inline scripts. Focused isolated subprocess regression checks diagnostic and byte-for-byte unchanged index. Previous exact-head PR Quality run 41669319024 succeeded at 69ff29a; new head requires its own checks. No release claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 and BUILD-BOM-116 QA/release (pending):** exact-head dev/PR Quality green including structural and browser tests; applicable protection/reviews verified; ordinary merge; main Quality and Pages success.
+2. **P0 QR rank-boundary references (planned):** independent high-precision threshold-adjacent matrices, perturbed RHS and singular rejection with tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile, saved-project round-trip and size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole/oscillation negative references, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed projects preserve prior state and v1/v2 compatibility.
+
+**Execution ledger:** Read root AGENTS, living plan, frozen inventory, dev/main comparison and PR #179; checked exact-head PR Quality 41669319024 (passed). Added BOM guard and regression to dev; new exact-head checks, release and Pages remain pending. Historical 166 gaps/95 partial features unchanged. No branch creation, force-push, bypass or deletion.
+
+## 2026-11-03 — BUILD-EMPTY-SOURCE-115 (dev; exact-head QA pending)
+
+**Change:** Standalone builder rejects empty and whitespace-only modular JavaScript source before replacing embedded HTML. A focused isolated subprocess regression asserts diagnostic and unchanged original index for both inputs. Source commit b38e358; regression commits 01ae2dd and fixture correction 8ac8136. Previous exact-head dev Quality run 41658791993 succeeded at 9bd506ea; new commits require new CI. No merge or Pages deployment claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 and BUILD-EMPTY-SOURCE-115 QA/release (pending):** full exact dev and PR Quality green for candidate SHA, applicable protections/reviews satisfied, ordinary PR merge, main Quality and Pages confirmed.
+2. **P0 QR rank-boundary references (planned):** independent high-precision near-threshold matrices, perturbed RHS, singular rejection and deterministic tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile and project round-trip regression, bundle-size comparison.
+4. **P1 Scalar-root discontinuity (planned):** pole and oscillatory negative fixtures, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed projects preserve prior state and legacy v1/v2 compatibility.
+
+**Execution ledger:** Inspected AGENTS, living plan, frozen inventory, main/dev comparison, PR #179 and successful development Quality. Added empty-source guard and direct regression to dev. New exact-head CI, PR Quality, main Quality and Pages pending. Historical 166 gaps and 95 partial features remain frozen. No new branches, force-push, CI bypass, merge or deletion.
+
+## 2026-11-03 — BUILD-SOURCE-OPENER-114 (dev; CI pending)
+
+**Change:** Standalone builder rejects embedded HTML script opening tags in modular JS source, including mixed-case and tab-separated variants, before writing index. Focused subprocess regression checks rejection and unchanged original HTML. Previous PR #179 Quality run 41649964029 passed at 751f9d1; new dev head needs exact-head checks. Local clone unavailable (github.com DNS resolution failure). No release claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 and BUILD-SOURCE-OPENER-114 QA/release (pending):** exact dev and PR Quality at latest SHA green, applicable reviews/protections verified, ordinary dev-to-main PR merge, main Quality and Pages success.
+2. **P0 QR rank boundary (planned):** high-precision near-threshold references, perturbed RHS and singular rejection with deterministic tolerances.
+3. **P1 UI controller extraction (planned):** source/offline parity, keyboard/mobile and saved-project round-trip regression plus bundle size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole and oscillatory negative cases, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed project fixtures preserve prior state and legacy v1/v2 compatibility.
+
+**Execution ledger:** Read AGENTS, living plan, frozen inventory, dev/main comparison, open PR #179 and successful PR Quality job. Added source guard and focused regression on dev; local GitHub DNS blocked test checkout. No merge, force-push, branch creation, bypass or deletion. Historical 166 gaps/95 partial features unchanged.
+
+## 2026-11-03 — BUILD-MISSING-SOURCE-113 and PR #178 release checkpoint
+
+**Release:** PR #178 merged normally at `1df9a6fbf69678268a937c06c39786c6a7fe3702` after exact-head PR Quality run 41640828944 passed, including structural and browser steps. No reviews recorded; GitHub accepted the ordinary merge. Dev was synchronized by non-force fast-forward. Main Quality, Pages and hosted behavior still require independent verification.
+
+**Implemented on dev; exact-head CI pending:** `scripts/build.py` now raises a descriptive `Missing standalone module source: src/data-tables.js` error when a module source is absent. Focused subprocess regression verifies nonzero exit, diagnostic and unchanged original index. Source commit `6d40a50`, regression commit `e1091b7`. No full local Python/Chromium test pass claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 BUILD-MISSING-SOURCE-113 QA/release (pending):** exact-head dev and PR Quality structural/browser checks green; applicable approvals/protections met; ordinary merge; main Quality and Pages and hosted smoke verified.
+2. **P0 QR rank boundary (planned):** independent high-precision near-threshold matrices, perturbed RHS, singular rejection and deterministic tolerances.
+3. **P1 UI controller extraction (planned):** source/offline parity, keyboard/mobile smoke, saved-project round-trip and bundle-size comparison.
+4. **P1 Scalar-root discontinuity (planned):** pole/oscillatory negative references, bounded diagnostic and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed fixtures preserve state and v1/v2 legacy round trips.
+
+**Execution ledger:** Inspected root AGENTS, living plan, frozen inventory, dev/main comparison, PR #178, exact-head successful Quality and reviews. Released verified PR via ordinary merge; added small build diagnostic and focused regression on dev. No force-push, branch creation or CI bypass. Historical 166 gaps/95 partial features remain frozen.
+
 ## 2026-11-03 — BUILD-MISSING-CLOSE-112 exact-head regression repair
 
 **CI failure:** PR #178 Quality run 41631737725 failed 1/291 structural tests at dev 907b41a1820caf76adf3316af0f45df08c1e35b1. The truncated-script fixture encoded literal backslash-n, so the marker guard fired before the missing-close guard. Fixed fixture to use real newline (commit e8f07d9); builder validation unchanged. Full exact-head CI and browser QA pending. No merge or deployment claimed. Historical 166 gaps/95 partial features frozen.

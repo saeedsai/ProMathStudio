@@ -1,3 +1,16 @@
+- 2026-11-03 (BUILD-HTML-COMMENT-118; dev QA pending): Reject HTML comment openers inside standalone inline module sources; subprocess regression asserts rejection and original HTML preservation. Exact-head Quality and release pending.
+- 2026-11-03 (BUILD-NUL-117, dev; QA pending): Reject NUL-containing module sources before standalone HTML write; focused rollback regression; exact-head CI pending.
+- 2026-11-03 (BUILD-BOM-116, dev; CI pending): Reject UTF-8 BOM-prefixed standalone JS modules before overwriting bundled HTML; isolated subprocess regression asserts error and unchanged original HTML. Prior PR Quality 41669319024 passed at previous dev head; new exact-head QA and Pages pending.
+- 2026-11-03: Standalone build rejects empty or whitespace-only module source before replacing HTML; focused rollback regression (BUILD-EMPTY-SOURCE-115; dev, QA pending).
+## 2026-11-03 — Reject script openers in standalone module sources (dev QA pending)
+
+- BUILD-SOURCE-OPENER-114: reject mixed-case and whitespace-delimited HTML script openers inside modular JavaScript before writing standalone HTML; focused subprocess regression verifies diagnostic and atomic rollback. Exact-head Quality, PR release, main Quality and Pages pending. Historical 166 gaps/95 partial features unchanged.
+
+## 2026-11-03 — Missing standalone module source diagnostic (dev QA pending)
+
+- BUILD-MISSING-SOURCE-113: fail with an explicit missing-source path before writing standalone HTML when a module file is absent; add subprocess regression asserting diagnostic and original-index preservation. Exact-head Quality and Pages pending.
+- PR #178 merged normally at `1df9a6fbf69678268a937c06c39786c6a7fe3702` after successful exact-head Quality run 41640828944; post-merge main Quality and Pages verification pending.
+
 ## 2026-11-03 — Build missing-close regression correction
 
 - Fixed a truncated standalone script fixture to use actual newlines, allowing the existing missing-close diagnostic to be tested. CI run 41631737725 previously failed 1/291 structural tests due to the fixture; new exact-head CI pending. No production release claimed.

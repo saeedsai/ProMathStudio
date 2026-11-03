@@ -39,7 +39,20 @@ for tag, source in modules:
         raise ValueError(f"Nested script opening before standalone module close: {tag}")
     original = text[start:end]
     trailing_newlines = original[len(original.rstrip("\n")):]
-    module_source = (root / source).read_text(encoding="utf-8").rstrip("\n")
+    source_path = root / source
+    if not source_path.is_file():
+        raise FileNotFoundError(f"Missing standalone module source: {source}")
+    module_source = source_path.read_text(encoding="utf-8").rstrip("\n")
+    if not module_source.strip():
+        raise ValueError(f"Empty standalone module source: {source}")
+    if "\x00" in module_source:
+        raise ValueError(f"Unexpected NUL byte in standalone module source: {source}")
+    if module_source.startswith("\ufeff"):
+        raise ValueError(f"Unexpected UTF-8 BOM in standalone module source: {source}")
+    if "<!--" in module_source:
+        raise ValueError(f"Unsafe HTML comment opener in module: {source}")
+    if re.search(r"<script(?=[\s/>])", module_source, flags=re.IGNORECASE):
+        raise ValueError(f"Unsafe script opening sequence in module: {source}")
     if "</script" in module_source.lower():
         raise ValueError(f"Unsafe script closing sequence in module: {source}")
     text = text[:start] + module_source + trailing_newlines + text[end:]

@@ -1,3 +1,7 @@
+## 2026-11-03 — Build missing-close regression correction
+
+- Fixed a truncated standalone script fixture to use actual newlines, allowing the existing missing-close diagnostic to be tested. CI run 41631737725 previously failed 1/291 structural tests due to the fixture; new exact-head CI pending. No production release claimed.
+
 - 2026-11-03 (BUILD-MISSING-CLOSE-112; dev QA pending): Standalone builder now raises an explicit error for a truncated inline module without a closing script tag; isolated regression checks failure and original HTML preservation. New exact-head CI and deployment pending.
 - 2026-11-03 BUILD-NESTED-CASE-111 (dev QA pending): Detect uppercase, tabbed and bare nested script openers during standalone rebuild; focused negative regression preserves original index. PR #177 merged after exact-head dev/PR Quality success; new exact-head CI/Pages pending. Frozen 166 gaps/95 partials unchanged.
 - 2026-11-03 BUILD-NESTED-SCRIPT-110: reject nested `<script ` opening tags inside standalone module boundaries; isolated regression confirms rejection without modifying HTML. PR #176 merged after green PR Quality; new exact-head CI and release pending. Historical 166 gaps/95 partials unchanged.

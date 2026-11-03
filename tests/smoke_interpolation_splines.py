@@ -2,29 +2,51 @@
 from pathlib import Path
 import math
 import os
-import numpy as np
+from bisect import bisect_right
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 API = "MathStudio.interpolationTools.interpolate"
 
 
+def solve_dense(matrix, rhs):
+    """Independent partial-pivot Gaussian elimination; no optional CI packages."""
+    a = [list(map(float, row)) for row in matrix]
+    b = list(map(float, rhs))
+    n = len(b)
+    for col in range(n):
+        pivot = max(range(col, n), key=lambda row: abs(a[row][col]))
+        if abs(a[pivot][col]) < 1e-14:
+            raise ValueError("Singular reference system")
+        a[col], a[pivot] = a[pivot], a[col]
+        b[col], b[pivot] = b[pivot], b[col]
+        for row in range(col + 1, n):
+            factor = a[row][col] / a[col][col]
+            for j in range(col, n):
+                a[row][j] -= factor * a[col][j]
+            b[row] -= factor * b[col]
+    x = [0.0] * n
+    for row in range(n - 1, -1, -1):
+        x[row] = (b[row] - sum(a[row][j] * x[j] for j in range(row + 1, n))) / a[row][row]
+    return x
+
+
 def natural_reference(xs, ys, queries):
-    """Independent second-derivative (M) formulation solved densely with numpy."""
+    """Independent second-derivative formulation with pure-Python dense solve."""
     n = len(xs)
-    h = np.diff(xs)
-    a = np.zeros((n, n))
-    b = np.zeros(n)
-    a[0, 0] = a[-1, -1] = 1.0
+    h = [xs[i + 1] - xs[i] for i in range(n - 1)]
+    a = [[0.0] * n for _ in range(n)]
+    b = [0.0] * n
+    a[0][0] = a[-1][-1] = 1.0
     for i in range(1, n - 1):
-        a[i, i - 1] = h[i - 1]
-        a[i, i] = 2 * (h[i - 1] + h[i])
-        a[i, i + 1] = h[i]
+        a[i][i - 1] = h[i - 1]
+        a[i][i] = 2 * (h[i - 1] + h[i])
+        a[i][i + 1] = h[i]
         b[i] = 6 * ((ys[i + 1] - ys[i]) / h[i] - (ys[i] - ys[i - 1]) / h[i - 1])
-    m = np.linalg.solve(a, b)
+    m = solve_dense(a, b)
     out = []
     for x in queries:
-        i = min(max(np.searchsorted(xs, x, side="right") - 1, 0), n - 2)
+        i = min(max(bisect_right(xs, x) - 1, 0), n - 2)
         hi, t0, t1 = h[i], xs[i + 1] - x, x - xs[i]
         y = (m[i] * t0 ** 3 + m[i + 1] * t1 ** 3) / (6 * hi) \
             + (ys[i] / hi - m[i] * hi / 6) * t0 + (ys[i + 1] / hi - m[i + 1] * hi / 6) * t1
@@ -37,6 +59,14 @@ def close(a, b, tol, ctx):
 
 
 def main():
+    # Independent solver controls: pivoting and singular detection.
+    assert solve_dense([[0, 2], [3, 4]], [4, 11]) == [1.0, 2.0]
+    try:
+        solve_dense([[1, 2], [2, 4]], [3, 6])
+    except ValueError as error:
+        assert "Singular" in str(error)
+    else:
+        raise AssertionError("Singular reference matrix must be rejected")
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     assert "function cyclicThomas(sub,diag,sup,rhs)" in html
     with sync_playwright() as pw:

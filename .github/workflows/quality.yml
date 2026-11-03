@@ -435,3 +435,5 @@ jobs:
         run: python tests/smoke_multivariate_tools.py
       - name: Vector fields, RK4 streamlines, slope fields and candidate equilibria browser regression
         run: python tests/smoke_vector_fields.py
+      - name: Engineering thermodynamic cycles and DC network nodal analysis browser regression
+        run: python tests/smoke_engineering_thermo_circuits.py

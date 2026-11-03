@@ -77,6 +77,8 @@ const visuals=Object.freeze([
  {id:'rlc',tool:'circuits.rlc.series.transient',title:'Simulation · Series RLC step response',compute:S.rlc,fields:[['resistance','R (Ω)','4'],['inductance','L (mH)','10'],['capacitance','C (µF)','100'],['voltage','Source V (V)','12']]},
  {id:'projectile',tool:'mechanics.projectile.drag',title:'Simulation · Projectile with air drag',compute:S.projectile,fields:[['speed','Launch speed (m/s)','40'],['angle','Launch angle (°)','45'],['mass','Mass (kg)','0.145'],['diameter','Diameter (mm)','74'],['drag','Drag coefficient Cd','0.47'],['density','Air density (kg/m³)','1.225']]},
  {id:'rod',tool:'thermal.conduction.rod',title:'Simulation · Heat conduction in a rod',compute:S.rodHeat,fields:[['material','Material','aluminium','select',[['aluminium','Aluminium'],['copper','Copper'],['steel','Steel'],['glass','Glass'],['water','Water (still)']]],['length','Rod length (m)','0.5'],['initial','Initial temperature (°C)','20'],['left','Left end (°C)','100'],['right','Right end (°C)','20'],['duration','Duration (s)','900']]},
+ {id:'cycle',tool:'thermal.cycle.analysis',title:'Simulation · Ideal Otto, Diesel and Brayton cycles',compute:S.thermoCycle,fields:[['cycle','Cycle','otto','select',[['otto','Otto (spark ignition)'],['diesel','Diesel (compression ignition)'],['brayton','Brayton (gas turbine)']]],['ratio','Compression ratio r (Otto/Diesel)','8'],['pressureRatio','Pressure ratio rp (Brayton)','10'],['spec','Heat addition given by','heat','select',[['heat','Heat input q_in'],['tmax','Maximum temperature T3'],['cutoff','Diesel cutoff ratio rc']]],['heatIn','Heat input q_in (kJ/kg)','1000'],['Tmax','Maximum temperature T3 (K)','1800'],['cutoff','Diesel cutoff ratio rc','2'],['T1','Inlet temperature T1 (K)','300'],['P1','Inlet pressure P1 (kPa)','100'],['gamma','Heat capacity ratio γ','1.4'],['cp','cp (J/kg·K)','1005']]},
+ {id:'network',tool:'circuits.network.analysis',title:'Simulation · DC resistive network (nodal analysis)',compute:S.dcNetwork,fields:[['netlist','Netlist: NAME node+ node− value (0 = ground)','V1 1 0 12\nR1 1 2 1000\nR2 2 0 2000\nR3 2 3 500\nR4 3 0 1500\nI1 0 3 0.002','textarea']]},
  {id:'spring',tool:'control.transient.two.state',title:'Mass–spring–damper step response',compute:springMassDamper,fields:[['zeta','Damping ratio ζ','0.2'],['wn','Natural frequency ωn (rad/s)','2'],['duration','Duration (s)','10']]},
  {id:'pendulum',tool:'ode.ivp.scalar',title:'Nonlinear pendulum (coupled RK4)',compute:pendulum,fields:[['theta0','Initial angle (°)','30'],['length','Length L (m)','1'],['duration','Duration (s)','6']]},
  {id:'spectrum',tool:'signals.fft.1d',title:'Two-tone signal and FFT spectrum',compute:spectrum,fields:[['f1','Frequency 1 (Hz)','5'],['a1','Amplitude 1','1'],['f2','Frequency 2 (Hz)','12'],['a2','Amplitude 2','0.5']]},
@@ -92,6 +94,7 @@ const FIELD_UNITS=Object.freeze({
  rlc:{resistance:'Ω',inductance:'mH',capacitance:'µF',voltage:'V'},
  projectile:{speed:'m/s',angle:'°',mass:'kg',diameter:'mm',density:'kg/m^3'},
  rod:{length:'m',initial:'°C',left:'°C',right:'°C',duration:'s'},
+ cycle:{T1:'K',P1:'kPa',heatIn:'kJ/kg',Tmax:'K',cp:'J/(kg*K)'},
  spring:{duration:'s'},
  pendulum:{theta0:'°',length:'m',duration:'s'},
  spectrum:{f1:'Hz',f2:'Hz'}
@@ -130,11 +133,13 @@ style.textContent='#eng-visuals{border:1px solid #d8e4e8;border-radius:12px;padd
  '#eng-visuals .eng-visual-actions button{min-height:40px;padding:8px 14px;border:1px solid #29817b;border-radius:9px;background:#e6f5f2;color:#174b48;cursor:pointer}'+
  '#eng-visuals button:focus-visible,#eng-visuals summary:focus-visible{outline:3px solid #29817b;outline-offset:2px}'+
  '#eng-visual-canvas{display:block;width:100%;height:auto;max-width:100%;border:1px solid #e1eaee;border-radius:10px;background:#fff}'+
+ '#eng-visuals .eng-visual-wide{grid-column:1/-1}#eng-visuals textarea{width:100%;box-sizing:border-box;min-height:120px;padding:10px;border:1px solid #c2cfdb;border-radius:9px;font-family:ui-monospace,monospace;font-size:13px}'+
+ '#eng-visuals textarea:focus-visible{outline:3px solid #29817b;outline-offset:2px}'+
  '#eng-visual-status.error{color:#a3262a}#eng-visual-status{font-size:13px;overflow-wrap:anywhere}';
 document.head.append(style);
 const area=document.createElement('details');area.id='eng-visuals';
 area.innerHTML='<summary>Engineering simulations &amp; animations</summary>'+
- '<p class="small-note">Physics-based engineering simulations (beam, orbit, circuit, projectile, heat) and solver animations. Each states its model assumptions; results are textbook-model estimates, not certified designs or code checks. Animations respect reduced-motion preferences.</p>'+
+ '<p class="small-note">Physics-based engineering simulations (beam, orbit, circuits, projectile, heat, thermodynamic cycles) and solver animations. Each states its model assumptions; results are textbook-model estimates, not certified designs or code checks. Animations respect reduced-motion preferences.</p>'+
  '<label>Visualization<select id="eng-visual-select"></select></label><div id="eng-visual-fields"></div>'+
  '<div class="eng-visual-actions"><button type="button" id="eng-visual-run">Compute &amp; animate</button><button type="button" id="eng-visual-toggle" aria-pressed="false">Pause</button><button type="button" id="eng-visual-step">Step frame</button><button type="button" id="eng-visual-table" disabled>Send data to Data Tables</button><button type="button" id="eng-visual-graph" disabled>Plot in Graphs</button><button type="button" id="eng-visual-png" disabled>Download frame (PNG)</button></div>'+
  '<canvas id="eng-visual-canvas" width="720" height="320" role="img" aria-label="Engineering animation"></canvas>'+
@@ -151,7 +156,8 @@ function buildFields(){
  for(const [key,label,value,type,options] of v.fields){
   const wrap=document.createElement('label');wrap.textContent=label;
   let input;
-  if(type==='select'){input=document.createElement('select');for(const [val,text] of options){const o=document.createElement('option');o.value=val;o.textContent=text;input.append(o);}}
+  if(type==='textarea'){input=document.createElement('textarea');input.rows=6;input.spellcheck=false;input.autocomplete='off';wrap.className='eng-visual-wide';}
+  else if(type==='select'){input=document.createElement('select');for(const [val,text] of options){const o=document.createElement('option');o.value=val;o.textContent=text;input.append(o);}}
   else if(FIELD_UNITS[v.id]?.[key]){
    const spec=FIELD_UNITS[v.id][key],unit=typeof spec==='function'?'kN or kN/m':spec;
    input=document.createElement('input');input.type='text';input.spellcheck=false;input.autocomplete='off';
@@ -163,7 +169,7 @@ function buildFields(){
   wrap.append(input);fields.append(wrap);
  }
 }
-function params(){return Object.fromEntries([...fields.querySelectorAll('input,select')].map(i=>[i.dataset.key,i.value]));}
+function params(){return Object.fromEntries([...fields.querySelectorAll('input,select,textarea')].map(i=>[i.dataset.key,i.value]));}
 const heat=t=>'hsl('+Math.round(240*(1-Math.max(0,Math.min(1,t))))+',80%,48%)';
 function arrow(x1,y1,x2,y2,color){ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();const a=Math.atan2(y2-y1,x2-x1);ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-8*Math.cos(a-0.4),y2-8*Math.sin(a-0.4));ctx.lineTo(x2-8*Math.cos(a+0.4),y2-8*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
 // Shared plotting helpers.
@@ -267,6 +273,45 @@ function draw(){
   polyline(xs.map((x,j)=>[x,fr.values[j]]),[0,c.L],[lo-span*0.05,hi+span*0.05],box,'#e7543f',2);
   text('T(x) at t = '+fr.time.toFixed(1)+' s (dashed: steady linear profile)',box[0]+6,box[1]+14);
   text('centre '+fr.values[Math.floor(n/2)].toFixed(2)+' °C',x0,30);
+ }else if(c.id==='cycle'){
+  const k=Math.min(c.path.length-1,Math.round(p*(c.path.length-1))),pv=[40,48,300,228],ts=[400,48,300,228];
+  frameBox(...pv);frameBox(...ts);
+  const vr=range(c.path.map(r=>r[1])),pr=range(c.path.map(r=>r[2])),tr=range(c.path.map(r=>r[3])),sr=range(c.path.map(r=>r[4]));
+  const map=(box,xr,yr,x,y)=>[box[0]+(x-xr[0])/(xr[1]-xr[0])*box[2],box[1]+box[3]-(y-yr[0])/(yr[1]-yr[0])*box[3]];
+  const colors=['#536be8','#e7543f','#188b81','#d99a2b'];
+  for(let proc=1;proc<=4;proc++){
+   const seg=c.path.filter((r,i)=>r[0]===proc||(i>0&&c.path[i-1][0]===proc));
+   polyline(seg.map(r=>[r[1],r[2]]),vr,pr,pv,colors[proc-1],2);polyline(seg.map(r=>[r[4],r[3]]),sr,tr,ts,colors[proc-1],2);
+  }
+  c.states.forEach(st=>{const [a,b]=map(pv,vr,pr,st.v,st.P/1000),[d,e]=map(ts,sr,tr,st.s,st.T);text(String(st.state),a+5,b-5);text(String(st.state),d+5,e-5);});
+  const row=c.path[k],[mx,my]=map(pv,vr,pr,row[1],row[2]),[nx,ny]=map(ts,sr,tr,row[4],row[3]);
+  ctx.fillStyle='#27444b';for(const [x,y] of [[mx,my],[nx,ny]]){ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();}
+  text('P–v (P in kPa, v in m³/kg)',pv[0],pv[1]-6);text('T–s (T in K, s relative to state 1)',ts[0],ts[1]-6);
+  const proc=['isentropic compression 1→2',c.cycle==='otto'?'constant-volume heat addition 2→3':'constant-pressure heat addition 2→3','isentropic expansion 3→4',c.cycle==='brayton'?'constant-pressure heat rejection 4→1':'constant-volume heat rejection 4→1'][row[0]-1];
+  text(proc+': P = '+row[2].toPrecision(4)+' kPa, T = '+row[3].toPrecision(4)+' K',40,20);
+  text('η = '+(c.efficiency*100).toFixed(2)+'%, w_net = '+(c.wNet/1000).toPrecision(4)+' kJ/kg',40,300);
+ }else if(c.id==='network'){
+  const cx=200,cy=165,R=120,nodes=c.nodes,N=nodes.length,pos=new Map(nodes.map((nd,i)=>{const a=-Math.PI/2+2*Math.PI*i/N;return [nd.node,[cx+R*Math.cos(a),cy+R*Math.sin(a)]];}));
+  const vs=nodes.map(nd=>nd.voltage),vlo=Math.min(...vs),vhi=Math.max(...vs),imax=Math.max(1e-300,...c.elements.map(e=>Math.abs(e.current)));
+  const pairCount=new Map();
+  const colorOf={R:'#597b82',V:'#2f6fb3',I:'#8a4fc2'};
+  c.elements.forEach(e=>{
+   const key=[e.a,e.b].sort().join('|'),idx=pairCount.get(key)||0;pairCount.set(key,idx+1);
+   const [x1,y1]=pos.get(e.a),[x2,y2]=pos.get(e.b),mx=(x1+x2)/2,my=(y1+y2)/2,len=Math.max(1,Math.hypot(x2-x1,y2-y1));
+   const bow=(idx%2?-1:1)*Math.ceil(idx/2)*28+(e.a===e.b?40:0),qx=mx-(y2-y1)/len*bow,qy=my+(x2-x1)/len*bow;
+   const at=t=>[(1-t)*(1-t)*x1+2*(1-t)*t*qx+t*t*x2,(1-t)*(1-t)*y1+2*(1-t)*t*qy+t*t*y2];
+   ctx.strokeStyle=colorOf[e.type];ctx.lineWidth=e.type==='R'?2:3;ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo(qx,qy,x2,y2);ctx.stroke();
+   const [lx,ly]=at(0.5);ctx.fillStyle='#fff';ctx.fillRect(lx-18,ly-9,36,16);text(e.name,lx-16,ly+4,colorOf[e.type]);
+   // Current dots: direction follows the sign of the current, speed is proportional to |I|.
+   const rel=Math.abs(e.current)/imax,dots=5;
+   if(rel>1e-9)for(let j=0;j<dots;j++){let t=((j/dots+Math.sign(e.current)*p*3*rel)%1+1)%1;const [dx,dy]=at(t);ctx.fillStyle='#ec824f';ctx.beginPath();ctx.arc(dx,dy,3.5,0,Math.PI*2);ctx.fill();}
+  });
+  nodes.forEach(nd=>{const [x,y]=pos.get(nd.node);ctx.fillStyle=heat(vhi>vlo?(nd.voltage-vlo)/(vhi-vlo):0.5);ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#27444b';ctx.lineWidth=1;ctx.stroke();
+   text((nd.node==='0'?'⏚ 0':nd.node)+': '+Number(nd.voltage.toPrecision(5))+' V',x+12,y-10);});
+  const list=c.elements.slice().sort((a,b)=>Math.abs(b.current)-Math.abs(a.current)).slice(0,14);
+  text('Element    I (mA)      P (mW)',430,24);
+  list.forEach((e,i)=>text(e.name.padEnd(9,' ')+' '+(e.current*1000).toPrecision(5).padStart(10,' ')+'  '+(e.power*1000).toPrecision(5).padStart(10,' '),430,44+i*18,colorOf[e.type]));
+  text('KCL residual '+c.kclResidual.toExponential(1)+' · node colour: voltage (blue low → red high)',20,312);
  }else if(c.id==='spring'||c.id==='pendulum'){
   const k=Math.min(c.rows.length-1,Math.round(p*(c.rows.length-1))),row=c.rows[k],box=[300,20,400,270];
   frameBox(...box);
@@ -345,6 +390,8 @@ function tableOf(c){
   case 'orbit':return f(c.path,['t_s','x_km','y_km','vx_km_s','vy_km_s'],'SIM_ORBIT');
   case 'rlc':return f(c.rows,['t_s','vC_V','i_A'],'SIM_RLC');
   case 'projectile':return f(c.rows,['t_s','x_m','y_m','vx_m_s','vy_m_s'],'SIM_PROJECTILE');
+  case 'cycle':return f(c.path,['process','v_m3_kg','P_kPa','T_K','s_J_kgK'],'SIM_CYCLE');
+  case 'network':return f(c.elements.map((e,i)=>[i+1,e.current,e.voltage,e.power,e.value,e.name,e.a,e.b]),['index','current_A','voltage_V','power_W','value','element','node_pos','node_neg'],'SIM_NETWORK');
   case 'rod':{const last=c.frames.at(-1).values,first=c.frames[0].values;return f(last.map((T,j)=>[j*c.L/(last.length-1),first[j],T]),['x_m','T_initial_C','T_final_C'],'SIM_ROD');}
  }
  throw Error('No tabular export for this visual.');
@@ -384,7 +431,7 @@ function select(id){if(!visuals.some(v=>v.id===id))throw Error('Unknown engineer
 // Catalog "Open existing tool" entry point for simulation tools: select, run, focus first input.
 function open(toolId){
  const v=visuals.find(x=>x.tool===toolId);if(!v)throw Error('No simulation for tool: '+toolId);
- select(v.id);run();area.scrollIntoView({block:'nearest'});fields.querySelector('input,select')?.focus({preventScroll:true});return v.id;
+ select(v.id);run();area.scrollIntoView({block:'nearest'});fields.querySelector('input,select,textarea')?.focus({preventScroll:true});return v.id;
 }
 picker.addEventListener('change',()=>select(picker.value));
 $('eng-visual-run').addEventListener('click',run);
@@ -402,6 +449,6 @@ function decorate(){
 new MutationObserver(decorate).observe($('eng-results'),{childList:true});decorate();
 buildFields();draw();stop();
 M.engineeringVisuals=Object.freeze({visuals:visuals.map(v=>Object.freeze({id:v.id,tool:v.tool,title:v.title})),
- compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,beamGeneral:S.beamGeneral,vibration:S.vibration,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat}),
+ compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,beamGeneral:S.beamGeneral,vibration:S.vibration,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat,cycle:S.thermoCycle,network:S.dcNetwork}),
  select,open,run,play,pause:stop,resolveInputs,fieldUnits:FIELD_UNITS,tableOf,exportTable,plotGraph,downloadPng,frame:()=>frame,frames:FRAMES,current:()=>current});
 })();

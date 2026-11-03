@@ -225,5 +225,134 @@ function vibration({zeta=0.1,ratio=0.8,cycles=20}={}){
   summary:'Forced vibration ζ = '+z+', r = '+r+': steady amplitude '+measured.toPrecision(5)+'×static (closed form '+analytic.toPrecision(5)+'), phase lag '+(phase*180/Math.PI).toFixed(2)+
    '° (closed form '+(analyticPhase*180/Math.PI).toFixed(2)+'°)'+(transientLeft>1e-3?'; transient not fully decayed (e^(−ζτ) = '+transientLeft.toExponential(1)+').':'.')};
 }
-M.engineeringSimulations=Object.freeze({beam,beamGeneral,vibration,orbit,rlc,projectile,rodHeat,rk4Vector,materials:MATERIALS,constants:Object.freeze({mu:MU,earthRadius:RE,g:G0})});
+/* Ideal cold-air-standard Otto, Diesel and Brayton cycles: closed-system (Otto/Diesel) or
+   steady-flow (Brayton) ideal gas with constant cp, cv = cp/γ and R = cp − cv; isentropic
+   compression/expansion, heat addition at constant volume (Otto) or pressure (Diesel, Brayton).
+   Net work is summed process by process and checked against q_in − q_out. */
+function thermoCycle({cycle='otto',ratio=8,pressureRatio=10,spec='heat',heatIn=1000,Tmax=1800,cutoff=2,T1=300,P1=100,gamma=1.4,cp=1005}={}){
+ cycle=choice(cycle,['otto','diesel','brayton'],'Cycle');spec=choice(spec,['heat','tmax','cutoff'],'Heat addition');
+ const k=num(gamma,'Heat capacity ratio γ',1.01,1.8),Cp=num(cp,'cp (J/kg·K)',100,20000),Cv=Cp/k,R=Cp-Cv;
+ const Ta=num(T1,'Inlet temperature T1 (K)',50,2000),Pa=num(P1,'Inlet pressure P1 (kPa)',1,20000)*1000;
+ if(spec==='cutoff'&&cycle!=='diesel')throw Error('A cutoff ratio applies only to the Diesel cycle; choose heat input or maximum temperature.');
+ const r=cycle==='brayton'?null:num(ratio,'Compression ratio r',1.01,40),rp=cycle==='brayton'?num(pressureRatio,'Pressure ratio rp',1.01,100):null;
+ const v1=R*Ta/Pa;
+ let T2,P2,v2;
+ if(cycle==='brayton'){P2=Pa*rp;T2=Ta*rp**((k-1)/k);v2=R*T2/P2;}else{v2=v1/r;T2=Ta*r**(k-1);P2=Pa*r**k;}
+ const cAdd=cycle==='otto'?Cv:Cp;
+ let T3;
+ if(spec==='heat')T3=T2+num(heatIn,'Heat input q_in (kJ/kg)',0.001,1e5)*1000/cAdd;
+ else if(spec==='tmax'){T3=num(Tmax,'Maximum temperature T3 (K)',50,5000);if(!(T3>T2))throw Error('Maximum temperature T3 must exceed the compression end temperature T2 = '+T2.toPrecision(5)+' K.');}
+ else T3=T2*num(cutoff,'Diesel cutoff ratio rc',1.0001,40);
+ if(!(T3<=1e5))throw Error('Peak temperature '+T3.toPrecision(4)+' K is outside the model range (≤ 100000 K); reduce the heat input.');
+ let P3,v3,T4,P4,v4;
+ if(cycle==='otto'){v3=v2;P3=R*T3/v3;v4=v1;T4=T3*(v3/v4)**(k-1);P4=R*T4/v4;}
+ else if(cycle==='diesel'){P3=P2;v3=R*T3/P3;if(!(v3<v1))throw Error('Cutoff ratio rc = '+(v3/v2).toPrecision(4)+' must be below the compression ratio r = '+r+'; reduce the heat input.');v4=v1;T4=T3*(v3/v4)**(k-1);P4=R*T4/v4;}
+ else{P3=P2;v3=R*T3/P3;P4=Pa;T4=T3*(P4/P3)**((k-1)/k);v4=R*T4/P4;}
+ const qIn=cAdd*(T3-T2),qOut=(cycle==='brayton'?Cp:Cv)*(T4-Ta);
+ // Process works (by the gas, or shaft work for Brayton), summed independently of q_in − q_out.
+ let wCompress,wExpand;
+ if(cycle==='brayton'){wCompress=Cp*(T2-Ta);wExpand=Cp*(T3-T4);}
+ else{wCompress=Cv*(T2-Ta);wExpand=Cv*(T3-T4)+(cycle==='diesel'?P2*(v3-v2):0);}
+ const wNet=wExpand-wCompress,balance=Math.abs(wNet-(qIn-qOut))/Math.abs(qIn);
+ const efficiency=wNet/qIn,rc=cycle==='diesel'?v3/v2:null;
+ const formula=cycle==='otto'?1-r**(1-k):cycle==='diesel'?1-r**(1-k)*(rc**k-1)/(k*(rc-1)):1-rp**((1-k)/k);
+ const entropy=(T,P)=>Cp*Math.log(T/Ta)-R*Math.log(P/Pa);
+ const states=[[Ta,Pa,v1],[T2,P2,v2],[T3,P3,v3],[T4,P4,v4]].map(([T,P,v],i)=>Object.freeze({state:i+1,T,P,v,s:entropy(T,P)}));
+ // Sampled process paths; every point satisfies P·v = R·T.
+ const n=60,path=[];
+ const isentropic=(a,b,proc)=>{for(let j=0;j<n;j++){const f=j/n;let T,P,v;
+  if(cycle==='brayton'){P=a.P*(b.P/a.P)**f;T=a.T*(P/a.P)**((k-1)/k);v=R*T/P;}else{v=a.v+(b.v-a.v)*f;T=a.T*(a.v/v)**(k-1);P=R*T/v;}
+  path.push([proc,v,P/1000,T,entropy(T,P)]);}};
+ const heatLeg=(a,b,proc,constVolume)=>{for(let j=0;j<n;j++){const T=a.T+(b.T-a.T)*j/n;let P,v;if(constVolume){v=a.v;P=R*T/v;}else{P=a.P;v=R*T/P;}path.push([proc,v,P/1000,T,entropy(T,P)]);}};
+ const [s1,s2,s3,s4]=states;
+ isentropic(s1,s2,1);heatLeg(s2,s3,2,cycle==='otto');isentropic(s3,s4,3);heatLeg(s4,s1,4,cycle!=='brayton');
+ path.push([4,s1.v,s1.P/1000,s1.T,0]);
+ const swept=v1-v2,mep=cycle==='brayton'?null:wNet/swept,bwr=wCompress/wExpand;
+ const names={otto:'Otto',diesel:'Diesel',brayton:'Brayton'};
+ return {id:'cycle',cycle,gamma:k,cp:Cp,cv:Cv,R,r,rp,rc,states,path,qIn,qOut,wNet,wCompress,wExpand,efficiency,formulaEfficiency:formula,balance,mep,backWorkRatio:bwr,carnot:1-Ta/T3,
+  assumptions:'Ideal cold-air-standard cycle: ideal gas with constant cp and cv, reversible isentropic compression and expansion, ideal heat addition/rejection; no friction, heat loss, combustion chemistry, dissociation or variable specific heats.',
+  summary:'Ideal '+names[cycle]+' cycle ('+(cycle==='brayton'?'rp = '+rp:'r = '+r)+(rc?', rc = '+rc.toPrecision(4):'')+', γ = '+k+'): thermal efficiency '+(efficiency*100).toFixed(2)+'% (closed form '+(formula*100).toFixed(2)+'%), q_in '+(qIn/1000).toPrecision(5)+
+   ' kJ/kg, q_out '+(qOut/1000).toPrecision(5)+' kJ/kg, w_net '+(wNet/1000).toPrecision(5)+' kJ/kg, '+(cycle==='brayton'?'back-work ratio '+bwr.toPrecision(4):'MEP '+(mep/1000).toPrecision(5)+' kPa')+', T_max '+T3.toPrecision(5)+' K; energy balance error '+balance.toExponential(1)+'.'};
+}
+
+/* DC modified nodal analysis of linear resistive networks with independent sources.
+   Netlist lines "NAME n+ n− value": R (Ω), V (volts, n+ minus n−), I (amperes flowing from n+
+   through the source to n−). Node 0 (or gnd) is ground. Dense Gaussian elimination with partial pivoting. */
+function solveDense(A,b){
+ // Scaled partial pivoting: rows are compared relative to their own largest original entry, so
+ // conductances spanning many decades are not mistaken for singularity.
+ const n=b.length,a=A.map((row,i)=>row.concat(b[i])),s=A.map(row=>Math.max(0,...row.map(Math.abs)));
+ for(let c=0;c<n;c++){
+  let p=-1,best=0;for(let r=c;r<n;r++){const q=s[r]?Math.abs(a[r][c])/s[r]:0;if(q>best){best=q;p=r;}}
+  if(p<0||!(best>1e-13))return {singular:c};
+  [a[c],a[p]]=[a[p],a[c]];[s[c],s[p]]=[s[p],s[c]];
+  for(let r=c+1;r<n;r++){const f=a[r][c]/a[c][c];if(f)for(let j=c;j<=n;j++)a[r][j]-=f*a[c][j];}
+ }
+ const x=Array(n).fill(0);
+ for(let i=n-1;i>=0;i--){let s=a[i][n];for(let j=i+1;j<n;j++)s-=a[i][j]*x[j];x[i]=s/a[i][i];}
+ if(x.some(v=>!Number.isFinite(v)))throw Error('Circuit solution exceeded finite floating-point range.');
+ return {x};
+}
+function parseNetlist(netlist){
+ const text=String(netlist??'');if(text.length>4000)throw Error('Netlist is limited to 4000 characters.');
+ const lines=text.split(/[\n;]/).map(s=>s.trim()).filter(s=>s&&!s.startsWith('*')&&!s.startsWith('#'));
+ if(!lines.length)throw Error('Enter a netlist: one element per line, e.g. "R1 1 2 100".');
+ if(lines.length>30)throw Error('Netlist is limited to 30 elements ('+lines.length+' given).');
+ const names=new Set(),elements=[];
+ lines.forEach((line,i)=>{
+  const tok=line.split(/\s+/),where='Line '+(i+1)+' ("'+line.slice(0,40)+'")';
+  if(tok.length!==4)throw Error(where+': expected NAME node+ node− value.');
+  const [name,na,nb,raw]=tok,type=name[0].toUpperCase();
+  if(!/^[RVI][A-Za-z0-9_]{0,15}$/i.test(name))throw Error(where+': element names start with R, V or I (letters, digits, _).');
+  if(names.has(name.toUpperCase()))throw Error(where+': duplicate element name '+name+'.');
+  names.add(name.toUpperCase());
+  for(const node of [na,nb])if(!/^[A-Za-z0-9_]{1,16}$/.test(node))throw Error(where+': node names use letters, digits or _ (0 or gnd = ground).');
+  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(raw))throw Error(where+': value must be a decimal or scientific number (e.g. 1e3).');
+  const value=Number(raw),g=n=>/^(0|gnd)$/i.test(n)?'0':n,a=g(na),b=g(nb);
+  if(type==='R'&&!(value>0&&value<=1e12))throw Error(where+': resistance must be greater than 0 and at most 1e12 Ω.');
+  if(type!=='R'&&!(Math.abs(value)<=1e6))throw Error(where+': source value must have magnitude at most 1e6.');
+  if(type==='V'&&a===b)throw Error(where+': a voltage source cannot connect a node to itself.');
+  elements.push({name,type,a,b,value});
+ });
+ return elements;
+}
+function dcNetwork({netlist='V1 1 0 12\nR1 1 2 1000\nR2 2 0 2000'}={}){
+ const elements=parseNetlist(netlist);
+ const nodes=['0',...[...new Set(elements.flatMap(e=>[e.a,e.b]))].filter(n=>n!=='0')];
+ if(!elements.some(e=>e.a==='0'||e.b==='0'))throw Error('No element connects to ground node 0 (or gnd).');
+ // Connectivity to ground (union–find over all elements).
+ const parent=new Map(nodes.map(n=>[n,n])),find=n=>{while(parent.get(n)!==n)n=parent.get(n);return n;};
+ for(const e of elements)parent.set(find(e.a),find(e.b));
+ const floating=nodes.filter(n=>find(n)!==find('0'));
+ if(floating.length)throw Error('Floating node'+(floating.length>1?'s ':' ')+floating.join(', ')+': no path to ground node 0, so the voltages are undefined.');
+ const index=new Map(nodes.slice(1).map((n,i)=>[n,i])),N=nodes.length-1,vs=elements.filter(e=>e.type==='V'),size=N+vs.length;
+ const A=Array.from({length:size},()=>Array(size).fill(0)),rhs=Array(size).fill(0);
+ const stamp=(r,c,v)=>{if(r!==undefined&&c!==undefined)A[r][c]+=v;};
+ for(const e of elements){
+  const i=index.get(e.a),j=index.get(e.b);
+  if(e.type==='R'){const g=1/e.value;stamp(i,i,g);stamp(j,j,g);stamp(i,j,-g);stamp(j,i,-g);}
+  else if(e.type==='I'){if(i!==undefined)rhs[i]-=e.value;if(j!==undefined)rhs[j]+=e.value;}
+  else{const k=N+vs.indexOf(e);stamp(i,k,1);stamp(k,i,1);stamp(j,k,-1);stamp(k,j,-1);rhs[k]=e.value;}
+ }
+ const solved=solveDense(A,rhs);
+ if(solved.singular!==undefined)throw Error('Singular network matrix: no unique DC solution. Check for a node fed only by current sources, current sources in series, or a loop of voltage sources.');
+ const x=solved.x,volt=n=>n==='0'?0:x[index.get(n)];
+ const out=elements.map(e=>{
+  const v=volt(e.a)-volt(e.b);
+  const current=e.type==='R'?v/e.value:e.type==='I'?e.value:x[N+vs.indexOf(e)];
+  return Object.freeze({name:e.name,type:e.type,a:e.a,b:e.b,value:e.value,voltage:v,current,power:v*current});
+ });
+ // KCL: net current leaving every node (current flows from terminal a to terminal b through each element).
+ const imax=Math.max(1e-300,...out.map(e=>Math.abs(e.current)));
+ const kcl=nodes.map(n=>out.reduce((s,e)=>s+(e.a===n?e.current:0)-(e.b===n?e.current:0),0));
+ const kclResidual=Math.max(...kcl.map(Math.abs))/imax;
+ const pmax=Math.max(1e-300,...out.map(e=>Math.abs(e.power))),powerBalance=Math.abs(out.reduce((s,e)=>s+e.power,0))/pmax;
+ const voltages=nodes.map(n=>Object.freeze({node:n,voltage:volt(n)}));
+ const supplied=-out.filter(e=>e.type!=='R').reduce((s,e)=>s+e.power,0);
+ return {id:'network',nodes:voltages,elements:out,unknowns:size,kclResidual,powerBalance,supplied,
+  assumptions:'Linear DC resistive network: ideal resistors and independent ideal voltage/current sources, steady state; no capacitors, inductors, AC, dependent or nonlinear devices.',
+  summary:'DC network: '+(nodes.length-1)+' node(s) + ground, '+out.length+' element(s), '+size+' MNA unknowns; '+voltages.slice(1,5).map(v=>'V('+v.node+') = '+Number(v.voltage.toPrecision(6))+' V').join(', ')+(voltages.length>5?', …':'')+
+   '; sources supply '+Number(supplied.toPrecision(6))+' W; KCL residual '+kclResidual.toExponential(1)+', power balance '+powerBalance.toExponential(1)+'.'};
+}
+M.engineeringSimulations=Object.freeze({beam,beamGeneral,vibration,orbit,rlc,projectile,rodHeat,thermoCycle,dcNetwork,parseNetlist,rk4Vector,materials:MATERIALS,constants:Object.freeze({mu:MU,earthRadius:RE,g:G0})});
 })();

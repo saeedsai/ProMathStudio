@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-SOURCE-OPENER-114 (dev; CI pending)
+
+**Change:** Standalone builder rejects embedded HTML script opening tags in modular JS source, including mixed-case and tab-separated variants, before writing index. Focused subprocess regression checks rejection and unchanged original HTML. Previous PR #179 Quality run 41649964029 passed at 751f9d1; new dev head needs exact-head checks. Local clone unavailable (github.com DNS resolution failure). No release claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 and BUILD-SOURCE-OPENER-114 QA/release (pending):** exact dev and PR Quality at latest SHA green, applicable reviews/protections verified, ordinary dev-to-main PR merge, main Quality and Pages success.
+2. **P0 QR rank boundary (planned):** high-precision near-threshold references, perturbed RHS and singular rejection with deterministic tolerances.
+3. **P1 UI controller extraction (planned):** source/offline parity, keyboard/mobile and saved-project round-trip regression plus bundle size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole and oscillatory negative cases, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed project fixtures preserve prior state and legacy v1/v2 compatibility.
+
+**Execution ledger:** Read AGENTS, living plan, frozen inventory, dev/main comparison, open PR #179 and successful PR Quality job. Added source guard and focused regression on dev; local GitHub DNS blocked test checkout. No merge, force-push, branch creation, bypass or deletion. Historical 166 gaps/95 partial features unchanged.
+
 ## 2026-11-03 — BUILD-MISSING-SOURCE-113 and PR #178 release checkpoint
 
 **Release:** PR #178 merged normally at `1df9a6fbf69678268a937c06c39786c6a7fe3702` after exact-head PR Quality run 41640828944 passed, including structural and browser steps. No reviews recorded; GitHub accepted the ordinary merge. Dev was synchronized by non-force fast-forward. Main Quality, Pages and hosted behavior still require independent verification.

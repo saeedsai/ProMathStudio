@@ -409,3 +409,5 @@ jobs:
         run: python tests/smoke_stiff_ode.py
       - name: Statistics hypothesis tests and confidence intervals browser regression
         run: python tests/smoke_statistics_tests.py
+      - name: Curve overlays on the main 2D graph, project round-trip and atomic import regression
+        run: python tests/smoke_graph_curves_overlay.py

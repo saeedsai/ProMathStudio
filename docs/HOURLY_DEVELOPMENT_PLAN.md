@@ -1,3 +1,16 @@
+## 2026-11-03 — QR acceptance release reconciliation (MATH-QR-GATE-104)
+
+**Released via [PR #171](https://github.com/saeedsai/ProMathStudio/pull/171)** after exact-head PR [Quality run 41549483017](https://github.com/saeedsai/ProMathStudio/actions/runs/41549483017) completed successfully. Merge SHA: `84d400394fe763928c1146102c50cd1aa4137bd4`. Existing `dev` safely fast-forwarded to merge SHA with non-force expected-head lease. Post-merge main Quality and Pages publishing are **not yet verified**; hosted behavior remains unverified. No additional feature implementation in this run; prioritize correctness and honest release evidence over untested source changes.
+
+**NEXT FIVE (status / acceptance):**
+1. **P0 post-merge release validation (pending):** verify exact main Quality, Pages publish, and hosted critical path; repair failures without bypass.
+2. **P0 QR rank boundary audit (planned):** independent 90-digit coefficient/residual references at tolerance margins and perturbed RHS; singular rejection, Node and responsive Chromium.
+3. **P1 reusable UI controller extraction (planned):** source/standalone parity, saved-project round trip, keyboard/mobile focus, bundle-size comparison.
+4. **P1 scalar root aliasing/pole diagnostics (planned):** oscillatory paired roots, pole rejection, bounded-sampling warning, browser recovery.
+5. **P1 Matrix/Data project migration (planned):** legacy/current fixtures, malformed nested import atomic rollback, responsive focus retention.
+
+**Execution log:** Reviewed AGENTS, living plan, frozen inventory, dev/main comparison and PR #171. PR head `f2296b7505aebaaf4d77f86950956cba62b1bd55` passed PR Quality; merged via ordinary PR; synchronized dev. Historical 166 gaps/95 partials unchanged. No source changes or new regression committed in this release-focused checkpoint.
+
 ## 2026-11-03 — QR orthogonality acceptance transparency (MATH-QR-GATE-104)
 
 **Implemented on dev; exact-head Quality/PR/Pages pending.** The existing QR least-squares acceptance gate now exposes its effective tolerance and whether the orthogonality check was deliberately skipped for a near-exact fit (relative residual at or below 1e-12); the skipped threshold is null, not an unbounded number. The Calculator displays “Orthogonality acceptance” and clear ordinary/roundoff-relaxed/near-exact guidance for ordinary and weighted 3×2 least squares. No numerical acceptance thresholds or solver decisions changed. New focused Node/Python regression covers ordinary 1e-8, near-rank relaxed threshold, near-exact skip, singular/invalid input and offline parity; existing 390/768/1280 Chromium smoke checks guidance and numerical output. The threshold is a floating-point acceptance heuristic, not a certified accuracy guarantee.

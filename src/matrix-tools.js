@@ -196,6 +196,8 @@ function qr(A){
  if(m<n)throw Error('QR requires Matrix A rows to be at least its columns.');
  const Q=Array.from({length:m},()=>Array(n).fill(0));
  const R=Array.from({length:n},()=>Array(n).fill(0));
+ // Smallest orthogonalized-column ratio relative to the 1e-12 rejection cutoff.
+ let minIndependenceRatio=Infinity;
  for(let j=0;j<n;j++){
   const v=A.map(row=>row[j]),columnNorm=Math.hypot(...v);
   if(!Number.isFinite(columnNorm)||columnNorm===0)
@@ -209,7 +211,7 @@ function qr(A){
   const norm=Math.hypot(...v);
   if(!Number.isFinite(norm)||norm<=tolerance*columnNorm)
    throw Error('Rank-deficient or nearly rank-deficient matrix: QR requires independent columns.');
-  R[j][j]=norm;
+  R[j][j]=norm;minIndependenceRatio=Math.min(minIndependenceRatio,norm/columnNorm);
   for(let i=0;i<m;i++)Q[i][j]=v[i]/norm;
  }
  const magnitude=Math.max(Number.MIN_VALUE,Math.hypot(...A.flat()));
@@ -225,7 +227,10 @@ function qr(A){
  }
  if(!Number.isFinite(residual)||!Number.isFinite(orthogonality)||residual>1e-8||orthogonality>1e-8)
   throw Error('QR decomposition failed its numerical reconstruction or orthogonality check.');
- return {Q,R,residual,orthogonality};
+ // Near the cutoff, R's last diagonal carries roughly eps/ratio relative error.
+ const rankMargin=minIndependenceRatio/tolerance;
+ return {Q,R,residual,orthogonality,minIndependenceRatio,rankTolerance:tolerance,rankMargin,
+  rankGuidance:rankMargin<1e4?'Near rank threshold: columns are close to dependent; R and downstream solutions may carry relative errors near 1e-16/'+minIndependenceRatio.toExponential(2)+'. This is a screening heuristic, not a certified bound.':'Columns are well separated from the 1e-12 rank-rejection threshold (heuristic screen).'};
 }
 /* Shared strict RHS parsing for ordinary and weighted least squares.
    Do not let Number() silently accept hexadecimal, binary or array coercion. */
@@ -1248,7 +1253,7 @@ function calculate(operation){
    'eigen: symmetric A = V·diag(λ)·Vᵀ\nEigenvalues (descending): '+value.values.map(format).join(', ')+'\nEigenvectors (columns of V):\n'+rowsText(value.vectors)+'\nRelative residual: '+format(value.residual)+'\nReconstruction residual: '+format(value.reconstructionResidual)+'\nOrthogonality residual: '+format(value.orthogonality):
    operation==='lu'?
    'lu: P·A = L·U\nP:\n'+rowsText(value.P)+'\nL:\n'+rowsText(value.L)+'\nU:\n'+rowsText(value.U)+'\nRelative reconstruction residual: '+format(value.residual):operation==='qr'?
-   'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality):
+   'qr: A = Q·R\nQ:\n'+rowsText(value.Q)+'\nR:\n'+rowsText(value.R)+'\nRelative reconstruction residual: '+format(value.residual)+'\nOrthogonality residual: '+format(value.orthogonality)+'\nMinimum column independence ratio: '+format(value.minIndependenceRatio)+' (rejection cutoff 1e-12; margin '+format(value.rankMargin)+'×)\n'+value.rankGuidance:
    operation+':\n'+(typeof display==='number'?format(display):rowsText(display))+
    (operation==='rref'?'\nRank: '+value.rank:operation==='solve'?'\nRelative residual: '+format(value.residual)+'\nMax absolute residual: '+format(value.absoluteResidual)+'\nNormwise backward error (∞): '+format(value.normwiseBackwardError):operation==='leastSquares'?'\nResidual norm: '+format(value.residual)+'\nRelative residual: '+format(value.relativeResidual)+'\nNormal-equation orthogonality: '+format(value.normalResidual)+'\nOrthogonality acceptance: '+(value.orthogonalityCheckSkipped?'not evaluated (near-exact fit)':format(value.orthogonalityTolerance))+'\n'+value.orthogonalityGuidance:operation==='weightedLeastSquares'?'\nWeighted squared residual: '+format(value.weightedResidualSquared)+'\nNormalized weighted residual: '+format(value.residual)+'\nRelative weighted residual: '+format(value.relativeResidual)+'\nWeighted normwise residual ratio: '+format(value.weightedNormwiseResidualRatio)+'\n'+value.weightedNormwiseResidualGuidance+'\nWeighted orthogonality: '+format(value.normalResidual)+'\nOrthogonality acceptance: '+(value.orthogonalityCheckSkipped?'not evaluated (near-exact fit)':format(value.orthogonalityTolerance))+'\n'+value.orthogonalityGuidance+'\nWeighted fitted values (rows 1–3): '+value.fittedValues.map(format).join(', ')+'\n'+value.fittedValueGuidance+'\nRelative weighted squared-residual shares (rows 1–3): '+value.weightedResidualShares.map(format).join(', ')+'\n'+value.weightedResidualShareGuidance+'\nRelative weight ratio (max/min): '+format(value.weightRatio)+'\nRelative-weight effective count (Kish-style): '+format(value.effectiveWeightCount)+'\n'+value.effectiveWeightGuidance+'\nWeighted design QR diagonal spread (heuristic): '+format(value.qrDiagonalSpread)+ '\nWeighted design column independence (sine): '+format(value.designColumnSine)+'\n'+value.designColumnGuidance+'\nWeighted design singular values (max, min; normalized relative weights): '+value.weightedDesignSingularValues.map(format).join(', ')+'\n'+value.weightedDesignSingularGuidance+'\nWeighted design spectral condition estimate (2-norm): '+(value.spectralCondition2===null?'unavailable':format(value.spectralCondition2))+'\n'+value.spectralConditionGuidance+'\nCoefficient roundoff amplification screen (kappa2 × binary64 epsilon): '+(value.coefficientRoundoffScreen===null?'unavailable':format(value.coefficientRoundoffScreen))+'\n'+value.coefficientRoundoffGuidance+'\nColumn-normalized weighted design condition (2-norm): '+(value.columnNormalizedCondition2===null?'unavailable':format(value.columnNormalizedCondition2))+'\n'+value.columnNormalizedConditionGuidance+'\nWeighted design leverage (rows 1–3): '+value.rowLeverages.map(format).join(', ')+'\n'+value.leverageGuidance+'\nRHS +1-unit response (rows 1–3, Δx0/Δx1): '+value.rhsResponseRows.map(row=>'['+row.map(format).join(', ')+']').join('; ')+'\n'+value.rhsResponseGuidance+'\nRHS ±1-unit box sensitivity (max |Δx0|, |Δx1|): '+value.rhsUnitBoxSensitivity.map(format).join(', ')+'\n'+value.rhsUnitBoxGuidance+'\nRHS independent ±1% proportional box sensitivity (max |Δx0|, |Δx1|): '+value.rhsOnePercentBoxSensitivity.map(format).join(', ')+'\n'+value.rhsOnePercentBoxGuidance+'\nLog-weight first-order coefficient responses (rows 1–3, dx0/dlogw, dx1/dlogw): '+value.logWeightResponseRows.map(row=>'['+row.map(format).join(', ')+']').join('; ')+'\n'+value.logWeightResponseGuidance+'\nLeave-one-out prediction residuals (rows 1–3): '+value.looResiduals.map(x=>x===null?'unavailable':format(x)).join(', ')+'\nLeave-one-out predictions (rows 1–3): '+value.looPredictions.map(x=>x===null?'unavailable':format(x)).join(', ')+'\nWeighted leave-one-out PRESS: '+(value.looWeightedPress===null?'unavailable':format(value.looWeightedPress))+'\n'+value.looGuidance+'\nRetained-row independence (LOO normalized area; rows 1–3): '+value.looRetainedAreas.map(format).join(', ')+'\n'+value.looRetainedGuidance+'\nLeave-one-out coefficient shifts (rows 1–3, Δx0/Δx1): '+value.looCoefficientShifts.map(row=>row===null?'unavailable':'['+row.map(format).join(', ')+']').join('; ')+'\n'+value.looCoefficientGuidance+'\n'+value.conditioningAdvisory:'')+conditionLabel;
   send.disabled=false;return last;

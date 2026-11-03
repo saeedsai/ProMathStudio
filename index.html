@@ -5627,6 +5627,229 @@ $('interp-to-graph').addEventListener('click',()=>{
 M.interpolationTools={interpolate,parsePairs,parseQueries};
 })();
 </script>
+<script id="promath-integration-tools">
+/* ProMathStudio: bounded offline double/triple integrals (nested adaptive Gauss-Kronrod G7-K15) and discrete-data integration. */
+(()=>{'use strict';
+const M=window.MathStudio,panel=document.getElementById('numerical-panel');
+if(!M?.numerical?.evaluate||!M?.dataTables||!panel)return;
+const $=id=>document.getElementById(id);
+const LIMIT=1e12,MAX_SUBINTERVALS=200,MAX_POINTS=6000;
+const NOTE='Estimated error is a heuristic Gauss-Kronrod difference, not a certified bound; singularities, discontinuities or oscillations between nodes may be missed.';
+function number(value,label){
+ if(value===null||value===undefined||String(value).trim()==='')throw Error(label+' is required.');
+ const n=Number(value);
+ if(!Number.isFinite(n)||Math.abs(n)>LIMIT)throw Error(label+' must be finite with magnitude at most 1e12.');
+ return n;
+}
+function expression(text,label){
+ text=String(text??'').trim();
+ if(!text||text.length>1000)throw Error(label+' must contain 1–1000 characters.');
+ return text;
+}
+function settings(tolerance,maxEvaluations){
+ tolerance=number(tolerance,'Tolerance');
+ if(tolerance<1e-12||tolerance>1e-2)throw Error('Tolerance must be between 1e-12 and 0.01.');
+ maxEvaluations=number(maxEvaluations,'Maximum evaluations');
+ if(!Number.isInteger(maxEvaluations)||maxEvaluations<1000||maxEvaluations>500000)throw Error('Maximum evaluations must be an integer from 1000 to 500000.');
+ return {tolerance,maxEvaluations};
+}
+function interval(a,b,lo,hi){
+ a=number(a,lo);b=number(b,hi);
+ if(!(b>a))throw Error(hi+' must exceed '+lo.toLowerCase()+'.');
+ return [a,b];
+}
+// Gauss-Kronrod 7-15 nodes (positive half) and weights.
+const XK=[0.991455371120812639206854697526329,0.949107912342758524526189684047851,0.864864423359769072789712788640926,0.741531185599394439863864773280788,0.586087235467691130294144845693013,0.405845151377397166906606412076961,0.207784955007898467600689403773245,0];
+const WK=[0.022935322010529224963732008058970,0.063092092629978553290700663189204,0.104790010322250183839876322541518,0.140653259715525918745189590510238,0.169004726639267902826583426598550,0.190350578064785409913256402421014,0.204432940075298892414161999234649,0.209482141084727828012999174891714];
+const WG=[0.129484966168869693270611432679082,0.279705391489276667901467771423780,0.381830050505118944950369775488975,0.417959183673469387755102040816327];
+function gk15(f,a,b){
+ const c=(a+b)/2,h=(b-a)/2;let k=0,g=0,side=0;
+ for(let i=0;i<8;i++){
+  const pts=i===7?[c]:[c-h*XK[i],c+h*XK[i]];
+  for(const x of pts){
+   const [v,e]=f(x);k+=WK[i]*v;side+=WK[i]*e;
+   if(i%2===1)g+=WG[(i-1)/2]*v;else if(i===7)g+=WG[3]*v;
+  }
+ }
+ return {value:k*h,error:Math.abs((k-g)*h),side:Math.abs(side*h)};
+}
+// Global adaptive GK15 on [a,b]; f returns [value, inner error estimate]. Throws if the target cannot be met.
+function adaptive(f,a,b,tol,state){
+ const first={a,b,...gk15(f,a,b)},list=[first];
+ const sum=key=>list.reduce((s,p)=>s+p[key],0);
+ for(;;){
+  const value=sum('value'),error=sum('error');
+  if(!Number.isFinite(value)||!Number.isFinite(error))throw Error('Non-finite integral estimate; the integrand may be singular or overflow in the domain.');
+  if(error<=Math.max(tol,tol*Math.abs(value)))return {value,error,side:sum('side'),panels:list.length};
+  if(list.length>=MAX_SUBINTERVALS)throw Error('Tolerance could not be met within '+MAX_SUBINTERVALS+' subintervals per level; the integrand may be singular, discontinuous or too oscillatory. Relax the tolerance.');
+  let worst=0;for(let i=1;i<list.length;i++)if(list[i].error>list[worst].error)worst=i;
+  const p=list[worst],m=(p.a+p.b)/2;
+  if(!(m>p.a&&m<p.b))throw Error('Subinterval width reached machine precision; suspected singularity.');
+  list.splice(worst,1,{a:p.a,b:m,...gk15(f,p.a,m)},{a:m,b:p.b,...gk15(f,m,p.b)});
+  state.subdivisions++;
+ }
+}
+function counter(expr,maxEvaluations,state){
+ return env=>{
+  if(++state.evaluations>maxEvaluations)throw Error('Evaluation budget of '+maxEvaluations+' exceeded; relax the tolerance or raise the budget.');
+  let v;
+  try{v=M.numerical.evaluate(expr,env);}
+  catch(err){throw Error('Integrand is not finite and real at '+Object.entries(env).map(([k,x])=>k+'='+(+x.toPrecision(8))).join(', ')+' (possible singularity): '+err.message);}
+  if(!Number.isFinite(v)||Math.abs(v)>1e150)throw Error('Integrand is not finite at '+JSON.stringify(env)+'.');
+  return v;
+ };
+}
+function limitAt(expr,x,label){
+ let v;try{v=M.numerical.evaluate(expr,{x});}catch(err){throw Error(label+' is not finite and real at x='+(+x.toPrecision(8))+': '+err.message);}
+ if(!Number.isFinite(v)||Math.abs(v)>LIMIT)throw Error(label+' must be finite at x='+x+'.');
+ return v;
+}
+function double({expression:f='x*y',a=0,b=1,lower='0',upper='1',tolerance=1e-8,maxEvaluations=200000}={}){
+ f=expression(f,'Integrand f(x,y)');lower=expression(lower,'Inner lower limit g1(x)');upper=expression(upper,'Inner upper limit g2(x)');
+ [a,b]=interval(a,b,'Outer lower limit a','Outer upper limit b');
+ ({tolerance,maxEvaluations}=settings(tolerance,maxEvaluations));
+ const state={evaluations:0,subdivisions:0},fx=counter(f,maxEvaluations,state);
+ const innerTol=Math.max(1e-15,tolerance/(4*(b-a)));
+ const outer=adaptive(x=>{
+  const g1=limitAt(lower,x,'Inner lower limit g1(x)'),g2=limitAt(upper,x,'Inner upper limit g2(x)');
+  if(g1===g2)return [0,0];
+  const lo=Math.min(g1,g2),hi=Math.max(g1,g2),sign=g2>g1?1:-1;
+  const r=adaptive(y=>[fx({x,y}),0],lo,hi,innerTol,state);
+  return [sign*r.value,r.error];
+ },a,b,tolerance/2,state);
+ return {type:'integral-double',value:outer.value,estimatedError:outer.error+outer.side,evaluations:state.evaluations,subdivisions:state.subdivisions,
+  tolerance,method:'Nested adaptive Gauss-Kronrod G7-K15 (dy inner, dx outer)',
+  region:'x∈['+a+', '+b+'], y∈['+lower+', '+upper+']',note:NOTE};
+}
+function triple({expression:f='x*y*z',a=0,b=1,c=0,d=1,e=0,g=1,tolerance=1e-8,maxEvaluations=200000}={}){
+ f=expression(f,'Integrand f(x,y,z)');
+ [a,b]=interval(a,b,'x lower limit','x upper limit');[c,d]=interval(c,d,'y lower limit','y upper limit');[e,g]=interval(e,g,'z lower limit','z upper limit');
+ ({tolerance,maxEvaluations}=settings(tolerance,maxEvaluations));
+ const state={evaluations:0,subdivisions:0},fx=counter(f,maxEvaluations,state);
+ const yTol=Math.max(1e-15,tolerance/(4*(b-a))),zTol=Math.max(1e-15,yTol/(4*(d-c)));
+ const outer=adaptive(x=>{
+  const mid=adaptive(y=>{const r=adaptive(z=>[fx({x,y,z}),0],e,g,zTol,state);return [r.value,r.error];},c,d,yTol,state);
+  return [mid.value,mid.error+mid.side];
+ },a,b,tolerance/2,state);
+ return {type:'integral-triple',value:outer.value,estimatedError:outer.error+outer.side,evaluations:state.evaluations,subdivisions:state.subdivisions,
+  tolerance,method:'Nested adaptive Gauss-Kronrod G7-K15 over a box (dz, dy, dx)',
+  region:'['+a+', '+b+']×['+c+', '+d+']×['+e+', '+g+']',note:NOTE};
+}
+// Discrete-data integration: x strictly ascending, finite y; blanks are skipped and reported.
+function discrete({x=[],y=[]}={}){
+ if(!Array.isArray(x)||!Array.isArray(y)||x.length!==y.length)throw Error('X and Y columns must have the same length.');
+ const xs=[],ys=[];let ignored=0;
+ for(let i=0;i<x.length;i++){
+  const bx=String(x[i]??'').trim()==='',by=String(y[i]??'').trim()==='';
+  if(bx||by){ignored++;continue;}
+  xs.push(number(x[i],'X row '+(i+1)));ys.push(number(y[i],'Y row '+(i+1)));
+ }
+ if(xs.length<2)throw Error('At least two numeric (x, y) points are required.');
+ if(xs.length>MAX_POINTS)throw Error('At most '+MAX_POINTS+' points are supported.');
+ for(let i=1;i<xs.length;i++)if(!(xs[i]>xs[i-1]))throw Error('X must be strictly ascending (row '+(i+1)+' of the numeric data is not greater than the previous value).');
+ const cumulative=[0];let trapezoid=0;
+ for(let i=1;i<xs.length;i++){trapezoid+=(xs[i]-xs[i-1])*(ys[i]+ys[i-1])/2;cumulative.push(trapezoid);}
+ if(!Number.isFinite(trapezoid))throw Error('Trapezoid sum overflowed.');
+ const n=xs.length-1,h=(xs[n]-xs[0])/n;
+ const uniform=xs.every((v,i)=>i===0||Math.abs((v-xs[i-1])-h)<=1e-9*Math.max(Math.abs(h),Math.abs(v)));
+ let simpson=null,simpsonNote;
+ if(!uniform)simpsonNote='Simpson not applied: X spacing is non-uniform; use the trapezoid value.';
+ else if(n%2)simpsonNote='Simpson not applied: an odd number of intervals ('+n+'); use the trapezoid value.';
+ else{let s=ys[0]+ys[n];for(let i=1;i<n;i++)s+=(i%2?4:2)*ys[i];simpson=s*h/3;simpsonNote='Composite Simpson 1/3 rule on '+n+' uniform intervals (exact for cubics).';}
+ return {type:'integral-discrete',trapezoid,simpson,uniform,points:xs.length,ignored,simpsonNote,
+  columns:['x','y','cumulative_trapezoid'],rows:xs.map((v,i)=>[v,ys[i],cumulative[i]]),
+  method:'Composite trapezoid (non-uniform allowed); Simpson when uniform with even intervals',
+  note:'Accuracy depends on sampling density; no error bound is available from samples alone.'};
+}
+function discreteFromTable({table,xColumn=0,yColumn=1}={}){
+ const list=M.dataTables.tables,t=table===undefined||table===null||table===''?M.dataTables.active:list.find(s=>s.id===table||s.name===table);
+ if(!t)throw Error('Select an existing Data Table.');
+ const xc=Number(xColumn),yc=Number(yColumn);
+ if(!Number.isInteger(xc)||!Number.isInteger(yc)||xc<0||yc<0||xc>=t.columns.length||yc>=t.columns.length)throw Error('Choose valid X and Y columns.');
+ if(xc===yc)throw Error('X and Y must be different columns.');
+ const rows=M.dataTables.calculate(t);
+ const r=discrete({x:rows.map(row=>row[xc]),y:rows.map(row=>row[yc])});
+ r.table=t.name;r.columns=[String(t.columns[xc]),String(t.columns[yc]),'cumulative_trapezoid'];return r;
+}
+const area=document.createElement('details');area.id='integration-details';
+const field=(id,label,value,type='text')=>'<label>'+label+'<input id="'+id+'" type="'+type+'"'+(type==='number'?' step="any"':'')+' value="'+value+'"></label>';
+area.innerHTML='<summary>Multiple and discrete integrals</summary>'+
+ '<p class="graph-data-muted">Double integral ∫ₐᵇ∫_{g1(x)}^{g2(x)} f dy dx, triple integral over a box, or trapezoid/Simpson integration of two Data Table columns.</p>'+
+ '<div class="data-toolbar"><label>Integral type<select id="int-mode"><option value="double">Double ∫∫ f(x,y) dy dx</option><option value="triple">Triple ∫∫∫ f(x,y,z) over a box</option><option value="discrete">Discrete data (table columns)</option></select></label></div>'+
+ '<div class="num-fields" id="int-continuous">'+field('int-expression','Integrand f','x*y')+
+ field('int-a','x lower a','0','number')+field('int-b','x upper b','1','number')+
+ '<span class="int-double">'+field('int-g1','y lower g1(x)','0')+'</span><span class="int-double">'+field('int-g2','y upper g2(x)','1')+'</span>'+
+ '<span class="int-triple" hidden>'+field('int-c','y lower c','0','number')+'</span><span class="int-triple" hidden>'+field('int-d','y upper d','1','number')+'</span>'+
+ '<span class="int-triple" hidden>'+field('int-e','z lower e','0','number')+'</span><span class="int-triple" hidden>'+field('int-f','z upper f','1','number')+'</span>'+
+ field('int-tolerance','Tolerance','0.00000001','number')+field('int-budget','Maximum evaluations','200000','number')+'</div>'+
+ '<div class="num-fields" id="int-discrete" hidden><label>Data Table<select id="int-table"></select></label><label>X column (ascending)<select id="int-x"></select></label><label>Y column<select id="int-y"></select></label></div>'+
+ '<div class="data-toolbar"><button id="int-run" class="primary" type="button">Integrate</button>'+
+ '<button id="int-refresh" class="secondary" type="button" hidden>Refresh tables</button>'+
+ '<button id="int-to-table" class="secondary" type="button" disabled>Save cumulative to Data Tables</button></div>'+
+ '<pre id="int-output" role="status" aria-live="polite">Choose an integral type and press Integrate.</pre>';
+panel.append(area);
+const style=document.createElement('style');
+style.textContent='#integration-details{border-top:1px solid #dce4f6;margin-top:15px;padding-top:13px}'+
+ '#integration-details summary{cursor:pointer;color:#3c50ae;font-weight:750;min-height:40px;display:flex;align-items:center}'+
+ '#integration-details span[hidden],#integration-details [hidden]{display:none!important}'+
+ '#integration-details .num-fields span{display:contents}'+
+ '#integration-details .data-toolbar select{max-width:100%}'+
+ '#int-output{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#fff;border:1px solid #dce5f3;border-radius:10px;font:12px/1.6 Consolas,monospace;max-width:100%;box-sizing:border-box}'+
+ '#int-output.error{color:#a82241;background:#fff2f4}';
+document.head.append(style);
+let last=null;
+const out=$('int-output');
+function invalidate(){last=null;$('int-to-table').disabled=true;out.classList.remove('error');}
+function fail(err){invalidate();out.classList.add('error');out.textContent=err.message+'\nAdjust the inputs and press Integrate again.';}
+function option(select,value,text){const o=document.createElement('option');o.value=value;o.textContent=text;select.append(o);}
+function fillColumns(){
+ const t=M.dataTables.tables.find(s=>s.id===$('int-table').value);
+ for(const id of ['int-x','int-y']){const s=$(id);s.replaceChildren();if(t)t.columns.forEach((c,i)=>option(s,String(i),String(c)));}
+ if(t&&t.columns.length>1)$('int-y').value='1';
+}
+function fillTables(){
+ const s=$('int-table'),prev=s.value;s.replaceChildren();
+ for(const t of M.dataTables.tables)option(s,t.id,t.name);
+ if([...s.options].some(o=>o.value===prev))s.value=prev;else if(M.dataTables.active)s.value=M.dataTables.active.id;
+ fillColumns();
+}
+function mode(){
+ const m=$('int-mode').value;
+ $('int-continuous').hidden=m==='discrete';$('int-discrete').hidden=m!=='discrete';$('int-refresh').hidden=m!=='discrete';
+ for(const e of area.querySelectorAll('.int-double'))e.hidden=m!=='double';
+ for(const e of area.querySelectorAll('.int-triple'))e.hidden=m!=='triple';
+ if(m==='discrete')fillTables();
+ invalidate();out.textContent=m==='discrete'?'Choose a table and two numeric columns.':'Enter limits and press Integrate.';
+}
+$('int-mode').addEventListener('change',mode);
+$('int-table').addEventListener('change',()=>{fillColumns();invalidate();});
+$('int-refresh').addEventListener('click',()=>{fillTables();invalidate();out.textContent='Table list refreshed.';});
+for(const el of area.querySelectorAll('input,#int-x,#int-y'))el.addEventListener('input',invalidate);
+const fmt=v=>Number.isFinite(v)?(+v.toPrecision(12)).toString():String(v);
+$('int-run').addEventListener('click',()=>{
+ try{
+  const m=$('int-mode').value,v=id=>$(id).value;
+  if(m==='discrete'){
+   const r=discreteFromTable({table:v('int-table'),xColumn:v('int-x'),yColumn:v('int-y')});
+   out.classList.remove('error');
+   out.textContent=r.method+'\nTable '+r.table+': '+r.points+' points'+(r.ignored?'; '+r.ignored+' blank row(s) ignored':'')+
+    '\nTrapezoid: '+fmt(r.trapezoid)+'\nSimpson: '+(r.simpson===null?'n/a':fmt(r.simpson))+'\n'+r.simpsonNote+'\n'+r.note;
+   last=r;$('int-to-table').disabled=false;return;
+  }
+  const common={expression:v('int-expression'),a:v('int-a'),b:v('int-b'),tolerance:v('int-tolerance'),maxEvaluations:v('int-budget')};
+  const r=m==='triple'?triple({...common,c:v('int-c'),d:v('int-d'),e:v('int-e'),g:v('int-f')}):double({...common,lower:v('int-g1'),upper:v('int-g2')});
+  invalidate();
+  out.textContent=r.method+'\nRegion: '+r.region+'\nIntegral ≈ '+fmt(r.value)+'\nEstimated error: '+r.estimatedError.toExponential(2)+
+   '\nEvaluations: '+r.evaluations+'; subdivisions: '+r.subdivisions+'\n'+r.note;
+ }catch(err){fail(err);}
+});
+$('int-to-table').addEventListener('click',()=>{
+ try{if(!last)throw Error('Run a discrete integration first.');M.dataTables.importData({headers:last.columns,rows:last.rows.map(r=>r.map(String))},'Integration_Cumulative');M.advanced?.mode?.('data');}
+ catch(err){fail(err);}
+});
+M.integration={double,triple,discrete,discreteFromTable,gk15:f=>(a,b)=>gk15(x=>[f(x),0],a,b)};
+})();
+</script>
 <script id="promath-context-actions">
 /* ProMathStudio: accessible, contextual commands. No eval or hidden clipboard access. */
 (()=>{
@@ -7446,6 +7669,241 @@ $('ode-to-graph').addEventListener('click',()=>{
 M.odeTools={solve,solveAdaptive,solveSystem,run};
 })();
 </script>
+<script id="promath-stiff-ode">
+/* ProMathStudio: bounded, offline adaptive implicit TR-BDF2 solver for stiff scalar or
+   coupled two-state first-order IVPs. Separate from the explicit RK4/RK45 solvers in
+   ode-tools.js. Expressions use the existing safe numeric AST evaluator only. */
+(()=>{'use strict';
+const M=window.MathStudio, anchor=document.getElementById('ode-details');
+if(!M?.numerical?.evaluate||!M?.dataTables||!anchor)return;
+const $=id=>document.getElementById(id), MAX=1e12;
+// TR-BDF2 (Bank et al. 1985; Hosea & Shampine 1996): gamma=2-sqrt(2), L-stable, order 2.
+const GAMMA=2-Math.SQRT2, D=GAMMA/2, W=Math.SQRT2/4;
+function finite(value,label){
+ if(value===null||value===undefined||String(value).trim()==='')throw Error(label+' is required.');
+ const n=Number(value);
+ if(!Number.isFinite(n)||Math.abs(n)>MAX)throw Error(label+' must be finite with magnitude at most 1e12.');
+ return n;
+}
+function inRange(value,label,lo,hi){
+ const n=finite(value,label);
+ if(!(n>=lo&&n<=hi))throw Error(label+' must be between '+lo+' and '+hi+'.');
+ return n;
+}
+function timeResolution(t){
+ let delta=Math.max(Number.MIN_VALUE,Math.abs(t)*Number.EPSILON/2);
+ while(t+delta===t)delta*=2;
+ return (t+delta)-t;
+}
+const solve2=(a,b,c,d,r0,r1)=>{ // [[a,b],[c,d]] x = r
+ const det=a*d-b*c;
+ if(!Number.isFinite(det)||Math.abs(det)<1e-300)return null;
+ return [(d*r0-b*r1)/det,(a*r1-c*r0)/det];
+};
+function solve({expression='-1000*(y-cos(t))',expressionZ='',t0=0,t1=1,y0=0,z0=0,
+ rtol=1e-6,atol=1e-9,maxSteps=5000,minStep}={}){
+ expression=String(expression??'').trim();expressionZ=String(expressionZ??'').trim();
+ if(!expression||expression.length>1000)throw Error('Enter dy/dt as a mathematical expression (at most 1,000 characters).');
+ if(expressionZ.length>1000)throw Error('dz/dt must be at most 1,000 characters.');
+ const n=expressionZ?2:1;
+ t0=finite(t0,'Initial time');t1=finite(t1,'End time');
+ if(t1===t0)throw Error('End time must differ from initial time.');
+ const y=[finite(y0,'Initial y')];if(n===2)y.push(finite(z0,'Initial z'));
+ rtol=inRange(rtol,'Relative tolerance',1e-10,0.1);
+ atol=inRange(atol,'Absolute tolerance',1e-14,1);
+ maxSteps=finite(maxSteps,'Step budget');
+ if(!Number.isInteger(maxSteps)||maxSteps<10||maxSteps>20000)throw Error('Step budget must be an integer from 10 to 20000.');
+ const span=t1-t0, dir=Math.sign(span), absSpan=Math.abs(span);
+ const hmin=Math.max(minStep===undefined||minStep===null||minStep===''?absSpan*1e-12:
+  inRange(minStep,'Minimum step',1e-300,absSpan),timeResolution(Math.max(Math.abs(t0),Math.abs(t1)))*4);
+ let evaluations=0;
+ // Raw derivative; returns null for a non-finite or out-of-bounds value (caller decides).
+ const rhs=(t,s)=>{
+  evaluations++;
+  const env={t,y:s[0],z:n===2?s[1]:0};
+  const out=[M.numerical.evaluate(expression,env)];
+  if(n===2)out.push(M.numerical.evaluate(expressionZ,env));
+  return out.every(v=>Number.isFinite(v)&&Math.abs(v)<=MAX)?out:null;
+ };
+ let f0;
+ try{f0=rhs(t0,y);}catch(error){throw Error('Derivative could not be evaluated at the initial point: '+error.message);}
+ if(!f0)throw Error('Derivative is non-finite or exceeds magnitude 1e12 at the initial point.');
+ const scale=(a,b)=>a.map((v,i)=>atol+rtol*Math.max(Math.abs(v),Math.abs(b?b[i]:v)));
+ const norm=(v,sc)=>Math.sqrt(v.reduce((s,x,i)=>s+(x/sc[i])**2,0)/v.length);
+ let jacobianEvaluations=0;
+ function jacobian(t,s,fs){
+  jacobianEvaluations++;
+  const J=[[0,0],[0,0]];
+  for(let j=0;j<n;j++){
+   const delta=Math.sqrt(Number.EPSILON)*Math.max(1,Math.abs(s[j]));
+   const p=s.slice();p[j]+=delta;
+   const fp=rhs(t,p);
+   if(!fp)return null;
+   for(let i=0;i<n;i++)J[i][j]=(fp[i]-fs[i])/delta;
+  }
+  return J;
+ }
+ // Solve x = c + dh*f(tc,x) by modified Newton with matrix I - dh*J.
+ function newton(tc,c,guess,dh,J,sc){
+  const a=1-dh*J[0][0], b=-dh*J[0][1], cc=-dh*J[1][0], d=1-dh*J[1][1];
+  let x=guess.slice(), prev=Infinity, fx=null;
+  for(let k=0;k<10;k++){
+   fx=rhs(tc,x);
+   if(!fx)return {fail:'non-finite derivative in Newton iterate'};
+   const r=x.map((v,i)=>-(v-c[i]-dh*fx[i]));
+   let dx;
+   if(n===1){if(!Number.isFinite(a)||Math.abs(a)<1e-300)return {fail:'singular Newton matrix'};dx=[r[0]/a];}
+   else{dx=solve2(a,b,cc,d,r[0],r[1]);if(!dx)return {fail:'singular Newton matrix'};}
+   x=x.map((v,i)=>v+dx[i]);
+   if(!x.every(v=>Number.isFinite(v)&&Math.abs(v)<=MAX))return {fail:'Newton iterate became non-finite'};
+   const size=norm(dx,sc), rate=k>0?size/prev:0;
+   if(!Number.isFinite(size))return {fail:'Newton iterate became non-finite'};
+   if(k>0&&rate>0.9)return {fail:'Newton iteration diverged'};
+   if(size<=1e-3||(k>0&&size*rate/(1-rate)<=1e-2)){
+    fx=rhs(tc,x);
+    if(!fx)return {fail:'non-finite derivative at Newton solution'};
+    return {x,fx};
+   }
+   prev=size;
+  }
+  return {fail:'Newton iteration did not converge in 10 iterations'};
+ }
+ let t=t0, s=y.slice(), fs=f0, J=jacobian(t,s,fs);
+ if(!J)throw Error('Finite-difference Jacobian is non-finite at the initial point.');
+ // Initial step heuristic (Hairer–Wanner style), bounded by span and minimum step.
+ const sc0=scale(s), d0=norm(s,sc0), d1=norm(fs,sc0);
+ let h=(d0<1e-5||d1<1e-5)?1e-6*absSpan:0.01*d0/d1;
+ h=Math.min(Math.max(h,hmin),absSpan/10);
+ const rows=[[t0,...s]];
+ let accepted=0,rejected=0,newtonFailures=0,attempts=0,maxErrorRatio=0,maxLocalError=0,
+  minAccepted=Infinity,maxAccepted=0,justRejected=false;
+ while(dir*(t1-t)>0){
+  if(attempts>=maxSteps)throw Error('Step budget of '+maxSteps+' attempts exhausted at t='+t.toPrecision(10)+
+   ' (accepted '+accepted+', rejected '+rejected+'); raise the budget, loosen tolerances or shorten the interval.');
+  attempts++;
+  let step=Math.min(h,Math.abs(t1-t));
+  if(Math.abs(t1-(t+dir*step))<hmin)step=Math.abs(t1-t); // avoid a sliver final step
+  const hs=dir*step, tg=t+GAMMA*hs, tn=(Math.abs(t1-t)===step)?t1:t+hs;
+  const sc=scale(s), dh=D*hs;
+  // Stage 1: trapezoidal rule to t+gamma*h. Stage 2: BDF2 to t+h (same Newton matrix).
+  const c1=s.map((v,i)=>v+dh*fs[i]);
+  const st1=newton(tg,c1,s.map((v,i)=>v+GAMMA*hs*fs[i]),dh,J,sc);
+  let st2=null;
+  if(!st1.fail){
+   const c2=s.map((v,i)=>v+hs*W*(fs[i]+st1.fx[i]));
+   const guess=s.map((v,i)=>v+(st1.x[i]-v)/GAMMA);
+   st2=newton(tn,c2,guess,dh,J,sc);
+  }
+  const fail=st1.fail||st2.fail;
+  if(fail){
+   newtonFailures++;rejected++;justRejected=true;
+   if(step<=hmin)throw Error('Newton iteration failed at t='+t.toPrecision(10)+' with the minimum step '+
+    hmin.toPrecision(3)+' ('+fail+'); the problem may blow up, be singular or need looser tolerances.');
+   h=Math.max(step/4,hmin);continue;
+  }
+  const yn=st2.x, fn=st2.fx;
+  // Embedded third-order comparison, filtered by (I - dh*J)^-1 to damp stiff components.
+  const raw=s.map((_,i)=>hs*((1-4*W)/3*fs[i]+st1.fx[i]/3-2*D/3*fn[i]));
+  let est;
+  if(n===1){est=[raw[0]/(1-dh*J[0][0])];}
+  else est=solve2(1-dh*J[0][0],-dh*J[0][1],-dh*J[1][0],1-dh*J[1][1],raw[0],raw[1])||raw;
+  if(!est.every(Number.isFinite))est=raw;
+  const ratio=norm(est,scale(s,yn));
+  if(!Number.isFinite(ratio)){
+   rejected++;justRejected=true;
+   if(step<=hmin)throw Error('Non-finite local error estimate at t='+t.toPrecision(10)+' with the minimum step.');
+   h=Math.max(step/4,hmin);continue;
+  }
+  if(ratio>1){
+   rejected++;justRejected=true;
+   if(step<=hmin)throw Error('Step size underflow at t='+t.toPrecision(10)+': the local error estimate still exceeds tolerance at the minimum step '+
+    hmin.toPrecision(3)+'; the solution may be singular or blowing up.');
+   h=Math.max(step*Math.max(0.2,0.9*ratio**(-1/3)),hmin);continue;
+  }
+  accepted++;
+  maxErrorRatio=Math.max(maxErrorRatio,ratio);
+  maxLocalError=Math.max(maxLocalError,...est.map(Math.abs));
+  minAccepted=Math.min(minAccepted,step);maxAccepted=Math.max(maxAccepted,step);
+  t=tn;s=yn;fs=fn;rows.push([t,...s]);
+  const grow=ratio===0?5:Math.min(5,Math.max(0.2,0.9*ratio**(-1/3)));
+  h=Math.max(step*(justRejected?Math.min(grow,1):grow),hmin);justRejected=false;
+  if(dir*(t1-t)>0){J=jacobian(t,s,fs);if(!J)throw Error('Finite-difference Jacobian became non-finite at t='+t.toPrecision(10)+'.');}
+ }
+ return {type:'ode-tr-bdf2',columns:n===2?['t','y','z']:['t','y'],rows,states:n,
+  accepted,rejected,newtonFailures,attempts,jacobianEvaluations,functionEvaluations:evaluations,
+  maxErrorRatio,maxLocalError,minAcceptedStep:minAccepted,maxAcceptedStep:maxAccepted,
+  rtol,atol,maxSteps,minStep:hmin,
+  method:'Adaptive implicit TR-BDF2 (L-stable, order 2) with modified Newton on a finite-difference Jacobian',
+  note:(n===2?'Two coupled real equations y′=f(t,y,z), z′=g(t,y,z)':'Scalar y′=f(t,y)')+
+   '; forward or backward. Local error estimates are heuristic (filtered embedded order-3 comparison), not certified global error bounds.'};
+}
+
+const area=document.createElement('details');area.id='stiff-ode-details';
+area.innerHTML='<summary>Stiff ODE initial-value problem · implicit adaptive TR-BDF2</summary>'+
+ '<p class="graph-data-muted">For stiff problems where explicit RK4/RK45 need tiny steps. Leave dz/dt empty for a scalar equation. Example: dy/dt=-1000*(y-cos(t)), y(0)=0.</p>'+
+ '<div class="num-fields">'+
+ '<label>Derivative dy/dt<input id="stiff-ode-dy" value="-1000*(y-cos(t))" spellcheck="false"></label>'+
+ '<label>Optional dz/dt (two-state system)<input id="stiff-ode-dz" value="" spellcheck="false" placeholder="leave empty for scalar"></label>'+
+ '<label>Initial time t₀<input id="stiff-ode-t0" type="number" step="any" value="0"></label>'+
+ '<label>End time t₁<input id="stiff-ode-t1" type="number" step="any" value="1"></label>'+
+ '<label>Initial y(t₀)<input id="stiff-ode-y0" type="number" step="any" value="0"></label>'+
+ '<label>Initial z(t₀)<input id="stiff-ode-z0" type="number" step="any" value="0"></label>'+
+ '<label>Relative tolerance (1e-10–0.1)<input id="stiff-ode-rtol" type="number" step="any" value="0.000001"></label>'+
+ '<label>Absolute tolerance (1e-14–1)<input id="stiff-ode-atol" type="number" step="any" value="0.000000001"></label>'+
+ '<label>Step budget (10–20000)<input id="stiff-ode-max-steps" type="number" min="10" max="20000" step="1" value="5000"></label></div>'+
+ '<div class="data-toolbar"><button id="stiff-ode-run" type="button" class="primary">Solve stiff IVP</button>'+
+ '<button id="stiff-ode-to-table" type="button" class="secondary" disabled>Save to Data Tables</button></div>'+
+ '<pre id="stiff-ode-output" role="status" aria-live="polite">Enter the derivative(s), initial values and tolerances.</pre>';
+anchor.after(area);
+const style=document.createElement('style');
+style.textContent='#stiff-ode-details{border-top:1px solid #dce4f6;margin-top:15px;padding-top:13px;max-width:100%;box-sizing:border-box}'+
+ '#stiff-ode-details summary{cursor:pointer;color:#3c50ae;font-weight:750;min-height:40px;display:flex;align-items:center}'+
+ '#stiff-ode-details .num-fields{min-width:0}#stiff-ode-details label{min-width:0}'+
+ '#stiff-ode-output{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#fff;border:1px solid #dce5f3;border-radius:10px;max-width:100%;box-sizing:border-box}'+
+ '#stiff-ode-output.error{color:#a82241;background:#fff2f4}'+
+ '#stiff-ode-details button,#stiff-ode-details input{min-height:40px}'+
+ '@media(max-width:480px){#stiff-ode-details .num-fields{grid-template-columns:1fr}}';
+document.head.append(style);
+let last=null;
+const output=$('stiff-ode-output'), toTable=$('stiff-ode-to-table');
+function invalidate(){
+ last=null;toTable.disabled=true;
+ output.classList.remove('error');output.textContent='Enter the derivative(s), initial values and tolerances.';
+}
+for(const input of area.querySelectorAll('input')){input.addEventListener('input',invalidate);input.addEventListener('change',invalidate);}
+function fail(error){
+ last=null;toTable.disabled=true;
+ output.classList.add('error');
+ output.textContent=error.message+'\nRecovery: check the expressions and inputs, loosen the tolerances, raise the step budget or shorten the interval, then press Solve again.';
+}
+function run(){
+ try{
+  last=solve({expression:$('stiff-ode-dy').value,expressionZ:$('stiff-ode-dz').value,
+   t0:$('stiff-ode-t0').value,t1:$('stiff-ode-t1').value,y0:$('stiff-ode-y0').value,
+   z0:$('stiff-ode-z0').value,rtol:$('stiff-ode-rtol').value,atol:$('stiff-ode-atol').value,
+   maxSteps:$('stiff-ode-max-steps').value});
+  const end=last.rows[last.rows.length-1];
+  output.classList.remove('error');
+  output.textContent=last.method+'\n'+last.rows.length+' output rows; accepted '+last.accepted+', rejected '+last.rejected+
+   ' (Newton failures '+last.newtonFailures+'), Jacobian evaluations '+last.jacobianEvaluations+
+   ', derivative evaluations '+last.functionEvaluations+'\naccepted |Δt| '+last.minAcceptedStep.toPrecision(4)+'–'+
+   last.maxAcceptedStep.toPrecision(4)+', max scaled local-error estimate '+last.maxErrorRatio.toPrecision(4)+
+   ', max |local-error estimate| '+last.maxLocalError.toPrecision(4)+'\ny('+end[0].toPrecision(10)+') ≈ '+end[1].toPrecision(12)+
+   (last.states===2?', z ≈ '+end[2].toPrecision(12):'')+'\n'+last.note;
+  toTable.disabled=false;
+ }catch(error){fail(error);}
+}
+$('stiff-ode-run').addEventListener('click',run);
+toTable.addEventListener('click',()=>{
+ try{
+  if(!last)throw Error('Solve a stiff initial-value problem first.');
+  M.dataTables.importData({headers:last.columns,rows:last.rows},last.states===2?'ODE_TRBDF2_SYSTEM':'ODE_TRBDF2');
+  M.advanced?.mode?.('data');
+ }catch(error){fail(error);}
+});
+M.stiffOde={solve,run,method:'tr-bdf2'};
+})();
+</script>
 <script id="promath-fft-tools">
 /* ProMathStudio: offline radix-2 FFT for uniformly sampled real signals. No eval or network. */
 (()=>{'use strict';
@@ -7658,6 +8116,368 @@ $('minimize-to-table').addEventListener('click',()=>{
 M.minimizeTools={minimize};
 })();
 </script>
+<script id="promath-optimization-tools">
+/* ProMathStudio: offline optimization — dense two-phase simplex LP (Bland's rule) and bounded Nelder-Mead. */
+(()=>{'use strict';
+const M=window.MathStudio;if(!M)return;
+const LP_LIMIT=1e9,LIMIT=1e12,MAX_LP=10,EPS=1e-9;
+
+/* ---------- Linear programming: strict text format ----------
+   First line:  max: 3x1 + 5x2      (or min:, maximize:, minimize:)
+   Then one constraint per line:  2x1 - x2 <= 12   (operators <=, >=, =, ≤, ≥)
+   Variables are x1..x10, implicitly x >= 0; right-hand sides are plain numbers; '#' starts a comment. */
+const NUM='(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?';
+const TERM=new RegExp('\\s*([+-])?\\s*(?:('+NUM+')\\s*\\*?\\s*)?x(\\d+)(?![\\d.])\\s*','y');
+function parseLinear(source,where,coefs){
+ const s=source.trim();
+ if(!s)throw Error(where+': expected a linear expression such as 3x1+5x2.');
+ let pos=0,count=0;
+ while(pos<s.length){
+  TERM.lastIndex=pos;const m=TERM.exec(s);
+  if(!m)throw Error(where+': cannot read "'+s.slice(pos,pos+12).trim()+'"; use terms like 3x1, -2.5*x2 or x3.');
+  if(count>0&&!m[1])throw Error(where+': terms must be separated by + or -.');
+  if(!/^[1-9]\d*$/.test(m[3]))throw Error(where+': variable names are x1 to x10.');
+  const index=Number(m[3]);
+  if(index>MAX_LP)throw Error(where+': at most 10 variables (x1 to x10) are supported.');
+  const value=(m[1]==='-'?-1:1)*(m[2]===undefined?1:Number(m[2]));
+  if(!Number.isFinite(value)||Math.abs(value)>LP_LIMIT)throw Error(where+': coefficients must be finite with magnitude at most 1e9.');
+  coefs.set(index,(coefs.get(index)||0)+value);
+  pos=TERM.lastIndex;count++;
+ }
+ return coefs;
+}
+function parseLP(text){
+ if(typeof text!=='string'||!text.trim())throw Error('Enter a linear program: an objective line such as "max: 3x1+5x2" followed by constraints.');
+ if(text.length>5000)throw Error('Linear program text is limited to 5000 characters.');
+ const lines=text.split(/\r?\n/).map((line,i)=>({no:i+1,text:line.replace(/#.*$/,'').trim()})).filter(l=>l.text);
+ if(!lines.length)throw Error('Enter an objective line such as "max: 3x1+5x2".');
+ const head=/^(max|min)(?:imi[sz]e)?\s*:(.*)$/i.exec(lines[0].text);
+ if(!head)throw Error('Line '+lines[0].no+': the first line must start with "max:" or "min:".');
+ const objective=parseLinear(head[2],'Objective (line '+lines[0].no+')',new Map());
+ const rows=[];
+ for(const line of lines.slice(1)){
+  const where='Line '+line.no,ops=line.text.match(/<=|>=|=<|=>|==|≤|≥|<|>|=/g)||[];
+  if(ops.length!==1)throw Error(where+': each constraint needs exactly one of <=, >= or =.');
+  const op=ops[0];
+  if(op==='<'||op==='>'||op==='=='||op==='=<'||op==='=>')throw Error(where+': use <=, >= or = (strict < and > are not supported).');
+  const [lhs,rhs]=line.text.split(op);
+  const rhsText=rhs.trim();
+  if(!new RegExp('^[+-]?'+NUM+'$').test(rhsText))throw Error(where+': the right-hand side must be a single number.');
+  const b=Number(rhsText);
+  if(!Number.isFinite(b)||Math.abs(b)>LP_LIMIT)throw Error(where+': the right-hand side must be finite with magnitude at most 1e9.');
+  rows.push({coefs:parseLinear(lhs,where,new Map()),type:op==='≤'?'<=':op==='≥'?'>=':op,b});
+ }
+ if(!rows.length)throw Error('Add at least one constraint line below the objective.');
+ if(rows.length>MAX_LP)throw Error('At most 10 constraints are supported.');
+ let n=0;for(const map of [objective,...rows.map(r=>r.coefs)])for(const k of map.keys())n=Math.max(n,k);
+ const vector=map=>Array.from({length:n},(_,j)=>map.get(j+1)||0);
+ return {sense:head[1].toLowerCase(),c:vector(objective),A:rows.map(r=>vector(r.coefs)),b:rows.map(r=>r.b),types:rows.map(r=>r.type)};
+}
+function checkProblem(p){
+ if(!p||typeof p!=='object')throw Error('Provide a linear program.');
+ const sense=String(p.sense||'').toLowerCase();
+ if(sense!=='max'&&sense!=='min')throw Error('Sense must be "max" or "min".');
+ const num=(v,label)=>{if(typeof v!=='number'||!Number.isFinite(v)||Math.abs(v)>LP_LIMIT)throw Error(label+' must be a finite number with magnitude at most 1e9.');return v;};
+ if(!Array.isArray(p.c)||p.c.length<1||p.c.length>MAX_LP)throw Error('Use 1 to 10 variables.');
+ const n=p.c.length,c=p.c.map((v,j)=>num(v,'Objective coefficient '+(j+1)));
+ if(!Array.isArray(p.A)||!Array.isArray(p.b)||!Array.isArray(p.types)||p.A.length<1||p.A.length>MAX_LP||p.b.length!==p.A.length||p.types.length!==p.A.length)
+  throw Error('Use 1 to 10 constraints with matching A rows, b values and types.');
+ const A=p.A.map((row,i)=>{if(!Array.isArray(row)||row.length!==n)throw Error('Constraint '+(i+1)+' must have exactly '+n+' coefficients.');return row.map((v,j)=>num(v,'A['+(i+1)+']['+(j+1)+']'));});
+ const b=p.b.map((v,i)=>num(v,'Right-hand side '+(i+1)));
+ const types=p.types.map((t,i)=>{if(t!=='<='&&t!=='>='&&t!=='=')throw Error('Constraint '+(i+1)+' type must be <=, >= or =.');return t;});
+ return {sense,c,A,b,types};
+}
+function pivot(T,z,basis,r,col){
+ const W=T[r].length,p=T[r][col];
+ for(let j=0;j<W;j++)T[r][j]/=p;T[r][col]=1;
+ for(let i=0;i<T.length;i++){if(i===r)continue;const f=T[i][col];if(f!==0){for(let j=0;j<W;j++)T[i][j]-=f*T[r][j];T[i][col]=0;}}
+ const f=z[col];if(f!==0){for(let j=0;j<W;j++)z[j]-=f*T[r][j];z[col]=0;}
+ basis[r]=col;
+}
+function reducedCosts(T,basis,cost){
+ const W=T.length?T[0].length:cost.length+1,z=new Array(W).fill(0);
+ for(let j=0;j<W-1;j++)z[j]=cost[j];
+ for(let i=0;i<T.length;i++){const cb=cost[basis[i]];if(cb)for(let j=0;j<W;j++)z[j]-=cb*T[i][j];}
+ return z;
+}
+/* Bland's rule: lowest-index improving column enters; ties in the ratio test leave by lowest basic index. */
+function simplexPhase(T,basis,cost,allowed,state){
+ const z=reducedCosts(T,basis,cost),W=z.length;
+ for(;;){
+  let enter=-1;for(let j=0;j<W-1;j++)if(allowed(j)&&z[j]<-EPS){enter=j;break;}
+  if(enter<0)return {status:'optimal',value:-z[W-1]};
+  let leave=-1,best=Infinity;
+  for(let i=0;i<T.length;i++){
+   const a=T[i][enter];if(a<=EPS)continue;
+   const ratio=Math.max(0,T[i][W-1])/a;
+   if(leave<0||ratio<best-1e-12*(1+Math.abs(best))){best=ratio;leave=i;}
+   else if(Math.abs(ratio-best)<=1e-12*(1+Math.abs(best))&&basis[i]<basis[leave]){leave=i;}
+  }
+  if(leave<0)return {status:'unbounded',column:enter};
+  if(++state.iterations>5000)throw Error('Simplex pivot budget exceeded (5000); the problem may be badly scaled.');
+  pivot(T,z,basis,leave,enter);
+ }
+}
+function linprog(problem){
+ const p=typeof problem==='string'?parseLP(problem):checkProblem(problem&&typeof problem.text==='string'?parseLP(problem.text):problem);
+ const {sense,c,A,b,types}=p,n=c.length,m=A.length;
+ // Normalise every row to a non-negative right-hand side.
+ const rows=A.map((row,i)=>b[i]<0?{a:row.map(v=>-v),b:-b[i],type:types[i]==='<='?'>=':types[i]==='>='?'<=':'='}:{a:row.slice(),b:b[i],type:types[i]});
+ const slackCount=rows.filter(r=>r.type!=='=').length,artCount=rows.filter(r=>r.type!=='<=').length;
+ const slackStart=n,artStart=n+slackCount,W=artStart+artCount+1;
+ const T=[],basis=[];let s=0,a=0;
+ rows.forEach(r=>{
+  const line=new Array(W).fill(0);r.a.forEach((v,j)=>line[j]=v);line[W-1]=r.b;
+  if(r.type==='<='){line[slackStart+s]=1;basis.push(slackStart+s);s++;}
+  else{if(r.type==='>='){line[slackStart+s]=-1;s++;}line[artStart+a]=1;basis.push(artStart+a);a++;}
+  T.push(line);
+ });
+ const state={iterations:0},scale=1+b.reduce((t,v)=>t+Math.abs(v),0);
+ let phase1Iterations=0,removedRows=0;
+ if(artCount){
+  const cost1=new Array(W-1).fill(0);for(let j=artStart;j<W-1;j++)cost1[j]=1;
+  const r1=simplexPhase(T,basis,cost1,()=>true,state);phase1Iterations=state.iterations;
+  if(r1.value>1e-8*scale)return finish({status:'infeasible',message:'Infeasible: no x ≥ 0 satisfies all constraints (phase-1 infeasibility '+r1.value.toExponential(3)+').'});
+  // Drive remaining (zero-level) artificials out of the basis; drop redundant equality rows.
+  for(let i=T.length-1;i>=0;i--){
+   if(basis[i]<artStart)continue;
+   let col=-1;for(let j=0;j<artStart;j++)if(Math.abs(T[i][j])>EPS){col=j;break;}
+   if(col>=0)pivot(T,new Array(W).fill(0),basis,i,col);else{T.splice(i,1);basis.splice(i,1);removedRows++;}
+  }
+ }
+ const cost2=new Array(W-1).fill(0);c.forEach((v,j)=>cost2[j]=sense==='max'?-v:v);
+ const r2=simplexPhase(T,basis,cost2,j=>j<artStart,state);
+ if(r2.status==='unbounded')return finish({status:'unbounded',message:'Unbounded: the objective can be '+(sense==='max'?'increased':'decreased')+' without limit along a feasible ray (x'+(r2.column<n?r2.column+1:'slack')+' enters with no blocking constraint).'});
+ const x=new Array(n).fill(0);basis.forEach((col,i)=>{if(col<n)x[col]=T[i][W-1];});
+ // Verify the returned point against the original constraints before reporting it.
+ const tolFor=i=>1e-7*(1+Math.abs(b[i])+A[i].reduce((t,v,j)=>t+Math.abs(v*x[j]),0));
+ for(let j=0;j<n;j++){if(x[j]<-1e-9*scale)throw Error('Numerical verification failed: x'+(j+1)+' is negative.');if(x[j]<0||Math.abs(x[j])<1e-13)x[j]=0;}
+ const constraints=A.map((row,i)=>{
+  const activity=row.reduce((t,v,j)=>t+v*x[j],0),residual=activity-b[i],tol=tolFor(i);
+  const slack=types[i]==='<='?b[i]-activity:types[i]==='>='?activity-b[i]:Math.abs(residual);
+  if(slack<-tol||(types[i]==='='&&slack>tol))throw Error('Numerical verification failed on constraint '+(i+1)+' (residual '+residual.toExponential(3)+').');
+  return {index:i+1,type:types[i],rhs:b[i],activity,slack:Math.abs(slack)<=tol?0:slack,binding:Math.abs(slack)<=tol};
+ });
+ const objective=c.reduce((t,v,j)=>t+v*x[j],0);
+ return finish({status:'optimal',x,objective,constraints,binding:constraints.filter(r=>r.binding).map(r=>r.index),
+  maxViolation:Math.max(0,...constraints.map(r=>r.type==='='?r.slack:Math.max(0,-r.slack)))});
+ function finish(out){return Object.assign({type:'linprog',sense,variables:n,constraintCount:m,iterations:state.iterations,phase1Iterations,removedRedundantRows:removedRows,
+  method:'Dense two-phase simplex with Bland\'s anti-cycling rule (x ≥ 0)',
+  note:'Floating-point simplex with tolerance 1e-9; the reported point is re-checked against the original constraints. Alternative optima may exist.'},out);}
+}
+
+/* ---------- Nelder-Mead with projection onto optional box bounds ---------- */
+function finiteNumber(v,label){
+ if(v===null||v===undefined||String(v).trim()==='')throw Error(label+' is required.');
+ const n=Number(v);if(!Number.isFinite(n)||Math.abs(n)>LIMIT)throw Error(label+' must be finite with magnitude at most 1e12.');return n;
+}
+function integerIn(v,label,lo,hi){const n=finiteNumber(v,label);if(!Number.isInteger(n)||n<lo||n>hi)throw Error(label+' must be an integer from '+lo+' to '+hi+'.');return n;}
+function parseVector(value,label,{allowInfinite=false,length=null}={}){
+ let items=value;
+ if(typeof value==='string'){const t=value.trim();items=t?t.split(/\s*[,;]\s*|\s+/):[];}
+ if(!Array.isArray(items))throw Error(label+' must be a comma-separated list of numbers.');
+ const out=items.map((v,i)=>{
+  const where=label+' entry '+(i+1);
+  if(allowInfinite&&(v===null||v===Infinity||v===-Infinity||(typeof v==='string'&&/^([+-]?inf(inity)?|∞|-∞|\+∞)?$/i.test(v.trim()))))
+   return typeof v==='number'?v:null;
+  if(typeof v==='string'&&!new RegExp('^[+-]?'+NUM+'$').test(v.trim()))throw Error(where+' is not a number.');
+  return finiteNumber(v,where);
+ });
+ if(length!==null&&out.length!==length)throw Error(label+' must have exactly '+length+' entries (one per variable).');
+ return out;
+}
+function minimizeFunction(f,start,options={}){
+ const n=start.length;
+ const lower=options.lower||new Array(n).fill(-Infinity),upper=options.upper||new Array(n).fill(Infinity);
+ const xTol=options.xTol??1e-8,fTol=options.fTol??1e-10,maxIterations=options.maxIterations??4000,maxEvaluations=options.maxEvaluations??8000;
+ const adaptive=options.adaptive!==false,restarts=options.restarts??1;
+ const alpha=1,gamma=adaptive?1+2/n:2,rho=adaptive?0.75-1/(2*n):0.5,sigma=adaptive?1-1/n:0.5;
+ const project=p=>p.map((v,i)=>Math.min(upper[i],Math.max(lower[i],v)));
+ let evaluations=0,rejected=0,iterations=0;const BUDGET={};
+ const value=p=>{
+  if(evaluations>=maxEvaluations)throw BUDGET;evaluations++;
+  let y;try{y=f(p);}catch(e){y=Infinity;}
+  if(!Number.isFinite(y)||Math.abs(y)>LIMIT){rejected++;return Infinity;}
+  if(y<best.f)best={x:p.slice(),f:y};return y;
+ };
+ const x0=project(start.slice());
+ let f0;try{f0=f(x0);}catch(e){f0=NaN;}evaluations++;
+ if(!Number.isFinite(f0)||Math.abs(f0)>LIMIT)throw Error('The objective must be finite (magnitude ≤ 1e12) at the start point.');
+ let best={x:x0,f:f0},status='converged',runs=0;
+ const run=(origin,fOrigin)=>{
+  const simplex=[{x:origin,f:fOrigin}];
+  for(let i=0;i<n;i++){
+   const step=origin[i]!==0?0.05*Math.abs(origin[i]):0.00025,v=origin.slice();
+   v[i]=origin[i]+step<=upper[i]?origin[i]+step:origin[i]-step>=lower[i]?origin[i]-step:(origin[i]-lower[i]>upper[i]-origin[i]?lower[i]:upper[i]);
+   simplex.push({x:v,f:value(v)});
+  }
+  for(;;){
+   simplex.sort((p,q)=>p.f-q.f);
+   const b=simplex[0],scaleX=Math.max(1,...b.x.map(Math.abs));
+   let size=0,spread=0;for(const v of simplex.slice(1)){spread=Math.max(spread,Math.abs(v.f-b.f));for(let i=0;i<n;i++)size=Math.max(size,Math.abs(v.x[i]-b.x[i]));}
+   if(size<=xTol*scaleX&&spread<=fTol*Math.max(1,Math.abs(b.f)))return 'converged';
+   if(iterations>=maxIterations)return 'iteration budget exhausted';
+   iterations++;
+   const worst=simplex[n],centroid=new Array(n).fill(0);
+   for(let k=0;k<n;k++)for(let i=0;i<n;i++)centroid[i]+=simplex[k].x[i]/n;
+   const along=(t,p)=>project(centroid.map((c,i)=>c+t*(p[i]-c)));
+   const xr=along(-alpha,worst.x),fr=value(xr);
+   if(fr<b.f){const xe=along(-alpha*gamma,worst.x),fe=value(xe);simplex[n]=fe<fr?{x:xe,f:fe}:{x:xr,f:fr};continue;}
+   if(fr<simplex[n-1].f){simplex[n]={x:xr,f:fr};continue;}
+   if(fr<worst.f){const xc=along(-alpha*rho,worst.x),fc=value(xc);if(fc<=fr){simplex[n]={x:xc,f:fc};continue;}}
+   else{const xc=along(rho,worst.x),fc=value(xc);if(fc<worst.f){simplex[n]={x:xc,f:fc};continue;}}
+   for(let k=1;k<=n;k++){const xs=project(b.x.map((v,i)=>v+sigma*(simplex[k].x[i]-v)));simplex[k]={x:xs,f:value(xs)};}
+  }
+ };
+ try{
+  for(let r=0;r<=restarts;r++){
+   runs++;const before=best.f;
+   status=run(best.x,best.f);
+   if(status!=='converged')break;
+   if(r>0&&!(best.f<before-fTol*Math.max(1,Math.abs(before))))break;
+  }
+ }catch(e){if(e!==BUDGET)throw e;status='evaluation budget exhausted';}
+ return {x:best.x,f:best.f,status,converged:status==='converged',iterations,evaluations,rejectedEvaluations:rejected,runs,
+  gradient:gradientDiagnostic(f,best.x,best.f,lower,upper)};
+}
+function gradientDiagnostic(f,x,fx,lower,upper){
+ const n=x.length,g=new Array(n),active=[];let evaluations=0;
+ for(let i=0;i<n;i++){
+  const h=1e-6*Math.max(1,Math.abs(x[i])),at=(t)=>{const p=x.slice();p[i]=t;evaluations++;return f(p);};
+  let gi;
+  try{
+   if(x[i]+h<=upper[i]&&x[i]-h>=lower[i])gi=(at(x[i]+h)-at(x[i]-h))/(2*h);
+   else if(x[i]-h>=lower[i])gi=(fx-at(x[i]-h))/h;
+   else gi=(at(x[i]+h)-fx)/h;
+  }catch(e){gi=NaN;}
+  g[i]=gi;
+  const tolB=1e-9*Math.max(1,Math.abs(x[i]));
+  if(x[i]<=lower[i]+tolB)active.push({variable:i,bound:'lower'});
+  if(x[i]>=upper[i]-tolB)active.push({variable:i,bound:'upper'});
+ }
+ if(!g.every(Number.isFinite))return {gradient:null,norm:null,projectedNorm:null,activeBounds:active,evaluations};
+ const projected=g.map((v,i)=>{const lo=active.some(a=>a.variable===i&&a.bound==='lower'),hi=active.some(a=>a.variable===i&&a.bound==='upper');return (lo&&v>0)||(hi&&v<0)?0:v;});
+ const norm=v=>Math.sqrt(v.reduce((t,u)=>t+u*u,0));
+ return {gradient:g,norm:norm(g),projectedNorm:norm(projected),activeBounds:active,evaluations};
+}
+function nelderMead({expression='(x-1)^2+(y-2)^2',start=[0,0],lower=null,upper=null,xTol=1e-8,fTol=1e-10,maxIterations=4000,maxEvaluations=8000,adaptive=true,restarts=1}={}){
+ if(!M.numerical?.evaluate)throw Error('The numerical evaluator is unavailable.');
+ expression=String(expression).trim();
+ if(!expression||expression.length>1000)throw Error('Enter an objective expression of 1–1000 characters.');
+ const x0=parseVector(start,'Start point');
+ if(x0.length<2||x0.length>3)throw Error('Start point must have 2 (x, y) or 3 (x, y, z) entries.');
+ const n=x0.length,names=['x','y','z'].slice(0,n);
+ const bound=(v,label,fallback)=>{if(v===null||v===undefined||(typeof v==='string'&&!v.trim()))return new Array(n).fill(fallback);
+  return parseVector(v,label,{allowInfinite:true,length:n}).map(u=>u===null?fallback:u);};
+ const lo=bound(lower,'Lower bounds',-Infinity),hi=bound(upper,'Upper bounds',Infinity);
+ for(let i=0;i<n;i++){
+  if(lo[i]===Infinity||hi[i]===-Infinity)throw Error('Bounds for '+names[i]+' are inverted.');
+  if(!(hi[i]>lo[i]))throw Error('Upper bound for '+names[i]+' must exceed its lower bound.');
+ }
+ xTol=finiteNumber(xTol,'Simplex size tolerance');if(xTol<1e-14||xTol>1e-2)throw Error('Simplex size tolerance must be between 1e-14 and 1e-2.');
+ fTol=finiteNumber(fTol,'Function spread tolerance');if(fTol<1e-16||fTol>1e-2)throw Error('Function spread tolerance must be between 1e-16 and 1e-2.');
+ maxIterations=integerIn(maxIterations,'Maximum iterations',10,20000);
+ maxEvaluations=integerIn(maxEvaluations,'Maximum evaluations',20,50000);
+ const f=p=>M.numerical.evaluate(expression,Object.fromEntries(names.map((k,i)=>[k,p[i]])));
+ const projectedStart=x0.map((v,i)=>Math.min(hi[i],Math.max(lo[i],v)));
+ try{const y=f(projectedStart);if(!Number.isFinite(y))throw Error('non-finite value');}
+ catch(e){throw Error('Objective could not be evaluated at the start point: '+e.message);}
+ const r=minimizeFunction(f,x0,{lower:lo,upper:hi,xTol,fTol,maxIterations,maxEvaluations,adaptive,restarts:integerIn(restarts,'Restarts',0,5)});
+ return Object.assign(r,{type:'nelder-mead',expression,variables:names,lower:lo,upper:hi,start:x0,startProjected:projectedStart.some((v,i)=>v!==x0[i]),
+  method:'Nelder-Mead simplex'+(adaptive?' (adaptive Gao-Han parameters)':'')+(lo.some(Number.isFinite)||hi.some(Number.isFinite)?' with box bounds by projection':''),
+  note:'Derivative-free local search: convergence is judged by simplex size and f-spread. The finite-difference gradient norm is a heuristic diagnostic, not a certificate of a (global) minimum.'});
+}
+M.optimization=Object.freeze({linprog,parseLP,nelderMead,minimizeFunction,parseVector});
+
+/* ---------- UI (Numerical panel) ---------- */
+const panel=document.getElementById('numerical-panel');
+if(!panel||!M.dataTables||!M.numerical?.evaluate)return;
+const $=id=>document.getElementById(id),fmt=v=>Number.isFinite(v)?Number(v.toPrecision(12)).toString():String(v);
+const area=document.createElement('details');area.id='optimization-details';
+area.innerHTML='<summary>Optimization · linear programming &amp; Nelder-Mead</summary>'+
+ '<h4 id="opt-lp-heading">Linear program (x ≥ 0)</h4>'+
+ '<p class="graph-data-muted" id="opt-lp-help">First line "max:" or "min:" with a linear objective in x1…x10; then one constraint per line using &lt;=, &gt;= or = and a numeric right-hand side. Up to 10 variables and 10 constraints. "#" starts a comment. Ctrl+Enter solves.</p>'+
+ '<label for="opt-lp-text">LP text</label>'+
+ '<textarea id="opt-lp-text" rows="6" spellcheck="false" aria-describedby="opt-lp-help">max: 3x1 + 5x2\nx1 &lt;= 4\n2x2 &lt;= 12\n3x1 + 2x2 &lt;= 18</textarea>'+
+ '<div class="data-toolbar"><button id="opt-lp-run" class="primary" type="button">Solve LP</button>'+
+ '<button id="opt-lp-to-table" class="secondary" type="button" disabled>Save to Data Tables</button></div>'+
+ '<pre id="opt-lp-output" class="opt-output" role="status" aria-live="polite">Enter a linear program.</pre>'+
+ '<h4>Minimize f(x, y[, z]) · Nelder-Mead</h4>'+
+ '<p class="graph-data-muted">Local derivative-free minimization. Use 2 or 3 start values; leave bounds empty (or write -inf / inf) for unbounded variables.</p>'+
+ '<div class="num-fields"><label>Objective f(x, y[, z])<input id="opt-nm-expression" value="100*(y-x^2)^2+(1-x)^2" spellcheck="false"></label>'+
+ '<label>Start point (comma-separated)<input id="opt-nm-start" value="-1.2, 1" spellcheck="false"></label>'+
+ '<label>Lower bounds (optional)<input id="opt-nm-lower" value="" placeholder="e.g. 0, -inf" spellcheck="false"></label>'+
+ '<label>Upper bounds (optional)<input id="opt-nm-upper" value="" placeholder="e.g. 2, inf" spellcheck="false"></label>'+
+ '<label>Simplex size tolerance<input id="opt-nm-xtol" type="number" step="any" value="0.00000001"></label>'+
+ '<label>f-spread tolerance<input id="opt-nm-ftol" type="number" step="any" value="0.0000000001"></label>'+
+ '<label>Maximum evaluations (20–50000)<input id="opt-nm-maxeval" type="number" step="1" min="20" max="50000" value="8000"></label></div>'+
+ '<div class="data-toolbar"><button id="opt-nm-run" class="primary" type="button">Minimize</button>'+
+ '<button id="opt-nm-to-table" class="secondary" type="button" disabled>Save to Data Tables</button></div>'+
+ '<pre id="opt-nm-output" class="opt-output" role="status" aria-live="polite">Enter an objective and start point.</pre>';
+panel.append(area);
+const style=document.createElement('style');
+style.textContent='#optimization-details{border-top:1px solid #dce4f6;margin-top:15px;padding-top:13px;max-width:100%;box-sizing:border-box}'+
+ '#optimization-details summary{cursor:pointer;color:#3c50ae;font-weight:750;min-height:40px;display:flex;align-items:center}'+
+ '#optimization-details h4{margin:14px 0 6px;font-size:14px;color:#33415e}'+
+ '#optimization-details>label{display:block;font-size:12px;font-weight:700;color:#566784;margin:6px 0 4px}'+
+ '#opt-lp-text{width:100%;max-width:100%;box-sizing:border-box;min-height:120px;padding:9px;border:1px solid #cdd8ec;border-radius:9px;font:13px/1.5 Consolas,monospace;resize:vertical}'+
+ '#optimization-details .data-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}'+
+ '#optimization-details button{min-height:40px;min-width:40px}'+
+ '.opt-output{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box;padding:12px;background:white;border:1px solid #dce5f3;border-radius:10px;font:12px/1.6 Consolas,monospace}'+
+ '.opt-output.error{color:#a82241;background:#fff2f4}.opt-output.warn{color:#8a5a00;background:#fff8e8}';
+document.head.append(style);
+let lastLP=null,lastNM=null;
+const show=(id,text,cls)=>{const o=$(id);o.classList.remove('error','warn');if(cls)o.classList.add(cls);o.textContent=text;};
+const invalidateLP=()=>{lastLP=null;$('opt-lp-to-table').disabled=true;$('opt-lp-output').classList.remove('error','warn');};
+const invalidateNM=()=>{lastNM=null;$('opt-nm-to-table').disabled=true;$('opt-nm-output').classList.remove('error','warn');};
+$('opt-lp-text').addEventListener('input',invalidateLP);
+$('opt-lp-text').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();$('opt-lp-run').click();}});
+for(const input of area.querySelectorAll('.num-fields input')){input.addEventListener('input',invalidateNM);input.addEventListener('change',invalidateNM);}
+$('opt-lp-run').addEventListener('click',()=>{
+ invalidateLP();
+ try{
+  const r=linprog($('opt-lp-text').value);
+  if(r.status!=='optimal'){show('opt-lp-output',r.method+'\n'+r.message+'\nPivots: '+r.iterations,'warn');return;}
+  lastLP=r;
+  show('opt-lp-output',r.method+'\nStatus: optimal\n'+r.x.map((v,j)=>'x'+(j+1)+' = '+fmt(v)).join('\n')+
+   '\nObjective ('+r.sense+') = '+fmt(r.objective)+
+   '\nConstraints:\n'+r.constraints.map(k=>'  #'+k.index+' '+k.type+' '+fmt(k.rhs)+': activity '+fmt(k.activity)+', slack '+fmt(k.slack)+(k.binding?' (binding)':'')).join('\n')+
+   '\nBinding: '+(r.binding.length?r.binding.map(i=>'#'+i).join(', '):'none')+'; max violation '+r.maxViolation.toExponential(2)+
+   '\nPivots: '+r.iterations+' (phase 1: '+r.phase1Iterations+')'+(r.removedRedundantRows?'; redundant rows removed: '+r.removedRedundantRows:'')+'\n'+r.note);
+  $('opt-lp-to-table').disabled=false;
+ }catch(e){show('opt-lp-output',e.message+'\nFix the highlighted line and press Solve LP again.','error');}
+});
+$('opt-nm-run').addEventListener('click',()=>{
+ invalidateNM();
+ try{
+  const r=nelderMead({expression:$('opt-nm-expression').value,start:$('opt-nm-start').value,lower:$('opt-nm-lower').value,upper:$('opt-nm-upper').value,
+   xTol:$('opt-nm-xtol').value,fTol:$('opt-nm-ftol').value,maxEvaluations:$('opt-nm-maxeval').value});
+  lastNM=r;const gd=r.gradient,bounded=r.lower.some(Number.isFinite)||r.upper.some(Number.isFinite);
+  show('opt-nm-output',r.method+'\nStatus: '+r.status+'\n'+r.variables.map((k,i)=>k+' ≈ '+fmt(r.x[i])).join('\n')+'\nf ≈ '+fmt(r.f)+
+   '\nIterations: '+r.iterations+'; evaluations: '+r.evaluations+(r.rejectedEvaluations?' ('+r.rejectedEvaluations+' non-finite trial points rejected)':'')+
+   '\nFinite-difference ‖∇f‖ ≈ '+(gd.norm===null?'unavailable':gd.norm.toExponential(3))+
+   (bounded&&gd.projectedNorm!==null?'; projected ‖∇f‖ ≈ '+gd.projectedNorm.toExponential(3):'')+
+   (gd.activeBounds.length?'\nActive bounds: '+gd.activeBounds.map(a=>r.variables[a.variable]+' at '+a.bound).join(', '):'')+
+   (r.startProjected?'\nStart point was projected onto the bounds.':'')+'\n'+r.note,r.converged?null:'warn');
+  $('opt-nm-to-table').disabled=false;
+ }catch(e){show('opt-nm-output',e.message+'\nCorrect the input and press Minimize again.','error');}
+});
+$('opt-lp-to-table').addEventListener('click',()=>{
+ try{
+  if(!lastLP)throw Error('Solve a linear program first.');
+  const rows=lastLP.x.map((v,j)=>['x'+(j+1),v,'','']).concat([['objective',lastLP.objective,'','']],
+   lastLP.constraints.map(k=>['constraint '+k.index+' ('+k.type+' '+k.rhs+')',k.activity,k.slack,k.binding?'yes':'no']));
+  M.dataTables.importData({headers:['name','value','slack','binding'],rows},'Optimization_LP');M.advanced?.mode?.('data');
+ }catch(e){show('opt-lp-output',e.message,'error');}
+});
+$('opt-nm-to-table').addEventListener('click',()=>{
+ try{
+  if(!lastNM)throw Error('Run a minimization first.');
+  M.dataTables.importData({headers:[...lastNM.variables,'f','status','gradient_norm'],rows:[[...lastNM.x,lastNM.f,lastNM.status,lastNM.gradient.norm??'']]},'Optimization_NelderMead');M.advanced?.mode?.('data');
+ }catch(e){show('opt-nm-output',e.message,'error');}
+});
+})();
+</script>
 <script id="promath-brent-tools">
 /* Offline bounded Brent-Dekker root refinement; uses the shared safe numeric evaluator. */
 (()=>{'use strict';
@@ -7733,6 +8553,268 @@ $('brent-run').addEventListener('click',()=>{
 });
 $('brent-to-table').addEventListener('click',()=>{try{if(!last)throw Error('Refine a root first.');M.dataTables.importData({headers:['x','residual'],rows:[[last.x,last.residual]]},'Numerical_Root_Brent');M.advanced.mode('data');}catch(err){$('brent-output').textContent=err.message;}});
 M.brentTools={refine};
+})();
+</script>
+<script id="promath-statistics-tools">
+/* Offline probability distributions, special functions and descriptive statistics (no dependencies). */
+(()=>{'use strict';
+const M=window.MathStudio=window.MathStudio||{};
+const EPS=1e-16,FPMIN=1e-300,MAX_ITER=100000,LN_SQRT_2PI=0.9189385332046728,SQRT2=Math.SQRT2;
+const LANCZOS=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+
+/* ---------- special functions ---------- */
+function logGamma(x){
+ if(!Number.isFinite(x))throw Error('logGamma requires a finite argument.');
+ if(x<=0&&Number.isInteger(x))return Infinity;
+ if(x<0.5)return Math.log(Math.PI/Math.abs(Math.sin(Math.PI*x)))-logGamma(1-x);
+ x-=1;let a=LANCZOS[0];const t=x+7.5;
+ for(let i=1;i<9;i++)a+=LANCZOS[i]/(x+i);
+ return LN_SQRT_2PI+(x+0.5)*Math.log(t)-t+Math.log(a);
+}
+function gammaArgs(a,x){if(!(a>0)||!Number.isFinite(a))throw Error('Incomplete gamma shape must be positive and finite.');if(!(x>=0))throw Error('Incomplete gamma argument must be non-negative.');}
+function gammaSeries(a,x){
+ let ap=a,del=1/a,sum=del;
+ for(let i=0;i<MAX_ITER;i++){ap+=1;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*EPS)return sum*Math.exp(-x+a*Math.log(x)-logGamma(a));}
+ throw Error('Incomplete gamma series did not converge.');
+}
+function gammaFraction(a,x){
+ let b=x+1-a,c=1/FPMIN,d=1/b,h=d;
+ for(let i=1;i<=MAX_ITER;i++){
+  const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<FPMIN)d=FPMIN;c=b+an/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;const del=d*c;h*=del;
+  if(Math.abs(del-1)<EPS)return Math.exp(-x+a*Math.log(x)-logGamma(a))*h;
+ }
+ throw Error('Incomplete gamma continued fraction did not converge.');
+}
+/** Regularized lower incomplete gamma P(a,x). */
+function gammaP(a,x){gammaArgs(a,x);if(x===0)return 0;if(x===Infinity)return 1;return x<a+1?gammaSeries(a,x):1-gammaFraction(a,x);}
+/** Regularized upper incomplete gamma Q(a,x)=1-P(a,x), computed without cancellation in the tail. */
+function gammaQ(a,x){gammaArgs(a,x);if(x===0)return 1;if(x===Infinity)return 0;return x<a+1?1-gammaSeries(a,x):gammaFraction(a,x);}
+function betaFraction(a,b,x){
+ const qab=a+b,qap=a+1,qam=a-1;let c=1,d=1-qab*x/qap;if(Math.abs(d)<FPMIN)d=FPMIN;d=1/d;let h=d;
+ for(let m=1;m<=MAX_ITER;m++){
+  const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+  d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;h*=d*c;
+  aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+  d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;const del=d*c;h*=del;
+  if(Math.abs(del-1)<EPS)return h;
+ }
+ throw Error('Incomplete beta continued fraction did not converge.');
+}
+/** Regularized incomplete beta I_x(a,b); optional y=1-x supplied exactly to avoid cancellation. */
+function betaI(a,b,x,y=1-x){
+ if(!(a>0)||!(b>0)||!Number.isFinite(a)||!Number.isFinite(b))throw Error('Incomplete beta parameters must be positive and finite.');
+ if(!(x>=0&&x<=1))throw Error('Incomplete beta argument must be in [0, 1].');
+ if(x===0)return 0;if(y<=0)return 1;
+ const bt=Math.exp(logGamma(a+b)-logGamma(a)-logGamma(b)+a*Math.log(x)+b*Math.log(y));
+ return x<(a+1)/(a+b+2)?bt*betaFraction(a,b,x)/a:1-bt*betaFraction(b,a,y,x)/b;
+}
+function erf(x){if(Number.isNaN(x))return NaN;if(x===0)return x;const s=x<0?-1:1,z=x*x;return s*(z<1.5?gammaP(0.5,z):1-gammaQ(0.5,z));}
+function erfc(x){if(Number.isNaN(x))return NaN;if(x<0)return 2-erfc(-x);const z=x*x;return z<1.5?1-gammaP(0.5,z):gammaQ(0.5,z);}
+
+/* ---------- validation ---------- */
+function num(value,name){if(value===null||value===undefined||String(value).trim()==='')throw Error(name+' is required.');const n=Number(value);if(!Number.isFinite(n))throw Error(name+' must be a finite number.');return n;}
+function positive(value,name){const n=num(value,name);if(!(n>0))throw Error(name+' must be greater than 0.');if(n>1e12)throw Error(name+' must be at most 1e12.');return n;}
+function probability(value,name='Probability p'){const n=num(value,name);if(n<0||n>1)throw Error(name+' must be in [0, 1].');return n;}
+function count(value,name,max){const n=num(value,name);if(!Number.isInteger(n)||n<0||n>max)throw Error(name+' must be an integer from 0 to '+max+'.');return n;}
+
+/* ---------- quantile solvers ---------- */
+function continuousQuantile(d,p,lo,hi,lower,upper){
+ p=probability(p);if(p===0)return lower;if(p===1)return upper;
+ const up=p<=0.5,q=1-p,F=x=>up?d.cdf(x)-p:q-d.sf(x);
+ let guard=0;
+ while(F(lo)>0){if(++guard>2000)throw Error('Quantile bracket expansion failed.');const w=hi-lo;hi=lo;lo=Math.max(lower,lo-2*w);if(lo===lower&&F(lo)>0)break;}
+ while(F(hi)<0){if(++guard>4000)throw Error('Quantile bracket expansion failed.');const w=hi-lo;lo=hi;hi=hi+2*w;if(!Number.isFinite(hi))throw Error('Quantile is outside the finite range.');}
+ for(let i=0;i<3000;i++){
+  const mid=lo+(hi-lo)/2;if(mid===lo||mid===hi)return mid;
+  const v=F(mid);if(v===0)return mid;if(v<0)lo=mid;else hi=mid;
+ }
+ return lo+(hi-lo)/2;
+}
+/** Smallest integer k in [lo, ∞) with CDF(k) ≥ p, using a tiny relative tolerance for CDF rounding. */
+function discreteQuantile(d,p,max){
+ p=probability(p);if(p===0)return 0;if(p===1)return max;
+ const target=p*(1-64*Number.EPSILON),ok=k=>d.cdf(k)>=target;
+ let lo=-1,hi=Math.max(1,Math.ceil(d.mean||1));
+ while(!ok(hi)){lo=hi;hi*=2;if(hi>=max){hi=max;break;}}
+ while(hi-lo>1){const mid=Math.floor((lo+hi)/2);if(ok(mid))hi=mid;else lo=mid;}
+ return hi;
+}
+
+/* ---------- distributions ---------- */
+const normalStd={pdf:z=>Math.exp(-0.5*z*z-LN_SQRT_2PI),cdf:z=>0.5*erfc(-z/SQRT2),sf:z=>0.5*erfc(z/SQRT2)};
+const builders={
+ normal({mu=0,sigma=1}={}){
+  mu=num(mu,'Mean μ');if(Math.abs(mu)>1e12)throw Error('Mean μ must be at most 1e12 in magnitude.');sigma=positive(sigma,'Standard deviation σ');
+  const z=x=>(num(x,'x')-mu)/sigma;
+  const d={name:'Normal',label:'Normal(μ='+mu+', σ='+sigma+')',discrete:false,params:{mu,sigma},mean:mu,variance:sigma*sigma,
+   pdf:x=>normalStd.pdf(z(x))/sigma,cdf:x=>normalStd.cdf(z(x)),sf:x=>normalStd.sf(z(x))};
+  d.quantile=p=>{const s=continuousQuantile(normalStd,p,-1,1,-Infinity,Infinity);return Number.isFinite(s)?mu+sigma*s:s;};
+  return d;
+ },
+ t({nu=1}={}){
+  nu=positive(nu,'Degrees of freedom ν');
+  const tail=t=>{const t2=t*t;return 0.5*betaI(nu/2,0.5,nu/(nu+t2),t2/(nu+t2));};
+  const cdf=x=>{x=num(x,'x');if(x===0)return 0.5;const v=tail(x);return x>0?1-v:v;};
+  const sf=x=>{x=num(x,'x');if(x===0)return 0.5;const v=tail(x);return x>0?v:1-v;};
+  const lc=logGamma((nu+1)/2)-logGamma(nu/2)-0.5*Math.log(nu*Math.PI);
+  const d={name:'Student t',label:'Student t(ν='+nu+')',discrete:false,params:{nu},mean:nu>1?0:null,variance:nu>2?nu/(nu-2):nu>1?Infinity:null,
+   pdf:x=>{x=num(x,'x');return Math.exp(lc-(nu+1)/2*Math.log1p(x*x/nu));},cdf,sf};
+  d.quantile=p=>continuousQuantile(d,p,-1,1,-Infinity,Infinity);
+  return d;
+ },
+ chisquare({k=1}={}){
+  k=positive(k,'Degrees of freedom k');const h=k/2,lc=-h*Math.LN2-logGamma(h);
+  const d={name:'Chi-square',label:'Chi-square(k='+k+')',discrete:false,params:{k},mean:k,variance:2*k,
+   pdf:x=>{x=num(x,'x');if(x<0)return 0;if(x===0)return k<2?Infinity:k===2?0.5:0;return Math.exp(lc+(h-1)*Math.log(x)-x/2);},
+   cdf:x=>{x=num(x,'x');return x<=0?0:gammaP(h,x/2);},sf:x=>{x=num(x,'x');return x<=0?1:gammaQ(h,x/2);}};
+  d.quantile=p=>continuousQuantile(d,p,0,Math.max(1,k),0,Infinity);
+  return d;
+ },
+ exponential({lambda=1}={}){
+  lambda=positive(lambda,'Rate λ');
+  return {name:'Exponential',label:'Exponential(λ='+lambda+')',discrete:false,params:{lambda},mean:1/lambda,variance:1/(lambda*lambda),
+   pdf:x=>{x=num(x,'x');return x<0?0:lambda*Math.exp(-lambda*x);},cdf:x=>{x=num(x,'x');return x<=0?0:-Math.expm1(-lambda*x);},
+   sf:x=>{x=num(x,'x');return x<=0?1:Math.exp(-lambda*x);},quantile:p=>{p=probability(p);return p===1?Infinity:-Math.log1p(-p)/lambda;}};
+ },
+ binomial({n=10,p=0.5}={}){
+  n=count(n,'Trials n',1e7);p=probability(p,'Success probability p');
+  const lnC=k=>logGamma(n+1)-logGamma(k+1)-logGamma(n-k+1);
+  const pmf=x=>{x=num(x,'k');if(!Number.isInteger(x)||x<0||x>n)return 0;if(p===0)return x===0?1:0;if(p===1)return x===n?1:0;return Math.exp(lnC(x)+x*Math.log(p)+(n-x)*Math.log1p(-p));};
+  const cdf=x=>{x=Math.floor(num(x,'k'));if(x<0)return 0;if(x>=n)return 1;if(p===0)return 1;if(p===1)return 0;return betaI(n-x,x+1,1-p,p);};
+  const d={name:'Binomial',label:'Binomial(n='+n+', p='+p+')',discrete:true,params:{n,p},mean:n*p,variance:n*p*(1-p),pdf:pmf,cdf,sf:x=>1-cdf(x)};
+  d.quantile=q=>discreteQuantile(d,q,n);
+  return d;
+ },
+ poisson({lambda=1}={}){
+  lambda=positive(lambda,'Rate λ');if(lambda>1e7)throw Error('Rate λ must be at most 1e7.');
+  const pmf=x=>{x=num(x,'k');if(!Number.isInteger(x)||x<0)return 0;return Math.exp(x*Math.log(lambda)-lambda-logGamma(x+1));};
+  const cdf=x=>{x=Math.floor(num(x,'k'));return x<0?0:gammaQ(x+1,lambda);};
+  const sf=x=>{x=Math.floor(num(x,'k'));return x<0?1:gammaP(x+1,lambda);};
+  const d={name:'Poisson',label:'Poisson(λ='+lambda+')',discrete:true,params:{lambda},mean:lambda,variance:lambda,pdf:pmf,cdf,sf};
+  d.quantile=q=>discreteQuantile(d,q,Infinity);
+  return d;
+ }
+};
+function distribution(name,params){const b=builders[String(name||'').toLowerCase()];if(!b)throw Error('Unknown distribution: '+name+'. Choose normal, t, chisquare, exponential, binomial or poisson.');return b(params||{});}
+function evaluate({dist='normal',params={},x='',p=''}={}){
+ const d=distribution(dist,params),hasX=String(x??'').trim()!=='',hasP=String(p??'').trim()!=='';
+ if(!hasX&&!hasP)throw Error('Enter a value x (or k) and/or a probability p.');
+ const out={type:'distribution',name:d.name,label:d.label,discrete:d.discrete,params:d.params,mean:d.mean,variance:d.variance};
+ if(hasX){out.x=num(x,d.discrete?'k':'x');out.density=d.pdf(out.x);out.cdf=d.cdf(out.x);out.sf=d.sf(out.x);}
+ if(hasP){out.p=probability(p);out.quantile=d.quantile(out.p);}
+ return out;
+}
+
+/* ---------- descriptive statistics ---------- */
+function toNumber(cell){if(typeof cell==='number')return Number.isFinite(cell)?cell:null;const s=String(cell??'').trim();if(!s)return null;const n=Number(s);return Number.isFinite(n)?n:null;}
+function quantile7(sorted,q){const h=(sorted.length-1)*q,lo=Math.floor(h),hi=Math.min(lo+1,sorted.length-1);return sorted[lo]+(h-lo)*(sorted[hi]-sorted[lo]);}
+function meanOf(v){let s=0;for(const x of v)s+=x;let m=s/v.length,c=0;for(const x of v)c+=x-m;return m+c/v.length;}
+function describe(values){
+ const v=Array.from(values||[],x=>{if(typeof x!=='number'||!Number.isFinite(x))throw Error('Descriptive statistics need finite numbers.');return x;});
+ const n=v.length;if(!n)throw Error('Column has no numeric values.');
+ const sorted=[...v].sort((a,b)=>a-b),mean=meanOf(v);let m2=0,m3=0;for(const x of v){const d=x-mean;m2+=d*d;m3+=d*d*d;}
+ const popVar=m2/n,sampleVar=n>1?m2/(n-1):null,q1=quantile7(sorted,0.25),q3=quantile7(sorted,0.75);
+ let skewness=null;if(n>=3&&m2>0){const g1=(m3/n)/Math.pow(m2/n,1.5);skewness=g1*Math.sqrt(n*(n-1))/(n-2);}
+ return {n,mean,median:quantile7(sorted,0.5),sampleVariance:sampleVar,populationVariance:popVar,sampleStd:sampleVar===null?null:Math.sqrt(sampleVar),populationStd:Math.sqrt(popVar),min:sorted[0],max:sorted[n-1],q1,q3,iqr:q3-q1,skewness};
+}
+function correlate(xs,ys){
+ if(xs.length!==ys.length)throw Error('Paired samples must have equal length.');const n=xs.length;if(n<2)throw Error('Correlation needs at least two complete numeric pairs.');
+ const mx=meanOf(xs),my=meanOf(ys);let sxy=0,sxx=0,syy=0;for(let i=0;i<n;i++){const dx=xs[i]-mx,dy=ys[i]-my;sxy+=dx*dy;sxx+=dx*dx;syy+=dy*dy;}
+ return {pairs:n,covariance:sxy/(n-1),populationCovariance:sxy/n,pearson:sxx>0&&syy>0?Math.max(-1,Math.min(1,sxy/Math.sqrt(sxx*syy))):null};
+}
+function columnValues(cells){let blank=0,nonNumeric=0;const values=[];for(const cell of cells){const n=toNumber(cell);if(n!==null)values.push(n);else if(String(cell??'').trim()==='')blank++;else nonNumeric++;}return {values,blank,nonNumeric};}
+function describeColumns(rows,c1,c2=null){
+ if(!Array.isArray(rows))throw Error('Rows must be an array.');
+ const first=columnValues(rows.map(r=>r?.[c1])),out={type:'descriptive',first:{...describe(first.values),blank:first.blank,nonNumeric:first.nonNumeric}};
+ if(c2!==null&&c2!==undefined&&c2!==''){
+  const second=columnValues(rows.map(r=>r?.[c2]));out.second={...describe(second.values),blank:second.blank,nonNumeric:second.nonNumeric};
+  const xs=[],ys=[];for(const r of rows){const a=toNumber(r?.[c1]),b=toNumber(r?.[c2]);if(a!==null&&b!==null){xs.push(a);ys.push(b);}}
+  out.pair=correlate(xs,ys);
+ }
+ return out;
+}
+function describeTable({table,column,column2=null}={}){
+ const T=M.dataTables;if(!T)throw Error('Data Tables are unavailable.');
+ const t=T.tables.find(s=>s.name===table||s.id===table);if(!t)throw Error('Choose an existing data table.');
+ const idx=name=>{if(name===null||name===undefined||name==='')return null;const i=t.columns.indexOf(String(name));if(i<0)throw Error('Unknown column: '+name+'.');return i;};
+ const c1=idx(column);if(c1===null)throw Error('Choose a column.');const c2=idx(column2);if(c2!==null&&c2===c1)throw Error('Choose two different columns.');
+ const rows=typeof T.calculate==='function'?T.calculate(t):t.rows;
+ const out=describeColumns(rows,c1,c2);out.table=t.name;out.column=t.columns[c1];out.column2=c2===null?null:t.columns[c2];return out;
+}
+
+M.statistics={logGamma,gammaP,gammaQ,betaI,erf,erfc,distribution,evaluate,describe,correlate,describeColumns,describeTable,quantile7};
+
+/* ---------- UI ---------- */
+const panel=document.getElementById('numerical-panel');if(!panel)return;
+const $=id=>document.getElementById(id);
+const fmt=v=>v===null||v===undefined?'undefined':typeof v==='number'?(Number.isFinite(v)?(Number.isInteger(v)&&Math.abs(v)<1e15?String(v):Number(v.toPrecision(12)).toString()):String(v)):String(v);
+const PARAMS={normal:[['mu','Mean μ','0'],['sigma','Standard deviation σ','1']],t:[['nu','Degrees of freedom ν','10']],chisquare:[['k','Degrees of freedom k','2']],exponential:[['lambda','Rate λ','1']],binomial:[['n','Trials n','10'],['p','Success probability p','0.3']],poisson:[['lambda','Rate λ','4']]};
+const area=document.createElement('details');area.id='stats-details';
+area.innerHTML='<summary>Statistics · distributions and descriptive statistics</summary>'+
+ '<p>Density/mass, CDF, survival and quantile for common distributions; summary statistics for Data Tables columns.</p>'+
+ '<div class="num-fields"><label>Distribution<select id="stats-dist"><option value="normal">Normal</option><option value="t">Student t</option><option value="chisquare">Chi-square</option><option value="exponential">Exponential</option><option value="binomial">Binomial</option><option value="poisson">Poisson</option></select></label>'+
+ '<label id="stats-param1-label"><span id="stats-param1-name">Mean μ</span><input id="stats-param1" type="number" step="any" value="0"></label>'+
+ '<label id="stats-param2-label"><span id="stats-param2-name">Standard deviation σ</span><input id="stats-param2" type="number" step="any" value="1"></label>'+
+ '<label><span id="stats-x-name">Value x</span><input id="stats-x" type="number" step="any" value="1.96"></label>'+
+ '<label>Probability p (quantile)<input id="stats-p" type="number" step="any" min="0" max="1" value="0.975"></label></div>'+
+ '<div class="data-toolbar"><button id="stats-dist-run" class="primary" type="button">Evaluate distribution</button></div>'+
+ '<div class="num-fields"><label>Data table<select id="stats-table"></select></label>'+
+ '<label>Column<select id="stats-column"></select></label>'+
+ '<label>Second column (optional)<select id="stats-column2"></select></label></div>'+
+ '<div class="data-toolbar"><button id="stats-desc-run" class="primary" type="button">Describe column</button>'+
+ '<button id="stats-to-table" class="secondary" type="button" disabled>Save to Data Tables</button></div>'+
+ '<pre id="stats-output" role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%">Choose a distribution or a data column.</pre>';
+panel.append(area);let last=null;
+const output=$('stats-output');
+const invalidate=()=>{last=null;$('stats-to-table').disabled=true;output.classList.remove('error');};
+const option=(select,value,text)=>{const o=document.createElement('option');o.value=value;o.textContent=text;select.append(o);};
+function syncParams(){
+ const spec=PARAMS[$('stats-dist').value];
+ for(const i of [1,2]){const s=spec[i-1],label=$('stats-param'+i+'-label');label.hidden=!s;if(s){$('stats-param'+i+'-name').textContent=s[1];$('stats-param'+i).value=s[2];}}
+ const discrete=$('stats-dist').value==='binomial'||$('stats-dist').value==='poisson';
+ $('stats-x-name').textContent=discrete?'Count k':'Value x';$('stats-x').value=discrete?'3':'1.96';
+}
+function syncTables(){
+ const T=M.dataTables,tableSel=$('stats-table');if(!T)return;
+ const keep=tableSel.value;tableSel.replaceChildren();for(const t of T.tables)option(tableSel,t.name,t.name);
+ if([...tableSel.options].some(o=>o.value===keep))tableSel.value=keep;syncColumns();
+}
+function syncColumns(){
+ const T=M.dataTables,t=T?.tables.find(s=>s.name===$('stats-table').value),c1=$('stats-column'),c2=$('stats-column2'),k1=c1.value,k2=c2.value;
+ c1.replaceChildren();c2.replaceChildren();option(c2,'','(none)');
+ for(const name of t?.columns||[]){option(c1,name,name);option(c2,name,name);}
+ if([...c1.options].some(o=>o.value===k1))c1.value=k1;if([...c2.options].some(o=>o.value===k2))c2.value=k2;
+}
+$('stats-dist').addEventListener('change',()=>{syncParams();invalidate();});
+$('stats-table').addEventListener('change',()=>{syncColumns();invalidate();});
+area.addEventListener('toggle',()=>{if(area.open)syncTables();});
+for(const id of ['stats-table','stats-column','stats-column2'])$(id).addEventListener('focus',()=>{if(id==='stats-table')syncTables();else syncColumns();});
+for(const el of area.querySelectorAll('input,select')){el.addEventListener('input',invalidate);el.addEventListener('change',invalidate);}
+const fail=err=>{invalidate();output.classList.add('error');output.textContent=err.message;};
+$('stats-dist-run').addEventListener('click',()=>{
+ try{
+  const dist=$('stats-dist').value,spec=PARAMS[dist],params={};spec.forEach((s,i)=>{params[s[0]]=$('stats-param'+(i+1)).value;});
+  const r=evaluate({dist,params,x:$('stats-x').value,p:$('stats-p').value}),lines=[r.label,'Mean = '+fmt(r.mean)+'; variance = '+fmt(r.variance)];
+  const rows=[['distribution',r.label],['mean',fmt(r.mean)],['variance',fmt(r.variance)]];
+  if('x' in r){const k=r.discrete?'k':'x',f=r.discrete?'P(X = '+r.x+')':'pdf('+r.x+')';lines.push(f+' = '+fmt(r.density),'P(X ≤ '+r.x+') = '+fmt(r.cdf),'P(X > '+r.x+') = '+fmt(r.sf));rows.push([k,r.x],[r.discrete?'pmf':'pdf',r.density],['cdf',r.cdf],['sf',r.sf]);}
+  if('p' in r){lines.push((r.discrete?'Quantile (smallest k with CDF ≥ p)':'Quantile F⁻¹(p)')+' at p = '+r.p+': '+fmt(r.quantile));rows.push(['p',r.p],['quantile',fmt(r.quantile)]);}
+  last={headers:['quantity','value'],rows,name:'Statistics_Distribution'};output.classList.remove('error');output.textContent=lines.join('\n');$('stats-to-table').disabled=false;
+ }catch(err){fail(err);}
+});
+$('stats-desc-run').addEventListener('click',()=>{
+ try{
+  const r=describeTable({table:$('stats-table').value,column:$('stats-column').value,column2:$('stats-column2').value||null});
+  const keys=[['n','n'],['mean','Mean'],['median','Median'],['sampleVariance','Sample variance'],['populationVariance','Population variance'],['sampleStd','Sample std'],['populationStd','Population std'],['min','Min'],['max','Max'],['q1','Q1 (type 7)'],['q3','Q3 (type 7)'],['iqr','IQR'],['skewness','Skewness (adjusted)'],['blank','Blank cells ignored'],['nonNumeric','Non-numeric cells ignored']];
+  const cols=[r.first].concat(r.second?[r.second]:[]),names=[r.column].concat(r.second?[r.column2]:[]);
+  const lines=['Table '+r.table+' · '+names.join(' vs ')];
+  for(const [k,label] of keys)lines.push(label+': '+cols.map(c=>fmt(c[k])).join(' | '));
+  const rows=keys.map(([k,label])=>[label].concat(cols.map(c=>c[k]===null?'':c[k])));
+  if(r.pair){lines.push('Complete pairs: '+r.pair.pairs,'Sample covariance: '+fmt(r.pair.covariance),'Pearson r: '+fmt(r.pair.pearson)+(r.pair.pearson===null?' (zero variance)':''));rows.push(['Complete pairs',r.pair.pairs,''],['Sample covariance',r.pair.covariance,''],['Pearson r',r.pair.pearson===null?'':r.pair.pearson,'']);}
+  last={headers:['statistic'].concat(names),rows,name:'Statistics_Descriptive'};output.classList.remove('error');output.textContent=lines.join('\n');$('stats-to-table').disabled=false;
+ }catch(err){fail(err);}
+});
+$('stats-to-table').addEventListener('click',()=>{try{if(!last)throw Error('Run a statistics calculation first.');M.dataTables.importData({headers:last.headers,rows:last.rows},last.name);if(M.advanced?.mode)M.advanced.mode('data');}catch(err){output.classList.add('error');output.textContent=err.message;}});
+syncParams();syncTables();
 })();
 </script>
 <script id="promath-xlsx-tools">
@@ -8308,6 +9390,322 @@ $('precision-expression-run').addEventListener('click',()=>{
 M.precisionTools={calculate,evaluateExpression,toScientificDecimal};
 })();
 </script>
+<script id="promath-units-tools">
+/* ProMathStudio: unit conversion and dimensional analysis over the 7 SI base dimensions (offline, no eval). */
+(()=>{'use strict';
+const M=window.MathStudio;
+if(!M)return;
+/* Dimension vector order: m, kg, s, A, K, mol, cd. Exponents are exact rationals [numerator, denominator]. */
+const BASE=['m','kg','s','A','K','mol','cd'];
+const DIM_SYMBOL=['L','M','T','I','Θ','N','J'];
+const DISPLAY_ORDER=[1,0,2,3,4,5,6];
+const MAX_EXPR=200,MAX_EXP=24;
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;}
+function rat(n,d=1){if(d<0){n=-n;d=-d;}const g=gcd(n,d);return [n/g,d/g];}
+function radd(a,b){return rat(a[0]*b[1]+b[0]*a[1],a[1]*b[1]);}
+function rmul(a,b){return rat(a[0]*b[0],a[1]*b[1]);}
+function rval(r){return r[0]/r[1];}
+const ZERO_DIM=()=>BASE.map(()=>rat(0));
+function dimOf(ints){return ints.map(n=>rat(n));}
+function sameDim(a,b){return a.every((r,i)=>r[0]===b[i][0]&&r[1]===b[i][1]);}
+function expText(r){return r[1]===1?(r[0]===1?'':'^'+r[0]):'^('+r[0]+'/'+r[1]+')';}
+function dimensionText(dim){
+ const parts=DISPLAY_ORDER.filter(i=>dim[i][0]!==0).map(i=>DIM_SYMBOL[i]+expText(dim[i]));
+ return parts.length?parts.join(' '):'1 (dimensionless)';
+}
+function vectorText(dim){return '('+dim.map(r=>r[1]===1?String(r[0]):r[0]+'/'+r[1]).join(', ')+')';}
+function siText(dim){
+ const parts=DISPLAY_ORDER.filter(i=>dim[i][0]!==0).map(i=>BASE[i]+expText(dim[i]));
+ return parts.length?parts.join('·'):'1';
+}
+
+/* SI prefixes as exact powers of ten. 'u' is the ASCII alias of micro. */
+const PREFIX={q:-30,r:-27,y:-24,z:-21,a:-18,f:-15,p:-12,n:-9,'µ':-6,'μ':-6,u:-6,m:-3,c:-2,d:-1,da:1,h:2,k:3,M:6,G:9,T:12,P:15,E:18,Z:21,Y:24,R:27,Q:30};
+/* Each unit: factor = m × 10^p (in SI base units), dim = integer base exponents, pre = accepts SI prefixes,
+   zero = offset to absolute zero in the unit's own scale (non-zero only for affine °C/°F), ice = reading at 0 °C. */
+const UNITS=Object.create(null);
+function def(names,m,p,dim,pre=false,extra={}){
+ const unit=Object.freeze({name:names[0],m,p,dim:dimOf(dim),pre,temp:!!extra.temp,zero:extra.zero||0,ice:extra.ice||0,note:extra.note||''});
+ for(const n of names){if(UNITS[n])throw Error('Duplicate unit symbol '+n);UNITS[n]=unit;}
+}
+//     m  kg  s  A  K mol cd
+def(['m'],1,0,[1,0,0,0,0,0,0],true);
+def(['g'],1,-3,[0,1,0,0,0,0,0],true);
+def(['s'],1,0,[0,0,1,0,0,0,0],true);
+def(['A'],1,0,[0,0,0,1,0,0,0],true);
+def(['K'],1,0,[0,0,0,0,1,0,0],true,{temp:true,ice:273.15});
+def(['mol'],1,0,[0,0,0,0,0,1,0],true);
+def(['cd'],1,0,[0,0,0,0,0,0,1],true);
+def(['N'],1,0,[1,1,-2,0,0,0,0],true);
+def(['J'],1,0,[2,1,-2,0,0,0,0],true);
+def(['W'],1,0,[2,1,-3,0,0,0,0],true);
+def(['Pa'],1,0,[-1,1,-2,0,0,0,0],true);
+def(['Hz'],1,0,[0,0,-1,0,0,0,0],true);
+def(['C'],1,0,[0,0,1,1,0,0,0],true);
+def(['V'],1,0,[2,1,-3,-1,0,0,0],true);
+def(['Ω','\u2126','ohm'],1,0,[2,1,-3,-2,0,0,0],true);
+def(['F'],1,0,[-2,-1,4,2,0,0,0],true);
+def(['H'],1,0,[2,1,-2,-2,0,0,0],true);
+def(['S'],1,0,[-2,-1,3,2,0,0,0],true);
+def(['Wb'],1,0,[2,1,-2,-1,0,0,0],true);
+def(['T'],1,0,[0,1,-2,-1,0,0,0],true);
+def(['L','l'],1,-3,[3,0,0,0,0,0,0],true);
+def(['rad'],1,0,[0,0,0,0,0,0,0],true);
+def(['sr'],1,0,[0,0,0,0,0,0,0]);
+def(['deg','°'],Math.PI/180,0,[0,0,0,0,0,0,0]);
+def(['min'],60,0,[0,0,1,0,0,0,0]);
+def(['h'],3600,0,[0,0,1,0,0,0,0]);
+def(['day'],86400,0,[0,0,1,0,0,0,0]);
+def(['eV'],1.602176634,-19,[2,1,-2,0,0,0,0],true);
+def(['cal'],4.184,0,[2,1,-2,0,0,0,0],true,{note:'thermochemical calorie'});
+def(['Wh'],3600,0,[2,1,-2,0,0,0,0],true);
+def(['bar'],1,5,[-1,1,-2,0,0,0,0],true);
+def(['atm'],101325,0,[-1,1,-2,0,0,0,0]);
+def(['degC','°C','℃'],1,0,[0,0,0,0,1,0,0],false,{temp:true,zero:273.15,ice:0});
+def(['degF','°F','℉'],5/9,0,[0,0,0,0,1,0,0],false,{temp:true,zero:459.67,ice:32});
+def(['R','degR','°R'],5/9,0,[0,0,0,0,1,0,0],false,{temp:true,ice:491.67});
+/* US customary / imperial (exact NIST SP 811 definitions). */
+def(['in'],2.54,-2,[1,0,0,0,0,0,0]);
+def(['ft'],0.3048,0,[1,0,0,0,0,0,0]);
+def(['yd'],0.9144,0,[1,0,0,0,0,0,0]);
+def(['mi'],1609.344,0,[1,0,0,0,0,0,0]);
+def(['lb','lbm'],0.45359237,0,[0,1,0,0,0,0,0]);
+def(['lbf'],4.4482216152605,0,[1,1,-2,0,0,0,0]);
+def(['psi'],4.4482216152605/0.00064516,0,[-1,1,-2,0,0,0,0]);
+def(['ksi'],4.4482216152605/0.00064516,3,[-1,1,-2,0,0,0,0]);
+def(['gal'],3.785411784,-3,[3,0,0,0,0,0,0],false,{note:'US liquid gallon'});
+def(['mph'],1609.344/3600,0,[1,0,-1,0,0,0,0]);
+def(['hp'],745.69987158227022,0,[2,1,-3,0,0,0,0],false,{note:'mechanical horsepower'});
+def(['BTU','Btu'],1055.05585262,0,[2,1,-2,0,0,0,0],false,{note:'International Table BTU'});
+/* Names deliberately rejected because they denote several different quantities. */
+const AMBIGUOUS={
+ ton:'"ton" is ambiguous (short ton, long ton or metric tonne); write the mass in lb or kg.',
+ oz:'"oz" is ambiguous (avoirdupois mass ounce or US fluid ounce) and is not supported.',
+ Cal:'"Cal" (food Calorie) is easily confused with "cal"; write kcal.',
+ gallon:'"gallon" is ambiguous (US or imperial); "gal" means the US liquid gallon.',
+ mil:'"mil" is ambiguous (thousandth of an inch or milliradian) and is not supported.'
+};
+const NAMED=['N','J','W','Pa','Hz','C','V','Ω','F','H','S','Wb','T'].map(n=>UNITS[n]);
+
+function decompositions(token){
+ const out=[];
+ for(const [prefix,power] of Object.entries(PREFIX)){
+  if(token.length>prefix.length&&token.startsWith(prefix)){
+   const unit=UNITS[token.slice(prefix.length)];
+   if(unit&&unit.pre)out.push({prefix,power,unit});
+  }
+ }
+ return out;
+}
+function suggest(token){
+ const lower=token.toLowerCase(),names=Object.keys(UNITS).filter(n=>n.toLowerCase()===lower);
+ for(const [prefix] of Object.entries(PREFIX)){
+  const rest=token.slice(prefix.length);
+  if(token.startsWith(prefix)&&UNITS[rest]&&!UNITS[rest].pre)return ' SI prefix "'+prefix+'" cannot be applied to "'+rest+'".';
+ }
+ return names.length?' Did you mean '+names.map(n=>'"'+n+'"').join(' or ')+'? Unit symbols are case-sensitive.':'';
+}
+/* Exact symbols win only when no prefixed reading also exists; otherwise the token is rejected as ambiguous. */
+function resolveUnit(token,pos){
+ if(Object.prototype.hasOwnProperty.call(AMBIGUOUS,token))throw Error('Ambiguous unit at position '+(pos+1)+': '+AMBIGUOUS[token]);
+ const exact=UNITS[token],split=decompositions(token);
+ if(exact&&!split.length)return {unit:exact,power:0};
+ if(split.length+(exact?1:0)>1){
+  const readings=(exact?['"'+token+'" ('+exact.name+')']:[]).concat(split.map(s=>'"'+s.prefix+'" + "'+s.unit.name+'"'));
+  throw Error('Ambiguous unit "'+token+'" at position '+(pos+1)+': it reads as '+readings.join(' or ')+'.');
+ }
+ if(split.length)return {unit:split[0].unit,power:split[0].power};
+ throw Error('Unknown unit "'+token+'" at position '+(pos+1)+'.'+suggest(token));
+}
+function collisions(){return Object.keys(UNITS).filter(n=>decompositions(n).length);}
+
+const SUPER={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁻':'-'};
+const IDENT=/[A-Za-z\u00b5\u03bc\u03a9\u2126\u00b0\u2103\u2109_]/;
+function tokenize(src){
+ const tokens=[];let i=0;
+ while(i<src.length){
+  const c=src[i];
+  if(/\s/.test(c)){i++;continue;}
+  if(IDENT.test(c)){let j=i;while(j<src.length&&IDENT.test(src[j]))j++;tokens.push({t:'id',v:src.slice(i,j),pos:i});i=j;continue;}
+  if(/\d/.test(c)){let j=i;while(j<src.length&&/\d/.test(src[j]))j++;tokens.push({t:'num',v:src.slice(i,j),pos:i});i=j;continue;}
+  if(SUPER[c]!==undefined){
+   let j=i,text='';while(j<src.length&&SUPER[src[j]]!==undefined){text+=SUPER[src[j]];j++;}
+   if(!/^-?\d+$/.test(text))throw Error('Malformed superscript exponent at position '+(i+1)+'.');
+   tokens.push({t:'sup',v:Number(text),pos:i});i=j;continue;
+  }
+  if('*·⋅×/^()-'.includes(c)){tokens.push({t:'op',v:c==='⋅'||c==='×'||c==='·'?'*':c,pos:i});i++;continue;}
+  throw Error('Unexpected character "'+c+'" at position '+(i+1)+'.');
+ }
+ return tokens;
+}
+/* term = {m, p, dim, atoms}; factor = m × 10^p. atoms tracks referenced units for temperature semantics. */
+function unity(){return {m:1,p:0,dim:ZERO_DIM(),atoms:[]};}
+function combine(a,b,sign){
+ return {m:sign>0?a.m*b.m:a.m/b.m,p:a.p+sign*b.p,dim:a.dim.map((r,i)=>radd(r,rmul(b.dim[i],rat(sign)))),
+  atoms:a.atoms.concat(b.atoms.map(x=>({unit:x.unit,exp:rmul(x.exp,rat(sign))})))};
+}
+function power(a,e){
+ const v=rval(e);
+ return {m:Math.pow(a.m,v),p:a.p*v,dim:a.dim.map(r=>rmul(r,e)),atoms:a.atoms.map(x=>({unit:x.unit,exp:rmul(x.exp,e)}))};
+}
+function parse(expression){
+ const src=String(expression??'').trim();
+ if(!src)throw Error('Enter a unit expression, for example kg*m/s^2.');
+ if(src.length>MAX_EXPR)throw Error('Unit expression exceeds '+MAX_EXPR+' characters.');
+ const tokens=tokenize(src);let k=0;
+ const peek=()=>tokens[k],end=()=>k>=tokens.length;
+ const where=()=>end()?'at the end':'at position '+(peek().pos+1);
+ const isOp=v=>!end()&&peek().t==='op'&&peek().v===v;
+ function integer(){
+  let sign=1;if(isOp('-')){k++;sign=-1;}
+  if(end()||peek().t!=='num')throw Error('Expected an integer exponent '+where()+'.');
+  return sign*Number(tokens[k++].v);
+ }
+ function exponent(){
+  if(!end()&&peek().t==='sup')return rat(tokens[k++].v);
+  if(isOp('(')){
+   k++;const n=integer();let d=1;
+   if(isOp('/')){k++;d=integer();if(d<=0)throw Error('Exponent denominator must be a positive integer.');}
+   if(!isOp(')'))throw Error('Expected ")" to close the exponent '+where()+'.');
+   k++;return rat(n,d);
+  }
+  return rat(integer());
+ }
+ function primary(){
+  if(end())throw Error('Expected a unit, "1" or "(" at the end of the expression.');
+  const tok=peek();
+  if(tok.t==='id'){k++;const r=resolveUnit(tok.v,tok.pos),u=r.unit;
+   return {m:u.m,p:u.p+r.power,dim:u.dim.slice(),atoms:[{unit:u,exp:rat(1),prefixed:r.power!==0}]};}
+  if(tok.t==='num'){
+   if(tok.v!=='1')throw Error('Numeric factor "'+tok.v+'" at position '+(tok.pos+1)+' is not allowed in a unit; use ^(p/q) for rational exponents.');
+   k++;return unity();
+  }
+  if(isOp('(')){k++;const inner=expr();if(!isOp(')'))throw Error('Expected ")" '+where()+'.');k++;return inner;}
+  throw Error('Expected a unit, "1" or "(" '+where()+'.');
+ }
+ function factor(){
+  let base=primary();
+  if(!end()&&(isOp('^')||peek().t==='sup')){
+   if(isOp('^'))k++;
+   const e=exponent();
+   if(Math.abs(rval(e))>MAX_EXP||e[1]>12)throw Error('Exponent '+e[0]+(e[1]===1?'':'/'+e[1])+' is outside the supported range.');
+   base=power(base,e);
+   if(!end()&&(isOp('^')||peek().t==='sup'))throw Error('Chained exponents are not allowed '+where()+'; use parentheses.');
+  }
+  return base;
+ }
+ function expr(){
+  let left=factor();
+  while(isOp('*')||isOp('/')){const sign=tokens[k++].v==='*'?1:-1;left=combine(left,factor(),sign);}
+  return left;
+ }
+ const result=expr();
+ if(!end())throw Error('Unexpected "'+peek().v+'" '+where()+'; join units with * or /.');
+ const factorValue=result.m*Math.pow(10,result.p);
+ if(!Number.isFinite(factorValue)||factorValue===0)throw Error('Unit scale factor is outside the floating-point range.');
+ const single=result.atoms.length===1&&result.atoms[0].exp[0]===1&&result.atoms[0].exp[1]===1?result.atoms[0].unit:null;
+ return Object.freeze({expression:src,factor:factorValue,m:result.m,p:result.p,dim:result.dim,
+  vector:result.dim.map(rval),dimension:dimensionText(result.dim),si:siText(result.dim),
+  bareTemperature:single&&single.temp?single:null,
+  affineInCompound:result.atoms.some(x=>x.unit.zero!==0)&&!(single&&single.temp)});
+}
+function ratio(a,b){return (a.m/b.m)*Math.pow(10,a.p-b.p);}
+function parseValue(value){
+ if(typeof value==='number'){if(!Number.isFinite(value))throw Error('Value must be a finite number.');return value;}
+ const s=String(value??'').trim();
+ if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(s))throw Error('Value must be a finite decimal number such as 12.5 or 1e-3.');
+ const v=Number(s);if(!Number.isFinite(v))throw Error('Value must be a finite number.');
+ return v;
+}
+function dimensions(expression){const u=parse(expression);return {vector:u.vector,text:u.dimension,si:u.si};}
+function simplify(expression){
+ const u=parse(expression);
+ const named=NAMED.find(n=>sameDim(n.dim,u.dim));
+ return {factor:u.factor,si:u.si,dimension:u.dimension,vector:u.vector,
+  named:named&&Math.abs(u.factor-1)<=1e-12?named.name:null,
+  text:u.expression+' = '+u.factor+' '+u.si};
+}
+/* Temperatures: absolute (affine) conversion only between two bare temperature units such as degC → degF.
+   Inside compound expressions °C/°F/K/R are temperature differences (W/(m^2*degC) ≡ W/(m^2*K)).
+   options.difference = true treats bare temperatures as differences too (10 degC difference = 18 degF). */
+function convert(value,from,to,options={}){
+ const v=parseValue(value),a=parse(from),b=parse(to),difference=!!(options&&options.difference);
+ if(!sameDim(a.dim,b.dim))throw Error('Dimension mismatch: "'+a.expression+'" has dimension '+a.dimension+' '+vectorText(a.dim)+
+  ' but "'+b.expression+'" has dimension '+b.dimension+' '+vectorText(b.dim)+' over (m, kg, s, A, K, mol, cd).');
+ let out,mode='linear',factor=ratio(a,b);
+ const ta=a.bareTemperature,tb=b.bareTemperature;
+ if(!difference&&ta&&tb){
+  /* Anchor at the ice point (0 °C) so that e.g. 100 °C → 212 °F and −40 °C → −40 °F are exact in binary64. */
+  if((v-ta.ice)*a.factor+273.15<-1e-9)throw Error('Temperature '+v+' '+a.expression+' is below absolute zero.');
+  out=(v-ta.ice)*(a.factor/b.factor)+tb.ice;mode='absolute';factor=null;
+ }else if(!difference&&(ta||tb)&&((ta||tb).zero!==0||(ta?b:a).affineInCompound)){
+  throw Error('Absolute temperature conversion between bare "'+(ta?a:b).expression+'" and compound "'+(ta?b:a).expression+
+   '" is not defined. Inside compound units temperatures are differences; tick "Temperature difference" or use bare temperature units on both sides.');
+ }else if(difference&&(ta||tb)||a.affineInCompound||b.affineInCompound)mode='difference';
+ out=mode==='absolute'?out:v*factor;
+ if(!Number.isFinite(out))throw Error('Converted value overflows the floating-point range.');
+ return {value:out,from:a.expression,to:b.expression,factor,mode,dimension:a.dimension,vector:a.vector,si:a.si,
+  siValue:mode==='absolute'?(v-ta.ice)*a.factor+273.15:v*a.factor};
+}
+function formatNumber(x){
+ if(x===0)return '0';
+ const t=Number(x.toPrecision(15));
+ return Math.abs(t)>=1e15||Math.abs(t)<1e-6?t.toExponential():String(t);
+}
+const api=Object.freeze({parse,convert,dimensions,simplify,formatNumber,
+ units:()=>Object.keys(UNITS),prefixes:()=>Object.assign({},PREFIX),_collisions:collisions});
+M.units=api;
+
+const panel=typeof document!=='undefined'&&document.getElementById('calculator-panel');
+if(!panel)return;
+const $=id=>document.getElementById(id);
+const area=document.createElement('details');area.id='units-details';
+area.innerHTML='<summary>Unit conversion and dimensional analysis · offline</summary>'+
+ '<p class="small-note">SI base, prefixed (q…Q, µ/u, da), derived and exact NIST US customary units. Write products with * or ·, quotients with /, exponents as ^2, ^-1 or ^(1/2), e.g. W/(m^2*K). '+
+ 'Absolute °C/°F conversion applies to bare temperatures only; inside compound units temperatures are differences (W/(m^2*degC) ≡ W/(m^2*K)). Leave “To unit” empty to simplify to SI base units. Floating-point (binary64) results.</p>'+
+ '<div class="units-fields"><label for="units-value">Value<input id="units-value" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" value="1"></label>'+
+ '<label for="units-from">From unit<input id="units-from" type="text" spellcheck="false" autocomplete="off" value="mi"></label>'+
+ '<label for="units-to">To unit<input id="units-to" type="text" spellcheck="false" autocomplete="off" value="m"></label></div>'+
+ '<label class="units-delta"><input id="units-delta" type="checkbox"> Temperature difference (Δ, no offset)</label>'+
+ '<div class="data-toolbar"><button id="units-convert" class="primary" type="button">Convert</button></div>'+
+ '<pre id="units-output" role="status" aria-live="polite">Enter a value and units, then press Convert or Enter.</pre>';
+panel.append(area);
+const style=document.createElement('style');style.textContent=
+ '#units-details{margin:16px 22px 22px;padding:14px;border:1px solid #dce4f6;border-radius:12px;background:#fbfcff;min-width:0;max-width:100%;box-sizing:border-box}'+
+ '#units-details summary{cursor:pointer;font-weight:750;color:#3c50ae;min-height:40px;display:flex;align-items:center}'+
+ '.units-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0}'+
+ '.units-fields label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#566784;font-weight:700;min-width:0}'+
+ '.units-fields input{min-width:0;width:100%;box-sizing:border-box;min-height:40px;border:1px solid #cdd8ec;border-radius:8px;padding:9px;background:white;font:inherit}'+
+ '.units-delta{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#566784;min-height:40px}'+
+ '.units-delta input{width:20px;height:20px}'+
+ '#units-convert{min-height:40px;min-width:40px}'+
+ '#units-output{white-space:pre-wrap;overflow-wrap:anywhere;background:white;border:1px solid #dce5f3;border-radius:9px;padding:12px;max-height:250px;overflow:auto}'+
+ '#units-output.error{color:#a82241;background:#fff2f4}'+
+ '@media(max-width:600px){.units-fields{grid-template-columns:1fr}#units-details{margin:12px}}';
+document.head.append(style);
+const output=$('units-output');
+function run(){
+ try{
+  const to=$('units-to').value.trim();
+  if(!to){
+   const s=simplify($('units-from').value),v=parseValue($('units-value').value);
+   output.textContent=formatNumber(v*s.factor)+' '+s.si+(s.named?'  (≡ '+s.named+')':'')+'\nDimension: '+s.dimension+'\nScale: 1 '+$('units-from').value.trim()+' = '+formatNumber(s.factor)+' '+s.si;
+  }else{
+   const r=convert($('units-value').value,$('units-from').value,to,{difference:$('units-delta').checked});
+   output.textContent=formatNumber(r.value)+' '+r.to+'\nDimension: '+r.dimension+' · SI base: '+formatNumber(r.siValue)+' '+r.si+'\n'+
+    (r.mode==='absolute'?'Absolute temperature conversion (affine offset applied).':r.mode==='difference'?'Temperature-difference conversion (no offset).':'Factor: 1 '+r.from+' = '+formatNumber(r.factor)+' '+r.to);
+  }
+  output.classList.remove('error');
+ }catch(e){output.classList.add('error');output.textContent=e.message+'\nCorrect the input and press Convert again.';}
+}
+$('units-convert').addEventListener('click',run);
+for(const id of ['units-value','units-from','units-to']){
+ $(id).addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();run();}});
+ $(id).addEventListener('input',()=>{output.classList.remove('error');output.textContent='Inputs changed. Press Convert or Enter.';});
+}
+$('units-delta').addEventListener('change',()=>{output.classList.remove('error');output.textContent='Option changed. Press Convert or Enter.';});
+})();
+</script>
 <script id="promath-workspace-tasks">
 /* Task-first progressive disclosure while preserving existing computation modules. */
 (()=>{'use strict';
@@ -8508,6 +9906,308 @@ get('complex-view').addEventListener('change',render);
 get('complex-function').addEventListener('change',render);
 root.addEventListener('toggle',()=>{if(root.open)render();});
 window.ProMathComplexGraph={evaluate:calc,render};
+})();
+</script>
+<script id="promath-graph-curves">
+/* ProMathStudio: implicit F(x,y)=0, parametric (x(t),y(t)) and polar r(theta) 2D curves.
+   Expressions are evaluated only through MathStudio.numerical.evaluate (no eval/Function). */
+(()=>{'use strict';
+const M=window.MathStudio;
+if(!M?.numerical?.evaluate)return;
+const MAX_GRID=300,MIN_GRID=4,MAX_SAMPLES=20000,MIN_SAMPLES=2,MAX_EXPR=1500;
+
+const fail=message=>{throw Error(message);};
+const finite=(value,label)=>{const n=typeof value==='string'?(value.trim()?Number(value):NaN):Number(value);if(!Number.isFinite(n))fail(label+' must be a finite number.');return n;};
+const intIn=(value,min,max,label)=>{const n=finite(value,label);if(!Number.isInteger(n)||n<min||n>max)fail(label+' must be an integer from '+min+' to '+max+'.');return n;};
+const cleanExpr=(expr,label)=>{const s=String(expr??'').replace(/θ/g,'theta').trim();if(!s)fail(label+' is empty. Enter an expression.');if(s.length>MAX_EXPR)fail(label+' exceeds '+MAX_EXPR+' characters.');return s;};
+const window2=(lo,hi,label)=>{const a=finite(lo,label+' minimum'),b=finite(hi,label+' maximum');if(!(b>a))fail(label+' maximum must be greater than its minimum.');if(Math.abs(a)>1e12||Math.abs(b)>1e12)fail(label+' bounds must be within ±1e12.');return [a,b];};
+
+/* An unknown variable or syntax error must be reported, not silently rendered as a blank plot. */
+const fatal=err=>/unknown variable|unexpected|syntax|unbalanced|parenthes|expected|maximum 1,500|unsupported|unknown function/i.test(String(err&&err.message));
+function safeEval(expr,env){
+ try{const v=M.numerical.evaluate(expr,env);return Number.isFinite(v)?v:NaN;}
+ catch(err){if(fatal(err))throw err;return NaN;}
+}
+
+/* Implicit equations: "lhs = rhs" becomes F = lhs - rhs; a bare expression is F. */
+function implicitFunction(expr){
+ const s=cleanExpr(expr,'Implicit equation');
+ const parts=s.split('=');
+ if(parts.length>2||/==|<=|>=|!=/.test(s))fail('Use a single "=" in the implicit equation, for example x^2 + y^2 = 1.');
+ if(parts.length===2){
+  const lhs=parts[0].trim(),rhs=parts[1].trim();
+  if(!lhs||!rhs)fail('Both sides of "=" need an expression.');
+  return (x,y)=>{const a=safeEval(lhs,{x,y});if(!Number.isFinite(a))return NaN;const b=safeEval(rhs,{x,y});return a-b;};
+ }
+ return (x,y)=>safeEval(s,{x,y});
+}
+
+/* Refine a sign change of F on the segment P(s)=A+s(B-A), s in [0,1], with an Illinois
+   false-position iteration safeguarded by periodic bisection so the bracket always shrinks. */
+function refineEdge(F,ax,ay,bx,by,fa,fb){
+ let lo=0,hi=1,flo=fa,fhi=fb,side=0,s=fa/(fa-fb),fs=NaN;
+ const at=t=>F(ax+(bx-ax)*t,ay+(by-ay)*t);
+ for(let it=0;it<48;it++){
+  s=(it%3===2)?(lo+hi)/2:(lo*fhi-hi*flo)/(fhi-flo);
+  if(!(s>lo&&s<hi))s=(lo+hi)/2;
+  fs=at(s);
+  if(!Number.isFinite(fs))return {s,residual:Infinity};
+  if(fs===0||hi-lo<1e-15)break;
+  if((fs>0)===(flo>0)){lo=s;flo=fs;if(side===-1)fhi/=2;side=-1;}
+  else{hi=s;fhi=fs;if(side===1)flo/=2;side=1;}
+  if(Math.abs(fs)<1e-15)break;
+ }
+ return {s,residual:Math.abs(fs)};
+}
+
+function implicit(expr,options={}){
+ const F=implicitFunction(expr);
+ const [xmin,xmax]=window2(options.xmin??-2,options.xmax??2,'x');
+ const [ymin,ymax]=window2(options.ymin??-2,options.ymax??2,'y');
+ const nx=intIn(options.nx??options.grid??160,MIN_GRID,MAX_GRID,'Grid cells in x');
+ const ny=intIn(options.ny??options.grid??160,MIN_GRID,MAX_GRID,'Grid cells in y');
+ const tolScale=Number.isFinite(options.tolerance)&&options.tolerance>0?options.tolerance:1e-6;
+ const hx=(xmax-xmin)/nx,hy=(ymax-ymin)/ny,X=i=>xmin+i*hx,Y=j=>ymin+j*hy;
+ const V=new Float64Array((nx+1)*(ny+1));let finiteCount=0;
+ for(let j=0;j<=ny;j++)for(let i=0;i<=nx;i++){const v=F(X(i),Y(j));V[j*(nx+1)+i]=v;if(Number.isFinite(v))finiteCount++;}
+ if(!finiteCount)fail('F(x, y) is not finite anywhere on the grid. Check the expression and the window.');
+ const at=(i,j)=>V[j*(nx+1)+i];
+ let rejected=0,maxResidual=0;
+ /* One refined crossing per grid edge, shared by neighbouring cells. */
+ const crossing=(i0,j0,i1,j1)=>{
+  const a=at(i0,j0),b=at(i1,j1);
+  if(!Number.isFinite(a)||!Number.isFinite(b)||(a>0)===(b>0))return null;
+  const ax=X(i0),ay=Y(j0),bx=X(i1),by=Y(j1);
+  const r=refineEdge(F,ax,ay,bx,by,a,b);
+  const tol=tolScale*Math.max(1,Math.min(Math.abs(a),Math.abs(b)));
+  if(!(r.residual<=tol)){rejected++;return false;}
+  if(r.residual>maxResidual)maxResidual=r.residual;
+  return [ax+(bx-ax)*r.s,ay+(by-ay)*r.s];
+ };
+ const H=new Array(nx*(ny+1)),Vt=new Array((nx+1)*ny);
+ for(let j=0;j<=ny;j++)for(let i=0;i<nx;i++)H[j*nx+i]=crossing(i,j,i+1,j);
+ for(let j=0;j<ny;j++)for(let i=0;i<=nx;i++)Vt[j*(nx+1)+i]=crossing(i,j,i,j+1);
+ const segments=[];let ambiguous=0;
+ for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){
+  const c=[at(i,j),at(i+1,j),at(i+1,j+1),at(i,j+1)];
+  if(!c.every(Number.isFinite))continue;
+  const e=[H[j*nx+i],Vt[j*(nx+1)+i+1],H[(j+1)*nx+i],Vt[j*(nx+1)+i]];/* bottom,right,top,left */
+  const present=[0,1,2,3].filter(k=>e[k]!==null);
+  let pairs;
+  if(present.length===2)pairs=[present];
+  else if(present.length===4){
+   ambiguous++;
+   const centre=(c[0]+c[1]+c[2]+c[3])/4;
+   pairs=((centre>0)===(c[0]>0))?[[0,1],[2,3]]:[[3,0],[1,2]];
+  }else continue;
+  for(const [p,q] of pairs){if(e[p]&&e[q])segments.push([e[p][0],e[p][1],e[q][0],e[q][1]]);}
+ }
+ return {type:'implicit',segments,segmentCount:segments.length,rejected,maxResidual,ambiguousCells:ambiguous,
+  grid:[nx,ny],window:{xmin,xmax,ymin,ymax},finiteFraction:finiteCount/V.length};
+}
+
+function sampleCount(n){
+ const s=finite(n,'Samples');
+ if(!Number.isInteger(s))fail('Samples must be an integer.');
+ if(s>MAX_SAMPLES)fail('Too many samples: maximum is '+MAX_SAMPLES.toLocaleString('en-US')+'.');
+ if(s<MIN_SAMPLES)fail('Samples must be at least '+MIN_SAMPLES+'.');
+ return s;
+}
+function polylines(points){
+ const lines=[];let current=[],breaks=0;
+ for(const p of points){
+  if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){current.push(p);}
+  else{if(current.length){lines.push(current);breaks++;}current=[];}
+ }
+ if(current.length)lines.push(current);
+ return {lines,breaks};
+}
+function finish(type,points,extra){
+ const finitePoints=points.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
+ if(!finitePoints.length)fail('The curve is not finite at any sample. Check the expressions and parameter range.');
+ const {lines,breaks}=polylines(points);
+ return Object.assign({type,points,polylines:lines,breaks,finiteCount:finitePoints.length,nonFinite:points.length-finitePoints.length},extra);
+}
+function parametric(xExpr,yExpr,options={}){
+ const xs=cleanExpr(xExpr,'x(t)'),ys=cleanExpr(yExpr,'y(t)');
+ const [t0,t1]=window2(options.t0??0,options.t1??2*Math.PI,'t');
+ const n=sampleCount(options.samples??400);
+ const points=[];
+ for(let k=0;k<n;k++){const t=k===n-1?t1:t0+(t1-t0)*k/(n-1);const x=safeEval(xs,{t}),y=Number.isFinite(x)?safeEval(ys,{t}):NaN;points.push({t,x,y});}
+ return finish('parametric',points,{range:[t0,t1],samples:n});
+}
+/* Negative r is plotted through the origin: (r cos theta, r sin theta) with signed r. */
+function polar(rExpr,options={}){
+ const rs=cleanExpr(rExpr,'r(θ)');
+ const [a,b]=window2(options.theta0??0,options.theta1??2*Math.PI,'θ');
+ const n=sampleCount(options.samples??720);
+ const points=[];
+ for(let k=0;k<n;k++){const theta=k===n-1?b:a+(b-a)*k/(n-1);const r=safeEval(rs,{theta});points.push({theta,r,x:r*Math.cos(theta),y:r*Math.sin(theta)});}
+ return finish('polar',points,{range:[a,b],samples:n});
+}
+
+function bounds(result){
+ if(result.type==='implicit'){const w=result.window;return [w.xmin,w.xmax,w.ymin,w.ymax];}
+ let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+ for(const p of result.points)if(Number.isFinite(p.x)&&Number.isFinite(p.y)){x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y);}
+ const px=(x1-x0)*.06||Math.max(1,Math.abs(x0))*.1,py=(y1-y0)*.06||Math.max(1,Math.abs(y0))*.1;
+ return [x0-px,x1+px,y0-py,y1+py];
+}
+function niceStep(span,count){
+ const raw=span/Math.max(1,count),p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;
+ return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p;
+}
+const fmt=v=>{const a=Math.abs(v);if(a<1e-12)return '0';if(a>=1e5||a<1e-3)return v.toExponential(2);return String(Number(v.toPrecision(6)));};
+
+/* Shared canvas renderer: axes, grid, tick labels and the curve. Returns the view transform. */
+function draw(canvas,result,options={}){
+ const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+ const pad={l:72,r:18,t:16,b:44};
+ let [x0,x1,y0,y1]=bounds(result);
+ const pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+ if(options.equal){
+  const sx=pw/(x1-x0),sy=ph/(y1-y0),s=Math.min(sx,sy);
+  const cx=(x0+x1)/2,cy=(y0+y1)/2,hw=pw/s/2,hh=ph/s/2;
+  x0=cx-hw;x1=cx+hw;y0=cy-hh;y1=cy+hh;
+ }
+ const sx=pw/(x1-x0),sy=ph/(y1-y0);
+ const px=x=>pad.l+(x-x0)*sx,py=y=>pad.t+(y1-y)*sy;
+ ctx.save();
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);
+ ctx.font='17px system-ui,sans-serif';ctx.lineWidth=1;
+ const stepX=niceStep(x1-x0,Math.max(3,Math.round(pw/90))),stepY=niceStep(y1-y0,Math.max(3,Math.round(ph/70)));
+ ctx.strokeStyle='#e4ecee';ctx.fillStyle='#3d5960';
+ ctx.textAlign='center';ctx.textBaseline='top';
+ for(let v=Math.ceil(x0/stepX)*stepX;v<=x1+stepX*1e-9;v+=stepX){const X=px(v);ctx.beginPath();ctx.moveTo(X,pad.t);ctx.lineTo(X,h-pad.b);ctx.stroke();ctx.fillText(fmt(v),X,h-pad.b+6);}
+ ctx.textAlign='right';ctx.textBaseline='middle';
+ for(let v=Math.ceil(y0/stepY)*stepY;v<=y1+stepY*1e-9;v+=stepY){const Y=py(v);ctx.beginPath();ctx.moveTo(pad.l,Y);ctx.lineTo(w-pad.r,Y);ctx.stroke();ctx.fillText(fmt(v),pad.l-6,Y);}
+ ctx.strokeStyle='#5d7c84';ctx.lineWidth=1.6;ctx.beginPath();
+ if(y0<=0&&y1>=0){ctx.moveTo(pad.l,py(0));ctx.lineTo(w-pad.r,py(0));}
+ if(x0<=0&&x1>=0){ctx.moveTo(px(0),pad.t);ctx.lineTo(px(0),h-pad.b);}
+ ctx.stroke();
+ ctx.strokeStyle='#9fb5ba';ctx.lineWidth=1;ctx.strokeRect(pad.l,pad.t,pw,ph);
+ ctx.fillStyle='#27444b';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText('x',w-pad.r-4,h-pad.b-4);
+ ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('y',pad.l+6,pad.t+4);
+ ctx.beginPath();ctx.rect(pad.l,pad.t,pw,ph);ctx.clip();
+ ctx.strokeStyle='#c2410c';ctx.lineWidth=2.6;ctx.lineJoin='round';ctx.lineCap='round';
+ ctx.beginPath();
+ if(result.type==='implicit'){for(const s of result.segments){ctx.moveTo(px(s[0]),py(s[1]));ctx.lineTo(px(s[2]),py(s[3]));}}
+ else for(const line of result.polylines){
+  ctx.moveTo(px(line[0].x),py(line[0].y));
+  if(line.length===1)ctx.lineTo(px(line[0].x)+.01,py(line[0].y));
+  for(let k=1;k<line.length;k++)ctx.lineTo(px(line[k].x),py(line[k].y));
+ }
+ ctx.stroke();ctx.restore();
+ return {x0,x1,y0,y1};
+}
+
+/* Table rows for Data Tables export. */
+function tableOf(result){
+ if(result.type==='implicit'){const rows=[];result.segments.forEach((s,k)=>{rows.push([k+1,s[0],s[1]],[k+1,s[2],s[3]]);});return {headers:['segment','x','y'],rows};}
+ if(result.type==='parametric')return {headers:['t','x','y'],rows:result.points.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>[p.t,p.x,p.y])};
+ return {headers:['theta','r','x','y'],rows:result.points.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>[p.theta,p.r,p.x,p.y])};
+}
+
+const api={implicit,parametric,polar,draw,table:tableOf,limits:{maxGrid:MAX_GRID,maxSamples:MAX_SAMPLES}};
+M.graphCurves=api;
+
+/* ---------- UI (static markup only; user text never reaches innerHTML) ---------- */
+const panel=document.getElementById('graph-panel');
+if(!panel||document.getElementById('curves-details'))return;
+const style=document.createElement('style');style.id='graph-curves-style';
+style.textContent='#curves-details{padding:15px 18px;margin:12px 0 20px;border:1px solid #cfdde8;border-radius:13px;background:#f8fbfd;max-width:100%;box-sizing:border-box;min-width:0}'+
+'#curves-details>summary{font-weight:780;color:#1d5f86;cursor:pointer;font-size:15px;min-height:40px;display:flex;align-items:center}'+
+'#curves-details .curves-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}'+
+'#curves-details label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:650;color:#31545a;min-width:0}'+
+'#curves-details label.curves-wide{grid-column:span 2}'+
+'#curves-details input:not([type=checkbox]),#curves-details select{width:100%;min-width:0;min-height:42px;box-sizing:border-box;padding:9px 10px;border:1px solid #bfd3dc;border-radius:9px;background:#fff;color:#24434b;font:inherit}'+
+'#curves-details label.curves-check{flex-direction:row;align-items:center;min-height:42px}'+
+'#curves-details input[type=checkbox]{width:22px;height:22px}'+
+'#curves-details .curves-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px}'+
+'#curves-details .curves-actions button{min-height:42px}'+
+'#curves-status{font-size:13px;color:#3f5f68;overflow-wrap:anywhere}'+
+'#curves-status.curves-error{color:#b42318;font-weight:650}'+
+'#curves-canvas{display:block;width:100%;height:auto;aspect-ratio:3/2;background:#fff;border:1px solid #dce7e7;border-radius:12px}'+
+'#curves-details [hidden]{display:none!important}'+
+'@media(max-width:760px){#curves-details{padding:12px}#curves-details .curves-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}'+
+'@media(max-width:440px){#curves-details .curves-grid{grid-template-columns:minmax(0,1fr)}#curves-details label.curves-wide{grid-column:auto}}';
+document.head.appendChild(style);
+const root=document.createElement('details');root.id='curves-details';
+root.innerHTML='<summary>Implicit, parametric &amp; polar curves · F(x,y)=0, (x(t), y(t)), r(θ)</summary>'+
+'<p class="small-note">Implicit curves use marching squares with each edge crossing refined toward F = 0; sign changes across poles or jumps whose refined residual stays large are rejected and counted. Parametric and polar polylines break at non-finite samples. Polar r may be negative (plotted through the origin). Radian angles.</p>'+
+'<div class="curves-grid">'+
+'<label for="curves-type">Curve type<select id="curves-type"><option value="implicit">Implicit F(x, y) = 0</option><option value="parametric">Parametric x(t), y(t)</option><option value="polar">Polar r(θ)</option></select></label>'+
+'<label for="curves-expr" class="curves-wide" data-curves="implicit">Equation F(x, y) = 0 or lhs = rhs<input id="curves-expr" type="text" spellcheck="false" autocomplete="off" value="x^2 + y^2 = 1"></label>'+
+'<label for="curves-grid-n" data-curves="implicit">Grid cells per axis (4–300)<input id="curves-grid-n" type="number" min="4" max="300" step="1" value="160"></label>'+
+'<label for="curves-xmin" data-curves="implicit">x min<input id="curves-xmin" type="number" step="any" value="-2"></label>'+
+'<label for="curves-xmax" data-curves="implicit">x max<input id="curves-xmax" type="number" step="any" value="2"></label>'+
+'<label for="curves-ymin" data-curves="implicit">y min<input id="curves-ymin" type="number" step="any" value="-2"></label>'+
+'<label for="curves-ymax" data-curves="implicit">y max<input id="curves-ymax" type="number" step="any" value="2"></label>'+
+'<label for="curves-xt" class="curves-wide" data-curves="parametric" hidden>x(t)<input id="curves-xt" type="text" spellcheck="false" autocomplete="off" value="sin(3*t)"></label>'+
+'<label for="curves-yt" class="curves-wide" data-curves="parametric" hidden>y(t)<input id="curves-yt" type="text" spellcheck="false" autocomplete="off" value="sin(2*t)"></label>'+
+'<label for="curves-r" class="curves-wide" data-curves="polar" hidden>r(θ) (use theta)<input id="curves-r" type="text" spellcheck="false" autocomplete="off" value="cos(3*theta)"></label>'+
+'<label for="curves-p0" data-curves="parametric polar" hidden>Parameter start (t₀ or θ₀)<input id="curves-p0" type="number" step="any" value="0"></label>'+
+'<label for="curves-p1" data-curves="parametric polar" hidden>Parameter end (t₁ or θ₁)<input id="curves-p1" type="number" step="any" value="6.283185307179586"></label>'+
+'<label for="curves-samples" data-curves="parametric polar" hidden>Samples (2–20,000)<input id="curves-samples" type="number" min="2" max="20000" step="1" value="721"></label>'+
+'<label for="curves-equal" class="curves-check"><input id="curves-equal" type="checkbox" checked> Equal aspect (1:1)</label>'+
+'</div>'+
+'<div class="curves-actions"><button id="curves-plot" type="button" class="primary">Plot curve</button><button id="curves-save" type="button" class="secondary" disabled>Save points to Data Tables</button></div>'+
+'<p id="curves-status" role="status" aria-live="polite">Ready. Choose a curve type and press Plot curve.</p>'+
+'<canvas id="curves-canvas" width="900" height="600" role="img" aria-label="Implicit, parametric or polar curve plot (not yet plotted)"></canvas>';
+const anchor=document.getElementById('complex-graph-workbench');
+if(anchor&&panel.contains(anchor))anchor.after(root);else (panel.querySelector('.graph-wrap')||panel).appendChild(root);
+
+const $=id=>document.getElementById(id);
+const canvas=$('curves-canvas'),status=$('curves-status');
+let last=null;
+const setStatus=(text,error)=>{status.textContent=text;status.classList.toggle('curves-error',!!error);};
+const syncType=()=>{const type=$('curves-type').value;root.querySelectorAll('[data-curves]').forEach(el=>{el.hidden=!el.getAttribute('data-curves').split(' ').includes(type);});};
+const g=v=>Number(v.toPrecision(4));
+function plot(){
+ const type=$('curves-type').value;
+ try{
+  let result,summary,label;
+  if(type==='implicit'){
+   result=implicit($('curves-expr').value,{xmin:$('curves-xmin').value,xmax:$('curves-xmax').value,ymin:$('curves-ymin').value,ymax:$('curves-ymax').value,grid:$('curves-grid-n').value});
+   summary='Implicit curve: '+result.segmentCount+' segment'+(result.segmentCount===1?'':'s')+' on a '+result.grid[0]+'×'+result.grid[1]+' grid; max |F| at plotted points '+result.maxResidual.toExponential(2)+'; '+result.rejected+' pole/discontinuity sign change'+(result.rejected===1?'':'s')+' rejected.'+(result.segmentCount?'':' No zero contour found in this window.');
+   label='Implicit curve '+$('curves-expr').value.trim()+' with '+result.segmentCount+' segments, x from '+g(result.window.xmin)+' to '+g(result.window.xmax)+', y from '+g(result.window.ymin)+' to '+g(result.window.ymax);
+  }else if(type==='parametric'){
+   result=parametric($('curves-xt').value,$('curves-yt').value,{t0:$('curves-p0').value,t1:$('curves-p1').value,samples:$('curves-samples').value});
+   summary='Parametric curve: '+result.finiteCount+' finite of '+result.samples+' samples, '+result.polylines.length+' polyline piece'+(result.polylines.length===1?'':'s')+', t ∈ ['+g(result.range[0])+', '+g(result.range[1])+'].'+(result.nonFinite?' '+result.nonFinite+' non-finite sample'+(result.nonFinite===1?'':'s')+' break the curve.':'');
+   label='Parametric curve x(t) = '+$('curves-xt').value.trim()+', y(t) = '+$('curves-yt').value.trim()+' for t from '+g(result.range[0])+' to '+g(result.range[1]);
+  }else{
+   result=polar($('curves-r').value,{theta0:$('curves-p0').value,theta1:$('curves-p1').value,samples:$('curves-samples').value});
+   const rmax=Math.max(...result.points.filter(p=>Number.isFinite(p.r)).map(p=>Math.abs(p.r)));
+   summary='Polar curve: '+result.finiteCount+' finite of '+result.samples+' samples, '+result.polylines.length+' polyline piece'+(result.polylines.length===1?'':'s')+', θ ∈ ['+g(result.range[0])+', '+g(result.range[1])+'], max |r| = '+g(rmax)+'.'+(result.nonFinite?' '+result.nonFinite+' non-finite sample'+(result.nonFinite===1?'':'s')+' break the curve.':'');
+   label='Polar curve r(θ) = '+$('curves-r').value.trim()+' for θ from '+g(result.range[0])+' to '+g(result.range[1]);
+  }
+  draw(canvas,result,{equal:$('curves-equal').checked});
+  canvas.setAttribute('aria-label',label.slice(0,400));
+  last=result;$('curves-save').disabled=false;
+  setStatus(summary,false);
+ }catch(err){
+  last=null;$('curves-save').disabled=true;
+  setStatus('Error: '+err.message,true);
+ }
+}
+$('curves-type').addEventListener('change',()=>{syncType();last=null;$('curves-save').disabled=true;
+ setStatus('Ready. Press Plot curve.',false);});
+$('curves-plot').addEventListener('click',plot);
+$('curves-equal').addEventListener('change',()=>{if(last)draw(canvas,last,{equal:$('curves-equal').checked});});
+root.querySelectorAll('input[type=text],input[type=number]').forEach(input=>input.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();plot();}}));
+$('curves-save').addEventListener('click',()=>{
+ try{
+  if(!last)fail('Plot a curve first.');
+  if(!M.dataTables?.importData)fail('Data Tables are unavailable.');
+  const t=tableOf(last);if(!t.rows.length)fail('There are no points to save.');
+  if(t.rows.length>6000)fail('Too many points for one table ('+t.rows.length+' > 6,000). Reduce samples or grid cells.');
+  const name=last.type==='implicit'?'Implicit_Curve':last.type==='parametric'?'Parametric_Curve':'Polar_Curve';
+  M.dataTables.importData(t,name);
+  setStatus('Saved '+t.rows.length+' points to Data Tables as '+name+'.',false);
+ }catch(err){setStatus('Error: '+err.message,true);}
+});
+syncType();
+api.plot=plot;
 })();
 </script>
 <script id="promath-control-theory">

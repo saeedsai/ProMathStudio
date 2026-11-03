@@ -1,3 +1,16 @@
+## 2026-11-03 — Engineering simulations with animation (ENG-SIMULATIONS-125; user request)
+
+**Release checkpoint:** ENG-VISUALS-124 released via PR #183 at main eb62023; main Quality 41717592998 and Pages 41717592382 succeeded.
+
+**Implemented on branch (QA pending):** The user clarified that "engineering animation" means engineering simulation with relevant animation. Added `src/engineering-simulations.js` with five physics simulations: beam, orbit, series RLC, projectile with drag, and rod conduction. Each states its assumptions and uses SI units. The simulations reuse the existing RK4 and FTCS solvers where they apply; a small native vector RK4 handles the four-state projectile. `structures.beam.deflection` and `aerospace.orbit.propagation` move from planned to available under their narrowed published scope; three new catalog tools were added. Tests: `tests/test_engineering_simulations.py`, `tests/smoke_engineering_simulations.py`.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release ENG-SIMULATIONS-125 (pending):** exact-head Quality, ordinary PR to main, main Quality and Pages success.
+2. **P1 Simulation export (planned):** send simulation time series to Data Tables and Graphs through the existing transfer bridge; round-trip and column-identity tests.
+3. **P1 Forced vibration and resonance sweep (planned):** harmonic forcing on the existing RK4 system; amplitude-ratio reference 1/√((1−r²)²+(2ζr)²).
+4. **P1 Beam: overhang and multiple loads by superposition (planned):** superposition references and equilibrium checks; no design-code claims.
+5. **P1 Control Theory controller extraction (planned):** byte-identical rebuild; control smokes green.
+
 ## 2026-11-03 — BUILD-UTF8-DIAGNOSTIC-125 (dev checkpoint; exact-head CI pending)
 
 **Change:** The standalone builder now identifies the offending module path when its bytes cannot be decoded as UTF-8. The focused subprocess regression writes a malformed source file, checks the diagnostic, and asserts the original standalone HTML is unchanged. No generated bundle or JavaScript runtime behavior changes. Exact-head Quality, PR review and main/Pages release remain unverified for this checkpoint.

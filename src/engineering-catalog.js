@@ -27,11 +27,14 @@ const raw=[
  ['signals.spectral.analysis','Signal spectral analysis','Dedicated sampling/windowing/spectrum workflow is not yet implemented.','signals electronics','fft spectral frequency'],
  ['control.frequency.response','Control frequency response','Bode and frequency response analysis is not yet implemented.','control electrical','bode control stability'],
  ['thermal.cycle.analysis','Thermodynamic cycle analysis','Cycle efficiency calculations are not yet implemented.','physics mechanical','thermal energy'],
- ['structures.beam.deflection','Beam deflection and stress','Structural loading workflows are not yet implemented.','mechanical aerospace','beam mechanics'],
+ ['structures.beam.deflection','Beam deflection and stress','Animated Euler–Bernoulli simulation of simply supported or cantilever rectangular beams under a point or uniform load: deflection, bending moment, reactions and bending stress. Linear elastic, small deflection; no shear deformation, buckling or design-standard checks.','mechanical aerospace','beam mechanics structural deflection moment stress simulation','engineering','eng-visuals'],
  ['circuits.network.analysis','Circuit network analysis','General nodal circuit analysis is not yet implemented.','electrical electronics','circuit kirchhoff'],
  ['electronics.digital.logic','Digital logic simulation','Digital logic timing is not yet implemented.','electronics','logic digital'],
  ['fluids.pipe.network','Pipe network pressure loss','Pipe network calculations are not yet implemented.','fluids mechanical','hydraulic pipe'],
- ['aerospace.orbit.propagation','Orbital propagation','Orbit propagation is not yet implemented.','aerospace physics','orbit spaceflight']
+ ['aerospace.orbit.propagation','Orbital propagation','Animated planar two-body Earth orbit propagated with symplectic velocity Verlet, checked against Kepler period, energy and angular momentum. No J2, drag, third-body or relativistic effects.','aerospace physics','orbit spaceflight kepler satellite simulation','engineering','eng-visuals'],
+ ['circuits.rlc.series.transient','Series RLC step response','Animated transient of an ideal series RLC circuit switched onto a DC source: capacitor voltage, current, damping ratio and resonant frequency via the existing RK4 solver. Ideal lumped elements only; general multi-loop networks are a separate catalog entry.','electrical electronics','circuit rlc transient resonance damping simulation','engineering','eng-visuals'],
+ ['mechanics.projectile.drag','Projectile with air drag','Animated point-mass trajectory over flat ground with quadratic air drag, compared against the vacuum parabola: range, apex, flight time and impact speed. No lift, spin, wind or Mach effects.','physics mechanical aerospace','projectile ballistics drag trajectory simulation','engineering','eng-visuals'],
+ ['thermal.conduction.rod','Heat conduction in a rod','Animated 1-D transient conduction with fixed end temperatures and preset material diffusivities, using the existing explicit finite-difference heat solver (stability limit enforced). Insulated sides, constant properties.','physics mechanical','heat conduction thermal diffusion temperature simulation','engineering','eng-visuals']
 ];
 const ids=new Set(),valid=new Set(disciplines.map(d=>d.id));
 const tools=Object.freeze(raw.map(([id,title,description,domains,tags,mode,target,focusId])=>{
@@ -75,6 +78,8 @@ for(const [id,title] of [['','All nine disciplines'],...disciplines.map(d=>[d.id
 }
 function openTool(t){
  if(t.status!=='available')return;
+ // Simulation tools live in this workspace's Engineering simulations panel.
+ if(t.route.target==='eng-visuals'){M.advanced.mode('engineering');M.engineeringVisuals?.open(t.id);return;}
  M.advanced.mode(t.route.mode);
  requestAnimationFrame(()=>{
   if(t.route.target.startsWith('ct-')){

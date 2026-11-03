@@ -1,3 +1,19 @@
+- 2026-11-03 (ENG-SIMULATIONS-125; branch QA pending): Added engineering simulations with physics-driven animation in the renamed "Engineering simulations & animations" panel. A new DOM-free kernel module (`src/engineering-simulations.js`, SI units, stated assumptions) provides five simulations:
+  - **Euler–Bernoulli beam** (`structures.beam.deflection`, now available): simply supported or cantilever, point or uniform load; deflection, moment, shear, reactions and bending stress; the animated load ramp colours the beam by moment.
+  - **Two-body Earth orbit** (`aerospace.orbit.propagation`, now available): velocity-Verlet propagation checked against Kepler period, energy and angular momentum.
+  - **Series RLC step response** (new `circuits.rlc.series.transient`): dimensionless form on the existing RK4 solver; current dots and capacitor charge are animated.
+  - **Projectile with quadratic drag** (new `mechanics.projectile.drag`): compared against the vacuum parabola.
+  - **1-D heat conduction in a rod** (new `thermal.conduction.rod`): material presets on the existing FTCS solver; heat-map animation.
+
+  Catalog "Open existing tool" opens and runs each simulation. Pipe networks, general circuit networks and thermodynamic cycles stay planned. `tests/smoke_engineering_simulations.py` covers:
+  - **Beam:** four closed-form maxima to 1e-12, equilibrium, EI·v″ = −M and the off-centre maximum location.
+  - **Orbit:** vis-viva speed, period and closure.
+  - **RLC:** analytic underdamped vC and i within 1e-6·V.
+  - **Projectile:** drag-free range and apex.
+  - **Rod:** within 0.25 °C of a 400-term Fourier series.
+  - **Other:** invalid inputs, keyboard routing, select inputs, 390/768/1280 layout and reduced motion.
+
+  These are textbook-model estimates, not certified designs or code checks.
 - 2026-11-03 (BUILD-UTF8-DIAGNOSTIC-125; dev QA pending): Standalone builder reports the module path on invalid UTF-8 instead of an opaque decoding traceback; subprocess regression verifies the failure and unchanged HTML. Exact-head CI and release pending.
 - 2026-11-03 (ENG-VISUALS-124; branch QA pending): Engineering Toolbox gains an "Engineering animations" panel (`src/engineering-visuals.js`) with six animated canvas visuals, each linked to an available catalog tool and computed by its existing solver. They cover: mass–spring–damper step response (RK4 system; `control.transient.two.state`), nonlinear pendulum with energy-drift report (RK4; `ode.ivp.scalar`), two-tone signal with live FFT spectrum (`signals.fft.1d`), root bracket halving (`numerical.root.brent`), integral as accumulated area (adaptive Simpson; `numerical.quadrature.adaptive`) and symmetric matrix circle→ellipse transform with eigenvectors (`matrix.eigen.symmetric.small`). Controls include Play/Pause (aria-pressed) and Step, with live text summaries and a canvas aria-label. With prefers-reduced-motion the final frame is shown without autoplay. Catalog cards keep a single action button and gain a text note. The regression checks analytic references: underdamped step response within 1e-5 and overshoot e^(−πζ/√(1−ζ²)); small-angle period within 0.1%; energy drift below 1e-6; FFT bin amplitudes within 1e-12; Wallis cubic bracket width 2/2^14; ∫₀^π sin = 2; golden-ratio eigenvalues. It also covers invalid-input recovery, keyboard use, 390/768/1280 layout and a project round trip. These are illustrations, not certified engineering designs.
 - 2026-11-03 (ARCH-COMPLEX-GRAPH-MODULE-123; branch QA pending): Extracted the inline Complex Graph UI controller to canonical `src/complex-graph.js`, declared in `scripts/build.py`; the rebuilt standalone `index.html` is byte-identical (md5 unchanged, bundle size delta 0 bytes; one extra 3.9 KB source file). New Chromium regression checks z², 1/z and exp(z) references, keyboard activation, 390/768/1280 layout without horizontal overflow, invalid/overflow recovery and a saved-project round trip.

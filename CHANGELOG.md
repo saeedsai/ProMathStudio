@@ -1,3 +1,8 @@
+## 2026-11-03 — Missing standalone module source diagnostic (dev QA pending)
+
+- BUILD-MISSING-SOURCE-113: fail with an explicit missing-source path before writing standalone HTML when a module file is absent; add subprocess regression asserting diagnostic and original-index preservation. Exact-head Quality and Pages pending.
+- PR #178 merged normally at `1df9a6fbf69678268a937c06c39786c6a7fe3702` after successful exact-head Quality run 41640828944; post-merge main Quality and Pages verification pending.
+
 ## 2026-11-03 — Build missing-close regression correction
 
 - Fixed a truncated standalone script fixture to use actual newlines, allowing the existing missing-close diagnostic to be tested. CI run 41631737725 previously failed 1/291 structural tests due to the fixture; new exact-head CI pending. No production release claimed.

@@ -21,6 +21,7 @@ modules = [
     ("promath-control-equilibrium", "src/control-equilibrium.js"),
     ("promath-ode-tools", "src/ode-tools.js"),
     ("promath-stiff-ode", "src/stiff-ode.js"),
+    ("promath-bvp-tools", "src/bvp-tools.js"),
     ("promath-minimize-tools", "src/minimize-tools.js"),
     ("promath-optimization-tools", "src/optimization-tools.js"),
     ("promath-fft-tools", "src/fft-tools.js"),

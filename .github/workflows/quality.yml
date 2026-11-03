@@ -437,3 +437,5 @@ jobs:
         run: python tests/smoke_vector_fields.py
       - name: Engineering thermodynamic cycles and DC network nodal analysis browser regression
         run: python tests/smoke_engineering_thermo_circuits.py
+      - name: Engineering pipe networks (Darcy–Weisbach, Colebrook) and digital logic gates/flip-flops browser regression
+        run: python tests/smoke_engineering_pipe_logic.py

@@ -129,9 +129,9 @@ def main():
         statuses = page.evaluate("Object.fromEntries(MathStudio.engineeringCatalog.tools.map(t=>[t.id,t.status]))")
         for tool in ("structures.beam.deflection", "aerospace.orbit.propagation", "circuits.rlc.series.transient",
                      "mechanics.projectile.drag", "thermal.conduction.rod", "thermal.cycle.analysis",
-                     "circuits.network.analysis"):
+                     "circuits.network.analysis", "fluids.pipe.network", "electronics.digital.logic"):
             assert statuses[tool] == "available", tool
-        for tool in ("fluids.pipe.network", "electronics.digital.logic", "control.frequency.response"):
+        for tool in ("gnss.positioning.least.squares", "control.frequency.response", "signals.spectral.analysis"):
             assert statuses[tool] == "planned", tool
         page.locator('[data-workspace="engineering"]').click()
         status = page.locator("#eng-visual-status")

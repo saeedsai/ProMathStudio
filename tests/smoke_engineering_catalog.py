@@ -46,13 +46,14 @@ def main():
   assert page.locator('#eng-results article[data-tool-id="gnss.positioning.least.squares"]').count()==1
   assert page.locator('#eng-results article button').count()==0
   page.locator('#eng-search').fill('')
-  page.locator('#eng-discipline').select_option('fluids')
-  page.locator('#eng-search').fill('pipe')
+  page.locator('#eng-discipline').select_option('control')
+  page.locator('#eng-search').fill('bode')
   assert page.locator('#eng-results article').count()==1
   planned=page.locator('#eng-results article')
-  assert planned.get_attribute('data-tool-id')=='fluids.pipe.network'
+  assert planned.get_attribute('data-tool-id')=='control.frequency.response'
   assert planned.locator('button').count()==0
   assert 'planned' in planned.inner_text().lower()
+  page.locator('#eng-discipline').select_option('fluids')
   page.locator('#eng-search').fill('no-such-tool')
   assert 'No matching tools' in page.locator('#eng-results').inner_text()
   page.locator('#eng-search').fill('matrix')

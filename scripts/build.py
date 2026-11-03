@@ -42,6 +42,7 @@ modules = [
     ("promath-workspace-tasks", "src/workspace-tasks.js"),
     ("promath-complex-graph", "src/complex-graph.js"),
     ("promath-graph-curves", "src/graph-curves.js"),
+    ("promath-vector-fields", "src/vector-fields.js"),
     ("promath-control-theory", "src/control-theory.js"),
     ("promath-engineering-simulations", "src/engineering-simulations.js"),
     ("promath-engineering-catalog", "src/engineering-catalog.js"),

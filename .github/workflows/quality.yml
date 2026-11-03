@@ -433,3 +433,5 @@ jobs:
         run: python tests/smoke_matrix_extras.py
       - name: Multivariate covariance/correlation, PCA and k-means reference, accessibility and responsive browser regression
         run: python tests/smoke_multivariate_tools.py
+      - name: Vector fields, RK4 streamlines, slope fields and candidate equilibria browser regression
+        run: python tests/smoke_vector_fields.py

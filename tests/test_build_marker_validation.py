@@ -26,6 +26,23 @@ class BuildMarkerValidationTests(unittest.TestCase):
                 self.assertIn('Expected exactly one standalone script marker', result.stderr)
                 self.assertEqual((root / "index.html").read_text(encoding="utf-8"), html)
 
+    def test_missing_closing_script_rejected_without_overwriting_index(self):
+        builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
+        marker = '<script id="mathstudio-data-tables">\\n'
+        html = marker + '/* truncated module */\\n'
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "scripts").mkdir()
+            (root / "src").mkdir()
+            (root / "scripts/build.py").write_text(builder, encoding="utf-8")
+            (root / "src/data-tables.js").write_text("const safe = 1;\\n", encoding="utf-8")
+            (root / "index.html").write_text(html, encoding="utf-8")
+            result = subprocess.run(['python3', str(root / "scripts/build.py")],
+                                    capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Missing standalone script closing tag", result.stderr)
+            self.assertEqual((root / "index.html").read_text(encoding="utf-8"), html)
+
     def test_embedded_script_terminator_rejected_without_overwriting_index(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
         marker = '<script id="mathstudio-data-tables">\n'

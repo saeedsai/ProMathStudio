@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-MISSING-CLOSE-112: truncated standalone module diagnostics
+
+**Implemented on dev; exact-head CI pending.** The standalone builder now reports a specific missing closing-script error instead of an unhandled substring lookup when a module block is truncated. A focused isolated Python regression asserts the diagnostic and byte-for-byte preservation of the original index. Source/test commits e6aa29653c93f362d71be7ba3464304207b7b57b and 419a8851775a4e62159c5336f5ed609a92084fba. Previous exact-head development Quality run 41624502050 succeeded at 3880cbe8bd99301e8db89a7a7572face44bbe0e3; new head requires fresh verification. No release claimed. Historical 166 gaps and 95 partial features remain frozen.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 BUILD-MISSING-CLOSE-112 QA/release (pending):** focused structural and browser CI green at exact dev and PR heads; required review/protection checks; ordinary PR merge; verify main Quality and Pages.
+2. **P0 QR rank-boundary references (planned):** independent high-precision threshold-adjacent matrices, perturbed RHS and singular rejection.
+3. **P1 UI controller extraction (planned):** offline bundle parity, keyboard/mobile smoke, project round-trip and size measurements.
+4. **P1 Scalar-root discontinuity (planned):** pole and oscillatory counterexamples, bounded warnings and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed projects preserve state; legacy v1/v2 compatibility.
+
+**Execution log:** Inspected AGENTS, living plan, frozen inventory, dev/main comparison and exact-head Quality jobs. Added bounded missing-close diagnostic and regression on dev. New CI, PR checks, main Quality and Pages pending; no force push, bypass or branch deletion.
+
 ## 2026-11-03 — BUILD-NESTED-CASE-111 exact-head CI repair
 
 **CI failure diagnosed and corrected on dev; fresh exact-head QA pending.** PR #178's prior exact-head Quality run 41615609901 failed 4 of 290 structural tests: nested-script fixtures used literal backslash-n instead of newline, so marker detection failed first; the builder regex also used a doubled backslash in its raw whitespace class, missing actual tabs. Corrected both without relaxing the nested-script rejection or rollback assertions. Source commit e4f9d33f3d0ceab2fc2eaeebb7386180e3c0cee8; test fixes aec1072c02a8a65518d42413e042f581a60139ef and 5840bcf9972333b6c9d6c27625d80029d8217ab9. No full Python/Chromium pass or release claimed. Frozen 166 gaps/95 partials unchanged.

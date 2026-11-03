@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-HTML-COMMENT-118 (dev; exact-head QA pending)
+
+**Change:** Reject HTML comment openers in inline JavaScript module source before rebuilding standalone HTML. HTML script parsing treats `<!--` specially; a focused subprocess regression checks the rejection diagnostic and unchanged original index. Prior exact-head PR Quality 41689680817 passed at 5d273b3; new head needs fresh checks. Local checkout failed DNS resolution; no local suite claimed.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 PR #179 QA/release (pending):** exact-head dev/PR Quality structural and browser checks green; applicable protections/reviews verified; ordinary merge; main Quality and Pages verified.
+2. **P0 QR rank-boundary references (planned):** high-precision near-threshold references, perturbed RHS and singular rejection with tolerances.
+3. **P1 UI controller extraction (planned):** offline source/bundle parity, keyboard/mobile and saved-project round-trip with size delta.
+4. **P1 Scalar-root discontinuity (planned):** pole and oscillatory negative cases, bounded diagnostics and recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed project fixtures preserve prior state and v1/v2 compatibility.
+
+**Execution ledger:** Read root AGENTS, plan, frozen inventory, branch comparison, PR #179, reviews and exact-head Quality. Added source guard and focused regression; pending new exact-head CI. Frozen 166 gaps/95 partials unchanged. No new branch, force-push, bypass, merge or deletion.
+
 ## 2026-11-03 — BUILD-NUL-117 (dev; QA pending)
 
 **Change:** Reject embedded NUL in standalone module source before writing HTML. Focused subprocess regression asserts diagnostic and original-index preservation. Previous exact-head dev and PR Quality runs 41679640777 and 41679647176 passed at 1748115; new commit needs exact-head CI. Branch protection read returned 403; no merge claimed.

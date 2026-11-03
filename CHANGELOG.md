@@ -1,3 +1,13 @@
+- 2026-11-03 (parallel batch 142–149; branch QA pending). Eight features from a third round of parallel agents:
+  - **POLY-142 polynomial tools:** Aberth–Ehrlich complex roots with backward errors and multiplicity clustering, plus Horner evaluation, derivative/integral, add/multiply/divide, numerical GCD and build-from-roots.
+  - **NLFIT-143 nonlinear fitting:** Levenberg–Marquardt with standard errors and t intervals, verified against NIST Misra1a, with warnings for parameters that cannot be identified.
+  - **FILTERS-144 digital filters:** convolution and correlation, windowed-sinc FIR, Butterworth IIR (order 1–8, second-order sections), zero-phase filtfilt and frequency response.
+  - **VECCALC-145 vector calculus:** Ridders derivatives of order 1–4, gradient, Hessian, Jacobian, divergence, curl, Laplacian and directional derivatives, with error estimates; kinks are refused.
+  - **MATRIX-EXTRAS-146:** for matrices up to 8×8, Cholesky and LDLᵀ, Jacobi-SVD rank with null-space and column-space bases, determinant, characteristic polynomial, norms and κ₂.
+  - **MULTIVAR-147 multivariate analysis:** covariance and Pearson/Spearman matrices, a scatter matrix, PCA and seeded k-means++ on Data Tables columns.
+  - **FIELDS-148 vector fields:** quiver plots, RK4 streamlines, slope fields with solution curves, heuristic equilibria and reduced-motion-aware particle animation.
+  - **ENG-THERMO-CIRCUITS-149:** `thermal.cycle.analysis` (Otto, Diesel and Brayton with animated P–v/T–s diagrams) and `circuits.network.analysis` (a DC modified-nodal-analysis netlist solver with animated current flow) are now available.
+  - **Tests:** each feature has reference, negative, keyboard and 390/1280 px tests registered in Quality.
 - 2026-11-03 (UI-TOOL-SEARCH-141; branch QA pending): global "Find a tool" search in the workspace bar (`/` or Ctrl/Cmd+K). It indexes every tool panel, workspace task and Engineering catalog tool at runtime, matches a small synonym map, and opens the chosen tool in the right workspace without clearing inputs. Results use an accessible combobox with keyboard navigation and announced counts. Planned tools are marked "Planned". Works at 390px.
 - 2026-11-03 (parallel batch 135–140; branch QA pending). Six features from a second round of parallel agents, integrated onto one branch:
   - **STATS-TESTS-135:** hypothesis tests with confidence intervals: one-sample, Welch, pooled and paired t-tests; chi-square goodness-of-fit and r×c independence (optional Yates); one-proportion z-test with Wilson interval; exact binomial with Clopper–Pearson; chi-square variance interval. Results include effect sizes and assumptions, and values match scipy within 1e-8.

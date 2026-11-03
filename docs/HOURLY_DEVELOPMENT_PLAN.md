@@ -1,3 +1,16 @@
+## 2026-11-03 — Parallel batch 142–149 (polynomials, nonlinear fit, filters, vector calculus, matrix extras, multivariate, vector fields, thermo cycles + DC circuits)
+
+**Release checkpoint:** PR #188 into dev at 2c60767; release PR #189 to main is waiting on exact-head Quality.
+
+**Implemented on branch (QA pending):** eight agents worked on disjoint modules, and all integrated without source conflicts. `thermal.cycle.analysis` and `circuits.network.analysis` move from planned to available under their narrowed scopes; `fluids.pipe.network`, `electronics.digital.logic`, `control.frequency.response` and `gnss.positioning.least.squares` stay planned. The frozen baseline is unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release batches 135–149 (pending):** exact-head Quality, PRs to main, main Quality and Pages.
+2. **P1 Pipe network (planned):** Hardy-Cross or Newton loop solver with Darcy–Weisbach/Colebrook; references from textbook loop networks.
+3. **P1 Digital logic simulation (planned):** gate netlists with truth tables and an animated timing diagram.
+4. **P1 Tool search favourites and recents (planned):** kept per viewer in try/catch localStorage.
+5. **P2 Offline symbolic gaps (blocked by CDN):** define an offline scope for nonlinear symbolic systems and series.
+
 ## 2026-11-03 — Parallel batch 135–141 (hypothesis tests, curve overlays, simulation units, BVP shooting, uncertainty, splines, tool search)
 
 **Release checkpoint:** PR #186 into dev at 657503c, then PR #187 to main at 70fc483. Main Quality 41730966059 and Pages 41730962844 succeeded.

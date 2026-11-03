@@ -1,3 +1,14 @@
+## 2026-11-03 — CI-SPLINE-NUMPY-142 (exact-head QA pending)
+
+**Failure diagnosis:** dev exact-head Quality run 41734143560 at 2c607679 failed in the spline browser smoke step because the runner had no `numpy` package; all earlier structural and browser steps passed. The independent natural-cubic-spline reference previously used NumPy only to solve a small dense tridiagonal reference system. Replaced it with a pure-standard-library partial-pivot dense Gaussian elimination reference and `bisect_right`; retained the original nonuniform-data numerical comparisons and added pivot-required and singular-matrix reference controls. This is a CI test-harness dependency correction, not a change to the production spline implementation. Committed to existing dev at 297068eb. Local browser and Python suite not executed; exact-head CI required. PR #189 remains pending. Main 70fc483 and dev had diverged before this edit; do not merge without resolving ancestry through an ordinary protected PR. Frozen historical inventory: 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 CI-SPLINE-NUMPY-142 and PR #189 release (pending):** exact new dev/PR Quality pass including spline smoke; verify reviews, branch ancestry and protections, then ordinary dev-to-main PR and post-merge main Quality/Pages.
+2. **P1 Polynomial roots (planned):** real and complex polynomial roots with degree and convergence limits; reference residuals and repeated-root negative tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** shared solver with analytic model references, ill-conditioned refusal and browser keyboard tests.
+4. **P1 Digital filters (planned):** reusable FIR/IIR response and stability checks with frequency-reference and mobile regression.
+5. **P1 Tool-search favourites and recent tools (planned):** bounded persisted pins, safe storage fallback, keyboard/390px browser tests and no duplicated actions.
+
 ## 2026-11-03 — Parallel batch 135–141 (hypothesis tests, curve overlays, simulation units, BVP shooting, uncertainty, splines, tool search)
 
 **Release checkpoint:** PR #186 into dev at 657503c, then PR #187 to main at 70fc483. Main Quality 41730966059 and Pages 41730962844 succeeded.

@@ -19,15 +19,16 @@ class EngineeringSimulationTests(unittest.TestCase):
         self.assertNotIn("document.", source, "kernels must stay DOM-free")
         self.assertNotIn("eval(", source)
         self.assertNotIn("new Function(", source)
-        self.assertEqual(source.count("assumptions:'"), 7, "every simulation states its model assumptions")
+        self.assertEqual(source.count("assumptions:'"), 9, "every simulation states its model assumptions")
         self.assertIn("M.odeTools.solveSystem(", source)
         self.assertIn("M.numerical.heat1D(", source)
         catalog = (ROOT / "src/engineering-catalog.js").read_text(encoding="utf-8")
         for tool in ("structures.beam.deflection", "aerospace.orbit.propagation", "circuits.rlc.series.transient",
-                     "mechanics.projectile.drag", "thermal.conduction.rod"):
+                     "mechanics.projectile.drag", "thermal.conduction.rod", "thermal.cycle.analysis",
+                     "circuits.network.analysis"):
             row = next(line for line in catalog.splitlines() if line.strip().startswith("['" + tool + "'"))
             self.assertTrue(row.rstrip(",]").endswith("'engineering','eng-visuals'"), tool)
-        for planned in ("circuits.network.analysis", "fluids.pipe.network", "thermal.cycle.analysis"):
+        for planned in ("fluids.pipe.network", "electronics.digital.logic", "control.frequency.response"):
             row = next(line for line in catalog.splitlines() if line.strip().startswith("['" + planned + "'"))
             self.assertIn("not yet implemented", row)
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")

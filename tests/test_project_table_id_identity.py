@@ -13,7 +13,7 @@ class TableIdIdentityTests(unittest.TestCase):
 const fs=require('fs'),assert=require('assert'),vm=require('vm');
 const source=fs.readFileSync('src/project-schema.js','utf8');
 const html=fs.readFileSync('index.html','utf8');
-const marker='<script id="promath-project-schema">\\n';
+const marker='<script id="promath-project-schema">\n';
 const start=html.indexOf(marker);assert(start>=0);
 assert.strictEqual(html.slice(start+marker.length,html.indexOf('</script>',start)).trimEnd(),source.trimEnd());
 const window={MathStudio:{}};vm.runInNewContext(source,{window});

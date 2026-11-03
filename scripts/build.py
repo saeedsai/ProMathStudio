@@ -26,6 +26,7 @@ modules = [
     ("promath-workspace-tasks", "src/workspace-tasks.js"),
     ("promath-complex-graph", "src/complex-graph.js"),
     ("promath-engineering-catalog", "src/engineering-catalog.js"),
+    ("promath-engineering-visuals", "src/engineering-visuals.js"),
 ]
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'

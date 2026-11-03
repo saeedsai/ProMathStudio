@@ -437,3 +437,5 @@ jobs:
         run: python tests/smoke_vector_fields.py
       - name: Engineering thermodynamic cycles and DC network nodal analysis browser regression
         run: python tests/smoke_engineering_thermo_circuits.py
+      - name: GNSS least-squares positioning, DOP, WGS-84 geodesy references and responsive browser regression
+        run: python tests/smoke_gnss_tools.py

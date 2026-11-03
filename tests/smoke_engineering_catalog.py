@@ -22,7 +22,7 @@ def main():
   assert len(set(catalog['ids']))==len(catalog['ids'])
   assert 'matrix.solve.real.small' in catalog['available']
   assert page.locator('#eng-results article').count()==len(catalog['ids'])
-  for discipline, tool_id in [('gnss','gnss.positioning.least.squares'),
+  for discipline, tool_id in [('electrical','control.frequency.response'),
                               ('signals','signals.spectral.analysis'),
                               ('control','control.frequency.response')]:
    page.locator('#eng-discipline').select_option(discipline)
@@ -43,8 +43,17 @@ def main():
   page.locator('#eng-search').fill('control orbit')
   assert page.locator('#eng-results article').count()==0
   page.locator('#eng-search').fill('GNSS positioning')
-  assert page.locator('#eng-results article[data-tool-id="gnss.positioning.least.squares"]').count()==1
-  assert page.locator('#eng-results article button').count()==0
+  gnss_card=page.locator('#eng-results article[data-tool-id="gnss.positioning.least.squares"]')
+  assert gnss_card.count()==1 and page.locator('#eng-results article').count()==1
+  # GNSS positioning is now a real numerical tool: exactly one honest, runnable card.
+  assert gnss_card.locator('button').count()==1 and 'planned' not in gnss_card.inner_text().lower()
+  assert 'No ionosphere' in gnss_card.inner_text()
+  page.locator('#eng-search').fill('Bode')
+  bode=page.locator('#eng-results article[data-tool-id="control.frequency.response"]')
+  assert bode.count()==1 and bode.locator('button').count()==0 and 'planned' in bode.inner_text().lower()
+  page.locator('#eng-search').fill('')
+  page.locator('#eng-discipline').select_option('gnss')
+  assert page.locator('#eng-results article').count()>=1
   page.locator('#eng-search').fill('')
   page.locator('#eng-discipline').select_option('fluids')
   page.locator('#eng-search').fill('pipe')
@@ -73,6 +82,7 @@ def main():
   assert page.locator('#control-theory-toolbox').evaluate('(e)=>e.open')
   # Existing numerical tools route to their real, visible controls.
   for tool_id, selector in [('signals.fft.1d', '#fft-run'), ('numerical.root.brent', '#brent-run'),
+                            ('gnss.positioning.least.squares', '#gnss-run'),
                             ('numerical.interpolation.1d', '#interp-run'),
                             ('numerical.quadrature.adaptive', '#num-run'),
                             ('numerical.minimize.golden', '#minimize-run'),

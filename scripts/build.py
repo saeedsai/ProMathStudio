@@ -13,6 +13,7 @@ modules = [
     ("mathstudio-data-tables", "src/data-tables.js"),
     ("promath-advanced-features", "src/advanced-features.js"),
     ("promath-numerical-data", "src/numerical-data.js"),
+    ("promath-function-analysis", "src/function-analysis.js"),
     ("promath-interpolation-tools", "src/interpolation-tools.js"),
     ("promath-integration-tools", "src/integration-tools.js"),
     ("promath-vector-calculus", "src/vector-calculus.js"),

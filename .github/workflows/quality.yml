@@ -407,3 +407,5 @@ jobs:
         run: python tests/smoke_integration_tools.py
       - name: Stiff TR-BDF2 implicit ODE reference, failure and responsive UI regression
         run: python tests/smoke_stiff_ode.py
+      - name: Unit-aware engineering simulation inputs browser regression
+        run: python tests/smoke_engineering_sim_units.py

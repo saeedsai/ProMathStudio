@@ -25,6 +25,7 @@ modules = [
     ("promath-minimize-tools", "src/minimize-tools.js"),
     ("promath-optimization-tools", "src/optimization-tools.js"),
     ("promath-fft-tools", "src/fft-tools.js"),
+    ("promath-signal-filters", "src/signal-filters.js"),
     ("promath-brent-tools", "src/brent-tools.js"),
     ("promath-statistics-tools", "src/statistics-tools.js"),
     ("promath-uncertainty-tools", "src/uncertainty-tools.js"),

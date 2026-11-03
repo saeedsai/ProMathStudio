@@ -39,7 +39,10 @@ for tag, source in modules:
         raise ValueError(f"Nested script opening before standalone module close: {tag}")
     original = text[start:end]
     trailing_newlines = original[len(original.rstrip("\n")):]
-    module_source = (root / source).read_text(encoding="utf-8").rstrip("\n")
+    source_path = root / source
+    if not source_path.is_file():
+        raise FileNotFoundError(f"Missing standalone module source: {source}")
+    module_source = source_path.read_text(encoding="utf-8").rstrip("\n")
     if "</script" in module_source.lower():
         raise ValueError(f"Unsafe script closing sequence in module: {source}")
     text = text[:start] + module_source + trailing_newlines + text[end:]

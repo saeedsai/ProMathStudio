@@ -22,9 +22,7 @@ def main():
   assert len(set(catalog['ids']))==len(catalog['ids'])
   assert 'matrix.solve.real.small' in catalog['available']
   assert page.locator('#eng-results article').count()==len(catalog['ids'])
-  for discipline, tool_id in [('fluids','fluids.pipe.network'),
-                              ('signals','signals.spectral.analysis'),
-                              ('electronics','electronics.digital.logic')]:
+  for discipline, tool_id in [('signals','signals.spectral.analysis')]:
    page.locator('#eng-discipline').select_option(discipline)
    page.locator('#eng-search').fill(tool_id.split('.')[0])
    card=page.locator('#eng-results article[data-tool-id="'+tool_id+'"]')
@@ -56,13 +54,14 @@ def main():
   page.locator('#eng-discipline').select_option('gnss')
   assert page.locator('#eng-results article').count()>=1
   page.locator('#eng-search').fill('')
-  page.locator('#eng-discipline').select_option('fluids')
-  page.locator('#eng-search').fill('pipe')
+  page.locator('#eng-discipline').select_option('control')
+  page.locator('#eng-search').fill('bode')
   assert page.locator('#eng-results article').count()==1
   planned=page.locator('#eng-results article')
-  assert planned.get_attribute('data-tool-id')=='fluids.pipe.network'
+  assert planned.get_attribute('data-tool-id')=='control.frequency.response'
   assert planned.locator('button').count()==0
   assert 'planned' in planned.inner_text().lower()
+  page.locator('#eng-discipline').select_option('fluids')
   page.locator('#eng-search').fill('no-such-tool')
   assert 'No matching tools' in page.locator('#eng-results').inner_text()
   page.locator('#eng-search').fill('matrix')

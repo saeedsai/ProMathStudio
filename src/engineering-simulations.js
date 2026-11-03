@@ -354,5 +354,240 @@ function dcNetwork({netlist='V1 1 0 12\nR1 1 2 1000\nR2 2 0 2000'}={}){
   summary:'DC network: '+(nodes.length-1)+' node(s) + ground, '+out.length+' element(s), '+size+' MNA unknowns; '+voltages.slice(1,5).map(v=>'V('+v.node+') = '+Number(v.voltage.toPrecision(6))+' V').join(', ')+(voltages.length>5?', …':'')+
    '; sources supply '+Number(supplied.toPrecision(6))+' W; KCL residual '+kclResidual.toExponential(1)+', power balance '+powerBalance.toExponential(1)+'.'};
 }
-M.engineeringSimulations=Object.freeze({beam,beamGeneral,vibration,orbit,rlc,projectile,rodHeat,thermoCycle,dcNetwork,parseNetlist,rk4Vector,materials:MATERIALS,constants:Object.freeze({mu:MU,earthRadius:RE,g:G0})});
+/* Steady incompressible looped pipe network: Darcy–Weisbach head loss, friction factor from the
+   iterated Colebrook–White equation (or explicit Swamee–Jain), laminar f = 64/Re below Re 2000 and
+   a linear blend to the turbulent value across 2000–4000 (flagged). Global Newton (gradient) method
+   on pipe flows and unknown node heads; continuity rows are linear, energy rows use a central-
+   difference head-loss derivative, with residual-halving line search. Netlist lines:
+   "P1 A B length_m diameter_mm roughness_mm", "D node m³/s" (demand > 0, supply < 0), "H node head_m". */
+const VALUE=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/,NAME=/^[A-Za-z0-9_]{1,16}$/;
+function swameeJain(Re,rel){return 0.25/Math.log10(rel/3.7+5.74/Re**0.9)**2;}
+function colebrook(Re,rel){
+ // Fixed-point iteration on x = 1/√f started from Swamee–Jain; contraction is fast for Re ≥ 2000.
+ let x=1/Math.sqrt(swameeJain(Re,rel));
+ for(let k=0;k<100;k++){const next=-2*Math.log10(rel/3.7+2.51*x/Re);const done=Math.abs(next-x)<=1e-15*Math.abs(x);x=next;if(done)break;}
+ return 1/(x*x);
+}
+function frictionFactor(Re,rel,law='colebrook'){
+ if(!(Re>0))throw Error('Reynolds number must be positive.');
+ const turbulent=r=>law==='swamee'?swameeJain(r,rel):colebrook(r,rel);
+ if(Re<2000)return 64/Re;
+ if(Re<4000){const w=(Re-2000)/2000;return (1-w)*0.032+w*turbulent(4000);}
+ return turbulent(Re);
+}
+function parsePipeNetlist(netlist){
+ const text=String(netlist??'');if(text.length>4000)throw Error('Pipe network description is limited to 4000 characters.');
+ const lines=text.split(/[\n;]/).map(s=>s.trim()).filter(s=>s&&!s.startsWith('*')&&!s.startsWith('#'));
+ if(!lines.length)throw Error('Enter a pipe network: e.g. "P1 A B 300 200 0.05", "D B 0.02", "H A 50".');
+ if(lines.length>80)throw Error('Pipe network is limited to 80 lines ('+lines.length+' given).');
+ const pipes=[],demand=new Map(),fixed=new Map(),names=new Set();
+ lines.forEach((line,i)=>{
+  const tok=line.split(/\s+/),where='Line '+(i+1)+' ("'+line.slice(0,40)+'")',key=tok[0].toUpperCase();
+  const val=(raw,label)=>{if(!VALUE.test(raw||''))throw Error(where+': '+label+' must be a decimal or scientific number.');return Number(raw);};
+  const node=n=>{if(!NAME.test(n||''))throw Error(where+': node names use 1–16 letters, digits or _.');return n;};
+  if(key==='D'||key==='H'){
+   if(tok.length!==3)throw Error(where+': expected "'+key+' node value".');
+   const n=node(tok[1]),v=val(tok[2],key==='D'?'demand (m³/s)':'head (m)');
+   if(key==='D'){if(!(Math.abs(v)<=100))throw Error(where+': demand magnitude must be at most 100 m³/s.');demand.set(n,(demand.get(n)||0)+v);}
+   else{if(!(Math.abs(v)<=1e5))throw Error(where+': head must be within ±100000 m.');if(fixed.has(n))throw Error(where+': duplicate fixed head for node '+n+'.');fixed.set(n,v);}
+   return;
+  }
+  if(!/^P[A-Za-z0-9_]{0,15}$/i.test(tok[0]))throw Error(where+': lines start with a pipe name P…, D (demand) or H (fixed head).');
+  if(tok.length!==6)throw Error(where+': expected NAME from to length_m diameter_mm roughness_mm.');
+  if(names.has(key))throw Error(where+': duplicate pipe name '+tok[0]+'.');
+  names.add(key);
+  const a=node(tok[1]),b=node(tok[2]);
+  if(a===b)throw Error(where+': a pipe cannot connect a node to itself.');
+  const L=val(tok[3],'length'),Dmm=val(tok[4],'diameter'),eps=val(tok[5],'roughness');
+  if(!(L>0&&L<=1e5))throw Error(where+': length must be greater than 0 and at most 100000 m.');
+  if(!(Dmm>=1&&Dmm<=5000))throw Error(where+': diameter must be from 1 to 5000 mm.');
+  if(!(eps>=0&&eps<Dmm/10))throw Error(where+': roughness must be at least 0 and below a tenth of the diameter.');
+  pipes.push({name:tok[0],a,b,L,D:Dmm/1000,eps:eps/1000});
+ });
+ if(!pipes.length)throw Error('Add at least one pipe line "P1 from to length_m diameter_mm roughness_mm".');
+ if(pipes.length>40)throw Error('Pipe network is limited to 40 pipes ('+pipes.length+' given).');
+ if(!fixed.size)throw Error('Add a fixed-head (reservoir) node, e.g. "H A 50": heads are otherwise undetermined.');
+ for(const n of demand.keys())if(fixed.has(n))throw Error('Node '+n+' has a fixed head, so its inflow is a result; remove its D line.');
+ return {pipes,demand,fixed};
+}
+function pipeNetwork({netlist='H A 50\nP1 A B 500 300 0.26\nP2 B C 400 250 0.26\nP3 A D 600 250 0.26\nP4 D C 400 200 0.26\nD B 0.04\nD C 0.05\nD D 0.03',density=998.2,viscosity=1.002e-3,friction='colebrook',maxIterations=200}={}){
+ friction=choice(friction,['colebrook','swamee'],'Friction law');
+ const rho=num(density,'Density ρ (kg/m³)',1,20000),mu=num(viscosity,'Dynamic viscosity μ (Pa·s)',1e-7,100),limit=Math.round(num(maxIterations,'Newton iteration limit',1,500));
+ const {pipes,demand,fixed}=parsePipeNetlist(netlist);
+ const nodes=[...new Set(pipes.flatMap(p=>[p.a,p.b]))];
+ for(const n of [...demand.keys(),...fixed.keys()])if(!nodes.includes(n))throw Error('Node '+n+' has a demand or head but no connected pipe.');
+ if(nodes.length>41)throw Error('Pipe network is limited to 41 nodes.');
+ const parent=new Map(nodes.map(n=>[n,n])),find=n=>{while(parent.get(n)!==n)n=parent.get(n);return n;};
+ for(const p of pipes)parent.set(find(p.a),find(p.b));
+ const fedRoots=new Set([...fixed.keys()].map(find)),cut=nodes.filter(n=>!fedRoots.has(find(n)));
+ if(cut.length)throw Error('Disconnected node'+(cut.length>1?'s ':' ')+cut.join(', ')+': no pipe path to a fixed-head node, so the heads are undefined.');
+ const free=nodes.filter(n=>!fixed.has(n)),hIndex=new Map(free.map((n,i)=>[n,i])),np=pipes.length,size=np+free.length;
+ const area=p=>Math.PI*p.D*p.D/4;
+ // Head loss h(Q) = f·(L/D)·V|V|/(2g), sign follows Q (from → to).
+ const loss=(p,Q)=>{const V=Q/area(p),Re=rho*Math.abs(V)*p.D/mu;
+  if(Re<2000)return 32*mu*p.L*V/(rho*G0*p.D*p.D); // Hagen–Poiseuille: exact laminar loss, including Q = 0
+  return frictionFactor(Re,p.eps/p.D,friction)*p.L/p.D*V*Math.abs(V)/(2*G0);};
+ const Qs=Math.max(1e-6,...pipes.map(area)),Hfix=[...fixed.values()],Hs=Math.max(1,...Hfix.map(Math.abs));
+ const Q=pipes.map(p=>area(p)*0.5),H=free.map(()=>Hfix.reduce((s,v)=>s+v,0)/Hfix.length);
+ const head=(n,Hv)=>fixed.has(n)?fixed.get(n):Hv[hIndex.get(n)];
+ const residual=(Qv,Hv)=>{
+  const r=pipes.map((p,i)=>head(p.a,Hv)-head(p.b,Hv)-loss(p,Qv[i]));
+  for(const n of free){let s=-(demand.get(n)||0);pipes.forEach((p,i)=>{if(p.b===n)s+=Qv[i];if(p.a===n)s-=Qv[i];});r.push(s);}
+  return r;};
+ const norm=r=>Math.max(0,...r.slice(0,np).map(v=>Math.abs(v)/Hs),...r.slice(np).map(v=>Math.abs(v)/Qs));
+ let r=residual(Q,H),iterations=0,converged=false;
+ for(;iterations<=limit;iterations++){
+  if(norm(r)<1e-12){converged=true;break;}
+  if(iterations===limit)break;
+  const J=Array.from({length:size},()=>Array(size).fill(0));
+  pipes.forEach((p,i)=>{const d=1e-7*Math.max(Math.abs(Q[i]),1e-4*area(p));J[i][i]=-(loss(p,Q[i]+d)-loss(p,Q[i]-d))/(2*d);
+   if(hIndex.has(p.a)){J[i][np+hIndex.get(p.a)]+=1;J[np+hIndex.get(p.a)][i]-=1;}
+   if(hIndex.has(p.b)){J[i][np+hIndex.get(p.b)]-=1;J[np+hIndex.get(p.b)][i]+=1;}});
+  const solved=solveDense(J,r.map(v=>-v));
+  if(solved.singular!==undefined)throw Error('Singular hydraulic Jacobian: the network has no unique steady solution.');
+  let t=1,trialQ,trialH,trialR;
+  for(let k=0;k<30;k++){trialQ=Q.map((q,i)=>q+t*solved.x[i]);trialH=H.map((h,i)=>h+t*solved.x[np+i]);trialR=residual(trialQ,trialH);if(norm(trialR)<norm(r)||k===29)break;t/=2;}
+  Q.splice(0,np,...trialQ);H.splice(0,H.length,...trialH);r=trialR;
+  if(!Q.every(Number.isFinite)||!H.every(Number.isFinite))break;
+ }
+ if(!converged)throw Error('Pipe network did not converge in '+limit+' Newton iteration(s) (scaled residual '+norm(r).toExponential(2)+'); check demands, sizes and fixed heads.');
+ const warnings=[];
+ const outPipes=pipes.map((p,i)=>{
+  const V=Q[i]/area(p),Re=rho*Math.abs(V)*p.D/mu,hf=loss(p,Q[i]),rel=p.eps/p.D;
+  const regime=Re<2000?'laminar':Re<4000?'transitional':'turbulent';
+  if(regime==='transitional')warnings.push(p.name+' is transitional (Re = '+Re.toFixed(0)+'); friction factor blended and uncertain.');
+  return Object.freeze({name:p.name,a:p.a,b:p.b,length:p.L,diameter:p.D,roughness:p.eps,flow:Q[i],velocity:V,reynolds:Re,friction:Re>0?frictionFactor(Re,rel,friction):null,headloss:hf,regime,
+   direction:Q[i]>=0?p.a+'→'+p.b:p.b+'→'+p.a,swameeJain:Re>=4000?swameeJain(Re,rel):null,colebrook:Re>=4000?colebrook(Re,rel):null});
+ });
+ const inflow=n=>outPipes.reduce((s,p)=>s+(p.b===n?p.flow:0)-(p.a===n?p.flow:0),0);
+ const nodeOut=nodes.map(n=>Object.freeze({node:n,head:head(n,H),fixed:fixed.has(n),demand:fixed.has(n)?inflow(n):(demand.get(n)||0)}));
+ // Continuity residual at every free node (m³/s) and fundamental-loop head-loss sums (m).
+ const continuity=Math.max(0,...free.map(n=>Math.abs(inflow(n)-(demand.get(n)||0))));
+ const adj=new Map(nodes.map(n=>[n,[]]));pipes.forEach((p,i)=>{adj.get(p.a).push([p.b,i,1]);adj.get(p.b).push([p.a,i,-1]);});
+ const up=new Map(),depth=new Map(),tree=new Set();
+ for(const root of nodes){if(depth.has(root))continue;depth.set(root,0);const queue=[root];
+  while(queue.length){const n=queue.shift();for(const [m,i,s] of adj.get(n))if(!depth.has(m)){depth.set(m,depth.get(n)+1);up.set(m,[n,i,s]);tree.add(i);queue.push(m);}}}
+ const pathTo=n=>{const out=[n];while(up.has(out.at(-1)))out.push(up.get(out.at(-1))[0]);return out;};
+ const loops=[];
+ pipes.forEach((p,i)=>{if(tree.has(i))return;
+  // Loop: pipe a→b, tree path b → common ancestor, then common → a. Signed sum of head losses.
+  const pa=pathTo(p.a),pb=pathTo(p.b),common=pa.find(n=>pb.includes(n)),members=[[i,1]];
+  const climb=(start,sign)=>{let n=start;while(n!==common){const [par,j,s]=up.get(n);members.push([j,-sign*s]);n=par;}};
+  climb(p.b,1);climb(p.a,-1);
+  loops.push(Object.freeze({pipes:members.map(([j,sg])=>(sg>0?'+':'−')+pipes[j].name),headSum:members.reduce((s,[j,sg])=>s+sg*outPipes[j].headloss,0)}));
+ });
+ const loopResidual=Math.max(0,...loops.map(l=>Math.abs(l.headSum)));
+ const supply=-nodeOut.filter(n=>n.fixed).reduce((s,n)=>s+n.demand,0),total=[...demand.values()].reduce((s,v)=>s+v,0);
+ const layers=nodes.map(n=>depth.get(n));
+ return {id:'pipes',pipes:outPipes,nodes:nodeOut,layers,loops,iterations,continuityResidual:continuity,loopResidual,supply,totalDemand:total,rho,mu,friction,warnings,
+  maxVelocity:Math.max(...outPipes.map(p=>Math.abs(p.velocity))),
+  assumptions:'Steady incompressible single-phase flow in full circular pipes; Darcy–Weisbach friction with Colebrook–White (or Swamee–Jain) turbulent factor, laminar f = 64/Re below Re 2000 and a blended, uncertain transition up to Re 4000; heads are total heads; minor losses, elevations, pumps, valves and transients are not modelled.',
+  summary:'Pipe network: '+pipes.length+' pipe(s), '+nodes.length+' node(s), '+loops.length+' loop(s); Newton converged in '+iterations+' iteration(s); reservoir supply '+Number((supply*1000).toPrecision(6))+' L/s; '+
+   outPipes.slice(0,4).map(p=>p.name+' '+Number((Math.abs(p.flow)*1000).toPrecision(5))+' L/s '+p.direction).join(', ')+(outPipes.length>4?', …':'')+
+   '; lowest head '+Number(Math.min(...nodeOut.map(n=>n.head)).toPrecision(6))+' m; continuity residual '+continuity.toExponential(1)+' m³/s, loop residual '+loopResidual.toExponential(1)+' m'+(warnings.length?'; '+warnings.length+' transitional pipe(s)':'')+'.'};
+}
+
+/* Gate-level digital logic: AND, OR, NOT, NAND, NOR, XOR (odd parity), XNOR, BUF and rising-edge
+   D flip-flops on the implicit clock CLK (reset to 0). Netlist lines: "IN A [stimulus bits]",
+   "OUT X Y", "CYCLES n", "net = GATE in1 in2 …", "Q = DFF D [CLK]"; literals 0/1 are constants.
+   Combinational circuits give a full truth table (≤ 10 inputs); circuits with flip-flops give a
+   clocked timing table (≤ 64 cycles). Zero delay evaluates in topological order; unit delay updates
+   every gate simultaneously each step until stable and counts glitch transitions. */
+const GATES=Object.freeze({AND:v=>v.every(Boolean),OR:v=>v.some(Boolean),NAND:v=>!v.every(Boolean),NOR:v=>!v.some(Boolean),
+ XOR:v=>v.reduce((s,x)=>s^x,0)===1,XNOR:v=>v.reduce((s,x)=>s^x,0)===0,NOT:v=>!v[0],BUF:v=>Boolean(v[0])});
+function parseLogicNetlist(netlist){
+ const text=String(netlist??'');if(text.length>4000)throw Error('Logic netlist is limited to 4000 characters.');
+ const lines=text.split(/[\n;]/).map(s=>s.trim()).filter(s=>s&&!s.startsWith('*')&&!s.startsWith('#'));
+ if(!lines.length)throw Error('Enter a logic netlist: e.g. "IN A B", "S = XOR A B".');
+ if(lines.length>80)throw Error('Logic netlist is limited to 80 lines ('+lines.length+' given).');
+ const inputs=[],stimulus=new Map(),gates=[],outputs=[],driver=new Map();let cycles=null;
+ const netName=(n,where)=>{
+  if(!/^[A-Za-z_][A-Za-z0-9_]{0,15}$/.test(n||''))throw Error(where+': net names start with a letter or _ (letters, digits, _; at most 16).');
+  if(/^CLK$/i.test(n))throw Error(where+': CLK is the reserved clock and cannot be driven or used as data.');
+  if(n==='t_step')throw Error(where+': t_step is reserved for the table index.');
+  return n;};
+ const drive=(n,by,where)=>{if(driver.has(n))throw Error(where+': net '+n+' is driven twice ('+driver.get(n)+' and '+by+').');driver.set(n,by);};
+ lines.forEach((line,i)=>{
+  const where='Line '+(i+1)+' ("'+line.slice(0,40)+'")',tok=line.split(/\s+/),key=tok[0].toUpperCase();
+  if(key==='IN'||key==='INPUT'){
+   if(tok.length<2)throw Error(where+': expected "IN name [stimulus bits]".');
+   const rest=tok.slice(1);
+   if(rest.length===2&&/^[01]+$/.test(rest[1])){
+    if(rest[1].length>64)throw Error(where+': stimulus is limited to 64 bits.');
+    const n=netName(rest[0],where);drive(n,'input',where);inputs.push(n);stimulus.set(n,rest[1]);
+   }else for(const r of rest){const n=netName(r,where);drive(n,'input',where);inputs.push(n);}
+  }else if(key==='OUT'||key==='OUTPUT'){if(tok.length<2)throw Error(where+': expected "OUT net …".');for(const r of tok.slice(1))outputs.push(netName(r,where));}
+  else if(key==='CYCLES'){if(tok.length!==2||!/^\d+$/.test(tok[1])||+tok[1]<1||+tok[1]>64)throw Error(where+': CYCLES must be an integer from 1 to 64.');cycles=+tok[1];}
+  else{
+   if(tok[1]!=='='||tok.length<4)throw Error(where+': expected "net = GATE input …" (or IN, OUT, CYCLES).');
+   const out=netName(tok[0],where),type=tok[2].toUpperCase();let ins=tok.slice(3);
+   if(type==='DFF'){if(ins.length===2&&/^CLK$/i.test(ins[1]))ins=[ins[0]];if(ins.length!==1)throw Error(where+': DFF takes one data input (optionally followed by CLK).');}
+   else if(!GATES[type])throw Error(where+': unknown gate '+tok[2]+' (use AND, OR, NOT, NAND, NOR, XOR, XNOR, BUF or DFF).');
+   else if((type==='NOT'||type==='BUF')&&ins.length!==1)throw Error(where+': '+type+' takes exactly one input.');
+   else if(type!=='NOT'&&type!=='BUF'&&(ins.length<2||ins.length>8))throw Error(where+': '+type+' takes 2 to 8 inputs.');
+   ins=ins.map(n=>/^[01]$/.test(n)?n:netName(n,where));
+   drive(out,type,where);gates.push({out,type,ins});
+  }
+ });
+ if(!gates.length)throw Error('Add at least one gate, e.g. "Y = AND A B".');
+ if(gates.length>60)throw Error('Logic netlist is limited to 60 gates ('+gates.length+' given).');
+ for(const g of gates)for(const n of g.ins)if(n!=='0'&&n!=='1'&&!driver.has(n))throw Error('Undriven net '+n+' (input of the '+g.type+' driving '+g.out+'): declare it with IN or drive it with a gate.');
+ for(const n of outputs)if(!driver.has(n))throw Error('Undriven net '+n+' listed in OUT.');
+ return {inputs,stimulus,gates,outputs,cycles};
+}
+function digitalLogic({netlist='IN A B Cin\nAX = XOR A B\nS = XOR AX Cin\nC1 = AND A B\nC2 = AND AX Cin\nCout = OR C1 C2\nOUT S Cout',delay='zero'}={}){
+ delay=choice(delay,['zero','unit'],'Gate delay model');
+ const {inputs,stimulus,gates,outputs,cycles}=parseLogicNetlist(netlist);
+ const flops=gates.filter(g=>g.type==='DFF'),comb=gates.filter(g=>g.type!=='DFF'),sequential=flops.length>0;
+ // Topological order of combinational gates (depth-first); inputs and flip-flop outputs are sources.
+ const byOut=new Map(comb.map(g=>[g.out,g])),order=[],state=new Map();
+ const visit=(g,stack)=>{
+  if(state.get(g)===2)return;
+  if(state.get(g)===1){const k=stack.indexOf(g);throw Error('Combinational loop through nets '+stack.slice(k).map(x=>x.out).join(' → ')+' → '+g.out+': feedback must pass through a DFF.');}
+  state.set(g,1);stack.push(g);for(const n of g.ins){const d=byOut.get(n);if(d)visit(d,stack);}stack.pop();state.set(g,2);order.push(g);};
+ for(const g of comb)visit(g,[]);
+ const level=new Map();for(const g of order)level.set(g.out,1+Math.max(0,...g.ins.map(n=>level.get(n)||0)));
+ const depth=Math.max(0,...level.values());
+ if(!sequential&&!inputs.length)throw Error('Declare at least one input with IN for a combinational truth table.');
+ if(!sequential&&inputs.length>10)throw Error('A truth table is limited to 10 inputs ('+inputs.length+' given).');
+ if(sequential&&inputs.length>16)throw Error('A sequential simulation is limited to 16 inputs.');
+ if(sequential)for(const n of inputs)if(!stimulus.has(n))throw Error('Sequential circuit: give input '+n+' a stimulus bit string, e.g. "IN '+n+' 0110".');
+ const nets=[...inputs,...flops.map(f=>f.out),...order.map(g=>g.out)];
+ const shown=outputs.length?[...new Set([...inputs,...outputs])]:nets;
+ const bit=(vals,n)=>n==='1'?1:n==='0'?0:vals.get(n);
+ let glitches=0,maxSettle=0;
+ const settle=vals=>{
+  if(delay==='zero'){for(const g of order)vals.set(g.out,GATES[g.type](g.ins.map(n=>bit(vals,n)))?1:0);return 0;}
+  // Unit delay: every gate updates simultaneously from the previous step's values until stable.
+  const changes=new Map();let steps=0;
+  for(;steps<=comb.length+1;steps++){
+   const moved=comb.map(g=>[g.out,GATES[g.type](g.ins.map(n=>bit(vals,n)))?1:0]).filter(([n,v])=>vals.get(n)!==v);
+   if(!moved.length)break;
+   for(const [n,v] of moved){vals.set(n,v);changes.set(n,(changes.get(n)||0)+1);}
+  }
+  for(const c of changes.values())if(c>1)glitches+=c-1;
+  maxSettle=Math.max(maxSettle,steps);return steps;};
+ const rows=[],settleSteps=[],vals=new Map(nets.map(n=>[n,0]));
+ if(delay==='unit'){settle(vals);glitches=0;maxSettle=0;} // Power-on: settle the all-zero state first.
+ if(!sequential){
+  for(let k=0;k<2**inputs.length;k++){
+   inputs.forEach((n,j)=>vals.set(n,(k>>(inputs.length-1-j))&1));
+   settleSteps.push(settle(vals));rows.push([k,...shown.map(n=>vals.get(n))]);
+  }
+ }else{
+  const N=cycles||Math.max(8,...[...stimulus.values()].map(s=>s.length));
+  for(let k=0;k<N;k++){
+   inputs.forEach(n=>{const s=stimulus.get(n);vals.set(n,+s[k%s.length]);});
+   settleSteps.push(settle(vals));rows.push([k,...shown.map(n=>vals.get(n))]);
+   // Rising CLK edge ending cycle k: every D flip-flop samples its input simultaneously.
+   const sampled=flops.map(f=>[f.out,bit(vals,f.ins[0])]);for(const [n,v] of sampled)vals.set(n,v);
+  }
+ }
+ const outsShown=outputs.length?outputs:shown.filter(n=>!inputs.includes(n));
+ return {id:'logic',kind:sequential?'sequential':'combinational',delay,inputs,outputs:outsShown,signals:shown,rows,gates:gates.length,flipFlops:flops.length,depth,settleSteps,maxSettle,glitches,
+  assumptions:'Ideal binary gate-level logic: zero-delay gates in topological order, or unit delay with synchronous gate updates; rising-edge D flip-flops on one ideal clock CLK, reset to 0; no setup/hold timing, metastability, tri-state, analogue levels or wire delays.',
+  summary:(sequential?'Sequential circuit: '+rows.length+' clock cycle(s), '+flops.length+' D flip-flop(s)':'Combinational circuit: truth table of '+rows.length+' row(s) over '+inputs.length+' input(s)')+', '+gates.length+' gate(s), logic depth '+depth+
+   (delay==='unit'?' (unit delay: settles within '+maxSettle+' step(s), '+glitches+' glitch transition(s))':' (zero delay)')+'; outputs '+outsShown.join(', ')+'.'};
+}
+M.engineeringSimulations=Object.freeze({beam,beamGeneral,vibration,orbit,rlc,projectile,rodHeat,thermoCycle,dcNetwork,parseNetlist,pipeNetwork,parsePipeNetlist,frictionFactor,colebrook,swameeJain,digitalLogic,parseLogicNetlist,rk4Vector,materials:MATERIALS,constants:Object.freeze({mu:MU,earthRadius:RE,g:G0})});
 })();

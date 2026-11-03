@@ -79,6 +79,8 @@ const visuals=Object.freeze([
  {id:'rod',tool:'thermal.conduction.rod',title:'Simulation · Heat conduction in a rod',compute:S.rodHeat,fields:[['material','Material','aluminium','select',[['aluminium','Aluminium'],['copper','Copper'],['steel','Steel'],['glass','Glass'],['water','Water (still)']]],['length','Rod length (m)','0.5'],['initial','Initial temperature (°C)','20'],['left','Left end (°C)','100'],['right','Right end (°C)','20'],['duration','Duration (s)','900']]},
  {id:'cycle',tool:'thermal.cycle.analysis',title:'Simulation · Ideal Otto, Diesel and Brayton cycles',compute:S.thermoCycle,fields:[['cycle','Cycle','otto','select',[['otto','Otto (spark ignition)'],['diesel','Diesel (compression ignition)'],['brayton','Brayton (gas turbine)']]],['ratio','Compression ratio r (Otto/Diesel)','8'],['pressureRatio','Pressure ratio rp (Brayton)','10'],['spec','Heat addition given by','heat','select',[['heat','Heat input q_in'],['tmax','Maximum temperature T3'],['cutoff','Diesel cutoff ratio rc']]],['heatIn','Heat input q_in (kJ/kg)','1000'],['Tmax','Maximum temperature T3 (K)','1800'],['cutoff','Diesel cutoff ratio rc','2'],['T1','Inlet temperature T1 (K)','300'],['P1','Inlet pressure P1 (kPa)','100'],['gamma','Heat capacity ratio γ','1.4'],['cp','cp (J/kg·K)','1005']]},
  {id:'network',tool:'circuits.network.analysis',title:'Simulation · DC resistive network (nodal analysis)',compute:S.dcNetwork,fields:[['netlist','Netlist: NAME node+ node− value (0 = ground)','V1 1 0 12\nR1 1 2 1000\nR2 2 0 2000\nR3 2 3 500\nR4 3 0 1500\nI1 0 3 0.002','textarea']]},
+ {id:'pipes',tool:'fluids.pipe.network',title:'Simulation · Looped pipe network (Darcy–Weisbach)',compute:S.pipeNetwork,fields:[['netlist','Pipes: P name from to length_m diameter_mm roughness_mm; D node demand_m³/s; H node head_m','H A 60\nP1 A B 600 300 0.26\nP2 B C 500 250 0.26\nP3 A D 500 250 0.26\nP4 B E 600 200 0.26\nP5 C F 500 200 0.26\nP6 D E 600 200 0.26\nP7 E F 500 150 0.26\nD B 0.03\nD C 0.03\nD D 0.02\nD E 0.04\nD F 0.03','textarea'],['density','Density ρ (kg/m³)','998.2'],['viscosity','Dynamic viscosity μ (Pa·s)','0.001002'],['friction','Turbulent friction factor','colebrook','select',[['colebrook','Colebrook–White (iterated)'],['swamee','Swamee–Jain (explicit)']]]]},
+ {id:'logic',tool:'electronics.digital.logic',title:'Simulation · Digital logic gates and flip-flops',compute:S.digitalLogic,fields:[['netlist','Logic: IN A B [bits]; net = GATE inputs; Q = DFF D CLK; OUT nets; CYCLES n','IN A B Cin\nAX = XOR A B\nS = XOR AX Cin\nC1 = AND A B\nC2 = AND AX Cin\nCout = OR C1 C2\nOUT S Cout','textarea'],['delay','Gate delay model','zero','select',[['zero','Ideal zero delay'],['unit','Unit delay (glitch count)']]]]},
  {id:'spring',tool:'control.transient.two.state',title:'Mass–spring–damper step response',compute:springMassDamper,fields:[['zeta','Damping ratio ζ','0.2'],['wn','Natural frequency ωn (rad/s)','2'],['duration','Duration (s)','10']]},
  {id:'pendulum',tool:'ode.ivp.scalar',title:'Nonlinear pendulum (coupled RK4)',compute:pendulum,fields:[['theta0','Initial angle (°)','30'],['length','Length L (m)','1'],['duration','Duration (s)','6']]},
  {id:'spectrum',tool:'signals.fft.1d',title:'Two-tone signal and FFT spectrum',compute:spectrum,fields:[['f1','Frequency 1 (Hz)','5'],['a1','Amplitude 1','1'],['f2','Frequency 2 (Hz)','12'],['a2','Amplitude 2','0.5']]},
@@ -95,6 +97,7 @@ const FIELD_UNITS=Object.freeze({
  projectile:{speed:'m/s',angle:'°',mass:'kg',diameter:'mm',density:'kg/m^3'},
  rod:{length:'m',initial:'°C',left:'°C',right:'°C',duration:'s'},
  cycle:{T1:'K',P1:'kPa',heatIn:'kJ/kg',Tmax:'K',cp:'J/(kg*K)'},
+ pipes:{density:'kg/m^3',viscosity:'Pa*s'},
  spring:{duration:'s'},
  pendulum:{theta0:'°',length:'m',duration:'s'},
  spectrum:{f1:'Hz',f2:'Hz'}
@@ -139,7 +142,7 @@ style.textContent='#eng-visuals{border:1px solid #d8e4e8;border-radius:12px;padd
 document.head.append(style);
 const area=document.createElement('details');area.id='eng-visuals';
 area.innerHTML='<summary>Engineering simulations &amp; animations</summary>'+
- '<p class="small-note">Physics-based engineering simulations (beam, orbit, circuits, projectile, heat, thermodynamic cycles) and solver animations. Each states its model assumptions; results are textbook-model estimates, not certified designs or code checks. Animations respect reduced-motion preferences.</p>'+
+ '<p class="small-note">Physics-based engineering simulations (beam, orbit, circuits, projectile, heat, thermodynamic cycles, pipe networks, digital logic) and solver animations. Each states its model assumptions; results are textbook-model estimates, not certified designs or code checks. Animations respect reduced-motion preferences.</p>'+
  '<label>Visualization<select id="eng-visual-select"></select></label><div id="eng-visual-fields"></div>'+
  '<div class="eng-visual-actions"><button type="button" id="eng-visual-run">Compute &amp; animate</button><button type="button" id="eng-visual-toggle" aria-pressed="false">Pause</button><button type="button" id="eng-visual-step">Step frame</button><button type="button" id="eng-visual-table" disabled>Send data to Data Tables</button><button type="button" id="eng-visual-graph" disabled>Plot in Graphs</button><button type="button" id="eng-visual-png" disabled>Download frame (PNG)</button></div>'+
  '<canvas id="eng-visual-canvas" width="720" height="320" role="img" aria-label="Engineering animation"></canvas>'+
@@ -312,6 +315,51 @@ function draw(){
   text('Element    I (mA)      P (mW)',430,24);
   list.forEach((e,i)=>text(e.name.padEnd(9,' ')+' '+(e.current*1000).toPrecision(5).padStart(10,' ')+'  '+(e.power*1000).toPrecision(5).padStart(10,' '),430,44+i*18,colorOf[e.type]));
   text('KCL residual '+c.kclResidual.toExponential(1)+' · node colour: voltage (blue low → red high)',20,312);
+ }else if(c.id==='pipes'){
+  // Layered layout: column = breadth-first depth from the first node, row = order within the column.
+  const cols=new Map();c.nodes.forEach((nd,i)=>{const d=c.layers[i];if(!cols.has(d))cols.set(d,[]);cols.get(d).push(nd.node);});
+  const ncol=Math.max(...cols.keys())+1,pos=new Map();
+  for(const [d,list] of cols)list.forEach((n,j)=>pos.set(n,[40+(ncol>1?d/(ncol-1):0.5)*340,40+(j+1)/(list.length+1)*250]));
+  const heads=c.nodes.map(n=>n.head),hlo=Math.min(...heads),hhi=Math.max(...heads),vmax=Math.max(1e-300,c.maxVelocity),dmax=Math.max(...c.pipes.map(q=>q.diameter));
+  const tags=[];
+  c.pipes.forEach(q=>{
+   const [x1,y1]=pos.get(q.a),[x2,y2]=pos.get(q.b);
+   ctx.strokeStyle='#9fb6bd';ctx.lineWidth=3+7*q.diameter/dmax;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.lineCap='butt';
+   // Particles: speed proportional to |V|, travelling in the flow direction (from → to when Q > 0).
+   const rel=Math.abs(q.velocity)/vmax,dots=6,dir=Math.sign(q.flow);
+   if(rel>1e-9)for(let j=0;j<dots;j++){const t=((j/dots+dir*p*4*rel)%1+1)%1;ctx.fillStyle='#2f6fb3';ctx.beginPath();ctx.arc(x1+(x2-x1)*t,y1+(y2-y1)*t,3,0,Math.PI*2);ctx.fill();}
+   const mx=x1+(x2-x1)*0.68,my=y1+(y2-y1)*0.68,[fx,fy,tx,ty]=dir>=0?[x1,y1,x2,y2]:[x2,y2,x1,y1],len=Math.max(1,Math.hypot(tx-fx,ty-fy));
+   arrow(mx-(tx-fx)/len*9,my-(ty-fy)/len*9,mx+(tx-fx)/len*9,my+(ty-fy)/len*9,'#ec824f');
+   tags.push([q.name,x1+(x2-x1)*0.4,y1+(y2-y1)*0.4]);
+  });
+  c.nodes.forEach(nd=>{const [x,y]=pos.get(nd.node);ctx.fillStyle=heat(hhi>hlo?(nd.head-hlo)/(hhi-hlo):0.5);ctx.beginPath();
+   if(nd.fixed)ctx.rect(x-10,y-10,20,20);else ctx.arc(x,y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#27444b';ctx.lineWidth=1;ctx.stroke();
+   const label=nd.node+': '+nd.head.toFixed(2)+' m',lw=ctx.measureText(label).width;ctx.fillStyle='rgba(255,255,255,0.85)';ctx.fillRect(x-lw/2-2,y+12,lw+4,16);text(label,x-lw/2,y+24);});
+  for(const [name,x,y] of tags){const lw=ctx.measureText(name).width;ctx.fillStyle='rgba(255,255,255,0.85)';ctx.fillRect(x-lw/2-2,y-8,lw+4,15);text(name,x-lw/2,y+4,'#174b48');}
+  text('Pipe   Q (L/s)   V (m/s)   hf (m)    Re',430,24);
+  c.pipes.slice(0,14).forEach((q,i)=>text(q.name.padEnd(6,' ')+(q.flow*1000).toFixed(2).padStart(8,' ')+q.velocity.toFixed(3).padStart(9,' ')+q.headloss.toFixed(3).padStart(9,' ')+' '+q.reynolds.toExponential(2).padStart(9,' '),430,44+i*18,q.regime==='turbulent'?'#27444b':'#a3262a'));
+  text('square: fixed head · colour: head (blue low → red high) · arrow: flow direction',20,312);
+ }else if(c.id==='logic'){
+  // Timing diagram: a window of up to 32 steps (truth-table rows or clock cycles) around the cursor.
+  const steps=c.rows.length,k=Math.min(steps-1,Math.floor(p*steps)),win=Math.min(steps,32),start=Math.max(0,Math.min(steps-win,k-Math.floor(win/2)));
+  const names=c.kind==='sequential'?['CLK',...c.signals]:c.signals,rowH=Math.min(26,250/names.length),x0=90,x1=700,w=(x1-x0)/win,top=36;
+  names.forEach((name,i)=>{
+   const y=top+i*rowH,hi=y+3,lo=y+rowH-5,isClk=name==='CLK',col=isClk?-1:c.signals.indexOf(name)+1;
+   const now=isClk?null:c.rows[k][col];
+   ctx.fillStyle=now===1?'#e6f5f2':'#fff';ctx.fillRect(0,y,x0-6,rowH-2);
+   text(name+(now===null?'':' = '+now),6,y+rowH/2+4,now===1?'#188b81':'#597b82');
+   if(!isClk)for(let j=0;j<win;j++)if(c.rows[start+j][col]){ctx.fillStyle='rgba(24,139,129,0.12)';ctx.fillRect(x0+j*w,hi,w,lo-hi);}
+   ctx.lineWidth=2;ctx.strokeStyle=isClk?'#8a4fc2':'#188b81';ctx.beginPath();
+   for(let j=0;j<win;j++){const xa=x0+j*w;
+    if(isClk){ctx.moveTo(xa,hi);ctx.lineTo(xa+w/2,hi);ctx.lineTo(xa+w/2,lo);ctx.lineTo(xa+w,lo);ctx.lineTo(xa+w,hi);} // rising edge at each cycle end
+    else{const yv=c.rows[start+j][col]?hi:lo;if(j===0)ctx.moveTo(xa,yv);else ctx.lineTo(xa,yv);ctx.lineTo(xa+w,yv);}
+   }
+   ctx.stroke();
+  });
+  const cx=x0+(k-start+0.5)*w;ctx.strokeStyle='#ec824f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,top-6);ctx.lineTo(cx,top+names.length*rowH);ctx.stroke();
+  const label=c.kind==='sequential'?'cycle '+k:'row '+k+' of '+steps;
+  text((label+': '+c.signals.map((n,i)=>n+'='+c.rows[k][i+1]).join(' ')).slice(0,96),x0,22);
+  text((c.kind==='sequential'?'rising CLK edge ends each cycle; ':'truth table as time steps; ')+(c.delay==='unit'?'unit delay, settled in '+c.settleSteps[k]+' step(s)':'zero delay')+(steps>win?' · showing steps '+start+'–'+(start+win-1):''),20,312);
  }else if(c.id==='spring'||c.id==='pendulum'){
   const k=Math.min(c.rows.length-1,Math.round(p*(c.rows.length-1))),row=c.rows[k],box=[300,20,400,270];
   frameBox(...box);
@@ -392,6 +440,8 @@ function tableOf(c){
   case 'projectile':return f(c.rows,['t_s','x_m','y_m','vx_m_s','vy_m_s'],'SIM_PROJECTILE');
   case 'cycle':return f(c.path,['process','v_m3_kg','P_kPa','T_K','s_J_kgK'],'SIM_CYCLE');
   case 'network':return f(c.elements.map((e,i)=>[i+1,e.current,e.voltage,e.power,e.value,e.name,e.a,e.b]),['index','current_A','voltage_V','power_W','value','element','node_pos','node_neg'],'SIM_NETWORK');
+  case 'pipes':return f(c.pipes.map((q,i)=>[i+1,q.flow,q.velocity,q.headloss,q.reynolds,q.friction,q.name,q.a,q.b,q.direction]),['index','flow_m3_s','velocity_m_s','headloss_m','reynolds','friction_factor','pipe','from_node','to_node','flow_direction'],'SIM_PIPES');
+  case 'logic':return f(c.rows,['t_step',...c.signals],'SIM_LOGIC');
   case 'rod':{const last=c.frames.at(-1).values,first=c.frames[0].values;return f(last.map((T,j)=>[j*c.L/(last.length-1),first[j],T]),['x_m','T_initial_C','T_final_C'],'SIM_ROD');}
  }
  throw Error('No tabular export for this visual.');
@@ -449,6 +499,6 @@ function decorate(){
 new MutationObserver(decorate).observe($('eng-results'),{childList:true});decorate();
 buildFields();draw();stop();
 M.engineeringVisuals=Object.freeze({visuals:visuals.map(v=>Object.freeze({id:v.id,tool:v.tool,title:v.title})),
- compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,beamGeneral:S.beamGeneral,vibration:S.vibration,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat,cycle:S.thermoCycle,network:S.dcNetwork}),
+ compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,beamGeneral:S.beamGeneral,vibration:S.vibration,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat,cycle:S.thermoCycle,network:S.dcNetwork,pipes:S.pipeNetwork,logic:S.digitalLogic}),
  select,open,run,play,pause:stop,resolveInputs,fieldUnits:FIELD_UNITS,tableOf,exportTable,plotGraph,downloadPng,frame:()=>frame,frames:FRAMES,current:()=>current});
 })();

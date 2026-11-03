@@ -42,7 +42,7 @@ class EngineeringThermoCircuitTests(unittest.TestCase):
             m = re.match(r"\s*\['([a-z0-9.-]+)','[^']*','([^']*)','([^']*)','([^']*)'", line)
             if m and "physics" in m.group(3).split() and m.group(1) != "ode.ivp.scalar":
                 self.assertNotIn("ode", (m.group(1) + " " + m.group(2) + " " + m.group(4)).lower(), m.group(1))
-        row = next(line for line in catalog.splitlines() if line.strip().startswith("['fluids.pipe.network'"))
+        row = next(line for line in catalog.splitlines() if line.strip().startswith("['signals.spectral.analysis'"))
         self.assertIn("not yet implemented", row)
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
         self.assertIn("run: python tests/smoke_engineering_thermo_circuits.py", workflow)

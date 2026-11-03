@@ -3170,14 +3170,24 @@ self.onmessage=async ({data})=>{
           fail('saved Matrix ' + key + ' entries are invalid.');
       }
     }
+    // Validate saved custom functions as strictly as the editor: restore would otherwise
+    // silently drop ambiguous duplicates or argument-less entries after other state changed.
     if (data.customFunctions !== undefined) {
-      if (!Array.isArray(data.customFunctions) || data.customFunctions.length > 60) fail('custom function limit is 60.');
-      for (const fn of data.customFunctions) {
-        if (!record(fn) || typeof fn.name !== 'string' || !/^[A-Za-z][A-Za-z0-9_]*$/.test(fn.name) ||
-            !Array.isArray(fn.params) || fn.params.length > 6) fail('custom function definition is invalid.');
-        short(fn.expression, 12000, 'custom function expression');
-        for (const param of fn.params) if (typeof param !== 'string' || !/^[A-Za-z][A-Za-z0-9_]*$/.test(param))
-          fail('custom function parameter is invalid.');
+      const list = data.customFunctions, identifier = /^[A-Za-z][A-Za-z0-9_]*$/, seen = new Set();
+      if (!Array.isArray(list) || list.length > 60) fail('custom function limit is 60.');
+      for (const item of list) {
+        if (!record(item) || typeof item.name !== 'string' || item.name.length > 64 || !identifier.test(item.name))
+          fail('custom function name is invalid.');
+        const key = item.name.toLowerCase();
+        if (seen.has(key)) fail('duplicate custom function names.');
+        seen.add(key);
+        if (!Array.isArray(item.params) || item.params.length < 1 || item.params.length > 6 ||
+            item.params.some(param => typeof param !== 'string' || param.length > 64 || !identifier.test(param)) ||
+            new Set(item.params).size !== item.params.length)
+          fail('custom function arguments are invalid.');
+        short(item.expression, 12000, 'custom function expression');
+        if (item.source !== undefined) short(item.source, 12000, 'custom function source');
+        if (item.type !== undefined && !['formula', 'python'].includes(item.type)) fail('custom function type is invalid.');
       }
     }
     if (data.tables) {

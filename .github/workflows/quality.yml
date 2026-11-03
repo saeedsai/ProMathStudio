@@ -429,3 +429,5 @@ jobs:
         run: python tests/smoke_signal_filters.py
       - name: Numerical derivatives (Ridders) and vector calculus references, refusals and responsive browser regression
         run: python tests/smoke_vector_calculus.py
+      - name: Matrix extras (Cholesky, SVD rank and bases, LU determinant, characteristic polynomial, norms) browser regression
+        run: python tests/smoke_matrix_extras.py

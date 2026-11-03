@@ -21,11 +21,13 @@ modules = [
     ("promath-control-equilibrium", "src/control-equilibrium.js"),
     ("promath-ode-tools", "src/ode-tools.js"),
     ("promath-stiff-ode", "src/stiff-ode.js"),
+    ("promath-bvp-tools", "src/bvp-tools.js"),
     ("promath-minimize-tools", "src/minimize-tools.js"),
     ("promath-optimization-tools", "src/optimization-tools.js"),
     ("promath-fft-tools", "src/fft-tools.js"),
     ("promath-brent-tools", "src/brent-tools.js"),
     ("promath-statistics-tools", "src/statistics-tools.js"),
+    ("promath-uncertainty-tools", "src/uncertainty-tools.js"),
     ("promath-xlsx-tools", "src/xlsx-tools.js"),
     ("promath-xlsx-import", "src/xlsx-import.js"),
     ("promath-project-schema", "src/project-schema.js"),
@@ -38,6 +40,7 @@ modules = [
     ("promath-engineering-simulations", "src/engineering-simulations.js"),
     ("promath-engineering-catalog", "src/engineering-catalog.js"),
     ("promath-engineering-visuals", "src/engineering-visuals.js"),
+    ("promath-tool-search", "src/tool-search.js"),
 ]
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'

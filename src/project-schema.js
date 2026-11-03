@@ -67,6 +67,37 @@
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
     }
+    // Main-graph curve overlays (implicit/parametric/polar definitions). Legacy projects omit
+    // the field; present definitions must match the exact shape the exporter writes.
+    if (data.graph?.curves !== undefined && data.graph.curves !== null) {
+      const curves = data.graph.curves;
+      if (!Array.isArray(curves) || curves.length > 8) fail('graph curve overlays must be a list of at most 8.');
+      const shapes = {implicit: {expression: 'text', grid: 'grid'},
+        parametric: {x: 'text', y: 'text', t0: 'bound', t1: 'bound', samples: 'samples'},
+        polar: {r: 'text', theta0: 'bound', theta1: 'bound', samples: 'samples'}};
+      const seen = new Set();
+      for (const curve of curves) {
+        if (!record(curve) || !Object.prototype.hasOwnProperty.call(shapes, curve.type)) fail('graph curve overlay type is invalid.');
+        const shape = shapes[curve.type], keys = Object.keys(curve).filter(k => k !== 'type');
+        if (keys.length !== Object.keys(shape).length || keys.some(k => !Object.prototype.hasOwnProperty.call(shape, k)))
+          fail('graph curve overlay fields are invalid.');
+        for (const [key, kind] of Object.entries(shape)) {
+          const value = curve[key];
+          const ok = kind === 'text' ? typeof value === 'string' && value.trim() !== '' && value.length <= 1500 :
+            kind === 'bound' ? typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 1e12 :
+            kind === 'grid' ? Number.isInteger(value) && value >= 4 && value <= 300 :
+            Number.isInteger(value) && value >= 2 && value <= 20000;
+          if (!ok) fail('graph curve overlay ' + key + ' is invalid.');
+        }
+        if (curve.type === 'implicit' && (curve.expression.split('=').length > 2 || /==|<=|>=|!=/.test(curve.expression)))
+          fail('graph curve overlay implicit equation must use at most one "=".');
+        if (curve.type === 'parametric' && !(curve.t1 > curve.t0)) fail('graph curve overlay t range is empty.');
+        if (curve.type === 'polar' && !(curve.theta1 > curve.theta0)) fail('graph curve overlay θ range is empty.');
+        const identity = JSON.stringify(Object.keys(shape).map(k => curve[k]).concat(curve.type));
+        if (seen.has(identity)) fail('duplicate graph curve overlays.');
+        seen.add(identity);
+      }
+    }
     if (data.engineering !== undefined && data.engineering !== null) {
       const eng = data.engineering;
       if (!record(eng) || typeof eng.discipline !== 'string' || !/^[a-z-]{0,32}$/.test(eng.discipline) ||

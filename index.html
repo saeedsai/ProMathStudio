@@ -2705,7 +2705,7 @@ self.onmessage=async ({data})=>{
   }
   function compileGraph(){
     const lines=$('graph-input').value.replace(/\\\s*\n/g,'\n').split(/[\n;]+/).map(x=>x.trim()).filter(Boolean);
-    if(!lines.length&&!window.MathStudio.graphData?.hasData())throw Error('Type a function or import a dataset to plot.');
+    if(!lines.length&&!window.MathStudio.graphData?.hasData()&&!window.MathStudio.graphOverlays?.hasOverlays(graphMode))throw Error('Type a function or import a dataset to plot.');
     if(lines.length>8)throw Error('Plot a maximum of eight equations at a time.');
     if(graphMode==='2d')return lines.map((text,i)=>({name:text,kind:'curve2d',ast:parseRaw(graphSource(text)),color:plotColor(i),seriesIndex:i}));
     // In 3D, y=f(x) constrains a one-dimensional curve on each z=f(x,y) surface.
@@ -2826,6 +2826,7 @@ self.onmessage=async ({data})=>{
       ctx.stroke();ctx.setLineDash([]);
     }
     window.MathStudio.graphData?.draw(ctx,{mode:'2d',range,w,h});
+    window.MathStudio.graphOverlays?.draw(ctx,{mode:'2d',range,w,h});
   }
   function persp(x,y,z){
     const {xmin,xmax,ymin,ymax,zmin,zmax}=range;
@@ -2924,14 +2925,14 @@ self.onmessage=async ({data})=>{
     const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=f.kind==='trace'?f.color:f.color;
     const t=document.createElement('span');t.textContent=f.name;row.append(sw,t);frame.append(row);
   }
-    for(const item of window.MathStudio.graphData?.legend()||[]){
+    for(const item of [...(window.MathStudio.graphData?.legend()||[]),...(graphMode==='2d'?window.MathStudio.graphOverlays?.legend()||[]:[])]){
       const row=document.createElement('div');row.className='graph-legend-line';const sw=document.createElement('span');sw.className='graph-swatch';sw.style.background=item.color;const t=document.createElement('span');t.textContent=item.name;row.append(sw,t);frame.append(row);
     }
   }
   function drawGraph(){if(graphCanvas.width!==w||graphCanvas.height!==h){graphCanvas.width=w;graphCanvas.height=h}if(graphMode==='3d')draw3D();else draw2D();legend();}
   function plot(){
     try{updateRange();graphExpr=compileGraph();updateSeriesColorInputs();drawGraph();
-      let hasRealSamples=!!window.MathStudio.graphData?.hasData(),hasTraceSamples=false;
+      let hasRealSamples=!!window.MathStudio.graphData?.hasData()||!!window.MathStudio.graphOverlays?.hasOverlays(graphMode),hasTraceSamples=false;
       for(const func of graphExpr){
         for(let k=0;k<=96;k++){
           const x=range.xmin+(range.xmax-range.xmin)*k/96;
@@ -2947,7 +2948,7 @@ self.onmessage=async ({data})=>{
       const traces=graphExpr.filter(f=>f.kind==='trace').length;
       const surfaces=graphExpr.filter(f=>f.kind==='surface').length;
       const summary=graphMode==='3d'&&traces?`Displaying ${surfaces} surface(s) and ${traces} constrained 3D curve(s). ${hasTraceSamples?'The bright line follows y=f(x) on z=f(x,y).':'The curve is outside the current Y/Z range; adjust graph bounds.'} Drag to rotate.`:'Displaying '+graphExpr.length+' '+(graphExpr.length===1?'function':'functions')+' in '+(graphMode==='2d'?'2D':'3D')+'. '+(graphMode==='3d'?'Drag to rotate the surface; scroll to zoom.':'Drag to pan; scroll to zoom.');
-      const added=window.MathStudio.graphData?.info();
+      const added=[window.MathStudio.graphData?.info(),graphMode==='2d'?window.MathStudio.graphOverlays?.info():''].filter(Boolean).join(' and ');
       graphMsg(hasRealSamples?(added?(graphExpr.length?summary+' ':'')+added+'. '+(graphMode==='3d'?'Drag to rotate.':'Drag to pan.') :summary):'No real-valued points in this view. A function may be complex or undefined here; adjust the domain or plot its original real-valued equation.',!hasRealSamples||traces>0&&!hasTraceSamples);
     }catch(e){graphMsg(e.message,true);}
   }
@@ -3060,7 +3061,7 @@ self.onmessage=async ({data})=>{
       $('graph-input').value=[...lines,added].join('\n');plot();
       if($('graph-status').classList.contains('error'))throw Error($('graph-status').textContent);
     },
-    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,panX3d,panY3d,dataset:window.MathStudio.graphData?.exportState()||null,appearance:getAppearance()}),
+    getGraphState:()=>({mode:graphMode,functions:$('graph-input').value,bounds:{...range},azimuth,elevation,zoom3d,panX3d,panY3d,dataset:window.MathStudio.graphData?.exportState()||null,curves:window.MathStudio.graphOverlays?.exportState()||[],appearance:getAppearance()}),
     restoreGraphState:data=>{
       if(!data||typeof data!=='object')return;
       if(['2d','3d'].includes(data.mode))switchGraph(data.mode);
@@ -3075,6 +3076,7 @@ self.onmessage=async ({data})=>{
       if(Number.isFinite(data.panX3d))panX3d=Math.max(-5000,Math.min(5000,data.panX3d));
       if(Number.isFinite(data.panY3d))panY3d=Math.max(-5000,Math.min(5000,data.panY3d));
       if(window.MathStudio.graphData)window.MathStudio.graphData.restoreState(data.dataset??null);setAppearance(data.appearance||{});
+      window.MathStudio.graphOverlays?.restoreState(data.curves??null);
       plot();
     }
   };
@@ -3150,6 +3152,37 @@ self.onmessage=async ({data})=>{
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
+    }
+    // Main-graph curve overlays (implicit/parametric/polar definitions). Legacy projects omit
+    // the field; present definitions must match the exact shape the exporter writes.
+    if (data.graph?.curves !== undefined && data.graph.curves !== null) {
+      const curves = data.graph.curves;
+      if (!Array.isArray(curves) || curves.length > 8) fail('graph curve overlays must be a list of at most 8.');
+      const shapes = {implicit: {expression: 'text', grid: 'grid'},
+        parametric: {x: 'text', y: 'text', t0: 'bound', t1: 'bound', samples: 'samples'},
+        polar: {r: 'text', theta0: 'bound', theta1: 'bound', samples: 'samples'}};
+      const seen = new Set();
+      for (const curve of curves) {
+        if (!record(curve) || !Object.prototype.hasOwnProperty.call(shapes, curve.type)) fail('graph curve overlay type is invalid.');
+        const shape = shapes[curve.type], keys = Object.keys(curve).filter(k => k !== 'type');
+        if (keys.length !== Object.keys(shape).length || keys.some(k => !Object.prototype.hasOwnProperty.call(shape, k)))
+          fail('graph curve overlay fields are invalid.');
+        for (const [key, kind] of Object.entries(shape)) {
+          const value = curve[key];
+          const ok = kind === 'text' ? typeof value === 'string' && value.trim() !== '' && value.length <= 1500 :
+            kind === 'bound' ? typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 1e12 :
+            kind === 'grid' ? Number.isInteger(value) && value >= 4 && value <= 300 :
+            Number.isInteger(value) && value >= 2 && value <= 20000;
+          if (!ok) fail('graph curve overlay ' + key + ' is invalid.');
+        }
+        if (curve.type === 'implicit' && (curve.expression.split('=').length > 2 || /==|<=|>=|!=/.test(curve.expression)))
+          fail('graph curve overlay implicit equation must use at most one "=".');
+        if (curve.type === 'parametric' && !(curve.t1 > curve.t0)) fail('graph curve overlay t range is empty.');
+        if (curve.type === 'polar' && !(curve.theta1 > curve.theta0)) fail('graph curve overlay θ range is empty.');
+        const identity = JSON.stringify(Object.keys(shape).map(k => curve[k]).concat(curve.type));
+        if (seen.has(identity)) fail('duplicate graph curve overlays.');
+        seen.add(identity);
+      }
     }
     if (data.engineering !== undefined && data.engineering !== null) {
       const eng = data.engineering;
@@ -5430,7 +5463,7 @@ const topics=$('help-topics');if(topics)topics.insertAdjacentHTML('beforeend',`<
 })();
 </script>
 <script id="promath-interpolation-tools">
-/* ProMathStudio: bounded offline one-dimensional linear, PCHIP and barycentric interpolation. */
+/* ProMathStudio: bounded offline one-dimensional linear, PCHIP, barycentric, cubic spline and Akima interpolation. */
 (()=>{'use strict';
 const M=window.MathStudio, panel=document.getElementById('numerical-panel');
 if(!M?.dataTables||!M?.advanced||!panel)return;
@@ -5489,8 +5522,151 @@ function barycentricWeights(samples){
  const max=Math.max(...logs);
  return logs.map((v,i)=>signs[i]*Math.exp(v-max));
 }
+const SPLINE_METHODS={
+ natural:{min:2,label:'Natural cubic spline (zero end second derivatives)',name:'Natural'},
+ clamped:{min:2,label:'Clamped cubic spline (user end slopes)',name:'Clamped'},
+ notaknot:{min:4,label:'Not-a-knot cubic spline (continuous third derivative at x1 and x(n-2))',name:'NotAKnot'},
+ periodic:{min:3,label:'Periodic cubic spline (matching end value, slope and curvature)',name:'Periodic'},
+ akima:{min:3,label:'Akima (1970) local cubic interpolation',name:'Akima'},
+ makima:{min:3,label:'Modified Akima (makima) local cubic interpolation',name:'Makima'}
+};
+const METHODS=['linear','pchip','barycentric',...Object.keys(SPLINE_METHODS)];
+function thomas(sub,diag,sup,rhs){
+ // Tridiagonal solve without pivoting; callers supply diagonally dominant systems.
+ const n=diag.length,c=Array(n),d=Array(n);
+ let pivot=diag[0];
+ if(!(Math.abs(pivot)>0))throw Error('Spline system is singular.');
+ c[0]=n>1?sup[0]/pivot:0;d[0]=rhs[0]/pivot;
+ for(let i=1;i<n;i++){
+  pivot=diag[i]-sub[i]*c[i-1];
+  if(!(Math.abs(pivot)>0)||!Number.isFinite(pivot))throw Error('Spline system is singular.');
+  c[i]=i<n-1?sup[i]/pivot:0;d[i]=(rhs[i]-sub[i]*d[i-1])/pivot;
+ }
+ for(let i=n-2;i>=0;i--)d[i]-=c[i]*d[i+1];
+ return d;
+}
+function cyclicThomas(sub,diag,sup,rhs){
+ // Sherman-Morrison solve of a cyclic tridiagonal system; sub[0] and sup[n-1] are the corner entries.
+ const n=diag.length;
+ if(n===2){
+  const a=diag[0],b=sup[0]+sub[0],c=sub[1]+sup[1],d=diag[1],det=a*d-b*c;
+  if(!(Math.abs(det)>0))throw Error('Periodic spline system is singular.');
+  return [(rhs[0]*d-b*rhs[1])/det,(a*rhs[1]-c*rhs[0])/det];
+ }
+ const alpha=sub[0],beta=sup[n-1],gamma=-diag[0];
+ const b=diag.slice();b[0]-=gamma;b[n-1]-=alpha*beta/gamma;
+ const s=sub.slice(),p=sup.slice();s[0]=0;p[n-1]=0;
+ const x=thomas(s,b,p,rhs);
+ const u=Array(n).fill(0);u[0]=gamma;u[n-1]=beta;
+ const z=thomas(s,b,p,u);
+ const factor=(x[0]+alpha*x[n-1]/gamma)/(1+z[0]+alpha*z[n-1]/gamma);
+ if(!Number.isFinite(factor))throw Error('Periodic spline system is singular.');
+ return x.map((v,i)=>v-factor*z[i]);
+}
+function segments(samples){
+ const h=[],delta=[];
+ for(let i=0;i<samples.length-1;i++){
+  const width=samples[i+1][0]-samples[i][0],secant=(samples[i+1][1]-samples[i][1])/width;
+  if(!(width>0)||!Number.isFinite(width)||!Number.isFinite(secant))
+   throw Error('Sample spacing or values cause a non-finite interpolation slope.');
+  h.push(width);delta.push(secant);
+ }
+ return {h,delta};
+}
+function splineSlopes(samples,method,endSlopes){
+ // All cubic methods are stored as node slopes and evaluated in cubic Hermite form.
+ const n=samples.length,{h,delta}=segments(samples);
+ if(method==='akima'||method==='makima'){
+  // Akima (1970): extend the secants by two linearly extrapolated values at each end.
+  const d=[0,0,...delta,0,0],k=n-1;
+  d[1]=2*d[2]-d[3];d[0]=2*d[1]-d[2];
+  d[k+2]=2*d[k+1]-d[k];d[k+3]=2*d[k+2]-d[k+1];
+  const slopes=[];
+  for(let i=0;i<n;i++){
+   const a=d[i],b=d[i+1],c=d[i+2],e=d[i+3];
+   let w1=Math.abs(e-c),w2=Math.abs(b-a);
+   if(method==='makima'){w1+=Math.abs(e+c)/2;w2+=Math.abs(b+a)/2;}
+   const sum=w1+w2;
+   const m=sum>0?(w1*b+w2*c)/sum:(method==='makima'?0:(b+c)/2);
+   if(!Number.isFinite(m))throw Error('Akima slope is non-finite.');
+   slopes.push(m);
+  }
+  return slopes;
+ }
+ // Interior C2 condition: h_i m_(i-1) + 2(h_(i-1)+h_i) m_i + h_(i-1) m_(i+1) = 3(h_i d_(i-1) + h_(i-1) d_i).
+ const interior=i=>[h[i],2*(h[i-1]+h[i]),h[i-1],3*(h[i]*delta[i-1]+h[i-1]*delta[i])];
+ if(method==='periodic'){
+  const N=n-1,sub=[],diag=[],sup=[],rhs=[];
+  for(let i=0;i<N;i++){
+   const hp=h[(i-1+N)%N],hc=h[i],dp=delta[(i-1+N)%N],dc=delta[i];
+   sub.push(hc);diag.push(2*(hp+hc));sup.push(hp);rhs.push(3*(hc*dp+hp*dc));
+  }
+  const m=cyclicThomas(sub,diag,sup,rhs);
+  return [...m,m[0]];
+ }
+ if(method==='notaknot'){
+  // Eliminate the two not-a-knot end rows so the reduced interior system stays diagonally dominant.
+  const d0=h[0]+h[1],r0=((h[0]+2*d0)*h[1]*delta[0]+h[0]*h[0]*delta[1])/d0;
+  const dl=h[n-3]+h[n-2],rl=(h[n-2]*h[n-2]*delta[n-3]+(2*dl+h[n-2])*h[n-3]*delta[n-2])/dl;
+  const sub=[],diag=[],sup=[],rhs=[];
+  for(let i=1;i<n-1;i++){const [a,b,c,r]=interior(i);sub.push(a);diag.push(b);sup.push(c);rhs.push(r);}
+  diag[0]-=d0;rhs[0]-=r0;sub[0]=0;
+  const L=diag.length-1;diag[L]-=dl;rhs[L]-=rl;sup[L]=0;
+  const m=thomas(sub,diag,sup,rhs);
+  return [(r0-d0*m[0])/h[1],...m,(rl-dl*m[L])/h[n-3]];
+ }
+ const sub=[0],diag=[],sup=[],rhs=[];
+ if(method==='clamped'){diag.push(1);sup.push(0);rhs.push(endSlopes[0]);}
+ else{diag.push(2);sup.push(1);rhs.push(3*delta[0]);}
+ for(let i=1;i<n-1;i++){const [a,b,c,r]=interior(i);sub.push(a);diag.push(b);sup.push(c);rhs.push(r);}
+ if(method==='clamped'){sub.push(0);diag.push(1);rhs.push(endSlopes[1]);}
+ else{sub.push(1);diag.push(2);rhs.push(3*delta[n-2]);}
+ sup.push(0);
+ return thomas(sub,diag,sup,rhs);
+}
+function hermiteIntegral(y0,y1,m0,m1,h,t){
+ // Exact integral of the cubic Hermite piece from its left knot to t in [0,1].
+ const t2=t*t,t3=t2*t,t4=t3*t;
+ return h*((t4/2-t3+t)*y0+(t4/4-2*t3/3+t2/2)*h*m0+(t3-t4/2)*y1+(t4/4-t3/3)*h*m1);
+}
+function prepareSpline(samples,method,endSlopes){
+ const spec=SPLINE_METHODS[method];
+ if(samples.length<spec.min)throw Error(spec.label+' needs at least '+spec.min+' sample points.');
+ let ends=null;
+ if(method==='clamped'){
+  if(!Array.isArray(endSlopes)||endSlopes.length!==2)throw Error('Clamped spline needs start and end slopes.');
+  ends=[number(endSlopes[0],'Start slope'),number(endSlopes[1],'End slope')];
+ }
+ if(method==='periodic'){
+  const y0=samples[0][1],yn=samples[samples.length-1][1];
+  const scale=Math.max(1,...samples.map(p=>Math.abs(p[1])));
+  if(!(Math.abs(y0-yn)<=1e-9*scale))
+   throw Error('Periodic spline requires the first and last y values to match (|y0 - yn| <= 1e-9 x max(1, max|y|)).');
+  samples=samples.map((p,i)=>i===samples.length-1?[p[0],y0]:p);
+ }
+ const slopes=splineSlopes(samples,method,ends);
+ const cumulative=[0];
+ for(let i=0;i<samples.length-1;i++){
+  const h=samples[i+1][0]-samples[i][0];
+  cumulative.push(cumulative[i]+h*(samples[i][1]+samples[i+1][1])/2+h*h*(slopes[i]-slopes[i+1])/12);
+ }
+ if(!slopes.every(Number.isFinite)||!cumulative.every(Number.isFinite))throw Error('Spline coefficients are non-finite.');
+ return {samples,slopes,cumulative};
+}
+function evaluateSpline(spline,lo,hi,x){
+ const {samples,slopes,cumulative}=spline,[x0,y0]=samples[lo],[x1,y1]=samples[hi];
+ const h=x1-x0,t=(x-x0)/h,t2=t*t,t3=t2*t,m0=slopes[lo],m1=slopes[hi];
+ // Return exact sample values at knots; elsewhere evaluate the cubic Hermite form.
+ const y=x===x0?y0:x===x1?y1:(2*t3-3*t2+1)*y0+(t3-2*t2+t)*h*m0+(3*t2-2*t3)*y1+(t3-t2)*h*m1;
+ const d1=x===x0?m0:x===x1?m1:((6*t2-6*t)*(y0-y1)+(3*t2-4*t+1)*h*m0+(3*t2-2*t)*h*m1)/h;
+ const d2=((12*t-6)*(y0-y1)+(6*t-4)*h*m0+(6*t-2)*h*m1)/(h*h);
+ const integral=x===x1?cumulative[hi]:cumulative[lo]+hermiteIntegral(y0,y1,m0,m1,h,t);
+ return [x,number(y,'Interpolated y'),number(d1,'First derivative'),number(d2,'Second derivative'),number(integral,'Integral')];
+}
 function interpolate({points,queries,method='linear'}={}){
- if(!['linear','pchip','barycentric'].includes(method))throw Error('Interpolation method must be linear, pchip or barycentric.');
+ // Optional clamped end slopes are read separately so the established signature stays unchanged.
+ const endSlopes=arguments[0]?.endSlopes;
+ if(!METHODS.includes(method))throw Error('Interpolation method must be linear, pchip, barycentric, natural, clamped, notaknot, periodic, akima or makima.');
  if(!Array.isArray(points)||points.length<2||points.length>MAX_POINTS)throw Error('Provide 2–200 sample points.');
  if(!Array.isArray(queries)||queries.length<1||queries.length>MAX_QUERIES)throw Error('Provide 1–1000 query x values.');
  const samples=points.map((pair,i)=>{
@@ -5499,10 +5675,25 @@ function interpolate({points,queries,method='linear'}={}){
  });
  for(let i=1;i<samples.length;i++)if(!(samples[i][0]>samples[i-1][0]))
   throw Error('Sample x values must be strictly increasing; duplicates and unsorted points are not allowed.');
+ const spec=SPLINE_METHODS[method];
+ const spline=spec?prepareSpline(samples,method,endSlopes):null;
  const slopes=method==='pchip'?pchipSlopes(samples):null;
  const weights=method==='barycentric'?barycentricWeights(samples):null;
  const xs=queries.map((x,i)=>number(x,'Query x '+(i+1))).sort((a,b)=>a-b);
  const min=samples[0][0],max=samples[samples.length-1][0];
+ if(spline){
+  const rows=xs.map(x=>{
+   if(x<min||x>max)throw Error('Query x='+x+' is outside sample domain ['+min+', '+max+']; extrapolation is disabled.');
+   let lo=0,hi=samples.length-1;
+   while(hi-lo>1){const mid=Math.floor((lo+hi)/2);if(samples[mid][0]<=x)lo=mid;else hi=mid;}
+   return evaluateSpline(spline,lo,hi,x);
+  });
+  const local=method==='akima'||method==='makima';
+  return {type:'interpolation-'+method,columns:['x','y','dy/dx','d2y/dx2','integral from x0'],rows,domain:[min,max],
+   method:spec.label,tableName:'Interpolation_'+spec.name,slopes:spline.slopes.slice(),
+   note:(local?'Local C1 cubic (second derivative may jump at knots); ':'Global C2 cubic spline; ')+
+    'derivatives and the integral are exact for the piecewise cubic, not for the unknown source function; no extrapolation or uncertainty estimate.'};
+ }
  const rows=xs.map(x=>{
   if(x<min||x>max)throw Error('Query x='+x+' is outside sample domain ['+min+', '+max+']; extrapolation is disabled.');
   let lo=0,hi=samples.length-1;
@@ -5558,9 +5749,14 @@ function parseQueries(text){
  return parts;
 }
 const area=document.createElement('details');area.id='interp-details';
-area.innerHTML='<summary>1D interpolation · Linear / PCHIP / Polynomial · Data Tables / Graphs</summary>'+
+area.innerHTML='<summary>1D interpolation · Linear / PCHIP / Polynomial / Cubic splines / Akima · Data Tables / Graphs</summary>'+
  '<p class="graph-data-muted">Enter sorted sample pairs (x,y), one per line, or load the first two columns of the active Data Table. Query values must be inside the sample domain.</p>'+
- '<div class="data-toolbar"><label>Interpolation method <select id="interp-method"><option value="linear">Linear</option><option value="pchip">Shape-preserving cubic (PCHIP)</option><option value="barycentric">Polynomial (barycentric, 2–16 points)</option></select></label></div>'+ 
+ '<div class="data-toolbar"><label>Interpolation method <select id="interp-method"><option value="linear">Linear</option><option value="pchip">Shape-preserving cubic (PCHIP)</option><option value="barycentric">Polynomial (barycentric, 2–16 points)</option>'+
+ '<option value="natural">Natural cubic spline</option><option value="clamped">Clamped cubic spline (end slopes)</option>'+
+ '<option value="notaknot">Not-a-knot cubic spline (4+ points)</option><option value="periodic">Periodic cubic spline (y0 = yn)</option>'+
+ '<option value="akima">Akima (1970)</option><option value="makima">Modified Akima (makima)</option></select></label>'+
+ '<label id="interp-slopes" hidden>Clamped end slopes <input id="interp-slope-start" type="text" inputmode="decimal" value="0" aria-label="Clamped start slope dy/dx at x0" size="8">'+
+ '<input id="interp-slope-end" type="text" inputmode="decimal" value="0" aria-label="Clamped end slope dy/dx at xn" size="8"></label></div>'+
  '<div class="interp-fields"><label>Sample pairs (x,y)<textarea id="interp-samples" rows="5" spellcheck="false">0,0\n1,2\n2,4</textarea></label>'+
  '<label>Query x values (comma, space or newline separated)<textarea id="interp-queries" rows="5" spellcheck="false">0,0.5,1,1.5,2</textarea></label></div>'+
  '<div class="data-toolbar"><button id="interp-from-table" class="secondary" type="button">Load active table x/y</button>'+
@@ -5577,7 +5773,8 @@ style.textContent='#interp-details{border-top:1px solid #dce4f6;margin-top:15px;
  '.interp-fields textarea{width:100%;padding:10px;border:1px solid #cdd8ec;border-radius:9px;font:13px Consolas,monospace}'+
  '#interp-output{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:white;border:1px solid #dce5f3;border-radius:10px}'+
  '#interp-output.error{color:#a82241;background:#fff2f4}'+
- '@media(max-width:600px){.interp-fields{grid-template-columns:1fr}}';
+ '#interp-slopes[hidden]{display:none}#interp-slopes input{width:6.5em;margin-left:6px;padding:6px;border:1px solid #cdd8ec;border-radius:7px;font:13px Consolas,monospace}'+
+ '@media(max-width:600px){.interp-fields{grid-template-columns:1fr}#interp-slopes input{width:5.5em}}';
 document.head.append(style);
 let last=null;
 function invalidate(){
@@ -5587,8 +5784,8 @@ function invalidate(){
 function fail(error){
  invalidate();$('interp-output').classList.add('error');$('interp-output').textContent=error.message;
 }
-for(const id of ['interp-samples','interp-queries'])$(id).addEventListener('input',invalidate);
-$('interp-method').addEventListener('change',invalidate);
+for(const id of ['interp-samples','interp-queries','interp-slope-start','interp-slope-end'])$(id).addEventListener('input',invalidate);
+$('interp-method').addEventListener('change',()=>{invalidate();$('interp-slopes').hidden=$('interp-method').value!=='clamped';});
 $('interp-from-table').addEventListener('click',()=>{
  try{
   const t=M.dataTables.active;
@@ -5602,17 +5799,21 @@ $('interp-from-table').addEventListener('click',()=>{
 });
 $('interp-run').addEventListener('click',()=>{
  try{
-  last=interpolate({points:parsePairs($('interp-samples').value),queries:parseQueries($('interp-queries').value),method:$('interp-method').value});
+  const method=$('interp-method').value;
+  last=interpolate({points:parsePairs($('interp-samples').value),queries:parseQueries($('interp-queries').value),method,
+   endSlopes:method==='clamped'?[$('interp-slope-start').value,$('interp-slope-end').value]:undefined});
   $('interp-output').classList.remove('error');
+  const fmt=v=>String(Number(v.toPrecision(12)));
   $('interp-output').textContent=last.method+'\n'+last.rows.length+' query results; domain ['+last.domain.join(', ')+']\n'+
-   last.rows.slice(0,12).map(r=>r[0]+' → '+r[1]).join('\n')+
+   (last.columns.length>2?'x → y | dy/dx | d2y/dx2 | integral from x0\n':'')+
+   last.rows.slice(0,12).map(r=>r[0]+' → '+(r.length>2?r.slice(1).map(fmt).join(' | '):r[1])).join('\n')+
    (last.rows.length>12?'\n… '+(last.rows.length-12)+' more':'')+'\n'+last.note;
   $('interp-to-table').disabled=$('interp-to-graph').disabled=false;
  }catch(e){fail(e);}
 });
 function exportTable(){
  if(!last)throw Error('Run interpolation first.');
- return M.dataTables.importData({headers:last.columns,rows:last.rows},last.type==='interpolation-barycentric'?'Interpolation_Barycentric':last.type==='interpolation-pchip'?'Interpolation_PCHIP':'Interpolation_Linear');
+ return M.dataTables.importData({headers:last.columns,rows:last.rows},last.tableName||(last.type==='interpolation-barycentric'?'Interpolation_Barycentric':last.type==='interpolation-pchip'?'Interpolation_PCHIP':'Interpolation_Linear'));
 }
 $('interp-to-table').addEventListener('click',()=>{try{exportTable();M.advanced.mode('data');}catch(e){fail(e);}});
 $('interp-to-graph').addEventListener('click',()=>{
@@ -5624,7 +5825,7 @@ $('interp-to-graph').addEventListener('click',()=>{
   $('dt-plot-table').click();
  }catch(e){fail(e);}
 });
-M.interpolationTools={interpolate,parsePairs,parseQueries};
+M.interpolationTools={interpolate,parsePairs,parseQueries,methods:METHODS.slice(),splineMethods:Object.keys(SPLINE_METHODS)};
 })();
 </script>
 <script id="promath-integration-tools">
@@ -7904,6 +8105,257 @@ toTable.addEventListener('click',()=>{
 M.stiffOde={solve,run,method:'tr-bdf2'};
 })();
 </script>
+<script id="promath-bvp-tools">
+/* ProMathStudio: two-point boundary-value problems y''=f(x,y,y') by the shooting method.
+   Reuses the existing RK4 system solver (odeTools.solveSystem) or the implicit TR-BDF2
+   solver (stiffOde.solve); no new integrator. Expressions use the safe numeric AST evaluator. */
+(()=>{'use strict';
+const M=window.MathStudio, anchor=document.getElementById('stiff-ode-details')||document.getElementById('ode-details');
+if(!M?.odeTools?.solveSystem||!M?.dataTables||!anchor)return;
+const $=id=>document.getElementById(id), MAX=1e12;
+function finite(value,label){
+ if(value===null||value===undefined||String(value).trim()==='')throw Error(label+' is required.');
+ const n=Number(value);
+ if(!Number.isFinite(n)||Math.abs(n)>MAX)throw Error(label+' must be finite with magnitude at most 1e12.');
+ return n;
+}
+function integer(value,label,lo,hi){
+ const n=finite(value,label);
+ if(!Number.isInteger(n)||n<lo||n>hi)throw Error(label+' must be an integer from '+lo+' to '+hi+'.');
+ return n;
+}
+// The user writes f with x (independent variable), y and yp (= y'). The existing system
+// solver names them t, y, z, so rename identifier tokens only (exp, max etc. are untouched);
+// t and z are therefore accepted aliases for x and yp.
+function toSystemExpression(expression){
+ expression=String(expression??'').trim();
+ if(!expression||expression.length>1000)throw Error("Enter y'' = f(x, y, yp) as a mathematical expression (at most 1,000 characters).");
+ return expression.replace(/\bx\b/g,'t').replace(/\byp\b/g,'z');
+}
+const TYPES={dirichlet:[1,0],neumann:[0,1]};
+function boundary(spec,label){
+ if(!spec||typeof spec!=='object')throw Error(label+' boundary condition is required.');
+ const type=String(spec.type||'dirichlet').toLowerCase();
+ let c0,c1;
+ if(TYPES[type])[c0,c1]=TYPES[type];
+ else if(type==='robin'){c0=finite(spec.c0,label+' coefficient c₀');c1=finite(spec.c1,label+' coefficient c₁');}
+ else throw Error(label+' boundary type must be dirichlet, neumann or robin.');
+ if(c0===0&&c1===0)throw Error(label+' Robin condition needs c₀ or c₁ nonzero.');
+ return {type,c0,c1,gamma:finite(spec.value,label+' boundary value')};
+}
+function shoot({expression="-y",a=0,b=1,left={type:'dirichlet',value:0},right={type:'dirichlet',value:1},
+ sMin=-10,sMax=10,scanCount=60,steps=200,method='rk4',tolerance=1e-10,maxIterations=80,maxSolutions=10}={}){
+ const f=toSystemExpression(expression);
+ a=finite(a,'Left endpoint a');b=finite(b,'Right endpoint b');
+ if(!(b>a))throw Error('Right endpoint b must be greater than left endpoint a.');
+ const L=boundary(left,'Left'), R=boundary(right,'Right');
+ sMin=finite(sMin,'Scan minimum');sMax=finite(sMax,'Scan maximum');
+ if(!(sMax>sMin))throw Error('Scan maximum must be greater than scan minimum.');
+ scanCount=integer(scanCount,'Scan intervals',2,400);
+ method=String(method);
+ if(method!=='rk4'&&method!=='tr-bdf2')throw Error('Integrator must be rk4 or tr-bdf2.');
+ if(method==='tr-bdf2'&&!M?.stiffOde?.solve)throw Error('The stiff TR-BDF2 solver is not available.');
+ steps=integer(steps,'RK4 steps',10,500);
+ tolerance=finite(tolerance,'Shooting tolerance');
+ if(!(tolerance>=1e-14&&tolerance<=1e-3))throw Error('Shooting tolerance must be between 1e-14 and 1e-3.');
+ maxIterations=integer(maxIterations,'Refinement iterations',5,200);
+ // Shooting parameter s: y'(a) when the left condition fixes y(a) only, otherwise s=y(a).
+ const parameter=L.c1===0?"y′(a)":'y(a)';
+ const initial=s=>L.c1===0?[L.gamma/L.c0,s]:[s,(L.gamma-L.c0*s)/L.c1];
+ let integrations=0;
+ // fine=1: requested resolution; fine=2: step doubling (RK4) or 100x tighter tolerances (TR-BDF2).
+ function integrate(s,fine=1){
+  const [y0,z0]=initial(s);integrations++;
+  if(method==='rk4')return M.odeTools.solveSystem({expression:'z',expressionZ:f,t0:a,t1:b,y0,z0,steps:steps*fine},true).rows;
+  return M.stiffOde.solve({expression:'z',expressionZ:f,t0:a,t1:b,y0,z0,
+   rtol:fine===1?1e-7:1e-9,atol:fine===1?1e-10:1e-12,maxSteps:20000}).rows;
+ }
+ const residualOf=rows=>{const e=rows.at(-1);return R.c0*e[1]+R.c1*e[2]-R.gamma;};
+ const scaleOf=rows=>1+rows.reduce((m,r)=>Math.max(m,Math.abs(r[1]),Math.abs(r[2])),0);
+ // Validate the expression once so syntax/domain errors are reported instead of skipped.
+ const midS=(sMin+sMax)/2;
+ let probe=null,firstError=null;
+ for(const s of [midS,sMin,sMax]){try{probe=integrate(s);break;}catch(error){firstError=firstError||error;}}
+ if(!probe)throw Error('Initial-value integration failed for every probe slope: '+firstError.message);
+ const residual=(s,fine=1)=>{try{return residualOf(integrate(s,fine));}catch(e){return NaN;}};
+ const grid=[],values=[];let failed=0;
+ for(let k=0;k<=scanCount;k++){
+  const s=k===scanCount?sMax:sMin+k*(sMax-sMin)/scanCount, r=residual(s);
+  grid.push(s);values.push(r);if(!Number.isFinite(r))failed++;
+ }
+ // Degenerate (non-unique) problem: residual indistinguishable from discretization error
+ // at the scan ends and centre, i.e. every probed trajectory satisfies the right condition.
+ const degenerate=[sMin,midS,sMax].every(s=>{
+  try{
+   const coarse=integrate(s), r1=residualOf(coarse), r2=residualOf(integrate(s,2));
+   return Number.isFinite(r1)&&Math.abs(r1)<=Math.max(10*Math.abs(r1-r2),1e-9*scaleOf(coarse));
+  }catch(e){return false;}
+ });
+ // Illinois (modified regula falsi) on a sign-change bracket: bracketing, superlinear.
+ function refine(lo,hi,flo,fhi,fine){
+  let iterations=0,side=0;
+  if(flo===0)return {s:lo,iterations};if(fhi===0)return {s:hi,iterations};
+  while(iterations<maxIterations){
+   iterations++;
+   let s=hi-fhi*(hi-lo)/(fhi-flo);
+   if(!(s>lo&&s<hi))s=lo+(hi-lo)/2;
+   const fs=residual(s,fine);
+   if(!Number.isFinite(fs)){ // integration failure inside the bracket: bisect instead
+    const m=lo+(hi-lo)/2,fm=residual(m,fine);
+    if(!Number.isFinite(fm))return {s:m,iterations,failed:true};
+    if(Math.sign(fm)===Math.sign(flo)){lo=m;flo=fm;}else{hi=m;fhi=fm;}
+    continue;
+   }
+   if(fs===0||hi-lo<=tolerance*(1+Math.abs(s)))return {s,iterations};
+   if(Math.sign(fs)===Math.sign(fhi)){hi=s;fhi=fs;if(side===-1)flo/=2;side=-1;}
+   else{lo=s;flo=fs;if(side===1)fhi/=2;side=1;}
+   if(hi-lo<=tolerance*(1+Math.abs(lo)))return {s:Math.abs(flo)<Math.abs(fhi)?lo:hi,iterations};
+  }
+  return {s:Math.abs(flo)<Math.abs(fhi)?lo:hi,iterations,exhausted:true};
+ }
+ // Secant iteration on the refined residual for the step-doubling diagnostic only.
+ function secant(s0,delta){
+  let x0=s0,x1=s0+delta,f0=residual(x0,2),f1=residual(x1,2);
+  for(let k=0;k<30;k++){
+   if(!Number.isFinite(f0)||!Number.isFinite(f1))return null;
+   if(f1===0)return x1;
+   if(f0===f1)return Math.abs(f0)<Math.abs(f1)?x0:x1;
+   const x2=x1-f1*(x1-x0)/(f1-f0);
+   if(!Number.isFinite(x2))return null;
+   x0=x1;f0=f1;x1=x2;f1=residual(x1,2);
+   if(Math.abs(x1-x0)<=tolerance*(1+Math.abs(x1)))return x1;
+  }
+  return null;
+ }
+ const solutions=[],rejected=[];
+ let brackets=0;
+ if(!degenerate)for(let k=0;k<scanCount;k++){
+  const f0=values[k],f1=values[k+1];
+  if(!Number.isFinite(f0)||!Number.isFinite(f1))continue;
+  const exactLeft=f0===0&&k===0, signChange=f0!==0&&(f1===0||Math.sign(f0)!==Math.sign(f1));
+  if(!exactLeft&&!signChange)continue;
+  brackets++;
+  if(solutions.length>=maxSolutions)continue;
+  const lo=grid[k],hi=grid[k+1], root=exactLeft?{s:lo,iterations:0}:refine(lo,hi,f0,f1,1);
+  let rows;
+  try{rows=integrate(root.s);}catch(e){rejected.push({s:root.s,reason:'integration failed'});continue;}
+  const res=residualOf(rows), scale=scaleOf(rows);
+  // A sign change through a blow-up (pole in R(s)) is not a solution.
+  if(root.failed||!(Math.abs(res)<=Math.max(1e-6,1e3*tolerance)*scale)){
+   rejected.push({s:root.s,residual:res,reason:'sign change without small residual (possible pole or blow-up)'});continue;
+  }
+  // Step-doubling estimate: re-shoot at 2N steps (or 100x tighter TR-BDF2 tolerances) by a
+  // bounded secant iteration started at the accepted parameter (the root moves only slightly).
+  let estimate=null;
+  try{
+   const fineRoot=secant(root.s,Math.max(1e-6,(hi-lo)*1e-3)*(1+Math.abs(root.s)));
+   if(fineRoot!==null){
+    const fineRows=integrate(fineRoot,2);
+    let maxDiff=0;
+    if(method==='rk4')rows.forEach((row,i)=>{maxDiff=Math.max(maxDiff,Math.abs(row[1]-fineRows[2*i][1]));});
+    else maxDiff=Math.abs(rows.reduce((m,r)=>Math.max(m,r[1]),-Infinity)-fineRows.reduce((m,r)=>Math.max(m,r[1]),-Infinity));
+    estimate={parameterDifference:Math.abs(fineRoot-root.s),solutionDifference:maxDiff,
+     basis:method==='rk4'?'max |y_N − y_2N| on shared grid nodes':'change of max y with 100× tighter tolerances'};
+   }
+  }catch(e){estimate=null;}
+  const start=initial(root.s);
+  solutions.push({parameter:root.s,y0:start[0],slope0:start[1],residual:res,iterations:root.iterations,
+   exhausted:!!root.exhausted,estimate,rows:rows.map(r=>[r[0],r[1],r[2]]),
+   yMax:rows.reduce((m,r)=>Math.max(m,r[1]),-Infinity),yMin:rows.reduce((m,r)=>Math.min(m,r[1]),Infinity)});
+ }
+ const status=degenerate?'non-unique':solutions.length===0?'none-found':solutions.length===1?'unique-in-scan':'multiple';
+ return {type:'bvp-shooting',status,degenerate,solutions,rejected,brackets,failedScanPoints:failed,
+  scan:{sMin,sMax,scanCount,values:grid.map((s,i)=>[s,values[i]])},parameter,left:L,right:R,a,b,method,steps,integrations,
+  columns:['x','y','dy/dx'],
+  method_label:method==='rk4'?'Shooting with classical RK4 (odeTools.solveSystem)':'Shooting with implicit TR-BDF2 (stiffOde.solve)',
+  note:'Solutions are found only where the boundary residual changes sign between scan points of the chosen '+parameter+
+   ' range; touching (double) roots, roots between close scan points and roots outside the range can be missed. '+
+   'The step-doubling estimate is a diagnostic, not a certified error bound.'};
+}
+
+const area=document.createElement('details');area.id='bvp-details';
+area.innerHTML='<summary>Boundary-value problem · shooting y″ = f(x, y, y′)</summary>'+
+ '<p class="graph-data-muted">Write f using x, y and yp (for y′). Boundary conditions are c₀·y + c₁·y′ = γ at each end (Dirichlet: y=γ, Neumann: y′=γ). The scan range is for y′(a) when the left condition is Dirichlet, otherwise for y(a). Example (Bratu): f = -exp(y), y(0)=0, y(1)=0, scan 0–15.</p>'+
+ '<div class="num-fields">'+
+ '<label>f(x, y, yp) = y″<input id="bvp-f" value="-exp(y)" spellcheck="false"></label>'+
+ '<label>Left endpoint a<input id="bvp-a" type="number" step="any" value="0"></label>'+
+ '<label>Right endpoint b<input id="bvp-b" type="number" step="any" value="1"></label>'+
+ '<label>Left condition<select id="bvp-left-type"><option value="dirichlet">Dirichlet y(a)=γ</option><option value="neumann">Neumann y′(a)=γ</option><option value="robin">Robin c₀y+c₁y′=γ</option></select></label>'+
+ '<label>Left γ<input id="bvp-left-value" type="number" step="any" value="0"></label>'+
+ '<label class="bvp-robin-left" hidden>Left c₀<input id="bvp-left-c0" type="number" step="any" value="1"></label>'+
+ '<label class="bvp-robin-left" hidden>Left c₁<input id="bvp-left-c1" type="number" step="any" value="1"></label>'+
+ '<label>Right condition<select id="bvp-right-type"><option value="dirichlet">Dirichlet y(b)=γ</option><option value="neumann">Neumann y′(b)=γ</option><option value="robin">Robin c₀y+c₁y′=γ</option></select></label>'+
+ '<label>Right γ<input id="bvp-right-value" type="number" step="any" value="0"></label>'+
+ '<label class="bvp-robin-right" hidden>Right c₀<input id="bvp-right-c0" type="number" step="any" value="1"></label>'+
+ '<label class="bvp-robin-right" hidden>Right c₁<input id="bvp-right-c1" type="number" step="any" value="1"></label>'+
+ '<label>Scan minimum<input id="bvp-smin" type="number" step="any" value="0"></label>'+
+ '<label>Scan maximum<input id="bvp-smax" type="number" step="any" value="15"></label>'+
+ '<label>Scan intervals (2–400)<input id="bvp-scan" type="number" min="2" max="400" step="1" value="60"></label>'+
+ '<label>RK4 steps (10–500)<input id="bvp-steps" type="number" min="10" max="500" step="1" value="200"></label>'+
+ '<label>Integrator<select id="bvp-method"><option value="rk4">Fixed-step RK4</option><option value="tr-bdf2">Stiff TR-BDF2</option></select></label></div>'+
+ '<div class="data-toolbar"><button id="bvp-run" type="button" class="primary">Solve BVP</button>'+
+ '<button id="bvp-to-table" type="button" class="secondary" disabled>Save to Data Tables</button></div>'+
+ '<pre id="bvp-output" role="status" aria-live="polite">Enter f, the interval, boundary conditions and the scan range.</pre>';
+anchor.after(area);
+const style=document.createElement('style');
+style.textContent='#bvp-details{border-top:1px solid #dce4f6;margin-top:15px;padding-top:13px;max-width:100%;box-sizing:border-box}'+
+ '#bvp-details summary{cursor:pointer;color:#3c50ae;font-weight:750;min-height:40px;display:flex;align-items:center}'+
+ '#bvp-details .num-fields{min-width:0}#bvp-details label{min-width:0}'+
+ '#bvp-details input,#bvp-details select{max-width:100%;box-sizing:border-box}'+
+ '#bvp-output{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#fff;border:1px solid #dce5f3;border-radius:10px;max-width:100%;box-sizing:border-box}'+
+ '#bvp-output.error{color:#a82241;background:#fff2f4}'+
+ '#bvp-details button,#bvp-details input,#bvp-details select{min-height:40px}'+
+ '@media(max-width:480px){#bvp-details .num-fields{grid-template-columns:1fr}}';
+document.head.append(style);
+let last=null;
+const output=$('bvp-output'), toTable=$('bvp-to-table'), IDLE='Enter f, the interval, boundary conditions and the scan range.';
+function invalidate(){last=null;toTable.disabled=true;output.classList.remove('error');output.textContent=IDLE;}
+function updateRobin(){
+ for(const side of ['left','right']){
+  const robin=$('bvp-'+side+'-type').value==='robin';
+  for(const label of area.querySelectorAll('.bvp-robin-'+side))label.hidden=!robin;
+ }
+}
+for(const input of area.querySelectorAll('input,select')){input.addEventListener('input',invalidate);input.addEventListener('change',invalidate);}
+$('bvp-left-type').addEventListener('change',updateRobin);$('bvp-right-type').addEventListener('change',updateRobin);updateRobin();
+function fail(error){
+ last=null;toTable.disabled=true;output.classList.add('error');
+ output.textContent=error.message+'\nRecovery: check f (use x, y, yp), the interval a<b, the boundary conditions and the scan range, then press Solve BVP again.';
+}
+const p=v=>Number(v).toPrecision(10);
+function describe(r){
+ const lines=[r.method_label,'Shooting parameter s = '+r.parameter+', scanned '+r.scan.sMin+'…'+r.scan.sMax+' in '+r.scan.scanCount+
+  ' intervals; '+r.integrations+' IVP integrations'+(r.failedScanPoints?', '+r.failedScanPoints+' scan points failed to integrate':'')];
+ if(r.status==='non-unique')lines.push('No unique solution: the boundary residual vanishes (to discretization error) across the whole scan range, so a family of solutions satisfies both conditions (e.g. an eigenvalue/resonant linear problem).');
+ else if(r.status==='none-found')lines.push('No solution found: the boundary residual does not change sign in the scan range. Widen the range or refine the scan; the problem may have no solution.');
+ else lines.push(r.solutions.length+' solution'+(r.solutions.length>1?'s':'')+' bracketed in the scan range'+(r.status==='multiple'?' (the BVP is not unique)':'')+':');
+ r.solutions.forEach((s,i)=>lines.push('#'+(i+1)+': y(a) = '+p(s.y0)+', y′(a) = '+p(s.slope0)+', residual at b = '+Number(s.residual).toExponential(3)+
+  ', y range ['+p(s.yMin)+', '+p(s.yMax)+'], '+s.iterations+' refinement iterations'+(s.exhausted?' (iteration budget reached)':'')+
+  (s.estimate?'; step-doubling '+s.estimate.basis+' = '+s.estimate.solutionDifference.toExponential(3):'; step-doubling estimate unavailable')));
+ if(r.rejected.length)lines.push(r.rejected.length+' sign change(s) rejected as possible poles or integration failures.');
+ lines.push(r.note);
+ return lines.join('\n');
+}
+function run(){
+ try{
+  const side=s=>({type:$('bvp-'+s+'-type').value,value:$('bvp-'+s+'-value').value,c0:$('bvp-'+s+'-c0').value,c1:$('bvp-'+s+'-c1').value});
+  last=shoot({expression:$('bvp-f').value,a:$('bvp-a').value,b:$('bvp-b').value,left:side('left'),right:side('right'),
+   sMin:$('bvp-smin').value,sMax:$('bvp-smax').value,scanCount:$('bvp-scan').value,steps:$('bvp-steps').value,method:$('bvp-method').value});
+  output.classList.remove('error');output.textContent=describe(last);
+  toTable.disabled=!last.solutions.length;
+ }catch(error){fail(error);}
+}
+$('bvp-run').addEventListener('click',run);
+toTable.addEventListener('click',()=>{
+ try{
+  if(!last||!last.solutions.length)throw Error('Solve a boundary-value problem with at least one solution first.');
+  last.solutions.forEach((s,i)=>M.dataTables.importData({headers:last.columns,rows:s.rows},'BVP_SHOOTING_'+(i+1)));
+  M.advanced?.mode?.('data');
+ }catch(error){fail(error);}
+});
+M.bvp={shoot,run};
+})();
+</script>
 <script id="promath-fft-tools">
 /* ProMathStudio: offline radix-2 FFT for uniformly sampled real signals. No eval or network. */
 (()=>{'use strict';
@@ -8742,7 +9194,163 @@ function describeTable({table,column,column2=null}={}){
  const out=describeColumns(rows,c1,c2);out.table=t.name;out.column=t.columns[c1];out.column2=c2===null?null:t.columns[c2];return out;
 }
 
-M.statistics={logGamma,gammaP,gammaQ,betaI,erf,erfc,distribution,evaluate,describe,correlate,describeColumns,describeTable,quantile7};
+/* ---------- hypothesis tests and confidence intervals ---------- */
+const ALTERNATIVES=['two-sided','less','greater'];
+function alternativeOf(a){a=String(a||'two-sided').toLowerCase();if(!ALTERNATIVES.includes(a))throw Error('Alternative must be two-sided, less or greater.');return a;}
+function confidenceOf(c){const v=num(c??0.95,'Confidence level');if(!(v>0&&v<1))throw Error('Confidence level must be strictly between 0 and 1.');return v;}
+function sample(values,name,min=2){
+ const v=Array.from(values||[],x=>{const n=toNumber(x);if(n===null)throw Error(name+' must contain only finite numbers.');return n;});
+ if(v.length<min)throw Error(name+' needs at least '+min+' values.');if(v.length>1e6)throw Error(name+' may contain at most 1,000,000 values.');
+ const mean=meanOf(v);let m2=0;for(const x of v){const d=x-mean;m2+=d*d;}return {n:v.length,mean,variance:m2/(v.length-1)};
+}
+/** p-value of a statistic under a symmetric (t/normal) reference distribution. */
+function pValue(d,stat,alt){if(alt==='less')return d.cdf(stat);if(alt==='greater')return d.sf(stat);return Math.min(1,2*d.sf(Math.abs(stat)));}
+function symmetricInterval(d,est,se,alt,conf){
+ if(alt==='less')return [-Infinity,est+d.quantile(conf)*se];if(alt==='greater')return [est-d.quantile(conf)*se,Infinity];
+ const q=d.quantile(1-(1-conf)/2);return [est-q*se,est+q*se];
+}
+const T_NOTE='Assumes independent observations from (approximately) normal populations; the t procedure is robust to moderate non-normality for larger n but not to outliers or dependence.';
+function tResult(test,stat,df,alt,conf,est,se,extra){
+ const d=builders.t({nu:df});
+ return Object.assign({type:'hypothesis',test,statisticName:'t',statistic:stat,df,pValue:pValue(d,stat,alt),alternative:alt,confidence:conf,estimate:est,standardError:se,ci:symmetricInterval(d,est,se,alt,conf),warnings:[]},extra);
+}
+function ttestOne(values,{mu=0,alternative,confidence}={}){
+ const s=sample(values,'Sample');mu=num(mu,'Hypothesized mean μ0');const alt=alternativeOf(alternative),conf=confidenceOf(confidence);
+ if(!(s.variance>0))throw Error('Sample has zero variance; the t statistic is undefined.');
+ const sd=Math.sqrt(s.variance),se=sd/Math.sqrt(s.n);
+ return tResult('One-sample t-test',(s.mean-mu)/se,s.n-1,alt,conf,s.mean,se,{n:s.n,mu,sampleStd:sd,ciLabel:'Confidence interval for the mean',effectSize:{name:"Cohen's d",value:(s.mean-mu)/sd},assumptions:T_NOTE});
+}
+function ttestTwo(x,y,{equalVariance=false,mu=0,alternative,confidence}={}){
+ const a=sample(x,'Sample 1'),b=sample(y,'Sample 2');mu=num(mu,'Hypothesized difference Δ0');const alt=alternativeOf(alternative),conf=confidenceOf(confidence);
+ if(!(a.variance>0)&&!(b.variance>0))throw Error('Both samples have zero variance; the t statistic is undefined.');
+ const diff=a.mean-b.mean;let se,df,effect,test,note;
+ if(equalVariance){
+  df=a.n+b.n-2;const sp2=((a.n-1)*a.variance+(b.n-1)*b.variance)/df;se=Math.sqrt(sp2*(1/a.n+1/b.n));effect={name:"Cohen's d (pooled SD)",value:diff/Math.sqrt(sp2)};test='Pooled-variance two-sample t-test';
+  note=T_NOTE+' The pooled test additionally assumes equal population variances; prefer Welch when unsure.';
+ }else{
+  const va=a.variance/a.n,vb=b.variance/b.n;se=Math.sqrt(va+vb);df=(va+vb)*(va+vb)/(va*va/(a.n-1)+vb*vb/(b.n-1));effect={name:"Cohen's d (average-variance SD)",value:diff/Math.sqrt((a.variance+b.variance)/2)};test='Welch two-sample t-test';
+  note=T_NOTE+' The Welch test does not assume equal variances; df is the Welch–Satterthwaite approximation.';
+ }
+ return tResult(test,(diff-mu)/se,df,alt,conf,diff,se,{n:a.n,n2:b.n,mean1:a.mean,mean2:b.mean,variance1:a.variance,variance2:b.variance,mu,ciLabel:'Confidence interval for mean1 − mean2',effectSize:effect,assumptions:note});
+}
+function ttestPaired(x,y,{mu=0,alternative,confidence}={}){
+ x=Array.from(x||[]);y=Array.from(y||[]);if(x.length!==y.length)throw Error('Paired samples must have equal length.');
+ const d=x.map((v,i)=>{const a=toNumber(v),b=toNumber(y[i]);if(a===null||b===null)throw Error('Paired samples must contain only finite numbers.');return a-b;});
+ const r=ttestOne(d,{mu,alternative,confidence});
+ return Object.assign(r,{test:'Paired t-test',ciLabel:'Confidence interval for the mean difference (sample 1 − sample 2)',effectSize:{name:"Cohen's d_z",value:r.effectSize.value},
+  assumptions:'Assumes independent pairs whose differences are (approximately) normal; observations within a pair may be dependent.'});
+}
+function counts(values,name){
+ return Array.from(values||[],x=>{const n=toNumber(x);if(n===null)throw Error(name+' must contain only finite numbers.');if(n<0)throw Error(name+' must not contain negative counts.');return n;});
+}
+const CHI_NOTE='Assumes independent observations, each counted in exactly one cell; the chi-square approximation needs expected counts ≥ 5 in (nearly) all cells.';
+function chisqGof(observed,expected=null,{ddof=0}={}){
+ const o=counts(observed,'Observed counts');if(o.length<2)throw Error('Goodness-of-fit needs at least two categories.');if(o.length>1000)throw Error('At most 1,000 categories are supported.');
+ const total=o.reduce((s,x)=>s+x,0);if(!(total>0))throw Error('Observed counts must have a positive total.');
+ let e;
+ if(expected===null||expected===undefined||(Array.isArray(expected)&&!expected.length))e=o.map(()=>total/o.length);
+ else{
+  const raw=counts(expected,'Expected counts');if(raw.length!==o.length)throw Error('Expected counts must have the same number of categories as observed counts.');
+  if(raw.some(x=>x===0))throw Error('Expected counts must be positive; an expected count of 0 makes the statistic undefined.');
+  const sum=raw.reduce((s,x)=>s+x,0);e=raw.map(x=>x*total/sum);
+ }
+ ddof=count(ddof,'ddof',o.length-2);const df=o.length-1-ddof;let stat=0;for(let i=0;i<o.length;i++){const d=o[i]-e[i];stat+=d*d/e[i];}
+ const warnings=e.some(x=>x<5)?['Some expected counts are below 5; the chi-square approximation may be unreliable.']:[];
+ return {type:'hypothesis',test:'Chi-square goodness-of-fit',statisticName:'χ²',statistic:stat,df,pValue:builders.chisquare({k:df}).sf(stat),alternative:'greater',n:total,categories:o.length,observed:o,expected:e,
+  effectSize:{name:"Cohen's w",value:Math.sqrt(stat/total)},ci:null,warnings,assumptions:CHI_NOTE+' Expected values are rescaled proportionally to the observed total (blank = uniform).'};
+}
+function chisqIndependence(table,{yates=false}={}){
+ if(!Array.isArray(table)||table.length<2)throw Error('Contingency table needs at least two rows.');if(table.length>10)throw Error('Contingency table may have at most 10 rows.');
+ const rows=table.map((r,i)=>counts(r,'Row '+(i+1))),c=rows[0].length;
+ if(c<2)throw Error('Contingency table needs at least two columns.');if(c>10)throw Error('Contingency table may have at most 10 columns.');
+ if(rows.some(r=>r.length!==c))throw Error('Every contingency-table row must have the same number of columns.');
+ const rs=rows.map(r=>r.reduce((s,x)=>s+x,0)),cs=rows[0].map((_,j)=>rows.reduce((s,r)=>s+r[j],0)),N=rs.reduce((s,x)=>s+x,0);
+ if(rs.some(x=>x===0)||cs.some(x=>x===0))throw Error('A row or column total is 0, giving an expected count of 0; remove empty rows/columns.');
+ const df=(rows.length-1)*(c-1),correct=!!yates&&df===1,expected=rows.map((_,i)=>cs.map(cj=>rs[i]*cj/N));let stat=0;
+ for(let i=0;i<rows.length;i++)for(let j=0;j<c;j++){let d=Math.abs(rows[i][j]-expected[i][j]);if(correct)d-=Math.min(0.5,d);stat+=d*d/expected[i][j];}
+ const warnings=expected.some(r=>r.some(x=>x<5))?['Some expected counts are below 5; the chi-square approximation may be unreliable (consider an exact test).']:[];
+ return {type:'hypothesis',test:'Chi-square test of independence'+(correct?' (Yates continuity correction)':''),statisticName:'χ²',statistic:stat,df,pValue:builders.chisquare({k:df}).sf(stat),alternative:'greater',n:N,rows:rows.length,columns:c,expected,
+  effectSize:{name:"Cramér's V",value:Math.sqrt(stat/(N*Math.min(rows.length-1,c-1)))},ci:null,warnings,assumptions:CHI_NOTE+' Tests independence of the row and column classifications.'};
+}
+function successes(k,n){n=count(n,'Trials n',1e7);if(n<1)throw Error('Trials n must be at least 1.');k=count(k,'Successes k',1e7);if(k>n)throw Error('Successes k cannot exceed trials n.');return [k,n];}
+function nullProportion(p){const v=num(p,'Null proportion p0');if(!(v>0&&v<1))throw Error('Null proportion p0 must be strictly between 0 and 1.');return v;}
+/** Wilson score interval; one-sided alternatives give the matching one-sided bound. */
+function wilson(k,n,{confidence,alternative}={}){
+ [k,n]=successes(k,n);const conf=confidenceOf(confidence),alt=alternativeOf(alternative),N=builders.normal({});
+ const z=N.quantile(alt==='two-sided'?1-(1-conf)/2:conf),ph=k/n,z2=z*z,den=1+z2/n,centre=(ph+z2/(2*n))/den,half=z/den*Math.sqrt(ph*(1-ph)/n+z2/(4*n*n));
+ const lo=Math.max(0,centre-half),hi=Math.min(1,centre+half);return alt==='less'?[0,hi]:alt==='greater'?[lo,1]:[lo,hi];
+}
+function propZTest(k,n,{p0=0.5,alternative,confidence}={}){
+ [k,n]=successes(k,n);p0=nullProportion(p0);const alt=alternativeOf(alternative),conf=confidenceOf(confidence),ph=k/n,se=Math.sqrt(p0*(1-p0)/n),z=(ph-p0)/se;
+ const warnings=n*p0<10||n*(1-p0)<10?['n·p0 or n·(1 − p0) is below 10; the normal approximation may be poor — prefer the exact binomial test.']:[];
+ return {type:'hypothesis',test:'One-proportion z-test',statisticName:'z',statistic:z,df:null,pValue:pValue(builders.normal({}),z,alt),alternative:alt,confidence:conf,estimate:ph,k,n,p0,standardError:se,
+  ci:wilson(k,n,{confidence:conf,alternative:alt}),ciLabel:'Wilson score interval for p',effectSize:{name:"Cohen's h",value:2*Math.asin(Math.sqrt(ph))-2*Math.asin(Math.sqrt(p0))},warnings,
+  assumptions:'Assumes n independent Bernoulli trials with constant success probability; the z statistic uses the null standard error and a normal approximation.'};
+}
+function bisect(f,lo,hi){for(let i=0;i<200;i++){const mid=(lo+hi)/2;if(mid===lo||mid===hi)break;if(f(mid))hi=mid;else lo=mid;}return (lo+hi)/2;}
+/** Clopper–Pearson exact interval by bisection on regularized incomplete beta tail probabilities. */
+function clopperPearson(k,n,conf=0.95,alt='two-sided'){
+ [k,n]=successes(k,n);conf=confidenceOf(conf);alt=alternativeOf(alt);const a=alt==='two-sided'?(1-conf)/2:1-conf;
+ const lower=k===0?0:bisect(p=>betaI(k,n-k+1,p,1-p)>=a,0,1),upper=k===n?1:bisect(p=>betaI(n-k,k+1,1-p,p)<=a,0,1);
+ return alt==='less'?[0,upper]:alt==='greater'?[lower,1]:[lower,upper];
+}
+function binomTest(k,n,{p=0.5,alternative,confidence}={}){
+ [k,n]=successes(k,n);if(n>1e6)throw Error('Exact binomial test supports at most 1,000,000 trials.');
+ const p0=nullProportion(p),alt=alternativeOf(alternative),conf=confidenceOf(confidence),B=builders.binomial({n,p:p0});
+ const upperTail=x=>x<0?1:x>=n?0:betaI(x+1,n-x,p0,1-p0);let pv;
+ if(alt==='less')pv=B.cdf(k);else if(alt==='greater')pv=upperTail(k-1);
+ else{
+  const d=B.pdf(k)*(1+1e-7),mode=n*p0;
+  if(k===mode)pv=1;
+  else if(k<mode){let lo=Math.ceil(mode),hi=n+1;while(lo<hi){const m=Math.floor((lo+hi)/2);if(B.pdf(m)<=d)hi=m;else lo=m+1;}pv=B.cdf(k)+upperTail(lo-1);}
+  else{/* pmf is non-decreasing on 0..floor(np): y = count of those outcomes with pmf ≤ d. */
+   let y=0,hi=Math.floor(mode)+1;while(y<hi){const m=Math.floor((y+hi)/2);if(B.pdf(m)<=d)y=m+1;else hi=m;}
+   pv=(y>0?B.cdf(y-1):0)+upperTail(k-1);}
+  pv=Math.min(1,pv);
+ }
+ return {type:'hypothesis',test:'Exact binomial test',statisticName:'k',statistic:k,df:null,pValue:pv,alternative:alt,confidence:conf,estimate:k/n,k,n,p0,ci:clopperPearson(k,n,conf,alt),ciLabel:'Clopper–Pearson exact interval for p',
+  effectSize:{name:"Cohen's h",value:2*Math.asin(Math.sqrt(k/n))-2*Math.asin(Math.sqrt(p0))},warnings:[],
+  assumptions:'Assumes n independent Bernoulli trials with constant success probability. The two-sided p sums all outcomes no more likely than k (relative tolerance 1 + 1e-7); the Clopper–Pearson interval is conservative.'};
+}
+function varianceTest(values,{sigma2=null,alternative,confidence}={}){
+ const s=sample(values,'Sample'),alt=alternativeOf(alternative),conf=confidenceOf(confidence);if(!(s.variance>0))throw Error('Sample has zero variance; a variance interval needs spread in the data.');
+ const df=s.n-1,C=builders.chisquare({k:df}),ss=df*s.variance;let ci;
+ if(alt==='less')ci=[0,ss/C.quantile(1-conf)];else if(alt==='greater')ci=[ss/C.quantile(conf),Infinity];else ci=[ss/C.quantile(1-(1-conf)/2),ss/C.quantile((1-conf)/2)];
+ const has=sigma2!==null&&sigma2!==undefined&&String(sigma2).trim()!=='';let stat=null,pv=null,s2=null;
+ if(has){s2=positive(sigma2,'Null variance σ0²');stat=ss/s2;pv=alt==='less'?C.cdf(stat):alt==='greater'?C.sf(stat):Math.min(1,2*Math.min(C.cdf(stat),C.sf(stat)));}
+ return {type:'hypothesis',test:'Chi-square variance test / interval',statisticName:'χ²',statistic:stat,df,pValue:pv,alternative:alt,confidence:conf,estimate:s.variance,n:s.n,sigma2:s2,ci,ciLabel:'Confidence interval for σ²',
+  effectSize:has?{name:'Variance ratio s²/σ0²',value:s.variance/s2}:null,warnings:[],
+  assumptions:'Assumes independent observations from a normal population; unlike the t-test, this interval is NOT robust to non-normality.'};
+}
+/** Parse a comma/space/semicolon separated list of numbers (plain numeric literals only, no expression evaluation). */
+function parseList(text,name='List'){
+ return String(text??'').split(/[\s,;]+/).filter(Boolean).map(s=>{const n=Number(s);if(!Number.isFinite(n))throw Error(name+': "'+s.slice(0,24)+'" is not a finite number.');return n;});
+}
+/** Parse a contingency table: rows separated by ';' or newlines, cells by commas or spaces. */
+function parseMatrix(text){return String(text??'').split(/[;\n]+/).map(r=>r.trim()).filter(Boolean).map((r,i)=>parseList(r,'Row '+(i+1)));}
+function tableOf(name){const T=M.dataTables;if(!T)throw Error('Data Tables are unavailable.');const t=T.tables.find(s=>s.name===name||s.id===name);if(!t)throw Error('Choose an existing data table.');return {t,rows:typeof T.calculate==='function'?T.calculate(t):t.rows};}
+/** Numeric values of a Data Tables column (blank and text cells ignored, as in describeTable). */
+function tableColumn(table,column){const {t,rows}=tableOf(table),i=t.columns.indexOf(String(column??''));if(i<0)throw Error('Choose an existing column.');return columnValues(rows.map(r=>r?.[i])).values;}
+/** Complete numeric pairs from two Data Tables columns. */
+function tablePairs(table,c1,c2){
+ const {t,rows}=tableOf(table),i=t.columns.indexOf(String(c1??'')),j=t.columns.indexOf(String(c2??''));
+ if(i<0||j<0)throw Error('Choose two existing columns.');if(i===j)throw Error('Choose two different columns.');
+ const xs=[],ys=[];for(const r of rows){const a=toNumber(r?.[i]),b=toNumber(r?.[j]);if(a!==null&&b!==null){xs.push(a);ys.push(b);}}return [xs,ys];
+}
+/** Contingency table from every numeric column of a Data Table (text label columns and blank rows skipped). */
+function tableMatrix(table){
+ const {t,rows}=tableOf(table),cols=t.columns.map((_,j)=>j).filter(j=>{let any=false;for(const r of rows){const s=String(r?.[j]??'').trim();if(!s)continue;if(toNumber(s)===null)return false;any=true;}return any;});
+ if(cols.length<2)throw Error('The table needs at least two numeric columns for a contingency table.');
+ return rows.filter(r=>cols.some(j=>String(r?.[j]??'').trim()!=='')).map((r,i)=>cols.map(j=>{const n=toNumber(r?.[j]);if(n===null)throw Error('Contingency cell in row '+(i+1)+' is blank.');return n;}));
+}
+const TESTS={
+ t1:o=>ttestOne(o.x,o),welch:o=>ttestTwo(o.x,o.y,{...o,equalVariance:false}),pooled:o=>ttestTwo(o.x,o.y,{...o,equalVariance:true}),paired:o=>ttestPaired(o.x,o.y,o),
+ gof:o=>chisqGof(o.x,o.y,o),independence:o=>chisqIndependence(o.table,o),prop:o=>propZTest(o.k,o.n,o),binom:o=>binomTest(o.k,o.n,{...o,p:o.p0}),variance:o=>varianceTest(o.x,o)
+};
+function hypothesisTest(test,options={}){const f=TESTS[test];if(!f)throw Error('Unknown test: '+test+'.');return f(options||{});}
+
+M.statistics={logGamma,gammaP,gammaQ,betaI,erf,erfc,distribution,evaluate,describe,correlate,describeColumns,describeTable,quantile7,
+ ttestOne,ttestTwo,ttestPaired,chisqGof,chisqIndependence,propZTest,wilson,binomTest,clopperPearson,varianceTest,parseList,parseMatrix,tableColumn,tablePairs,tableMatrix,hypothesisTest};
 
 /* ---------- UI ---------- */
 const panel=document.getElementById('numerical-panel');if(!panel)return;
@@ -8750,8 +9358,8 @@ const $=id=>document.getElementById(id);
 const fmt=v=>v===null||v===undefined?'undefined':typeof v==='number'?(Number.isFinite(v)?(Number.isInteger(v)&&Math.abs(v)<1e15?String(v):Number(v.toPrecision(12)).toString()):String(v)):String(v);
 const PARAMS={normal:[['mu','Mean μ','0'],['sigma','Standard deviation σ','1']],t:[['nu','Degrees of freedom ν','10']],chisquare:[['k','Degrees of freedom k','2']],exponential:[['lambda','Rate λ','1']],binomial:[['n','Trials n','10'],['p','Success probability p','0.3']],poisson:[['lambda','Rate λ','4']]};
 const area=document.createElement('details');area.id='stats-details';
-area.innerHTML='<summary>Statistics · distributions and descriptive statistics</summary>'+
- '<p>Density/mass, CDF, survival and quantile for common distributions; summary statistics for Data Tables columns.</p>'+
+area.innerHTML='<summary>Statistics · distributions, descriptive statistics and hypothesis tests</summary>'+
+ '<p>Density/mass, CDF, survival and quantile for common distributions; summary statistics for Data Tables columns; t, chi-square, proportion, binomial and variance tests with confidence intervals.</p>'+
  '<div class="num-fields"><label>Distribution<select id="stats-dist"><option value="normal">Normal</option><option value="t">Student t</option><option value="chisquare">Chi-square</option><option value="exponential">Exponential</option><option value="binomial">Binomial</option><option value="poisson">Poisson</option></select></label>'+
  '<label id="stats-param1-label"><span id="stats-param1-name">Mean μ</span><input id="stats-param1" type="number" step="any" value="0"></label>'+
  '<label id="stats-param2-label"><span id="stats-param2-name">Standard deviation σ</span><input id="stats-param2" type="number" step="any" value="1"></label>'+
@@ -8763,6 +9371,19 @@ area.innerHTML='<summary>Statistics · distributions and descriptive statistics<
  '<label>Second column (optional)<select id="stats-column2"></select></label></div>'+
  '<div class="data-toolbar"><button id="stats-desc-run" class="primary" type="button">Describe column</button>'+
  '<button id="stats-to-table" class="secondary" type="button" disabled>Save to Data Tables</button></div>'+
+ '<h4 id="stats-ht-heading">Hypothesis test</h4>'+
+ '<div class="num-fields" role="group" aria-labelledby="stats-ht-heading"><label>Test<select id="stats-test"><option value="t1">One-sample t-test (mean)</option><option value="welch">Welch two-sample t-test</option><option value="pooled">Pooled-variance two-sample t-test</option><option value="paired">Paired t-test</option>'+
+ '<option value="gof">Chi-square goodness-of-fit</option><option value="independence">Chi-square independence (r×c)</option><option value="prop">One-proportion z-test (Wilson CI)</option><option value="binom">Exact binomial test</option><option value="variance">Variance interval / chi-square test</option></select></label>'+
+ '<label id="stats-ht-source-label">Data source<select id="stats-ht-source"><option value="typed">Typed lists</option><option value="table">Data table and columns above</option></select></label>'+
+ '<label id="stats-ht-a-label"><span id="stats-ht-a-name">Sample</span><input id="stats-ht-a" type="text" autocomplete="off" spellcheck="false"></label>'+
+ '<label id="stats-ht-b-label"><span id="stats-ht-b-name">Sample 2</span><input id="stats-ht-b" type="text" autocomplete="off" spellcheck="false"></label>'+
+ '<label id="stats-ht-k-label">Successes k<input id="stats-ht-k" type="number" step="1" min="0"></label>'+
+ '<label id="stats-ht-n-label">Trials n<input id="stats-ht-n" type="number" step="1" min="1"></label>'+
+ '<label id="stats-ht-param-label"><span id="stats-ht-param-name">Hypothesized mean μ0</span><input id="stats-ht-param" type="number" step="any"></label>'+
+ '<label id="stats-ht-alt-label">Alternative<select id="stats-ht-alt"><option value="two-sided">Two-sided (≠)</option><option value="less">Less (&lt;)</option><option value="greater">Greater (&gt;)</option></select></label>'+
+ '<label id="stats-ht-conf-label">Confidence level<input id="stats-ht-conf" type="number" step="any" min="0" max="1" value="0.95"></label>'+
+ '<label id="stats-ht-yates-label">Continuity correction<select id="stats-ht-yates"><option value="">None</option><option value="yates">Yates (2×2 only)</option></select></label></div>'+
+ '<div class="data-toolbar"><button id="stats-ht-run" class="primary" type="button">Run test</button></div>'+
  '<pre id="stats-output" role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%">Choose a distribution or a data column.</pre>';
 panel.append(area);let last=null;
 const output=$('stats-output');
@@ -8814,7 +9435,270 @@ $('stats-desc-run').addEventListener('click',()=>{
  }catch(err){fail(err);}
 });
 $('stats-to-table').addEventListener('click',()=>{try{if(!last)throw Error('Run a statistics calculation first.');M.dataTables.importData({headers:last.headers,rows:last.rows},last.name);if(M.advanced?.mode)M.advanced.mode('data');}catch(err){output.classList.add('error');output.textContent=err.message;}});
+const HT={
+ t1:{a:['Sample (comma-separated)','5.1, 4.9, 5.6, 5.8, 6.0, 5.2'],param:['Hypothesized mean μ0','5'],alt:1,source:1},
+ welch:{a:['Sample 1','1, 2, 3, 4, 5'],b:['Sample 2','2, 4, 6, 8, 10'],param:['Hypothesized difference Δ0','0'],alt:1,source:1},
+ pooled:{a:['Sample 1','1, 2, 3, 4, 5'],b:['Sample 2','2, 4, 6, 8, 10'],param:['Hypothesized difference Δ0','0'],alt:1,source:1},
+ paired:{a:['Sample 1 (before)','1, 2, 3, 4, 5.5'],b:['Sample 2 (after)','2, 4, 6, 8, 10'],param:['Hypothesized mean difference Δ0','0'],alt:1,source:1},
+ gof:{a:['Observed counts','16, 18, 16, 14, 12, 12'],b:['Expected counts or proportions (blank = uniform)',''],source:1,noConf:1},
+ independence:{a:['Contingency table (rows separated by ;)','10, 20; 20, 40'],source:1,yates:1,noConf:1},
+ prop:{kn:['81','263'],param:['Null proportion p0','0.25'],alt:1},
+ binom:{kn:['7','20'],param:['Null proportion p0','0.5'],alt:1},
+ variance:{a:['Sample (comma-separated)','5.1, 4.9, 5.6, 5.8, 6.0, 5.2'],param:['Null variance σ0² (optional)',''],alt:1,source:1}
+};
+function syncTest(){
+ const s=HT[$('stats-test').value],show=(id,on)=>{$(id).hidden=!on;};
+ show('stats-ht-a-label',s.a);show('stats-ht-b-label',s.b);show('stats-ht-k-label',s.kn);show('stats-ht-n-label',s.kn);show('stats-ht-param-label',s.param);
+ show('stats-ht-alt-label',s.alt);show('stats-ht-conf-label',!s.noConf);show('stats-ht-yates-label',s.yates);show('stats-ht-source-label',s.source);
+ if(s.a){$('stats-ht-a-name').textContent=s.a[0];$('stats-ht-a').value=s.a[1];}if(s.b){$('stats-ht-b-name').textContent=s.b[0];$('stats-ht-b').value=s.b[1];}
+ if(s.param){$('stats-ht-param-name').textContent=s.param[0];$('stats-ht-param').value=s.param[1];}if(s.kn){$('stats-ht-k').value=s.kn[0];$('stats-ht-n').value=s.kn[1];}
+ if(!s.source)$('stats-ht-source').value='typed';$('stats-ht-alt').value='two-sided';
+}
+function testInputs(test){
+ const s=HT[test],fromTable=s.source&&$('stats-ht-source').value==='table',table=$('stats-table').value,c1=$('stats-column').value,c2=$('stats-column2').value;
+ const o={alternative:$('stats-ht-alt').value,confidence:$('stats-ht-conf').value,yates:$('stats-ht-yates').value==='yates'};
+ if(s.param){const v=$('stats-ht-param').value;if(test==='prop'||test==='binom')o.p0=v;else if(test==='variance')o.sigma2=v;else o.mu=v;}
+ if(s.kn){o.k=$('stats-ht-k').value;o.n=$('stats-ht-n').value;return o;}
+ if(test==='independence'){o.table=fromTable?tableMatrix(table):parseMatrix($('stats-ht-a').value);return o;}
+ if(!fromTable){o.x=parseList($('stats-ht-a').value,s.a[0]);if(s.b){const b=parseList($('stats-ht-b').value,s.b[0]);o.y=test==='gof'&&!b.length?null:b;}return o;}
+ if(test==='paired'||(test==='gof'&&c2)){[o.x,o.y]=tablePairs(table,c1,c2);return o;}
+ o.x=tableColumn(table,c1);if(test==='welch'||test==='pooled'){if(!c2)throw Error('Choose a second column for sample 2.');if(c2===c1)throw Error('Choose two different columns.');o.y=tableColumn(table,c2);}
+ return o;
+}
+const cell=v=>typeof v==='number'&&Number.isFinite(v)?v:fmt(v);
+$('stats-test').addEventListener('change',()=>{syncTest();invalidate();});
+$('stats-ht-run').addEventListener('click',()=>{
+ try{
+  const test=$('stats-test').value,r=hypothesisTest(test,testInputs(test)),lines=[r.test],rows=[['test',r.test]];
+  const add=(label,key,v)=>{lines.push(label+' = '+fmt(v));rows.push([key,cell(v)]);};
+  if(r.n!==undefined)add(r.n2!==undefined?'n1':'n','n',r.n);if(r.n2!==undefined)add('n2','n2',r.n2);
+  if(r.statistic!==null)add(r.statisticName+' statistic','statistic_'+r.statisticName,r.statistic);if(r.df!==null&&r.df!==undefined)add('Degrees of freedom','df',r.df);
+  if(r.pValue!==null){lines.push('p-value ('+r.alternative+') = '+fmt(r.pValue));rows.push(['alternative',r.alternative],['p_value',r.pValue]);}
+  if(r.estimate!==undefined)add('Estimate','estimate',r.estimate);
+  if(r.ci){const pct=Number((r.confidence*100).toPrecision(10))+'%';lines.push(r.ciLabel+' ('+pct+') = ['+fmt(r.ci[0])+', '+fmt(r.ci[1])+']');rows.push(['confidence',r.confidence],['ci_lower',cell(r.ci[0])],['ci_upper',cell(r.ci[1])]);}
+  if(r.effectSize)add('Effect size '+r.effectSize.name,'effect_size',r.effectSize.value);
+  for(const w of r.warnings){lines.push('Warning: '+w);rows.push(['warning',w]);}
+  lines.push('Assumptions: '+r.assumptions);rows.push(['assumptions',r.assumptions]);
+  last={headers:['quantity','value'],rows,name:'Statistics_HypothesisTest'};output.classList.remove('error');output.textContent=lines.join('\n');$('stats-to-table').disabled=false;
+ }catch(err){fail(err);}
+});
+syncTest();
 syncParams();syncTables();
+})();
+</script>
+<script id="promath-uncertainty-tools">
+/* Offline measurement-uncertainty propagation: first-order GUM law and seeded Monte Carlo (GUM-S1 style). */
+(()=>{'use strict';
+const M=window.MathStudio=window.MathStudio||{};
+const LIMIT=1e12,MAX_VARS=6,MAX_SAMPLES=200000,RESERVED=new Set(['e','pi','i','inf','infinity','nan']);
+
+/* ---------- validation ---------- */
+function num(value,name){if(value===null||value===undefined||String(value).trim()==='')throw Error(name+' is required.');const n=Number(value);if(!Number.isFinite(n)||Math.abs(n)>LIMIT)throw Error(name+' must be finite and at most 1e12 in magnitude.');return n;}
+function evaluator(){const f=M.numerical?.evaluate;if(typeof f!=='function')throw Error('The numerical evaluator is unavailable.');return f;}
+function normalize({expression,variables,correlations=[],k=2}={}){
+ expression=String(expression??'').trim();if(!expression||expression.length>1000)throw Error('Enter a model expression f of 1–1000 characters.');
+ if(!Array.isArray(variables)||variables.length<1||variables.length>MAX_VARS)throw Error('Define 1 to '+MAX_VARS+' input variables.');
+ const seen=new Set();
+ const vars=variables.map((v,i)=>{
+  const label='Variable '+(i+1),name=String(v?.name??'').trim();
+  if(!/^[A-Za-z][A-Za-z0-9_]{0,15}$/.test(name))throw Error(label+' name must start with a letter and use at most 16 letters, digits or underscores.');
+  if(RESERVED.has(name.toLowerCase()))throw Error(label+' name "'+name+'" is reserved for a constant.');
+  if(seen.has(name))throw Error('Variable name "'+name+'" is duplicated.');seen.add(name);
+  const distribution=String(v?.distribution||'normal').toLowerCase();
+  if(distribution!=='normal'&&distribution!=='uniform')throw Error(name+' distribution must be normal or uniform.');
+  const mean=num(v?.mean,name+' mean');
+  if(distribution==='normal'){const u=num(v?.u??v?.spread,name+' standard uncertainty u');if(u<0)throw Error(name+' standard uncertainty u must be non-negative.');return {name,mean,u,distribution};}
+  const a=num(v?.halfWidth??v?.spread,name+' half-width a');if(a<0)throw Error(name+' half-width a must be non-negative.');
+  return {name,mean,u:a/Math.sqrt(3),halfWidth:a,distribution};
+ });
+ const n=vars.length,R=vars.map((_,i)=>vars.map((_,j)=>i===j?1:0)),index=new Map(vars.map((v,i)=>[v.name,i]));
+ if(!Array.isArray(correlations))throw Error('Correlations must be a list.');
+ for(const c of correlations){
+  const a=String(c?.a??'').trim(),b=String(c?.b??'').trim();
+  if(!index.has(a)||!index.has(b))throw Error('Correlation refers to an unknown variable: '+(index.has(a)?b:a)+'.');
+  if(a===b)throw Error('A variable cannot be correlated with itself.');
+  const rho=num(c?.rho,'Correlation '+a+'–'+b);if(rho<-1||rho>1)throw Error('Correlation '+a+'–'+b+' must be in [−1, 1].');
+  const i=index.get(a),j=index.get(b);if(R[i][j]!==0&&R[i][j]!==rho)throw Error('Correlation '+a+'–'+b+' is given twice with different values.');
+  R[i][j]=R[j][i]=rho;
+ }
+ k=num(k,'Coverage factor k');if(k<=0||k>10)throw Error('Coverage factor k must be in (0, 10].');
+ const L=cholesky(R);
+ return {expression,vars,R,L,k,n};
+}
+/** Lower-triangular factor of a correlation matrix; accepts positive semidefinite (e.g. ρ=±1) and rejects indefinite matrices. */
+function cholesky(R){
+ const n=R.length,L=R.map(()=>new Array(n).fill(0)),TOL=1e-10;
+ for(let j=0;j<n;j++){
+  let d=R[j][j];for(let m=0;m<j;m++)d-=L[j][m]*L[j][m];
+  if(d<-TOL)throw Error('Correlation matrix is not positive semidefinite; the coefficients are mutually inconsistent.');
+  const s=d>TOL?Math.sqrt(d):0;L[j][j]=s;
+  for(let i=j+1;i<n;i++){let v=R[i][j];for(let m=0;m<j;m++)v-=L[i][m]*L[j][m];
+   if(s===0){if(Math.abs(v)>1e-8)throw Error('Correlation matrix is not positive semidefinite; the coefficients are mutually inconsistent.');L[i][j]=0;}else L[i][j]=v/s;}
+ }
+ return L;
+}
+function model(spec){
+ const f=evaluator();let calls=0;
+ return {get calls(){return calls;},at(x){const env={};spec.vars.forEach((v,i)=>{env[v.name]=x[i];});calls++;const y=f(spec.expression,env);if(!Number.isFinite(y)||Math.abs(y)>LIMIT)throw Error('Model must return a finite real value at most 1e12 in magnitude.');return y;}};
+}
+
+/* ---------- first-order (GUM linear) propagation ---------- */
+function linear(spec){
+ const F=model(spec),x0=spec.vars.map(v=>v.mean),y=F.at(x0);
+ const c=spec.vars.map((v,i)=>{
+  if(v.u===0)return 0;
+  const h=1e-5*Math.max(Math.abs(v.mean),v.u,1e-8),a=x0.slice(),b=x0.slice();a[i]+=h;b[i]-=h;
+  let fa,fb;try{fa=F.at(a);fb=F.at(b);}catch(err){throw Error('Sensitivity for '+v.name+' failed near the mean: '+err.message);}
+  return (fa-fb)/(2*h);
+ });
+ let variance=0;const terms=spec.vars.map((v,i)=>c[i]*v.u);
+ for(let i=0;i<spec.n;i++)for(let j=0;j<spec.n;j++)variance+=terms[i]*terms[j]*spec.R[i][j];
+ if(variance<0)variance=0;const uc=Math.sqrt(variance),diag=terms.reduce((s,t)=>s+t*t,0);
+ const contributions=spec.vars.map((v,i)=>({name:v.name,mean:v.mean,u:v.u,distribution:v.distribution,sensitivity:c[i],contribution:terms[i],percent:variance>0?100*terms[i]*terms[i]/variance:0}));
+ return {type:'uncertainty-linear',value:y,uc,k:spec.k,U:spec.k*uc,interval:[y-spec.k*uc,y+spec.k*uc],contributions,correlationPercent:variance>0?100*(variance-diag)/variance:0,evaluations:F.calls,
+  method:'First-order GUM law of propagation (central-difference sensitivities)'};
+}
+
+/* ---------- seeded PRNG and normals ---------- */
+function rng(seed){
+ // splitmix32 seeding of xoshiro128**; deterministic for a given 32-bit seed.
+ let z=seed>>>0;const next=()=>{z=(z+0x9e3779b9)>>>0;let t=z;t=Math.imul(t^(t>>>16),0x21f0aaad);t=Math.imul(t^(t>>>15),0x735a2d97);return (t^(t>>>15))>>>0;};
+ let a=next(),b=next(),c=next(),d=next();if((a|b|c|d)===0)a=1;
+ const u32=()=>{const r=Math.imul(((Math.imul(b,5)<<7)|(Math.imul(b,5)>>>25)),9)>>>0,t=b<<9;c^=a;d^=b;b^=c;a^=d;c^=t;d=((d<<11)|(d>>>21))>>>0;a>>>=0;b>>>=0;c>>>=0;return r;};
+ // Open interval (0,1) with 53-bit resolution.
+ const uniform=()=>((u32()>>>5)*67108864+(u32()>>>6)+0.5)/9007199254740992;
+ let spare=null;
+ const normal=()=>{if(spare!==null){const s=spare;spare=null;return s;}const r=Math.sqrt(-2*Math.log(uniform())),t=2*Math.PI*uniform();spare=r*Math.sin(t);return r*Math.cos(t);};
+ return {u32,uniform,normal};
+}
+function seedOf(value){const s=num(value,'Seed');if(!Number.isInteger(s)||s<0||s>4294967295)throw Error('Seed must be an integer from 0 to 4294967295.');return s;}
+
+/* ---------- Monte Carlo propagation ---------- */
+function monteCarlo(spec,{samples=100000,seed=1,timeBudgetMs=8000,keep=false}={}){
+ samples=num(samples,'Number of samples N');if(!Number.isInteger(samples)||samples<1000||samples>MAX_SAMPLES)throw Error('Number of samples N must be an integer from 1000 to '+MAX_SAMPLES+'.');
+ seed=seedOf(seed);timeBudgetMs=num(timeBudgetMs,'Time budget');
+ for(let i=0;i<spec.n;i++)for(let j=0;j<spec.n;j++)if(i!==j&&spec.R[i][j]!==0&&(spec.vars[i].distribution!=='normal'||spec.vars[j].distribution!=='normal'))
+  throw Error('Monte Carlo supports correlations only between normal inputs ('+spec.vars[i].name+'–'+spec.vars[j].name+' involves a uniform input).');
+ const F=model(spec),R=rng(seed),L=spec.L,n=spec.n,ys=new Float64Array(samples),z=new Array(n),x=new Array(n),start=Date.now();
+ let count=0,truncated=false;
+ for(;count<samples;count++){
+  if((count&1023)===0&&count>0&&Date.now()-start>timeBudgetMs){truncated=true;break;}
+  for(let i=0;i<n;i++)z[i]=spec.vars[i].distribution==='normal'?R.normal():R.uniform();
+  for(let i=0;i<n;i++){const v=spec.vars[i];
+   if(v.distribution==='uniform'){x[i]=v.mean+v.halfWidth*(2*z[i]-1);continue;}
+   let s=0;for(let m=0;m<=i;m++)if(spec.vars[m].distribution==='normal')s+=L[i][m]*z[m];
+   x[i]=v.mean+v.u*s;}
+  try{ys[count]=F.at(x);}catch(err){throw Error('Model is undefined at Monte Carlo sample '+(count+1)+' ('+spec.vars.map((v,i)=>v.name+'='+Number(x[i].toPrecision(6))).join(', ')+'): '+err.message);}
+ }
+ if(count<1000)throw Error('Monte Carlo time budget allowed fewer than 1000 samples.');
+ const y=ys.subarray(0,count);let mean=0;for(let i=0;i<count;i++)mean+=(y[i]-mean)/(i+1);
+ let ss=0;for(let i=0;i<count;i++){const d=y[i]-mean;ss+=d*d;}const std=Math.sqrt(ss/(count-1));
+ const sorted=Float64Array.from(y).sort(),p=0.95,q=Math.round(p*count);
+ const low=Math.max(0,Math.floor((1-p)/2*count)),symmetric=[sorted[low],sorted[Math.min(count-1,low+q-1)]];
+ let best=0;for(let r=1;r+q-1<count;r++)if(sorted[r+q-1]-sorted[r]<sorted[best+q-1]-sorted[best])best=r;
+ const out={type:'uncertainty-monte-carlo',samples:count,requested:samples,truncated,seed,mean,std,symmetric95:symmetric,shortest95:[sorted[best],sorted[best+q-1]],min:sorted[0],max:sorted[count-1],
+  histogram:histogram(sorted,40),elapsedMs:Date.now()-start,method:'Monte Carlo propagation of distributions (GUM Supplement 1 style), xoshiro128** seeded PRNG'};
+ if(keep)out.values=Array.from(y);
+ return out;
+}
+function histogram(sorted,bins){
+ const lo=sorted[0],hi=sorted[sorted.length-1],counts=new Array(bins).fill(0);
+ if(!(hi>lo)){counts[0]=sorted.length;return {lo,hi,counts};}
+ const w=(hi-lo)/bins;for(const v of sorted)counts[Math.min(bins-1,Math.floor((v-lo)/w))]++;
+ return {lo,hi,counts};
+}
+function compare(lin,mc){
+ const scale=Math.max(lin.uc,mc.std),stdDiff=scale>0?Math.abs(mc.std-lin.uc)/scale:0,meanShift=scale>0?Math.abs(mc.mean-lin.value)/scale:0;
+ const nonlinear=stdDiff>0.1||meanShift>0.1;
+ return {stdRelativeDifference:stdDiff,meanShiftInUnits:meanShift,nonlinear,
+  note:nonlinear?'Linear and Monte Carlo results differ by more than 10%: the model is significantly non-linear (or non-Gaussian) over the input uncertainty; prefer the Monte Carlo result.':'Linear and Monte Carlo results agree within 10%.'};
+}
+function propagate(options){return linear(normalize(options));}
+function run(options={}){
+ const spec=normalize(options),lin=linear(spec),mc=monteCarlo(spec,options);
+ return {type:'uncertainty',expression:spec.expression,linear:lin,monteCarlo:mc,comparison:compare(lin,mc),
+  note:'Assumes independent inputs unless correlations are given; first-order results need a model that is approximately linear over ±u. Monte Carlo accuracy depends on N; not a validated metrology certificate.'};
+}
+function parseCorrelations(text){
+ const out=[];for(const [i,raw] of String(text??'').split(/\n|;/).entries()){
+  const line=raw.trim();if(!line)continue;const parts=line.split(/[\s,]+/).filter(Boolean);
+  if(parts.length!==3)throw Error('Correlation line '+(i+1)+' must read: name name ρ.');
+  out.push({a:parts[0],b:parts[1],rho:parts[2]});
+ }
+ return out;
+}
+
+M.uncertainty={normalize,cholesky,propagate,monteCarlo:(options={})=>monteCarlo(normalize(options),options),run,rng,parseCorrelations};
+
+/* ---------- UI ---------- */
+const panel=document.getElementById('numerical-panel');if(!panel||!document.createElement)return;
+const $=id=>document.getElementById(id);
+const fmt=v=>Number.isFinite(v)?Number(v.toPrecision(8)).toString():String(v);
+const area=document.createElement('details');area.id='uncertainty-details';
+area.innerHTML='<summary>Uncertainty · error propagation and Monte Carlo</summary>'+
+ '<p>Propagate input uncertainties through y = f(variables) by the first-order GUM law and by seeded Monte Carlo sampling.</p>'+
+ '<style>#uncertainty-details fieldset{border:1px solid #d8dfeb;border-radius:9px;margin:8px 0;padding:6px 10px;min-width:0}#uncertainty-details label{min-width:0}#uncertainty-details textarea{min-height:64px;width:100%;box-sizing:border-box;padding:9px;border:1px solid #cdd8ec;border-radius:9px;font:inherit}#uncertainty-canvas{width:100%;max-width:480px;height:auto;display:block;border:1px solid #d8dfeb;border-radius:9px;background:#fff}#uncertainty-output{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%}</style>'+
+ '<div class="num-fields"><label>Model y = f(…)<input id="uncertainty-expression" value="a*b" autocomplete="off" spellcheck="false"></label>'+
+ '<label>Coverage factor k<input id="uncertainty-k" type="number" step="any" value="2"></label>'+
+ '<label>Monte Carlo samples N<input id="uncertainty-samples" type="number" step="1" min="1000" max="200000" value="100000"></label>'+
+ '<label>Seed<input id="uncertainty-seed" type="number" step="1" min="0" value="1"></label></div>'+
+ '<div id="uncertainty-vars"></div>'+
+ '<div class="data-toolbar"><button id="uncertainty-add" class="secondary" type="button">Add variable</button><button id="uncertainty-remove" class="secondary" type="button">Remove last variable</button></div>'+
+ '<label>Correlations (one pair per line: name name ρ)<textarea id="uncertainty-correlations" rows="2" spellcheck="false" placeholder="a b 0.5"></textarea></label>'+
+ '<div class="data-toolbar"><button id="uncertainty-run" class="primary" type="button">Propagate uncertainty</button>'+
+ '<button id="uncertainty-to-table" class="secondary" type="button" disabled>Save samples summary to Data Tables</button></div>'+
+ '<pre id="uncertainty-output" role="status" aria-live="polite">Define the model and its input uncertainties.</pre>'+
+ '<canvas id="uncertainty-canvas" width="480" height="160" role="img" aria-label="Monte Carlo histogram: not yet computed"></canvas>';
+panel.append(area);let last=null;
+const output=$('uncertainty-output'),varsBox=$('uncertainty-vars'),canvas=$('uncertainty-canvas');
+const invalidate=()=>{last=null;$('uncertainty-to-table').disabled=true;output.classList.remove('error');};
+function field(labelText,input){const l=document.createElement('label');l.append(document.createTextNode(labelText),input);return l;}
+function addVariable(name,mean,spread,dist='normal'){
+ const i=varsBox.children.length;if(i>=MAX_VARS)return;
+ const fs=document.createElement('fieldset');fs.className='uncertainty-var';
+ const lg=document.createElement('legend');lg.textContent='Variable '+(i+1);fs.append(lg);
+ const box=document.createElement('div');box.className='num-fields';
+ const mk=(type,value,cls)=>{const e=document.createElement('input');e.type=type;if(type==='number')e.step='any';e.value=value;e.className=cls;e.autocomplete='off';return e;};
+ const sel=document.createElement('select');sel.className='uv-dist';
+ for(const [v,t] of [['normal','Normal (u)'],['uniform','Uniform (half-width a)']]){const o=document.createElement('option');o.value=v;o.textContent=t;sel.append(o);}sel.value=dist;
+ const spreadInput=mk('number',spread,'uv-spread'),spreadLabel=field(dist==='uniform'?'Half-width a':'Standard uncertainty u',spreadInput);
+ sel.addEventListener('change',()=>{spreadLabel.firstChild.textContent=sel.value==='uniform'?'Half-width a':'Standard uncertainty u';});
+ box.append(field('Name',mk('text',name,'uv-name')),field('Mean',mk('number',mean,'uv-mean')),field('Distribution',sel),spreadLabel);
+ fs.append(box);varsBox.append(fs);
+ for(const el of fs.querySelectorAll('input,select')){el.addEventListener('input',invalidate);el.addEventListener('change',invalidate);}
+ syncButtons();
+}
+function syncButtons(){const n=varsBox.children.length;$('uncertainty-add').disabled=n>=MAX_VARS;$('uncertainty-remove').disabled=n<=1;}
+function readVariables(){return [...varsBox.children].map(fs=>({name:fs.querySelector('.uv-name').value,mean:fs.querySelector('.uv-mean').value,distribution:fs.querySelector('.uv-dist').value,spread:fs.querySelector('.uv-spread').value}));}
+function draw(mc){
+ const ctx=canvas.getContext&&canvas.getContext('2d');if(!ctx)return;const W=canvas.width,H=canvas.height,c=mc.histogram.counts,top=Math.max(...c);
+ ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);const bw=(W-20)/c.length;
+ ctx.fillStyle='#4f63d2';c.forEach((v,i)=>{const h=(H-30)*v/top;ctx.fillRect(10+i*bw,H-20-h,Math.max(1,bw-1),h);});
+ const span=mc.histogram.hi-mc.histogram.lo||1,xAt=v=>10+(W-20)*(v-mc.histogram.lo)/span;
+ ctx.strokeStyle='#c0392b';ctx.lineWidth=2;for(const v of mc.symmetric95){ctx.beginPath();ctx.moveTo(xAt(v),5);ctx.lineTo(xAt(v),H-20);ctx.stroke();}
+ ctx.fillStyle='#283752';ctx.font='11px sans-serif';ctx.fillText(fmt(mc.histogram.lo),10,H-6);const t=fmt(mc.histogram.hi);ctx.fillText(t,W-10-ctx.measureText(t).width,H-6);
+ canvas.setAttribute('aria-label','Monte Carlo histogram of '+mc.samples+' samples from '+fmt(mc.histogram.lo)+' to '+fmt(mc.histogram.hi)+'; mean '+fmt(mc.mean)+', standard deviation '+fmt(mc.std)+'; 95% interval '+fmt(mc.symmetric95[0])+' to '+fmt(mc.symmetric95[1])+' marked in red.');
+}
+$('uncertainty-add').addEventListener('click',()=>{const n=varsBox.children.length;addVariable(String.fromCharCode(97+n),'1','0.1');invalidate();});
+$('uncertainty-remove').addEventListener('click',()=>{if(varsBox.children.length>1)varsBox.lastElementChild.remove();syncButtons();invalidate();});
+for(const el of area.querySelectorAll('#uncertainty-expression,#uncertainty-k,#uncertainty-samples,#uncertainty-seed,#uncertainty-correlations')){el.addEventListener('input',invalidate);el.addEventListener('change',invalidate);}
+$('uncertainty-run').addEventListener('click',()=>{
+ try{
+  const r=run({expression:$('uncertainty-expression').value,variables:readVariables(),correlations:parseCorrelations($('uncertainty-correlations').value),k:$('uncertainty-k').value,samples:$('uncertainty-samples').value,seed:$('uncertainty-seed').value});
+  const L=r.linear,C=r.monteCarlo,lines=[L.method,'y = '+fmt(L.value)+'; combined standard uncertainty u_c = '+fmt(L.uc),'Expanded U = k·u_c = '+fmt(L.U)+' (k = '+fmt(L.k)+'); interval ['+fmt(L.interval[0])+', '+fmt(L.interval[1])+']'];
+  for(const c of L.contributions)lines.push('  '+c.name+': ∂f/∂'+c.name+' = '+fmt(c.sensitivity)+', u = '+fmt(c.u)+' ('+c.distribution+'), contribution '+fmt(c.percent)+'%');
+  if(Math.abs(L.correlationPercent)>1e-9)lines.push('  correlation terms: '+fmt(L.correlationPercent)+'% of u_c²');
+  lines.push('','Monte Carlo · N = '+C.samples+(C.truncated?' (time budget reached before '+C.requested+')':'')+', seed '+C.seed,'mean = '+fmt(C.mean)+'; std = '+fmt(C.std),
+   'Probabilistically symmetric 95%: ['+fmt(C.symmetric95[0])+', '+fmt(C.symmetric95[1])+']','Shortest 95%: ['+fmt(C.shortest95[0])+', '+fmt(C.shortest95[1])+']','',(r.comparison.nonlinear?'NON-LINEARITY FLAG: ':'')+r.comparison.note,r.note);
+  output.classList.remove('error');output.textContent=lines.join('\n');draw(C);
+  const rows=[['expression',r.expression],['linear value',L.value],['linear u_c',L.uc],['k',L.k],['expanded U',L.U],['MC samples',C.samples],['MC seed',C.seed],['MC mean',C.mean],['MC std',C.std],
+   ['MC symmetric 95% low',C.symmetric95[0]],['MC symmetric 95% high',C.symmetric95[1]],['MC shortest 95% low',C.shortest95[0]],['MC shortest 95% high',C.shortest95[1]],['MC min',C.min],['MC max',C.max],['non-linearity flag',r.comparison.nonlinear?'yes':'no']];
+  for(const c of L.contributions)rows.push(['sensitivity '+c.name,c.sensitivity],['contribution % '+c.name,c.percent]);
+  last={headers:['quantity','value'],rows};$('uncertainty-to-table').disabled=false;
+ }catch(err){invalidate();output.classList.add('error');output.textContent=err.message+' Correct the input and run again.';canvas.setAttribute('aria-label','Monte Carlo histogram: not computed because of an input error');}
+});
+$('uncertainty-to-table').addEventListener('click',()=>{try{if(!last)throw Error('Propagate uncertainty first.');M.dataTables.importData({headers:last.headers,rows:last.rows},'Uncertainty_Summary');if(M.advanced?.mode)M.advanced.mode('data');}catch(err){output.classList.add('error');output.textContent=err.message;}});
+addVariable('a','10','0.1');addVariable('b','5','0.2');
 })();
 </script>
 <script id="promath-xlsx-tools">
@@ -9843,7 +10727,9 @@ document.addEventListener('click',event=>{
  }
 },true);
 new MutationObserver(()=>{const next=mode();if(next!==activeMode)selectMode(next);}).observe(document.querySelector('.workspace-bar'),{attributes:true,attributeFilter:['class'],subtree:true});
-window.MathStudio.workspaceTasks={select:selectTask,current:()=>activeMode};
+// Read-only task metadata for discovery UIs; selectors stay owned by this module.
+const list=()=>Object.entries(tasks).map(([m,entries])=>entries.map(([key,label,description,selector])=>Object.freeze({mode:m,key,label,description,selector:selector||null}))).flat();
+window.MathStudio.workspaceTasks={select:selectTask,current:()=>activeMode,list};
 })();
 </script>
 <script id="promath-complex-graph">
@@ -10108,8 +10994,119 @@ function tableOf(result){
  return {headers:['theta','r','x','y'],rows:result.points.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>[p.theta,p.r,p.x,p.y])};
 }
 
-const api={implicit,parametric,polar,draw,table:tableOf,limits:{maxGrid:MAX_GRID,maxSamples:MAX_SAMPLES}};
+/* ---------- Main 2D graph overlays ----------
+   Definitions (not computed points) are the persisted source of truth. Parametric and polar
+   samples are independent of the view; implicit contours are re-traced on the main graph's
+   visible window whenever its bounds change, so zoom and pan stay exact. */
+const MAX_OVERLAYS=8,OVERLAY_KEYS={implicit:['type','expression','grid'],parametric:['type','x','y','t0','t1','samples'],polar:['type','r','theta0','theta1','samples']};
+const OVERLAY_COLORS=['#c2410c','#7c3aed','#0f766e','#be185d','#1d4ed8','#a16207','#15803d','#9f1239'];
+function normalizeOverlay(def){
+ if(!def||typeof def!=='object'||Array.isArray(def))fail('Overlay curve definition must be an object.');
+ const keys=OVERLAY_KEYS[def.type];
+ if(!keys)fail('Overlay curve type must be implicit, parametric or polar.');
+ const extra=Object.keys(def).filter(k=>!keys.includes(k));
+ if(extra.length)fail('Overlay curve has unsupported field '+extra[0].slice(0,40)+'.');
+ const text=(v,label)=>{if(typeof v!=='string')fail(label+' must be text.');return cleanExpr(v,label);};
+ if(def.type==='implicit'){
+  const expression=text(def.expression,'Implicit equation');implicitFunction(expression);
+  return {type:'implicit',expression,grid:intIn(def.grid,MIN_GRID,MAX_GRID,'Grid cells per axis')};
+ }
+ const num=(v,label)=>{if(typeof v!=='number')fail(label+' must be a number.');return v;};
+ if(def.type==='parametric'){
+  const [t0,t1]=window2(num(def.t0,'t start'),num(def.t1,'t end'),'t');
+  return {type:'parametric',x:text(def.x,'x(t)'),y:text(def.y,'y(t)'),t0,t1,samples:sampleCount(num(def.samples,'Samples'))};
+ }
+ const [theta0,theta1]=window2(num(def.theta0,'θ start'),num(def.theta1,'θ end'),'θ');
+ return {type:'polar',r:text(def.r,'r(θ)'),theta0,theta1,samples:sampleCount(num(def.samples,'Samples'))};
+}
+const g4=v=>String(Number(v.toPrecision(4)));
+const overlayLabel=d=>d.type==='implicit'?'Implicit: '+d.expression+(d.expression.includes('=')?'':' = 0'):
+ d.type==='parametric'?'Parametric: ('+d.x+', '+d.y+'), t ∈ ['+g4(d.t0)+', '+g4(d.t1)+']':'Polar: r = '+d.r+', θ ∈ ['+g4(d.theta0)+', '+g4(d.theta1)+']';
+/* Each overlay: {def, color, fixed (view-independent result), cache:{key, lines}}. */
+let overlays=[],lastRender={window:null,overlays:[]};
+function linesOf(result){
+ if(result.type==='implicit')return result.segments.map(s=>[[s[0],s[1]],[s[2],s[3]]]);
+ return result.polylines.map(line=>line.map(p=>[p.x,p.y]));
+}
+function computeFixed(def){
+ if(def.type==='parametric')return parametric(def.x,def.y,{t0:def.t0,t1:def.t1,samples:def.samples});
+ if(def.type==='polar')return polar(def.r,{theta0:def.theta0,theta1:def.theta1,samples:def.samples});
+ return null;
+}
+function buildEntry(def,index){
+ const d=normalizeOverlay(def),fixed=computeFixed(d);
+ return {def:d,color:OVERLAY_COLORS[index%OVERLAY_COLORS.length],fixed,lines:fixed?linesOf(fixed):null,cacheKey:'',error:''};
+}
+function overlayLines(entry,range){
+ if(!entry.fixed){
+  const key=[range.xmin,range.xmax,range.ymin,range.ymax,entry.def.grid].join('|');
+  if(entry.cacheKey!==key){
+   entry.cacheKey=key;
+   try{entry.lines=linesOf(implicit(entry.def.expression,{xmin:range.xmin,xmax:range.xmax,ymin:range.ymin,ymax:range.ymax,grid:entry.def.grid}));entry.error='';}
+   catch(err){entry.lines=[];entry.error=err.message;}
+  }
+ }
+ return entry.lines||[];
+}
+/* Draw into the main graph canvas using its own view transform. Breaks never get joined:
+   each polyline starts with moveTo, and a step that leaves the visible window with a jump
+   larger than 80% of the canvas (an asymptote such as t -> 1/t) is broken too. */
+function drawOverlays(ctx,props){
+ if(!props||props.mode!=='2d'){return;}
+ const {range,w,h}=props,{xmin,xmax,ymin,ymax}=range;
+ const sx=x=>(x-xmin)/(xmax-xmin)*w,sy=y=>h-(y-ymin)/(ymax-ymin)*h;
+ const inside=(x,y)=>x>=xmin&&x<=xmax&&y>=ymin&&y<=ymax,limit=.8*Math.max(w,h);
+ const rendered=[];
+ for(const entry of overlays){
+  const lines=overlayLines(entry,range);let visible=0;
+  ctx.save();ctx.strokeStyle=entry.color;ctx.lineWidth=2.6;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash([]);ctx.beginPath();
+  for(const line of lines){
+   let prev=null;
+   for(const [x,y] of line){
+    const X=sx(x),Y=sy(y);
+    if(!Number.isFinite(X)||!Number.isFinite(Y)||Math.abs(X)>1e7||Math.abs(Y)>1e7){prev=null;continue;}
+    const inView=inside(x,y);if(inView)visible++;
+    if(!prev||(Math.hypot(X-prev.X,Y-prev.Y)>limit&&!(inView&&prev.inView)))ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+    prev={X,Y,inView};
+   }
+   if(line.length===1&&prev)ctx.lineTo(prev.X+.01,prev.Y);
+  }
+  ctx.stroke();ctx.restore();
+  rendered.push({type:entry.def.type,label:overlayLabel(entry.def),color:entry.color,polylines:lines,visiblePoints:visible,error:entry.error});
+ }
+ lastRender={window:{xmin,xmax,ymin,ymax},overlays:rendered};
+}
+const redrawMain=()=>{document.getElementById('graph-plot')?.click();};
+const overlayApi={
+ add(def){
+  if(overlays.length>=MAX_OVERLAYS)fail('A graph can show up to '+MAX_OVERLAYS+' curve overlays. Clear overlays first.');
+  const entry=buildEntry(def,overlays.length),key=JSON.stringify(entry.def);
+  if(overlays.some(o=>JSON.stringify(o.def)===key))fail('This curve is already overlaid on the main graph.');
+  overlays=overlays.concat([entry]);redrawMain();return {...entry.def};
+ },
+ clear(redraw=true){overlays=[];lastRender={window:lastRender.window,overlays:[]};if(redraw)redrawMain();},
+ count:()=>overlays.length,
+ hasOverlays:mode=>overlays.length>0&&(mode===undefined||mode==='2d'),
+ draw:drawOverlays,
+ legend:()=>overlays.map(o=>({name:overlayLabel(o.def),color:o.color})),
+ info:()=>overlays.length?overlays.length+' curve overlay'+(overlays.length===1?'':'s'):'',
+ exportState:()=>overlays.map(o=>({...o.def})),
+ /* Atomic: every definition is validated and sampled before the current list is replaced. */
+ restoreState(list){
+  if(list===null||list===undefined){overlays=[];overlayApi.onChange?.();return;}
+  if(!Array.isArray(list)||list.length>MAX_OVERLAYS)fail('Overlay curves must be a list of at most '+MAX_OVERLAYS+'.');
+  const next=list.map((def,i)=>buildEntry(def,i));
+  const keys=next.map(e=>JSON.stringify(e.def));if(new Set(keys).size!==keys.length)fail('Duplicate overlay curves.');
+  overlays=next;overlayApi.onChange?.();
+ },
+ rendered:()=>JSON.parse(JSON.stringify(lastRender)),
+ normalize:normalizeOverlay,
+ limits:{maxOverlays:MAX_OVERLAYS}
+};
+
+const api={implicit,parametric,polar,draw,table:tableOf,limits:{maxGrid:MAX_GRID,maxSamples:MAX_SAMPLES},overlays:overlayApi};
 M.graphCurves=api;
+M.graphOverlays=overlayApi;
 
 /* ---------- UI (static markup only; user text never reaches innerHTML) ---------- */
 const panel=document.getElementById('graph-panel');
@@ -10151,7 +11148,8 @@ root.innerHTML='<summary>Implicit, parametric &amp; polar curves · F(x,y)=0, (x
 '<label for="curves-samples" data-curves="parametric polar" hidden>Samples (2–20,000)<input id="curves-samples" type="number" min="2" max="20000" step="1" value="721"></label>'+
 '<label for="curves-equal" class="curves-check"><input id="curves-equal" type="checkbox" checked> Equal aspect (1:1)</label>'+
 '</div>'+
-'<div class="curves-actions"><button id="curves-plot" type="button" class="primary">Plot curve</button><button id="curves-save" type="button" class="secondary" disabled>Save points to Data Tables</button></div>'+
+'<div class="curves-actions"><button id="curves-plot" type="button" class="primary">Plot curve</button><button id="curves-save" type="button" class="secondary" disabled>Save points to Data Tables</button><button id="curves-overlay" type="button" class="secondary" aria-describedby="curves-overlay-status">Overlay on main 2D graph</button><button id="curves-overlay-clear" type="button" class="secondary" aria-describedby="curves-overlay-status" disabled>Clear overlays</button></div>'+
+'<p id="curves-overlay-status" class="small-note" role="status" aria-live="polite">No curve overlays on the main 2D graph. Implicit overlays are re-traced on the main graph\'s visible window; parametric and polar overlays use their parameter range.</p>'+
 '<p id="curves-status" role="status" aria-live="polite">Ready. Choose a curve type and press Plot curve.</p>'+
 '<canvas id="curves-canvas" width="900" height="600" role="img" aria-label="Implicit, parametric or polar curve plot (not yet plotted)"></canvas>';
 const anchor=document.getElementById('complex-graph-workbench');
@@ -10206,8 +11204,28 @@ $('curves-save').addEventListener('click',()=>{
   setStatus('Saved '+t.rows.length+' points to Data Tables as '+name+'.',false);
  }catch(err){setStatus('Error: '+err.message,true);}
 });
+/* Overlay the current definition on the main 2D graph (validated before anything changes). */
+const overlayStatus=$('curves-overlay-status');
+const setOverlayStatus=(text,error)=>{overlayStatus.textContent=text;overlayStatus.classList.toggle('curves-error',!!error);$('curves-overlay-clear').disabled=!overlayApi.count();};
+function currentDefinition(){
+ const type=$('curves-type').value,n=id=>finite($(id).value,id==='curves-samples'?'Samples':id==='curves-grid-n'?'Grid cells per axis':'Parameter bound');
+ if(type==='implicit')return {type,expression:$('curves-expr').value,grid:n('curves-grid-n')};
+ if(type==='parametric')return {type,x:$('curves-xt').value,y:$('curves-yt').value,t0:n('curves-p0'),t1:n('curves-p1'),samples:n('curves-samples')};
+ return {type,r:$('curves-r').value,theta0:n('curves-p0'),theta1:n('curves-p1'),samples:n('curves-samples')};
+}
+function overlay(){
+ try{
+  const def=overlayApi.add(currentDefinition());
+  const mode=M.advanced?.currentGraphMode?.();
+  setOverlayStatus('Overlaid '+overlayLabel(def)+' on the main graph ('+overlayApi.count()+' of '+MAX_OVERLAYS+').'+(mode==='3d'?' Switch the main graph to 2D to see overlays.':''),false);
+ }catch(err){setOverlayStatus('Overlay error: '+err.message,true);}
+}
+$('curves-overlay').addEventListener('click',overlay);
+$('curves-overlay-clear').addEventListener('click',()=>{overlayApi.clear();setOverlayStatus('Cleared all curve overlays from the main 2D graph.',false);});
+overlayApi.onChange=()=>{if(overlayApi.count())setOverlayStatus(overlayApi.count()+' curve overlay'+(overlayApi.count()===1?'':'s')+' on the main 2D graph.',false);else setOverlayStatus('No curve overlays on the main 2D graph.',false);};
 syncType();
 api.plot=plot;
+api.overlay=overlay;
 })();
 </script>
 <script id="promath-control-theory">
@@ -10829,7 +11847,9 @@ function restoreState(state){
   throw Error('Invalid saved Engineering filter.');
  select.value=state.discipline;search.value=state.query;render();
 }
-M.engineeringCatalog=Object.freeze({disciplines,tools,filter,exportState,restoreState});
+// Public open-by-id lets other UI (e.g. global tool search) reuse this single routing path.
+function openById(id){const t=tools.find(x=>x.id===id);if(!t||t.status!=='available')return false;openTool(t);return true;}
+M.engineeringCatalog=Object.freeze({disciplines,tools,filter,open:openById,exportState,restoreState});
 // The saved mode may have been restored before this late-added tab existed.
 if(M.advanced.currentMode()==='engineering')M.advanced.mode('engineering');
 })();
@@ -10921,6 +11941,41 @@ const visuals=Object.freeze([
  {id:'quadrature',tool:'numerical.quadrature.adaptive',title:'Integral as accumulated area',compute:quadrature,fields:[['expression','f(x)','sin(x)','text'],['a','Lower limit','0'],['b','Upper limit','3.141592653589793']]},
  {id:'eigen',tool:'matrix.eigen.symmetric.small',title:'Symmetric matrix transform and eigenvectors',compute:eigenMorph,fields:[['a','A11','2'],['b','A12 = A21','1'],['d','A22','1']]}
 ].map(Object.freeze));
+/* Expected unit per numeric field (what the kernel's bare number means). Plain numbers keep that
+   meaning; "number unit" input is converted with the shared units module before the kernel runs. */
+const FIELD_UNITS=Object.freeze({
+ beam:{length:'m',supportB:'m',force:p=>p.load==='udl'?'kN/m':'kN',position:'m',force2:'kN',position2:'m',udl:'kN/m',modulus:'GPa',width:'mm',height:'mm'},
+ orbit:{altitude:'km'},
+ rlc:{resistance:'Ω',inductance:'mH',capacitance:'µF',voltage:'V'},
+ projectile:{speed:'m/s',angle:'°',mass:'kg',diameter:'mm',density:'kg/m^3'},
+ rod:{length:'m',initial:'°C',left:'°C',right:'°C',duration:'s'},
+ spring:{duration:'s'},
+ pendulum:{theta0:'°',length:'m',duration:'s'},
+ spectrum:{f1:'Hz',f2:'Hz'}
+});
+const QUANTITY=/^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*(\S.*)?$/;
+/* Returns the kernel parameters plus a list of conversions performed. Throws field-specific errors. */
+function resolveInputs(id,raw){
+ const v=visuals.find(x=>x.id===id);if(!v)throw Error('Unknown engineering visual: '+id);
+ const spec=FIELD_UNITS[id]||{},out=Object.assign({},raw),conversions=[];
+ for(const [key,label] of v.fields){
+  const want=typeof spec[key]==='function'?spec[key](raw):spec[key];
+  if(!want||raw[key]===undefined)continue;
+  const m=QUANTITY.exec(String(raw[key]));
+  if(!m||!m[2])continue; // Plain number (or invalid text): unchanged, the kernel validates it as before.
+  const unit=m[2].trim(),U=M.units; // Looked up at call time so load order cannot break plain input.
+  if(!U)throw Error(label+': unit conversion is unavailable; enter a plain number in '+want+'.');
+  let given,expected;
+  try{given=U.dimensions(unit);}catch(e){throw Error(label+': '+e.message+' Enter a number, optionally followed by a unit compatible with '+want+'.');}
+  expected=U.dimensions(want);
+  if(given.text!==expected.text)throw Error(label+': expected a unit compatible with '+want+' (dimension '+expected.text+') but "'+unit+'" has dimension '+given.text+'.');
+  let r;
+  try{r=U.convert(m[1],unit,want);}catch(e){throw Error(label+': '+e.message);}
+  out[key]=r.value;
+  conversions.push({key,label,input:String(raw[key]).trim(),unit:want,value:r.value,mode:r.mode});
+ }
+ return {params:out,conversions};
+}
 const toolIds=new Set(M.engineeringCatalog.tools.filter(t=>t.status==='available').map(t=>t.id));
 for(const v of visuals)if(!toolIds.has(v.tool))throw Error('Engineering visual references an unavailable tool: '+v.tool);
 
@@ -10954,6 +12009,12 @@ function buildFields(){
   const wrap=document.createElement('label');wrap.textContent=label;
   let input;
   if(type==='select'){input=document.createElement('select');for(const [val,text] of options){const o=document.createElement('option');o.value=val;o.textContent=text;input.append(o);}}
+  else if(FIELD_UNITS[v.id]?.[key]){
+   const spec=FIELD_UNITS[v.id][key],unit=typeof spec==='function'?'kN or kN/m':spec;
+   input=document.createElement('input');input.type='text';input.spellcheck=false;input.autocomplete='off';
+   input.placeholder='number [unit], default '+unit;input.title='Number in '+unit+', or a number followed by any compatible unit (e.g. ft, lbf, ksi).';
+   input.dataset.unit=unit;
+  }
   else{input=document.createElement('input');input.type=type||'number';input.step='any';}
   input.id='eng-visual-'+key;input.value=value;input.dataset.key=key;
   wrap.append(input);fields.append(wrap);
@@ -11169,8 +12230,9 @@ function play(){if(!current)return;if(frame>=FRAMES)frame=0;playing=true;toggle.
 function run(){
  stop();
  try{
-  const v=visuals.find(x=>x.id===picker.value);current=v.compute(params());status.classList.remove('error');
-  status.textContent=current.summary;setExport(true);
+  const v=visuals.find(x=>x.id===picker.value),resolved=resolveInputs(v.id,params());current=v.compute(resolved.params);status.classList.remove('error');
+  const fmt=x=>String(Number(x.toPrecision(12))); // Display only; the kernel receives the full binary64 value.
+  status.textContent=current.summary+(resolved.conversions.length?' Unit inputs: '+resolved.conversions.map(c=>c.label+' '+c.input+' → '+fmt(c.value)+' '+c.unit).join('; ')+'.':'');setExport(true);
   if(reduced()){frame=FRAMES;draw();}else{frame=0;draw();play();}
  }catch(error){current=null;setExport(false);frame=0;draw();status.classList.add('error');status.textContent='Cannot animate: '+error.message;}
  return current;
@@ -11198,7 +12260,257 @@ new MutationObserver(decorate).observe($('eng-results'),{childList:true});decora
 buildFields();draw();stop();
 M.engineeringVisuals=Object.freeze({visuals:visuals.map(v=>Object.freeze({id:v.id,tool:v.tool,title:v.title})),
  compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,beamGeneral:S.beamGeneral,vibration:S.vibration,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat}),
- select,open,run,play,pause:stop,tableOf,exportTable,plotGraph,downloadPng,frame:()=>frame,frames:FRAMES,current:()=>current});
+ select,open,run,play,pause:stop,resolveInputs,fieldUnits:FIELD_UNITS,tableOf,exportTable,plotGraph,downloadPng,frame:()=>frame,frames:FRAMES,current:()=>current});
+})();
+</script>
+<script id="promath-tool-search">
+/* Global "Find a tool" search. Discovery only: it indexes existing tool panels, workspace
+   tasks and the Engineering catalog, then routes to them through public APIs. It never runs a
+   computation, clears inputs or duplicates a tool implementation. SPDX-License-Identifier: MIT. */
+(()=>{'use strict';
+const M=window.MathStudio,bar=document.querySelector('.workspace-bar'),main=document.querySelector('main');
+if(!M?.advanced?.mode||!bar||!main)return;
+const MAX_RESULTS=12;
+// Small, data-only synonym map: query word -> extra terms that also count as a match.
+const SYNONYMS=Object.freeze({
+ integral:['integration','quadrature','simpson'],integrate:['integral','integration','quadrature'],
+ root:['brent','roots','bracket','nonlinear'],zero:['root','brent'],
+ units:['unit','conversion','dimensional'],unit:['conversion','dimensional'],convert:['conversion','unit'],
+ beam:['structural','deflection'],structure:['beam','structural'],structures:['beam','structural'],
+ stats:['statistics','distribution','hypothesis','descriptive'],statistics:['distribution','descriptive'],
+ spline:['interpolation','pchip'],interpolate:['interpolation'],
+ ode:['differential','rk4','rk45','initial-value'],differential:['ode'],
+ lp:['linear programming','optimization','simplex'],optimize:['optimization','minimization','minimize'],
+ curve:['implicit','polar','parametric'],curves:['implicit','polar','parametric'],
+ plot:['graph'],chart:['graph','plot'],fft:['spectrum','fourier'],fourier:['fft','spectrum'],
+ eigen:['eigenvalues','eigenanalysis'],excel:['xlsx'],spreadsheet:['table','xlsx'],
+ matrices:['matrix'],complex:['argand'],control:['bode','nyquist','locus']
+});
+const PANEL_MODES=Object.freeze({'numerical-panel':'editor','symbolic-panel':'editor'});
+const norm=s=>String(s??'').replace(/\s+/g,' ').trim();
+const fold=s=>norm(s).toLocaleLowerCase();
+const words=s=>fold(s).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+function workspaceLabel(mode){
+ const tab=bar.querySelector('button[data-workspace="'+mode+'"]');
+ return tab?norm(tab.textContent).replace(/^[^\p{L}\p{N}]+/u,''):mode||'All workspaces';
+}
+// The workspace that shows an element, from its enclosing workspace panel.
+function modeOf(el){
+ const modes=new Set([...bar.querySelectorAll('button[data-workspace]')].map(b=>b.dataset.workspace));
+ for(let n=el;n&&n!==main;n=n.parentElement){
+  if(n.id&&PANEL_MODES[n.id])return PANEL_MODES[n.id];
+  const m=n.id&&n.id.endsWith('-panel')?n.id.slice(0,-6):'';
+  if(m&&modes.has(m))return m;
+  // Unnamed top-level panels belong to the Equation station (editor, preview, Python).
+  if(n.parentElement===main&&n.tagName==='SECTION'&&n.classList.contains('panel')&&!n.id)return 'editor';
+ }
+ return null; // Shared panels that are visible in every workspace.
+}
+function ownText(details,selector,limit){
+ let text='';
+ for(const node of details.querySelectorAll(selector)){
+  if(node.closest('details')!==details)continue;
+  text+=' '+norm(node.textContent);if(text.length>limit)break;
+ }
+ return text.slice(0,limit);
+}
+
+let index=[];
+function build(){
+ const items=[],byPanel=new Map();
+ for(const d of main.querySelectorAll('details[id]')){
+  if(d.closest('#tool-search'))continue;
+  const summary=d.querySelector(':scope>summary');if(!summary)continue;
+  const title=norm(summary.textContent).replace(/^[^\p{L}\p{N}]+/u,'');if(!title)continue;
+  const mode=modeOf(d);
+  const item={id:'panel:'+d.id,kind:'panel',title,mode,status:'available',targetId:d.id,task:null,
+   nested:Boolean(d.parentElement?.closest('details[id]')),
+   keywords:[d.id.replace(/-/g,' '),ownText(d,'h2,h3,h4,legend,option',1500)]};
+  items.push(item);byPanel.set(d.id,item);
+ }
+ for(const t of M.workspaceTasks?.list?.()||[]){
+  const target=t.selector?document.querySelector(t.selector):null;
+  const merged=target?.id?byPanel.get(target.id):null;
+  if(merged&&merged.mode===t.mode){merged.keywords.push(t.label,t.description);merged.task=t;continue;}
+  items.push({id:'task:'+t.mode+':'+t.key,kind:'task',title:t.label,mode:t.mode,status:'available',
+   targetId:target?.id||null,task:t,keywords:[t.description]});
+ }
+ for(const t of M.engineeringCatalog?.tools||[]){
+  // Catalog entries stay separate: their single route may select a preset (for example a beam animation).
+  const tags=[t.tags,t.description,...t.disciplines];
+  items.push({id:'catalog:'+t.id,kind:'catalog',title:t.title,mode:t.route?.mode||'engineering',
+   status:t.status==='available'?'available':'planned',catalogId:t.id,keywords:['engineering',...tags]});
+ }
+ for(const item of items){
+  item.workspace=item.kind==='catalog'&&item.status==='available'&&item.mode!=='engineering'?'Engineering Toolbox · opens in '+workspaceLabel(item.mode):workspaceLabel(item.mode);
+  item.titleFolded=fold(item.title);item.titleWords=words(item.title);
+  item.haystack=fold([item.title,item.workspace,...item.keywords].join(' '));
+  item.hayWords=words(item.haystack);
+ }
+ index=items;return items.length;
+}
+function contains(text,list,term){
+ // Very short terms (for example "lp") must start a word to avoid noisy substring hits.
+ return term.length<=2?list.some(w=>w.startsWith(term)):text.includes(term);
+}
+function search(query){
+ const terms=words(query);if(!terms.length)return [];
+ if(!index.length)build();
+ const q=fold(query),out=[];
+ for(const item of index){
+  let score=0,ok=true;
+  for(const term of terms){
+   const variants=[[term,1],...(SYNONYMS[term]||[]).map(s=>[fold(s),0.6])];
+   let best=0;
+   for(const [v,weight] of variants){
+    let s=0;
+    if(contains(item.titleFolded,item.titleWords,v)){s=10;if(item.titleWords.some(w=>w.startsWith(v)))s+=4;}
+    else if(contains(item.haystack,item.hayWords,v))s=3;
+    best=Math.max(best,s*weight);
+   }
+   if(!best){ok=false;break;}
+   score+=best;
+  }
+  if(!ok)continue;
+  if(item.titleFolded.startsWith(q))score+=5;
+  if(item.kind==='panel')score+=item.nested?-2:1; // Prefer whole tool panels over sub-sections and routes.
+  if(item.status==='planned')score-=4;
+  out.push([score,item]);
+ }
+ out.sort((a,b)=>b[0]-a[0]||a[1].title.localeCompare(b[1].title));
+ return out.slice(0,MAX_RESULTS).map(([,item])=>item);
+}
+
+function revealPanel(id){
+ const el=document.getElementById(id);if(!el)return false;
+ if(el.tagName==='DETAILS')el.open=true;
+ for(let n=el.parentElement;n;n=n.parentElement)if(n.tagName==='DETAILS')n.open=true;
+ const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ el.scrollIntoView({block:'start',behavior:reduce?'auto':'smooth'});
+ const focusable=el.querySelector(':scope>summary')||el.querySelector('input,select,textarea,button');
+ focusable?.focus({preventScroll:true});
+ return true;
+}
+function openItem(item){
+ if(!item||item.status!=='available')return false;
+ if(item.kind==='catalog')return Boolean(M.engineeringCatalog?.open?.(item.catalogId));
+ if(item.mode)M.advanced.mode(item.mode);
+ // Wait for workspace observers to switch the task picker before selecting or revealing.
+ requestAnimationFrame(()=>{
+  if(item.task&&M.workspaceTasks?.current?.()===item.task.mode)M.workspaceTasks.select(item.task.key,false);
+  if(item.targetId)revealPanel(item.targetId);
+  else if(item.task)document.getElementById('workspace-task-select')?.focus({preventScroll:true});
+ });
+ return true;
+}
+
+const css=document.createElement('style');
+css.textContent=
+ '#tool-search{position:relative;flex:1 1 300px;min-width:0;display:flex;align-items:center;gap:8px;margin-left:auto;padding:0 2px}'+
+ '#tool-search label{font:750 12px system-ui,sans-serif;color:#435c9c;white-space:nowrap}'+
+ '#tool-search-input{flex:1 1 auto;width:100%;min-width:0;min-height:40px;box-sizing:border-box;padding:8px 12px;border:1px solid #c9d4e8;border-radius:10px;background:#f8faff;color:#1f3157;font:14px system-ui,sans-serif}'+
+ '#tool-search-input:focus-visible{outline:3px solid #93a5ed;outline-offset:2px;background:#fff}'+
+ '#tool-search kbd{font:11px ui-monospace,monospace;border:1px solid #c9d4e8;border-radius:5px;padding:1px 5px;color:#596987;background:#fff}'+
+ '#tool-search-popup{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:60;background:#fff;border:1px solid #cdd7e8;border-radius:12px;box-shadow:0 12px 32px #1c30572a;padding:4px;max-height:min(62vh,460px);overflow:auto;box-sizing:border-box}'+
+ '#tool-search-list{list-style:none;margin:0;padding:0}'+
+ '#tool-search-list [role=option]{display:flex;flex-direction:column;gap:2px;min-height:40px;box-sizing:border-box;justify-content:center;padding:7px 10px;border-radius:8px;cursor:pointer;overflow-wrap:anywhere}'+
+ '#tool-search-list [role=option] strong{font-size:13px;color:#1f3157}'+
+ '#tool-search-list [role=option] span{font-size:11px;color:#596987}'+
+ '#tool-search-list [role=option][aria-disabled=true]{cursor:default}'+
+ '#tool-search-list [role=option][aria-disabled=true] strong{color:#6b7891}'+
+ '#tool-search-list [role=option]:hover{background:#f1f5fd}'+
+ '#tool-search-list [role=option][aria-selected=true]{background:#e6edfc;outline:2px solid #5b74d6;outline-offset:-2px}'+
+ '#tool-search .ts-badge{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;background:#fdf1de;color:#7a4b00;font-size:10px;font-weight:700}'+
+ '#tool-search-empty{margin:0;padding:10px;font-size:12px;color:#596987}'+
+ '#tool-search .ts-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}'+
+ '@media(max-width:760px){#tool-search{grid-column:1/-1;flex-basis:100%;margin-left:0}#tool-search kbd{display:none}}';
+document.head.append(css);
+
+const wrap=document.createElement('div');wrap.id='tool-search';wrap.setAttribute('role','search');
+const label=document.createElement('label');label.htmlFor='tool-search-input';label.textContent='Find a tool';
+const input=document.createElement('input');
+Object.assign(input,{id:'tool-search-input',type:'search',autocomplete:'off',spellcheck:false,placeholder:'Search tools: integral, matrix, beam, units…'});
+input.setAttribute('role','combobox');input.setAttribute('aria-autocomplete','list');
+input.setAttribute('aria-expanded','false');input.setAttribute('aria-controls','tool-search-list');
+input.setAttribute('aria-describedby','tool-search-hint');input.setAttribute('aria-keyshortcuts','/ Control+K Meta+K');
+const kbd=document.createElement('kbd');kbd.textContent='/';kbd.setAttribute('aria-hidden','true');
+const hint=document.createElement('span');hint.id='tool-search-hint';hint.className='ts-sr';
+hint.textContent='Press slash or Control+K to search. Use arrow keys to choose a result and Enter to open it.';
+const popup=document.createElement('div');popup.id='tool-search-popup';popup.hidden=true;
+const list=document.createElement('ul');list.id='tool-search-list';list.setAttribute('role','listbox');list.setAttribute('aria-label','Matching tools');
+const empty=document.createElement('p');empty.id='tool-search-empty';empty.hidden=true;
+empty.textContent='No matching tools. Try another word, such as root, plot or table.';
+const status=document.createElement('p');status.id='tool-search-status';status.className='ts-sr';
+status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+popup.append(list,empty);wrap.append(label,input,kbd,hint,popup,status);bar.append(wrap);
+
+let results=[],active=-1;
+function setActive(i){
+ active=results.length?Math.max(-1,Math.min(i,results.length-1)):-1;
+ for(const [n,opt] of [...list.children].entries())opt.setAttribute('aria-selected',String(n===active));
+ if(active>=0){input.setAttribute('aria-activedescendant','tool-search-opt-'+active);list.children[active].scrollIntoView({block:'nearest'});}
+ else input.removeAttribute('aria-activedescendant');
+}
+function close(){popup.hidden=true;input.setAttribute('aria-expanded','false');setActive(-1);}
+function render(){
+ results=search(input.value);list.replaceChildren();
+ if(!norm(input.value)){close();status.textContent='';return;}
+ for(const [n,item] of results.entries()){
+  const opt=document.createElement('li');opt.id='tool-search-opt-'+n;opt.setAttribute('role','option');
+  opt.setAttribute('aria-selected','false');opt.dataset.toolId=item.id;
+  const name=document.createElement('strong');name.textContent=item.title;
+  if(item.status==='planned'){
+   opt.setAttribute('aria-disabled','true');
+   const badge=document.createElement('span');badge.className='ts-badge';badge.textContent='Planned';name.append(badge);
+  }
+  const where=document.createElement('span');where.textContent=item.status==='planned'?item.workspace+' · not yet available':item.workspace;
+  opt.append(name,where);
+  opt.addEventListener('click',()=>choose(n));
+  list.append(opt);
+ }
+ empty.hidden=results.length>0;list.hidden=!results.length;
+ popup.hidden=false;input.setAttribute('aria-expanded','true');
+ setActive(results.findIndex(r=>r.status==='available'));
+ status.textContent=results.length?results.length+(results.length===1?' tool':' tools')+' found.':'No matching tools.';
+}
+function choose(n){
+ const item=results[n];if(!item)return;
+ if(item.status!=='available'){status.textContent=item.title+' is planned and not yet available.';setActive(n);return;}
+ close();input.value='';status.textContent='Opening '+item.title+'.';
+ openItem(item);
+}
+// Keep focus in the input while a result is clicked.
+popup.addEventListener('mousedown',e=>e.preventDefault());
+input.addEventListener('focus',()=>{build();if(norm(input.value))render();});
+input.addEventListener('input',render);
+input.addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==input)close();},0));
+input.addEventListener('keydown',e=>{
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+  e.preventDefault();if(popup.hidden&&norm(input.value)){render();return;}
+  if(!results.length)return;
+  const step=e.key==='ArrowDown'?1:-1;setActive(active<0?(step>0?0:results.length-1):(active+step+results.length)%results.length);
+ }else if(e.key==='Enter'){
+  e.preventDefault();
+  if(active>=0)choose(active);else{const first=results.findIndex(r=>r.status==='available');if(first>=0)choose(first);}
+ }else if(e.key==='Escape'){
+  e.preventDefault();
+  if(!popup.hidden)close();else{input.value='';status.textContent='';}
+ }
+});
+function editable(t){return t instanceof Element&&(t.isContentEditable||Boolean(t.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])')));}
+function focusSearch(){input.focus();input.select();}
+document.addEventListener('keydown',e=>{
+ if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();focusSearch();return;}
+ if(e.key==='/'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.defaultPrevented&&!editable(e.target)){e.preventDefault();focusSearch();}
+});
+build();
+const publicItem=item=>Object.freeze({id:item.id,title:item.title,workspace:item.workspace,mode:item.mode,kind:item.kind,status:item.status});
+M.toolSearch=Object.freeze({
+ search:query=>search(query).map(publicItem),
+ open:id=>{if(!index.some(i=>i.id===id))build();return openItem(index.find(i=>i.id===id));},
+ refresh:build,focus:focusSearch,synonyms:SYNONYMS
+});
 })();
 </script>
 </body>

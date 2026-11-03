@@ -84,6 +84,41 @@ const visuals=Object.freeze([
  {id:'quadrature',tool:'numerical.quadrature.adaptive',title:'Integral as accumulated area',compute:quadrature,fields:[['expression','f(x)','sin(x)','text'],['a','Lower limit','0'],['b','Upper limit','3.141592653589793']]},
  {id:'eigen',tool:'matrix.eigen.symmetric.small',title:'Symmetric matrix transform and eigenvectors',compute:eigenMorph,fields:[['a','A11','2'],['b','A12 = A21','1'],['d','A22','1']]}
 ].map(Object.freeze));
+/* Expected unit per numeric field (what the kernel's bare number means). Plain numbers keep that
+   meaning; "number unit" input is converted with the shared units module before the kernel runs. */
+const FIELD_UNITS=Object.freeze({
+ beam:{length:'m',supportB:'m',force:p=>p.load==='udl'?'kN/m':'kN',position:'m',force2:'kN',position2:'m',udl:'kN/m',modulus:'GPa',width:'mm',height:'mm'},
+ orbit:{altitude:'km'},
+ rlc:{resistance:'Ω',inductance:'mH',capacitance:'µF',voltage:'V'},
+ projectile:{speed:'m/s',angle:'°',mass:'kg',diameter:'mm',density:'kg/m^3'},
+ rod:{length:'m',initial:'°C',left:'°C',right:'°C',duration:'s'},
+ spring:{duration:'s'},
+ pendulum:{theta0:'°',length:'m',duration:'s'},
+ spectrum:{f1:'Hz',f2:'Hz'}
+});
+const QUANTITY=/^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*(\S.*)?$/;
+/* Returns the kernel parameters plus a list of conversions performed. Throws field-specific errors. */
+function resolveInputs(id,raw){
+ const v=visuals.find(x=>x.id===id);if(!v)throw Error('Unknown engineering visual: '+id);
+ const spec=FIELD_UNITS[id]||{},out=Object.assign({},raw),conversions=[];
+ for(const [key,label] of v.fields){
+  const want=typeof spec[key]==='function'?spec[key](raw):spec[key];
+  if(!want||raw[key]===undefined)continue;
+  const m=QUANTITY.exec(String(raw[key]));
+  if(!m||!m[2])continue; // Plain number (or invalid text): unchanged, the kernel validates it as before.
+  const unit=m[2].trim(),U=M.units; // Looked up at call time so load order cannot break plain input.
+  if(!U)throw Error(label+': unit conversion is unavailable; enter a plain number in '+want+'.');
+  let given,expected;
+  try{given=U.dimensions(unit);}catch(e){throw Error(label+': '+e.message+' Enter a number, optionally followed by a unit compatible with '+want+'.');}
+  expected=U.dimensions(want);
+  if(given.text!==expected.text)throw Error(label+': expected a unit compatible with '+want+' (dimension '+expected.text+') but "'+unit+'" has dimension '+given.text+'.');
+  let r;
+  try{r=U.convert(m[1],unit,want);}catch(e){throw Error(label+': '+e.message);}
+  out[key]=r.value;
+  conversions.push({key,label,input:String(raw[key]).trim(),unit:want,value:r.value,mode:r.mode});
+ }
+ return {params:out,conversions};
+}
 const toolIds=new Set(M.engineeringCatalog.tools.filter(t=>t.status==='available').map(t=>t.id));
 for(const v of visuals)if(!toolIds.has(v.tool))throw Error('Engineering visual references an unavailable tool: '+v.tool);
 
@@ -117,6 +152,12 @@ function buildFields(){
   const wrap=document.createElement('label');wrap.textContent=label;
   let input;
   if(type==='select'){input=document.createElement('select');for(const [val,text] of options){const o=document.createElement('option');o.value=val;o.textContent=text;input.append(o);}}
+  else if(FIELD_UNITS[v.id]?.[key]){
+   const spec=FIELD_UNITS[v.id][key],unit=typeof spec==='function'?'kN or kN/m':spec;
+   input=document.createElement('input');input.type='text';input.spellcheck=false;input.autocomplete='off';
+   input.placeholder='number [unit], default '+unit;input.title='Number in '+unit+', or a number followed by any compatible unit (e.g. ft, lbf, ksi).';
+   input.dataset.unit=unit;
+  }
   else{input=document.createElement('input');input.type=type||'number';input.step='any';}
   input.id='eng-visual-'+key;input.value=value;input.dataset.key=key;
   wrap.append(input);fields.append(wrap);
@@ -332,8 +373,9 @@ function play(){if(!current)return;if(frame>=FRAMES)frame=0;playing=true;toggle.
 function run(){
  stop();
  try{
-  const v=visuals.find(x=>x.id===picker.value);current=v.compute(params());status.classList.remove('error');
-  status.textContent=current.summary;setExport(true);
+  const v=visuals.find(x=>x.id===picker.value),resolved=resolveInputs(v.id,params());current=v.compute(resolved.params);status.classList.remove('error');
+  const fmt=x=>String(Number(x.toPrecision(12))); // Display only; the kernel receives the full binary64 value.
+  status.textContent=current.summary+(resolved.conversions.length?' Unit inputs: '+resolved.conversions.map(c=>c.label+' '+c.input+' → '+fmt(c.value)+' '+c.unit).join('; ')+'.':'');setExport(true);
   if(reduced()){frame=FRAMES;draw();}else{frame=0;draw();play();}
  }catch(error){current=null;setExport(false);frame=0;draw();status.classList.add('error');status.textContent='Cannot animate: '+error.message;}
  return current;
@@ -361,5 +403,5 @@ new MutationObserver(decorate).observe($('eng-results'),{childList:true});decora
 buildFields();draw();stop();
 M.engineeringVisuals=Object.freeze({visuals:visuals.map(v=>Object.freeze({id:v.id,tool:v.tool,title:v.title})),
  compute:Object.freeze({spring:springMassDamper,pendulum,spectrum,bisection,quadrature,eigen:eigenMorph,beam:S.beam,beamGeneral:S.beamGeneral,vibration:S.vibration,orbit:S.orbit,rlc:S.rlc,projectile:S.projectile,rod:S.rodHeat}),
- select,open,run,play,pause:stop,tableOf,exportTable,plotGraph,downloadPng,frame:()=>frame,frames:FRAMES,current:()=>current});
+ select,open,run,play,pause:stop,resolveInputs,fieldUnits:FIELD_UNITS,tableOf,exportTable,plotGraph,downloadPng,frame:()=>frame,frames:FRAMES,current:()=>current});
 })();

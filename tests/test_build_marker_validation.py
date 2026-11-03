@@ -26,6 +26,21 @@ class BuildMarkerValidationTests(unittest.TestCase):
                 self.assertIn('Expected exactly one standalone script marker', result.stderr)
                 self.assertEqual((root / "index.html").read_text(encoding="utf-8"), html)
 
+    def test_missing_module_source_rejected_without_overwriting_index(self):
+        builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
+        marker = '<script id="mathstudio-data-tables">\n'
+        html = marker + '/* existing module */\n</script>\n'
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "scripts").mkdir()
+            (root / "scripts/build.py").write_text(builder, encoding="utf-8")
+            (root / "index.html").write_text(html, encoding="utf-8")
+            result = subprocess.run(['python3', str(root / "scripts/build.py")],
+                                    capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Missing standalone module source: src/data-tables.js", result.stderr)
+            self.assertEqual((root / "index.html").read_text(encoding="utf-8"), html)
+
     def test_missing_closing_script_rejected_without_overwriting_index(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
         marker = '<script id="mathstudio-data-tables">\n'

@@ -1,3 +1,14 @@
+## 2026-11-04 — BUILD-INDEX-NUL-143 (dev QA pending)
+
+**Change:** The standalone HTML builder now rejects a NUL character in the existing index before any module replacement; an isolated subprocess regression asserts the diagnostic and byte-for-byte preservation. The preceding spline NumPy CI correction succeeded on PR-triggered Quality run 41735564147 for 4c14043; no local clone was possible (github.com DNS resolution failed). The new exact-head Quality, PR checks, main Quality and Pages are not yet verified. PR #189 remains open and dev/main diverged (22 ahead/1 behind before this change); do not merge without reconciliation and verified gates. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Release QA and ancestry reconciliation (pending):** green exact-head dev/PR Quality, review/protection verification, ordinary dev-to-main merge, then main Quality and Pages validation.
+2. **P1 Polynomial roots (planned):** real/complex roots with degree limits, reference residuals and repeated-root failure coverage.
+3. **P1 Levenberg–Marquardt fitting (planned):** shared solver, reference fits, ill-conditioned refusal, keyboard/browser tests.
+4. **P1 Digital filters (planned):** FIR/IIR responses, stability checks, frequency references and responsive browser tests.
+5. **P1 Tool search favourites (planned):** persisted pins with safe fallback, keyboard and 390px smoke, no duplicated actions.
+
 ## 2026-11-03 — CI-SPLINE-NUMPY-142 (exact-head QA pending)
 
 **Failure diagnosis:** dev exact-head Quality run 41734143560 at 2c607679 failed in the spline browser smoke step because the runner had no `numpy` package; all earlier structural and browser steps passed. The independent natural-cubic-spline reference previously used NumPy only to solve a small dense tridiagonal reference system. Replaced it with a pure-standard-library partial-pivot dense Gaussian elimination reference and `bisect_right`; retained the original nonuniform-data numerical comparisons and added pivot-required and singular-matrix reference controls. This is a CI test-harness dependency correction, not a change to the production spline implementation. Committed to existing dev at 297068eb. Local browser and Python suite not executed; exact-head CI required. PR #189 remains pending. Main 70fc483 and dev had diverged before this edit; do not merge without resolving ancestry through an ordinary protected PR. Frozen historical inventory: 166 gaps / 95 partial unchanged.

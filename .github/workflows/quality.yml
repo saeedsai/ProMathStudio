@@ -421,3 +421,5 @@ jobs:
         run: python tests/smoke_interpolation_splines.py
       - name: Global Find a tool search, shortcuts, routing and responsive browser regression
         run: python tests/smoke_tool_search.py
+      - name: Vector fields, RK4 streamlines, slope fields and candidate equilibria browser regression
+        run: python tests/smoke_vector_fields.py

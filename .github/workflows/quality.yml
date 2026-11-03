@@ -407,3 +407,5 @@ jobs:
         run: python tests/smoke_integration_tools.py
       - name: Stiff TR-BDF2 implicit ODE reference, failure and responsive UI regression
         run: python tests/smoke_stiff_ode.py
+      - name: Uncertainty propagation GUM linear and seeded Monte Carlo browser regression
+        run: python tests/smoke_uncertainty_tools.py

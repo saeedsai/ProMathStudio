@@ -31,7 +31,9 @@ for tag, source in modules:
     if text.count(marker) != 1:
         raise ValueError(f"Expected exactly one standalone script marker: {tag}")
     start = text.index(marker) + len(marker)
-    end = text.index("</script>", start)
+    end = text.find("</script>", start)
+    if end < 0:
+        raise ValueError(f"Missing standalone script closing tag: {tag}")
     nested_script = re.search(r"<script(?=[\s/>])", text[start:end], flags=re.IGNORECASE)
     if nested_script is not None:
         raise ValueError(f"Nested script opening before standalone module close: {tag}")

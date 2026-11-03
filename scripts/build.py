@@ -34,6 +34,8 @@ for tag, source in modules:
     original = text[start:end]
     trailing_newlines = original[len(original.rstrip("\n")):]
     module_source = (root / source).read_text(encoding="utf-8").rstrip("\n")
+    if "</script" in module_source.lower():
+        raise ValueError(f"Unsafe script closing sequence in module: {source}")
     text = text[:start] + module_source + trailing_newlines + text[end:]
 
 index.write_text(text, encoding="utf-8")

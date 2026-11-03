@@ -437,3 +437,5 @@ jobs:
         run: python tests/smoke_vector_fields.py
       - name: Engineering thermodynamic cycles and DC network nodal analysis browser regression
         run: python tests/smoke_engineering_thermo_circuits.py
+      - name: Seeded random sampling (PCG32), Monte Carlo and Halton integration references and responsive browser regression
+        run: python tests/smoke_random_tools.py

@@ -43,6 +43,8 @@ for tag, source in modules:
     if not source_path.is_file():
         raise FileNotFoundError(f"Missing standalone module source: {source}")
     module_source = source_path.read_text(encoding="utf-8").rstrip("\n")
+    if re.search(r"<script(?=[\\s/>])", module_source, flags=re.IGNORECASE):
+        raise ValueError(f"Unsafe script opening sequence in module: {source}")
     if "</script" in module_source.lower():
         raise ValueError(f"Unsafe script closing sequence in module: {source}")
     text = text[:start] + module_source + trailing_newlines + text[end:]

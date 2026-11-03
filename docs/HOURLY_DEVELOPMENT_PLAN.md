@@ -1,3 +1,16 @@
+## 2026-11-03 — Script terminator integrity (BUILD-SCRIPT-TERMINATOR-109)
+
+**Implemented on dev; exact-head QA pending.** PR #175 exact-head PR Quality run 41593936573 passed (static and browser regression job); ordinary merge SHA 27dcda12154910d16b7170eec91c12e77ac359bc. Dev fast-forwarded non-force. Main Quality and Pages for this merge are not independently verified. Build now rejects case-insensitive embedded HTML script closing sequences in module source, which otherwise prematurely terminate inline scripts. Added focused negative regression asserting original index remains unchanged. Source and test are on dev; full new exact-head CI is pending. Historical 166 gaps / 95 partial features unchanged.
+
+**NEXT FIVE (status / acceptance):**
+1. **P0 BUILD-SCRIPT-TERMINATOR-109 QA/release (pending):** focused regression, full dev and PR Quality pass at exact head, ordinary PR merge, main Quality and Pages verified.
+2. **P0 QR rank-boundary references (planned):** high-precision coefficients and perturbed RHS near rank threshold, plus singular rejection.
+3. **P1 UI controller extraction (planned):** offline parity, keyboard/mobile browser smoke, project round trip, bundle-size delta.
+4. **P1 scalar-root discontinuity (planned):** pole/oscillatory negative fixtures and bounded-sampling guidance.
+5. **P1 Matrix/Data atomic rollback (planned):** malformed nested project fixtures preserve existing state and legacy migrations.
+
+**Execution log:** Read AGENTS, plan, frozen inventory, dev/main comparison, PR #175, exact-head PR Quality and reviews. Merged only after successful PR Quality, synchronized dev, implemented bounded source/test follow-up. No local full test execution or hosted-browser verification; new exact-head CI pending. No new branch or force push.
+
 ## 2026-11-03 — Standalone build marker integrity (BUILD-MARKER-108)
 
 **Implemented on dev; exact-head Quality pending.** Ordinary PR #174 merged after development and PR Quality jobs each completed successfully (180 steps); merge SHA `1e3744f7ee6217cf2bd59c3fbbc945172686a702`. Dev fast-forwarded non-force. Main Quality/Pages and hosted behavior for that merge remain to be verified. Builder now rejects missing or duplicate module script markers instead of silently replacing the wrong embedded script; a new isolated regression checks both failures leave index unchanged. Production app bundle unchanged. Source and regression were committed separately because GitHub Contents API writes one file per commit; both are now on dev. Full repository and browser suites await exact-head CI.

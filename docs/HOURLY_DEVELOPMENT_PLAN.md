@@ -1,3 +1,16 @@
+## 2026-11-03 — BUILD-NESTED-CASE-111 exact-head CI repair
+
+**CI failure diagnosed and corrected on dev; fresh exact-head QA pending.** PR #178's prior exact-head Quality run 41615609901 failed 4 of 290 structural tests: nested-script fixtures used literal backslash-n instead of newline, so marker detection failed first; the builder regex also used a doubled backslash in its raw whitespace class, missing actual tabs. Corrected both without relaxing the nested-script rejection or rollback assertions. Source commit e4f9d33f3d0ceab2fc2eaeebb7386180e3c0cee8; test fixes aec1072c02a8a65518d42413e042f581a60139ef and 5840bcf9972333b6c9d6c27625d80029d8217ab9. No full Python/Chromium pass or release claimed. Frozen 166 gaps/95 partials unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 BUILD-NESTED-CASE-111 QA/release (pending):** exact-head dev and PR Quality including all 290 structural tests and browser jobs green; required review/protection gates; ordinary PR merge; verify main Quality and Pages.
+2. **P0 QR rank-boundary references (planned):** independent threshold-adjacent reference matrices, perturbed RHS, singular rejection.
+3. **P1 UI controller extraction (planned):** source/offline parity, keyboard/mobile smoke, project round-trip and bundle size.
+4. **P1 Scalar-root discontinuity (planned):** poles, oscillatory cases, bounded warning and browser recovery.
+5. **P1 Matrix/Data atomic import (planned):** malformed fixtures preserve state; legacy v1/v2 compatibility.
+
+**Execution log:** Read AGENTS, living plan, frozen inventory, dev/main comparison, PR #178 and failing exact-head job logs. Corrected regex and fixture escapes on dev. Pending new exact-head CI; no merge or deployment attempted.
+
 ## 2026-11-03 — Case-insensitive standalone nested script protection (BUILD-NESTED-CASE-111)
 
 **Implemented on dev; CI and release pending.** PR #177 exact-head dev Quality 41607093925 and PR Quality 41607109020 succeeded at dfb8fc25143ad34292b9a36a04c4c87e8367faf8; ordinary merge 57d762630046c629597c6e2daf6d11d0ab651efe; dev fast-forwarded without force. Main Quality 41606987001 and Pages 41606985903 for previous main 3d299ae84ecc0043bc5f821b01f633e100153c68 succeeded. New builder fix recognizes mixed-case, tabbed and unadorned nested script opening tags, preventing ambiguous inline module boundaries. Focused regression added on dev in e40bfa542dafff39a066775038140d8f27178e37; local clone/test blocked by DNS resolution of github.com. No full new exact-head CI pass or deployment claimed. Frozen 166 gaps/95 partials unchanged.

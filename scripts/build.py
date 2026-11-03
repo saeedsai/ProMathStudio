@@ -25,6 +25,7 @@ modules = [
     ("promath-precision-tools", "src/precision-tools.js"),
     ("promath-workspace-tasks", "src/workspace-tasks.js"),
     ("promath-complex-graph", "src/complex-graph.js"),
+    ("promath-control-theory", "src/control-theory.js"),
     ("promath-engineering-simulations", "src/engineering-simulations.js"),
     ("promath-engineering-catalog", "src/engineering-catalog.js"),
     ("promath-engineering-visuals", "src/engineering-visuals.js"),

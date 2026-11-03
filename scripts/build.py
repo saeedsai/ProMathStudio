@@ -32,7 +32,7 @@ for tag, source in modules:
         raise ValueError(f"Expected exactly one standalone script marker: {tag}")
     start = text.index(marker) + len(marker)
     end = text.index("</script>", start)
-    nested_script = re.search(r"<script(?=[\\s/>])", text[start:end], flags=re.IGNORECASE)
+    nested_script = re.search(r"<script(?=[\s/>])", text[start:end], flags=re.IGNORECASE)
     if nested_script is not None:
         raise ValueError(f"Nested script opening before standalone module close: {tag}")
     original = text[start:end]

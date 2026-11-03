@@ -28,7 +28,7 @@ class EngineeringSimulationTests(unittest.TestCase):
                      "circuits.network.analysis"):
             row = next(line for line in catalog.splitlines() if line.strip().startswith("['" + tool + "'"))
             self.assertTrue(row.rstrip(",]").endswith("'engineering','eng-visuals'"), tool)
-        for planned in ("fluids.pipe.network", "electronics.digital.logic", "control.frequency.response"):
+        for planned in ("fluids.pipe.network", "electronics.digital.logic", "signals.spectral.analysis"):
             row = next(line for line in catalog.splitlines() if line.strip().startswith("['" + planned + "'"))
             self.assertIn("not yet implemented", row)
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")

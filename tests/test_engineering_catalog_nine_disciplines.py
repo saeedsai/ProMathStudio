@@ -24,7 +24,7 @@ const fs=require('fs'),assert=require('assert');
 const source=fs.readFileSync('src/engineering-catalog.js','utf8');
 const ids=[...source.matchAll(/^ \['([a-z]+(?:\.[a-z]+)+)'/gm)].map(x=>x[1]);
 assert.equal(new Set(ids).size,ids.length,'tool IDs must be unique');
-for(const id of ['gnss.positioning.least.squares','signals.spectral.analysis','control.frequency.response']){
+for(const id of ['gnss.positioning.least.squares','signals.spectral.analysis','fluids.pipe.network']){
  assert(ids.includes(id),id);
  const row=source.split('\n').find(x=>x.trimStart().startsWith("['"+id+"'"));
  assert(row && !/,'(calculator|graph|editor)'/.test(row),'planned workflows must not advertise executable route');

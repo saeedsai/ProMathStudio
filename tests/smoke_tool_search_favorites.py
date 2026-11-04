@@ -164,7 +164,10 @@ def main():
         results = [page.evaluate("id=>MathStudio.toolSearch.pin(id)", tool_id) for tool_id in ids[:21]]
         assert results[:20] == [True] * 20 and results[20] is None, results
         assert len(page.evaluate("()=>MathStudio.toolSearch.pinned()")) == 20
-        assert page.evaluate("()=>MathStudio.toolSearch.pin('catalog:gnss.positioning.least.squares')") is False
+        # GNSS is implemented: a full pin list must reject it for capacity, not status.
+        assert page.evaluate("()=>MathStudio.toolSearch.pin('catalog:gnss.positioning.least.squares')") is None
+        # The genuinely planned spectral-analysis catalog entry is never pinnable.
+        assert page.evaluate("()=>MathStudio.toolSearch.pin('catalog:signals.spectral.analysis')") is False
         assert page.evaluate("()=>MathStudio.toolSearch.pin('panel:no-such-tool')") is False
         for tool_id in ids[5:20]:
             page.evaluate("id=>MathStudio.toolSearch.pin(id,false)", tool_id)

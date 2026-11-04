@@ -57,10 +57,11 @@ def main():
   page.locator('#eng-discipline').select_option('control')
   page.locator('#eng-search').fill('bode')
   assert page.locator('#eng-results article').count()==1
-  planned=page.locator('#eng-results article')
-  assert planned.get_attribute('data-tool-id')=='control.frequency.response'
-  assert planned.locator('button').count()==0
-  assert 'planned' in planned.inner_text().lower()
+  frequency=page.locator('#eng-results article')
+  assert frequency.get_attribute('data-tool-id')=='control.frequency.response'
+  # Frequency response became a real runnable tool: it must not regress to a fake planned card.
+  assert frequency.locator('button').count()==1,'Implemented frequency response needs its Open action'
+  assert 'planned' not in frequency.inner_text().lower()
   page.locator('#eng-discipline').select_option('fluids')
   page.locator('#eng-search').fill('no-such-tool')
   assert 'No matching tools' in page.locator('#eng-results').inner_text()

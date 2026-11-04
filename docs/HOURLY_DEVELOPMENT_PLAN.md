@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-CATALOG-STATUS-157 (exact-head QA pending)
+
+**Execution ledger:** After two failed exact-head Quality runs (41831147188 and 41831141719) for merge d578398a, inspected jobs 126578355230 and 126578336365. Structural tests passed; `tests/smoke_engineering_catalog.py` failed at its legacy expectation that `control.frequency.response` has no Open button. This tool is implemented with a real `ct-frequency` route, so corrected the outdated smoke assertion to require one real Open button and no planned label; retained the separate genuinely planned `signals.spectral.analysis` refusal test. Also reconciled main's history-only merge commit into dev through a non-force two-parent commit; main tree matches existing ancestor, so no production source was replaced. Exact-head structural/browser CI and dev-to-main PR #189 release pending. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Consolidated exact-head CI (pending):** verify all structural/unit and Chromium workflow steps at new dev/PR head including catalog honesty, builder safety, new engineering solvers, tool-search favourites and Home/End; fix any observed failures without weakening coverage.
+2. **P0 Ordinary dev-to-main release (pending):** only after exact-head CI, required reviews, protections and diff pass; verify new main SHA Quality and GitHub Pages including live functional smoke.
+3. **P0 Obsolete branch cleanup (pending):** verify Claude commit reachable from dev/main, no open PR, branch unprotected; delete only via authorized branch deletion action, preserving full history.
+4. **P1 Numerical solver QA (planned):** polynomial roots, LM fitting, FIR/IIR poles, GNSS and fluid pipe residual and failure references.
+5. **P1 Tool search accessibility (planned):** fav/recent persistence fallback, planned-only pointer + arrow and Home/End keyboard controls at 390px.
+
 ## 2026-11-04 — BRANCH-CONSOLIDATION-156 (dev; exact-head CI pending)
 
 **Execution ledger:** Audited all three remote branches; 34 commits unique to `claude/sharp-babbage-pqhvgr`, 53 unique to the previous `dev` SHA, plus one history-only main merge commit whose tree matches the common release baseline. Reconciled six overlapping files: append both living ledger and changelog prefixes; retain hardened builder validation while adding all 42 module registrations; retain Claude favourites/recents and engineering search while preserving dev Home/End, planned-item pointer and keyboard fixes; update the synchronized standalone HTML and combine browser assertions. Retained 53 other-branch-only file versions verbatim and both Git parent histories. Exact-head Quality and browser checks pending; no new production merge/Pages deployment claimed. Historical 166 gaps / 95 partial unchanged.

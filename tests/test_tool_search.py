@@ -41,6 +41,14 @@ class ToolSearchModuleTests(unittest.TestCase):
         tasks = (ROOT / "src/workspace-tasks.js").read_text(encoding="utf-8")
         self.assertIn("current:()=>activeMode,list}", tasks)
 
+    def test_planned_click_does_not_activate_disabled_option(self):
+        # Mouse clicks on unavailable catalog entries must not leave aria-selected
+        # on a disabled option, even after keyboard navigation selected a valid tool.
+        blocked = "if(item.status!=='available'){status.textContent=item.title+' is planned and not yet available.';return;}"
+        self.assertIn(blocked, SOURCE)
+        self.assertNotIn("setActive(n);return;}", SOURCE)
+        self.assertIn(blocked, HTML)
+
     def test_synonym_map_is_small_and_data_only(self):
         block = SOURCE.split("const SYNONYMS=Object.freeze({", 1)[1].split("});", 1)[0]
         self.assertNotIn("=>", block)

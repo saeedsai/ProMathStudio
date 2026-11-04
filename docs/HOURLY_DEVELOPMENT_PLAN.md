@@ -1,3 +1,14 @@
+## 2026-11-04 — BUILD-MODULE-CRLF-147 (exact-head QA pending)
+
+**Execution ledger:** Read AGENTS.md, historical audit, current plan, PR #189 and exact-head Quality evidence. Prior dev head 1e2c1cfb2b8d99ed0add25affc7d4d409c91de7d had successful PR-triggered Quality run 41764210746. main 70fc483cb1cec3d2372d37484e4a8ef7942343da; 35 ahead/1 behind before changes. Fixed module-source universal-newline normalization in scripts/build.py by opening sources with newline="" and rejecting CR before any write. Added isolated subprocess regression for CRLF and lone CR in src/data-tables.js, checking error and unchanged index bytes. Source commit d9b1ca5; regression commit 73d470a. Local repository checkout/browser checks unavailable in this execution; exact new-head CI pending. PR #189 unmerged; no review approvals recorded. No main/Pages release claimed. Frozen inventory remains 166 gaps/95 partial.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Exact-head QA / PR #189 release (pending):** dev and PR Quality pass on same exact SHA, including new module CR tests and browser suite; reconcile main divergence without history rewrite; verify required reviews/protections; ordinary PR merge; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver with reference roots, residual tolerance, repeated-root and non-convergence regressions.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable kernel with reference fit, conditioning rejection, keyboard/mobile smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, stability rejection, and 390px browser checks.
+5. **P1 Tool-search favourites (planned):** persistent pins, storage-failure fallback, keyboard and mobile regression.
+
 ## 2026-11-04 — CI-CRLF-146 (exact-head QA pending)
 
 **Execution ledger:** Inspected AGENTS.md, frozen audit, current dev/main and PR #189. The exact dev-head Quality run [41757292742](https://github.com/saeedsai/ProMathStudio/actions/runs/41757292742) failed structural unittest `test_crlf_index_rejected_without_overwrite`: universal-newline translation concealed CRLF, so builder proceeded until a missing module error. Changed `scripts/build.py` to open index with `newline=""`, preserving carriage returns for the existing pre-write guard. Added a focused lone-CR/mixed-newline subprocess regression; both cases assert no index mutation. Source commit b7f9ceb; test commit 567ad23. Raw-newline semantics locally verified in Python; full repository unit/browser suites and new exact-head CI remain pending. No release merge. dev/main divergence still requires non-destructive reconciliation. Historical 166 gaps/95 partial unchanged.

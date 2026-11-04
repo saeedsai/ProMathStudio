@@ -116,11 +116,16 @@ def main():
         if selected:
             assert page.locator('[id="' + selected + '"]').get_attribute('aria-disabled') != 'true'
         assert option.get_attribute('aria-selected') == 'false'
+        # Click while the popup is still visible: Enter may legitimately open an
+        # enabled spectral match and dismiss the popup before the mouse check.
         mode_before = page.evaluate("()=>MathStudio.advanced.currentMode()")
-        page.keyboard.press('Enter')
-        option.click(force=True)
+        assert option.is_visible()
+        option.click()
         assert 'planned' in page.locator('#tool-search-status').inner_text().lower()
         assert page.evaluate("()=>MathStudio.advanced.currentMode()") == mode_before
+        # Reopen the same results for a separate keyboard refusal check.
+        search(page, 'signal spectral analysis')
+        assert page.locator('#tool-search-list [role=option]').first.get_attribute('aria-disabled') == 'true'
         assert page.evaluate("()=>MathStudio.toolSearch.open('catalog:signals.spectral.analysis')") is False
         # The implemented GNSS tool is searchable and available (no longer a planned placeholder).
         assert all(r['status'] == 'available' for r in page.evaluate("()=>MathStudio.toolSearch.search('gnss positioning')"))

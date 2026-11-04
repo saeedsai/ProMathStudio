@@ -1,3 +1,7 @@
+## 2026-11-04 — CI-CRLF-146
+- Fix standalone builder carriage-return validation by disabling Python universal-newline translation when reading `index.html`. Prevents CRLF/lone-CR HTML from bypassing the fail-fast guard.
+- Add subprocess regression for lone CR and mixed newline files, asserting diagnostic and byte-for-byte preservation. Exact-head CI pending; no release claimed.
+
 - 2026-11-04 (BUILD-INDEX-CRLF-145; dev QA pending): reject carriage returns in standalone index before Python newline normalization can silently rewrite CRLF input; subprocess regression verifies unchanged bytes. Prior PR Quality 41751753649 passed; new head QA and release pending.
 - 2026-11-04 (BUILD-INDEX-BOM-144; dev QA pending): reject leading UTF-8 BOM in standalone index before rewriting; isolated subprocess regression asserts diagnostic and unchanged input. Exact-head CI and release pending.
 - 2026-11-04 (BUILD-INDEX-NUL-143; dev QA pending): standalone builder rejects embedded NUL in index.html before rewriting; isolated subprocess regression verifies diagnostic and byte-preserving failure. Exact-head CI and release pending.

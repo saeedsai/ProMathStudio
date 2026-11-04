@@ -77,6 +77,8 @@ for tag, source in modules:
         raise ValueError(f"Empty standalone module source: {source}")
     if "\x00" in module_source:
         raise ValueError(f"Unexpected NUL byte in standalone module source: {source}")
+    if any(ord(char) < 32 and char not in "\n\t" for char in module_source):
+        raise ValueError(f"Unexpected ASCII control character in standalone module source: {source}")
     if module_source.startswith("\ufeff"):
         raise ValueError(f"Unexpected UTF-8 BOM in standalone module source: {source}")
     if "<!--" in module_source or "-->" in module_source:

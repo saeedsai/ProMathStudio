@@ -233,6 +233,9 @@ def main():
         assert page4.evaluate("()=>document.activeElement.matches('#tool-search .ts-browse>summary')")
         page4.keyboard.press('Enter')
         assert page4.locator('#tool-search-popup').is_visible()
+        # The native <details> toggle event is asynchronous: wait for the browse
+        # groups to be populated instead of racing its render callback.
+        page4.wait_for_function("()=>document.querySelectorAll('#tool-search .ts-browse-group').length >= 5")
         groups = page4.locator('#tool-search .ts-browse-group')
         modes = [groups.nth(i).get_attribute('data-mode') for i in range(groups.count())]
         for mode in ('calculator', 'editor', 'graph', 'data', 'engineering'):

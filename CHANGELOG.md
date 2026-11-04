@@ -1,3 +1,4 @@
+- 2026-11-04 (BUILD-SYMLINK-153; dev QA pending): reject symlinked standalone index.html before reading or writing it; isolated subprocess regression verifies the symlink and external target remain unchanged. Exact-head Quality pending; no release claimed.
 - 2026-11-04 (UI-SEARCH-HOME-END-152; dev QA pending): Home/End navigates to first/last enabled search result without selecting planned-only tools; focused source/bundle regression. Exact-head CI and release pending.
 - 2026-11-04 (UI-SEARCH-DISABLED-151; dev QA pending): planned-only tool search mouse clicks now announce unavailable status without marking disabled results active; focused source/bundle regression. Exact-head Quality and release pending.
 - 2026-11-04 (UI-SEARCH-KEYBOARD-150; dev QA pending): tool-search ArrowUp/Down skips disabled planned entries, with browser regression for planned-only results; exact-head Quality and release pending.

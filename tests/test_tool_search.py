@@ -49,6 +49,12 @@ class ToolSearchModuleTests(unittest.TestCase):
         self.assertNotIn("setActive(n);return;}", SOURCE)
         self.assertIn(blocked, HTML)
 
+    def test_home_end_navigation_skips_planned_results(self):
+        self.assertIn("if(e.key==='Home'||e.key==='End')", SOURCE)
+        self.assertIn("item.status==='available'?i:-1", SOURCE)
+        self.assertIn("setActive(e.key==='Home'?available[0]:available[available.length-1])", SOURCE)
+        self.assertIn("if(e.key==='Home'||e.key==='End')", HTML)
+
     def test_synonym_map_is_small_and_data_only(self):
         block = SOURCE.split("const SYNONYMS=Object.freeze({", 1)[1].split("});", 1)[0]
         self.assertNotIn("=>", block)

@@ -5,7 +5,8 @@ import re
 root = Path(__file__).resolve().parents[1]
 index = root / "index.html"
 try:
-    text = index.read_text(encoding="utf-8")
+    with index.open("r", encoding="utf-8", newline="") as source_file:
+        text = source_file.read()
 except UnicodeDecodeError as error:
     raise ValueError("Invalid UTF-8 in standalone index.html") from error
 if "\r" in text:

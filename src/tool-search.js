@@ -210,7 +210,7 @@ function render(){
 }
 function choose(n){
  const item=results[n];if(!item)return;
- if(item.status!=='available'){status.textContent=item.title+' is planned and not yet available.';setActive(n);return;}
+ if(item.status!=='available'){status.textContent=item.title+' is planned and not yet available.';return;}
  close();input.value='';status.textContent='Opening '+item.title+'.';
  openItem(item);
 }

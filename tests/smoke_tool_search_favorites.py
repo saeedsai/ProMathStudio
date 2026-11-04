@@ -245,7 +245,7 @@ def main():
         assert 'panel:brent-details' in api['editor'] and 'panel:fft-details' in api['editor'], api['editor']
         assert 'panel:matrix-tools' in api['calculator']
         assert 'catalog:structures.beam.deflection' in api['engineering']
-        assert 'catalog:gnss.positioning' in api['engineering']  # Implemented GNSS is openable.
+        assert 'catalog:gnss.positioning.least.squares' in api['engineering']  # Implemented GNSS is openable.
         assert 'catalog:signals.spectral.analysis' not in api['engineering']  # Planned-only entries remain excluded.
         # Keyboard: open the Equation group and a tool inside it.
         page4.keyboard.press('Tab')

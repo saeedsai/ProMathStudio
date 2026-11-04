@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-SEARCH-MIXED-159 (exact-head QA pending)
+
+**Execution ledger:** Inspected dev/main (114 ahead, zero behind before edit), AGENTS.md, historical inventory, living plan, open PR #189 (zero reviews), and exact-head Quality run [41852963430](https://github.com/saeedsai/ProMathStudio/actions/runs/41852963430) for f6810f2. Structural and browser steps 1–196 succeeded; step 197 failed at tests/smoke_tool_search.py:108 because a mixed query for 'signal spectral analysis' also matches available tools and legitimately selects an available option. Strengthened the focused regression to check all active descendants after ArrowDown, ArrowUp, Home and End are never disabled, while preserving the planned-only refusal assertions. Commit 3f9fbf4. No local Chromium available; new exact-head CI pending. No merge or Pages claim. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head CI:** full structural and browser suite green at 3f9fbf4 or subsequent dev SHA; inspect first failing job and fix root cause.
+2. **P0 PR #189 release:** verify reviews, branch protections and required exact-head checks; ordinary PR merge only after gates, then main Quality and Pages verified.
+3. **P1 Search accessibility:** mixed available/planned results, pinned/recent persistence failure and 390px keyboard/touch smoke.
+4. **P1 Numerical references:** polynomial repeated roots, LM ill-conditioning and FIR/IIR stability against known solutions.
+5. **P1 Safe cleanup:** prove obsolete branches fully contained, unprotected and PR-free before deletion; remove only unused tracked files with reference audit.
+
 ## 2026-11-04 — CI-SEARCH-CATALOG-158 (exact-head QA pending)
 
 **Execution ledger:** Inspected AGENTS.md, frozen inventory, dev/main ancestry (111 ahead/0 behind at 84b09ad), PR #189 (no submitted reviews) and exact-head Quality run [41831603088](https://github.com/saeedsai/ProMathStudio/actions/runs/41831603088). Structural and 190+ browser steps passed until `tests/smoke_tool_search.py:103` asserted the now-implemented digital-logic simulation was still planned; later browser steps were skipped. Updated browser regression to require available digital logic and to test the genuinely planned signal spectral analysis entry's disabled pointer/keyboard/open behavior. Commit 38b7141. Local checkout and Chromium unavailable; new exact-head CI and Pages not yet verified. Historical 166 gaps / 95 partial unchanged.

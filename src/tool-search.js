@@ -220,7 +220,12 @@ input.addEventListener('focus',()=>{build();if(norm(input.value))render();});
 input.addEventListener('input',render);
 input.addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==input)close();},0));
 input.addEventListener('keydown',e=>{
- if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+ if(e.key==='Home'||e.key==='End'){
+  if(popup.hidden||!results.length)return;
+  e.preventDefault();
+  const available=results.map((item,i)=>item.status==='available'?i:-1).filter(i=>i>=0);
+  if(available.length)setActive(e.key==='Home'?available[0]:available[available.length-1]);
+ }else if(e.key==='ArrowDown'||e.key==='ArrowUp'){
   e.preventDefault();if(popup.hidden&&norm(input.value)){render();return;}
   if(!results.length)return;
   const step=e.key==='ArrowDown'?1:-1;

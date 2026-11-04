@@ -1,3 +1,7 @@
+## 2026-11-05 — Browse All Tools GNSS catalog regression
+
+- Exact-head Quality [41921062294](https://github.com/saeedsai/ProMathStudio/actions/runs/41921062294) passed structural and browser steps through 209, then failed at step 210 because a stale browse assertion excluded implemented GNSS. The regression now requires canonical `catalog:gnss.positioning.least.squares` while excluding planned-only `catalog:signals.spectral.analysis`. Browser rerun pending; no application source change or release.
+
 ## 2026-11-04 — CI browse disclosure timing regression
 
 - CI [41911514968](https://github.com/saeedsai/ProMathStudio/actions/runs/41911514968) passed structural and browser checks through step 209, then failed at browse-group assertion in `tests/smoke_tool_search_favorites.py:239`. The native `<details>` toggle event populates groups asynchronously. The browser test now waits for populated groups without relaxing any browse navigation, keyboard, storage or route assertions. Exact-head CI and release remain pending; no application source feature added.

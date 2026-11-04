@@ -8,6 +8,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 class BuildMarkerValidationTests(unittest.TestCase):
+    def test_mixed_line_endings_rejected_before_module_access(self):
+        builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
+        for original in (b"<html>line\rline</html>", b"<html>line\nnext\r\n</html>"):
+            with self.subTest(original=original), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                (root / "scripts").mkdir()
+                (root / "scripts/build.py").write_text(builder, encoding="utf-8")
+                (root / "index.html").write_bytes(original)
+                result = subprocess.run(["python3", str(root / "scripts/build.py")],
+                                        capture_output=True, text=True, timeout=10)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Unexpected carriage return in standalone index.html", result.stderr)
+                self.assertEqual((root / "index.html").read_bytes(), original)
+
     def test_crlf_index_rejected_without_overwrite(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
         original = b'<script id="mathstudio-data-tables">\r\n/* original */\r\n</script>\r\n'

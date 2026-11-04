@@ -1,3 +1,14 @@
+## 2026-11-04 — BUILD-INDEX-CONTROL-149 (CI pending)
+
+**Execution ledger:** Read root contract, historical inventory, living plan and dev/main comparison (43 ahead/1 behind), confirmed previous dev-head PR Quality 41776832633 succeeded and PR #189 has no submitted reviews. GitHub DNS prevented local checkout. Added pre-write rejection of unexpected ASCII controls in index.html and isolated subprocess regression (SOH/BS/FF/US, unchanged bytes). New exact-head Quality and browser verification pending; no merge/Pages claim. Historical 166 gaps/95 partial remain frozen.
+
+**NEXT FIVE (priority / acceptance):**
+1. P0 Exact-head QA and PR #189 release: green structural/browser dev and PR checks on exact SHA, reconcile main ancestry without rewrite, verify reviews/protection, ordinary PR merge, verify main Quality/Pages.
+2. P1 Polynomial roots: real/complex reference roots, residuals, repeated-root and bounded failure tests.
+3. P1 Levenberg–Marquardt fitting: analytic reference, ill-conditioning refusal, keyboard/mobile smoke.
+4. P1 FIR/IIR filters: frequency reference, unstable-pole rejection and 390px browser smoke.
+5. P1 Tool-search favourites: persisted pins, storage-failure fallback, keyboard/mobile regression.
+
 ## 2026-11-04 — BUILD-MODULE-CONTROL-148 (exact-head QA pending)
 
 **Execution ledger:** Inspected AGENTS.md, historical audit, living plan, dev/main divergence (39 ahead/1 behind), PR #189 (open; no submitted reviews), and exact previous dev-head Quality run 41770415108 (success for fc36cc8). Added a fail-fast rejection of nonprinting ASCII controls other than permitted TAB/LF in modular JavaScript sources; committed source 32d8d60 and isolated subprocess negative regression 9b78833 (SOH, BS, FF, US; unchanged index bytes). Local repository unit and browser checks were not executed; exact new-head Quality pending. No merge or Pages deployment attempted. Historical inventory remains frozen at 166 gaps / 95 partial.

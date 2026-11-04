@@ -16,10 +16,10 @@ class BuildMarkerValidationTests(unittest.TestCase):
             (root / "src").mkdir()
             (root / "scripts/build.py").write_text(builder, encoding="utf-8")
             target = root / "external.js"
-            original_source = b"const outside = true;\\n"
+            original_source = b"const outside = true;\n"
             target.write_bytes(original_source)
             (root / "src/data-tables.js").symlink_to(target)
-            original_html = b'<script id="mathstudio-data-tables">\\n/* original */\\n</script>\\n'
+            original_html = b'<script id="mathstudio-data-tables">\n/* original */\n</script>\n'
             (root / "index.html").write_bytes(original_html)
             result = subprocess.run(["python3", str(root / "scripts/build.py")],
                                     capture_output=True, text=True, timeout=10)

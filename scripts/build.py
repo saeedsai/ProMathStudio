@@ -67,6 +67,8 @@ for tag, source in modules:
     original = text[start:end]
     trailing_newlines = original[len(original.rstrip("\n")):]
     source_path = root / source
+    if source_path.is_symlink():
+        raise ValueError(f"Refusing symlinked standalone module source: {source}")
     if not source_path.is_file():
         raise FileNotFoundError(f"Missing standalone module source: {source}")
     try:

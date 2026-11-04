@@ -1,3 +1,14 @@
+## 2026-11-04 — UI-SEARCH-HOME-END-152 (dev; exact-head CI pending)
+
+**Execution ledger:** Read AGENTS.md, frozen audit, living plan, dev/main divergence (57 ahead/1 behind), PR #189 reviews (none), and prior exact-head Quality run 41796667931 (success at 33e85da). Local git DNS failed. Added Home/End keyboard navigation to first/last available result without selecting planned-only entries; source and standalone bundle synchronized; focused source/bundle regression. Local Python/Chromium and new exact-head Quality remain pending. No merge or Pages claim. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0 Exact-head Quality and safe PR release: structural/browser green on exact SHA, reconcile divergent ancestry without rewriting history, verify reviews/protections, ordinary PR merge, then main Quality and Pages success.
+2. P1 Polynomial roots: real/complex reference roots, residuals, repeated roots and bounded nonconvergence regression.
+3. P1 Levenberg–Marquardt fitting: analytic fit reference, ill-conditioning refusal, keyboard and 390px smoke.
+4. P1 FIR/IIR digital filters: reference frequency response, unstable-pole rejection and responsive smoke.
+5. P1 Tool-search favourites: bounded persistence, storage failure fallback, keyboard/mobile regression.
+
 ## 2026-11-04 — UI-SEARCH-DISABLED-151 (dev; exact-head QA pending)
 
 **Execution ledger:** Inspected root AGENTS.md, frozen inventory, current dev/main comparison (52 ahead/1 behind), prior exact-head Quality 41789155471 (success for 87444df), and PR review evidence (no submitted reviews). Fixed planned-only mouse clicks from activating an aria-disabled search result; the live-region diagnostic remains. Added focused source/bundle regression. Local checkout failed GitHub DNS; no local Python/Chromium pass claimed. Exact new-head CI, PR release, main Quality and Pages remain unverified. Frozen historical 166 gaps / 95 partial unchanged.

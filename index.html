@@ -12489,7 +12489,13 @@ input.addEventListener('keydown',e=>{
  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
   e.preventDefault();if(popup.hidden&&norm(input.value)){render();return;}
   if(!results.length)return;
-  const step=e.key==='ArrowDown'?1:-1;setActive(active<0?(step>0?0:results.length-1):(active+step+results.length)%results.length);
+  const step=e.key==='ArrowDown'?1:-1;
+  // Disabled planned tools remain discoverable, but keyboard focus skips them.
+  const start=active<0?(step>0?-1:0):active;
+  for(let offset=1;offset<=results.length;offset++){
+   const candidate=(start+step*offset+results.length*2)%results.length;
+   if(results[candidate].status==='available'){setActive(candidate);break;}
+  }
  }else if(e.key==='Enter'){
   e.preventDefault();
   if(active>=0)choose(active);else{const first=results.findIndex(r=>r.status==='available');if(first>=0)choose(first);}

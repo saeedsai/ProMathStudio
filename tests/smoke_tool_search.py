@@ -120,7 +120,11 @@ def main():
         # enabled spectral match and dismiss the popup before the mouse check.
         mode_before = page.evaluate("()=>MathStudio.advanced.currentMode()")
         assert option.is_visible()
-        option.click()
+        # Playwright treats aria-disabled options as disabled and refuses a normal
+        # click. Force the pointer event to test the application's refusal path.
+        assert option.get_attribute('aria-disabled') == 'true'
+        option.click(force=True, timeout=3000)
+        assert option.get_attribute('aria-selected') == 'false'
         assert 'planned' in page.locator('#tool-search-status').inner_text().lower()
         assert page.evaluate("()=>MathStudio.advanced.currentMode()") == mode_before
         # Reopen the same results for a separate keyboard refusal check.

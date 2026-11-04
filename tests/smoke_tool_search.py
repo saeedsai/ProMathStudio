@@ -104,10 +104,17 @@ def main():
         option = page.locator('#tool-search-list [role=option]').first
         assert 'Signal spectral analysis' in option.inner_text()
         assert 'Planned' in option.inner_text() and option.get_attribute('aria-disabled') == 'true'
-        # Planned-only matches must never become the active keyboard option.
-        assert box.get_attribute('aria-activedescendant') is None
-        page.keyboard.press('ArrowDown')
-        assert box.get_attribute('aria-activedescendant') is None
+        # A mixed result set may activate a real tool, but never a planned-only entry.
+        # The query also matches available spectral tools, so a null active ID is not required.
+        for key in ('ArrowDown', 'ArrowUp', 'Home', 'End'):
+            selected = box.get_attribute('aria-activedescendant')
+            if selected:
+                assert page.locator('[id="' + selected + '"]').get_attribute('aria-disabled') != 'true'
+            assert option.get_attribute('aria-selected') == 'false'
+            page.keyboard.press(key)
+        selected = box.get_attribute('aria-activedescendant')
+        if selected:
+            assert page.locator('[id="' + selected + '"]').get_attribute('aria-disabled') != 'true'
         assert option.get_attribute('aria-selected') == 'false'
         mode_before = page.evaluate("()=>MathStudio.advanced.currentMode()")
         page.keyboard.press('Enter')

@@ -100,6 +100,11 @@ def main():
         search(page, 'gnss')
         option = page.locator('#tool-search-list [role=option]').first
         assert 'Planned' in option.inner_text() and option.get_attribute('aria-disabled') == 'true'
+        # Planned-only matches must never become the active keyboard option.
+        assert box.get_attribute('aria-activedescendant') is None
+        page.keyboard.press('ArrowDown')
+        assert box.get_attribute('aria-activedescendant') is None
+        assert option.get_attribute('aria-selected') == 'false'
         mode_before = page.evaluate("()=>MathStudio.advanced.currentMode()")
         page.keyboard.press('Enter')
         option.click(force=True)

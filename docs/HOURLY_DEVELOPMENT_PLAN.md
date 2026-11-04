@@ -1,3 +1,14 @@
+## 2026-11-04 — BUILD-SYMLINK-153 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected dev/main, root AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and exact-head Quality 41804455015 (successful on 9a6d1ef). Added a fail-fast refusal to rewrite symlinked index.html so a build cannot alter an external target, plus an isolated subprocess regression that asserts failure, symlink preservation and byte-for-byte unchanged target. Source commit c1565e2; regression commit bc884f7. Local Python/Chromium suites were not executed; exact new-head CI remains pending. No merge or Pages release claimed. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality and PR #189 release (pending):** full structural/browser checks green for the exact dev/PR SHA; reconcile main divergence without history rewrite; verify required reviews/protections; ordinary dev-to-main PR merge only after all gates; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver with reference roots, residual tolerance, repeated roots and failure/convergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable kernel with analytic reference, ill-conditioning refusal, keyboard and 390px smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, unstable-pole rejection and mobile regression.
+5. **P1 Tool-search favourites (planned):** bounded persisted pins, storage failure fallback, keyboard/mobile tests.
+
 ## 2026-11-04 — UI-SEARCH-HOME-END-152 (dev; exact-head CI pending)
 
 **Execution ledger:** Read AGENTS.md, frozen audit, living plan, dev/main divergence (57 ahead/1 behind), PR #189 reviews (none), and prior exact-head Quality run 41796667931 (success at 33e85da). Local git DNS failed. Added Home/End keyboard navigation to first/last available result without selecting planned-only entries; source and standalone bundle synchronized; focused source/bundle regression. Local Python/Chromium and new exact-head Quality remain pending. No merge or Pages claim. Historical 166 gaps / 95 partial unchanged.

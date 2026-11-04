@@ -8,6 +8,8 @@ try:
     text = index.read_text(encoding="utf-8")
 except UnicodeDecodeError as error:
     raise ValueError("Invalid UTF-8 in standalone index.html") from error
+if text.startswith("\ufeff"):
+    raise ValueError("Unexpected UTF-8 BOM in standalone index.html")
 if "\x00" in text:
     raise ValueError("Unexpected NUL character in standalone index.html")
 

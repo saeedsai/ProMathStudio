@@ -8,6 +8,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 class BuildMarkerValidationTests(unittest.TestCase):
+    def test_index_utf8_bom_rejected_without_overwriting_index(self):
+        builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
+        html = '\ufeff<script id="mathstudio-data-tables">\n/* original */\n</script>\n'
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "scripts").mkdir()
+            (root / "scripts/build.py").write_text(builder, encoding="utf-8")
+            (root / "index.html").write_text(html, encoding="utf-8")
+            result = subprocess.run(['python3', str(root / "scripts/build.py")],
+                                    capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Unexpected UTF-8 BOM in standalone index.html", result.stderr)
+            self.assertEqual((root / "index.html").read_text(encoding="utf-8"), html)
+
     def test_missing_and_duplicate_markers_do_not_overwrite_index(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
         module = (ROOT / "src/data-tables.js").read_text(encoding="utf-8")

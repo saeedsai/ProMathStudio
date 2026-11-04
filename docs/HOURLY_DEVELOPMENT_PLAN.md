@@ -1,3 +1,14 @@
+## 2026-11-04 — BUILD-INDEX-BOM-144 (exact-head QA pending)
+
+**Change:** Reject a leading UTF-8 BOM in standalone index.html before any bundle rewriting. Focused isolated subprocess regression checks the diagnostic and unchanged HTML bytes. Existing dev Quality 41742985906 succeeded for BUILD-INDEX-NUL-143; PR #189 remains open with no reviews recorded and dev/main ancestry diverged (26 ahead, 1 behind before this commit). No merge without exact-head Quality, reviews/protections and ancestry reconciliation. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Exact-head CI and release reconciliation (pending):** green dev/PR Quality on this SHA; reconcile dev/main non-destructively; verify reviews/protection; ordinary PR merge; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex polynomial solver; reference roots and residuals, repeated roots and failure tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable solver with analytic references, conditioning refusal and keyboard/mobile checks.
+4. **P1 Digital filters (planned):** FIR/IIR frequency and stability reference tests plus responsive browser checks.
+5. **P1 Tool-search favourites (planned):** persistent pinned tools, safe storage fallback, keyboard and 390px browser checks.
+
 ## 2026-11-04 — BUILD-INDEX-NUL-143 (dev QA pending)
 
 **Change:** The standalone HTML builder now rejects a NUL character in the existing index before any module replacement; an isolated subprocess regression asserts the diagnostic and byte-for-byte preservation. The preceding spline NumPy CI correction succeeded on PR-triggered Quality run 41735564147 for 4c14043; no local clone was possible (github.com DNS resolution failed). The new exact-head Quality, PR checks, main Quality and Pages are not yet verified. PR #189 remains open and dev/main diverged (22 ahead/1 behind before this change); do not merge without reconciliation and verified gates. Historical inventory remains frozen at 166 gaps / 95 partial.

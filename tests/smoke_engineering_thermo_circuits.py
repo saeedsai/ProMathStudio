@@ -131,7 +131,7 @@ def main():
         # --- Catalog status, honest scope and search invariants.
         statuses = page.evaluate("Object.fromEntries(MathStudio.engineeringCatalog.tools.map(t=>[t.id,t.status]))")
         assert statuses["thermal.cycle.analysis"] == "available" and statuses["circuits.network.analysis"] == "available"
-        assert statuses["control.frequency.response"] == "planned"
+        # Frequency-response simulation is implemented; do not regress its catalog status.\n        assert statuses["control.frequency.response"] == "available"
         assert page.evaluate("MathStudio.engineeringCatalog.filter('physics','ode').map(t=>t.id)") == ["ode.ivp.scalar"]
         assert page.evaluate("MathStudio.engineeringCatalog.filter('','control orbit').length") == 0
         assert page.evaluate("MathStudio.engineeringCatalog.filter('physics','otto').length") == 0

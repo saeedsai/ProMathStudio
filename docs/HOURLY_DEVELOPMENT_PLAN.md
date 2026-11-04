@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-SEARCH-CATALOG-158 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen inventory, dev/main ancestry (111 ahead/0 behind at 84b09ad), PR #189 (no submitted reviews) and exact-head Quality run [41831603088](https://github.com/saeedsai/ProMathStudio/actions/runs/41831603088). Structural and 190+ browser steps passed until `tests/smoke_tool_search.py:103` asserted the now-implemented digital-logic simulation was still planned; later browser steps were skipped. Updated browser regression to require available digital logic and to test the genuinely planned signal spectral analysis entry's disabled pointer/keyboard/open behavior. Commit 38b7141. Local checkout and Chromium unavailable; new exact-head CI and Pages not yet verified. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head CI:** confirm structural and all browser smoke steps green on the new dev SHA; diagnose first failure with logs and preserve regression coverage.
+2. **P0 PR #189 release:** verify reviews, protection and exact-head checks, ordinary dev-to-main merge only when authorized; verify main Quality and Pages.
+3. **P0 Branch cleanup:** confirm obsolete branch commits contained, no open PR and no protection before deletion.
+4. **P1 Numerical QA:** polynomial roots/repeated roots, LM conditioning, FIR/IIR stability, GNSS and pipe residual references.
+5. **P1 Search accessibility:** planned-only, favourites, storage failure, Home/End and 390px mobile smoke.
+
 ## 2026-11-04 — CI-CATALOG-STATUS-157 (exact-head QA pending)
 
 **Execution ledger:** After two failed exact-head Quality runs (41831147188 and 41831141719) for merge d578398a, inspected jobs 126578355230 and 126578336365. Structural tests passed; `tests/smoke_engineering_catalog.py` failed at its legacy expectation that `control.frequency.response` has no Open button. This tool is implemented with a real `ct-frequency` route, so corrected the outdated smoke assertion to require one real Open button and no planned label; retained the separate genuinely planned `signals.spectral.analysis` refusal test. Also reconciled main's history-only merge commit into dev through a non-force two-parent commit; main tree matches existing ancestor, so no production source was replaced. Exact-head structural/browser CI and dev-to-main PR #189 release pending. Frozen 166 gaps / 95 partial unchanged.

@@ -1,3 +1,14 @@
+## 2026-11-04 — BUILD-MODULE-CONTROL-148 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, historical audit, living plan, dev/main divergence (39 ahead/1 behind), PR #189 (open; no submitted reviews), and exact previous dev-head Quality run 41770415108 (success for fc36cc8). Added a fail-fast rejection of nonprinting ASCII controls other than permitted TAB/LF in modular JavaScript sources; committed source 32d8d60 and isolated subprocess negative regression 9b78833 (SOH, BS, FF, US; unchanged index bytes). Local repository unit and browser checks were not executed; exact new-head Quality pending. No merge or Pages deployment attempted. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head QA and PR #189 release (pending):** structural and browser Quality green for exact dev/PR SHA; reconcile divergent main ancestry non-destructively, verify reviews/protections; ordinary PR merge only when all gates satisfied; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver; reference roots/residuals, repeated roots and failure/convergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable kernel with analytic reference fit, ill-conditioning refusal, keyboard/mobile smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, unstable-pole rejection and 390px browser regression.
+5. **P1 Tool-search favourites (planned):** bounded persisted pins, storage-failure fallback, keyboard and mobile regression.
+
 ## 2026-11-04 — BUILD-MODULE-CRLF-147 (exact-head QA pending)
 
 **Execution ledger:** Read AGENTS.md, historical audit, current plan, PR #189 and exact-head Quality evidence. Prior dev head 1e2c1cfb2b8d99ed0add25affc7d4d409c91de7d had successful PR-triggered Quality run 41764210746. main 70fc483cb1cec3d2372d37484e4a8ef7942343da; 35 ahead/1 behind before changes. Fixed module-source universal-newline normalization in scripts/build.py by opening sources with newline="" and rejecting CR before any write. Added isolated subprocess regression for CRLF and lone CR in src/data-tables.js, checking error and unchanged index bytes. Source commit d9b1ca5; regression commit 73d470a. Local repository checkout/browser checks unavailable in this execution; exact new-head CI pending. PR #189 unmerged; no review approvals recorded. No main/Pages release claimed. Frozen inventory remains 166 gaps/95 partial.

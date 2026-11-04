@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-BROWSE-TOGGLE-165 (exact-head recheck pending)
+
+**Execution ledger:** Inspected dev/main (131 ahead / 0 behind before this fix; main 70fc483cb1cec3d2372d37484e4a8ef7942343da), root AGENTS.md, frozen inventory, plan, PR #189 (zero reviews), and Quality run [41911514968](https://github.com/saeedsai/ProMathStudio/actions/runs/41911514968). Structural checks and browser steps 1–209 passed; step 210 failed at smoke_tool_search_favorites.py:239 because native details toggle dispatches asynchronously and browse groups were queried before renderBrowse ran. Added an explicit bounded wait for five browse groups, preserving all browse keyboard, routing and mobile assertions. No application source change; local Chromium/unit tests unavailable, exact-head rerun pending. No merge/Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head Quality:** all structural and Chromium steps green, including browse disclosure and subsequent pipe/digital logic smoke.
+2. **P0 PR #189 release:** exact-head required checks, reviews and protections verified, ordinary merge then main Quality and Pages live smoke.
+3. **P1 Search storage resilience:** blocked/corrupt persistence with session fallback and 390px browser assertions; source/bundle parity.
+4. **P1 Numerical reference QA:** repeated polynomial roots, nonlinear-fit conditioning and unstable digital filter rejection with tolerances.
+5. **P1 Safe cleanup:** ancestry, PR and protection audit before any branch/file deletion.
+
 ## 2026-11-04 — CI-PINS-GNSS-164 (exact-head recheck pending)
 
 **Execution ledger:** Reviewed dev/main ancestry (main 70fc483cb1cec3d2372d37484e4a8ef7942343da; dev 128 commits ahead before edit), AGENTS.md, historical inventory, PR #189 (zero reviews) and exact-head Quality run 41902185760 for 105676e95453a527864e3b2bc401144923a6c93b. Structural and browser steps through 209 passed, including thermo/circuits. Step 210 failed at tests/smoke_tool_search_favorites.py:167 because the test still treated implemented GNSS positioning as unpinnable. Updated the capacity assertion to expect refusal from a full 20-pin list, and added an explicit genuinely planned spectral-analysis refusal assertion; preserved the existing unknown-ID negative case. Source behavior unchanged. No local Chromium or unit tests; new-head CI pending. PR #189 and Pages not released. Frozen historical 166 gaps / 95 partial unchanged.

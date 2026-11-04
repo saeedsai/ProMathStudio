@@ -4,6 +4,8 @@ import re
 
 root = Path(__file__).resolve().parents[1]
 index = root / "index.html"
+if index.is_symlink():
+    raise ValueError("Refusing to rewrite symlinked standalone index.html")
 try:
     with index.open("r", encoding="utf-8", newline="") as source_file:
         text = source_file.read()

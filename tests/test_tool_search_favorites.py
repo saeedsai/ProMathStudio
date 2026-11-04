@@ -1,0 +1,68 @@
+"""Find a tool recents/pins/browse: preferences module parity, guarded storage, bounds, ARIA and CI."""
+import re
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+PREFS = (ROOT / "src/tool-prefs.js").read_text(encoding="utf-8")
+SEARCH = (ROOT / "src/tool-search.js").read_text(encoding="utf-8")
+HTML = (ROOT / "index.html").read_text(encoding="utf-8")
+
+
+def bundled(tag):
+    marker = '<script id="' + tag + '">\n'
+    assert HTML.count(marker) == 1, tag
+    return HTML.split(marker, 1)[1].split("</script>", 1)[0].rstrip("\n")
+
+
+class ToolSearchFavoritesTests(unittest.TestCase):
+    def test_bundle_parity_and_order(self):
+        self.assertEqual(PREFS.rstrip("\n"), bundled("promath-tool-prefs"))
+        self.assertEqual(SEARCH.rstrip("\n"), bundled("promath-tool-search"))
+        ids = re.findall(r'<script id="([^"]+)">', HTML)
+        self.assertEqual(ids[-2:], ["promath-tool-prefs", "promath-tool-search"])
+        build = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
+        self.assertIn('("promath-tool-prefs", "src/tool-prefs.js"),\n    ("promath-tool-search", "src/tool-search.js"),\n]', build)
+
+    def test_safety(self):
+        for source in (PREFS, SEARCH):
+            for forbidden in ("eval(", "new Function(", "innerHTML", "fetch(", "XMLHttpRequest", "<!--", "-->", "<script", "</script"):
+                self.assertNotIn(forbidden, source)
+        # Only the preferences module touches browser storage, and every access is guarded.
+        self.assertNotIn("localStorage", SEARCH)
+        self.assertEqual(PREFS.count("localStorage"), 2)
+        for line in PREFS.splitlines():
+            if "localStorage" in line:
+                self.assertRegex(line, r"try\{|^\s+const raw=", line)
+        self.assertIn("catch{return null;}", PREFS)
+        self.assertIn("catch{persisted=false;}", PREFS)
+        self.assertNotIn("document.", PREFS)
+
+    def test_namespaced_key_and_bounds(self):
+        self.assertIn("KEY='promath-tool-search-prefs-v1'", PREFS)
+        self.assertIn("MAX_RECENT=8", PREFS)
+        self.assertIn("MAX_PINS=20", PREFS)
+        self.assertIn("out.includes(id)", PREFS)  # Dedupe.
+        self.assertIn("M.toolPrefs=Object.freeze(", PREFS)
+        # Search filters stored IDs against the live index so removed tools are dropped.
+        self.assertIn("const openable=id=>byId.get(id)?.status==='available';", SEARCH)
+        self.assertIn("prefs.recent(openable)", SEARCH)
+        self.assertIn("prefs.pinned(openable)", SEARCH)
+
+    def test_accessible_groups_pins_and_browse(self):
+        for needle in ("'role','group'", "'aria-labelledby'", "'Recent tools'", "'Pinned tools'", "'aria-pressed'",
+                       "(on?'Unpin ':'Pin ')+item.title", "pin.tabIndex=-1", "e.code==='KeyP'", "Alt+P",
+                       "'Browse all tools'", "ts-browse-group", "min-width:40px;min-height:40px", ".ts-pin:focus-visible"):
+            self.assertIn(needle, SEARCH)
+        # Browse items reuse the existing open path rather than routing on their own.
+        self.assertIn("if(openItem(item))remember(item);", SEARCH)
+        for key in ("recent:", "pinned:", "pin:", "browse:"):
+            self.assertIn(" " + key, SEARCH.split("M.toolSearch=Object.freeze(", 1)[1])
+
+    def test_ci_registration(self):
+        workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+        self.assertIn("run: python tests/smoke_tool_search_favorites.py", workflow)
+
+
+if __name__ == "__main__":
+    unittest.main()

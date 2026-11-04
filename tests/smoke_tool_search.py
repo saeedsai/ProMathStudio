@@ -97,8 +97,9 @@ def main():
         assert page.evaluate("()=>MathStudio.engineeringVisuals.visuals.find(v=>v.tool==='structures.beam.deflection').id") == page.locator('#eng-visual-select').input_value()
 
         # Planned catalog tools are labelled and cannot be opened.
-        search(page, 'gnss')
+        search(page, 'digital logic simulation')
         option = page.locator('#tool-search-list [role=option]').first
+        assert 'digital logic' in option.inner_text().lower()
         assert 'Planned' in option.inner_text() and option.get_attribute('aria-disabled') == 'true'
         # Planned-only matches must never become the active keyboard option.
         assert box.get_attribute('aria-activedescendant') is None
@@ -110,7 +111,9 @@ def main():
         option.click(force=True)
         assert 'planned' in page.locator('#tool-search-status').inner_text().lower()
         assert page.evaluate("()=>MathStudio.advanced.currentMode()") == mode_before
-        assert page.evaluate("()=>MathStudio.toolSearch.open('catalog:gnss.positioning.least.squares')") is False
+        assert page.evaluate("()=>MathStudio.toolSearch.open('catalog:electronics.digital.logic')") is False
+        # The implemented GNSS tool is searchable and available (no longer a planned placeholder).
+        assert all(r['status'] == 'available' for r in page.evaluate("()=>MathStudio.toolSearch.search('gnss positioning')"))
 
         # Escape closes then clears; no-match message.
         search(page, 'zzqqxx')

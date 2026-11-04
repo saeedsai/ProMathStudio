@@ -421,3 +421,31 @@ jobs:
         run: python tests/smoke_interpolation_splines.py
       - name: Global Find a tool search, shortcuts, routing and responsive browser regression
         run: python tests/smoke_tool_search.py
+      - name: Polynomial roots (Aberth-Ehrlich), Horner, division, GCD and responsive browser regression
+        run: python tests/smoke_polynomial_tools.py
+      - name: Nonlinear least-squares Levenberg–Marquardt fit references (NIST Misra1a), identifiability warnings and responsive UI regression
+        run: python tests/smoke_nonlinear_fit.py
+      - name: Digital filters, convolution, Butterworth SOS references, zero-phase filtfilt and responsive browser regression
+        run: python tests/smoke_signal_filters.py
+      - name: Numerical derivatives (Ridders) and vector calculus references, refusals and responsive browser regression
+        run: python tests/smoke_vector_calculus.py
+      - name: Matrix extras (Cholesky, SVD rank and bases, LU determinant, characteristic polynomial, norms) browser regression
+        run: python tests/smoke_matrix_extras.py
+      - name: Multivariate covariance/correlation, PCA and k-means reference, accessibility and responsive browser regression
+        run: python tests/smoke_multivariate_tools.py
+      - name: Vector fields, RK4 streamlines, slope fields and candidate equilibria browser regression
+        run: python tests/smoke_vector_fields.py
+      - name: Engineering thermodynamic cycles and DC network nodal analysis browser regression
+        run: python tests/smoke_engineering_thermo_circuits.py
+      - name: Control frequency-response stability margins, bandwidth, resonant peak and catalog routing browser regression
+        run: python tests/smoke_control_margins.py
+      - name: GNSS least-squares positioning, DOP, WGS-84 geodesy references and responsive browser regression
+        run: python tests/smoke_gnss_tools.py
+      - name: Inequality solving and function domain analysis browser regression
+        run: python tests/smoke_function_analysis.py
+      - name: Seeded random sampling (PCG32), Monte Carlo and Halton integration references and responsive browser regression
+        run: python tests/smoke_random_tools.py
+      - name: Find a tool recent and pinned tools, Browse all tools, guarded storage and responsive browser regression
+        run: python tests/smoke_tool_search_favorites.py
+      - name: Engineering pipe networks (Darcy–Weisbach, Colebrook) and digital logic gates/flip-flops browser regression
+        run: python tests/smoke_engineering_pipe_logic.py

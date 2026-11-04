@@ -1,3 +1,14 @@
+## 2026-11-04 — BRANCH-CONSOLIDATION-156 (dev; exact-head CI pending)
+
+**Execution ledger:** Audited all three remote branches; 34 commits unique to `claude/sharp-babbage-pqhvgr`, 53 unique to the previous `dev` SHA, plus one history-only main merge commit whose tree matches the common release baseline. Reconciled six overlapping files: append both living ledger and changelog prefixes; retain hardened builder validation while adding all 42 module registrations; retain Claude favourites/recents and engineering search while preserving dev Home/End, planned-item pointer and keyboard fixes; update the synchronized standalone HTML and combine browser assertions. Retained 53 other-branch-only file versions verbatim and both Git parent histories. Exact-head Quality and browser checks pending; no new production merge/Pages deployment claimed. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Consolidated exact-head QA and release (pending):** full structural and Chromium Quality green on merged dev and dev→main PR #189; Python builder source/bundle consistency, planned-only + favourites/recents navigation, every newly integrated engineering numerical reference; check reviews/protections; merge only through normal PR and verify main Quality and Pages.
+2. **P0 Main ancestry and obsolete-branch cleanup (pending):** reconcile main's history-only merge commit without rewriting work; after validated release prove all prior branches' commits reachable from dev/main, verify no open PR and unprotected status, then remove obsolete branch only through permitted deletion action.
+3. **P1 Polynomial solver numerical hardening (planned):** compare real/complex roots against reference polynomials, repeated roots, residual limits, nonconvergence errors.
+4. **P1 Nonlinear fit and digital filters QA (planned):** verify Levenberg–Marquardt ill-conditioning and FIR/IIR pole/stability reference tests, plus browser mobile layout.
+5. **P1 Tool search favourites accessibility (planned):** offline/localStorage failure fallback, planned-only item keyboard and pointer behavior, Home/End and 390px smoke.
+
 ## 2026-11-04 — CI-SYMLINK-FIX-155 (dev; exact-head QA pending)
 
 **Execution ledger:** Inspected AGENTS.md, frozen historical inventory, current living plan, dev/main divergence (70 ahead / one behind before edits), PR #189 review submissions (none), and failed exact-head Quality run [41817935010](https://github.com/saeedsai/ProMathStudio/actions/runs/41817935010) at b2877e6. Job 126533675687 failed in structural tests: the new symlink fixture used literal backslash-n bytes instead of actual newlines, so the builder rejected the missing marker before reaching the symlink guard. Corrected the fixture (0e135cb). Hardened the source guard to reject a symlinked immediate module parent directory (c817db9), with an isolated regression asserting refusal and byte-for-byte unchanged external JS and index (516aa99). Local git checkout blocked by GitHub DNS; Python/Chromium suites not executed locally. New exact-head CI, PR review/merge, main Quality and Pages remain unverified. Historical 166 gaps / 95 partial remain frozen.
@@ -141,6 +152,18 @@
 4. **P1 Digital filters (planned):** FIR/IIR responses, stability checks, frequency references and responsive browser tests.
 5. **P1 Tool search favourites (planned):** persisted pins with safe fallback, keyboard and 390px smoke, no duplicated actions.
 
+## 2026-11-03 — Parallel batch 142–149 (polynomials, nonlinear fit, filters, vector calculus, matrix extras, multivariate, vector fields, thermo cycles + DC circuits)
+
+**Release checkpoint:** PR #188 into dev at 2c60767; release PR #189 to main is waiting on exact-head Quality.
+
+**Implemented on branch (QA pending):** eight agents worked on disjoint modules, and all integrated without source conflicts. `thermal.cycle.analysis` and `circuits.network.analysis` move from planned to available under their narrowed scopes; `fluids.pipe.network`, `electronics.digital.logic`, `control.frequency.response` and `gnss.positioning.least.squares` stay planned. The frozen baseline is unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release batches 135–149 (pending):** exact-head Quality, PRs to main, main Quality and Pages.
+2. **P1 Pipe network (planned):** Hardy-Cross or Newton loop solver with Darcy–Weisbach/Colebrook; references from textbook loop networks.
+3. **P1 Digital logic simulation (planned):** gate netlists with truth tables and an animated timing diagram.
+4. **P1 Tool search favourites and recents (planned):** kept per viewer in try/catch localStorage.
+5. **P2 Offline symbolic gaps (blocked by CDN):** define an offline scope for nonlinear symbolic systems and series.
 ## 2026-11-03 — CI-SPLINE-NUMPY-142 (exact-head QA pending)
 
 **Failure diagnosis:** dev exact-head Quality run 41734143560 at 2c607679 failed in the spline browser smoke step because the runner had no `numpy` package; all earlier structural and browser steps passed. The independent natural-cubic-spline reference previously used NumPy only to solve a small dense tridiagonal reference system. Replaced it with a pure-standard-library partial-pivot dense Gaussian elimination reference and `bisect_right`; retained the original nonuniform-data numerical comparisons and added pivot-required and singular-matrix reference controls. This is a CI test-harness dependency correction, not a change to the production spline implementation. Committed to existing dev at 297068eb. Local browser and Python suite not executed; exact-head CI required. PR #189 remains pending. Main 70fc483 and dev had diverged before this edit; do not merge without resolving ancestry through an ordinary protected PR. Frozen historical inventory: 166 gaps / 95 partial unchanged.

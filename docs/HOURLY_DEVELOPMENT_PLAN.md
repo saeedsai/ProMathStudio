@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-CRLF-146 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen audit, current dev/main and PR #189. The exact dev-head Quality run [41757292742](https://github.com/saeedsai/ProMathStudio/actions/runs/41757292742) failed structural unittest `test_crlf_index_rejected_without_overwrite`: universal-newline translation concealed CRLF, so builder proceeded until a missing module error. Changed `scripts/build.py` to open index with `newline=""`, preserving carriage returns for the existing pre-write guard. Added a focused lone-CR/mixed-newline subprocess regression; both cases assert no index mutation. Source commit b7f9ceb; test commit 567ad23. Raw-newline semantics locally verified in Python; full repository unit/browser suites and new exact-head CI remain pending. No release merge. dev/main divergence still requires non-destructive reconciliation. Historical 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 CI-CRLF-146 and PR #189 (pending):** exact-head dev and PR Quality pass, including CRLF/lone-CR tests and browser suites; reconcile diverged main ancestry without rewriting history; verify reviews/protections; ordinary PR merge; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver, known roots and residuals, repeated-root and non-convergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** shared numerical kernel, analytic references, ill-conditioning refusal, keyboard/mobile smoke.
+4. **P1 FIR/IIR digital filters (planned):** stability, frequency-response references and 390px browser checks.
+5. **P1 Tool-search favourites (planned):** bounded persistent pins, storage failure fallback, keyboard and mobile tests.
+
 ## 2026-11-04 — BUILD-INDEX-CRLF-145 (exact-head QA pending)
 
 **Execution ledger:** Pre-change dev 654f5d6d8ed24bb17433284d1d55a65068057dc2; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; dev/main diverged 27 ahead/1 behind. Prior exact-head PR Quality run 41751753649 succeeded (static/browser job). PR #189 open. Standalone builder reads HTML through Python universal-newline translation, which can silently rewrite CRLF files. Added a fail-fast carriage-return guard before rewriting and an isolated subprocess regression asserting byte-identical rollback. Source 535c16c, test 91b83dc; local Python/Chromium not run, new exact-head Quality pending. No merge or Pages claim. Frozen 166 gaps/95 partial unchanged.

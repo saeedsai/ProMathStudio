@@ -1,3 +1,14 @@
+## 2026-11-05 — CI-PIPE-CATALOG-167 (exact-head recheck pending)
+
+**Execution ledger:** Inspected root AGENTS.md, frozen inventory, living plan, main/dev ancestry (138 ahead / 0 behind before edit), and GitHub Quality run [41930385695](https://github.com/saeedsai/ProMathStudio/actions/runs/41930385695). The run was reported cancelled, but its job log identifies an actual step 211 failure at `tests/smoke_engineering_pipe_logic.py:218`: obsolete expectations classified implemented GNSS positioning and control frequency response as planned. Steps 1–210 succeeded, including favourites/Browse All Tools. Updated the focused browser regression to assert these two tools available while preserving the genuinely planned spectral-analysis assertion; commit ab7fa841. No local tests executed; corrected exact-head Chromium run pending. PR #189 reviews/protection and main Pages not verified. Historical 166 gaps / 95 partial unchanged. No app source feature in this bounded CI-repair iteration.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** full structural and Chromium suite green on final dev SHA, including pipe/digital-logic and every earlier browser regression; inspect exact failed logs.
+2. **P0 Protected PR #189 (blocked):** verify exact-head required checks, submitted reviews and protections; merge only via ordinary dev-to-main PR, then main Quality and live Pages smoke.
+3. **P1 Search preference storage resilience (planned):** implement observable blocked/corrupt localStorage session-only status with positive/negative browser tests and source/bundle parity.
+4. **P1 Numerical reference QA (planned):** independent repeated-root polynomial, ill-conditioned nonlinear fit and unstable-filter references, with tolerances and invalid-input tests.
+5. **P1 Branch/file cleanup (pending):** verify ancestry, protection, open PRs and file references before deleting anything; preserve unique contributions.
+
 ## 2026-11-05 — CI-BROWSE-GNSS-166 (exact-head recheck pending)
 
 **Execution ledger:** Inspected dev/main comparison (134 ahead, 0 behind before edit), root AGENTS.md, frozen inventory, plan, PR #189 (open, mergeable, zero submitted reviews), and exact-head Quality [41921062294](https://github.com/saeedsai/ProMathStudio/actions/runs/41921062294) at 7ed82f81b66859cbf7504ee2b7698cde63c7effd. Structural tests and browser steps 1–209 passed. Step 210 failed at smoke_tool_search_favorites.py:248 because Browse All Tools correctly includes implemented GNSS; the old assertion treated all GNSS as planned. Replaced it with the canonical implemented GNSS least-squares ID and explicit exclusion of planned-only spectral analysis. Regression commits ccd0db2 and 509821c; exact-head Chromium rerun pending. No local tests executed; no merge or Pages release. Frozen historical 166 gaps / 95 partial unchanged.

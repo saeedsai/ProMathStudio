@@ -1,4 +1,4 @@
-## 2026-11-04 — BUILD-MODULE-CRLF-147
+- BUILD-INDEX-CONTROL-149 (dev, QA pending): reject unexpected ASCII controls in index.html before rewrite; subprocess regression asserts original bytes preserved.\n## 2026-11-04 — BUILD-MODULE-CRLF-147
 
 - BUILD-MODULE-CONTROL-148 (dev, QA pending): fail fast when JavaScript modules contain nonprinting ASCII control characters other than TAB/LF; subprocess regression checks four controls and unchanged standalone HTML. Exact-head CI and release pending; frozen 166-gap/95-partial baseline unchanged.
 - Preserve raw newlines when reading standalone JavaScript modules; reject CRLF/lone CR module input before HTML rewrite, preventing silent newline normalization. Add focused subprocess regression for diagnostic and unchanged index. Exact-head CI pending; no release claimed.

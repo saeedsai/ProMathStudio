@@ -66,7 +66,11 @@ for tag, source in modules:
     if not source_path.is_file():
         raise FileNotFoundError(f"Missing standalone module source: {source}")
     try:
-        module_source = source_path.read_text(encoding="utf-8").rstrip("\n")
+        with source_path.open("r", encoding="utf-8", newline="") as module_file:
+            module_source = module_file.read()
+        if "\r" in module_source:
+            raise ValueError(f"Unexpected carriage return in standalone module source: {source}")
+        module_source = module_source.rstrip("\n")
     except UnicodeDecodeError as error:
         raise ValueError(f"Invalid UTF-8 in standalone module source: {source}") from error
     if not module_source.strip():

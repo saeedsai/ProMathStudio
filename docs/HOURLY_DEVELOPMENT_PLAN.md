@@ -1,3 +1,14 @@
+## 2026-11-04 — UI-SEARCH-KEYBOARD-150 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected root AGENTS.md, frozen inventory, dev/main (47 ahead/1 behind), PR #189 and exact-head Quality 41782489595/41782486746 (both successful on 05ed76b). Fixed global tool-search keyboard navigation to skip disabled planned-only entries while preserving their visibility/click diagnostic. Added browser regression for planned-only ArrowDown with no active descendant. Local Git checkout failed DNS; local Chromium/unit checks unavailable. Exact new-head CI, PR reviews, ancestry reconciliation, main Quality and Pages pending. Historical 166 gaps/95 partial frozen.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0 Exact-head dev/PR Quality and safe release: structural/browser green on exact candidate, reconcile diverged main ancestry without rewrite, verify reviews/protections, ordinary PR merge, then main Quality and Pages success.
+2. P1 Polynomial roots: real/complex reference roots, residuals, repeated roots and bounded nonconvergence regression.
+3. P1 Levenberg–Marquardt fitting: analytic reference, conditioning refusal, keyboard and 390px browser smoke.
+4. P1 FIR/IIR digital filters: reference response, unstable-pole rejection and responsive browser checks.
+5. P1 Tool-search favourites: bounded persistence, storage failure fallback, keyboard and mobile regression.
+
 ## 2026-11-04 — BUILD-INDEX-CONTROL-149 (CI pending)
 
 **Execution ledger:** Read root contract, historical inventory, living plan and dev/main comparison (43 ahead/1 behind), confirmed previous dev-head PR Quality 41776832633 succeeded and PR #189 has no submitted reviews. GitHub DNS prevented local checkout. Added pre-write rejection of unexpected ASCII controls in index.html and isolated subprocess regression (SOH/BS/FF/US, unchanged bytes). New exact-head Quality and browser verification pending; no merge/Pages claim. Historical 166 gaps/95 partial remain frozen.

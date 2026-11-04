@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-PINS-GNSS-164 (exact-head recheck pending)
+
+**Execution ledger:** Reviewed dev/main ancestry (main 70fc483cb1cec3d2372d37484e4a8ef7942343da; dev 128 commits ahead before edit), AGENTS.md, historical inventory, PR #189 (zero reviews) and exact-head Quality run 41902185760 for 105676e95453a527864e3b2bc401144923a6c93b. Structural and browser steps through 209 passed, including thermo/circuits. Step 210 failed at tests/smoke_tool_search_favorites.py:167 because the test still treated implemented GNSS positioning as unpinnable. Updated the capacity assertion to expect refusal from a full 20-pin list, and added an explicit genuinely planned spectral-analysis refusal assertion; preserved the existing unknown-ID negative case. Source behavior unchanged. No local Chromium or unit tests; new-head CI pending. PR #189 and Pages not released. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head Quality:** full structural and Chromium checks green on new dev SHA; verify pin-cap test and all later smoke tests.
+2. **P0 Protected release PR #189:** exact-head checks and reviews/protection satisfied, ordinary merge, then main Quality and live Pages smoke.
+3. **P1 Search persistence robustness:** verify blocked/corrupt storage fallback, session-only state and source/bundle parity with focused browser regression.
+4. **P1 Numerical references:** repeated polynomial roots, ill-conditioned nonlinear fit and unstable filter rejection with explicit tolerances.
+5. **P1 Safe cleanup:** verify branch ancestry, no open PR and no protection, plus tracked-file reference audit before any deletion.
+
 ## 2026-11-04 — CI-THERMO-CATALOG-163 (browser recheck pending)
 
 **Execution ledger:** Inspected dev 4af74fbcb6dbb9e53b51aa42e1c2484ca063b734, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, this plan, frozen inventory, PR #189 (zero reviews), and exact-head Quality [41892196257](https://github.com/saeedsai/ProMathStudio/actions/runs/41892196257). The engineering thermo/circuits browser step failed; its test still asserted control.frequency.response was planned although prior catalog QA established it is implemented and available. Updated that stale status assertion in commit 47943e29c87bd310183e302a0e997207b225d018, retaining numerical and UI assertions. The GitHub job summary does not expose a traceback, so the exact failing line is unconfirmed. Local git checkout failed DNS resolution; no local tests. Exact-head CI rerun pending. No merge or Pages verification. Frozen historical 166 gaps / 95 partial unchanged.

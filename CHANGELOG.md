@@ -1,3 +1,4 @@
+- 2026-11-04 (UI-SEARCH-KEYBOARD-150; dev QA pending): tool-search ArrowUp/Down skips disabled planned entries, with browser regression for planned-only results; exact-head Quality and release pending.
 - BUILD-INDEX-CONTROL-149 (dev, QA pending): reject unexpected ASCII controls in index.html before rewrite; subprocess regression asserts original bytes preserved.\n## 2026-11-04 — BUILD-MODULE-CRLF-147
 
 - BUILD-MODULE-CONTROL-148 (dev, QA pending): fail fast when JavaScript modules contain nonprinting ASCII control characters other than TAB/LF; subprocess regression checks four controls and unchanged standalone HTML. Exact-head CI and release pending; frozen 166-gap/95-partial baseline unchanged.

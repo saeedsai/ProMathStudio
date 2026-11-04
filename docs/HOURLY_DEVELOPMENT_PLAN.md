@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-SEARCH-DISABLED-162 (exact-head browser recheck pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen audit, dev/main (dev 6e26c479e6752460d4f988f35f7f22034c57165b; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; 122 ahead/0 behind), PR #189 (zero reviews) and exact-head Quality [41883559378](https://github.com/saeedsai/ProMathStudio/actions/runs/41883559378). Structural and browser steps 1–196 passed; step 197 failed because Playwright's ordinary click refuses an aria-disabled planned option (30-second timeout), not because the app opened it. The focused regression now uses a forced pointer click while asserting aria-disabled, non-selection, planned status announcement, and unchanged workspace. Test commit eaac95e549ba264f563e0c20626d715b8371907f. Local Chromium and unit checks not executed; exact new-head Quality pending. No application source change or production release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** structural and every Chromium step green at latest dev SHA, especially disabled planned-option pointer refusal and numerical steps 198+; repair first observed failure.
+2. **P0 PR #189 protected release (blocked):** verify required checks, reviews and protections, ordinary dev-to-main merge only then validate main Quality and Pages.
+3. **P1 Search storage fallback (planned):** handle blocked/corrupt localStorage without errors; add browser regression at 390px and source/bundle parity.
+4. **P1 Numerical references (planned):** repeated polynomial roots, ill-conditioned nonlinear fits and unstable filter rejection with explicit tolerances.
+5. **P1 Safe cleanup (pending):** only delete fully merged unprotected branches with no open PR, and unused files after reference audit.
+
 ## 2026-11-04 — CI-SEARCH-VISIBILITY-161 (browser recheck pending)
 
 **Execution ledger:** Read root AGENTS.md, frozen inventory, living plan, PR #189 and reviews, and exact-head Quality [41872973294](https://github.com/saeedsai/ProMathStudio/actions/runs/41872973294) for dev e84fc238ce844bf0f3c93dfd83d38849e57d551c (main 70fc483cb1cec3d2372d37484e4a8ef7942343da, 119 ahead/0 behind). Structural checks and browser steps 1–196 succeeded; step 197 failed at `tests/smoke_tool_search.py:121` because Enter legitimately opened an available spectral result and hid the popup before the planned-result click. Fixed the test ordering so the disabled planned result is clicked while visible, preserving disabled ARIA, keyboard navigation, status announcement, workspace non-navigation, and API refusal assertions. Commit e27190629ab2e6f150d689b772d5eba0f4fe1559. Local git checkout unavailable (DNS: github.com unresolved); no local Chromium or unit execution. New exact-head CI is pending; PR #189 has zero submitted reviews, so no merge or Pages release. Frozen 166 gaps / 95 partial unchanged.

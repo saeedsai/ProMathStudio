@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-SYMLINK-FIX-155 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen historical inventory, current living plan, dev/main divergence (70 ahead / one behind before edits), PR #189 review submissions (none), and failed exact-head Quality run [41817935010](https://github.com/saeedsai/ProMathStudio/actions/runs/41817935010) at b2877e6. Job 126533675687 failed in structural tests: the new symlink fixture used literal backslash-n bytes instead of actual newlines, so the builder rejected the missing marker before reaching the symlink guard. Corrected the fixture (0e135cb). Hardened the source guard to reject a symlinked immediate module parent directory (c817db9), with an isolated regression asserting refusal and byte-for-byte unchanged external JS and index (516aa99). Local git checkout blocked by GitHub DNS; Python/Chromium suites not executed locally. New exact-head CI, PR review/merge, main Quality and Pages remain unverified. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI and safe PR #189 release (pending):** structural and browser checks green on exact dev/PR SHA including both symlink regressions; reconcile diverged main without rewriting history; verify required reviews and protections; ordinary PR merge only after all gates; verify new main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex roots with reference residuals, repeated-root and convergence-failure tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable solver with analytic reference fit, ill-conditioning refusal and 390px keyboard smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, unstable-pole rejection and responsive browser regression.
+5. **P1 Tool-search favourites (planned):** bounded persisted pins, storage-failure fallback, keyboard and mobile regression.
+
 ## 2026-11-04 — BUILD-MODULE-SYMLINK-154 (dev; exact-head QA pending)
 
 **Execution ledger:** Inspected dev/main comparison (66 ahead, one behind at start), root AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and successful prior exact-head Quality run 41811306368 for 6a7b88a. Refused symlinked JavaScript module sources before reading them, preventing external source inclusion in the standalone HTML. Added subprocess regression for rejection, symlink preservation, unchanged external JS and unchanged index bytes. Source commit 6299b02; test commit 8a3f897. Local Python/Chromium suites were not executed; new exact-head Quality and Pages remain unverified. No merge. Historical inventory frozen at 166 gaps / 95 partial.

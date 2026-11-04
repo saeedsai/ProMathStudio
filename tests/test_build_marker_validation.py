@@ -8,6 +8,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 class BuildMarkerValidationTests(unittest.TestCase):
+    def test_symlinked_module_rejected_without_touching_external_source_or_index(self):
+        builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "scripts").mkdir()
+            (root / "src").mkdir()
+            (root / "scripts/build.py").write_text(builder, encoding="utf-8")
+            target = root / "external.js"
+            original_source = b"const outside = true;\\n"
+            target.write_bytes(original_source)
+            (root / "src/data-tables.js").symlink_to(target)
+            original_html = b'<script id="mathstudio-data-tables">\\n/* original */\\n</script>\\n'
+            (root / "index.html").write_bytes(original_html)
+            result = subprocess.run(["python3", str(root / "scripts/build.py")],
+                                    capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Refusing symlinked standalone module source: src/data-tables.js", result.stderr)
+            self.assertTrue((root / "src/data-tables.js").is_symlink())
+            self.assertEqual(target.read_bytes(), original_source)
+            self.assertEqual((root / "index.html").read_bytes(), original_html)
+
     def test_symlinked_index_rejected_without_touching_target(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
         with tempfile.TemporaryDirectory() as directory:

@@ -1,3 +1,14 @@
+## 2026-11-05 — CI-BROWSE-GNSS-166 (exact-head recheck pending)
+
+**Execution ledger:** Inspected dev/main comparison (134 ahead, 0 behind before edit), root AGENTS.md, frozen inventory, plan, PR #189 (open, mergeable, zero submitted reviews), and exact-head Quality [41921062294](https://github.com/saeedsai/ProMathStudio/actions/runs/41921062294) at 7ed82f81b66859cbf7504ee2b7698cde63c7effd. Structural tests and browser steps 1–209 passed. Step 210 failed at smoke_tool_search_favorites.py:248 because Browse All Tools correctly includes implemented GNSS; the old assertion treated all GNSS as planned. Replaced it with the canonical implemented GNSS least-squares ID and explicit exclusion of planned-only spectral analysis. Regression commits ccd0db2 and 509821c; exact-head Chromium rerun pending. No local tests executed; no merge or Pages release. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** structural tests and all Chromium steps including browse GNSS and pipe/digital logic pass at the final dev SHA; repair first observed failure.
+2. **P0 PR #189 release (blocked):** required exact-head checks, reviews and protections green; ordinary dev-to-main merge only then verify main Quality and Pages live critical paths.
+3. **P1 Search preference resilience (planned):** improve blocked/corrupt localStorage startup status, preserve in-memory state; test 390px and source/bundle parity.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, ill-conditioned nonlinear fit and unstable filter reference/negative tests with explicit tolerances.
+5. **P1 Safe cleanup (pending):** verify branch ancestry, protection and open PR status and tracked-file references before deletion.
+
 ## 2026-11-04 — CI-BROWSE-TOGGLE-165 (exact-head recheck pending)
 
 **Execution ledger:** Inspected dev/main (131 ahead / 0 behind before this fix; main 70fc483cb1cec3d2372d37484e4a8ef7942343da), root AGENTS.md, frozen inventory, plan, PR #189 (zero reviews), and Quality run [41911514968](https://github.com/saeedsai/ProMathStudio/actions/runs/41911514968). Structural checks and browser steps 1–209 passed; step 210 failed at smoke_tool_search_favorites.py:239 because native details toggle dispatches asynchronously and browse groups were queried before renderBrowse ran. Added an explicit bounded wait for five browse groups, preserving all browse keyboard, routing and mobile assertions. No application source change; local Chromium/unit tests unavailable, exact-head rerun pending. No merge/Pages claim. Frozen historical 166 gaps / 95 partial unchanged.

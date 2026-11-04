@@ -1,3 +1,14 @@
+## 2026-11-04 — BUILD-MODULE-SYMLINK-154 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected dev/main comparison (66 ahead, one behind at start), root AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and successful prior exact-head Quality run 41811306368 for 6a7b88a. Refused symlinked JavaScript module sources before reading them, preventing external source inclusion in the standalone HTML. Added subprocess regression for rejection, symlink preservation, unchanged external JS and unchanged index bytes. Source commit 6299b02; test commit 8a3f897. Local Python/Chromium suites were not executed; new exact-head Quality and Pages remain unverified. No merge. Historical inventory frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality and PR #189 release (pending):** structural/browser checks green for exact dev/PR SHA; reconcile diverged main ancestry without rewrite; verify reviews/protections; merge only via ordinary PR; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver, reference roots/residuals, repeated-root and nonconvergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable kernel, analytic reference fit, conditioning refusal and 390px keyboard smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, unstable-pole rejection and responsive smoke.
+5. **P1 Tool-search favourites (planned):** bounded persisted pins, storage failure fallback and keyboard/mobile tests.
+
 ## 2026-11-04 — BUILD-SYMLINK-153 (dev; exact-head QA pending)
 
 **Execution ledger:** Inspected dev/main, root AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and exact-head Quality 41804455015 (successful on 9a6d1ef). Added a fail-fast refusal to rewrite symlinked index.html so a build cannot alter an external target, plus an isolated subprocess regression that asserts failure, symlink preservation and byte-for-byte unchanged target. Source commit c1565e2; regression commit bc884f7. Local Python/Chromium suites were not executed; exact new-head CI remains pending. No merge or Pages release claimed. Frozen 166 gaps / 95 partial unchanged.

@@ -1,3 +1,14 @@
+## 2026-11-04 — BUILD-INDEX-CRLF-145 (exact-head QA pending)
+
+**Execution ledger:** Pre-change dev 654f5d6d8ed24bb17433284d1d55a65068057dc2; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; dev/main diverged 27 ahead/1 behind. Prior exact-head PR Quality run 41751753649 succeeded (static/browser job). PR #189 open. Standalone builder reads HTML through Python universal-newline translation, which can silently rewrite CRLF files. Added a fail-fast carriage-return guard before rewriting and an isolated subprocess regression asserting byte-identical rollback. Source 535c16c, test 91b83dc; local Python/Chromium not run, new exact-head Quality pending. No merge or Pages claim. Frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Release reconciliation (pending):** green exact-head dev and PR Quality; non-destructively reconcile main ancestry; verify reviews and protections; ordinary dev-to-main PR merge; main Quality and Pages checks.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver with known roots, repeated-root residuals and non-convergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** shared numerical kernel with analytic reference, ill-conditioning refusal and keyboard/mobile smoke.
+4. **P1 FIR/IIR digital filters (planned):** stability and reference frequency response tests, plus 390px browser checks.
+5. **P1 Tool-search favourites (planned):** bounded persistent pins, storage failure recovery, keyboard navigation and mobile smoke.
+
 ## 2026-11-04 — BUILD-INDEX-BOM-144 (exact-head QA pending)
 
 **Change:** Reject a leading UTF-8 BOM in standalone index.html before any bundle rewriting. Focused isolated subprocess regression checks the diagnostic and unchanged HTML bytes. Existing dev Quality 41742985906 succeeded for BUILD-INDEX-NUL-143; PR #189 remains open with no reviews recorded and dev/main ancestry diverged (26 ahead, 1 behind before this commit). No merge without exact-head Quality, reviews/protections and ancestry reconciliation. Historical 166 gaps / 95 partial unchanged.

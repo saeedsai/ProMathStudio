@@ -15,6 +15,8 @@ if text.startswith("\ufeff"):
     raise ValueError("Unexpected UTF-8 BOM in standalone index.html")
 if "\x00" in text:
     raise ValueError("Unexpected NUL character in standalone index.html")
+if any(ord(char) < 32 and char not in "\n\t" for char in text):
+    raise ValueError("Unexpected ASCII control character in standalone index.html")
 
 modules = [
     ("mathstudio-data-tables", "src/data-tables.js"),

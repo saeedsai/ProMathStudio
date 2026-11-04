@@ -1,3 +1,6 @@
+## 2026-11-04 — BUILD-MODULE-CRLF-147
+- Preserve raw newlines when reading standalone JavaScript modules; reject CRLF/lone CR module input before HTML rewrite, preventing silent newline normalization. Add focused subprocess regression for diagnostic and unchanged index. Exact-head CI pending; no release claimed.
+
 ## 2026-11-04 — CI-CRLF-146
 - Fix standalone builder carriage-return validation by disabling Python universal-newline translation when reading `index.html`. Prevents CRLF/lone-CR HTML from bypassing the fail-fast guard.
 - Add subprocess regression for lone CR and mixed newline files, asserting diagnostic and byte-for-byte preservation. Exact-head CI pending; no release claimed.

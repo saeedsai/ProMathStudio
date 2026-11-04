@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-THERMO-CATALOG-163 (browser recheck pending)
+
+**Execution ledger:** Inspected dev 4af74fbcb6dbb9e53b51aa42e1c2484ca063b734, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, this plan, frozen inventory, PR #189 (zero reviews), and exact-head Quality [41892196257](https://github.com/saeedsai/ProMathStudio/actions/runs/41892196257). The engineering thermo/circuits browser step failed; its test still asserted control.frequency.response was planned although prior catalog QA established it is implemented and available. Updated that stale status assertion in commit 47943e29c87bd310183e302a0e997207b225d018, retaining numerical and UI assertions. The GitHub job summary does not expose a traceback, so the exact failing line is unconfirmed. Local git checkout failed DNS resolution; no local tests. Exact-head CI rerun pending. No merge or Pages verification. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** all structural and Chromium checks green on current dev SHA; inspect actual thermo/circuits traceback and correct remaining failures without weakening coverage.
+2. **P0 PR #189 protected release (blocked):** verify exact-head required checks, reviews, protections; ordinary PR merge, then main Quality and Pages verification.
+3. **P1 Search storage fallback (planned):** handle unavailable/corrupt localStorage with no uncaught errors; add source/bundle parity and 390px browser regression.
+4. **P1 Numerical references (planned):** repeated polynomial roots, ill-conditioned nonlinear fitting and unstable digital-filter rejection with explicit tolerances.
+5. **P1 Cleanup (pending):** delete only fully merged unprotected PR-free obsolete branches/files after reference audit.
+
 ## 2026-11-04 — CI-SEARCH-DISABLED-162 (exact-head browser recheck pending)
 
 **Execution ledger:** Inspected AGENTS.md, frozen audit, dev/main (dev 6e26c479e6752460d4f988f35f7f22034c57165b; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; 122 ahead/0 behind), PR #189 (zero reviews) and exact-head Quality [41883559378](https://github.com/saeedsai/ProMathStudio/actions/runs/41883559378). Structural and browser steps 1–196 passed; step 197 failed because Playwright's ordinary click refuses an aria-disabled planned option (30-second timeout), not because the app opened it. The focused regression now uses a forced pointer click while asserting aria-disabled, non-selection, planned status announcement, and unchanged workspace. Test commit eaac95e549ba264f563e0c20626d715b8371907f. Local Chromium and unit checks not executed; exact new-head Quality pending. No application source change or production release. Frozen 166 gaps / 95 partial unchanged.

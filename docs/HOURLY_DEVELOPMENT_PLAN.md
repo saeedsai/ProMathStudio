@@ -1,3 +1,14 @@
+## 2026-11-04 — UI-SEARCH-DISABLED-151 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected root AGENTS.md, frozen inventory, current dev/main comparison (52 ahead/1 behind), prior exact-head Quality 41789155471 (success for 87444df), and PR review evidence (no submitted reviews). Fixed planned-only mouse clicks from activating an aria-disabled search result; the live-region diagnostic remains. Added focused source/bundle regression. Local checkout failed GitHub DNS; no local Python/Chromium pass claimed. Exact new-head CI, PR release, main Quality and Pages remain unverified. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0 Exact-head Quality and safe PR release: structural/browser green on exact SHA, reconcile main divergence without rewrite, verify reviews/protections, ordinary dev-to-main PR merge, then main Quality and Pages success.
+2. P1 Polynomial roots: real/complex reference roots, residuals, repeated roots and bounded nonconvergence regression.
+3. P1 Levenberg–Marquardt fitting: analytic fit reference, ill-conditioning refusal, keyboard and 390px smoke.
+4. P1 FIR/IIR digital filters: reference frequency response, unstable-pole rejection and responsive smoke.
+5. P1 Tool-search favourites: bounded persistence, storage failure fallback, keyboard/mobile regression.
+
 ## 2026-11-04 — UI-SEARCH-KEYBOARD-150 (dev; exact-head QA pending)
 
 **Execution ledger:** Inspected root AGENTS.md, frozen inventory, dev/main (47 ahead/1 behind), PR #189 and exact-head Quality 41782489595/41782486746 (both successful on 05ed76b). Fixed global tool-search keyboard navigation to skip disabled planned-only entries while preserving their visibility/click diagnostic. Added browser regression for planned-only ArrowDown with no active descendant. Local Git checkout failed DNS; local Chromium/unit checks unavailable. Exact new-head CI, PR reviews, ancestry reconciliation, main Quality and Pages pending. Historical 166 gaps/95 partial frozen.

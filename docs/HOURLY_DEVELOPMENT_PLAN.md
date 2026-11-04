@@ -1,3 +1,14 @@
+## 2026-11-04 — CI-CANCELLED-160 (exact-head QA blocked)
+
+**Execution ledger:** Inspected current dev/main comparison (dev d6422e85477d5cb90ab19d5a4ccb47682d3a5a68, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; 117 ahead, zero behind), AGENTS.md, frozen 26-Oct inventory, PR #189 (open, mergeable, zero reviews), and exact-head Quality run [41863330816](https://github.com/saeedsai/ProMathStudio/actions/runs/41863330816). The run was **cancelled** during browser dependency installation (job 126691448442, step 7), after structural/ledger/registry checks succeeded; all browser regressions were skipped. This is not evidence of a test failure or green browser QA. Local git access failed with 'Could not resolve host: github.com'; therefore no testable checkout, source change, or locally executed regression this iteration. Release, main Quality, and Pages remain unverified. Frozen 166 gaps / 95 partial unchanged. Keep recurring development enabled.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (blocked by cancelled run):** obtain completed Quality on exact dev SHA, with structural and all Chromium smoke steps green; inspect first observed failure and repair with focused regression.
+2. **P0 PR #189 release (pending):** confirm required reviews/protections and exact-head green PR checks, inspect full diff, merge only ordinarily; verify main Quality and live Pages critical paths.
+3. **P1 Search mixed-result accessibility (planned):** ensure disabled planned entries never become active through Arrow/Home/End, and mouse refusal leaves workspace unchanged at 390px/1280px.
+4. **P1 Numerical reference hardening (planned):** add independent repeated-root, ill-conditioned LM and filter-stability reference/negative tests with explicit tolerances.
+5. **P1 Safe cleanup (pending):** prove each obsolete branch fully merged, unprotected, and PR-free before deletion; audit references before removing tracked files.
+
 ## 2026-11-04 — CI-SEARCH-MIXED-159 (exact-head QA pending)
 
 **Execution ledger:** Inspected dev/main (114 ahead, zero behind before edit), AGENTS.md, historical inventory, living plan, open PR #189 (zero reviews), and exact-head Quality run [41852963430](https://github.com/saeedsai/ProMathStudio/actions/runs/41852963430) for f6810f2. Structural and browser steps 1–196 succeeded; step 197 failed at tests/smoke_tool_search.py:108 because a mixed query for 'signal spectral analysis' also matches available tools and legitimately selects an available option. Strengthened the focused regression to check all active descendants after ArrowDown, ArrowUp, Home and End are never disabled, while preserving the planned-only refusal assertions. Commit 3f9fbf4. No local Chromium available; new exact-head CI pending. No merge or Pages claim. Historical 166 gaps / 95 partial unchanged.

@@ -214,8 +214,9 @@ def main():
         # --- Catalog status and search invariants.
         statuses = page.evaluate("Object.fromEntries(MathStudio.engineeringCatalog.tools.map(t=>[t.id,t.status]))")
         assert statuses["fluids.pipe.network"] == "available" and statuses["electronics.digital.logic"] == "available"
-        for planned in ("gnss.positioning.least.squares", "control.frequency.response", "signals.spectral.analysis"):
-            assert statuses[planned] == "planned", planned
+        for available in ("gnss.positioning.least.squares", "control.frequency.response"):
+            assert statuses[available] == "available", available
+        assert statuses["signals.spectral.analysis"] == "planned"
         assert page.evaluate("MathStudio.engineeringCatalog.filter('physics','ode').map(t=>t.id)") == ["ode.ivp.scalar"]
         assert page.evaluate("MathStudio.engineeringCatalog.filter('','control orbit').length") == 0
         assert page.evaluate("MathStudio.engineeringCatalog.filter('fluids','pipe').map(t=>t.id)") == ["fluids.pipe.network"]

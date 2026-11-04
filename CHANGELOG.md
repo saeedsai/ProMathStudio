@@ -1,3 +1,7 @@
+## 2026-11-04 — CI browse disclosure timing regression
+
+- CI [41911514968](https://github.com/saeedsai/ProMathStudio/actions/runs/41911514968) passed structural and browser checks through step 209, then failed at browse-group assertion in `tests/smoke_tool_search_favorites.py:239`. The native `<details>` toggle event populates groups asynchronously. The browser test now waits for populated groups without relaxing any browse navigation, keyboard, storage or route assertions. Exact-head CI and release remain pending; no application source feature added.
+
 ## Unreleased — 2026-11-04
 - 2026-11-04 (CI-PINS-GNSS-164; QA pending): corrected the tool-search favourites regression to treat implemented GNSS positioning as available; at full pin capacity it must refuse a new pin, while genuinely planned spectral analysis remains unpinnable. Exact-head Chromium and release remain pending; frozen 166 gaps / 95 partial unchanged.
 - CI search regression: use Playwright forced pointer click to exercise refusal on an aria-disabled planned-only search result; preserve accessibility and workspace invariants. Exact-head browser QA pending.

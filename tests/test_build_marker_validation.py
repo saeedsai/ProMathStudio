@@ -8,6 +8,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 class BuildMarkerValidationTests(unittest.TestCase):
+    def test_symlinked_index_rejected_without_touching_target(self):
+        builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "scripts").mkdir()
+            (root / "scripts/build.py").write_text(builder, encoding="utf-8")
+            target = root / "external.html"
+            original = b"<html>external data must remain unchanged</html>"
+            target.write_bytes(original)
+            (root / "index.html").symlink_to(target)
+            result = subprocess.run(["python3", str(root / "scripts/build.py")],
+                                    capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Refusing to rewrite symlinked standalone index.html", result.stderr)
+            self.assertTrue((root / "index.html").is_symlink())
+            self.assertEqual(target.read_bytes(), original)
+
     def test_index_ascii_controls_rejected_without_overwriting_index(self):
         builder = (ROOT / "scripts/build.py").read_text(encoding="utf-8")
         for control in (b"\x01", b"\x08", b"\x0c", b"\x1f"):

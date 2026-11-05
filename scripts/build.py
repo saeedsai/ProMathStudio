@@ -3,6 +3,9 @@ from pathlib import Path
 import re
 import sys
 
+if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] != "--check"):
+    raise SystemExit("Usage: python scripts/build.py [--check]")
+
 root = Path(__file__).resolve().parents[1]
 index = root / "index.html"
 if index.is_symlink():

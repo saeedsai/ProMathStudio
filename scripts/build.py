@@ -114,7 +114,9 @@ if "--check" in sys.argv[1:]:
     with index.open("r", encoding="utf-8", newline="") as source_file:
         original_text = source_file.read()
     if text != original_text:
-        raise SystemExit("Standalone index.html is out of sync; run python scripts/build.py")
+        mismatch = next((i for i, (actual, expected) in enumerate(zip(original_text, text)) if actual != expected), min(len(original_text), len(text)))
+        line = original_text.count("\n", 0, mismatch) + 1
+        raise SystemExit(f"Standalone index.html is out of sync near line {line}; run python scripts/build.py")
     print("Standalone index.html matches modular sources")
 else:
     index.write_text(text, encoding="utf-8")

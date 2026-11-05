@@ -1,3 +1,14 @@
+## 2026-11-05 — CI-GREEN-168 (release review gate)
+
+**Execution ledger:** Re-read AGENTS.md, historical inventory and plan; compared dev/main (141 ahead, 0 behind), inspected open PR #189 and its review submissions (none), and verified exact dev head 262ba648be1fa99959a4a79a84d6bf5231275f1f Quality run [41937533190](https://github.com/saeedsai/ProMathStudio/actions/runs/41937533190): completed SUCCESS, including structural and browser regressions. GitHub-hosted source checkout from this runtime failed DNS resolution, preventing local build/browser tests and safe source/bundle editing; no app source or regression was changed this iteration. Protected PR release not attempted without reviews; main Quality/Pages unverified. Historical 166 gaps / 95 partial unchanged. This ledger commit creates a newer dev SHA whose own Quality must be verified before promotion.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending after ledger update):** verify all required structural and Chromium checks green for the newest dev SHA, not merely prior 262ba648.
+2. **P0 PR #189 release (review-blocked):** obtain authorized submitted reviews and verify protections/checks; ordinary PR merge only; confirm main Quality and live Pages.
+3. **P1 Search storage resilience (planned):** make blocked/corrupt storage state explicit without losing session behavior; focused browser regression and source/bundle parity.
+4. **P1 Numerical reference QA (planned):** independent repeated polynomial-root, nonlinear-fit and unstable-filter positive/negative tests with tolerances.
+5. **P1 Cleanup (pending):** ancestry, open-PR, protection and tracked-reference audit before any deletion.
+
 ## 2026-11-05 — CI-PIPE-CATALOG-167 (exact-head recheck pending)
 
 **Execution ledger:** Inspected root AGENTS.md, frozen inventory, living plan, main/dev ancestry (138 ahead / 0 behind before edit), and GitHub Quality run [41930385695](https://github.com/saeedsai/ProMathStudio/actions/runs/41930385695). The run was reported cancelled, but its job log identifies an actual step 211 failure at `tests/smoke_engineering_pipe_logic.py:218`: obsolete expectations classified implemented GNSS positioning and control frequency response as planned. Steps 1–210 succeeded, including favourites/Browse All Tools. Updated the focused browser regression to assert these two tools available while preserving the genuinely planned spectral-analysis assertion; commit ab7fa841. No local tests executed; corrected exact-head Chromium run pending. PR #189 reviews/protection and main Pages not verified. Historical 166 gaps / 95 partial unchanged. No app source feature in this bounded CI-repair iteration.

@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-DRIFT-SOURCES-178 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen inventory, living plan, dev/main comparison (171 ahead, zero behind), exact-head workflow (cancelled) and PR #189 reviews (none). Improved read-only drift diagnostic to list up to three mismatched module paths with total count and ellipsis for additional paths; focused two-source regression. Local checkout and Chromium execution unavailable. No merge or Pages verification. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head QA (pending):** focused builder Python regression, structural and Chromium suites green on final dev SHA; cancelled runs do not count.
+2. **P0 PR #189 release (review-blocked):** authorized approvals and exact-head checks green; ordinary merge, then main Quality and Pages smoke verified.
+3. **P1 Search-storage resilience (planned):** blocked/corrupt localStorage retains session navigation with accurate persistence status; browser regression and bundle parity.
+4. **P1 Numerical QA (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filters pass independent references and invalid-input cases.
+5. **P1 Safe cleanup (pending):** verify ancestry, protections, PRs and tracked references before deletion.
+
 ## 2026-11-05 — BUILD-DRIFT-COUNT-177 (exact-head QA pending)
 
 **Execution ledger:** Re-read AGENTS.md, frozen inventory and living plan; verified dev dd75b89dde4cc8f16bb2eb6aac7cea2cb52162f1 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head Quality [42023181030](https://github.com/saeedsai/ProMathStudio/actions/runs/42023181030) success, and PR #189 with no submitted reviews. Improved read-only builder diagnostics to report the number of mismatched embedded modules, retaining first-source and line/column information; added a two-module drift regression and byte-preservation assertion. Local git checkout failed DNS resolution; Python/Chromium execution and new exact-head Quality remain pending. No merge/Pages verification. Frozen historical 166 gaps / 95 partial unchanged.

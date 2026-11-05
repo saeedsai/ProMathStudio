@@ -1,3 +1,6 @@
+## 2026-11-05 — Standalone drift diagnostic lists source paths
+- Read-only --check lists up to three mismatched module paths, total count and first mismatch position; focused regression asserts two source paths. Exact-head CI pending, previous run cancelled. PR #189 review-blocked; Pages unverified. Frozen 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Standalone drift diagnostics count mismatched modules
 - Read-only `python scripts/build.py --check` now reports the number of embedded modules that differ from modular sources, while retaining first module and line/column details. Added focused two-module drift and no-rewrite regression. Previous exact-head Quality #42023181030 passed; new head CI and local tests pending. PR #189 remains review-gated, Pages unverified; historical 166 gaps / 95 partial unchanged.
 

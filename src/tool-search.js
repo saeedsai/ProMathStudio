@@ -275,9 +275,10 @@ function render(){
 }
 function togglePin(n){
  const item=results[n];if(!item||item.status!=='available')return;
+ const wasPersisted=prefs.persisted?.();
  const on=prefs.togglePin(item.id,openable);
  if(on===null){status.textContent='You can pin up to '+prefs.limits.pins+' tools. Unpin one first.';return;}
- status.textContent=(on?'Pinned ':'Unpinned ')+item.title+'.'+(prefs.persisted?.()===false?' This session only; browser storage is unavailable.':'');
+ status.textContent=(on?'Pinned ':'Unpinned ')+item.title+'.'+(prefs.persisted?.()===false?' This session only; browser storage is unavailable.':wasPersisted===false?' Preferences are now saved to this browser.':'');
  if(quick){const keep=active;renderQuick();setActive(Math.min(keep,results.length-1));}
  else for(const opt of opts)if(opt.dataset.toolId===item.id){const b=opt.querySelector('.ts-pin');if(b)syncPin(b,item);}
 }

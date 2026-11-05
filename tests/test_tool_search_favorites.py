@@ -115,6 +115,8 @@ assert.deepEqual(Array.from(prefs.pinned()),['panel:matrix-tools']);
         self.assertIn("const openable=id=>byId.get(id)?.status==='available';", SEARCH)
         self.assertIn("prefs.recent(openable)", SEARCH)
         self.assertIn("prefs.pinned(openable)", SEARCH)
+        self.assertIn("const wasPersisted=prefs.persisted?.();", SEARCH)
+        self.assertIn("Preferences are now saved to this browser.", SEARCH)
 
     def test_accessible_groups_pins_and_browse(self):
         for needle in ("'role','group'", "'aria-labelledby'", "'Recent tools'", "'Pinned tools'", "'aria-pressed'",

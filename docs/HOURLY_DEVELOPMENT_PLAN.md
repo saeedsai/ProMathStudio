@@ -1,3 +1,14 @@
+## 2026-11-05 — UI-PREFS-RECOVERY-183 (exact-head CI pending)
+
+**Execution ledger:** Inspected dev 474132b and main 70fc483, AGENTS.md, frozen inventory, living plan, exact-head push Quality #42108727954 and PR Quality #42108738708 (both successful), PR #189 (open, no reviews), and existing Pages evidence. Fixed a user-facing ambiguity: after a quota/storage write failure, successful later pinning silently restored persistence without announcing recovery. The pin live region now says preferences are saved to the browser when persistence changes false→true. Added source/bundle parity, focused structural assertion and 390px Chromium failed-write/recovery regression. Local full suite unavailable; exact-head CI pending. No merge or cleanup; frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** push and PR workflows pass new SHA, including 390px quota recovery, standalone parity and full browser suite.
+2. **P0 Protected release PR #189 (review-gated):** verify required approvals and checks before ordinary merge; confirm new main Quality, Pages build and live smoke.
+3. **P1 Storage recovery keyboard UX (planned):** verify screen-reader live status, quota/blocked transitions and persistence on reload across desktop/mobile.
+4. **P1 Numerical reference regressions (planned):** repeated polynomial roots, nonlinear fit conditioning and unstable digital filters pass independent reference/negative cases.
+5. **P1 Safe cleanup audit (pending):** verify old branch fully contained in main, no PR, no protections or unique commits before deletion.
+
 ## 2026-11-05 — UI-PREFS-INVALID-IDS-182 (exact-head QA pending)
 
 **Execution ledger:** Inspected AGENTS.md, frozen inventory, living plan, dev 5ced1f4 and main 70fc483, PR #189 (open, no submitted reviews) and exact-head push Quality #42099749807 plus PR Quality #42099754874 (both successful). Identified invalid whitespace-only and control-character preference IDs accepted by the direct preference API and corrupted storage. Reject them on restore and mutation without changing valid tool IDs, caps or legacy compatibility. Updated source, standalone bundle, focused Node regression, Chromium coverage, plan and changelog. New exact-head CI and local full-suite verification pending; no release, Pages deployment or cleanup. Historical 166 gaps / 95 partial unchanged.

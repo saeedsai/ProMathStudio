@@ -1,3 +1,6 @@
+## 2026-11-05 — Search preferences announce recovered persistence
+- Pin/unpin now announces when a previously session-only preference successfully saves to browser storage; existing failure message remains. Added structural and 390px Chromium quota-recovery regressions and synchronized the standalone HTML. Prior exact-head push/PR Quality green; new CI and review-gated release pending. Historical 166 gaps/95 partial unchanged.
+
 ## 2026-11-05 — Reject malformed saved tool IDs
 - Search favourites now discard whitespace-only and control-character IDs from corrupted storage and reject them in the preferences API. Valid IDs, limits and legacy preferences remain supported. Added executable Node negative/boundary cases and Chromium restore assertions; synchronized standalone HTML. Prior dev/PR Quality for 5ced1f4 passed; new exact-head QA and review-gated release pending. Historical 166 gaps / 95 partial unchanged.
 

@@ -231,6 +231,22 @@ def main():
         assert page3.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
         ctx3.close()
 
+        # A failed write followed by a successful pin save must announce recovery.
+        ctx_recover = browser.new_context(viewport={'width': 390, 'height': 850})
+        ctx_recover.add_init_script("""(()=>{let blocked=true;const original=Storage.prototype.setItem;
+            Storage.prototype.setItem=function(...args){if(blocked){blocked=false;throw new DOMException('full','QuotaExceededError');}
+                return original.apply(this,args);};})()""")
+        recover_page = ctx_recover.new_page()
+        watch(recover_page, errors)
+        recover_page.goto(url, wait_until='load')
+        search(recover_page, 'fft')
+        recover_page.keyboard.press('Alt+p')
+        assert 'session only' in recover_page.locator('#tool-search-status').inner_text().lower()
+        recover_page.keyboard.press('Alt+p')
+        assert 'now saved to this browser' in recover_page.locator('#tool-search-status').inner_text().lower()
+        assert recover_page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True
+        ctx_recover.close()
+
         # Browse all tools: collapsed workspace groups contain known tools and open them.
         ctx4 = browser.new_context(viewport={'width': 1280, 'height': 850})
         page4 = ctx4.new_page()

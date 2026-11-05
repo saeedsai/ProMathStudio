@@ -1,3 +1,6 @@
+## 2026-11-06 — Stabilize quota-recovery Chromium regression
+- Fixed a test-only one-shot quota simulation that could be consumed by unrelated startup storage writes. The browser test now arms a failure specifically for the tool-search preferences key immediately before pinning and verifies session-only state before recovery. Production JavaScript and standalone HTML are unchanged. Both previous exact-head Quality runs #42117774224 and #42117785366 failed at this browser assertion; new CI is pending. PR #189 remains review-gated. Historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Search preferences announce recovered persistence
 - Pin/unpin now announces when a previously session-only preference successfully saves to browser storage; existing failure message remains. Added structural and 390px Chromium quota-recovery regressions and synchronized the standalone HTML. Prior exact-head push/PR Quality green; new CI and review-gated release pending. Historical 166 gaps/95 partial unchanged.
 

@@ -1,3 +1,14 @@
+## 2026-11-06 — UI-PREFS-QUOTA-FIXTURE-184 (exact-head QA pending)
+
+**Execution ledger:** Read AGENTS.md, living plan, frozen inventory, dev 260044a and main 70fc483, PR #189 (no reviews), exact-head push Quality #42117774224 and PR Quality #42117785366 (both failed). Read failed job steps and logs: the only observed failure was tests/smoke_tool_search_favorites.py:244, the first 'session only' assertion in the quota-recovery browser case. Root cause is a nondeterministic fixture: a global one-shot Storage.setItem failure was armed before app initialization, allowing unrelated startup writes to consume it. Scope interception to the preferences storage key and arm immediately before the intended Alt+P pin write; assert persisted() false before checking the session-only live status, and retain the subsequent recovery assertion. Production source/bundle unchanged. Local checkout/Chromium unavailable; exact-head CI pending. No merge or cleanup. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** new quota fixture passes targeted Chromium browser regression; complete dev push and PR Quality both green for the same SHA, with no weakened product assertions.
+2. **P0 PR #189 release (review-gated):** verify required approvals/protections and exact-head checks; ordinary dev-to-main PR merge only when permitted, then verify main Quality and Pages/live smoke.
+3. **P1 Storage failure UX (planned):** deterministic keyboard, live region, quota and blocked-read recovery on desktop/390px with persisted-state assertions.
+4. **P1 Numerical correctness (planned):** independent repeated-root, nonlinear fitting and unstable-filter reference/negative regressions.
+5. **P1 Cleanup audit (pending):** verify old branch ancestry/unique commits, protections and open PRs before any deletion.
+
 ## 2026-11-05 — UI-PREFS-RECOVERY-183 (exact-head CI pending)
 
 **Execution ledger:** Inspected dev 474132b and main 70fc483, AGENTS.md, frozen inventory, living plan, exact-head push Quality #42108727954 and PR Quality #42108738708 (both successful), PR #189 (open, no reviews), and existing Pages evidence. Fixed a user-facing ambiguity: after a quota/storage write failure, successful later pinning silently restored persistence without announcing recovery. The pin live region now says preferences are saved to the browser when persistence changes false→true. Added source/bundle parity, focused structural assertion and 390px Chromium failed-write/recovery regression. Local full suite unavailable; exact-head CI pending. No merge or cleanup; frozen 166 gaps/95 partial unchanged.

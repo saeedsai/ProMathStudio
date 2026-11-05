@@ -1,3 +1,6 @@
+## 2026-11-05 — Consistent standalone check snapshot
+- Read-only build consistency checking now compares against the original index.html snapshot rather than reopening it after modular source processing. Added isolated regression simulating a concurrent index move; local test execution and new exact-head CI pending. Previous Quality #42014883879 passed. PR #189 remains review-gated; no release. Historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Idempotent standalone rebuild
 - Normal `python scripts/build.py` no longer rewrites already synchronized index.html; preserves modification time and avoids unnecessary rebuild churn. Focused isolated subprocess regression checks unchanged bytes, mtime and successful no-op output. Prior exact-head Quality #41999177480 passed; new-head QA pending. No release; frozen historical 166 gaps / 95 partial unchanged.
 

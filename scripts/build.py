@@ -1,6 +1,7 @@
 """Rebuild standalone HTML from modular JavaScript without changing script spacing."""
 from pathlib import Path
 import re
+import sys
 
 root = Path(__file__).resolve().parents[1]
 index = root / "index.html"
@@ -106,5 +107,12 @@ for tag, source in modules:
         raise ValueError(f"Unsafe script closing sequence in module: {source}")
     text = text[:start] + module_source + trailing_newlines + text[end:]
 
-index.write_text(text, encoding="utf-8")
-print("Rebuilt standalone index.html")
+if "--check" in sys.argv[1:]:
+    with index.open("r", encoding="utf-8", newline="") as source_file:
+        original_text = source_file.read()
+    if text != original_text:
+        raise SystemExit("Standalone index.html is out of sync; run python scripts/build.py")
+    print("Standalone index.html matches modular sources")
+else:
+    index.write_text(text, encoding="utf-8")
+    print("Rebuilt standalone index.html")

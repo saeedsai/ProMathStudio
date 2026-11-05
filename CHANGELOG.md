@@ -1,3 +1,6 @@
+## 2026-11-05 — Standalone builder identifies drift line
+- Read-only --check now identifies the first mismatched line to help repair stale standalone bundles. Added a focused line-number regression. Previous head Quality #41977921641 passed; new exact-head Quality pending. No release; frozen 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Standalone builder rejects unsupported CLI arguments
 - Reject unknown or extra flags before any index.html read/write; preserve normal build and --check modes. Added focused regression asserting no output mutation on invalid invocation. Previous head Quality #41971023436 green; new exact-head checks pending. No release; historical 166 gaps / 95 partial unchanged.
 

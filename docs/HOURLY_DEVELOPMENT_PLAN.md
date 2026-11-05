@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-CHECK-170 (CI pending)
+
+**Execution ledger:** Inspected dev/main (145 ahead / 0 behind before implementation), AGENTS.md, frozen inventory, living plan, and PR #189 reviews (none). Exact previous head 4626245 Quality #41964869817 completed successfully. Added read-only `python scripts/build.py --check` source/bundle consistency mode in commit d675a889 and isolated positive/drift/no-write/repair regression in 814f0db. Git clone DNS failed (`Could not resolve host: github.com`); local repository/browser checks unavailable. New exact-head CI pending. PR review gate remains; no merge or Pages deployment. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Verify new exact-head Quality (pending):** structural and complete Chromium checks green on final dev SHA; run `python -m unittest tests/test_build_check_mode.py` and `python scripts/build.py --check` when checkout is available.
+2. **P0 PR #189 release (review-blocked):** required approvals and exact-head checks verified; ordinary PR merge; main Quality and live Pages smoke green.
+3. **P1 Search-storage fallback (planned):** corrupt/blocked storage accurately reports session-only persistence; source/index parity and browser regression.
+4. **P1 Numerical QA (planned):** polynomial repeated roots, nonlinear fit and digital filter reference/invalid-input cases with tolerances.
+5. **P1 Safe cleanup (pending):** audit ancestry, open PRs, protections and file references before deletion.
+
 ## 2026-11-05 — CI-GREEN-169 (source checkout DNS blocked)
 
 **Execution ledger:** Inspected dev/main comparison (143 ahead, 0 behind), root AGENTS.md, frozen historical inventory, living plan, PR #189 (open, mergeable, no submitted reviews), and exact-head Quality run [41945883245](https://github.com/saeedsai/ProMathStudio/actions/runs/41945883245) at dev 20c89b114d47f3d9fd09c929392b26fae7919325 (success). Main remains 70fc483cb1cec3d2372d37484e4a8ef7942343da. Local git ls-remote failed: Could not resolve host github.com. Source/bundle parity requires editing both src/tool-prefs.js and standalone index.html; no unverified source/test edits or release were attempted. No local tests; no Pages/main deployment verified. Historical 166 gaps / 95 partial unchanged. This documentation update will create a new head requiring its own Quality check.

@@ -1,3 +1,14 @@
+## 2026-11-05 — CI-GREEN-169 (source checkout DNS blocked)
+
+**Execution ledger:** Inspected dev/main comparison (143 ahead, 0 behind), root AGENTS.md, frozen historical inventory, living plan, PR #189 (open, mergeable, no submitted reviews), and exact-head Quality run [41945883245](https://github.com/saeedsai/ProMathStudio/actions/runs/41945883245) at dev 20c89b114d47f3d9fd09c929392b26fae7919325 (success). Main remains 70fc483cb1cec3d2372d37484e4a8ef7942343da. Local git ls-remote failed: Could not resolve host github.com. Source/bundle parity requires editing both src/tool-prefs.js and standalone index.html; no unverified source/test edits or release were attempted. No local tests; no Pages/main deployment verified. Historical 166 gaps / 95 partial unchanged. This documentation update will create a new head requiring its own Quality check.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (pending):** complete structural and Chromium checks pass for the newest dev commit SHA.
+2. **P0 Release PR #189 (review-blocked):** verify required approvals/protection and exact-head checks; ordinary PR merge; verify main Quality and Pages deployment/live smoke.
+3. **P1 Storage fallback (blocked on source checkout):** initialize persistence status accurately when localStorage read throws or JSON corrupt; retain session state; source/bundle parity, blocked-storage browser and unit tests pass.
+4. **P1 Numerical QA (planned):** repeated-root polynomial, ill-conditioned nonlinear fit and unstable filter references with explicit tolerance and invalid-input checks pass.
+5. **P1 Safe cleanup (pending):** audit ancestry, protections, open PRs and tracked references before deleting anything.
+
 ## 2026-11-05 — CI-GREEN-168 (release review gate)
 
 **Execution ledger:** Re-read AGENTS.md, historical inventory and plan; compared dev/main (141 ahead, 0 behind), inspected open PR #189 and its review submissions (none), and verified exact dev head 262ba648be1fa99959a4a79a84d6bf5231275f1f Quality run [41937533190](https://github.com/saeedsai/ProMathStudio/actions/runs/41937533190): completed SUCCESS, including structural and browser regressions. GitHub-hosted source checkout from this runtime failed DNS resolution, preventing local build/browser tests and safe source/bundle editing; no app source or regression was changed this iteration. Protected PR release not attempted without reviews; main Quality/Pages unverified. Historical 166 gaps / 95 partial unchanged. This ledger commit creates a newer dev SHA whose own Quality must be verified before promotion.

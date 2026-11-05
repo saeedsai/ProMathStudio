@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-CLI-171 (exact-head CI pending)
+
+**Execution ledger:** Verified previous exact dev head b540071 Quality #41971023436 success; dev/main 149 ahead, 0 behind; PR #189 has zero submitted reviews. Hardened standalone builder CLI to reject unsupported flags before reading or writing index.html; added regression for unknown and mixed flags preserving index content. No local full checkout/browser execution; new exact-head CI pending. No merge or Pages release. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** builder CLI regression, structural suite and Chromium suite all pass at final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized reviews and required checks green; ordinary PR merge and verified main Quality/Pages smoke.
+3. **P1 Search-storage fallback (planned):** blocked/corrupt localStorage retains session behavior and displays accurate persistence state, with browser test and source/bundle parity.
+4. **P1 Numerical QA (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filter references plus invalid-input tests.
+5. **P1 Safe cleanup (pending):** confirm ancestry, open PRs, protections and tracked references before any removal.
+
 ## 2026-11-05 — BUILD-CHECK-170 (CI pending)
 
 **Execution ledger:** Inspected dev/main (145 ahead / 0 behind before implementation), AGENTS.md, frozen inventory, living plan, and PR #189 reviews (none). Exact previous head 4626245 Quality #41964869817 completed successfully. Added read-only `python scripts/build.py --check` source/bundle consistency mode in commit d675a889 and isolated positive/drift/no-write/repair regression in 814f0db. Git clone DNS failed (`Could not resolve host: github.com`); local repository/browser checks unavailable. New exact-head CI pending. PR review gate remains; no merge or Pages deployment. Historical 166 gaps / 95 partial unchanged.

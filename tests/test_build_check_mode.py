@@ -84,9 +84,8 @@ class StandaloneCheckTests(unittest.TestCase):
             self.assertIn("near line 3, column 18", failed.stderr)
             self.assertIn("module: src/data-tables.js", failed.stderr)
             self.assertIn("mismatched modules: 1", failed.stderr)
-            second_drift = drift.replace("window.fixture = true;", "window.fixture = false;", 1)
             # A second independent module must be counted without modifying the file.
-            second_drift = second_drift.replace("window.fixture = true;", "window.fixture = false;", 1)
+            second_drift = drift.replace("window.fixture = true;", "window.fixture = false;", 1)
             index.write_text(second_drift, encoding="utf-8")
             multiple = subprocess.run(cmd, capture_output=True, text=True)
             self.assertNotEqual(multiple.returncode, 0)

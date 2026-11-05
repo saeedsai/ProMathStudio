@@ -1,3 +1,6 @@
+## 2026-11-05 — Standalone drift diagnostics count mismatched modules
+- Read-only `python scripts/build.py --check` now reports the number of embedded modules that differ from modular sources, while retaining first module and line/column details. Added focused two-module drift and no-rewrite regression. Previous exact-head Quality #42023181030 passed; new head CI and local tests pending. PR #189 remains review-gated, Pages unverified; historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Consistent standalone check snapshot
 - Read-only build consistency checking now compares against the original index.html snapshot rather than reopening it after modular source processing. Added isolated regression simulating a concurrent index move; local test execution and new exact-head CI pending. Previous Quality #42014883879 passed. PR #189 remains review-gated; no release. Historical 166 gaps / 95 partial unchanged.
 

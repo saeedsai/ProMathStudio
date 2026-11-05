@@ -70,7 +70,7 @@ modules = [
     ("promath-tool-prefs", "src/tool-prefs.js"),
     ("promath-tool-search", "src/tool-search.js"),
 ]
-first_drift_source = None
+drift_sources = []
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'
     if text.count(marker) != 1:
@@ -112,8 +112,8 @@ for tag, source in modules:
     if "</script" in module_source.lower():
         raise ValueError(f"Unsafe script closing sequence in module: {source}")
     replacement = module_source + trailing_newlines
-    if first_drift_source is None and original != replacement:
-        first_drift_source = source
+    if original != replacement:
+        drift_sources.append(source)
     text = text[:start] + replacement + text[end:]
 
 if "--check" in sys.argv[1:]:
@@ -124,7 +124,7 @@ if "--check" in sys.argv[1:]:
         mismatch = next((i for i, (actual, expected) in enumerate(zip(original_text, text)) if actual != expected), min(len(original_text), len(text)))
         line = original_text.count("\n", 0, mismatch) + 1
         column = mismatch - original_text.rfind("\n", 0, mismatch)
-        module_hint = f" (module: {first_drift_source})" if first_drift_source else ""
+        module_hint = f" (module: {drift_sources[0]}; mismatched modules: {len(drift_sources)})" if drift_sources else ""
         raise SystemExit(f"Standalone index.html is out of sync near line {line}, column {column}{module_hint}; run python scripts/build.py")
     print("Standalone index.html matches modular sources")
 else:

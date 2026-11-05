@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-DRIFT-COUNT-177 (exact-head QA pending)
+
+**Execution ledger:** Re-read AGENTS.md, frozen inventory and living plan; verified dev dd75b89dde4cc8f16bb2eb6aac7cea2cb52162f1 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head Quality [42023181030](https://github.com/saeedsai/ProMathStudio/actions/runs/42023181030) success, and PR #189 with no submitted reviews. Improved read-only builder diagnostics to report the number of mismatched embedded modules, retaining first-source and line/column information; added a two-module drift regression and byte-preservation assertion. Local git checkout failed DNS resolution; Python/Chromium execution and new exact-head Quality remain pending. No merge/Pages verification. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head QA (pending):** run focused Python builder regression, structural suite and Chromium checks for the final dev SHA; all green.
+2. **P0 PR #189 release (review-blocked):** authorized submitted approvals and required exact-head checks verified, ordinary PR merge, then main Quality and Pages smoke green.
+3. **P1 Search-storage resilience (planned):** blocked/corrupt localStorage retains session navigation with accurate persistence status; source/bundle parity and browser regression.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fits and unstable filters pass independent references and invalid-input checks.
+5. **P1 Safe cleanup (pending):** verify ancestry, protections, open PRs and tracked references before any deletion.
+
 ## 2026-11-05 — BUILD-SNAPSHOT-176 (exact-head QA pending)
 
 **Execution ledger:** Inspected dev/main (164 ahead, 0 behind), AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and exact-head Quality [42014883879](https://github.com/saeedsai/ProMathStudio/actions/runs/42014883879) (success for ca8cebc). Changed read-only build consistency checking to use its original index snapshot rather than reopening the file after module processing; added a regression simulating a concurrent index move. Local full checkout/Chromium checks not executed; new exact-head CI pending. PR review gate remains; no merge or Pages verification. Historical 166 gaps / 95 partial unchanged.

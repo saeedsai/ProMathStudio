@@ -80,6 +80,16 @@ for(const invalid of ['null','[]','"text"','42']){
  assert.deepEqual(JSON.parse(raw).recents,['panel:fft-details']);
 }
 
+// A corrupt list type must not discard the other valid list.
+raw=JSON.stringify({v:1,recents:['panel:fft-details'],pins:'invalid'});
+prefs=load(recover);
+assert.equal(prefs.persisted(),false,'malformed pin list requires repair');
+assert.deepEqual(Array.from(prefs.recent()),['panel:fft-details']);
+assert.deepEqual(Array.from(prefs.pinned()),[]);
+assert.equal(prefs.setPinned('panel:matrix-tools',true),true);
+assert.equal(prefs.persisted(),true,'rewriting repaired lists restores persistence');
+assert.deepEqual(JSON.parse(raw).pins,['panel:matrix-tools']);
+
 let writable=false,stored=null;
 const quota={getItem(){return stored},setItem(key,value){if(!writable)throw Error('QuotaExceededError');stored=value}};
 prefs=load(quota);

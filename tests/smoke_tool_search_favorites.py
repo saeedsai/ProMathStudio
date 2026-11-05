@@ -200,6 +200,7 @@ def main():
         page.evaluate("""k=>localStorage.setItem(k,JSON.stringify({recents:[1,null,'panel:brent-details','panel:brent-details',
             'panel:no-such-tool','  ','panel:brent-details\\n',{x:1}],pins:'nope'}))""", KEY)
         page.reload(wait_until='load')
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
         assert [r['id'] for r in page.evaluate("()=>MathStudio.toolSearch.recent()")] == ['panel:brent-details']
         assert page.evaluate("()=>MathStudio.toolSearch.pinned()") == []
         assert page.evaluate("()=>MathStudio.toolPrefs.addRecent('  ')") is False

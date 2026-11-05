@@ -21,6 +21,9 @@ function read(){
   if(raw==null)return {recents:[],pins:[]};
   const data=JSON.parse(raw);
   if(!data||typeof data!=='object'||Array.isArray(data)){persisted=false;return null;}
+  // Keep a valid list if its sibling was corrupted, but report that storage
+  // needs a successful rewrite before preferences are reliably persisted.
+  if((data.recents!==undefined&&!Array.isArray(data.recents))||(data.pins!==undefined&&!Array.isArray(data.pins)))persisted=false;
   return {recents:clean(data.recents,MAX_RECENT),pins:clean(data.pins,MAX_PINS)};
  }catch{persisted=false;return null;} // Blocked storage or corrupt JSON: start session-only; retry on save.
 }

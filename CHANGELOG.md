@@ -1,3 +1,7 @@
+## 2026-11-06 — Salvage valid preferences when one stored list is malformed
+- A valid JSON preferences object with a non-array recent/pin field now reports non-persistent status until a successful rewrite, while retaining the other valid list. This avoids falsely claiming damaged stored preferences are fully restored. Node state-transition and Chromium corrupted-list assertions added; standalone HTML synchronized.
+- Previous exact-head dev push Quality #42126789186 and PR Quality #42126793454 passed for f80ff900; new exact-head CI pending, PR #189 review-gated and production Pages unchanged. Frozen historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-06 — Stabilize quota-recovery Chromium regression
 - Fixed a test-only one-shot quota simulation that could be consumed by unrelated startup storage writes. The browser test now arms a failure specifically for the tool-search preferences key immediately before pinning and verifies session-only state before recovery. Production JavaScript and standalone HTML are unchanged. Both previous exact-head Quality runs #42117774224 and #42117785366 failed at this browser assertion; new CI is pending. PR #189 remains review-gated. Historical 166 gaps / 95 partial unchanged.
 

@@ -117,8 +117,9 @@ for tag, source in modules:
     text = text[:start] + replacement + text[end:]
 
 if "--check" in sys.argv[1:]:
-    with index.open("r", encoding="utf-8", newline="") as source_file:
-        original_text = source_file.read()
+    # Compare with the same snapshot used to assemble the bundle; do not
+    # reopen index.html after modules have been processed.
+    original_text = original_index_text
     if text != original_text:
         mismatch = next((i for i, (actual, expected) in enumerate(zip(original_text, text)) if actual != expected), min(len(original_text), len(text)))
         line = original_text.count("\n", 0, mismatch) + 1

@@ -1,3 +1,6 @@
+## 2026-11-05 — Read-only standalone bundle consistency check
+- Added `python scripts/build.py --check` to report out-of-sync standalone HTML without rewriting it; normal build behavior retained. Added isolated regression for matching content, drift detection, byte-preserving failure and ordinary repair. New exact-head CI pending; PR #189 review-gated; no Pages release. Frozen 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Latest exact-head Quality confirmed; checkout unavailable
 - Quality [41945883245](https://github.com/saeedsai/ProMathStudio/actions/runs/41945883245) succeeded for dev `20c89b114d47f3d9fd09c929392b26fae7919325`. PR #189 remains review-gated. Local git checkout failed DNS resolution, preventing safe standalone source/bundle and browser-test edits; no application feature or regression was committed. Main Quality and Pages not verified. Historical 166 gaps / 95 partial unchanged.
 

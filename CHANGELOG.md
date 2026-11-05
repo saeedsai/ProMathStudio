@@ -1,3 +1,6 @@
+## 2026-11-05 — Standalone builder rejects unsupported CLI arguments
+- Reject unknown or extra flags before any index.html read/write; preserve normal build and --check modes. Added focused regression asserting no output mutation on invalid invocation. Previous head Quality #41971023436 green; new exact-head checks pending. No release; historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Read-only standalone bundle consistency check
 - Added `python scripts/build.py --check` to report out-of-sync standalone HTML without rewriting it; normal build behavior retained. Added isolated regression for matching content, drift detection, byte-preserving failure and ordinary repair. New exact-head CI pending; PR #189 review-gated; no Pages release. Frozen 166 gaps / 95 partial unchanged.
 

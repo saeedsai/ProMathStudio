@@ -11,6 +11,19 @@ BUILDER = ROOT / "scripts" / "build.py"
 
 
 class StandaloneCheckTests(unittest.TestCase):
+    def test_rejects_unknown_arguments_without_writing(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "scripts").mkdir()
+            (root / "scripts" / "build.py").write_text(BUILDER.read_text(encoding="utf-8"), encoding="utf-8")
+            index = root / "index.html"
+            index.write_text("unchanged", encoding="utf-8")
+            for extra in (["--unknown"], ["--check", "--unknown"]):
+                result = subprocess.run([sys.executable, str(root / "scripts" / "build.py"), *extra], capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Usage:", result.stderr)
+                self.assertEqual(index.read_text(encoding="utf-8"), "unchanged")
+
     def test_check_detects_drift_without_rewriting(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

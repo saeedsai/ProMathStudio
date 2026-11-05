@@ -1,3 +1,6 @@
+## 2026-11-05 — Standalone drift diagnostics identify source module
+- `scripts/build.py --check` now names the first mismatched modular source alongside line and column; focused regression verifies the module hint without rewriting output. Previous exact-head Quality #41990683493 passed; new-head checks pending. No release; historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Standalone builder reports drift column
 - Read-only `python scripts/build.py --check` now reports the first mismatched line and 1-based column; focused regression checks an embedded module change at line 3, column 18. Previous exact-head Quality #41984214066 passed; new head QA pending. No release; frozen 166 gaps / 95 partial unchanged.
 

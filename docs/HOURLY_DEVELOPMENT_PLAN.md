@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-DRIFT-MODULE-174 (exact-head CI pending)
+
+**Execution ledger:** Read root AGENTS.md, frozen inventory, current plan, dev/main comparison (162 ahead / 0 behind before changes), PR #189 reviews (none), and exact-head Quality run [41990683493](https://github.com/saeedsai/ProMathStudio/actions/runs/41990683493), successful for af1b17ed. Added the first mismatched modular source path to read-only standalone drift diagnostics and a focused regression asserting it for a changed embedded script. Local git DNS failure prevented checkout and local test execution; exact new-head CI pending. No release or Pages verification. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (pending):** new module-path regression, structural tests and all Chromium checks pass for final dev SHA.
+2. **P0 PR #189 release (review-blocked):** verify authorized reviews, branch protections and exact-head checks; ordinary merge only; main Quality and Pages smoke green.
+3. **P1 Search preference resilience (planned):** blocked/corrupt localStorage remains session-functional with honest status; source/bundle parity and browser regression pass.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fit and unstable filters with tolerances and invalid-input tests pass.
+5. **P1 Safe cleanup (pending):** verify ancestry, open PRs, protections and references before deleting any obsolete branch/file.
+
 ## 2026-11-05 — BUILD-DRIFT-COLUMN-173 (exact-head CI pending)
 
 **Execution ledger:** Inspected dev/main (158 ahead / 0 behind before edits), root AGENTS.md, frozen inventory, plan, PR #189 (open; zero reviews), and exact-head Quality [41984214066](https://github.com/saeedsai/ProMathStudio/actions/runs/41984214066) successful for 54ad159. Improved read-only standalone builder drift diagnostics with 1-based mismatch column in addition to line, with focused regression for changed embedded module text. Source and test were pushed as sequential commits because the available contents API does not support atomic multi-file commits. Local git checkout failed DNS; full local tests and Chromium unavailable. New exact-head Quality pending; PR reviews block release, Pages unverified. Historical 166 gaps / 95 partial unchanged.

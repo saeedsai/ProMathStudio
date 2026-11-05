@@ -50,6 +50,7 @@ class StandaloneCheckTests(unittest.TestCase):
             self.assertNotEqual(failed.returncode, 0)
             self.assertIn("out of sync", failed.stderr)
             self.assertIn("near line 3, column 18", failed.stderr)
+            self.assertIn("module: src/data-tables.js", failed.stderr)
             self.assertEqual(index.read_text(encoding="utf-8"), drift)
             repaired = subprocess.run(cmd[:-1], capture_output=True, text=True)
             self.assertEqual(repaired.returncode, 0, repaired.stderr)

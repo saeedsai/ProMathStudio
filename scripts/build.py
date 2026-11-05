@@ -68,6 +68,7 @@ modules = [
     ("promath-tool-prefs", "src/tool-prefs.js"),
     ("promath-tool-search", "src/tool-search.js"),
 ]
+first_drift_source = None
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'
     if text.count(marker) != 1:
@@ -108,7 +109,10 @@ for tag, source in modules:
         raise ValueError(f"Unsafe script opening sequence in module: {source}")
     if "</script" in module_source.lower():
         raise ValueError(f"Unsafe script closing sequence in module: {source}")
-    text = text[:start] + module_source + trailing_newlines + text[end:]
+    replacement = module_source + trailing_newlines
+    if first_drift_source is None and original != replacement:
+        first_drift_source = source
+    text = text[:start] + replacement + text[end:]
 
 if "--check" in sys.argv[1:]:
     with index.open("r", encoding="utf-8", newline="") as source_file:
@@ -117,7 +121,8 @@ if "--check" in sys.argv[1:]:
         mismatch = next((i for i, (actual, expected) in enumerate(zip(original_text, text)) if actual != expected), min(len(original_text), len(text)))
         line = original_text.count("\n", 0, mismatch) + 1
         column = mismatch - original_text.rfind("\n", 0, mismatch)
-        raise SystemExit(f"Standalone index.html is out of sync near line {line}, column {column}; run python scripts/build.py")
+        module_hint = f" (module: {first_drift_source})" if first_drift_source else ""
+        raise SystemExit(f"Standalone index.html is out of sync near line {line}, column {column}{module_hint}; run python scripts/build.py")
     print("Standalone index.html matches modular sources")
 else:
     index.write_text(text, encoding="utf-8")

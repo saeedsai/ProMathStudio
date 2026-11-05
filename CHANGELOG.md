@@ -1,3 +1,6 @@
+## 2026-11-05 — Deterministic LF standalone output
+- Builder explicitly writes LF line endings across operating systems; regression checks generated HTML bytes and unchanged rebuild timestamp. Previous exact-head Quality #42051332141 was cancelled, not passing. PR #189 remains review-blocked; historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Standalone drift diagnostic lists source paths
 - Read-only --check lists up to three mismatched module paths, total count and first mismatch position; focused regression asserts two source paths. Exact-head CI pending, previous run cancelled. PR #189 review-blocked; Pages unverified. Frozen 166 gaps / 95 partial unchanged.
 

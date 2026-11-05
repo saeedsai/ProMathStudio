@@ -97,6 +97,8 @@ class StandaloneCheckTests(unittest.TestCase):
             repaired = subprocess.run(cmd[:-1], capture_output=True, text=True)
             self.assertEqual(repaired.returncode, 0, repaired.stderr)
             self.assertEqual(index.read_text(encoding="utf-8"), original)
+            self.assertNotIn(b"\r\n", index.read_bytes(), "generated HTML must use LF on all platforms")
+            self.assertEqual(index.read_bytes(), original.encode("utf-8"))
             # An unchanged normal build must not touch the file timestamp.
             os.utime(index, ns=(1_600_000_000_000_000_000, 1_600_000_000_000_000_000))
             before = index.stat().st_mtime_ns

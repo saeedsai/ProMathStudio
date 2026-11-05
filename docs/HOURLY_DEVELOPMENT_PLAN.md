@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-LF-179 (CI pending)
+
+**Execution ledger:** Read AGENTS.md, frozen inventory, living plan, current dev/main comparison (172 ahead / 0 behind), exact-head Quality #42051332141 (cancelled), and PR #189 reviews (none). Changed standalone builder to write explicit LF on every platform; added a byte-level regression for generated output and preserved the no-op timestamp assertion. Local checkout unavailable (github.com DNS); new exact-head CI and Chromium pending. No merge or Pages verification. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** builder LF byte regression, Python structural suite and Chromium browser checks green on final dev SHA.
+2. **P0 Protected PR #189 (review-blocked):** authorized reviews and required checks green, ordinary PR merge, then main Quality and Pages smoke verified.
+3. **P1 Search-storage fallback (planned):** corrupt/blocked localStorage leaves navigation functional and reports session-only status; browser regression and source/bundle parity.
+4. **P1 Numerical reference coverage (planned):** repeated roots, nonlinear fits and unstable filters match independent references and reject invalid inputs.
+5. **P1 Cleanup audit (pending):** confirm ancestry, PRs, protections and references before removing obsolete files/branches.
+
 ## 2026-11-05 — BUILD-DRIFT-SOURCES-178 (exact-head QA pending)
 
 **Execution ledger:** Inspected AGENTS.md, frozen inventory, living plan, dev/main comparison (171 ahead, zero behind), exact-head workflow (cancelled) and PR #189 reviews (none). Improved read-only drift diagnostic to list up to three mismatched module paths with total count and ellipsis for additional paths; focused two-source regression. Local checkout and Chromium execution unavailable. No merge or Pages verification. Historical 166 gaps / 95 partial unchanged.

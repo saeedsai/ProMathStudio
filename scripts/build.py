@@ -130,7 +130,9 @@ if "--check" in sys.argv[1:]:
     print("Standalone index.html matches modular sources")
 else:
     if text != original_index_text:
-        index.write_text(text, encoding="utf-8")
+        # Explicit LF output keeps the generated standalone HTML reproducible on Windows.
+        with index.open("w", encoding="utf-8", newline="\n") as output:
+            output.write(text)
         print("Rebuilt standalone index.html")
     else:
         print("Standalone index.html already up to date")

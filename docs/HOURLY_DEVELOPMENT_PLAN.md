@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-SNAPSHOT-176 (exact-head QA pending)
+
+**Execution ledger:** Inspected dev/main (164 ahead, 0 behind), AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and exact-head Quality [42014883879](https://github.com/saeedsai/ProMathStudio/actions/runs/42014883879) (success for ca8cebc). Changed read-only build consistency checking to use its original index snapshot rather than reopening the file after module processing; added a regression simulating a concurrent index move. Local full checkout/Chromium checks not executed; new exact-head CI pending. PR review gate remains; no merge or Pages verification. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** snapshot regression, Python structural checks and Chromium suite pass for final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized reviews and branch protections satisfied; required exact-head checks green; ordinary merge and main Quality/Pages smoke verified.
+3. **P1 Search-storage resilience (planned):** blocked/corrupt storage retains session-only navigation with accurate persistence status; source/bundle parity and browser regression pass.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filters pass independent reference and invalid-input tests.
+5. **P1 Safe cleanup (pending):** verify ancestry, open PRs, protections and file references before deleting obsolete branches/files.
+
 ## 2026-11-05 — BUILD-IDEMPOTENT-175 (exact-head QA pending)
 
 **Execution ledger:** Inspected AGENTS.md, historical inventory, living plan, dev/main comparison (163 ahead, 0 behind), PR #189 review submissions (none) and exact-head Quality [41999177480](https://github.com/saeedsai/ProMathStudio/actions/runs/41999177480) (success for 3d9a88d). Normal standalone rebuild now skips rewriting an already synchronized index.html, preventing unnecessary mtime churn; focused regression checks unchanged bytes, timestamp and success message. GitHub connector supports atomic tree commit; local browser/structural execution unavailable at this checkpoint. New-head exact CI pending. No merge or Pages verification. Frozen 166 gaps / 95 partial unchanged.

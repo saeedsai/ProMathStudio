@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-DRIFT-DIAGNOSTIC-172 (CI pending)
+
+**Execution ledger:** Inspected dev/main (153 ahead / 0 behind), AGENTS.md, historical inventory, living plan, PR #189 (open; zero reviews) and exact-head Quality #41977921641 (success at 21b896a). Improved read-only builder drift diagnostic to report the first differing line; added focused regression asserting line 2 for a changed first embedded script. Local GitHub clone DNS failed, so unit/Chromium execution unavailable; new exact-head Quality pending. No merge or Pages verification. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** builder drift-line test, structural checks and full Chromium suite green at final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized approvals and exact-head required checks verified; ordinary PR merge and main Quality/Pages smoke.
+3. **P1 Search storage fallback (planned):** blocked/corrupt localStorage retains session behavior; browser regression and source/index parity.
+4. **P1 Numerical references (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filters have reference and invalid-input tests.
+5. **P1 Safe cleanup (pending):** confirm ancestry, open PRs, protection and tracked references before deletion.
+
 ## 2026-11-05 — BUILD-CLI-171 (exact-head CI pending)
 
 **Execution ledger:** Verified previous exact dev head b540071 Quality #41971023436 success; dev/main 149 ahead, 0 behind; PR #189 has zero submitted reviews. Hardened standalone builder CLI to reject unsupported flags before reading or writing index.html; added regression for unknown and mixed flags preserving index content. No local full checkout/browser execution; new exact-head CI pending. No merge or Pages release. Frozen historical 166 gaps / 95 partial unchanged.

@@ -1,3 +1,6 @@
+## 2026-11-05 — Standalone builder reports drift column
+- Read-only `python scripts/build.py --check` now reports the first mismatched line and 1-based column; focused regression checks an embedded module change at line 3, column 18. Previous exact-head Quality #41984214066 passed; new head QA pending. No release; frozen 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Standalone builder identifies drift line
 - Read-only --check now identifies the first mismatched line to help repair stale standalone bundles. Added a focused line-number regression. Previous head Quality #41977921641 passed; new exact-head Quality pending. No release; frozen 166 gaps / 95 partial unchanged.
 

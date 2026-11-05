@@ -24,6 +24,8 @@ if "\x00" in text:
 if any(ord(char) < 32 and char not in "\n\t" for char in text):
     raise ValueError("Unexpected ASCII control character in standalone index.html")
 
+original_index_text = text
+
 modules = [
     ("mathstudio-data-tables", "src/data-tables.js"),
     ("promath-advanced-features", "src/advanced-features.js"),
@@ -125,5 +127,8 @@ if "--check" in sys.argv[1:]:
         raise SystemExit(f"Standalone index.html is out of sync near line {line}, column {column}{module_hint}; run python scripts/build.py")
     print("Standalone index.html matches modular sources")
 else:
-    index.write_text(text, encoding="utf-8")
-    print("Rebuilt standalone index.html")
+    if text != original_index_text:
+        index.write_text(text, encoding="utf-8")
+        print("Rebuilt standalone index.html")
+    else:
+        print("Standalone index.html already up to date")

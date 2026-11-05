@@ -1,3 +1,6 @@
+## 2026-11-05 — Idempotent standalone rebuild
+- Normal `python scripts/build.py` no longer rewrites already synchronized index.html; preserves modification time and avoids unnecessary rebuild churn. Focused isolated subprocess regression checks unchanged bytes, mtime and successful no-op output. Prior exact-head Quality #41999177480 passed; new-head QA pending. No release; frozen historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Standalone drift diagnostics identify source module
 - `scripts/build.py --check` now names the first mismatched modular source alongside line and column; focused regression verifies the module hint without rewriting output. Previous exact-head Quality #41990683493 passed; new-head checks pending. No release; historical 166 gaps / 95 partial unchanged.
 

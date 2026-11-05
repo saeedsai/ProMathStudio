@@ -1,4 +1,5 @@
 """Regression for the standalone builder's read-only consistency mode."""
+import os
 import re
 import subprocess
 import sys
@@ -54,6 +55,14 @@ class StandaloneCheckTests(unittest.TestCase):
             self.assertEqual(index.read_text(encoding="utf-8"), drift)
             repaired = subprocess.run(cmd[:-1], capture_output=True, text=True)
             self.assertEqual(repaired.returncode, 0, repaired.stderr)
+            self.assertEqual(index.read_text(encoding="utf-8"), original)
+            # An unchanged normal build must not touch the file timestamp.
+            os.utime(index, ns=(1_600_000_000_000_000_000, 1_600_000_000_000_000_000))
+            before = index.stat().st_mtime_ns
+            unchanged = subprocess.run(cmd[:-1], capture_output=True, text=True)
+            self.assertEqual(unchanged.returncode, 0, unchanged.stderr)
+            self.assertIn("already up to date", unchanged.stdout)
+            self.assertEqual(index.stat().st_mtime_ns, before)
             self.assertEqual(index.read_text(encoding="utf-8"), original)
 
 

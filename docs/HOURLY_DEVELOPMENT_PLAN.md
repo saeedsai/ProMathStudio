@@ -1,3 +1,14 @@
+## 2026-11-05 — BUILD-IDEMPOTENT-175 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, historical inventory, living plan, dev/main comparison (163 ahead, 0 behind), PR #189 review submissions (none) and exact-head Quality [41999177480](https://github.com/saeedsai/ProMathStudio/actions/runs/41999177480) (success for 3d9a88d). Normal standalone rebuild now skips rewriting an already synchronized index.html, preventing unnecessary mtime churn; focused regression checks unchanged bytes, timestamp and success message. GitHub connector supports atomic tree commit; local browser/structural execution unavailable at this checkpoint. New-head exact CI pending. No merge or Pages verification. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (pending):** idempotent-build Python regression, structural checks and Chromium checks pass for final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized approvals, branch protection and exact-head checks verified; ordinary PR merge followed by main Quality and Pages smoke.
+3. **P1 Search-storage resilience (planned):** blocked/corrupt localStorage preserves session-only navigation with accurate status; browser test and source/bundle parity.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fits and unstable digital filters pass reference and invalid-input tests.
+5. **P1 Safe cleanup (pending):** verify ancestry, open PRs, protection and references before removing any obsolete branch/file.
+
 ## 2026-11-05 — BUILD-DRIFT-MODULE-174 (exact-head CI pending)
 
 **Execution ledger:** Read root AGENTS.md, frozen inventory, current plan, dev/main comparison (162 ahead / 0 behind before changes), PR #189 reviews (none), and exact-head Quality run [41990683493](https://github.com/saeedsai/ProMathStudio/actions/runs/41990683493), successful for af1b17ed. Added the first mismatched modular source path to read-only standalone drift diagnostics and a focused regression asserting it for a changed embedded script. Local git DNS failure prevented checkout and local test execution; exact new-head CI pending. No release or Pages verification. Historical 166 gaps / 95 partial remain frozen.

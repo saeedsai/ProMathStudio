@@ -1,5 +1,7 @@
 """Find a tool recents/pins/browse: preferences module parity, guarded storage, bounds, ARIA and CI."""
 import re
+import shutil
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -34,9 +36,54 @@ class ToolSearchFavoritesTests(unittest.TestCase):
         for line in PREFS.splitlines():
             if "localStorage" in line:
                 self.assertRegex(line, r"try\{|^\s+const raw=", line)
-        self.assertIn("catch{return null;}", PREFS)
+        self.assertIn("catch{persisted=false;return null;}", PREFS)
+        self.assertIn("let persisted=true;\nfunction read(){", PREFS)
         self.assertIn("catch{persisted=false;}", PREFS)
         self.assertNotIn("document.", PREFS)
+
+
+    @unittest.skipUnless(shutil.which("node"), "Node.js required")
+    def test_initial_storage_failure_and_recovery_are_reported(self):
+        # Execute the production module against failing, corrupt and recoverable
+        # Storage implementations, rather than testing only its source text.
+        js = r"""
+const assert=require('assert'),fs=require('fs'),vm=require('vm');
+const source=fs.readFileSync('src/tool-prefs.js','utf8');
+function load(storage){
+ const math={};
+ vm.runInNewContext(source,{window:{MathStudio:math,localStorage:storage}});
+ return math.toolPrefs;
+}
+const blocked={getItem(){throw Error('SecurityError')},setItem(){throw Error('SecurityError')}};
+let prefs=load(blocked);
+assert.equal(prefs.persisted(),false,'blocked read must not claim persistence');
+assert.equal(prefs.addRecent('panel:fft-details'),true);
+assert.deepEqual(Array.from(prefs.recent()),['panel:fft-details']);
+assert.equal(prefs.setPinned('panel:fft-details',true),true);
+assert.deepEqual(Array.from(prefs.pinned()),['panel:fft-details']);
+assert.equal(prefs.persisted(),false,'in-memory fallback must remain session-only');
+
+let raw='{not valid json';
+const recover={getItem(){return raw},setItem(key,value){raw=value}};
+prefs=load(recover);
+assert.equal(prefs.persisted(),false,'corrupt preferences were not restored');
+assert.equal(prefs.addRecent('panel:brent-details'),true);
+assert.equal(prefs.persisted(),true,'successful rewrite must recover persistence');
+assert.deepEqual(JSON.parse(raw).recents,['panel:brent-details']);
+
+let writable=false,stored=null;
+const quota={getItem(){return stored},setItem(key,value){if(!writable)throw Error('QuotaExceededError');stored=value}};
+prefs=load(quota);
+assert.equal(prefs.persisted(),true,'readable empty storage is available initially');
+prefs.addRecent('panel:matrix-tools');
+assert.equal(prefs.persisted(),false,'failed write reports session-only status');
+writable=true;
+prefs.addRecent('panel:fft-details');
+assert.equal(prefs.persisted(),true,'later successful save clears failure');
+assert.deepEqual(JSON.parse(stored).recents,['panel:fft-details','panel:matrix-tools']);
+"""
+        result = subprocess.run(["node", "-e", js], cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_namespaced_key_and_bounds(self):
         self.assertIn("KEY='promath-tool-search-prefs-v1'", PREFS)

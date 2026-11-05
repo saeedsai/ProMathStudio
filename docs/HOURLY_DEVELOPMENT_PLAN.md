@@ -1,3 +1,14 @@
+## 2026-11-05 — UI-PREFS-READ-FAILURE-180 (dev QA pending)
+
+**Execution ledger:** Inspected exact dev/main heads (25cea905 / 70fc483), root AGENTS.md, frozen 166-gap/95-partial audit, living plan, Quality #42070115621 (successful push) and #42070125639 (cancelled PR), PR #189 (open, no reviews), and previous main Quality/Pages success for 70fc483. Confirmed a real storage-state defect: localStorage getItem exceptions or corrupt preference JSON initially left persisted() true. Moved persistence initialization before read(), set persisted=false on failed restore, kept session recents/pins usable and allowed subsequent successful saves to recover. Added an accessible "This session only; browser storage is unavailable" pin announcement, synchronized modular sources and standalone index, strengthened existing Chromium blocked/corrupt-storage coverage, and added an executable Node state-transition reference test. Local git checkout remained unavailable (github.com DNS); focused repo unit/browser commands not run locally; new exact-head CI pending. No merge, branch deletion, or Pages release attempted. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head QA for UI-PREFS-READ-FAILURE-180 (pending):** structural/unit checks including Node read/write failure test, source/bundle parity, and complete Chromium suite (blocked/corrupt/recovered storage, keyboard and 390px smoke) must pass for new dev/PR SHA.
+2. **P0 PR #189 release (review/PR-Quality blocked):** only after exact SHA's dev and PR Quality are successful, review/protection requirements verified and relevant behavior checked, ordinary PR merge; verify new main Quality, Pages deployment and hosted functionality.
+3. **P1 Numerical regression hardening (planned):** independent polynomial repeated-root/backward-error, nonlinear-fit ill-conditioning, and FIR/IIR unstable-pole references, preserving current solver error semantics.
+4. **P1 Accessible search fallback (planned):** verify session-only announcement for quota/read failure, recovery, recent/pin keyboard controls and no horizontal overflow at 390px.
+5. **P1 Safe branch/files cleanup (pending):** prove stray branch fully reachable from validated main, no open PR, no protection, and no references before any authorized deletion.
+
 ## 2026-11-05 — BUILD-LF-179 (CI pending)
 
 **Execution ledger:** Read AGENTS.md, frozen inventory, living plan, current dev/main comparison (172 ahead / 0 behind), exact-head Quality #42051332141 (cancelled), and PR #189 reviews (none). Changed standalone builder to write explicit LF on every platform; added a byte-level regression for generated output and preserved the no-op timestamp assertion. Local checkout unavailable (github.com DNS); new exact-head CI and Chromium pending. No merge or Pages verification. Historical 166 gaps / 95 partial unchanged.

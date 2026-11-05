@@ -1,3 +1,7 @@
+## 2026-11-05 — Search preferences session-only persistence accuracy
+- When browser storage cannot be read (blocked or corrupt), tool preferences immediately report non-persistent state instead of falsely reporting success. The in-memory recent and pinned lists still work; successful subsequent writes restore persisted status. Pin actions announce session-only behavior to assistive technology through the existing live region.
+- New focused executable Node storage-state transitions and extended Chromium corrupt/blocked-storage assertions; synchronized source and offline standalone HTML. Previous dev Quality #42070115621 passed while PR Quality #42070125639 was cancelled; new exact-head CI, review-gated PR #189 and Pages release remain pending. Historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Deterministic LF standalone output
 - Builder explicitly writes LF line endings across operating systems; regression checks generated HTML bytes and unchanged rebuild timestamp. Previous exact-head Quality #42051332141 was cancelled, not passing. PR #189 remains review-blocked; historical 166 gaps / 95 partial unchanged.
 

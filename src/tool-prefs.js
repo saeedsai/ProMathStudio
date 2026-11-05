@@ -14,6 +14,7 @@ function clean(list,max,keep){
  }
  return out;
 }
+let persisted=true;
 function read(){
  try{
   const raw=window.localStorage.getItem(KEY);
@@ -21,10 +22,9 @@ function read(){
   const data=JSON.parse(raw);
   if(!data||typeof data!=='object'||Array.isArray(data))return null;
   return {recents:clean(data.recents,MAX_RECENT),pins:clean(data.pins,MAX_PINS)};
- }catch{return null;} // Blocked storage or corrupt JSON: start empty, overwrite on next save.
+ }catch{persisted=false;return null;} // Blocked storage or corrupt JSON: start session-only; retry on save.
 }
 const state=read()||{recents:[],pins:[]};
-let persisted=true;
 function save(){
  try{window.localStorage.setItem(KEY,JSON.stringify({v:1,recents:state.recents,pins:state.pins}));persisted=true;}
  catch{persisted=false;}

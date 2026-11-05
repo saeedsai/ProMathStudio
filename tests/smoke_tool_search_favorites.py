@@ -192,9 +192,11 @@ def main():
         page.evaluate("k=>localStorage.setItem(k,'{not json')", KEY)
         page.reload(wait_until='load')
         assert page.evaluate("()=>MathStudio.toolSearch.recent().length") == 0
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
         assert quick(page) == {'recent': [], 'pinned': []}
         assert page.evaluate("()=>MathStudio.toolSearch.open('panel:brent-details')")
         assert page.evaluate("k=>JSON.parse(localStorage.getItem(k)).recents", KEY) == ['panel:brent-details']
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True
         page.evaluate("""k=>localStorage.setItem(k,JSON.stringify({recents:[1,null,'panel:brent-details','panel:brent-details',
             'panel:no-such-tool',{x:1}],pins:'nope'}))""", KEY)
         page.reload(wait_until='load')
@@ -214,8 +216,10 @@ def main():
         watch(page3, errors)
         page3.goto(url, wait_until='load')
         assert page3.evaluate("()=>MathStudio.toolSearch.recent()") == []
+        assert page3.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
         search(page3, 'fft')
         page3.keyboard.press('Alt+p')
+        assert 'session only' in page3.locator('#tool-search-status').inner_text().lower()
         page3.keyboard.press('Enter')
         wait_open(page3, 'fft-details')
         assert quick(page3) == {'recent': ['panel:fft-details'], 'pinned': ['panel:fft-details']}

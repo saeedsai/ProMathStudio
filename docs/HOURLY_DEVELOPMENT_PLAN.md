@@ -1,3 +1,14 @@
+## 2026-11-05 — UI-PREFS-INVALID-IDS-182 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen inventory, living plan, dev 5ced1f4 and main 70fc483, PR #189 (open, no submitted reviews) and exact-head push Quality #42099749807 plus PR Quality #42099754874 (both successful). Identified invalid whitespace-only and control-character preference IDs accepted by the direct preference API and corrupted storage. Reject them on restore and mutation without changing valid tool IDs, caps or legacy compatibility. Updated source, standalone bundle, focused Node regression, Chromium coverage, plan and changelog. New exact-head CI and local full-suite verification pending; no release, Pages deployment or cleanup. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** push and PR workflows green on final SHA, including Node invalid-ID tests, Chromium pin flow and standalone parity.
+2. **P0 Release PR #189 (review-gated):** authorized reviews/protections and exact-head checks verified; ordinary merge, then main Quality, Pages build and hosted smoke verified.
+3. **P1 Storage recovery UX (planned):** blocked/quota/corrupt storage accurately announces session-only and recovery status in 390px and desktop Chromium checks.
+4. **P1 Numerical references (planned):** repeated-root residuals, nonlinear-fit conditioning and unstable filter rejection pass independent fixtures and negative cases.
+5. **P1 Cleanup audit (pending):** prove ancestry, no open PR, no protection and no unique commits before any deletion.
+
 ## 2026-11-05 — UI-PREFS-INVALID-ROOT-181 (exact-head QA pending)
 
 **Execution ledger:** Re-read AGENTS.md, frozen feature inventory, living plan, dev/main and latest CI/PR/Pages evidence. Prior exact-head b5a02ea had dev push and PR Quality still running, no failed steps at inspection; PR #189 remained open without reviews, main remained 70fc483. Discovered malformed but valid JSON preference roots (null, array, string, number) returned a fresh in-memory state while falsely reporting persisted=true. Changed preference restore to mark persisted=false for unsupported roots; subsequent valid saves recover true. Added focused Node execution cases for four root types and extended Chromium round-trip assertions, synchronized standalone index.html. Local git checkout failed DNS resolution; local structural/Chromium suites unavailable, exact-head CI pending. No PR merge, Pages deployment, or branch cleanup. Frozen historical 166 gaps / 95 partial unchanged.

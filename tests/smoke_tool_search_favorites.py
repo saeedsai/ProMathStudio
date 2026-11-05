@@ -198,10 +198,12 @@ def main():
         assert page.evaluate("k=>JSON.parse(localStorage.getItem(k)).recents", KEY) == ['panel:brent-details']
         assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True
         page.evaluate("""k=>localStorage.setItem(k,JSON.stringify({recents:[1,null,'panel:brent-details','panel:brent-details',
-            'panel:no-such-tool',{x:1}],pins:'nope'}))""", KEY)
+            'panel:no-such-tool','  ','panel:brent-details\\n',{x:1}],pins:'nope'}))""", KEY)
         page.reload(wait_until='load')
         assert [r['id'] for r in page.evaluate("()=>MathStudio.toolSearch.recent()")] == ['panel:brent-details']
         assert page.evaluate("()=>MathStudio.toolSearch.pinned()") == []
+        assert page.evaluate("()=>MathStudio.toolPrefs.addRecent('  ')") is False
+        assert page.evaluate("()=>MathStudio.toolPrefs.setPinned('panel:fft-details\\n',true)") is False
         for bad in ('null', '[]', '"text"', '42'):
             page.evaluate("([k,v])=>localStorage.setItem(k,v)", [KEY, bad])
             page.reload(wait_until='load')

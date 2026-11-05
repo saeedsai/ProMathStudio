@@ -1,3 +1,6 @@
+## 2026-11-05 — Reject malformed saved tool IDs
+- Search favourites now discard whitespace-only and control-character IDs from corrupted storage and reject them in the preferences API. Valid IDs, limits and legacy preferences remain supported. Added executable Node negative/boundary cases and Chromium restore assertions; synchronized standalone HTML. Prior dev/PR Quality for 5ced1f4 passed; new exact-head QA and review-gated release pending. Historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-05 — Invalid search-preferences root reports session-only state
 - Fixed a follow-on persistence-state defect: valid JSON with unsupported top-level types (null, array, number or string) now reports session-only until a successful rewrite, instead of incorrectly claiming preferences were saved. Expanded executable Node and Chromium recovery regressions and kept the standalone HTML synchronized. Exact-head CI pending; PR #189 still requires review and passing checks; historical 166 gaps / 95 partial unchanged.
 

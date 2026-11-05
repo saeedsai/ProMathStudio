@@ -15834,7 +15834,7 @@ const KEY='promath-tool-search-prefs-v1',MAX_RECENT=8,MAX_PINS=20,MAX_ID_LENGTH=
 function clean(list,max,keep){
  const out=[];if(!Array.isArray(list))return out;
  for(const id of list){
-  if(typeof id!=='string'||!id||id.length>MAX_ID_LENGTH||out.includes(id))continue;
+  if(typeof id!=='string'||!id.trim()||id.length>MAX_ID_LENGTH||/[\x00-\x1f\x7f]/.test(id)||out.includes(id))continue;
   if(keep&&!keep(id))continue;
   out.push(id);if(out.length>=max)break;
  }
@@ -15856,7 +15856,7 @@ function save(){
  catch{persisted=false;}
  return persisted;
 }
-const ok=id=>typeof id==='string'&&id.length>0&&id.length<=MAX_ID_LENGTH;
+const ok=id=>typeof id==='string'&&!!id.trim()&&id.length<=MAX_ID_LENGTH&&!/[\x00-\x1f\x7f]/.test(id);
 function addRecent(id,keep){
  if(!ok(id))return false;
  state.recents=clean([id,...state.recents],MAX_RECENT,keep);save();return true;

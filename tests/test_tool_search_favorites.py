@@ -90,6 +90,17 @@ writable=true;
 prefs.addRecent('panel:fft-details');
 assert.equal(prefs.persisted(),true,'later successful save clears failure');
 assert.deepEqual(JSON.parse(stored).recents,['panel:fft-details','panel:matrix-tools']);
+
+// Invalid IDs must not enter the session or saved preferences.
+const invalids=['','  ','panel:fft-details\n','panel:fft-details\u007f','x'.repeat(201)];
+for(const id of invalids){
+ assert.equal(prefs.addRecent(id),false,'invalid recent ID '+JSON.stringify(id));
+ assert.equal(prefs.setPinned(id,true),false,'invalid pinned ID '+JSON.stringify(id));
+}
+stored=JSON.stringify({v:1,recents:[' ','panel:fft-details\n','panel:fft-details','panel:fft-details'],pins:['\u0000','panel:matrix-tools']});
+prefs=load(quota);
+assert.deepEqual(Array.from(prefs.recent()),['panel:fft-details']);
+assert.deepEqual(Array.from(prefs.pinned()),['panel:matrix-tools']);
 """
         result = subprocess.run(["node", "-e", js], cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

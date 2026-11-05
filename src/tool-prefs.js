@@ -20,7 +20,7 @@ function read(){
   const raw=window.localStorage.getItem(KEY);
   if(raw==null)return {recents:[],pins:[]};
   const data=JSON.parse(raw);
-  if(!data||typeof data!=='object'||Array.isArray(data))return null;
+  if(!data||typeof data!=='object'||Array.isArray(data)){persisted=false;return null;}
   return {recents:clean(data.recents,MAX_RECENT),pins:clean(data.pins,MAX_PINS)};
  }catch{persisted=false;return null;} // Blocked storage or corrupt JSON: start session-only; retry on save.
 }

@@ -71,6 +71,15 @@ assert.equal(prefs.addRecent('panel:brent-details'),true);
 assert.equal(prefs.persisted(),true,'successful rewrite must recover persistence');
 assert.deepEqual(JSON.parse(raw).recents,['panel:brent-details']);
 
+for(const invalid of ['null','[]','"text"','42']){
+ raw=invalid;prefs=load(recover);
+ assert.equal(prefs.persisted(),false,'invalid storage root must be session-only: '+invalid);
+ assert.deepEqual(Array.from(prefs.recent()),[]);
+ assert.equal(prefs.addRecent('panel:fft-details'),true);
+ assert.equal(prefs.persisted(),true,'valid rewrite restores persistence: '+invalid);
+ assert.deepEqual(JSON.parse(raw).recents,['panel:fft-details']);
+}
+
 let writable=false,stored=null;
 const quota={getItem(){return stored},setItem(key,value){if(!writable)throw Error('QuotaExceededError');stored=value}};
 prefs=load(quota);

@@ -206,6 +206,9 @@ def main():
             page.evaluate("([k,v])=>localStorage.setItem(k,v)", [KEY, bad])
             page.reload(wait_until='load')
             assert page.evaluate("()=>MathStudio.toolSearch.recent()") == [], bad
+            assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False, bad
+            assert page.evaluate("()=>MathStudio.toolSearch.open('panel:brent-details')"), bad
+            assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True, bad
         ctx.close()
 
         # Storage that throws on every access: the session still keeps recents and pins in memory.

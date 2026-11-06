@@ -27,6 +27,8 @@ function read(){
   if(data.v!==undefined&&data.v!==1){persisted=false;unsupportedVersion=true;return null;}
   // Legacy unversioned data remains readable but needs a v1 rewrite.
   if(data.v===undefined)persisted=false;
+  // Incomplete v1 objects are recoverable, but should not be reported as cleanly persisted.
+  if(data.v===1&&(!Array.isArray(data.recents)||!Array.isArray(data.pins)))persisted=false;
   // Keep a valid list if its sibling was corrupted, but report that storage
   // needs a successful rewrite before preferences are reliably persisted.
   const recents=clean(data.recents,MAX_RECENT),pins=clean(data.pins,MAX_PINS);

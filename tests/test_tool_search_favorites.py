@@ -37,7 +37,7 @@ class ToolSearchFavoritesTests(unittest.TestCase):
             if "localStorage" in line:
                 self.assertRegex(line, r"try\{|^\s+const raw=", line)
         self.assertIn("catch{persisted=false;return null;}", PREFS)
-        self.assertIn("let persisted=true;\nfunction read(){", PREFS)
+        self.assertRegex(PREFS, r"let persisted=true(?:,unsupportedVersion=false)?;\nfunction read\(\)\{")
         self.assertIn("catch{persisted=false;}", PREFS)
         self.assertNotIn("document.", PREFS)
 
@@ -141,6 +141,16 @@ assert.deepEqual(Array.from(prefs.pinned()),[]);
 assert.equal(prefs.setPinned('panel:matrix-tools',true),true);
 assert.equal(prefs.persisted(),true,'rewriting repaired lists restores persistence');
 assert.deepEqual(JSON.parse(raw).pins,['panel:matrix-tools']);
+
+// A versioned payload missing a required list must be treated as needing repair.
+let missing=JSON.stringify({v:1,recents:['panel:fft-details']});
+const partial={getItem(){return missing},setItem(key,value){missing=value}};
+prefs=load(partial);
+assert.equal(prefs.persisted(),false,'missing pinned list needs repair');
+assert.deepEqual(Array.from(prefs.recent()),['panel:fft-details']);
+prefs.addRecent('panel:brent-details');
+assert.equal(prefs.persisted(),true,'repair save should restore persistence');
+assert.deepEqual(JSON.parse(missing).pins,[]);
 
 let writable=false,stored=null;
 const quota={getItem(){return stored},setItem(key,value){if(!writable)throw Error('QuotaExceededError');stored=value}};

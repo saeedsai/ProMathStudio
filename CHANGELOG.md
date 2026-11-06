@@ -1,3 +1,6 @@
+## 2026-11-06 — Repair incomplete v1 tool preferences and unblock structural Quality
+- Corrected a stale structural assertion for the now-extended preference state declaration; the assertion still requires persistence initialization before storage reads. Saved v1 preferences missing recents or pins are marked as needing repair, preserving valid sibling entries until a successful write. Added focused executable Node repair/recovery assertions and synchronized standalone HTML. Exact-head CI pending after previous push #42154342867 and PR #42154352048 failed at this structural assertion. No release; frozen 166 gaps / 95 partial unchanged.
+
 ## 2026-11-06 — Preserve unknown preference schemas and migrate legacy data
 - Saved tool preferences with an unsupported schema version no longer risk silent overwrite by an older client. Session-only recents and pins continue working; unversioned legacy data is readable and migrates to v1 after a successful save. Node and Chromium regressions cover both behaviors; offline standalone module synchronized. Prior dev exact-head push/PR Quality passed (#42147267403/#42147271856), new commit's QA pending. PR #189 still lacks reviews; Pages not redeployed. Historical 166 gaps / 95 partial unchanged.
 

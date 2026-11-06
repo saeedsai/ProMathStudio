@@ -1,3 +1,14 @@
+## 2026-11-06 — UI-PREFS-V1-COMPLETE-189 (exact-head CI pending)
+
+**Execution ledger:** Inspected dev 7402cb86d54e345eb440f13b7e0a9468c4e7fbef and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory and plan. Exact-head push Quality #42154342867 and PR Quality #42154352048 both FAILED at structural unittest: stale test_safety assertion expected `let persisted=true;` while production correctly added `unsupportedVersion=false`. Corrected the assertion to accept the optional additional state variable without weakening the requirement that persisted be initialized before read(). Added production recovery for version-1 preference objects missing either required array: report session-only until rewritten; executable Node regression verifies preservation and recovery. Updated standalone bundle in lockstep, changelog and next five. Local GitHub checkout failed DNS; Python/Chromium full checks not run locally; new exact-head CI pending. PR #189 still open with no reviews; main Pages remains unchanged. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** structural unittest (including state initialization), Node missing-v1-list repair and browser regression, bundle consistency, and push/PR Quality all green on final dev SHA.
+2. **P0 PR #189 release (review-blocked):** verify exact-head checks, required reviews and protection, ordinary authorized PR merge only; verify main Quality, Pages and hosted smoke afterward.
+3. **P1 Explicit future-schema reset (planned):** user-triggered opt-in reset preserves unsupported v2 data until confirmed; keyboard and browser regressions.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fitting and unstable filter reference/invalid cases.
+5. **P1 Safe cleanup (pending):** prove extra branch contained in main, unprotected, no open PR and no unique commits before deleting.
+
 ## 2026-11-06 — UI-PREFS-VERSION-188 (exact-head QA pending)
 
 **Execution ledger:** Inspected dev 5af8126cdcd75299a335620b7f8e62aa3b6c0636 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, plan, successful exact-head push Quality #42147267403 and PR Quality #42147271856, PR #189 (open, no reviews, mergeable clean), and previous main Quality/Pages evidence. Added forward-compatible preference schema handling: unsupported future versions stay session-only without overwriting unknown saved data; unversioned legacy lists remain readable and migrate to v1 on a successful write. Added Node and Chromium regression assertions, rebuilt synchronized standalone module, updated ledger/changelog. Local full suite and browser checks not executed; new exact-head CI pending. No merge, deployment, or branch deletion. Frozen historical 166 gaps / 95 partial unchanged.

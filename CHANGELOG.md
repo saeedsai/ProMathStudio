@@ -1,3 +1,8 @@
+## 2026-11-06 — Project import polling and explicit future-schema reset API
+- Fixed Chromium project migration regression's unsafe wait predicate when graph.dataset is temporarily null; preserved two-row success and added imported-header verification.
+- Added opt-in `MathStudio.toolPrefs.resetUnsupported(true)` API. Unsupported newer schema stays intact on ordinary operations and on failed reset writes; explicit successful reset stores v1. Focused Node regression exercises all transitions; standalone bundle synchronized. Reset UI is not yet implemented.
+- Prior exact-head push Quality #42159635636 failed in project schema browser smoke; PR Quality #42159640300 was cancelled. New exact-head CI pending, no local Chromium execution, PR #189 remains review-gated; no main/Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
 ## 2026-11-06 — Repair incomplete v1 tool preferences and unblock structural Quality
 - Corrected a stale structural assertion for the now-extended preference state declaration; the assertion still requires persistence initialization before storage reads. Saved v1 preferences missing recents or pins are marked as needing repair, preserving valid sibling entries until a successful write. Added focused executable Node repair/recovery assertions and synchronized standalone HTML. Exact-head CI pending after previous push #42154342867 and PR #42154352048 failed at this structural assertion. No release; frozen 166 gaps / 95 partial unchanged.
 

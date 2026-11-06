@@ -15865,9 +15865,10 @@ function read(){
  }catch{persisted=false;return null;} // Blocked storage or corrupt JSON: start session-only; retry on save.
 }
 const state=read()||{recents:[],pins:[]};
-function save(){
- if(unsupportedVersion){persisted=false;return false;}
- try{window.localStorage.setItem(KEY,JSON.stringify({v:1,recents:state.recents,pins:state.pins}));persisted=true;}
+function save(confirmedReset=false){
+ // A future schema is protected until the caller explicitly opts in to reset it.
+ if(unsupportedVersion&&!confirmedReset){persisted=false;return false;}
+ try{window.localStorage.setItem(KEY,JSON.stringify({v:1,recents:state.recents,pins:state.pins}));persisted=true;unsupportedVersion=false;}
  catch{persisted=false;}
  return persisted;
 }
@@ -15892,6 +15893,8 @@ M.toolPrefs=Object.freeze({
  addRecent,setPinned,
  togglePin:(id,keep)=>setPinned(id,!state.pins.includes(id),keep),
  clear:()=>{state.recents=[];state.pins=[];return save();},
+ // Explicit, opt-in recovery for a newer schema; false/omitted never overwrites it.
+ resetUnsupported:confirmed=>confirmed===true&&unsupportedVersion?save(true):false,
  persisted:()=>persisted
 });
 })();

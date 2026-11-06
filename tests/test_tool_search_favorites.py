@@ -177,6 +177,30 @@ assert.deepEqual(Array.from(prefs.pinned()),['panel:matrix-tools']);
         result = subprocess.run(["node", "-e", js], cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    @unittest.skipUnless(shutil.which("node"), "Node.js required")
+    def test_future_schema_requires_explicit_reset_and_retries_failed_writes(self):
+        js = r"""
+const assert=require('assert'),fs=require('fs'),vm=require('vm');
+const source=fs.readFileSync('src/tool-prefs.js','utf8');
+let raw=JSON.stringify({v:2,pins:['future'],unknown:{keep:true}}),writes=0,fail=false;
+const storage={getItem(){return raw},setItem(k,v){writes++;if(fail)throw Error('quota');raw=v}};
+const M={};vm.runInNewContext(source,{window:{MathStudio:M,localStorage:storage}});
+const p=M.toolPrefs;
+assert.equal(p.persisted(),false);
+p.addRecent('panel:fft-details');p.clear();
+assert.equal(p.resetUnsupported(),false);
+assert.equal(p.resetUnsupported(false),false);
+assert.equal(writes,0);assert.equal(JSON.parse(raw).v,2);
+fail=true;assert.equal(p.resetUnsupported(true),false);
+assert.equal(p.persisted(),false);assert.equal(JSON.parse(raw).v,2);
+fail=false;assert.equal(p.resetUnsupported(true),true);
+assert.equal(p.persisted(),true);assert.equal(JSON.parse(raw).v,1);
+assert.equal(p.resetUnsupported(true),false);
+assert.equal(writes,2);
+"""
+        result = subprocess.run(["node", "-e", js], cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_namespaced_key_and_bounds(self):
         self.assertIn("KEY='promath-tool-search-prefs-v1'", PREFS)
         self.assertIn("MAX_RECENT=8", PREFS)

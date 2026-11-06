@@ -76,8 +76,11 @@ def main():
         good_graph = dict(legacy, working='x+1', graph={
             'dataset': {'headers': ['time', 'value'], 'rows': [[0, 2], [1, None]]}})
         upload(page, good_graph)
-        page.wait_for_function("window.MathStudio.bridge.export().graph.dataset.rows.length === 2")
+        # The bridge can temporarily expose graph.dataset=null while import applies.
+        # Poll through that valid transient state, then assert the complete dataset.
+        page.wait_for_function("() => window.MathStudio.bridge.export().graph.dataset?.rows?.length === 2")
         assert page.evaluate("window.MathStudio.bridge.export().graph.dataset.rows[1][1]") is None
+        assert page.evaluate("window.MathStudio.bridge.export().graph.dataset.headers") == ['time', 'value']
 
         # Nonfinite table numeric values are rejected during schema validation.
         # JSON itself cannot encode Infinity, but JSON.parse may receive 1e999,

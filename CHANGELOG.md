@@ -1,3 +1,142 @@
+## 2026-11-06 — Project import polling and explicit future-schema reset API
+- Fixed Chromium project migration regression's unsafe wait predicate when graph.dataset is temporarily null; preserved two-row success and added imported-header verification.
+- Added opt-in `MathStudio.toolPrefs.resetUnsupported(true)` API. Unsupported newer schema stays intact on ordinary operations and on failed reset writes; explicit successful reset stores v1. Focused Node regression exercises all transitions; standalone bundle synchronized. Reset UI is not yet implemented.
+- Prior exact-head push Quality #42159635636 failed in project schema browser smoke; PR Quality #42159640300 was cancelled. New exact-head CI pending, no local Chromium execution, PR #189 remains review-gated; no main/Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Repair incomplete v1 tool preferences and unblock structural Quality
+- Corrected a stale structural assertion for the now-extended preference state declaration; the assertion still requires persistence initialization before storage reads. Saved v1 preferences missing recents or pins are marked as needing repair, preserving valid sibling entries until a successful write. Added focused executable Node repair/recovery assertions and synchronized standalone HTML. Exact-head CI pending after previous push #42154342867 and PR #42154352048 failed at this structural assertion. No release; frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Preserve unknown preference schemas and migrate legacy data
+- Saved tool preferences with an unsupported schema version no longer risk silent overwrite by an older client. Session-only recents and pins continue working; unversioned legacy data is readable and migrates to v1 after a successful save. Node and Chromium regressions cover both behaviors; offline standalone module synchronized. Prior dev exact-head push/PR Quality passed (#42147267403/#42147271856), new commit's QA pending. PR #189 still lacks reviews; Pages not redeployed. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Search preferences repair malformed nested IDs
+- Invalid, repeated and over-limit nested saved recent/pinned IDs are now flagged as requiring repair rather than silently treated as fully persisted. Valid sibling IDs remain available in memory; a successful save writes sanitized lists and restores persistence. Focused Node and Chromium regression cases plus synchronized standalone HTML were committed with the living plan.
+- Prior exact-head dev push Quality #42140368695 and PR Quality #42140374316 passed; new head CI and full local Chromium pending. PR #189 still lacks reviews, no merge/Pages release; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Bound restored search preference payloads
+- Preference restore now rejects payloads over 16,384 UTF-16 code units and non-string storage results before JSON parsing, reporting session-only status until a successful rewrite. Added Node and Chromium oversized-payload/recovery regressions; synchronized modular source and standalone HTML. Previous exact-head push #42133233110 and PR #42133237537 passed; new exact-head QA pending, PR #189 review-blocked. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Salvage valid preferences when one stored list is malformed
+- A valid JSON preferences object with a non-array recent/pin field now reports non-persistent status until a successful rewrite, while retaining the other valid list. This avoids falsely claiming damaged stored preferences are fully restored. Node state-transition and Chromium corrupted-list assertions added; standalone HTML synchronized.
+- Previous exact-head dev push Quality #42126789186 and PR Quality #42126793454 passed for f80ff900; new exact-head CI pending, PR #189 review-gated and production Pages unchanged. Frozen historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Stabilize quota-recovery Chromium regression
+- Fixed a test-only one-shot quota simulation that could be consumed by unrelated startup storage writes. The browser test now arms a failure specifically for the tool-search preferences key immediately before pinning and verifies session-only state before recovery. Production JavaScript and standalone HTML are unchanged. Both previous exact-head Quality runs #42117774224 and #42117785366 failed at this browser assertion; new CI is pending. PR #189 remains review-gated. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Search preferences announce recovered persistence
+- Pin/unpin now announces when a previously session-only preference successfully saves to browser storage; existing failure message remains. Added structural and 390px Chromium quota-recovery regressions and synchronized the standalone HTML. Prior exact-head push/PR Quality green; new CI and review-gated release pending. Historical 166 gaps/95 partial unchanged.
+
+## 2026-11-05 — Reject malformed saved tool IDs
+- Search favourites now discard whitespace-only and control-character IDs from corrupted storage and reject them in the preferences API. Valid IDs, limits and legacy preferences remain supported. Added executable Node negative/boundary cases and Chromium restore assertions; synchronized standalone HTML. Prior dev/PR Quality for 5ced1f4 passed; new exact-head QA and review-gated release pending. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Invalid search-preferences root reports session-only state
+- Fixed a follow-on persistence-state defect: valid JSON with unsupported top-level types (null, array, number or string) now reports session-only until a successful rewrite, instead of incorrectly claiming preferences were saved. Expanded executable Node and Chromium recovery regressions and kept the standalone HTML synchronized. Exact-head CI pending; PR #189 still requires review and passing checks; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Search preferences session-only persistence accuracy
+- When browser storage cannot be read (blocked or corrupt), tool preferences immediately report non-persistent state instead of falsely reporting success. The in-memory recent and pinned lists still work; successful subsequent writes restore persisted status. Pin actions announce session-only behavior to assistive technology through the existing live region.
+- New focused executable Node storage-state transitions and extended Chromium corrupt/blocked-storage assertions; synchronized source and offline standalone HTML. Previous dev Quality #42070115621 passed while PR Quality #42070125639 was cancelled; new exact-head CI, review-gated PR #189 and Pages release remain pending. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Deterministic LF standalone output
+- Builder explicitly writes LF line endings across operating systems; regression checks generated HTML bytes and unchanged rebuild timestamp. Previous exact-head Quality #42051332141 was cancelled, not passing. PR #189 remains review-blocked; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone drift diagnostic lists source paths
+- Read-only --check lists up to three mismatched module paths, total count and first mismatch position; focused regression asserts two source paths. Exact-head CI pending, previous run cancelled. PR #189 review-blocked; Pages unverified. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone drift diagnostics count mismatched modules
+- Read-only `python scripts/build.py --check` now reports the number of embedded modules that differ from modular sources, while retaining first module and line/column details. Added focused two-module drift and no-rewrite regression. Previous exact-head Quality #42023181030 passed; new head CI and local tests pending. PR #189 remains review-gated, Pages unverified; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Consistent standalone check snapshot
+- Read-only build consistency checking now compares against the original index.html snapshot rather than reopening it after modular source processing. Added isolated regression simulating a concurrent index move; local test execution and new exact-head CI pending. Previous Quality #42014883879 passed. PR #189 remains review-gated; no release. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Idempotent standalone rebuild
+- Normal `python scripts/build.py` no longer rewrites already synchronized index.html; preserves modification time and avoids unnecessary rebuild churn. Focused isolated subprocess regression checks unchanged bytes, mtime and successful no-op output. Prior exact-head Quality #41999177480 passed; new-head QA pending. No release; frozen historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone drift diagnostics identify source module
+- `scripts/build.py --check` now names the first mismatched modular source alongside line and column; focused regression verifies the module hint without rewriting output. Previous exact-head Quality #41990683493 passed; new-head checks pending. No release; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone builder reports drift column
+- Read-only `python scripts/build.py --check` now reports the first mismatched line and 1-based column; focused regression checks an embedded module change at line 3, column 18. Previous exact-head Quality #41984214066 passed; new head QA pending. No release; frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone builder identifies drift line
+- Read-only --check now identifies the first mismatched line to help repair stale standalone bundles. Added a focused line-number regression. Previous head Quality #41977921641 passed; new exact-head Quality pending. No release; frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone builder rejects unsupported CLI arguments
+- Reject unknown or extra flags before any index.html read/write; preserve normal build and --check modes. Added focused regression asserting no output mutation on invalid invocation. Previous head Quality #41971023436 green; new exact-head checks pending. No release; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Read-only standalone bundle consistency check
+- Added `python scripts/build.py --check` to report out-of-sync standalone HTML without rewriting it; normal build behavior retained. Added isolated regression for matching content, drift detection, byte-preserving failure and ordinary repair. New exact-head CI pending; PR #189 review-gated; no Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Latest exact-head Quality confirmed; checkout unavailable
+- Quality [41945883245](https://github.com/saeedsai/ProMathStudio/actions/runs/41945883245) succeeded for dev `20c89b114d47f3d9fd09c929392b26fae7919325`. PR #189 remains review-gated. Local git checkout failed DNS resolution, preventing safe standalone source/bundle and browser-test edits; no application feature or regression was committed. Main Quality and Pages not verified. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Exact-head Quality green; release still review-gated
+- Quality [41937533190](https://github.com/saeedsai/ProMathStudio/actions/runs/41937533190) completed successfully for dev 262ba648be1fa99959a4a79a84d6bf5231275f1f, including structural and Chromium checks. PR #189 has no submitted reviews. Local git checkout remains unavailable (GitHub DNS failure), so no application source/test was changed in this checkpoint; main Quality and Pages remain unverified. Ledger/changelog updates require their own exact-head Quality before promotion. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Browse All Tools GNSS catalog regression
+- 2026-11-05 (CI-PIPE-CATALOG-167; dev QA pending): corrected engineering pipe/digital-logic browser catalog assertions for implemented GNSS least-squares positioning and control frequency response; retained planned spectral-analysis negative assertion. Exact-head Quality/Pages pending; no application source feature in this iteration.
+
+- Exact-head Quality [41921062294](https://github.com/saeedsai/ProMathStudio/actions/runs/41921062294) passed structural and browser steps through 209, then failed at step 210 because a stale browse assertion excluded implemented GNSS. The regression now requires canonical `catalog:gnss.positioning.least.squares` while excluding planned-only `catalog:signals.spectral.analysis`. Browser rerun pending; no application source change or release.
+
+## 2026-11-04 — CI browse disclosure timing regression
+
+- CI [41911514968](https://github.com/saeedsai/ProMathStudio/actions/runs/41911514968) passed structural and browser checks through step 209, then failed at browse-group assertion in `tests/smoke_tool_search_favorites.py:239`. The native `<details>` toggle event populates groups asynchronously. The browser test now waits for populated groups without relaxing any browse navigation, keyboard, storage or route assertions. Exact-head CI and release remain pending; no application source feature added.
+
+## Unreleased — 2026-11-04
+- 2026-11-04 (CI-PINS-GNSS-164; QA pending): corrected the tool-search favourites regression to treat implemented GNSS positioning as available; at full pin capacity it must refuse a new pin, while genuinely planned spectral analysis remains unpinnable. Exact-head Chromium and release remain pending; frozen 166 gaps / 95 partial unchanged.
+- CI search regression: use Playwright forced pointer click to exercise refusal on an aria-disabled planned-only search result; preserve accessibility and workspace invariants. Exact-head browser QA pending.
+
+- 2026-11-04 (CI-SEARCH-VISIBILITY-161; exact-head QA pending): repaired browser regression ordering for mixed planned/available tool-search results. The planned result is now clicked while the popup remains visible, preserving disabled-result status and no-navigation checks; the preceding Enter had legitimately opened an available result and dismissed the popup. Source behavior unchanged; local Chromium unavailable; PR #189 and Pages remain gated. Frozen 166 gaps / 95 partial unchanged.\n- 2026-11-04 (CI-CANCELLED-160; QA pending): exact-head Quality run 41863330816 was cancelled during browser dependency installation after structural checks passed. No Chromium verification, source change, or release this iteration; recorded blocker and next five acceptance gates in the living plan. Frozen 166 gaps / 95 partial unchanged.
+- 2026-11-04 (CI-CATALOG-STATUS-157; exact-head CI pending): the consolidated branch's structural tests passed, but browser Quality failed because an old catalog smoke treated implemented control.frequency.response as planned. Updated its assertion to require an Open action and no planned label, while retaining the genuine planned-tool negative regression. Reconciled history-only main ancestry without changing released code. Full Quality and Pages release are still pending; frozen 166-gap/95-partial inventory unchanged.
+
+- QA (dev): strengthen global tool-search regression for mixed planned/available matches, verifying arrow/Home/End never select disabled planned entries; exact-head Chromium recheck pending ([3f9fbf4](https://github.com/saeedsai/ProMathStudio/commit/3f9fbf4809dbfc12c092c162e641d26512cd8a8b)).
+- Fixed global tool-search browser regression to recognize implemented digital logic and preserve disabled/keyboard refusal coverage for planned signal spectral analysis (CI run 41831603088; dev QA pending).
+- 2026-11-04 (BRANCH-CONSOLIDATION-156; exact-head CI pending): reconciled the existing Claude engineering-feature branch into dev without discarding either history; preserved 11 additional JavaScript modules, source/bundle consistency, toolbar favourites and recent tools, disabled-result keyboard/Home/End improvements, builder security guards, all existing tests and both development ledgers. PR #189 to main remains gated by exact-head structural/browser QA, reviews and Pages confirmation. Historical 166 gaps / 95 partial unchanged.
+- 2026-11-04 (CI-SYMLINK-FIX-155; dev QA pending): repaired malformed literal-newline symlink regression fixture responsible for failed exact-head Quality #41817935010; builder now also rejects modules reached via symlinked `src` directory, with isolated external-file/index byte-preservation regression. Local tests unavailable (GitHub DNS); exact-head CI and release pending. Historical 166 gaps / 95 partial unchanged.
+- 2026-11-04 (BUILD-MODULE-SYMLINK-154; dev QA pending): refuse symlinked JavaScript module sources before standalone bundling; focused subprocess regression asserts symlink, external target and index bytes remain untouched. Exact-head CI and release pending; historical 166-gap/95-partial audit unchanged.
+- 2026-11-04 (BUILD-SYMLINK-153; dev QA pending): reject symlinked standalone index.html before reading or writing it; isolated subprocess regression verifies the symlink and external target remain unchanged. Exact-head Quality pending; no release claimed.
+- 2026-11-04 (UI-SEARCH-HOME-END-152; dev QA pending): Home/End navigates to first/last enabled search result without selecting planned-only tools; focused source/bundle regression. Exact-head CI and release pending.
+- 2026-11-04 (UI-SEARCH-DISABLED-151; dev QA pending): planned-only tool search mouse clicks now announce unavailable status without marking disabled results active; focused source/bundle regression. Exact-head Quality and release pending.
+- 2026-11-04 (UI-SEARCH-KEYBOARD-150; dev QA pending): tool-search ArrowUp/Down skips disabled planned entries, with browser regression for planned-only results; exact-head Quality and release pending.
+- BUILD-INDEX-CONTROL-149 (dev, QA pending): reject unexpected ASCII controls in index.html before rewrite; subprocess regression asserts original bytes preserved.\n## 2026-11-04 — BUILD-MODULE-CRLF-147
+
+- BUILD-MODULE-CONTROL-148 (dev, QA pending): fail fast when JavaScript modules contain nonprinting ASCII control characters other than TAB/LF; subprocess regression checks four controls and unchanged standalone HTML. Exact-head CI and release pending; frozen 166-gap/95-partial baseline unchanged.
+- Preserve raw newlines when reading standalone JavaScript modules; reject CRLF/lone CR module input before HTML rewrite, preventing silent newline normalization. Add focused subprocess regression for diagnostic and unchanged index. Exact-head CI pending; no release claimed.
+
+## 2026-11-04 — CI-CRLF-146
+- Fix standalone builder carriage-return validation by disabling Python universal-newline translation when reading `index.html`. Prevents CRLF/lone-CR HTML from bypassing the fail-fast guard.
+- Add subprocess regression for lone CR and mixed newline files, asserting diagnostic and byte-for-byte preservation. Exact-head CI pending; no release claimed.
+
+- 2026-11-04 (BUILD-INDEX-CRLF-145; dev QA pending): reject carriage returns in standalone index before Python newline normalization can silently rewrite CRLF input; subprocess regression verifies unchanged bytes. Prior PR Quality 41751753649 passed; new head QA and release pending.
+- 2026-11-04 (BUILD-INDEX-BOM-144; dev QA pending): reject leading UTF-8 BOM in standalone index before rewriting; isolated subprocess regression asserts diagnostic and unchanged input. Exact-head CI and release pending.
+- 2026-11-04 (BUILD-INDEX-NUL-143; dev QA pending): standalone builder rejects embedded NUL in index.html before rewriting; isolated subprocess regression verifies diagnostic and byte-preserving failure. Exact-head CI and release pending.
+- 2026-11-03 (parallel batch 150–155; branch QA pending). Fourth round of parallel agents, plus a CI repair:
+  - **CTRL-MARGINS-150:** gain/phase margins, crossover frequencies, closed-loop bandwidth and resonant peak in a new Control Theory Frequency response panel, with crossover markers on the Bode plot. `control.frequency.response` is now available in the catalog.
+  - **GNSS-151:** weighted Gauss–Newton single-epoch positioning with clock bias, DOPs, WGS-84 coordinates and a sky plot. No atmospheric, relativistic or Sagnac corrections. `gnss.positioning.least.squares` is now available.
+  - **FUNC-ANALYSIS-152:** numerical inequality solving over intervals and function domain analysis (zeros, poles, extrema, monotonicity, symmetry), reusing the shared root finder.
+  - **RANDOM-153:** PCG32-seeded samplers, plus plain Monte Carlo and Halton quasi-Monte Carlo integration with a convergence table.
+  - **SEARCH-FAVS-154:** "Find a tool" adds Recent and Pinned tools (Alt+P to pin) and a collapsed "Browse all tools" list grouped by workspace. Preferences are stored per viewer with safe fallbacks.
+  - **DOCS-GUIDE-155:** `docs/USER_GUIDE.md` covers every tool with a worked example taken from its regression test. `tests/test_user_guide.py` fails if a panel or catalog tool is left undocumented.
+  - **CI-NUMPY-FIX:** Quality runs 41734137142/41734143560 failed because `smoke_interpolation_splines.py` imported numpy, which CI does not install. `smoke_matrix_extras.py` had the same problem. Both now use pure-Python or fixed references with unchanged tolerances.
+- 2026-11-03 (parallel batch 142–149; branch QA pending). Eight features from a third round of parallel agents:
+  - **POLY-142 polynomial tools:** Aberth–Ehrlich complex roots with backward errors and multiplicity clustering, plus Horner evaluation, derivative/integral, add/multiply/divide, numerical GCD and build-from-roots.
+  - **NLFIT-143 nonlinear fitting:** Levenberg–Marquardt with standard errors and t intervals, verified against NIST Misra1a, with warnings for parameters that cannot be identified.
+  - **FILTERS-144 digital filters:** convolution and correlation, windowed-sinc FIR, Butterworth IIR (order 1–8, second-order sections), zero-phase filtfilt and frequency response.
+  - **VECCALC-145 vector calculus:** Ridders derivatives of order 1–4, gradient, Hessian, Jacobian, divergence, curl, Laplacian and directional derivatives, with error estimates; kinks are refused.
+  - **MATRIX-EXTRAS-146:** for matrices up to 8×8, Cholesky and LDLᵀ, Jacobi-SVD rank with null-space and column-space bases, determinant, characteristic polynomial, norms and κ₂.
+  - **MULTIVAR-147 multivariate analysis:** covariance and Pearson/Spearman matrices, a scatter matrix, PCA and seeded k-means++ on Data Tables columns.
+  - **FIELDS-148 vector fields:** quiver plots, RK4 streamlines, slope fields with solution curves, heuristic equilibria and reduced-motion-aware particle animation.
+  - **ENG-THERMO-CIRCUITS-149:** `thermal.cycle.analysis` (Otto, Diesel and Brayton with animated P–v/T–s diagrams) and `circuits.network.analysis` (a DC modified-nodal-analysis netlist solver with animated current flow) are now available.
+  - **Tests:** each feature has reference, negative, keyboard and 390/1280 px tests registered in Quality.
+- 2026-11-03 (CI-SPLINE-NUMPY-142; dev QA pending): removed undeclared NumPy dependency from cubic spline browser smoke's independent dense numerical reference; pure-Python partial-pivot solver retains nonuniform spline checks and adds pivot/singular controls. Production spline code unchanged; exact-head CI pending.
+- 2026-11-03 (UI-TOOL-SEARCH-141; branch QA pending): global "Find a tool" search in the workspace bar (`/` or Ctrl/Cmd+K). It indexes every tool panel, workspace task and Engineering catalog tool at runtime, matches a small synonym map, and opens the chosen tool in the right workspace without clearing inputs. Results use an accessible combobox with keyboard navigation and announced counts. Planned tools are marked "Planned". Works at 390px.
+- 2026-11-03 (parallel batch 135–140; branch QA pending). Six features from a second round of parallel agents, integrated onto one branch:
+  - **STATS-TESTS-135:** hypothesis tests with confidence intervals: one-sample, Welch, pooled and paired t-tests; chi-square goodness-of-fit and r×c independence (optional Yates); one-proportion z-test with Wilson interval; exact binomial with Clopper–Pearson; chi-square variance interval. Results include effect sizes and assumptions, and values match scipy within 1e-8.
+  - **GRAPH-OVERLAY-136:** implicit, parametric and polar curves can be overlaid on the main 2D graph (up to 8). Implicit curves are re-traced on zoom and pan, and overlays persist in projects with schema validation before import.
+  - **ENG-SIM-UNITS-137:** Engineering simulation inputs accept units (e.g. `12 ft`, `3.5 kN`, `212 °F`) through the shared units module. Field-specific errors report dimension mismatches.
+  - **BVP-SHOOT-138:** two-point boundary-value problems solved by shooting on the existing RK4/TR-BDF2 solvers, with Dirichlet, Neumann or Robin conditions. Every bracketed solution is reported (for example both Bratu solutions), as are non-unique and no-solution cases.
+  - **UNCERTAINTY-139:** GUM first-order propagation with correlations and contributions, and seeded deterministic Monte Carlo with symmetric/shortest intervals, a histogram and a non-linearity flag.
+  - **SPLINES-140:** natural, clamped, not-a-knot and periodic cubic splines plus Akima and modified Akima, with derivatives and the exact spline integral.
+  - **Tests:** each feature adds reference, negative, keyboard and responsive browser tests, registered in Quality.
 - 2026-11-03 (parallel batch 129–134; branch QA pending). Six new modules were built by parallel agents and integrated onto one branch:
   - **STATS-DIST-129:** Normal, Student t, chi-square, exponential, binomial and Poisson pdf/pmf, CDF, survival and quantile functions, built on in-house log-gamma, incomplete gamma/beta and erf. Also descriptive statistics for Data Tables columns (type-7 quartiles, skewness, Pearson r, covariance). There are no hypothesis tests or confidence intervals.
   - **GRAPH-CURVES-130:** implicit F(x,y)=0 curves via marching squares with refined crossings; pole and jump crossings are rejected and counted. Also parametric and polar curves, equal-aspect axes and Data Tables export.
@@ -209,3 +348,5 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - 2026-10-29 (dev / CI pending): Added bounded continuous-time control analysis in Graphs with polynomial SISO transfer-function inputs, sampled Bode/Nyquist/root locus plots, Routh–Hurwitz table, and unity negative feedback. Structural regression added. Controller tuning, feedforward design and symbolic Laplace integration remain planned; release unverified.
 - 2026-10-29 (dev, CI pending): Added a dedicated complex-number Graph workbench with 2D Argand plots and sampled 3D |f(z)| magnitude surfaces, presets z, z², inverse and exp, finite-input validation, accessible status and responsive canvas. Preserved existing real graph workflows. Structural regression added; deployment not yet confirmed.
 - 2026-10-29 (dev, pending CI): Refreshed the entire interface with an original computational math-first design: stronger input/result hierarchy, teal navigation, palette/sidebar, consistent panels, focus visibility, mobile and reduced-motion refinements; added structural UI regression coverage. Deployment not yet verified.
+
+- 2026-11-04: Corrected stale control-frequency-response status assertion in thermo/circuit browser smoke (implemented tool is available); exact-head CI recheck pending. No application feature or release claimed.

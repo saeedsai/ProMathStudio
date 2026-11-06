@@ -1,44 +1,76 @@
 """Rebuild standalone HTML from modular JavaScript without changing script spacing."""
 from pathlib import Path
 import re
+import sys
+
+if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] != "--check"):
+    raise SystemExit("Usage: python scripts/build.py [--check]")
 
 root = Path(__file__).resolve().parents[1]
 index = root / "index.html"
+if index.is_symlink():
+    raise ValueError("Refusing to rewrite symlinked standalone index.html")
 try:
-    text = index.read_text(encoding="utf-8")
+    with index.open("r", encoding="utf-8", newline="") as source_file:
+        text = source_file.read()
 except UnicodeDecodeError as error:
     raise ValueError("Invalid UTF-8 in standalone index.html") from error
+if "\r" in text:
+    raise ValueError("Unexpected carriage return in standalone index.html")
+if text.startswith("\ufeff"):
+    raise ValueError("Unexpected UTF-8 BOM in standalone index.html")
+if "\x00" in text:
+    raise ValueError("Unexpected NUL character in standalone index.html")
+if any(ord(char) < 32 and char not in "\n\t" for char in text):
+    raise ValueError("Unexpected ASCII control character in standalone index.html")
+
+original_index_text = text
 
 modules = [
     ("mathstudio-data-tables", "src/data-tables.js"),
     ("promath-advanced-features", "src/advanced-features.js"),
     ("promath-numerical-data", "src/numerical-data.js"),
+    ("promath-function-analysis", "src/function-analysis.js"),
     ("promath-interpolation-tools", "src/interpolation-tools.js"),
     ("promath-integration-tools", "src/integration-tools.js"),
+    ("promath-vector-calculus", "src/vector-calculus.js"),
+    ("promath-gnss-tools", "src/gnss-tools.js"),
     ("promath-context-actions", "src/context-actions.js"),
     ("promath-visual-controls", "src/visual-controls.js"),
     ("promath-matrix-tools", "src/matrix-tools.js"),
+    ("promath-matrix-extras", "src/matrix-extras.js"),
     ("promath-control-equilibrium", "src/control-equilibrium.js"),
     ("promath-ode-tools", "src/ode-tools.js"),
     ("promath-stiff-ode", "src/stiff-ode.js"),
+    ("promath-bvp-tools", "src/bvp-tools.js"),
     ("promath-minimize-tools", "src/minimize-tools.js"),
     ("promath-optimization-tools", "src/optimization-tools.js"),
     ("promath-fft-tools", "src/fft-tools.js"),
+    ("promath-signal-filters", "src/signal-filters.js"),
     ("promath-brent-tools", "src/brent-tools.js"),
     ("promath-statistics-tools", "src/statistics-tools.js"),
+    ("promath-uncertainty-tools", "src/uncertainty-tools.js"),
+    ("promath-nonlinear-fit", "src/nonlinear-fit.js"),
+    ("promath-random-tools", "src/random-tools.js"),
     ("promath-xlsx-tools", "src/xlsx-tools.js"),
     ("promath-xlsx-import", "src/xlsx-import.js"),
+    ("promath-multivariate-tools", "src/multivariate-tools.js"),
     ("promath-project-schema", "src/project-schema.js"),
     ("promath-precision-tools", "src/precision-tools.js"),
     ("promath-units-tools", "src/units-tools.js"),
+    ("promath-polynomial-tools", "src/polynomial-tools.js"),
     ("promath-workspace-tasks", "src/workspace-tasks.js"),
     ("promath-complex-graph", "src/complex-graph.js"),
     ("promath-graph-curves", "src/graph-curves.js"),
+    ("promath-vector-fields", "src/vector-fields.js"),
     ("promath-control-theory", "src/control-theory.js"),
     ("promath-engineering-simulations", "src/engineering-simulations.js"),
     ("promath-engineering-catalog", "src/engineering-catalog.js"),
     ("promath-engineering-visuals", "src/engineering-visuals.js"),
+    ("promath-tool-prefs", "src/tool-prefs.js"),
+    ("promath-tool-search", "src/tool-search.js"),
 ]
+drift_sources = []
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'
     if text.count(marker) != 1:
@@ -53,16 +85,24 @@ for tag, source in modules:
     original = text[start:end]
     trailing_newlines = original[len(original.rstrip("\n")):]
     source_path = root / source
+    if source_path.is_symlink() or source_path.parent.is_symlink():
+        raise ValueError(f"Refusing symlinked standalone module source: {source}")
     if not source_path.is_file():
         raise FileNotFoundError(f"Missing standalone module source: {source}")
     try:
-        module_source = source_path.read_text(encoding="utf-8").rstrip("\n")
+        with source_path.open("r", encoding="utf-8", newline="") as module_file:
+            module_source = module_file.read()
+        if "\r" in module_source:
+            raise ValueError(f"Unexpected carriage return in standalone module source: {source}")
+        module_source = module_source.rstrip("\n")
     except UnicodeDecodeError as error:
         raise ValueError(f"Invalid UTF-8 in standalone module source: {source}") from error
     if not module_source.strip():
         raise ValueError(f"Empty standalone module source: {source}")
     if "\x00" in module_source:
         raise ValueError(f"Unexpected NUL byte in standalone module source: {source}")
+    if any(ord(char) < 32 and char not in "\n\t" for char in module_source):
+        raise ValueError(f"Unexpected ASCII control character in standalone module source: {source}")
     if module_source.startswith("\ufeff"):
         raise ValueError(f"Unexpected UTF-8 BOM in standalone module source: {source}")
     if "<!--" in module_source or "-->" in module_source:
@@ -71,7 +111,28 @@ for tag, source in modules:
         raise ValueError(f"Unsafe script opening sequence in module: {source}")
     if "</script" in module_source.lower():
         raise ValueError(f"Unsafe script closing sequence in module: {source}")
-    text = text[:start] + module_source + trailing_newlines + text[end:]
+    replacement = module_source + trailing_newlines
+    if original != replacement:
+        drift_sources.append(source)
+    text = text[:start] + replacement + text[end:]
 
-index.write_text(text, encoding="utf-8")
-print("Rebuilt standalone index.html")
+if "--check" in sys.argv[1:]:
+    # Compare with the same snapshot used to assemble the bundle; do not
+    # reopen index.html after modules have been processed.
+    original_text = original_index_text
+    if text != original_text:
+        mismatch = next((i for i, (actual, expected) in enumerate(zip(original_text, text)) if actual != expected), min(len(original_text), len(text)))
+        line = original_text.count("\n", 0, mismatch) + 1
+        column = mismatch - original_text.rfind("\n", 0, mismatch)
+        module_hint = (f" (modules: {', '.join(drift_sources[:3])}"
+                       f"{', ...' if len(drift_sources) > 3 else ''}; mismatched modules: {len(drift_sources)})") if drift_sources else ""
+        raise SystemExit(f"Standalone index.html is out of sync near line {line}, column {column}{module_hint}; run python scripts/build.py")
+    print("Standalone index.html matches modular sources")
+else:
+    if text != original_index_text:
+        # Explicit LF output keeps the generated standalone HTML reproducible on Windows.
+        with index.open("w", encoding="utf-8", newline="\n") as output:
+            output.write(text)
+        print("Rebuilt standalone index.html")
+    else:
+        print("Standalone index.html already up to date")

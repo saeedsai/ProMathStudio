@@ -46,6 +46,7 @@ The current implementation has limits: it is not an arbitrary Python interpreter
 ## Documentation
 
 - [User guide](docs/USER_GUIDE.md) · [Syntax and examples](docs/SYNTAX_REFERENCE.md)
+- [User guide: every tool by workspace, with a worked example, export path and keyboard shortcuts](docs/USER_GUIDE.md#getting-started)
 - [Features and limitations](docs/FEATURES_AND_LIMITATIONS.md) · [Symbolic engines](docs/SYMBOLIC_ENGINE.md)
 - [2D / 3D graphing](docs/GRAPHING.md) · [Workspaces and project format](docs/PROJECT_FORMAT.md)
 - [Word, LaTeX and other exports](docs/EXPORTS.md) · [Architecture](docs/ARCHITECTURE.md)

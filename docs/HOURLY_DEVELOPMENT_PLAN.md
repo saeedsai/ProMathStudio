@@ -1,3 +1,14 @@
+## 2026-11-06 — UI-PREFS-OVERSIZE-186 (exact-head QA pending)
+
+**Execution ledger:** Inspected dev 54dc353c73acaa9f47318eca7d3d06d632b16845 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, living plan, frozen audit, exact-head push Quality #42133233110 and PR Quality #42133237537 (both successful), PR #189 (open, zero reviews), and main Quality #41730966059 / Pages #41730962844 (successful for unchanged main). Bounded tool-preference JSON restore to 16,384 UTF-16 code units and rejected non-string storage returns, avoiding unbounded parsing and treating invalid restore as session-only. Valid saved sibling lists in ordinary malformed-but-bounded payloads retain the previous salvage behavior. Added focused Node and Chromium oversize/recovery regressions and synchronized standalone HTML. New exact-head Quality and local full browser checks pending; no merge or deletion. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** Node oversize/non-string recovery regression, Chromium oversize/recovery smoke, Python structural checks and full push/PR Quality pass on the new exact dev SHA.
+2. **P0 Protected release PR #189 (review-blocked):** verify required approvals/protections and exact-head PR checks, ordinary merge only when authorized; verify new main Quality, Pages build and live smoke.
+3. **P1 Storage integrity (planned):** reject malformed nested preference IDs and report repairs while preserving valid siblings; assert session and persistent state in browser.
+4. **P1 Numerical reference QA (planned):** repeated-root polynomial, nonlinear-fit conditioning and unstable digital filter reference/negative tests with tolerances.
+5. **P1 Cleanup audit (pending):** prove legacy branch reachable from validated main, no unique commits, open PRs or protections before any deletion.
+
 ## 2026-11-06 — UI-PREFS-PARTIAL-CORRUPTION-185 (exact-head QA pending)
 
 **Execution ledger:** Inspected AGENTS.md, living plan, frozen inventory, dev f80ff900 and main 70fc483, PR #189 (open, zero reviews, clean), dev push Quality #42126789186 and PR Quality #42126793454 (both success on exact f80ff900), previous main Quality #41730966059 and Pages #41730962844 (both success for unchanged main). Identified malformed preference object fields: a valid JSON object with a non-array recents or pins field was silently sanitized but persisted() remained true until the next write. Implemented partial salvage of valid sibling list while marking persistence as needing repair; a successful save restores persisted status. Added Node state-transition regression and Chromium persisted-state assertion for corrupt pins, and synchronized standalone index. New exact-head CI pending; local full browser suite not executed. No release merge or cleanup; frozen 166 gaps/95 partial unchanged.

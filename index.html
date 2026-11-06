@@ -15829,7 +15829,7 @@ M.engineeringVisuals=Object.freeze({visuals:visuals.map(v=>Object.freeze({id:v.i
    corrupt browser storage falls back to an in-memory session list. SPDX-License-Identifier: MIT. */
 (()=>{'use strict';
 const M=window.MathStudio;if(!M)return;
-const KEY='promath-tool-search-prefs-v1',MAX_RECENT=8,MAX_PINS=20,MAX_ID_LENGTH=200;
+const KEY='promath-tool-search-prefs-v1',MAX_RECENT=8,MAX_PINS=20,MAX_ID_LENGTH=200,MAX_STORED_LENGTH=16384;
 // Keep only distinct, short string IDs, in order, up to the bound.
 function clean(list,max,keep){
  const out=[];if(!Array.isArray(list))return out;
@@ -15845,6 +15845,8 @@ function read(){
  try{
   const raw=window.localStorage.getItem(KEY);
   if(raw==null)return {recents:[],pins:[]};
+  // A saved preference payload should be tiny. Avoid parsing unbounded or non-string data.
+  if(typeof raw!=='string'||raw.length>MAX_STORED_LENGTH){persisted=false;return null;}
   const data=JSON.parse(raw);
   if(!data||typeof data!=='object'||Array.isArray(data)){persisted=false;return null;}
   // Keep a valid list if its sibling was corrupted, but report that storage

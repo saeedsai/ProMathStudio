@@ -205,6 +205,14 @@ def main():
         assert page.evaluate("()=>MathStudio.toolSearch.pinned()") == []
         assert page.evaluate("()=>MathStudio.toolPrefs.addRecent('  ')") is False
         assert page.evaluate("()=>MathStudio.toolPrefs.setPinned('panel:fft-details\\n',true)") is False
+        # Oversized preference JSON must be ignored before parsing; a valid new save repairs it.
+        page.evaluate("k=>localStorage.setItem(k,JSON.stringify({v:1,recents:['panel:fft-details'],padding:'x'.repeat(20000)}))", KEY)
+        page.reload(wait_until='load')
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
+        assert page.evaluate("()=>MathStudio.toolSearch.recent()") == []
+        assert page.evaluate("()=>MathStudio.toolSearch.open('panel:brent-details')")
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True
+        assert page.evaluate("k=>JSON.parse(localStorage.getItem(k)).recents", KEY) == ['panel:brent-details']
         for bad in ('null', '[]', '"text"', '42'):
             page.evaluate("([k,v])=>localStorage.setItem(k,v)", [KEY, bad])
             page.reload(wait_until='load')

@@ -80,6 +80,19 @@ for(const invalid of ['null','[]','"text"','42']){
  assert.deepEqual(JSON.parse(raw).recents,['panel:fft-details']);
 }
 
+// Oversized or non-string storage values must not be parsed or trusted.
+raw=JSON.stringify({v:1,recents:['panel:fft-details'],padding:'x'.repeat(20000)});
+prefs=load(recover);
+assert.equal(prefs.persisted(),false,'oversized storage must require repair');
+assert.deepEqual(Array.from(prefs.recent()),[]);
+assert.equal(prefs.addRecent('panel:brent-details'),true);
+assert.equal(prefs.persisted(),true,'bounded rewrite must recover persistence');
+assert.deepEqual(JSON.parse(raw).recents,['panel:brent-details']);
+const nonString={getItem(){return {recents:['panel:fft-details']}},setItem(){}};
+prefs=load(nonString);
+assert.equal(prefs.persisted(),false,'non-string storage must be rejected');
+assert.deepEqual(Array.from(prefs.recent()),[]);
+
 // A corrupt list type must not discard the other valid list.
 raw=JSON.stringify({v:1,recents:['panel:fft-details'],pins:'invalid'});
 prefs=load(recover);
@@ -119,6 +132,7 @@ assert.deepEqual(Array.from(prefs.pinned()),['panel:matrix-tools']);
         self.assertIn("KEY='promath-tool-search-prefs-v1'", PREFS)
         self.assertIn("MAX_RECENT=8", PREFS)
         self.assertIn("MAX_PINS=20", PREFS)
+        self.assertIn("MAX_STORED_LENGTH=16384", PREFS)
         self.assertIn("out.includes(id)", PREFS)  # Dedupe.
         self.assertIn("M.toolPrefs=Object.freeze(", PREFS)
         # Search filters stored IDs against the live index so removed tools are dropped.

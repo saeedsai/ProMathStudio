@@ -1,3 +1,6 @@
+## 2026-11-06 — Bound restored search preference payloads
+- Preference restore now rejects payloads over 16,384 UTF-16 code units and non-string storage results before JSON parsing, reporting session-only status until a successful rewrite. Added Node and Chromium oversized-payload/recovery regressions; synchronized modular source and standalone HTML. Previous exact-head push #42133233110 and PR #42133237537 passed; new exact-head QA pending, PR #189 review-blocked. Historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-06 — Salvage valid preferences when one stored list is malformed
 - A valid JSON preferences object with a non-array recent/pin field now reports non-persistent status until a successful rewrite, while retaining the other valid list. This avoids falsely claiming damaged stored preferences are fully restored. Node state-transition and Chromium corrupted-list assertions added; standalone HTML synchronized.
 - Previous exact-head dev push Quality #42126789186 and PR Quality #42126793454 passed for f80ff900; new exact-head CI pending, PR #189 review-gated and production Pages unchanged. Frozen historical 166 gaps / 95 partial unchanged.

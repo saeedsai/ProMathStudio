@@ -93,6 +93,26 @@ prefs=load(nonString);
 assert.equal(prefs.persisted(),false,'non-string storage must be rejected');
 assert.deepEqual(Array.from(prefs.recent()),[]);
 
+// Malformed nested IDs, duplicate entries and over-limit lists require repair,
+// while valid siblings survive and a successful write persists sanitized values.
+raw=JSON.stringify({v:1,recents:['panel:fft-details',' ','panel:fft-details',null],
+ pins:['panel:matrix-tools']});
+prefs=load(recover);
+assert.equal(prefs.persisted(),false,'discarded nested IDs require repair');
+assert.deepEqual(Array.from(prefs.recent()),['panel:fft-details']);
+assert.deepEqual(Array.from(prefs.pinned()),['panel:matrix-tools']);
+assert.equal(prefs.setPinned('panel:brent-details',true),true);
+assert.equal(prefs.persisted(),true,'sanitized rewrite restores persistence');
+assert.deepEqual(JSON.parse(raw).recents,['panel:fft-details']);
+assert.deepEqual(JSON.parse(raw).pins,['panel:matrix-tools','panel:brent-details']);
+raw=JSON.stringify({v:1,recents:Array.from({length:12},(_,i)=>'panel:valid-'+i),pins:[]});
+prefs=load(recover);
+assert.equal(prefs.persisted(),false,'over-limit recent list requires repair');
+assert.equal(prefs.recent().length,8);
+assert.equal(prefs.addRecent('panel:fft-details'),true);
+assert.equal(prefs.persisted(),true);
+assert.equal(JSON.parse(raw).recents.length,8);
+
 // A corrupt list type must not discard the other valid list.
 raw=JSON.stringify({v:1,recents:['panel:fft-details'],pins:'invalid'});
 prefs=load(recover);

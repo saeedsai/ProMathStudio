@@ -15851,8 +15851,11 @@ function read(){
   if(!data||typeof data!=='object'||Array.isArray(data)){persisted=false;return null;}
   // Keep a valid list if its sibling was corrupted, but report that storage
   // needs a successful rewrite before preferences are reliably persisted.
-  if((data.recents!==undefined&&!Array.isArray(data.recents))||(data.pins!==undefined&&!Array.isArray(data.pins)))persisted=false;
-  return {recents:clean(data.recents,MAX_RECENT),pins:clean(data.pins,MAX_PINS)};
+  const recents=clean(data.recents,MAX_RECENT),pins=clean(data.pins,MAX_PINS);
+  // Discarded invalid, repeated or excessive IDs mean the stored lists need repair.
+  if((data.recents!==undefined&&(!Array.isArray(data.recents)||data.recents.length!==recents.length))||
+     (data.pins!==undefined&&(!Array.isArray(data.pins)||data.pins.length!==pins.length)))persisted=false;
+  return {recents,pins};
  }catch{persisted=false;return null;} // Blocked storage or corrupt JSON: start session-only; retry on save.
 }
 const state=read()||{recents:[],pins:[]};

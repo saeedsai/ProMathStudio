@@ -220,6 +220,17 @@ def main():
             assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False, bad
             assert page.evaluate("()=>MathStudio.toolSearch.open('panel:brent-details')"), bad
             assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True, bad
+        # Valid JSON with invalid nested IDs must report repair, retaining valid siblings.
+        page.evaluate("""k=>localStorage.setItem(k,JSON.stringify({
+            v:1,recents:['panel:brent-details',' ',null,'panel:brent-details'],
+            pins:['panel:fft-details']}))""", KEY)
+        page.reload(wait_until='load')
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
+        assert [r['id'] for r in page.evaluate("()=>MathStudio.toolSearch.recent()")] == ['panel:brent-details']
+        assert [r['id'] for r in page.evaluate("()=>MathStudio.toolSearch.pinned()")] == ['panel:fft-details']
+        assert page.evaluate("()=>MathStudio.toolSearch.pin('panel:matrix-tools')") is True
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True
+        assert page.evaluate("k=>JSON.parse(localStorage.getItem(k)).recents", KEY) == ['panel:brent-details']
         ctx.close()
 
         # Storage that throws on every access: the session still keeps recents and pins in memory.

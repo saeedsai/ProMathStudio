@@ -1,3 +1,7 @@
+## 2026-11-06 — Search preferences repair malformed nested IDs
+- Invalid, repeated and over-limit nested saved recent/pinned IDs are now flagged as requiring repair rather than silently treated as fully persisted. Valid sibling IDs remain available in memory; a successful save writes sanitized lists and restores persistence. Focused Node and Chromium regression cases plus synchronized standalone HTML were committed with the living plan.
+- Prior exact-head dev push Quality #42140368695 and PR Quality #42140374316 passed; new head CI and full local Chromium pending. PR #189 still lacks reviews, no merge/Pages release; historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-06 — Bound restored search preference payloads
 - Preference restore now rejects payloads over 16,384 UTF-16 code units and non-string storage results before JSON parsing, reporting session-only status until a successful rewrite. Added Node and Chromium oversized-payload/recovery regressions; synchronized modular source and standalone HTML. Previous exact-head push #42133233110 and PR #42133237537 passed; new exact-head QA pending, PR #189 review-blocked. Historical 166 gaps / 95 partial unchanged.
 

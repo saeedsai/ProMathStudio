@@ -1,3 +1,14 @@
+## 2026-11-06 — UI-PREFS-VERSION-188 (exact-head QA pending)
+
+**Execution ledger:** Inspected dev 5af8126cdcd75299a335620b7f8e62aa3b6c0636 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, plan, successful exact-head push Quality #42147267403 and PR Quality #42147271856, PR #189 (open, no reviews, mergeable clean), and previous main Quality/Pages evidence. Added forward-compatible preference schema handling: unsupported future versions stay session-only without overwriting unknown saved data; unversioned legacy lists remain readable and migrate to v1 on a successful write. Added Node and Chromium regression assertions, rebuilt synchronized standalone module, updated ledger/changelog. Local full suite and browser checks not executed; new exact-head CI pending. No merge, deployment, or branch deletion. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** schema v2 no-overwrite, legacy migration Node/Chromium, Python structural suite, source/bundle parity and full push/PR Quality pass for new dev SHA.
+2. **P0 PR #189 release (review-gated):** verify authorized approvals, branch protections and exact-head checks, ordinary dev-to-main PR merge, then main Quality, Pages and hosted smoke.
+3. **P1 Preference version recovery (planned):** explicit safe reset workflow for unsupported future schema only with user action, preserving unknown fields until then; browser and keyboard regression.
+4. **P1 Numerical reference QA (planned):** polynomial repeated roots, ill-conditioned nonlinear fitting and unstable filters against independent reference and invalid inputs.
+5. **P1 Safe cleanup (pending):** verify legacy branch containment in validated main, open PRs, protections and references before any deletion.
+
 ## 2026-11-06 — UI-PREFS-NESTED-INTEGRITY-187 (new exact-head CI pending)
 
 **Execution ledger:** Inspected dev 9e9369dee6a50ad78d241f0cc1a2ab109c435d6f and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, living plan, exact-head push Quality #42140368695 and PR Quality #42140374316 (both successful), PR #189 (open, no reviews, clean), and last main Quality #41730966059 / Pages #41730962844 (successful for unchanged main). Identified that invalid, repeated or over-limit nested saved IDs were silently sanitized without flagging persistence as requiring repair. Now compare cleaned list lengths with original arrays, preserve valid sibling IDs and mark session-only until a successful rewrite. Added focused executable Node cases for malformed/duplicate and over-limit lists, Chromium browser restoration and recovery coverage, and synchronized standalone HTML. New exact-head CI pending; local full Python/Chromium not executed because repository checkout unavailable. No release, merge or branch cleanup. Frozen historical 166 gaps / 95 partial unchanged.

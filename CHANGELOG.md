@@ -1,3 +1,6 @@
+## 2026-11-06 — Preserve unknown preference schemas and migrate legacy data
+- Saved tool preferences with an unsupported schema version no longer risk silent overwrite by an older client. Session-only recents and pins continue working; unversioned legacy data is readable and migrates to v1 after a successful save. Node and Chromium regressions cover both behaviors; offline standalone module synchronized. Prior dev exact-head push/PR Quality passed (#42147267403/#42147271856), new commit's QA pending. PR #189 still lacks reviews; Pages not redeployed. Historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-06 — Search preferences repair malformed nested IDs
 - Invalid, repeated and over-limit nested saved recent/pinned IDs are now flagged as requiring repair rather than silently treated as fully persisted. Valid sibling IDs remain available in memory; a successful save writes sanitized lists and restores persistence. Focused Node and Chromium regression cases plus synchronized standalone HTML were committed with the living plan.
 - Prior exact-head dev push Quality #42140368695 and PR Quality #42140374316 passed; new head CI and full local Chromium pending. PR #189 still lacks reviews, no merge/Pages release; historical 166 gaps / 95 partial unchanged.

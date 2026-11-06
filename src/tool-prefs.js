@@ -14,7 +14,7 @@ function clean(list,max,keep){
  }
  return out;
 }
-let persisted=true;
+let persisted=true,unsupportedVersion=false;
 function read(){
  try{
   const raw=window.localStorage.getItem(KEY);
@@ -23,6 +23,10 @@ function read(){
   if(typeof raw!=='string'||raw.length>MAX_STORED_LENGTH){persisted=false;return null;}
   const data=JSON.parse(raw);
   if(!data||typeof data!=='object'||Array.isArray(data)){persisted=false;return null;}
+  // Never overwrite a newer schema that this application cannot interpret.
+  if(data.v!==undefined&&data.v!==1){persisted=false;unsupportedVersion=true;return null;}
+  // Legacy unversioned data remains readable but needs a v1 rewrite.
+  if(data.v===undefined)persisted=false;
   // Keep a valid list if its sibling was corrupted, but report that storage
   // needs a successful rewrite before preferences are reliably persisted.
   const recents=clean(data.recents,MAX_RECENT),pins=clean(data.pins,MAX_PINS);
@@ -34,6 +38,7 @@ function read(){
 }
 const state=read()||{recents:[],pins:[]};
 function save(){
+ if(unsupportedVersion){persisted=false;return false;}
  try{window.localStorage.setItem(KEY,JSON.stringify({v:1,recents:state.recents,pins:state.pins}));persisted=true;}
  catch{persisted=false;}
  return persisted;

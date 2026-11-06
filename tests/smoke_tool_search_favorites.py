@@ -231,6 +231,25 @@ def main():
         assert page.evaluate("()=>MathStudio.toolSearch.pin('panel:matrix-tools')") is True
         assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True
         assert page.evaluate("k=>JSON.parse(localStorage.getItem(k)).recents", KEY) == ['panel:brent-details']
+        # Forward-compatible v2 preferences are never overwritten by an older client.
+        future = {'v': 2, 'recents': ['panel:fft-details'], 'future': {'keep': 'this'}}
+        page.evaluate("([k,v])=>localStorage.setItem(k,JSON.stringify(v))", [KEY, future])
+        page.reload(wait_until='load')
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
+        assert page.evaluate("()=>MathStudio.toolSearch.recent()") == []
+        assert page.evaluate("()=>MathStudio.toolSearch.open('panel:brent-details')")
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
+        assert page.evaluate("k=>JSON.parse(localStorage.getItem(k))", KEY) == future
+        # Unversioned legacy preferences are readable and migrate on write.
+        page.evaluate("([k,v])=>localStorage.setItem(k,JSON.stringify(v))",
+                      [KEY, {'recents': ['panel:fft-details'], 'pins': ['panel:matrix-tools']}])
+        page.reload(wait_until='load')
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is False
+        assert [r['id'] for r in page.evaluate("()=>MathStudio.toolSearch.recent()")] == ['panel:fft-details']
+        assert page.evaluate("()=>MathStudio.toolSearch.open('panel:brent-details')")
+        assert page.evaluate("()=>MathStudio.toolPrefs.persisted()") is True
+        assert page.evaluate("k=>JSON.parse(localStorage.getItem(k)).v", KEY) == 1
+
         ctx.close()
 
         # Storage that throws on every access: the session still keeps recents and pins in memory.

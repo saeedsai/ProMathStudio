@@ -113,6 +113,25 @@ assert.equal(prefs.addRecent('panel:fft-details'),true);
 assert.equal(prefs.persisted(),true);
 assert.equal(JSON.parse(raw).recents.length,8);
 
+// Unknown schema versions must not be overwritten by older clients; legacy
+// unversioned lists remain usable and migrate on the next successful save.
+raw=JSON.stringify({v:2,recents:['panel:fft-details'],future:{keep:'this'}});
+prefs=load(recover);
+assert.equal(prefs.persisted(),false);
+assert.deepEqual(Array.from(prefs.recent()),[]);
+assert.equal(prefs.addRecent('panel:brent-details'),true);
+assert.equal(prefs.persisted(),false);
+assert.equal(JSON.parse(raw).v,2);
+assert.deepEqual(JSON.parse(raw).future,{keep:'this'});
+raw=JSON.stringify({recents:['panel:fft-details'],pins:['panel:matrix-tools']});
+prefs=load(recover);
+assert.equal(prefs.persisted(),false);
+assert.deepEqual(Array.from(prefs.recent()),['panel:fft-details']);
+assert.equal(prefs.setPinned('panel:brent-details',true),true);
+assert.equal(prefs.persisted(),true);
+assert.equal(JSON.parse(raw).v,1);
+assert.deepEqual(JSON.parse(raw).pins,['panel:matrix-tools','panel:brent-details']);
+
 // A corrupt list type must not discard the other valid list.
 raw=JSON.stringify({v:1,recents:['panel:fft-details'],pins:'invalid'});
 prefs=load(recover);

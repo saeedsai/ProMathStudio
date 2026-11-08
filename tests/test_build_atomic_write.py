@@ -46,6 +46,28 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
             self.assertEqual(index.read_text(encoding="utf-8"), original)
             self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
 
+    def test_concurrent_index_edit_is_not_overwritten(self):
+        source = BUILDER.read_text(encoding="utf-8")
+        guard = 'with index.open("r", encoding="utf-8", newline="") as current_file:'
+        self.assertEqual(source.count(guard), 1)
+        # Simulate another editor saving after module assembly but before replace.
+        instrumented = source.replace(
+            guard,
+            'index.write_text("newer external edit\\n", encoding="utf-8")\\n            ' + guard,
+            1,
+        ).replace('\\n            with index.open', '\n            with index.open')
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            index, _ = make_fixture(root, instrumented)
+            result = subprocess.run(
+                [sys.executable, str(root / "scripts" / "build.py")],
+                capture_output=True, text=True, timeout=15,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("changed during rebuild", result.stderr)
+            self.assertEqual(index.read_text(encoding="utf-8"), "newer external edit\\n".replace("\\n", "\n"))
+            self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
+
     def test_successful_rebuild_keeps_permissions_and_cleans_temporary_output(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

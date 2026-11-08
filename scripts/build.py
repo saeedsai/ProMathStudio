@@ -147,6 +147,11 @@ else:
                 output.flush()
                 os.fsync(output.fileno())
             staged.chmod(stat.S_IMODE(index.stat().st_mode))
+            # A separate editor/build may have changed index.html while modules
+            # were read. Never replace those newer edits with this stale snapshot.
+            with index.open("r", encoding="utf-8", newline="") as current_file:
+                if current_file.read() != original_index_text:
+                    raise RuntimeError("Standalone index.html changed during rebuild; retry")
             os.replace(staged, index)
         finally:
             if staged is not None:

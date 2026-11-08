@@ -1,3 +1,6 @@
+## 2026-11-08 — Preserve concurrent standalone HTML edits during rebuild
+- The atomic standalone builder now checks that `index.html` still matches the snapshot read before module assembly; on an intervening external edit, it aborts and cleans the staged file rather than overwriting newer changes. Added a focused concurrent-edit subprocess regression. This detects ordinary lost-update races but does not implement an interprocess lock. Prior exact-head push/PR Quality #42485007089/#42485010736 passed; new commit CI pending. No runtime module change or production release.
+
 ## 2026-11-08 — Atomic standalone HTML rebuild and failure rollback
 - `scripts/build.py` now writes the complete LF-normalized bundle to a same-directory temporary file and atomically replaces `index.html` only after a successful write, preserving original file mode and cleaning abandoned temporary files on failures. Previously it could truncate `index.html` if writing failed. Added focused `tests/test_build_atomic_write.py` for failed replacement rollback and successful rebuild. Isolated prototype passed locally; exact-commit full CI pending. No application runtime change, main promotion or Pages release.
 

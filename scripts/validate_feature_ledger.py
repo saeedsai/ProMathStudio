@@ -12,29 +12,40 @@ ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "docs" / "feature-ledger-audit-20261026.json"
 
 
+def require(condition, message):
+    """Enforce audit invariants even when Python is invoked with -O."""
+    if not condition:
+        raise ValueError(message)
+
+
 def validate(data):
-    assert data["schemaVersion"] == 1
-    assert data["sourceAudit"] == "2026-10-26"
-    items = data["items"]
-    assert len(items) == 324, "Expected 158 existing and 166 gaps from frozen audit"
-    ids = [x["id"] for x in items]
-    assert len(ids) == len(set(ids)), "Duplicate feature IDs"
-    counts = Counter(x["kind"] for x in items)
-    assert counts == {"existing": 158, "gap": 166}, counts
-    assert data["counts"] == {"existing": 158, "gaps": 166}
-    assert Counter(x["status"] for x in items if x["kind"] == "existing") == {
-        "bounded-complete": 63, "partial": 95
-    }
-    assert Counter(x["priority"] for x in items if x["kind"] == "gap") == {
-        "P0": 22, "P1": 64, "P2": 53, "P3": 27
-    }
+    require(isinstance(data, dict), "Feature ledger must be a JSON object")
+    require(data.get("schemaVersion") == 1, "Expected feature ledger schemaVersion 1")
+    require(data.get("sourceAudit") == "2026-10-26", "Unexpected source audit date")
+    items = data.get("items")
+    require(isinstance(items, list), "Feature ledger items must be an array")
+    require(len(items) == 324, "Expected 158 existing and 166 gaps from frozen audit")
+    require(all(isinstance(item, dict) for item in items), "Every feature ledger item must be an object")
+    ids = [item.get("id") for item in items]
+    require(len(ids) == len(set(ids)), "Duplicate feature IDs")
+    counts = Counter(item.get("kind") for item in items)
+    require(counts == {"existing": 158, "gap": 166}, f"Unexpected feature kinds/counts: {counts}")
+    require(data.get("counts") == {"existing": 158, "gaps": 166}, "Frozen feature counts mismatch")
+    statuses = Counter(item.get("status") for item in items if item["kind"] == "existing")
+    require(statuses == {"bounded-complete": 63, "partial": 95}, f"Frozen feature statuses mismatch: {statuses}")
+    priorities = Counter(item.get("priority") for item in items if item["kind"] == "gap")
+    require(priorities == {"P0": 22, "P1": 64, "P2": 53, "P3": 27},
+            f"Frozen gap priorities mismatch: {priorities}")
     for item in items:
-        assert all(item.get(k) for k in ("id", "title", "scope", "section", "source"))
-        assert item["source"] == "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+        require(all(isinstance(item.get(k), str) and item[k].strip()
+                    for k in ("id", "title", "scope", "section", "source")),
+                f"Missing/invalid required feature field: {item.get('id')!r}")
+        require(item["source"] == "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md",
+                f"Unexpected audit source for {item['id']}")
         if item["kind"] == "gap":
-            assert item["status"] == "planned"
+            require(item.get("status") == "planned", f"Gap must remain historically planned: {item['id']}")
         else:
-            assert "priority" not in item
+            require("priority" not in item, f"Existing feature must not have gap priority: {item['id']}")
     return counts
 
 

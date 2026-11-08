@@ -1,3 +1,6 @@
+## 2026-11-08 — Enforce frozen audit validation even with optimized Python
+- Replaced optimization-removable `assert` checks in the historical feature-ledger validator with explicit, diagnostic validation failures. Added regression coverage for malformed audit records and a `python -O` subprocess to prove that the frozen inventory cannot silently pass when assertions are disabled. Historical 166 gaps / 95 partial unchanged. Exact-head CI pending; no application bundle, release or Pages change.
+
 ## 2026-11-08 — Recover cleanly from module removal during standalone verification
 - Standalone build snapshot verification now reports a consistent actionable concurrent-source error when a module is deleted or becomes undecodable between assembly and final check. Added a subprocess regression for deleted module in read-only check mode with unchanged HTML and no temporary files. Previous exact-head push/PR Quality passed; new exact-head full QA pending. No application JavaScript or bundled HTML changes, release or Pages deployment. Frozen 166 gaps / 95 partial unchanged.
 

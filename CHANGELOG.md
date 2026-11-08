@@ -1,3 +1,6 @@
+## 2026-11-08 — Correct injected builder fixture indentation
+- Corrected the concurrent-index test's guard targeting to preserve Python indentation while selecting the first of two matching destination reads. This preflight follow-up preserves the regression's failure and cleanup checks; no application code changed. Exact-head CI pending.
+
 ## 2026-11-08 — Repair concurrent-index regression fixtures
 - Fixed two structural test-only failures reported by exact-head push/PR Quality #42517673686/#42517679751. The publish-path injection now targets its uniquely indented guard rather than also matching the no-op path, and the no-op fixture expects a real newline written by the injected editor. Rollback and temporary cleanup assertions remain strict. No production source or bundle change; new exact-head CI pending.
 

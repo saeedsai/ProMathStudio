@@ -48,8 +48,9 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
 
     def test_concurrent_index_edit_is_not_overwritten(self):
         source = BUILDER.read_text(encoding="utf-8")
-        guard = '            with index.open("r", encoding="utf-8", newline="") as current_file:'
-        self.assertEqual(source.count(guard), 1)
+        guard = 'with index.open("r", encoding="utf-8", newline="") as current_file:'
+        # Both publish and no-op paths read index; inject only at the first.
+        self.assertEqual(source.count(guard), 2)
         # Simulate another editor saving after module assembly but before replace.
         instrumented = source.replace(
             guard,

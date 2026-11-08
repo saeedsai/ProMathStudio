@@ -48,7 +48,7 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
 
     def test_concurrent_index_edit_is_not_overwritten(self):
         source = BUILDER.read_text(encoding="utf-8")
-        guard = 'with index.open("r", encoding="utf-8", newline="") as current_file:'
+        guard = '            with index.open("r", encoding="utf-8", newline="") as current_file:'
         self.assertEqual(source.count(guard), 1)
         # Simulate another editor saving after module assembly but before replace.
         instrumented = source.replace(
@@ -177,7 +177,7 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("Standalone index.html changed during rebuild", result.stderr)
             self.assertNotIn("already up to date", result.stdout)
-            self.assertEqual(index.read_text(encoding="utf-8"), "newer external edit\\n")
+            self.assertEqual(index.read_text(encoding="utf-8"), "newer external edit\n")
             self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
 
     def test_symlink_swap_before_publish_preserves_external_target(self):

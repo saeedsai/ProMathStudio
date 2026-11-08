@@ -33,6 +33,11 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             ("missing scope", lambda d: d["items"][0].update(scope="")),
             ("invalid kind", lambda d: d["items"][0].update(kind="unknown")),
             ("wrong source", lambda d: d["items"][0].update(source="unverified.md")),
+            ("unhashable id", lambda d: d["items"][0].update(id=["not-an-id"])),
+            ("unhashable kind", lambda d: d["items"][0].update(kind={"bad": "kind"})),
+            ("unhashable status", lambda d: d["items"][0].update(status=["partial"])),
+            ("unhashable priority", lambda d: d["items"][158].update(priority=["P0"])),
+            ("boolean schema", lambda d: d.update(schemaVersion=True)),
         ]
         for label, mutate in cases:
             with self.subTest(label=label):

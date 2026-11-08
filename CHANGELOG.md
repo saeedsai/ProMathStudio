@@ -1,3 +1,6 @@
+## 2026-11-08 — Reject malformed historical audit field types
+- Hardened `scripts/validate_feature_ledger.py` to reject non-string ID/kind/status/priority before set/Counter processing and to reject boolean `schemaVersion` values, with descriptive `ValueError` instead of incidental `TypeError`. Added five negative regressions in `tests/test_feature_ledger_validation.py`. Historical inventory remains unchanged (166 gaps / 95 partial). Exact-commit CI pending; no application bundle changes, release or deployment.
+
 ## 2026-11-08 — Enforce frozen audit validation even with optimized Python
 - Replaced optimization-removable `assert` checks in the historical feature-ledger validator with explicit, diagnostic validation failures. Added regression coverage for malformed audit records and a `python -O` subprocess to prove that the frozen inventory cannot silently pass when assertions are disabled. Historical 166 gaps / 95 partial unchanged. Exact-head CI pending; no application bundle, release or Pages change.
 

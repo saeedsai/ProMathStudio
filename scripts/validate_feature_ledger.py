@@ -20,15 +20,24 @@ def require(condition, message):
 
 def validate(data):
     require(isinstance(data, dict), "Feature ledger must be a JSON object")
-    require(data.get("schemaVersion") == 1, "Expected feature ledger schemaVersion 1")
+    require(type(data.get("schemaVersion")) is int and data["schemaVersion"] == 1, "Expected feature ledger schemaVersion 1")
     require(data.get("sourceAudit") == "2026-10-26", "Unexpected source audit date")
     items = data.get("items")
     require(isinstance(items, list), "Feature ledger items must be an array")
     require(len(items) == 324, "Expected 158 existing and 166 gaps from frozen audit")
     require(all(isinstance(item, dict) for item in items), "Every feature ledger item must be an object")
-    ids = [item.get("id") for item in items]
+    # Validate hash keys before Counter/set: malformed JSON can contain arrays or
+    # objects here, which must raise a useful audit error rather than TypeError.
+    for index, item in enumerate(items):
+        for key in ("id", "kind", "status"):
+            require(isinstance(item.get(key), str),
+                    f"Feature ledger item {index} has invalid {key}")
+        if "priority" in item:
+            require(isinstance(item["priority"], str),
+                    f"Feature ledger item {index} has invalid priority")
+    ids = [item["id"] for item in items]
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
-    counts = Counter(item.get("kind") for item in items)
+    counts = Counter(item["kind"] for item in items)
     require(counts == {"existing": 158, "gap": 166}, f"Unexpected feature kinds/counts: {counts}")
     require(data.get("counts") == {"existing": 158, "gaps": 166}, "Frozen feature counts mismatch")
     statuses = Counter(item.get("status") for item in items if item["kind"] == "existing")

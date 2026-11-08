@@ -121,7 +121,20 @@ for tag, source in modules:
         drift_sources.append(source)
     text = text[:start] + replacement + text[end:]
 
+def verify_source_snapshots():
+    """Reject stale results if a module changed after it was assembled."""
+    for source, snapshot in source_snapshots.items():
+        source_path = root / source
+        if source_path.is_symlink() or source_path.parent.is_symlink():
+            raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
+        with source_path.open("r", encoding="utf-8", newline="") as current_source:
+            if current_source.read() != snapshot:
+                raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
+
+
 if "--check" in sys.argv[1:]:
+    # The read-only check must not report success for a stale module snapshot.
+    verify_source_snapshots()
     # Compare with the same snapshot used to assemble the bundle; do not
     # reopen index.html after modules have been processed.
     original_text = original_index_text
@@ -157,13 +170,7 @@ else:
             # A module edited during assembly must not be published as stale code.
             # Compare complete source snapshots, not only mtimes (which can be
             # restored or have coarse resolution on some filesystems).
-            for source, snapshot in source_snapshots.items():
-                source_path = root / source
-                if source_path.is_symlink() or source_path.parent.is_symlink():
-                    raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
-                with source_path.open("r", encoding="utf-8", newline="") as current_source:
-                    if current_source.read() != snapshot:
-                        raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
+            verify_source_snapshots()
             os.replace(staged, index)
         finally:
             if staged is not None:

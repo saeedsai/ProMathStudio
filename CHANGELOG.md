@@ -1,3 +1,6 @@
+## 2026-11-08 — Detect concurrent source changes in read-only bundle check
+- Reused the standalone builder's source-snapshot verification in `--check`, preventing a false consistency success when a modular source changes during the check. Added an injected concurrent-edit subprocess regression that verifies failure and unchanged `index.html`. Previous exact-head push/PR Quality #42492393106/#42492396772 passed; new commit CI pending. No runtime bundle change or Pages release.
+
 ## 2026-11-08 — Detect concurrent module edits before publishing standalone HTML
 - The standalone builder now snapshots modular source files and checks they have not changed before replacing `index.html`. If a source file is edited or replaced by a symlink during assembly, rebuilding aborts without publishing stale JavaScript. Added subprocess rollback/cleanup regression for an intervening source edit. This is a best-effort race guard, not a cross-process lock. Prior exact-head push/PR Quality #42487293944/#42487298107 succeeded; new commit QA pending. No runtime module change, merge or Pages release.
 

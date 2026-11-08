@@ -177,4 +177,7 @@ else:
                 staged.unlink(missing_ok=True)
         print("Rebuilt standalone index.html")
     else:
+        # A no-op build must also reject modules modified after their first
+        # read; otherwise it can falsely report a consistent bundle.
+        verify_source_snapshots()
         print("Standalone index.html already up to date")

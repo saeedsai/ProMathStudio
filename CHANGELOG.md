@@ -1,3 +1,6 @@
+## 2026-11-08 — Verify source snapshots on no-op standalone builds
+- Fixed a normal-build race where an initially unchanged `index.html` skipped module freshness verification and could report success despite a concurrent source edit. Added an injected no-op regression covering failure, preservation of the existing bundle and no staging artifacts. Exact-head CI pending; no runtime JS or Pages release.
+
 ## 2026-11-08 — Complete concurrent-module fixture newline repair
 - Corrected the injected literal-newline conversion to use the actual four-space function indentation. This supplements the earlier test-only syntax fix; exact-head CI pending, no production changes or release.
 

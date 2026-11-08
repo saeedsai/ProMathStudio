@@ -120,6 +120,37 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
             self.assertEqual(index.read_bytes(), expected)
             self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
 
+    def test_noop_rebuild_rejects_module_changed_after_assembly(self):
+        source = BUILDER.read_text(encoding="utf-8")
+        guard = 'if "--check" in sys.argv[1:]:'
+        self.assertEqual(source.count(guard), 1)
+        # Change a source after assembly; index initially matches every module,
+        # so a normal build would otherwise take the no-op path.
+        instrumented = source.replace(
+            guard,
+            '(root / "src/data-tables.js").write_text("window.newer = true;\\n", encoding="utf-8")\\n'
+            + guard,
+            1,
+        ).replace('\\nif "--check"', '\nif "--check"')
+        compile(instrumented, "<instrumented no-op builder>", "exec")
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            index, original = make_fixture(root, instrumented)
+            index.write_text(
+                original.replace("window.fixture = false;", "window.fixture = true;"),
+                encoding="utf-8",
+            )
+            expected = index.read_bytes()
+            result = subprocess.run(
+                [sys.executable, str(root / "scripts" / "build.py")],
+                capture_output=True, text=True, timeout=15,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Standalone module changed during rebuild: src/data-tables.js", result.stderr)
+            self.assertNotIn("already up to date", result.stdout)
+            self.assertEqual(index.read_bytes(), expected)
+            self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
+
     def test_successful_rebuild_keeps_permissions_and_cleans_temporary_output(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

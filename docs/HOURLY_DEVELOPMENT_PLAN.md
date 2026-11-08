@@ -1,3 +1,14 @@
+## 2026-11-08 — BUILD-NOOP-SNAPSHOT-197 (source freshness on unchanged bundle)
+
+**Execution ledger:** Inspected exact dev 0aefe20b1a4f16e5975698e694d42beb4f084773, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen 166-gap/95-partial inventory, current plan, PR #189 (open, zero reviews), and exact-head successful push/PR Quality #42502772591/#42502778355. Found that normal `python scripts/build.py` skipped `verify_source_snapshots()` when assembled output initially matched `index.html`, so a module changed during assembly could be falsely reported as up-to-date. Added snapshot verification to the normal no-op path, and focused injected concurrent-edit regression verifying nonzero exit, preserved bundle, no false success and no staging debris. No JS modules or standalone HTML changed. Local repository checkout unavailable; exact-commit CI must verify structural and browser suites. PR review gate still prevents release; no main/Pages deployment.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Exact-head CI (pending):** both push and PR Quality for new SHA succeed, including `python -m unittest discover -s tests -p 'test_*.py'`, the no-op snapshot regression, `python scripts/build.py --check` and browser smoke.
+2. **P0 Release PR #189 (review-gated):** verify required authorized reviews, exact-head checks, branch rules; ordinary PR merge only after green, then main Quality, Pages and hosted smoke.
+3. **P1 Future-schema preference reset UI (planned):** explicit confirmation and accessible keyboard/focus/cancel behavior, storage failure and unsupported-schema preservation tests; synchronize modular JS and standalone bundle.
+4. **P1 Numerical reference tests (planned):** repeated polynomial roots, ill-conditioned nonlinear fitting and unstable filters with reference values, tolerances, residuals and invalid domains.
+5. **P1 Cleanup audit (pending):** confirm all extra-branch commits in main, no open PR, protection or unique work before any deletion.
+
 ## 2026-11-08 — BUILD-RACE-TEST-FIX-196 (complete injected newline alignment)
 
 **Execution ledger:** During preflight inspection of 68cf8fad01238be37ef7c68c9db684a901ff853f, detected that its fixture's literal backslash-n conversion still targeted twelve-space indentation even though the injected loop had been corrected to four spaces. Updated the conversion to match the four-space `verify_source_snapshots` body; explicit fixture compilation remains, as do strict rollback and cleanup assertions. No production or standalone JS changes. Exact-head CI required; previous #42498036210/#42498040457 failed from test-only indentation. Main remains 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 review-gated. Historical 166 gaps / 95 partial unchanged.

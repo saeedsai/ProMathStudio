@@ -151,6 +151,34 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
             self.assertEqual(index.read_bytes(), expected)
             self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
 
+    def test_symlink_swap_before_publish_preserves_external_target(self):
+        source = BUILDER.read_text(encoding="utf-8")
+        guard = 'if index.is_symlink():\n                raise RuntimeError("Standalone index.html became a symlink during rebuild; retry")'
+        self.assertEqual(source.count(guard), 1)
+        # An editor replaces the index path with a symlink after assembly.
+        instrumented = source.replace(
+            guard,
+            'index.unlink()\n'
+            '            index.symlink_to(root / "external.html")\n'
+            '            ' + guard,
+            1,
+        )
+        compile(instrumented, "<symlink-swap builder>", "exec")
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            index, _ = make_fixture(root, instrumented)
+            external = root / "external.html"
+            external.write_text("external edit must survive", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(root / "scripts" / "build.py")],
+                capture_output=True, text=True, timeout=15,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("became a symlink during rebuild", result.stderr)
+            self.assertTrue(index.is_symlink())
+            self.assertEqual(external.read_text(encoding="utf-8"), "external edit must survive")
+            self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
+
     def test_successful_rebuild_keeps_permissions_and_cleans_temporary_output(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

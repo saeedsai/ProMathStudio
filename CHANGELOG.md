@@ -1,3 +1,6 @@
+## 2026-11-08 — Preserve externally introduced index symlinks during rebuild
+- The standalone builder now checks for a destination symlink immediately before publishing, preserving an independently replaced path instead of overwriting it. Added a subprocess regression simulating the symlink swap, verifying failure, external-target preservation and temporary-file cleanup. Best-effort guard, not a full interprocess lock. Exact-head CI pending; no application JS or Pages release.
+
 ## 2026-11-08 — Verify source snapshots on no-op standalone builds
 - Fixed a normal-build race where an initially unchanged `index.html` skipped module freshness verification and could report success despite a concurrent source edit. Added an injected no-op regression covering failure, preservation of the existing bundle and no staging artifacts. Exact-head CI pending; no runtime JS or Pages release.
 

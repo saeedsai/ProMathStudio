@@ -171,6 +171,10 @@ else:
             # Compare complete source snapshots, not only mtimes (which can be
             # restored or have coarse resolution on some filesystems).
             verify_source_snapshots()
+            # A symlink introduced after the initial check must not be
+            # replaced: it may represent an independent editor's work.
+            if index.is_symlink():
+                raise RuntimeError("Standalone index.html became a symlink during rebuild; retry")
             os.replace(staged, index)
         finally:
             if staged is not None:

@@ -1,7 +1,10 @@
 """Rebuild standalone HTML from modular JavaScript without changing script spacing."""
 from pathlib import Path
+import os
 import re
+import stat
 import sys
+import tempfile
 
 if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] != "--check"):
     raise SystemExit("Usage: python scripts/build.py [--check]")
@@ -130,9 +133,24 @@ if "--check" in sys.argv[1:]:
     print("Standalone index.html matches modular sources")
 else:
     if text != original_index_text:
-        # Explicit LF output keeps the generated standalone HTML reproducible on Windows.
-        with index.open("w", encoding="utf-8", newline="\n") as output:
-            output.write(text)
+        # Stage the complete LF-normalized output beside index.html, then replace
+        # it atomically. A failed write/rename must never truncate the live bundle.
+        staged = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", newline="\n",
+                prefix=".promath-index-", suffix=".tmp",
+                dir=index.parent, delete=False,
+            ) as output:
+                staged = Path(output.name)
+                output.write(text)
+                output.flush()
+                os.fsync(output.fileno())
+            staged.chmod(stat.S_IMODE(index.stat().st_mode))
+            os.replace(staged, index)
+        finally:
+            if staged is not None:
+                staged.unlink(missing_ok=True)
         print("Rebuilt standalone index.html")
     else:
         print("Standalone index.html already up to date")

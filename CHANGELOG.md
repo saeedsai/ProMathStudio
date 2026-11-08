@@ -1,3 +1,6 @@
+## 2026-11-08 — Atomic standalone HTML rebuild and failure rollback
+- `scripts/build.py` now writes the complete LF-normalized bundle to a same-directory temporary file and atomically replaces `index.html` only after a successful write, preserving original file mode and cleaning abandoned temporary files on failures. Previously it could truncate `index.html` if writing failed. Added focused `tests/test_build_atomic_write.py` for failed replacement rollback and successful rebuild. Isolated prototype passed locally; exact-commit full CI pending. No application runtime change, main promotion or Pages release.
+
 ## 2026-11-06 — Project import polling and explicit future-schema reset API
 - Fixed Chromium project migration regression's unsafe wait predicate when graph.dataset is temporarily null; preserved two-row success and added imported-header verification.
 - Added opt-in `MathStudio.toolPrefs.resetUnsupported(true)` API. Unsupported newer schema stays intact on ordinary operations and on failed reset writes; explicit successful reset stores v1. Focused Node regression exercises all transitions; standalone bundle synchronized. Reset UI is not yet implemented.

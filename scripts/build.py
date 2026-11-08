@@ -74,6 +74,7 @@ modules = [
     ("promath-tool-search", "src/tool-search.js"),
 ]
 drift_sources = []
+source_snapshots = {}
 for tag, source in modules:
     marker = f'<script id="{tag}">\n'
     if text.count(marker) != 1:
@@ -95,6 +96,7 @@ for tag, source in modules:
     try:
         with source_path.open("r", encoding="utf-8", newline="") as module_file:
             module_source = module_file.read()
+        source_snapshots[source] = module_source
         if "\r" in module_source:
             raise ValueError(f"Unexpected carriage return in standalone module source: {source}")
         module_source = module_source.rstrip("\n")
@@ -152,6 +154,16 @@ else:
             with index.open("r", encoding="utf-8", newline="") as current_file:
                 if current_file.read() != original_index_text:
                     raise RuntimeError("Standalone index.html changed during rebuild; retry")
+            # A module edited during assembly must not be published as stale code.
+            # Compare complete source snapshots, not only mtimes (which can be
+            # restored or have coarse resolution on some filesystems).
+            for source, snapshot in source_snapshots.items():
+                source_path = root / source
+                if source_path.is_symlink() or source_path.parent.is_symlink():
+                    raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
+                with source_path.open("r", encoding="utf-8", newline="") as current_source:
+                    if current_source.read() != snapshot:
+                        raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
             os.replace(staged, index)
         finally:
             if staged is not None:

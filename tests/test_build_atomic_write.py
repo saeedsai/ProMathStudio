@@ -68,6 +68,30 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
             self.assertEqual(index.read_text(encoding="utf-8"), "newer external edit\\n".replace("\\n", "\n"))
             self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
 
+    def test_concurrent_module_edit_does_not_publish_stale_bundle(self):
+        source = BUILDER.read_text(encoding="utf-8")
+        guard = "for source, snapshot in source_snapshots.items():"
+        self.assertEqual(source.count(guard), 1)
+        # Inject a module save after assembly, immediately before verification.
+        instrumented = source.replace(
+            guard,
+            '(root / "src/data-tables.js").write_text('
+            '"window.newer = true;\\\\n", encoding="utf-8")\\n            ' + guard,
+            1,
+        ).replace('\\n            for source, snapshot', '\n            for source, snapshot')
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            index, original = make_fixture(root, instrumented)
+            result = subprocess.run(
+                [sys.executable, str(root / "scripts" / "build.py")],
+                capture_output=True, text=True, timeout=15,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Standalone module changed during rebuild: src/data-tables.js", result.stderr)
+            self.assertEqual(index.read_text(encoding="utf-8"), original)
+            self.assertIn("window.newer = true;", (root / "src/data-tables.js").read_text(encoding="utf-8"))
+            self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
+
     def test_successful_rebuild_keeps_permissions_and_cleans_temporary_output(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

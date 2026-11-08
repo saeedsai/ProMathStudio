@@ -1,3 +1,6 @@
+## 2026-11-08 — Detect concurrent module edits before publishing standalone HTML
+- The standalone builder now snapshots modular source files and checks they have not changed before replacing `index.html`. If a source file is edited or replaced by a symlink during assembly, rebuilding aborts without publishing stale JavaScript. Added subprocess rollback/cleanup regression for an intervening source edit. This is a best-effort race guard, not a cross-process lock. Prior exact-head push/PR Quality #42487293944/#42487298107 succeeded; new commit QA pending. No runtime module change, merge or Pages release.
+
 ## 2026-11-08 — Preserve concurrent standalone HTML edits during rebuild
 - The atomic standalone builder now checks that `index.html` still matches the snapshot read before module assembly; on an intervening external edit, it aborts and cleans the staged file rather than overwriting newer changes. Added a focused concurrent-edit subprocess regression. This detects ordinary lost-update races but does not implement an interprocess lock. Prior exact-head push/PR Quality #42485007089/#42485010736 passed; new commit CI pending. No runtime module change or production release.
 

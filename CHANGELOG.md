@@ -1,3 +1,6 @@
+## 2026-11-08 — Recover cleanly from module removal during standalone verification
+- Standalone build snapshot verification now reports a consistent actionable concurrent-source error when a module is deleted or becomes undecodable between assembly and final check. Added a subprocess regression for deleted module in read-only check mode with unchanged HTML and no temporary files. Previous exact-head push/PR Quality passed; new exact-head full QA pending. No application JavaScript or bundled HTML changes, release or Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
 ## 2026-11-08 — Correct injected builder fixture indentation
 - Corrected the concurrent-index test's guard targeting to preserve Python indentation while selecting the first of two matching destination reads. This preflight follow-up preserves the regression's failure and cleanup checks; no application code changed. Exact-head CI pending.
 

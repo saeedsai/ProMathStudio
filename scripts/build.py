@@ -127,9 +127,12 @@ def verify_source_snapshots():
         source_path = root / source
         if source_path.is_symlink() or source_path.parent.is_symlink():
             raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
-        with source_path.open("r", encoding="utf-8", newline="") as current_source:
-            if current_source.read() != snapshot:
-                raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
+        try:
+            with source_path.open("r", encoding="utf-8", newline="") as current_source:
+                if current_source.read() != snapshot:
+                    raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry")
+        except (FileNotFoundError, UnicodeDecodeError) as error:
+            raise RuntimeError(f"Standalone module changed during rebuild: {source}; retry") from error
 
 
 if "--check" in sys.argv[1:]:

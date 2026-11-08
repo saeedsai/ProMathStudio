@@ -1,3 +1,14 @@
+## 2026-11-08 — BUILD-MODULE-REMOVAL-203 (explicit stale-source recovery)
+
+**Execution ledger:** Verified dev 52dad5e6f016ad2cc2fa5549749825fe4e8a1846, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen 166-gap/95-partial historical inventory, living plan, PR #189 (open; zero submitted reviews), and successful exact-head push/PR Quality #42518007258/#42518011853. Chose a bounded build-integrity failure path: if a module disappears or becomes invalid UTF-8 between assembly and snapshot verification, report the same actionable stale-source/retry error as other concurrent changes, rather than leaking an incidental raw exception. Added focused subprocess `--check` regression deleting a module after assembly and asserting no false success, index preservation and no temporary artifacts. No application JS or bundle change. Full local checkout unavailable; exact-head CI required for new commit; PR remains review-gated.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 new exact-head QA:** both push/PR Quality green; focused `python -m unittest discover -s tests -p 'test_build_atomic_write.py' -v`, full structural suite, `python scripts/build.py --check`, and Chromium regressions.
+2. **P0 reviewed release:** inspect required checks, PR #189 reviews and protections; merge only via authorized ordinary PR, then verify main Quality, Pages and hosted critical paths.
+3. **P1 future-schema reset UI:** explicit confirmation/cancellation, keyboard/focus, quota-failure and newer-schema preservation tests; source/bundle parity.
+4. **P1 numerical correctness:** independent repeated-root, nonlinear fit and unstable-filter reference/invalid-input tests.
+5. **P1 branch cleanup:** compare containment in main, open PRs, protection and unique commits before deleting any obsolete ref.
+
 ## 2026-11-08 — BUILD-TEST-CI-202 (guard-injection preflight correction)
 
 **Execution ledger:** Follow-up preflight of a8b12ef82e6521ac1c1bd2b307e8802150be61c7 found that including indentation in the replacement token would strip indentation from the injected Python statement. Corrected the test to count both guard occurrences and deliberately inject at the first (publish) guard, retaining the original valid indentation strategy and the strict concurrent-write rollback assertion. No application or builder source changes; exact-head CI is required. PR #189 still review-gated; frozen historical 166 gaps/95 partial unchanged.

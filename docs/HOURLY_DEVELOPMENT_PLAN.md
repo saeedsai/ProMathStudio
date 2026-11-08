@@ -1,3 +1,14 @@
+## 2026-11-08 — BUILD-RACE-TEST-FIX-195 (repair exact-head structural failure)
+
+**Execution ledger:** Exact dev 3b0ad752246237d3fad09dea1a73c304610e2775, main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Both exact-head push Quality #42498036210 and PR Quality #42498040457 failed at structural unittest: `test_concurrent_module_edit_does_not_publish_stale_bundle` generated a syntactically invalid instrumented builder (`IndentationError` at the four-space `verify_source_snapshots` loop). The prior test injected a 12-space indentation borrowed from a different builder location; corrected injection to the actual four-space function body and added explicit `compile(instrumented, ...)` before the subprocess so syntax regressions fail directly. No production builder, JS modules, or standalone bundle changes; regression assertions remain strict. New exact-head push/PR CI pending. PR #189 has no submitted reviews, so no merge or Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Exact-head structural recovery (pending):** both new push/PR Quality green; `python -m unittest discover -s tests -p 'test_*.py'` passes the concurrent-source-edit and read-only snapshot regressions; `python scripts/build.py --check` green.
+2. **P0 Release PR #189 (review-gated):** verify authorized submitted reviews, rulesets and exact-head checks; merge only through ordinary PR, then verify main Quality, Pages and hosted smoke.
+3. **P1 Future-schema preferences reset UI (planned):** explicit confirmation, cancellation, keyboard/focus, storage-failure regressions, and synchronized JS/bundle.
+4. **P1 Numerical references (planned):** repeated roots, nonlinear-fit conditioning and unstable filters with reference/residual/domain tests.
+5. **P1 Cleanup audit (pending):** prove obsolete branch containment in main, absence of open PRs/protection/unique work before deletion.
+
 ## 2026-11-08 — BUILD-CHECK-SNAPSHOT-194 (read-only check freshness)
 
 **Execution ledger:** Rechecked dev 59bab1d7442dd38e91fd597b72de69c9a57d9193, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory 166 gaps/95 partial, PR #189 (open, zero reviews), and successful exact-head push/PR Quality #42492393106/#42492396772. Local `timeout 5 git ls-remote` failed with `Could not resolve host: github.com`; GitHub connector fallback used. Identified that `scripts/build.py --check` could report success when a source module changed after its initial read, while normal build already reverified snapshots. Refactored source-snapshot verification into a shared helper called by both check and rebuild, and added a read-only check regression injecting a source edit before verification. No JS module or standalone bundle change. New exact-commit CI pending; no merge or Pages deployment.

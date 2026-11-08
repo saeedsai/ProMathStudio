@@ -1,3 +1,6 @@
+## 2026-11-08 — Repair concurrent-module-edit regression fixture
+- Exact-head CI exposed an indentation error in the subprocess-instrumented test builder, not in production `scripts/build.py`. Corrected the injected loop indentation and added explicit Python compilation of the fixture. Retained the original strict stale-module, index-preservation and cleanup assertions. New exact-head CI pending; no release.
+
 ## 2026-11-08 — Detect concurrent source changes in read-only bundle check
 - Reused the standalone builder's source-snapshot verification in `--check`, preventing a false consistency success when a modular source changes during the check. Added an injected concurrent-edit subprocess regression that verifies failure and unchanged `index.html`. Previous exact-head push/PR Quality #42492393106/#42492396772 passed; new commit CI pending. No runtime bundle change or Pages release.
 

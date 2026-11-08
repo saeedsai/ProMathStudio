@@ -78,7 +78,7 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
             '(root / "src/data-tables.js").write_text('
             '"window.newer = true;\\\\n", encoding="utf-8")\\n    ' + guard,
             1,
-        ).replace('\\n            for source, snapshot', '\n            for source, snapshot')
+        ).replace('\\n    for source, snapshot', '\n    for source, snapshot')
         # Fail at the fixture's syntax, not an incidental IndentationError.
         compile(instrumented, "<instrumented standalone builder>", "exec")
         with tempfile.TemporaryDirectory() as temp:

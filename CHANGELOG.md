@@ -1,3 +1,6 @@
+## 2026-11-08 — Complete concurrent-module fixture newline repair
+- Corrected the injected literal-newline conversion to use the actual four-space function indentation. This supplements the earlier test-only syntax fix; exact-head CI pending, no production changes or release.
+
 ## 2026-11-08 — Repair concurrent-module-edit regression fixture
 - Exact-head CI exposed an indentation error in the subprocess-instrumented test builder, not in production `scripts/build.py`. Corrected the injected loop indentation and added explicit Python compilation of the fixture. Retained the original strict stale-module, index-preservation and cleanup assertions. New exact-head CI pending; no release.
 

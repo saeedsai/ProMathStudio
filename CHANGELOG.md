@@ -1,3 +1,6 @@
+## 2026-11-08 — Reject stale destination on no-op standalone rebuild
+- The normal no-op builder now checks that `index.html` is still a regular unchanged file after assembling and verifying module snapshots. This prevents false "already up to date" reports when an external editor changes the destination. Added a subprocess regression for an injected concurrent index edit. Existing `--check` snapshot behavior is preserved. Exact-head CI pending; no application runtime changes or production release.
+
 ## 2026-11-08 — Preserve externally introduced index symlinks during rebuild
 - The standalone builder now checks for a destination symlink immediately before publishing, preserving an independently replaced path instead of overwriting it. Added a subprocess regression simulating the symlink swap, verifying failure, external-target preservation and temporary-file cleanup. Best-effort guard, not a full interprocess lock. Exact-head CI pending; no application JS or Pages release.
 

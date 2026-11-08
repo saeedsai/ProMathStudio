@@ -151,6 +151,35 @@ class AtomicStandaloneBuildTests(unittest.TestCase):
             self.assertEqual(index.read_bytes(), expected)
             self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
 
+    def test_noop_rebuild_rejects_external_index_edit(self):
+        source = BUILDER.read_text(encoding="utf-8")
+        anchor = '        # A no-op build must not claim success after an external editor changed'
+        self.assertEqual(source.count(anchor), 1)
+        # An editor writes a different index after initial assembly; the build
+        # must not incorrectly report an unchanged, consistent bundle.
+        instrumented = source.replace(
+            anchor,
+            '        index.write_text("newer external edit\\n", encoding="utf-8")\n' + anchor,
+            1,
+        )
+        compile(instrumented, "<no-op index edit builder>", "exec")
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            index, original = make_fixture(root, instrumented)
+            index.write_text(
+                original.replace("window.fixture = false;", "window.fixture = true;"),
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [sys.executable, str(root / "scripts" / "build.py")],
+                capture_output=True, text=True, timeout=15,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Standalone index.html changed during rebuild", result.stderr)
+            self.assertNotIn("already up to date", result.stdout)
+            self.assertEqual(index.read_text(encoding="utf-8"), "newer external edit\\n")
+            self.assertEqual(list(root.glob(".promath-index-*.tmp")), [])
+
     def test_symlink_swap_before_publish_preserves_external_target(self):
         source = BUILDER.read_text(encoding="utf-8")
         guard = 'if index.is_symlink():\n                raise RuntimeError("Standalone index.html became a symlink during rebuild; retry")'

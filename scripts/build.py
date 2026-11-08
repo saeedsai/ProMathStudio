@@ -181,7 +181,12 @@ else:
                 staged.unlink(missing_ok=True)
         print("Rebuilt standalone index.html")
     else:
-        # A no-op build must also reject modules modified after their first
-        # read; otherwise it can falsely report a consistent bundle.
+        # A no-op build must not claim success after an external editor changed
+        # either a module or the destination since the initial read.
         verify_source_snapshots()
+        if index.is_symlink():
+            raise RuntimeError("Standalone index.html became a symlink during rebuild; retry")
+        with index.open("r", encoding="utf-8", newline="") as current_file:
+            if current_file.read() != original_index_text:
+                raise RuntimeError("Standalone index.html changed during rebuild; retry")
         print("Standalone index.html already up to date")

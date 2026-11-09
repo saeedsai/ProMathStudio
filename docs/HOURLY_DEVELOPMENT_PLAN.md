@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-UTF8-BOM-222 (spreadsheet JSON interoperability)
+
+**Execution ledger:** Verified dev fc43225e828a102703ea3ddd6dc3eed635cb1dce, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, frozen 2026-10-26 inventory and PR #189 (zero reviews). Exact-head push Quality #42688061448 and PR Quality #42688074034 both succeeded. Historical JSON loader now accepts an optional UTF-8 BOM at file start (common in spreadsheet exports) without weakening strict UTF-8 rejection. Added BOM/plain UTF-8 positive tests and malformed post-BOM negative regression. Local isolated Python JSON/encoding smoke passed; full structural/Chromium CI pending new SHA. No app JavaScript/index.html change, main merge, or Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new push and PR Quality both pass on this exact SHA, including BOM, strict UTF-8 and Chromium checks.
+2. **P0 reviewed release:** obtain eligible approval on PR #189, recheck exact-head checks, ordinary dev-to-main PR merge, verify main Quality and Pages deployment.
+3. **P1 accessible preference reset:** confirm/cancel, keyboard focus, storage error and future-schema preservation; synchronized src/index.html and browser tests.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting, unstable filters with independent residuals/tolerances and invalid-input cases.
+5. **P1 safe obsolete branch audit:** prove main contains the Claude branch and there are no open PRs/protection before deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-UTF8-221 (malformed audit encoding)
 
 **Execution ledger:** Inspected dev 150813900c07ccc54e1f10810613100e371b6fe5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, living plan, frozen inventory, PR #189 (no reviews) and successful exact-head push/PR Quality #42679684395/#42679694866. Convert invalid UTF-8 ledger bytes into actionable ValueError and add two malformed-byte regressions plus valid UTF-8 acceptance. No application JS/index.html changes; new exact-head CI pending, Pages unchanged. Frozen 166 gaps / 95 partial unchanged.

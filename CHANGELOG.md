@@ -1,3 +1,6 @@
+## 2026-11-09 — Accept optional UTF-8 BOM in historical JSON exports
+- Historical feature-ledger loader accepts UTF-8 BOM at the start of JSON exports while retaining strict malformed UTF-8 rejection; added plain/BOM Unicode and invalid post-BOM regression cases. No runtime JS/index.html changes. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending.
+
 ## 2026-11-09 — Report malformed UTF-8 in historical audit input
 - Convert invalid UTF-8 ledger input to actionable ValueError; two malformed-byte regression cases and valid UTF-8 acceptance. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending. No app JS/index.html changes.
 

@@ -79,6 +79,19 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_text('{"title":"naive"}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path)["title"], "naive")
 
+    def test_utf8_bom_export_is_accepted_without_relaxing_utf8_validation(self):
+        # Spreadsheet JSON exports may prepend EF BB BF; internal BOMs remain
+        # ordinary data and malformed UTF-8 still raises an audit error.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for prefix in (b"", bytes.fromhex("efbbbf")):
+                with self.subTest(prefix=prefix):
+                    path.write_bytes(prefix + '{"title":"naïve"}'.encode("utf-8"))
+                    self.assertEqual(validator.load_ledger(path), {"title": "naïve"})
+            path.write_bytes(bytes.fromhex("efbbbf") + b"\\xff")
+            with self.assertRaisesRegex(ValueError, "must be valid UTF-8"):
+                validator.load_ledger(path)
+
     def test_duplicate_json_keys_are_rejected_before_validation(self):
         # json.loads normally silently accepts the final duplicate key.
         cases = [

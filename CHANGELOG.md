@@ -1,3 +1,6 @@
+## 2026-11-09 — Correct Unicode regression fixture escaping
+- Ensure JSON test fixtures decode surrogate escapes instead of escaping the backslash itself; validator behavior unchanged. Exact-head CI pending.
+
 ## 2026-11-09 — Reject unpaired Unicode surrogate escapes in frozen feature audit
 - Strict historical JSON decoding now rejects lone UTF-16 surrogate escapes in nested keys and values while accepting valid surrogate pairs. Added four focused cases. Frozen 166 gaps / 95 partial unchanged. New exact-head CI pending; no JS/HTML or Pages changes.
 

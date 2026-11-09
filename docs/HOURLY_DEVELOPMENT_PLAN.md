@@ -1,3 +1,7 @@
+## 2026-11-09 — AUDIT-LEDGER-UNICODE-210 test fixture correction
+
+**Execution ledger:** Corrected JSON escape fixture spelling to exercise decoded surrogate code points rather than literal backslashes; no change to validation logic. Exact-head CI pending; frozen 166 gaps/95 partial unchanged. NEXT FIVE remain exact-head CI, authorized PR release, accessible preference reset, numerical reference tests and safe branch audit, with acceptance gates documented below.
+
 ## 2026-11-09 — AUDIT-LEDGER-UNICODE-210 (reject unpaired surrogate escapes)
 
 **Execution ledger:** Verified AGENTS.md, frozen audit, living plan, dev aef5d7c1b098e17a2aa527d108aa199cfa538578 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, PR #189 with zero reviews, and successful exact-head push/PR Quality #42570211545/#42570216695. Added recursive rejection of invalid lone Unicode surrogate escapes in historical JSON keys/values, retaining valid surrogate pairs; four focused negative/positive cases. No runtime JS or index.html changes. New exact-head QA pending; no release or Pages update. Historical 166 gaps / 95 partial unchanged.

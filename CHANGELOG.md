@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject underflowed nonzero JSON floats in historical audit
+- Strict feature-ledger JSON loading rejects nonzero float literals silently rounded to zero (including nested fields), while accepting genuine zero. Added focused regression cases. Frozen 166 gaps/95 partial unchanged; exact-head CI pending. No runtime bundle, merge or Pages change.
+
 ## 2026-11-09 — Reject overflowed non-finite JSON floats in historical audit
 - Strict JSON loading now rejects float literals such as 1e999 and -1e999 that decode to infinity, even in nested unused fields. Added three negative regressions. Frozen 166 gaps/95 partial unchanged; new exact-head QA pending, no JS/HTML, merge or Pages deployment.
 

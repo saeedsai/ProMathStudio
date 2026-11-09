@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-FLOAT-UNDERFLOW-209 (preserve nonzero numeric audit inputs)
+
+**Execution ledger:** Verified dev 41e437a6c6a826ba21f365c87c9b0f6076833f46 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; read AGENTS.md, living plan, frozen historical inventory, PR #189 (zero reviews), and successful exact-head PR Quality #42553829518. Hardened JSON float decoding to reject nonzero values silently underflowing to zero (1e-999, -1e-999) while retaining legitimate zero literals; added focused nested and zero-value regression. No application JS or standalone HTML changed. New exact-head CI pending; no merge or Pages deployment. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** structural/validator and Chromium Quality pass at the new dev SHA.
+2. **P0 authorized release:** PR #189 submitted approvals and required exact-head checks; ordinary merge then main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage errors and future-schema preservation with synchronized source and index.html.
+4. **P1 numerical references:** repeated-root, nonlinear-fit and unstable-filter tolerance/domain/invalid-input cases.
+5. **P1 branch audit:** verify main containment, open PRs, protection and unique work before any deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-FLOAT-OVERFLOW-208 (finite numeric JSON)
 
 **Execution ledger:** Inspected AGENTS.md, living plan, frozen historical audit, dev ab70cbacdfe7bdc42eabebaf669062b7c0d0661a, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42548374443. JSON finite-constant validation still accepted syntactically valid overflowed float literals such as 1e999 as infinity in otherwise ignored nested fields. Reject non-finite decoded floats at any depth and add three negative temporary-file regressions. Local full checkout unavailable; new exact-head structural/Chromium QA pending. No application JS/HTML, release or Pages change; frozen 166 gaps/95 partial unchanged.

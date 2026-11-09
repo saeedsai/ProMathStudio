@@ -83,6 +83,19 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Non-finite feature ledger JSON number"):
                         validator.load_ledger(path)
 
+    def test_underflowed_json_float_is_rejected_at_any_depth(self):
+        for payload in ('{"extra":1e-999}', '{"nested":[-1e-999]}',
+                        '{"counts":{"gaps":0.000e-999}}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    if "0.000e-999" in payload:
+                        self.assertEqual(validator.load_ledger(path)["counts"]["gaps"], 0.0)
+                    else:
+                        with self.assertRaisesRegex(ValueError, "Underflowed feature ledger JSON number"):
+                            validator.load_ledger(path)
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

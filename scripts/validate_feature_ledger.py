@@ -76,6 +76,9 @@ def load_ledger(path):
         value = float(token)
         if not math.isfinite(value):
             raise ValueError(f"Non-finite feature ledger JSON number: {token}")
+        # Do not silently turn nonzero audit numbers into zero on underflow.
+        if value == 0.0 and any(ch in token for ch in "123456789"):
+            raise ValueError(f"Underflowed feature ledger JSON number: {token}")
         return value
 
     return json.loads(Path(path).read_text(encoding="utf-8"),

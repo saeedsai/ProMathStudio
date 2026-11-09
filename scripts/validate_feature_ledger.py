@@ -81,10 +81,26 @@ def load_ledger(path):
             raise ValueError(f"Underflowed feature ledger JSON number: {token}")
         return value
 
-    return json.loads(Path(path).read_text(encoding="utf-8"),
+    def reject_unpaired_surrogates(value):
+        # JSON escapes may decode to lone UTF-16 surrogate code points, which
+        # cannot be encoded as valid UTF-8 and corrupt downstream audit exports.
+        if isinstance(value, str):
+            if any(0xD800 <= ord(char) <= 0xDFFF for char in value):
+                raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
+        elif isinstance(value, list):
+            for item in value:
+                reject_unpaired_surrogates(item)
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                reject_unpaired_surrogates(key)
+                reject_unpaired_surrogates(item)
+
+    data = json.loads(Path(path).read_text(encoding="utf-8"),
                       object_pairs_hook=unique_object,
                       parse_constant=reject_nonfinite,
                       parse_float=finite_float)
+    reject_unpaired_surrogates(data)
+    return data
 
 
 def main():

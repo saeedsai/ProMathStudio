@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject unpaired Unicode surrogate escapes in frozen feature audit
+- Strict historical JSON decoding now rejects lone UTF-16 surrogate escapes in nested keys and values while accepting valid surrogate pairs. Added four focused cases. Frozen 166 gaps / 95 partial unchanged. New exact-head CI pending; no JS/HTML or Pages changes.
+
 ## 2026-11-09 — Reject underflowed nonzero JSON floats in historical audit
 - Strict feature-ledger JSON loading rejects nonzero float literals silently rounded to zero (including nested fields), while accepting genuine zero. Added focused regression cases. Frozen 166 gaps/95 partial unchanged; exact-head CI pending. No runtime bundle, merge or Pages change.
 

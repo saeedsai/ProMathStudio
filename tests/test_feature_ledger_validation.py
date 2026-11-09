@@ -96,6 +96,24 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                         with self.assertRaisesRegex(ValueError, "Underflowed feature ledger JSON number"):
                             validator.load_ledger(path)
 
+    def test_unpaired_unicode_surrogates_are_rejected_recursively(self):
+        # Python accepts escaped lone UTF-16 surrogate code points in JSON.
+        for payload in (r'{"title":"\\ud800"}',
+                        r'{"nested":[{"value":"\\udfff"}]}',
+                        r'{"\\ud800":"invalid key"}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Unpaired Unicode surrogate"):
+                        validator.load_ledger(path)
+
+    def test_valid_unicode_surrogate_pair_is_accepted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text(r'{"symbol":"\\ud83d\\ude80"}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path)["symbol"], "🚀")
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

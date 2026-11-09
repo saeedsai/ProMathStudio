@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-UNICODE-210 (reject unpaired surrogate escapes)
+
+**Execution ledger:** Verified AGENTS.md, frozen audit, living plan, dev aef5d7c1b098e17a2aa527d108aa199cfa538578 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, PR #189 with zero reviews, and successful exact-head push/PR Quality #42570211545/#42570216695. Added recursive rejection of invalid lone Unicode surrogate escapes in historical JSON keys/values, retaining valid surrogate pairs; four focused negative/positive cases. No runtime JS or index.html changes. New exact-head QA pending; no release or Pages update. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green at new dev SHA, including validator, structural and Chromium suites.
+2. **P0 authorized release:** required submitted approvals and exact-head checks for PR #189; ordinary PR merge, then main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage errors and future-schema preservation; synchronized src/index.html.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting and unstable filters, with residual and invalid-input checks.
+5. **P1 safe branch audit:** prove main containment, no unique work, open PRs or protection before deleting any branch.
+
 ## 2026-11-09 — AUDIT-LEDGER-FLOAT-UNDERFLOW-209 (preserve nonzero numeric audit inputs)
 
 **Execution ledger:** Verified dev 41e437a6c6a826ba21f365c87c9b0f6076833f46 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; read AGENTS.md, living plan, frozen historical inventory, PR #189 (zero reviews), and successful exact-head PR Quality #42553829518. Hardened JSON float decoding to reject nonzero values silently underflowing to zero (1e-999, -1e-999) while retaining legitimate zero literals; added focused nested and zero-value regression. No application JS or standalone HTML changed. New exact-head CI pending; no merge or Pages deployment. Historical 166 gaps / 95 partial unchanged.

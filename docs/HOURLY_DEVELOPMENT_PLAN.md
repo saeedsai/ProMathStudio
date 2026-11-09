@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-NONFINITE-207 (strict historical JSON constants)
+
+**Execution ledger:** Verified dev 03c4b1537f353505edeee6673db05a92c9b62f80, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical audit, plan, PR #189 (zero submitted reviews), and exact-head PR Quality #42537990901 successful. Local git could not resolve github.com; used connector fallback. Hardened frozen-ledger JSON loader to reject nonstandard NaN/Infinity/-Infinity constants at any depth, with three negative temporary-file regressions. No JS/standalone HTML changes. Local full checkout unavailable; new exact-head Quality/Chromium and Pages remain unverified; PR promotion review-gated. Frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green on the new SHA, including strict JSON validator regressions, source/bundle check and full Chromium smoke.
+2. **P0 authorized PR release:** obtain required submitted reviews and exact-head checks on PR #189; ordinary PR merge only, then verify main Quality and Pages.
+3. **P1 accessible future-schema preference reset:** confirmation/cancel, keyboard/focus, storage failure and future-schema preservation, with synchronized src and index.html plus Chromium coverage.
+4. **P1 numerical references:** repeated-root, nonlinear-fit and unstable-filter independent tolerance/domain/negative tests.
+5. **P1 safe branch audit:** verify main containment, open PRs, protection and unique commits before any deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-DUPLICATE-KEYS-206 (unambiguous historical JSON)
 
 **Execution ledger:** Inspected dev 6774e2844745209072effac7cb0ea15a42e0f522, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, plan, frozen audit, PR #189 and successful exact-head push/PR Quality #42533015898/#42533020995. Found that standard JSON parsing silently accepts duplicate object keys, potentially hiding conflicting frozen counts, IDs or statuses. Added duplicate-key rejection at all JSON object depths in the audit loader and a focused top-level/nested regression. Frozen inventory and application JS/HTML unchanged. Exact-new-head CI pending; PR remains review-gated, no release.

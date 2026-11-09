@@ -62,6 +62,16 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Duplicate feature ledger JSON key"):
                         validator.load_ledger(path)
 
+    def test_nonfinite_json_constants_are_rejected(self):
+        # Python's JSON decoder accepts these non-standard constants by default.
+        for token in ("NaN", "Infinity", "-Infinity"):
+            with self.subTest(token=token):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text('{"counts":{"gaps":' + token + '}}', encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Non-finite feature ledger JSON constant"):
+                        validator.load_ledger(path)
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

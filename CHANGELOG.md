@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject nonstandard non-finite JSON constants in historical feature ledger
+- The audit loader now rejects NaN, Infinity and -Infinity (including nested JSON), with three negative temporary-file regressions. Historical 166 gaps/95 partial preserved. New exact-head CI pending; no application JS/HTML, release or Pages change.
+
 ## 2026-11-09 — Reject ambiguous duplicate JSON keys in frozen feature ledger
 - Added a duplicate-key-safe JSON loader for the historical inventory, including nested objects, and focused regression coverage. The original audit remains 166 gaps / 95 partial; new exact-head CI pending. No application bundle, release or Pages change.
 

@@ -68,8 +68,12 @@ def load_ledger(path):
             result[key] = value
         return result
 
+    def reject_nonfinite(token):
+        raise ValueError(f"Non-finite feature ledger JSON constant: {token}")
+
     return json.loads(Path(path).read_text(encoding="utf-8"),
-                      object_pairs_hook=unique_object)
+                      object_pairs_hook=unique_object,
+                      parse_constant=reject_nonfinite)
 
 
 def main():

@@ -1,3 +1,6 @@
+## 2026-11-09 — Correct audit fraction-check Python source formatting
+- Replaced accidental literal newline escapes in the newly added validator guard with actual Python newlines; behavior and regression intent unchanged. Full exact-head QA pending.
+
 ## 2026-11-09 — Reject JSON decimal fractions silently rounded to integers
 - Historical audit loader now compares integer-valued binary64 floats with the original decimal token to reject fractional inputs rounded into integers. Added three nested/boundary regressions; frozen 166 gaps / 95 partial unchanged. Exact-head CI pending; no application JS/HTML or Pages changes.
 

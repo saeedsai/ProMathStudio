@@ -1,3 +1,7 @@
+## 2026-11-09 — AUDIT-LEDGER-FRACTION-ROUNDING-214 formatting correction
+
+**Execution ledger:** Corrected literal backslash-n sequences accidentally introduced in the previous validator patch into actual Python newlines before exact-head QA. No algorithm or test behavior changed. Full CI pending. Frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, authorized PR release, accessible preference reset, numerical reference regressions, and safe branch cleanup with the acceptance criteria immediately below.
+
 ## 2026-11-09 — AUDIT-LEDGER-FRACTION-ROUNDING-214 (reject rounded decimal fractions)
 
 **Execution ledger:** Rechecked dev f8adac70c1ff359b0be0a2f3e2f526d6b2f46d84, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, PR #189 (zero submitted reviews), and exact-head successful push/PR Quality #42613188434/#42613193591. Confirmed inherited Claude branch is fully contained in dev; release remains review-gated. Fixed an audit JSON precision loophole where non-integral decimal tokens (1.0000000000000001, -2.0000000000000001, 9007199254740991.1) silently round to exact integers under binary64. Added focused nested and boundary regression. No app JS or standalone index.html changes; new exact-head CI pending, no release/Pages update. Historical 166 gaps / 95 partial remain frozen.

@@ -1,3 +1,6 @@
+## 2026-11-09 — Require integer types for frozen historical counts
+- Historical feature-ledger validation now rejects float or boolean count fields even when Python equality would accept the numeric value. Added four direct regression cases. Frozen 166 gaps / 95 partial unchanged. New exact-head CI pending; no runtime bundle or Pages change.
+
 ## 2026-11-09 — Reject precision-losing JSON integers in frozen feature audit
 - Reject integer literals outside JavaScript's safe integer range (including nested values) to preserve audit fidelity in browser/spreadsheet consumers. Added negative and boundary-positive regressions. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No runtime bundle or Pages change.
 

@@ -40,6 +40,9 @@ def validate(data):
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
     counts = Counter(item["kind"] for item in items)
     require(counts == {"existing": 158, "gap": 166}, f"Unexpected feature kinds/counts: {counts}")
+    require(isinstance(data.get("counts"), dict) and
+            all(type(data["counts"].get(key)) is int for key in ("existing", "gaps")),
+            "Frozen feature counts must be integer values")
     require(data.get("counts") == {"existing": 158, "gaps": 166}, "Frozen feature counts mismatch")
     statuses = Counter(item.get("status") for item in items if item["kind"] == "existing")
     require(statuses == {"bounded-complete": 63, "partial": 95}, f"Frozen feature statuses mismatch: {statuses}")

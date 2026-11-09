@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-COUNT-TYPES-212 (strict historical count types)
+
+**Execution ledger:** Verified dev e922f06b3f472044adfb342d5f475c67948239e7, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, living plan, PR #189 (no reviews) and exact-head push/PR Quality success #42597948495/#42600567693. Fixed Python numeric equality allowing floating-point and boolean historical count fields to masquerade as frozen integer counts. Added four focused regressions. No JS/index.html change; new exact-head CI pending. Frozen 166 gaps / 95 partial unchanged. No release or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green at new dev SHA, including strict count tests, structural and Chromium checks.
+2. **P0 reviewed release:** obtain submitted approvals for PR #189, verify exact-head gates, ordinary PR merge, then main Quality and Pages confirmation.
+3. **P1 accessible preference reset:** confirmation/cancel, focus, storage failure and future-schema preservation, with synchronized src and standalone HTML and browser regression.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting, unstable filters with tolerances, residuals and invalid inputs.
+5. **P1 safe branch audit:** prove main containment, no open PR, unique commits or protection before deleting obsolete branches.
+
 ## 2026-11-09 — AUDIT-LEDGER-SAFE-INTEGERS-211 (preserve exact JSON integers)
 
 **Execution ledger:** Inspected dev 172b5589eb6c7d0b66223e1a856ab246f8ab2fd5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical audit, living plan, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42594433079. JSON integer tokens beyond IEEE-754 exact range could be silently rounded by downstream browser/spreadsheet consumers. Added strict recursive parse_int guard and focused positive/negative boundary tests. No runtime JS/index.html changes. New exact-head CI pending; no PR merge or Pages release. Frozen 166 gaps / 95 partial unchanged.

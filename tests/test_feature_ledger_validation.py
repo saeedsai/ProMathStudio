@@ -47,6 +47,17 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validator.validate(changed)
 
+    def test_frozen_counts_reject_float_and_boolean_coercion(self):
+        # Python considers 166.0 == 166 and True == 1; frozen counts
+        # must remain explicitly integral rather than coercible.
+        for key, value in (("gaps", 166.0), ("existing", 158.0),
+                           ("gaps", True), ("existing", False)):
+            with self.subTest(key=key, value=value):
+                changed = copy.deepcopy(self.original)
+                changed["counts"][key] = value
+                with self.assertRaisesRegex(ValueError, "integer values"):
+                    validator.validate(changed)
+
     def test_duplicate_json_keys_are_rejected_before_validation(self):
         # json.loads normally silently accepts the final duplicate key.
         cases = [

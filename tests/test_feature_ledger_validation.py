@@ -88,7 +88,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 with self.subTest(prefix=prefix):
                     path.write_bytes(prefix + '{"title":"naïve"}'.encode("utf-8"))
                     self.assertEqual(validator.load_ledger(path), {"title": "naïve"})
-            path.write_bytes(bytes.fromhex("efbbbf") + b"\\xff")
+            path.write_bytes(bytes.fromhex("efbbbf") + bytes.fromhex("ff"))
             with self.assertRaisesRegex(ValueError, "must be valid UTF-8"):
                 validator.load_ledger(path)
 

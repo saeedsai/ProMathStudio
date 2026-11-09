@@ -1,3 +1,6 @@
+## 2026-11-09 — Correct BOM regression malformed-byte fixture
+- Ensure the negative UTF-8 regression appends a real FF byte after BOM; preserve strict error assertion. New exact-head CI pending; frozen audit unchanged.
+
 ## 2026-11-09 — Accept optional UTF-8 BOM in historical JSON exports
 - Historical feature-ledger loader accepts UTF-8 BOM at the start of JSON exports while retaining strict malformed UTF-8 rejection; added plain/BOM Unicode and invalid post-BOM regression cases. No runtime JS/index.html changes. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending.
 

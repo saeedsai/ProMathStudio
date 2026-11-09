@@ -1,3 +1,7 @@
+## 2026-11-09 — AUDIT-LEDGER-UTF8-BOM-222 fixture correction
+
+**Execution ledger:** Corrected the new malformed post-BOM fixture to append byte FF via bytes.fromhex rather than a literal backslash escape; strict UTF-8 negative assertion unchanged. Previous exact-head CI success remains #42688061448/#42688074034; new exact-head CI pending. Frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, reviewed PR promotion, accessible preference reset, numerical reference regressions, and safe branch audit with acceptance tests below.
+
 ## 2026-11-09 — AUDIT-LEDGER-UTF8-BOM-222 (spreadsheet JSON interoperability)
 
 **Execution ledger:** Verified dev fc43225e828a102703ea3ddd6dc3eed635cb1dce, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, frozen 2026-10-26 inventory and PR #189 (zero reviews). Exact-head push Quality #42688061448 and PR Quality #42688074034 both succeeded. Historical JSON loader now accepts an optional UTF-8 BOM at file start (common in spreadsheet exports) without weakening strict UTF-8 rejection. Added BOM/plain UTF-8 positive tests and malformed post-BOM negative regression. Local isolated Python JSON/encoding smoke passed; full structural/Chromium CI pending new SHA. No app JavaScript/index.html change, main merge, or Pages deployment. Frozen 166 gaps / 95 partial unchanged.

@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject overflowed non-finite JSON floats in historical audit
+- Strict JSON loading now rejects float literals such as 1e999 and -1e999 that decode to infinity, even in nested unused fields. Added three negative regressions. Frozen 166 gaps/95 partial unchanged; new exact-head QA pending, no JS/HTML, merge or Pages deployment.
+
 ## 2026-11-09 — Reject nonstandard non-finite JSON constants in historical feature ledger
 - The audit loader now rejects NaN, Infinity and -Infinity (including nested JSON), with three negative temporary-file regressions. Historical 166 gaps/95 partial preserved. New exact-head CI pending; no application JS/HTML, release or Pages change.
 

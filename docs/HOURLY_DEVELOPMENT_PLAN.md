@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-FLOAT-OVERFLOW-208 (finite numeric JSON)
+
+**Execution ledger:** Inspected AGENTS.md, living plan, frozen historical audit, dev ab70cbacdfe7bdc42eabebaf669062b7c0d0661a, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42548374443. JSON finite-constant validation still accepted syntactically valid overflowed float literals such as 1e999 as infinity in otherwise ignored nested fields. Reject non-finite decoded floats at any depth and add three negative temporary-file regressions. Local full checkout unavailable; new exact-head structural/Chromium QA pending. No application JS/HTML, release or Pages change; frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality pass structural, new overflow regressions, standalone source/bundle consistency and Chromium at the same SHA.
+2. **P0 authorized release:** required submitted reviews and exact-head green checks for PR #189; ordinary PR merge, then main Quality and Pages verification.
+3. **P1 accessible future-schema preference reset:** confirmation/cancel, focus/keyboard, storage errors and preservation; synchronized src/index.html and Chromium.
+4. **P1 numerical references:** repeated-root, nonlinear-fit and unstable-filter tolerance/domain/invalid-input cases.
+5. **P1 branch audit:** verify full main containment, no PRs/protection/unique commits before deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-NONFINITE-207 (strict historical JSON constants)
 
 **Execution ledger:** Verified dev 03c4b1537f353505edeee6673db05a92c9b62f80, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical audit, plan, PR #189 (zero submitted reviews), and exact-head PR Quality #42537990901 successful. Local git could not resolve github.com; used connector fallback. Hardened frozen-ledger JSON loader to reject nonstandard NaN/Infinity/-Infinity constants at any depth, with three negative temporary-file regressions. No JS/standalone HTML changes. Local full checkout unavailable; new exact-head Quality/Chromium and Pages remain unverified; PR promotion review-gated. Frozen 166 gaps/95 partial unchanged.

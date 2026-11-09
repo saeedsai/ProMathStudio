@@ -72,6 +72,17 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Non-finite feature ledger JSON constant"):
                         validator.load_ledger(path)
 
+    def test_overflowed_json_float_is_rejected_at_any_depth(self):
+        # 1e999 is syntactically JSON but Python float parsing yields infinity.
+        for payload in ('{"extra":1e999}', '{"nested":[-1e999]}',
+                        '{"counts":{"gaps":1e999}}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Non-finite feature ledger JSON number"):
+                        validator.load_ledger(path)
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

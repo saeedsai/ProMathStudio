@@ -5,6 +5,7 @@ Usage: python3 scripts/validate_feature_ledger.py
 This checks historical audit data integrity, not current implementation status.
 """
 import json
+import math
 from collections import Counter
 from pathlib import Path
 
@@ -71,9 +72,16 @@ def load_ledger(path):
     def reject_nonfinite(token):
         raise ValueError(f"Non-finite feature ledger JSON constant: {token}")
 
+    def finite_float(token):
+        value = float(token)
+        if not math.isfinite(value):
+            raise ValueError(f"Non-finite feature ledger JSON number: {token}")
+        return value
+
     return json.loads(Path(path).read_text(encoding="utf-8"),
                       object_pairs_hook=unique_object,
-                      parse_constant=reject_nonfinite)
+                      parse_constant=reject_nonfinite,
+                      parse_float=finite_float)
 
 
 def main():

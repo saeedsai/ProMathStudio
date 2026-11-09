@@ -94,6 +94,12 @@ def load_ledger(path):
         # the integer is inside the safe range (e.g. 1.0000000000000001).
         if value.is_integer() and Decimal(token) != Decimal(int(value)):
             raise ValueError(f"Rounded feature ledger JSON fraction to integer: {token}")
+        # Also reject non-integer decimal tokens with more significant digits
+        # than binary64 retains, rather than silently changing audit values.
+        # str(value) is Python's shortest round-tripping decimal representation;
+        # compare numeric Decimal values so equivalent exponent notation works.
+        if not value.is_integer() and Decimal(token) != Decimal(str(value)):
+            raise ValueError(f"Rounded feature ledger JSON fractional precision: {token}")
         return value
 
     def safe_integer(token):

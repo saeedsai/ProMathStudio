@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-FRACTION-PRECISION-217 (preserve fractional decimal precision)
+
+**Execution ledger:** Verified dev 6a6cbb4adde806a569b7000854489e194bfa951a, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 with no submitted reviews, and successful exact-head push/PR Quality #42644694190/#42644707325. Added a bounded historical JSON integrity fix: reject fractional decimal literals whose extra significant digits are silently discarded by binary64, while retaining equivalent exponent notation, representable subnormals and signed decimal zero. Added positive and negative automated regression tests. Isolated decimal comparison checks passed; new exact-head GitHub Quality/Chromium pending. No application JS/index.html change, merge, branch deletion or Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality green at new dev SHA, including fractional precision regression, structural and Chromium checks.
+2. **P0 reviewed promotion:** eligible submitted PR #189 review(s), exact-head checks and ordinary merge; verify main Quality and published Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage failure and future-schema preservation with synchronized src/index.html and Chromium regression.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with independent tolerances, residuals and invalid-input tests.
+5. **P1 obsolete branch audit:** verify main contains all Claude branch commits, no open PR or protection before any deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-ZERO-TEST-216 fixture selector correction
 
 **Execution ledger:** Before exact-head QA completed, corrected the new zero-mantissa fixture selector to explicitly include the longer zero-mantissa token, preventing a false underflow assertion. Previous commit 63c02749c20fef3d0b826843579b9b0f4323160b; current exact-head Quality must be rerun. No application bundle change, no release or Pages deployment. Historical 166 gaps / 95 partial unchanged.

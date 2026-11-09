@@ -148,6 +148,29 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Rounded feature ledger JSON fraction"):
                         validator.load_ledger(path)
 
+    def test_fractional_json_precision_loss_is_rejected(self):
+        # Non-integer binary64 rounding must not silently discard decimal digits.
+        for payload in ('{"extra":0.10000000000000001}',
+                        '{"nested":[-1.23456789012345678]}',
+                        '{"counts":{"gaps":1.23456789012345678}}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Rounded feature ledger JSON fractional precision"):
+                        validator.load_ledger(path)
+
+    def test_equivalent_fraction_notations_remain_accepted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text('{"a":0.1,"b":1e-1,"c":1.2345678901234567,'
+                            '"subnormal":5e-324,"zero":-0.000e-999}', encoding="utf-8")
+            decoded = validator.load_ledger(path)
+            self.assertEqual(decoded["a"], decoded["b"])
+            self.assertEqual(decoded["c"], 1.2345678901234567)
+            self.assertEqual(decoded["subnormal"], 5e-324)
+            self.assertEqual(decoded["zero"], 0.0)
+
     def test_safe_integer_valued_json_floats_and_fractions(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"

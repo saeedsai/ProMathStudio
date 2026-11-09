@@ -67,6 +67,15 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "nesting exceeds decoder limit"):
                 validator.load_ledger(path)
 
+    def test_missing_or_directory_ledger_reports_read_error(self):
+        # Missing/unreadable audit inputs should fail with a stable diagnostic.
+        with tempfile.TemporaryDirectory() as directory:
+            missing = Path(directory) / "missing.json"
+            with self.assertRaisesRegex(ValueError, "Cannot read feature ledger JSON"):
+                validator.load_ledger(missing)
+            with self.assertRaisesRegex(ValueError, "Cannot read feature ledger JSON"):
+                validator.load_ledger(Path(directory))
+
     def test_invalid_utf8_is_reported_as_a_validation_error(self):
         # Strict UTF-8 input should give an actionable audit diagnostic.
         with tempfile.TemporaryDirectory() as directory:

@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-READ-ERROR-224
+
+**Execution ledger:** Verified dev cb52aed28e860eb94e84b0c245df05b5752829b4 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 has no submitted reviews. Previous exact-head PR Quality #42707708665 passed (static/browser job). Hardened historical audit input loading so missing or directory paths produce a stable actionable ValueError rather than a raw OS exception; added missing-path and directory regression cases. New exact-head CI pending; no app JS/index.html or production release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify push and PR Quality at the new dev SHA, including structural and Chromium jobs.
+2. **P0 authorized release:** obtain eligible PR #189 review and green exact-head checks, merge through ordinary PR, verify main Quality and Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, focus, storage failure, future-schema retention, synchronized src/index.html, browser regressions.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with residual and invalid-input tests.
+5. **P1 safe branch cleanup:** confirm obsolete branch fully contained in main, unprotected and without open PR before deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-BOM-SYNTAX-223 (restore exact-head CI)
 
 **Execution ledger:** Inspected dev 55e6c70bcc1d6db3cd5e502e791a01e68aa7e25e, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, living plan, PR #189 and failed exact-head push/PR Quality #42697648774/#42697656788. Root cause: BOM change left invalid Python assignment `data = # ...` in scripts/validate_feature_ledger.py, preventing the historical audit validation step and all downstream QA. Restore the comment on its own line and retain one JSON assignment. Add explicit misplaced/double-BOM rejection regression while preserving valid initial BOM and malformed UTF-8 cases. No app JS/index.html change. Full exact-head CI pending; PR #189 still review-blocked; no main/Pages deployment. Frozen 166 gaps / 95 partial unchanged.

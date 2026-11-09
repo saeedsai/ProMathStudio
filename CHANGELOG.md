@@ -1,3 +1,6 @@
+## 2026-11-09 — Normalize missing historical ledger read errors
+- Convert missing/unreadable JSON audit path errors to actionable ValueError, with missing-path and directory regressions. New exact-head CI pending; no runtime bundle, release or Pages change. Historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-09 — Restore BOM validator syntax and reject misplaced BOMs
 - Correct invalid Python assignment introduced by UTF-8 BOM support; preserve one JSON parse call. Add double-BOM and whitespace-before-BOM negative regressions. Exact-head CI pending; no application bundle change, main merge or Pages deployment. Frozen 166 gaps / 95 partial unchanged.
 

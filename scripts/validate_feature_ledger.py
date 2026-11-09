@@ -147,6 +147,8 @@ def load_ledger(path):
                           parse_int=safe_integer)
     except UnicodeDecodeError as exc:
         raise ValueError("Feature ledger JSON must be valid UTF-8") from exc
+    except OSError as exc:
+        raise ValueError(f"Cannot read feature ledger JSON: {exc.strerror or exc}") from exc
     except RecursionError as exc:
         raise ValueError("Feature ledger JSON nesting exceeds decoder limit") from exc
     reject_unpaired_surrogates(data)

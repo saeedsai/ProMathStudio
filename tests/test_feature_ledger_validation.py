@@ -91,6 +91,14 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_bytes(bytes.fromhex("efbbbf") + bytes.fromhex("ff"))
             with self.assertRaisesRegex(ValueError, "must be valid UTF-8"):
                 validator.load_ledger(path)
+            # Only a BOM at byte offset zero is a permitted transport marker.
+            # A second BOM or a BOM after whitespace must not be stripped.
+            for payload in (bytes.fromhex("efbbbfefbbbf") + b"{}",
+                            b" " + bytes.fromhex("efbbbf") + b"{}"):
+                with self.subTest(misplaced_bom=payload):
+                    path.write_bytes(payload)
+                    with self.assertRaises(json.JSONDecodeError):
+                        validator.load_ledger(path)
 
     def test_duplicate_json_keys_are_rejected_before_validation(self):
         # json.loads normally silently accepts the final duplicate key.

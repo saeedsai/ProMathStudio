@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-BOM-SYNTAX-223 (restore exact-head CI)
+
+**Execution ledger:** Inspected dev 55e6c70bcc1d6db3cd5e502e791a01e68aa7e25e, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, living plan, PR #189 and failed exact-head push/PR Quality #42697648774/#42697656788. Root cause: BOM change left invalid Python assignment `data = # ...` in scripts/validate_feature_ledger.py, preventing the historical audit validation step and all downstream QA. Restore the comment on its own line and retain one JSON assignment. Add explicit misplaced/double-BOM rejection regression while preserving valid initial BOM and malformed UTF-8 cases. No app JS/index.html change. Full exact-head CI pending; PR #189 still review-blocked; no main/Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new dev push and PR Quality both pass Python audit validation, structural suite and Chromium browser regressions.
+2. **P0 authorized promotion:** eligible submitted PR #189 approval plus green exact-head checks; ordinary merge, then main Quality and published Pages verified.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage failure and future-schema preservation; synchronized src/index.html and Chromium tests.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with reference tolerances, residuals and invalid-input tests.
+5. **P1 safe branch cleanup:** confirm Claude branch contained in main, no open PR and unprotected before deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-UTF8-BOM-222 fixture correction
 
 **Execution ledger:** Corrected the new malformed post-BOM fixture to append byte FF via bytes.fromhex rather than a literal backslash escape; strict UTF-8 negative assertion unchanged. Previous exact-head CI success remains #42688061448/#42688074034; new exact-head CI pending. Frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, reviewed PR promotion, accessible preference reset, numerical reference regressions, and safe branch audit with acceptance tests below.

@@ -139,7 +139,7 @@ def load_ledger(path):
                 reject_unpaired_surrogates(item)
 
     try:
-        data = # UTF-8 BOM is emitted by some spreadsheet exports; accept it only at the start.
+        # UTF-8 BOM is emitted by some spreadsheet exports; accept it only at the start.
         data = json.loads(Path(path).read_text(encoding="utf-8-sig"),
                           object_pairs_hook=unique_object,
                           parse_constant=reject_nonfinite,

@@ -130,6 +130,18 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Unsafe feature ledger JSON floating integer"):
                         validator.load_ledger(path)
 
+    def test_fractional_json_numbers_must_not_round_to_integers(self):
+        # Binary64 silently rounds these non-integral decimal tokens to ints.
+        for payload in ('{"extra":1.0000000000000001}',
+                        '{"nested":[-2.0000000000000001]}',
+                        '{"counts":{"gaps":9007199254740991.1}}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Rounded feature ledger JSON fraction"):
+                        validator.load_ledger(path)
+
     def test_safe_integer_valued_json_floats_and_fractions(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"

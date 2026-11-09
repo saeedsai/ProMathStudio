@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject JSON decimal fractions silently rounded to integers
+- Historical audit loader now compares integer-valued binary64 floats with the original decimal token to reject fractional inputs rounded into integers. Added three nested/boundary regressions; frozen 166 gaps / 95 partial unchanged. Exact-head CI pending; no application JS/HTML or Pages changes.
+
 ## 2026-11-09 — Reject precision-losing integer-valued JSON floats in frozen audit
 - JSON decimal/exponent forms above the JavaScript safe integer boundary now fail strict feature-ledger loading instead of bypassing parse_int. Added nested negative cases and safe boundary/fractional positive regression. Historical 166 gaps / 95 partial unchanged; new exact-head CI pending. No runtime JS/HTML or Pages change.
 

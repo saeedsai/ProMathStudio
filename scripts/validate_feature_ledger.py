@@ -6,6 +6,7 @@ This checks historical audit data integrity, not current implementation status.
 """
 import json
 import math
+from decimal import Decimal
 from collections import Counter
 from pathlib import Path
 
@@ -83,7 +84,7 @@ def load_ledger(path):
         # round large integer-valued numbers in JavaScript consumers.
         if value.is_integer() and abs(value) > 9007199254740991:
             raise ValueError(f"Unsafe feature ledger JSON floating integer: {token}")
-        # Do not silently turn nonzero audit numbers into zero on underflow.
+        # A decimal fraction can round to an integer in binary64 even when\n        # the integer is inside the safe range (e.g. 1.0000000000000001).\n        # Reject this silent loss before consumers treat it as exact.\n        if value.is_integer() and Decimal(token) != Decimal(int(value)):\n            raise ValueError(f"Rounded feature ledger JSON fraction to integer: {token}")\n        # Do not silently turn nonzero audit numbers into zero on underflow.
         if value == 0.0 and any(ch in token.lower().split("e", 1)[0] for ch in "123456789"):
             raise ValueError(f"Underflowed feature ledger JSON number: {token}")
         return value

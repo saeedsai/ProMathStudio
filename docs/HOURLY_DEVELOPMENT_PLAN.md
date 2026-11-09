@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-FRACTION-ROUNDING-214 (reject rounded decimal fractions)
+
+**Execution ledger:** Rechecked dev f8adac70c1ff359b0be0a2f3e2f526d6b2f46d84, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, PR #189 (zero submitted reviews), and exact-head successful push/PR Quality #42613188434/#42613193591. Confirmed inherited Claude branch is fully contained in dev; release remains review-gated. Fixed an audit JSON precision loophole where non-integral decimal tokens (1.0000000000000001, -2.0000000000000001, 9007199254740991.1) silently round to exact integers under binary64. Added focused nested and boundary regression. No app JS or standalone index.html changes; new exact-head CI pending, no release/Pages update. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new dev SHA push and PR Quality successful, including historical validator and browser/structural suites.
+2. **P0 authorized release:** PR #189 receives submitted required review(s), exact-head checks green, ordinary PR merge; confirm main Quality and Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage failure and future-schema preservation with synchronized src/index.html and browser regression.
+4. **P1 numerical references:** repeated roots, nonlinear fitting, unstable filters with independent reference tolerances, residual and invalid-input tests.
+5. **P1 branch cleanup:** verify Claude branch contained in main after approved release, no open PR/protection, then remove only if safe.
+
 ## 2026-11-09 — AUDIT-LEDGER-FLOAT-SAFE-213 (integer-valued JSON float precision)
 
 **Execution ledger:** Inspected dev eefd7e096260a412b084ffb0229665a9828c735d, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, PR #189 (no submitted reviews), and successful exact-head push/PR Quality #42604896376/#42604904388. Closed a precision loophole: JSON decimal/exponent tokens such as 9007199254740992.0 bypass parse_int and may be silently rounded in JavaScript. Added three rejection and four acceptance assertions in focused regressions. No application JS/index.html change. New exact-head CI pending; no release or Pages update. Frozen 166 gaps / 95 partial unchanged.

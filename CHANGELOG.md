@@ -1,3 +1,6 @@
+## 2026-11-09 — Restore underflow-specific audit validation after CI failure
+- Fixed exact-head Quality regression in the historical JSON loader: check nonzero-to-zero underflow before the rounded-to-integer guard, retaining both validations. Added subnormal underflow and valid zero-exponent regression cases. Historical 166 gaps / 95 partial unchanged; new CI pending. No application JS/HTML or Pages changes.
+
 ## 2026-11-09 — Correct audit fraction-check Python source formatting
 - Replaced accidental literal newline escapes in the newly added validator guard with actual Python newlines; behavior and regression intent unchanged. Full exact-head QA pending.
 

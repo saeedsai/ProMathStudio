@@ -84,14 +84,15 @@ def load_ledger(path):
         # round large integer-valued numbers in JavaScript consumers.
         if value.is_integer() and abs(value) > 9007199254740991:
             raise ValueError(f"Unsafe feature ledger JSON floating integer: {token}")
-        # A decimal fraction can round to an integer in binary64 even when
-        # the integer is inside the safe range (e.g. 1.0000000000000001).
-        # Reject this silent loss before consumers treat it as exact.
-        if value.is_integer() and Decimal(token) != Decimal(int(value)):
-            raise ValueError(f"Rounded feature ledger JSON fraction to integer: {token}")
-        # Do not silently turn nonzero audit numbers into zero on underflow.
+        # Preserve the more specific underflow diagnostic before the general
+        # rounded-fraction check: tiny nonzero tokens also round to integer 0.
+        # Inspect the mantissa, not exponent digits (0e-999 is valid zero).
         if value == 0.0 and any(ch in token.lower().split("e", 1)[0] for ch in "123456789"):
             raise ValueError(f"Underflowed feature ledger JSON number: {token}")
+        # A decimal fraction can round to an integer in binary64 even when
+        # the integer is inside the safe range (e.g. 1.0000000000000001).
+        if value.is_integer() and Decimal(token) != Decimal(int(value)):
+            raise ValueError(f"Rounded feature ledger JSON fraction to integer: {token}")
         return value
 
     def safe_integer(token):

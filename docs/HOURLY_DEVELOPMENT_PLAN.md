@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-UNDERFLOW-CI-215 (fix exact-head Quality regression)
+
+**Execution ledger:** Diagnosed failed exact-head push Quality #42621218800 and PR Quality #42621226312 at dev fbab98c3411d1452e418ea74a9f96970b1d417b2: 507 structural tests ran; two underflow tests failed because the newer rounded-fraction guard intercepted 1e-999 before the established underflow diagnostic. Reordered the two checks without weakening either validation, added 1e-324/-1e-324 and zero-exponent regression cases, and preserved the historical 166 gaps / 95 partial. Main remained 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 still review-gated. New exact-head CI must be verified before promotion.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality pass on this fix's exact SHA, including all underflow/fraction cases, structural and browser suites.
+2. **P0 reviewed release:** obtain required submitted review(s) on PR #189; merge through ordinary PR only after exact-head green, verify main Quality and Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage errors, future-schema preservation; synchronized src/index.html and browser tests.
+4. **P1 numerical reference cases:** repeated roots, nonlinear fitting and unstable filters with independent reference tolerances, residuals and invalid inputs.
+5. **P1 branch cleanup:** after authorized release, verify Claude branch fully contained in main and no PR/protection before removal.
+
 ## 2026-11-09 — AUDIT-LEDGER-FRACTION-ROUNDING-214 formatting correction
 
 **Execution ledger:** Corrected literal backslash-n sequences accidentally introduced in the previous validator patch into actual Python newlines before exact-head QA. No algorithm or test behavior changed. Full CI pending. Frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, authorized PR release, accessible preference reset, numerical reference regressions, and safe branch cleanup with the acceptance criteria immediately below.

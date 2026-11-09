@@ -81,6 +81,14 @@ def load_ledger(path):
             raise ValueError(f"Underflowed feature ledger JSON number: {token}")
         return value
 
+    def safe_integer(token):
+        # JSON integers beyond IEEE-754's exact integer range lose precision
+        # when the audit is consumed by JavaScript or spreadsheet tooling.
+        value = int(token)
+        if abs(value) > 9007199254740991:
+            raise ValueError(f"Unsafe feature ledger JSON integer: {token}")
+        return value
+
     def reject_unpaired_surrogates(value):
         # JSON escapes may decode to lone UTF-16 surrogate code points, which
         # cannot be encoded as valid UTF-8 and corrupt downstream audit exports.
@@ -98,7 +106,8 @@ def load_ledger(path):
     data = json.loads(Path(path).read_text(encoding="utf-8"),
                       object_pairs_hook=unique_object,
                       parse_constant=reject_nonfinite,
-                      parse_float=finite_float)
+                      parse_float=finite_float,
+                      parse_int=safe_integer)
     reject_unpaired_surrogates(data)
     return data
 

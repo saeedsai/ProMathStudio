@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject precision-losing JSON integers in frozen feature audit
+- Reject integer literals outside JavaScript's safe integer range (including nested values) to preserve audit fidelity in browser/spreadsheet consumers. Added negative and boundary-positive regressions. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No runtime bundle or Pages change.
+
 ## 2026-11-09 — Correct Unicode regression fixture escaping
 - Ensure JSON test fixtures decode surrogate escapes instead of escaping the backslash itself; validator behavior unchanged. Exact-head CI pending.
 

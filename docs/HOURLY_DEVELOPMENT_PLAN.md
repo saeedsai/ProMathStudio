@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-SAFE-INTEGERS-211 (preserve exact JSON integers)
+
+**Execution ledger:** Inspected dev 172b5589eb6c7d0b66223e1a856ab246f8ab2fd5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical audit, living plan, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42594433079. JSON integer tokens beyond IEEE-754 exact range could be silently rounded by downstream browser/spreadsheet consumers. Added strict recursive parse_int guard and focused positive/negative boundary tests. No runtime JS/index.html changes. New exact-head CI pending; no PR merge or Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green on this SHA, including audit validator, structural and Chromium checks.
+2. **P0 authorized release:** required PR #189 reviews and exact-head checks; ordinary PR merge, then main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirm/cancel, focus, storage errors, future-schema preservation; synchronized source and index.html with browser regression.
+4. **P1 numerical references:** repeated roots, nonlinear fitting, unstable filters; independent tolerances and invalid-input tests.
+5. **P1 branch audit:** prove main containment, no unique commits, open PRs or protections before deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-UNICODE-210 test fixture correction
 
 **Execution ledger:** Corrected JSON escape fixture spelling to exercise decoded surrogate code points rather than literal backslashes; no change to validation logic. Exact-head CI pending; frozen 166 gaps/95 partial unchanged. NEXT FIVE remain exact-head CI, authorized PR release, accessible preference reset, numerical reference tests and safe branch audit, with acceptance gates documented below.

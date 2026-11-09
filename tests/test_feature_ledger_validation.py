@@ -96,6 +96,25 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                         with self.assertRaisesRegex(ValueError, "Underflowed feature ledger JSON number"):
                             validator.load_ledger(path)
 
+    def test_unsafe_json_integers_are_rejected_at_any_depth(self):
+        for payload in ('{"extra":9007199254740992}',
+                        '{"nested":[-9007199254740992]}',
+                        '{"counts":{"gaps":999999999999999999999}}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Unsafe feature ledger JSON integer"):
+                        validator.load_ledger(path)
+
+    def test_safe_json_integer_boundaries_are_preserved(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text('{"max":9007199254740991,"min":-9007199254740991,"zero":0}',
+                            encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"max":9007199254740991, "min":-9007199254740991, "zero":0})
+
     def test_unpaired_unicode_surrogates_are_rejected_recursively(self):
         # Python accepts escaped lone UTF-16 surrogate code points in JSON.
         for payload in (r'{"title":"\ud800"}',

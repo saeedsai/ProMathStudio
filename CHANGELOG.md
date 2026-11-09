@@ -1,3 +1,6 @@
+## 2026-11-09 — Correct zero-mantissa regression fixture selection
+- Included extended zero-mantissa literal in the valid-zero test branch, before CI completion. No validator algorithm or application bundle change; new exact-head QA pending. Frozen 166 gaps / 95 partial unchanged.
+
 ## 2026-11-09 — Repair zero-literal CI fixture and exact decimal underflow check
 - Fixed exact-head CI KeyError in valid-zero JSON test by reading the field actually present in each fixture; added signed-zero and extended zero-mantissa regression cases. The validator now distinguishes exact decimal zero using Decimal rather than a digit heuristic. Historical 166 gaps / 95 partial unchanged; new exact-head CI pending. No application JS/index.html or Pages changes.
 

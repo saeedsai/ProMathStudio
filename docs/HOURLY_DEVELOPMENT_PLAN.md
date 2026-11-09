@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-ZERO-TEST-216 fixture selector correction
+
+**Execution ledger:** Before exact-head QA completed, corrected the new zero-mantissa fixture selector to explicitly include the longer zero-mantissa token, preventing a false underflow assertion. Previous commit 63c02749c20fef3d0b826843579b9b0f4323160b; current exact-head Quality must be rerun. No application bundle change, no release or Pages deployment. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality green including zero-mantissa and underflow tests and browser checks.
+2. **P0 reviewed release:** required reviews, exact-head checks, ordinary PR #189 merge, main Quality and Pages verification.
+3. **P1 accessible preference reset:** focus/keyboard, cancel, storage and future-schema cases, synchronized src/index.html and Chromium.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with independent reference tolerances.
+5. **P1 obsolete branch audit:** verify main containment, no open PR or protection before deleting the inherited Claude branch.
+
 ## 2026-11-09 — AUDIT-LEDGER-ZERO-TEST-216 (repair exact-head CI and precise underflow parsing)
 
 **Execution ledger:** Inspected dev becef1ecbe8dcfefc359e05e1d8aeb403ea98a8c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, PR #189 (no submitted reviews), and failed exact-head push/PR Quality #42639846795/#42639858321. Job 129237755446 ran 507 structural tests: one KeyError arose in the valid-zero test fixture because it read counts.gaps from an extra-only payload. Fixed the test to read the actual fixture field, added negative-zero and longer-zero-mantissa acceptance cases, and hardened the validator with exact Decimal zero detection instead of a mantissa digit heuristic. Local isolated JSON checks passed; new exact-head full CI/Chromium pending. No JS/index.html change, PR merge or Pages deployment. Frozen historical 166 gaps / 95 partial unchanged.

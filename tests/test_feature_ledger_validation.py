@@ -103,7 +103,9 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / "ledger.json"
                     path.write_text(payload, encoding="utf-8")
-                    if "0.000e-999" in payload or "0e-999" in payload:
+                    if payload in ('{"counts":{"gaps":0.000e-999}}',
+                                   '{"extra":0e-999}', '{"extra":-0e-999}',
+                                   '{"extra":0.000000e-999}'):
                         decoded = validator.load_ledger(path)
                         value = decoded["counts"]["gaps"] if "counts" in decoded else decoded["extra"]
                         self.assertEqual(value, 0.0)

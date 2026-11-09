@@ -1,3 +1,6 @@
+## 2026-11-10 — Bound historical audit JSON input size
+- Limit untrusted ledger JSON input to 8 MiB before UTF-8 decoding, with oversized-file rejection and valid-small regression. Frozen 166 gaps / 95 partial unchanged; new exact-head CI pending. No application bundle or Pages release.
+
 ## 2026-11-09 — Normalize missing historical ledger read errors
 - Convert missing/unreadable JSON audit path errors to actionable ValueError, with missing-path and directory regressions. New exact-head CI pending; no runtime bundle, release or Pages change. Historical 166 gaps / 95 partial unchanged.
 

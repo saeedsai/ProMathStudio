@@ -67,6 +67,16 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "nesting exceeds decoder limit"):
                 validator.load_ledger(path)
 
+    def test_oversized_ledger_is_rejected_before_json_decoding(self):
+        # Bound memory usage even if an export is mostly whitespace.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_bytes(b" " * (8 * 1024 * 1024 + 1))
+            with self.assertRaisesRegex(ValueError, "exceeds 8 MiB input limit"):
+                validator.load_ledger(path)
+            path.write_bytes(b'{"ok":true}')
+            self.assertEqual(validator.load_ledger(path), {"ok": True})
+
     def test_missing_or_directory_ledger_reports_read_error(self):
         # Missing/unreadable audit inputs should fail with a stable diagnostic.
         with tempfile.TemporaryDirectory() as directory:

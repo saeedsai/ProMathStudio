@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-SIZE-LIMIT-225
+
+**Execution ledger:** Inspected dev 10c294a93371db93b326f82b9d9225b16b325235, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, plan and PR #189 (no reviews). Exact-head PR Quality #42716245354 succeeded with static/browser job. Bound audit JSON imports to 8 MiB before decoding to prevent unbounded memory use, preserving UTF-8 BOM and strict validation; added oversized and valid-small regression. Full new-head CI pending; no application JS/index.html change, main merge or Pages verification. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality pass structural and Chromium checks for the new dev SHA.
+2. **P0 reviewed release:** eligible review and exact-head checks for PR #189; ordinary merge and verified main Quality/Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirm/cancel, keyboard focus, storage errors and future-schema browser regressions.
+4. **P1 numerical reference coverage:** repeated roots, nonlinear fits and unstable filters with residual/tolerance and invalid-input cases.
+5. **P1 safe branch audit:** verify obsolete branches contained in main, unprotected and without open PR before deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-READ-ERROR-224
 
 **Execution ledger:** Verified dev cb52aed28e860eb94e84b0c245df05b5752829b4 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 has no submitted reviews. Previous exact-head PR Quality #42707708665 passed (static/browser job). Hardened historical audit input loading so missing or directory paths produce a stable actionable ValueError rather than a raw OS exception; added missing-path and directory regression cases. New exact-head CI pending; no app JS/index.html or production release. Frozen 166 gaps / 95 partial unchanged.

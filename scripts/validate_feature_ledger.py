@@ -140,7 +140,12 @@ def load_ledger(path):
 
     try:
         # UTF-8 BOM is emitted by some spreadsheet exports; accept it only at the start.
-        data = json.loads(Path(path).read_text(encoding="utf-8-sig"),
+        # Cap untrusted audit imports before decoding to avoid unbounded memory use.
+        with Path(path).open("rb") as source:
+            payload = source.read(8 * 1024 * 1024 + 1)
+        if len(payload) > 8 * 1024 * 1024:
+            raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")
+        data = json.loads(payload.decode("utf-8-sig"),
                           object_pairs_hook=unique_object,
                           parse_constant=reject_nonfinite,
                           parse_float=finite_float,

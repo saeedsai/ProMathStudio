@@ -4,6 +4,7 @@ import importlib.util
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -45,6 +46,21 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 mutate(changed)
                 with self.assertRaises(ValueError):
                     validator.validate(changed)
+
+    def test_duplicate_json_keys_are_rejected_before_validation(self):
+        # json.loads normally silently accepts the final duplicate key.
+        cases = [
+            '{"schemaVersion":1,"schemaVersion":2}',
+            '{"items":[{"id":"first","id":"shadow"}]}',
+            '{"counts":{"gaps":166,"gaps":165}}',
+        ]
+        for content in cases:
+            with self.subTest(content=content):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(content, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Duplicate feature ledger JSON key"):
+                        validator.load_ledger(path)
 
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.

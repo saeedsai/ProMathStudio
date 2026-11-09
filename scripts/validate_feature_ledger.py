@@ -58,8 +58,22 @@ def validate(data):
     return counts
 
 
+def load_ledger(path):
+    """Reject ambiguous duplicate JSON keys instead of silently using the last value."""
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"Duplicate feature ledger JSON key: {key}")
+            result[key] = value
+        return result
+
+    return json.loads(Path(path).read_text(encoding="utf-8"),
+                      object_pairs_hook=unique_object)
+
+
 def main():
-    data = json.loads(LEDGER.read_text(encoding="utf-8"))
+    data = load_ledger(LEDGER)
     counts = validate(data)
     print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
 

@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject ambiguous duplicate JSON keys in frozen feature ledger
+- Added a duplicate-key-safe JSON loader for the historical inventory, including nested objects, and focused regression coverage. The original audit remains 166 gaps / 95 partial; new exact-head CI pending. No application bundle, release or Pages change.
+
 ## 2026-11-08 — Reject malformed historical audit field types
 - Hardened `scripts/validate_feature_ledger.py` to reject non-string ID/kind/status/priority before set/Counter processing and to reject boolean `schemaVersion` values, with descriptive `ValueError` instead of incidental `TypeError`. Added five negative regressions in `tests/test_feature_ledger_validation.py`. Historical inventory remains unchanged (166 gaps / 95 partial). Exact-commit CI pending; no application bundle changes, release or deployment.
 

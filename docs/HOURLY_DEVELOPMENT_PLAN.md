@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-DUPLICATE-KEYS-206 (unambiguous historical JSON)
+
+**Execution ledger:** Inspected dev 6774e2844745209072effac7cb0ea15a42e0f522, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, plan, frozen audit, PR #189 and successful exact-head push/PR Quality #42533015898/#42533020995. Found that standard JSON parsing silently accepts duplicate object keys, potentially hiding conflicting frozen counts, IDs or statuses. Added duplicate-key rejection at all JSON object depths in the audit loader and a focused top-level/nested regression. Frozen inventory and application JS/HTML unchanged. Exact-new-head CI pending; PR remains review-gated, no release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new push and PR Quality pass structural, feature-ledger tests, source/bundle check and Chromium smoke at the same SHA.
+2. **P0 authorized release:** PR #189 has required submitted approvals and exact-head checks; merge only through ordinary PR then verify main Quality and Pages.
+3. **P1 accessible preference reset:** confirm/cancel, keyboard focus, storage failures and future-schema preservation; synchronize modular JS and standalone HTML.
+4. **P1 numerical references:** repeated roots, nonlinear-fit and unstable-filter reference/tolerance and invalid-input tests.
+5. **P1 branch audit:** verify full main containment, no open PR or protection and no unique work before deleting obsolete refs.
+
 ## 2026-11-08 — AUDIT-LEDGER-JSON-TYPES-205 (malformed JSON diagnostics)
 
 **Execution ledger:** Verified exact dev 3f6a0a3bb068071c908e9b53c7772ccdcdff61b9, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, historical frozen audit (166 gaps, 95 partial), PR #189 (open, no submitted reviews), and successful exact-head push/PR Quality #42527989177/#42527993936. Identified a follow-on integrity defect in `scripts/validate_feature_ledger.py`: list/object values in JSON `id`, `kind`, `status` or `priority` can raise incidental `TypeError: unhashable type` during set/Counter rather than actionable audit errors; JSON `true` also compares equal to schema version integer 1 in Python. Added explicit type guards before hash operations and exact integer schema validation. Extended `tests/test_feature_ledger_validation.py` with negative cases for unhashable fields and boolean schema. Frozen data unchanged. No JS/HTML change. New exact-head CI required, no local full checkout. PR remains review-gated; Pages not redeployed.

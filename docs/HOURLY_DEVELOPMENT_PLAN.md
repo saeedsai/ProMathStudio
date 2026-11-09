@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-DEEP-NESTING-220 (bounded JSON decoder error)
+
+**Execution ledger:** Inspected dev b780046e18d1a74529d7b221dc13d13c61dc0a90, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, living plan, frozen inventory and PR #189 (no reviews). Exact-head push Quality #42671688174 succeeded; PR Quality #42671699698 failed before jobs were created (GitHub returned zero jobs), so no source-test failure can be inferred from that PR run. Hardened historical JSON loading to translate excessive-nesting RecursionError into an actionable ValueError and added a direct 12,000-level nested fixture regression. No app JS/index.html changes. Exact-head new CI and Pages pending; frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green at the same new SHA, including deep-nesting regression and Chromium checks; investigate zero-job PR failure if repeated.
+2. **P0 reviewed release:** eligible PR #189 approval, exact-head checks, ordinary dev-to-main merge, then main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage errors and future-schema preservation, synchronized src/index.html and browser tests.
+4. **P1 numerical reference tests:** repeated roots, nonlinear fits and unstable filters with residuals, tolerances and invalid inputs.
+5. **P1 safe branch audit:** prove main contains Claude branch, no open PR/protection before any deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-CONTROL-ESCAPES-219 (repair exact-head CI fixture)
 
 **Execution ledger:** Inspected dev e8a39b4ef313c912952052931496a82ae960e472, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, frozen historical inventory, PR #189 (no submitted reviews), and failing exact-head push/PR Quality #42659891450/#42659905006. Structural run reported 511 tests with one failure in test_non_nul_control_escapes_remain_supported: the fixture used double-backslash JSON escapes and therefore decoded literal backslash+n/tab, not newline/tab. Corrected the fixture to use single-backslash JSON escapes, retaining strict positive assertions for actual newline and tab. No application JavaScript or standalone index.html changed. New exact-head CI pending; no merge, branch deletion, or Pages verification. Frozen 166 gaps / 95 partial unchanged.

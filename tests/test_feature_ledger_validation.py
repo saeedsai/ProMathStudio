@@ -58,6 +58,15 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "integer values"):
                     validator.validate(changed)
 
+    def test_excessive_json_nesting_reports_a_validation_error(self):
+        # Deeply nested JSON should fail as invalid audit input rather than
+        # leaking an implementation-specific recursion exception.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text("[" * 12000 + "0" + "]" * 12000, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "nesting exceeds decoder limit"):
+                validator.load_ledger(path)
+
     def test_duplicate_json_keys_are_rejected_before_validation(self):
         # json.loads normally silently accepts the final duplicate key.
         cases = [

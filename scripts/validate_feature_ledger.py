@@ -138,11 +138,14 @@ def load_ledger(path):
                 reject_unpaired_surrogates(key)
                 reject_unpaired_surrogates(item)
 
-    data = json.loads(Path(path).read_text(encoding="utf-8"),
-                      object_pairs_hook=unique_object,
-                      parse_constant=reject_nonfinite,
-                      parse_float=finite_float,
-                      parse_int=safe_integer)
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"),
+                          object_pairs_hook=unique_object,
+                          parse_constant=reject_nonfinite,
+                          parse_float=finite_float,
+                          parse_int=safe_integer)
+    except RecursionError as exc:
+        raise ValueError("Feature ledger JSON nesting exceeds decoder limit") from exc
     reject_unpaired_surrogates(data)
     reject_nul(data)
     return data

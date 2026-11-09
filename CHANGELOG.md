@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject precision-losing integer-valued JSON floats in frozen audit
+- JSON decimal/exponent forms above the JavaScript safe integer boundary now fail strict feature-ledger loading instead of bypassing parse_int. Added nested negative cases and safe boundary/fractional positive regression. Historical 166 gaps / 95 partial unchanged; new exact-head CI pending. No runtime JS/HTML or Pages change.
+
 ## 2026-11-09 — Require integer types for frozen historical counts
 - Historical feature-ledger validation now rejects float or boolean count fields even when Python equality would accept the numeric value. Added four direct regression cases. Frozen 166 gaps / 95 partial unchanged. New exact-head CI pending; no runtime bundle or Pages change.
 

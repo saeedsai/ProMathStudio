@@ -118,6 +118,27 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Unsafe feature ledger JSON integer"):
                         validator.load_ledger(path)
 
+    def test_unsafe_integer_valued_json_floats_are_rejected(self):
+        # Decimal/exponent syntax routes through parse_float, not parse_int.
+        for payload in ('{"extra":9007199254740992.0}',
+                        '{"nested":[-9007199254740992e0]}',
+                        '{"counts":{"gaps":1e20}}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Unsafe feature ledger JSON floating integer"):
+                        validator.load_ledger(path)
+
+    def test_safe_integer_valued_json_floats_and_fractions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text('{"max":9007199254740991.0,"min":-9007199254740991e0,'
+                            '"fraction":1.5,"tiny":0.001}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"max":9007199254740991.0, "min":-9007199254740991.0,
+                              "fraction":1.5, "tiny":0.001})
+
     def test_safe_json_integer_boundaries_are_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"

@@ -79,6 +79,10 @@ def load_ledger(path):
         value = float(token)
         if not math.isfinite(value):
             raise ValueError(f"Non-finite feature ledger JSON number: {token}")
+        # JSON decimal/exponent notation can bypass parse_int and silently
+        # round large integer-valued numbers in JavaScript consumers.
+        if value.is_integer() and abs(value) > 9007199254740991:
+            raise ValueError(f"Unsafe feature ledger JSON floating integer: {token}")
         # Do not silently turn nonzero audit numbers into zero on underflow.
         if value == 0.0 and any(ch in token.lower().split("e", 1)[0] for ch in "123456789"):
             raise ValueError(f"Underflowed feature ledger JSON number: {token}")

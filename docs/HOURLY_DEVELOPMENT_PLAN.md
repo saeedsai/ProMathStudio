@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-FLOAT-SAFE-213 (integer-valued JSON float precision)
+
+**Execution ledger:** Inspected dev eefd7e096260a412b084ffb0229665a9828c735d, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, PR #189 (no submitted reviews), and successful exact-head push/PR Quality #42604896376/#42604904388. Closed a precision loophole: JSON decimal/exponent tokens such as 9007199254740992.0 bypass parse_int and may be silently rounded in JavaScript. Added three rejection and four acceptance assertions in focused regressions. No application JS/index.html change. New exact-head CI pending; no release or Pages update. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new dev SHA push and PR Quality both green, including feature-ledger, structural and Chromium regressions.
+2. **P0 reviewed release:** PR #189 submitted approvals, exact-head checks green, ordinary merge; verify main Quality and published Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage failure, future-schema preservation; synchronized src/index.html and browser test.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters; reference tolerances, invalid inputs and residual tests.
+5. **P1 safe branch audit:** demonstrate main containment, no unique work, open PR or protection before any deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-COUNT-TYPES-212 (strict historical count types)
 
 **Execution ledger:** Verified dev e922f06b3f472044adfb342d5f475c67948239e7, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, living plan, PR #189 (no reviews) and exact-head push/PR Quality success #42597948495/#42600567693. Fixed Python numeric equality allowing floating-point and boolean historical count fields to masquerade as frozen integer counts. Added four focused regressions. No JS/index.html change; new exact-head CI pending. Frozen 166 gaps / 95 partial unchanged. No release or Pages claim.

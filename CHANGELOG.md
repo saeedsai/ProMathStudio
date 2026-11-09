@@ -1,3 +1,6 @@
+## 2026-11-09 — Report malformed UTF-8 in historical audit input
+- Convert invalid UTF-8 ledger input to actionable ValueError; two malformed-byte regression cases and valid UTF-8 acceptance. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending. No app JS/index.html changes.
+
 ## 2026-11-09 — Report deeply nested historical JSON as invalid audit input
 - Converted JSON decoder recursion failures into explicit ValueError and added a 12,000-level nesting regression; no app JavaScript or standalone HTML changed. Exact-head CI and Pages pending; frozen 166 gaps / 95 partial unchanged.
 

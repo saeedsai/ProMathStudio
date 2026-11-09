@@ -67,6 +67,18 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "nesting exceeds decoder limit"):
                 validator.load_ledger(path)
 
+    def test_invalid_utf8_is_reported_as_a_validation_error(self):
+        # Strict UTF-8 input should give an actionable audit diagnostic.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for payload in (bytes([0xff]), bytes([0xc3, 0x28])):
+                with self.subTest(payload=payload):
+                    path.write_bytes(payload)
+                    with self.assertRaisesRegex(ValueError, "must be valid UTF-8"):
+                        validator.load_ledger(path)
+            path.write_text('{"title":"naive"}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path)["title"], "naive")
+
     def test_duplicate_json_keys_are_rejected_before_validation(self):
         # json.loads normally silently accepts the final duplicate key.
         cases = [

@@ -86,8 +86,9 @@ def load_ledger(path):
             raise ValueError(f"Unsafe feature ledger JSON floating integer: {token}")
         # Preserve the more specific underflow diagnostic before the general
         # rounded-fraction check: tiny nonzero tokens also round to integer 0.
-        # Inspect the mantissa, not exponent digits (0e-999 is valid zero).
-        if value == 0.0 and any(ch in token.lower().split("e", 1)[0] for ch in "123456789"):
+        # Decimal distinguishes exact zero from nonzero subnormal literals
+        # without inspecting exponent digits or losing mantissa precision.
+        if value == 0.0 and not Decimal(token).is_zero():
             raise ValueError(f"Underflowed feature ledger JSON number: {token}")
         # A decimal fraction can round to an integer in binary64 even when
         # the integer is inside the safe range (e.g. 1.0000000000000001).

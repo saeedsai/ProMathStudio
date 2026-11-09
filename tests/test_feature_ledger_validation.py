@@ -97,13 +97,16 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
     def test_underflowed_json_float_is_rejected_at_any_depth(self):
         for payload in ('{"extra":1e-999}', '{"nested":[-1e-999]}',
                         '{"extra":1e-324}', '{"nested":[-1e-324]}',
-                        '{"counts":{"gaps":0.000e-999}}', '{"extra":0e-999}'):
+                        '{"counts":{"gaps":0.000e-999}}', '{"extra":0e-999}',
+                        '{"extra":-0e-999}', '{"extra":0.000000e-999}'):
             with self.subTest(payload=payload):
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / "ledger.json"
                     path.write_text(payload, encoding="utf-8")
                     if "0.000e-999" in payload or "0e-999" in payload:
-                        self.assertEqual(validator.load_ledger(path)["counts"]["gaps"], 0.0)
+                        decoded = validator.load_ledger(path)
+                        value = decoded["counts"]["gaps"] if "counts" in decoded else decoded["extra"]
+                        self.assertEqual(value, 0.0)
                     else:
                         with self.assertRaisesRegex(ValueError, "Underflowed feature ledger JSON number"):
                             validator.load_ledger(path)

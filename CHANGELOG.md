@@ -1,3 +1,6 @@
+## 2026-11-09 — Repair zero-literal CI fixture and exact decimal underflow check
+- Fixed exact-head CI KeyError in valid-zero JSON test by reading the field actually present in each fixture; added signed-zero and extended zero-mantissa regression cases. The validator now distinguishes exact decimal zero using Decimal rather than a digit heuristic. Historical 166 gaps / 95 partial unchanged; new exact-head CI pending. No application JS/index.html or Pages changes.
+
 ## 2026-11-09 — Restore underflow-specific audit validation after CI failure
 - Fixed exact-head Quality regression in the historical JSON loader: check nonzero-to-zero underflow before the rounded-to-integer guard, retaining both validations. Added subnormal underflow and valid zero-exponent regression cases. Historical 166 gaps / 95 partial unchanged; new CI pending. No application JS/HTML or Pages changes.
 

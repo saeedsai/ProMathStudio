@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-ZERO-TEST-216 (repair exact-head CI and precise underflow parsing)
+
+**Execution ledger:** Inspected dev becef1ecbe8dcfefc359e05e1d8aeb403ea98a8c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, PR #189 (no submitted reviews), and failed exact-head push/PR Quality #42639846795/#42639858321. Job 129237755446 ran 507 structural tests: one KeyError arose in the valid-zero test fixture because it read counts.gaps from an extra-only payload. Fixed the test to read the actual fixture field, added negative-zero and longer-zero-mantissa acceptance cases, and hardened the validator with exact Decimal zero detection instead of a mantissa digit heuristic. Local isolated JSON checks passed; new exact-head full CI/Chromium pending. No JS/index.html change, PR merge or Pages deployment. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality both green at this commit, including 507+ structural tests and browser checks.
+2. **P0 authorized promotion:** submitted eligible review(s), required exact-head checks and ordinary PR #189 merge; verify new main Quality and Pages.
+3. **P1 accessible preference reset:** confirm/cancel, focus, keyboard, storage failures and future-schema preservation with synchronized src/index.html and browser tests.
+4. **P1 numerical reference cases:** repeated roots, nonlinear fits and unstable filters with independent tolerances, residuals and invalid inputs.
+5. **P1 safe branch cleanup:** verify inherited Claude branch is fully contained in main, no open PR and unprotected before deletion.
+
 ## 2026-11-09 — AUDIT-LEDGER-UNDERFLOW-CI-215 (fix exact-head Quality regression)
 
 **Execution ledger:** Diagnosed failed exact-head push Quality #42621218800 and PR Quality #42621226312 at dev fbab98c3411d1452e418ea74a9f96970b1d417b2: 507 structural tests ran; two underflow tests failed because the newer rounded-fraction guard intercepted 1e-999 before the established underflow diagnostic. Reordered the two checks without weakening either validation, added 1e-324/-1e-324 and zero-exponent regression cases, and preserved the historical 166 gaps / 95 partial. Main remained 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 still review-gated. New exact-head CI must be verified before promotion.

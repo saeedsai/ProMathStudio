@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-CONTROL-ESCAPES-219 (repair exact-head CI fixture)
+
+**Execution ledger:** Inspected dev e8a39b4ef313c912952052931496a82ae960e472, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, frozen historical inventory, PR #189 (no submitted reviews), and failing exact-head push/PR Quality #42659891450/#42659905006. Structural run reported 511 tests with one failure in test_non_nul_control_escapes_remain_supported: the fixture used double-backslash JSON escapes and therefore decoded literal backslash+n/tab, not newline/tab. Corrected the fixture to use single-backslash JSON escapes, retaining strict positive assertions for actual newline and tab. No application JavaScript or standalone index.html changed. New exact-head CI pending; no merge, branch deletion, or Pages verification. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality both pass the repaired control-escape regression, full structural suite and Chromium checks at the new SHA.
+2. **P0 reviewed promotion:** obtain eligible PR #189 approval, verify required exact-head checks and reviews, ordinary dev-to-main merge, then main Quality and live Pages verification.
+3. **P1 accessible preference reset:** confirm/cancel, keyboard focus, storage error and future-schema preservation; synchronized src/index.html plus browser regression.
+4. **P1 independent numerical references:** repeated roots, nonlinear fitting, unstable filters with residual/tolerance and invalid-input coverage.
+5. **P1 safe obsolete-branch cleanup:** prove main contains the Claude branch and no open PR/protection before deleting it.
+
 ## 2026-11-09 — AUDIT-LEDGER-NUL-218 (reject escaped NUL in historical JSON)
 
 **Execution ledger:** Inspected dev 91e1e3f419c5e826ee3f7516005ce82f66de3ccf, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical audit, living plan, PR #189 (zero reviews), and successful exact-head push/PR Quality #42649730769/#42649740066. Added recursive rejection of escaped U+0000 in historical JSON keys/values to prevent NUL-truncated audit exports; preserved valid newline/tab escapes. Focused regression covers nested values, keys, and accepted controls. No app JS/index.html changes. New exact-head CI pending; no release or Pages verification. Frozen 166 gaps / 95 partial unchanged.

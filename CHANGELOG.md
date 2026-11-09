@@ -1,3 +1,6 @@
+## 2026-11-09 — Repair valid-control JSON regression fixture
+- Corrected the escaped newline/tab fixture so the parser receives JSON control escapes rather than double-escaped literal backslashes. Preserved the positive assertions and existing NUL rejection. Exact-head CI pending; no application JS/index.html or Pages change. Historical 166 gaps / 95 partial unchanged.
+
 ## 2026-11-09 — Reject NUL escapes in historical JSON audit data
 - Feature-ledger JSON loader rejects U+0000 in nested values or object keys to prevent truncated audit exports. Added negative and valid-control regression cases; historical 166 gaps / 95 partial unchanged. New exact-head QA pending; no application bundle or Pages change.
 

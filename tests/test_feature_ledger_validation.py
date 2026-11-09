@@ -215,7 +215,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
     def test_non_nul_control_escapes_remain_supported(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"
-            path.write_text(r'{"label":"line\\nnext","tab":"a\\tb"}', encoding="utf-8")
+            path.write_text(r'{"label":"line\nnext","tab":"a\tb"}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path),
                              {"label": "line\nnext", "tab": "a\tb"})
 

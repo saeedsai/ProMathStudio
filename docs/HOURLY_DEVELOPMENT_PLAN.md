@@ -1,3 +1,14 @@
+## 2026-11-09 — AUDIT-LEDGER-NUL-218 (reject escaped NUL in historical JSON)
+
+**Execution ledger:** Inspected dev 91e1e3f419c5e826ee3f7516005ce82f66de3ccf, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical audit, living plan, PR #189 (zero reviews), and successful exact-head push/PR Quality #42649730769/#42649740066. Added recursive rejection of escaped U+0000 in historical JSON keys/values to prevent NUL-truncated audit exports; preserved valid newline/tab escapes. Focused regression covers nested values, keys, and accepted controls. No app JS/index.html changes. New exact-head CI pending; no release or Pages verification. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** both push and PR Quality pass the new NUL regression, validator and Chromium suite on the same SHA.
+2. **P0 reviewed promotion:** obtain eligible PR #189 approvals; verify required checks; ordinary dev-to-main merge, then main Quality and Pages live verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage failure and future-schema preservation; synchronized src/index.html plus Chromium tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with independent tolerances, residuals and invalid-input tests.
+5. **P1 safe branch cleanup:** confirm main contains the Claude branch, no open PR or protection before deleting it.
+
 ## 2026-11-09 — AUDIT-LEDGER-FRACTION-PRECISION-217 (preserve fractional decimal precision)
 
 **Execution ledger:** Verified dev 6a6cbb4adde806a569b7000854489e194bfa951a, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 with no submitted reviews, and successful exact-head push/PR Quality #42644694190/#42644707325. Added a bounded historical JSON integrity fix: reject fractional decimal literals whose extra significant digits are silently discarded by binary64, while retaining equivalent exponent notation, representable subnormals and signed decimal zero. Added positive and negative automated regression tests. Isolated decimal comparison checks passed; new exact-head GitHub Quality/Chromium pending. No application JS/index.html change, merge, branch deletion or Pages claim. Frozen historical 166 gaps / 95 partial unchanged.

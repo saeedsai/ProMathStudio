@@ -200,6 +200,25 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Unpaired Unicode surrogate"):
                         validator.load_ledger(path)
 
+    def test_nul_characters_are_rejected_in_keys_and_nested_values(self):
+        # JSON permits escaped U+0000; audit text exports must not.
+        for payload in (r'{"title":"\u0000"}',
+                        r'{"nested":[{"value":"x\u0000y"}]}',
+                        r'{"\u0000key":"value"}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "NUL character"):
+                        validator.load_ledger(path)
+
+    def test_non_nul_control_escapes_remain_supported(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text(r'{"label":"line\\nnext","tab":"a\\tb"}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"label": "line\nnext", "tab": "a\tb"})
+
     def test_valid_unicode_surrogate_pair_is_accepted(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"

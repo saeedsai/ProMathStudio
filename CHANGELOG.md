@@ -1,3 +1,6 @@
+## 2026-11-09 — Reject NUL escapes in historical JSON audit data
+- Feature-ledger JSON loader rejects U+0000 in nested values or object keys to prevent truncated audit exports. Added negative and valid-control regression cases; historical 166 gaps / 95 partial unchanged. New exact-head QA pending; no application bundle or Pages change.
+
 ## 2026-11-09 — Reject silently rounded fractional JSON audit numbers
 - Historical feature-ledger loader now rejects decimal fractional tokens with discarded significant digits (such as 0.10000000000000001) while accepting equivalent exponent notation, exact-decimal zero and subnormal boundary literals. Added focused positive/negative regressions; frozen 166 gaps / 95 partial unchanged. New exact-head CI pending; no runtime JS/HTML or Pages change.
 

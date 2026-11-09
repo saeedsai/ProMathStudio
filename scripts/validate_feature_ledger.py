@@ -110,6 +110,20 @@ def load_ledger(path):
             raise ValueError(f"Unsafe feature ledger JSON integer: {token}")
         return value
 
+    def reject_nul(value):
+        # Escaped U+0000 is legal JSON but can truncate text in C-backed
+        # export pipelines and make audit identifiers ambiguous.
+        if isinstance(value, str):
+            if "\x00" in value:
+                raise ValueError("NUL character in feature ledger JSON")
+        elif isinstance(value, list):
+            for item in value:
+                reject_nul(item)
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                reject_nul(key)
+                reject_nul(item)
+
     def reject_unpaired_surrogates(value):
         # JSON escapes may decode to lone UTF-16 surrogate code points, which
         # cannot be encoded as valid UTF-8 and corrupt downstream audit exports.
@@ -130,6 +144,7 @@ def load_ledger(path):
                       parse_float=finite_float,
                       parse_int=safe_integer)
     reject_unpaired_surrogates(data)
+    reject_nul(data)
     return data
 
 

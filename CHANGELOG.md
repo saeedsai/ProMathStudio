@@ -1,3 +1,6 @@
+## 2026-11-10 — Machine-readable validated historical ledger summary
+- Add opt-in `--json-summary` CLI output for automation consumers, retaining existing default text output and failing closed for malformed exports. Add subprocess success/error regression. Frozen 166 gaps / 95 partial unchanged; no application bundle or Pages release. Exact-head CI pending.
+
 ## 2026-11-10 — Validate external historical audit exports from CLI
 - Accept optional ledger JSON path while retaining canonical default; report malformed exports without tracebacks. Add subprocess acceptance/rejection regression. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No application bundle or Pages release.
 

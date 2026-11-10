@@ -37,6 +37,26 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertIn("Malformed feature ledger JSON at line", bad.stderr)
             self.assertNotIn("Traceback", bad.stderr)
 
+    def test_cli_json_summary_is_machine_readable_and_validated(self):
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(self.original), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--json-summary", str(export)],
+                capture_output=True, text=True, check=False, timeout=10,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), {"existing": 158, "gaps": 166})
+            self.assertEqual(result.stderr, "")
+            export.write_text('{"items": [}', encoding="utf-8")
+            invalid = subprocess.run(
+                [sys.executable, str(SCRIPT), "--json-summary", str(export)],
+                capture_output=True, text=True, check=False, timeout=10,
+            )
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertEqual(invalid.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", invalid.stderr)
+
     def test_historical_inventory_is_accepted(self):
         counts = validator.validate(self.original)
         self.assertEqual((counts["existing"], counts["gap"]), (158, 166))

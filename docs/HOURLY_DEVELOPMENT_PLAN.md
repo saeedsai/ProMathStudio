@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-JSON-SUMMARY-232 (machine-readable audit output)
+
+**Execution ledger:** Inspected dev a7f36cfc99a0633f27968d1079e35ee964edaedd and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, PR #189 (zero reviews), and successful exact-head PR Quality #42765291438. Add opt-in --json-summary to the historical ledger CLI, retaining human-readable default and refusing malformed exports without emitting misleading JSON. Add subprocess success/failure regression. No application JS/index.html change or release; frozen 166 gaps / 95 partial unchanged. New exact-head CI pending.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push/PR Quality structural and Chromium jobs pass for this commit SHA; diagnose any failure.
+2. **P0 authorized release:** obtain eligible PR #189 review and required checks, merge ordinarily, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirmation/cancel, focus, storage failure and future-schema Chromium tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters against independent tolerances and invalid-input cases.
+5. **P1 obsolete branch audit:** prove full main containment, unprotected status and no open PR before any deletion.
+
 ## 2026-11-10 — AUDIT-LEDGER-CLI-231 (external export validation)
 
 **Execution ledger:** Inspected dev 821522ba5dd510b614f0fd873c87c7cfa6fdf7ef, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, PR #189 (no reviews) and exact-head PR Quality #42759613806 (success). Add optional external JSON export CLI path, preserving canonical default and concise malformed-input diagnostics; subprocess regression. No app JS/index.html change, merge or Pages claim. Frozen 166 gaps / 95 partial unchanged.

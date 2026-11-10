@@ -167,12 +167,17 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Validate a historical feature-ledger JSON export")
     parser.add_argument("path", nargs="?", type=Path, default=LEDGER,
                         help="JSON export to validate (default: frozen audit ledger)")
+    parser.add_argument("--json-summary", action="store_true",
+                        help="Print validated historical counts as machine-readable JSON")
     args = parser.parse_args(argv)
     try:
         counts = validate(load_ledger(args.path))
     except ValueError as exc:
         parser.error(str(exc))
-    print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
+    if args.json_summary:
+        print(json.dumps({"existing": counts["existing"], "gaps": counts["gap"]}, sort_keys=True))
+    else:
+        print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
 
 
 if __name__ == "__main__":

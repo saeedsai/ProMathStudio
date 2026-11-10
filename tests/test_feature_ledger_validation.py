@@ -81,11 +81,14 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         # A visually identical ID with hidden spaces must not survive export.
         for malformed in (" " + self.original["items"][0]["id"],
                           self.original["items"][0]["id"] + " ",
-                          "\\t" + self.original["items"][0]["id"]):
+                          "\t" + self.original["items"][0]["id"],
+                          self.original["items"][0]["id"] + "\t",
+                          "\n" + self.original["items"][0]["id"],
+                          self.original["items"][0]["id"] + "\n"):
             with self.subTest(malformed=malformed):
                 changed = copy.deepcopy(self.original)
                 changed["items"][0]["id"] = malformed
-                with self.assertRaisesRegex(ValueError, "surrounding whitespace"):
+                with self.assertRaisesRegex(ValueError, "surrounding whitespace \\(item 0\\)"):
                     validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 

@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-WHITESPACE-CI-235 (repair exact-head CI)
+
+**Execution ledger:** Inspected dev 0902335b699a99d3cc81f8f6c102e432d450efda, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 (zero reviews) and failed exact-head Quality #42840129606 (structural failure, browser skipped). Fix the literal-backslash-t test fixture to real tab and add trailing-tab/newline boundary cases; identify invalid item index in validator diagnostics. Isolated local boundary checks only; full exact-head GitHub structural/Chromium CI pending. No application JS/index.html changes, release or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 CI repair:** verify exact new dev SHA has green push/PR structural and Chromium suites; inspect any failure logs.
+2. **P0 protected release:** obtain eligible review and required exact-head checks on PR #189, ordinary merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronize src/index.html, browser-test confirmation/cancel, keyboard focus, storage errors and future-schema preservation.
+4. **P1 numerical reference tests:** repeated polynomial roots, nonlinear fitting and unstable filters, including residuals, tolerances and invalid input.
+5. **P1 obsolete branch audit:** verify main containment, no open PR and no protection before deletion.
+
 ## 2026-11-10 — AUDIT-LEDGER-ID-WHITESPACE-234 (stable feature identifiers)
 
 **Execution ledger:** Verified dev 6ebfca8635789fa58fae5345afc29909103ed7a3, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical audit, PR #189 (zero reviews) and exact-head PR Quality #42820607841 (success). Reject leading/trailing whitespace in historical feature IDs before duplicate detection, preventing ambiguous external references; add negative whitespace and positive canonical-ID regression. No app JS/index.html change; frozen 166 gaps / 95 partial unchanged. New exact-head CI pending.

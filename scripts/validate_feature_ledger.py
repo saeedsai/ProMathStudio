@@ -38,8 +38,9 @@ def validate(data):
             require(isinstance(item["priority"], str),
                     f"Feature ledger item {index} has invalid priority")
     # Reject invisible ID differences that make cross-file references ambiguous.
-    require(all(item["id"] == item["id"].strip() and item["id"]
-                for item in items), "Feature IDs must not have surrounding whitespace")
+    for index, item in enumerate(items):
+        require(bool(item["id"]) and item["id"] == item["id"].strip(),
+                f"Feature IDs must not have surrounding whitespace (item {index})")
     ids = [item["id"] for item in items]
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
     counts = Counter(item["kind"] for item in items)

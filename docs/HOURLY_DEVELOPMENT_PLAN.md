@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-NEGATIVE-ZERO-230 (integer representation integrity)
+
+**Execution ledger:** Inspected dev e9f9d707bc3c49cac10a14b5e0b764f06e7c6c33, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root contract, frozen audit, PR #189 (no reviews), and exact-head PR Quality #42752743626 (success). Reject integer JSON -0 before Python silently normalizes it to 0; add nested negative-zero and ordinary integer/floating negative-zero acceptance regression. No application JS or standalone index.html changes. New exact-head CI pending; no release or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality structural and Chromium jobs pass on new dev SHA.
+2. **P0 reviewed release:** eligible PR #189 approval and required exact-head checks; normal merge, then main Quality and Pages verification.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirmation/cancel, focus, storage failure and future-schema Chromium tests.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting and unstable filters against independent references, tolerances and invalid inputs.
+5. **P1 obsolete branch audit:** verify full main containment, unprotected status and no open PR before cleanup.
+
 ## 2026-11-10 — AUDIT-LEDGER-INTEGER-DIGITS-229 (bounded decoder error)
 
 **Execution ledger:** Verified dev ad88b0665238fb85f0867513262b0986cd4fff77 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root contract, frozen inventory and PR #189 (zero reviews). Exact-head PR Quality #42746545304 succeeded including structural and browser checks. Normalize Python 3.11+ excessive-integer-digit conversion errors into an actionable feature-ledger ValueError; add 5,000-digit rejection and safe-boundary acceptance tests. New exact-head CI pending. No application JS/index.html changes, release or Pages claim. Frozen 166 gaps / 95 partial unchanged.

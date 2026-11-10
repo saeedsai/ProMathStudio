@@ -1,3 +1,6 @@
+## 2026-11-10 — Reject ambiguous negative-zero JSON integers in frozen audit
+- Reject JSON integer -0 before Python silently converts it to zero; add nested negative cases and valid zero/negative-one/negative-zero-float controls. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No runtime bundle or Pages deployment.
+
 ## 2026-11-10 — Normalize excessive JSON integer digit errors
 - Convert Python 3.11+ integer digit-limit failures to a stable audit ValueError; test 5,000-digit rejection and safe integer acceptance. No application bundle change. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending.
 

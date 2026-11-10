@@ -204,6 +204,19 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                         with self.assertRaisesRegex(ValueError, "Underflowed feature ledger JSON number"):
                             validator.load_ledger(path)
 
+    def test_negative_zero_integer_is_not_silently_normalized(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for payload in ('{"value":-0}', '{"nested":[1,-0]}'):
+                with self.subTest(payload=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Negative-zero"):
+                        validator.load_ledger(path)
+            for payload in ('{"value":0}', '{"value":-1}', '{"value":-0.0}'):
+                with self.subTest(valid=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    self.assertIn("value", validator.load_ledger(path))
+
     def test_excessive_integer_digits_report_stable_error(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"

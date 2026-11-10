@@ -103,6 +103,10 @@ def load_ledger(path):
         return value
 
     def safe_integer(token):
+        # JSON -0 silently loses its sign when decoded as Python int 0.
+        # Preserve the audit's exact numeric representation instead.
+        if token == "-0":
+            raise ValueError("Negative-zero feature ledger JSON integer is ambiguous")
         # JSON integers beyond IEEE-754's exact integer range lose precision
         # when the audit is consumed by JavaScript or spreadsheet tooling.
         try:

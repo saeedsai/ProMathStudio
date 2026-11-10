@@ -57,6 +57,26 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(invalid.stdout, "")
             self.assertIn("Malformed feature ledger JSON", invalid.stderr)
 
+    def test_cli_quiet_is_silent_on_success_but_not_on_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(self.original), encoding="utf-8")
+            for extra in ([], ["--json-summary"]):
+                good = subprocess.run(
+                    [sys.executable, str(SCRIPT), "--quiet", *extra, str(export)],
+                    capture_output=True, text=True, check=False, timeout=10,
+                )
+                self.assertEqual(good.returncode, 0, good.stderr)
+                self.assertEqual((good.stdout, good.stderr), ("", ""))
+            export.write_text('{"items": [}', encoding="utf-8")
+            bad = subprocess.run(
+                [sys.executable, str(SCRIPT), "--quiet", str(export)],
+                capture_output=True, text=True, check=False, timeout=10,
+            )
+            self.assertNotEqual(bad.returncode, 0)
+            self.assertEqual(bad.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", bad.stderr)
+
     def test_historical_inventory_is_accepted(self):
         counts = validator.validate(self.original)
         self.assertEqual((counts["existing"], counts["gap"]), (158, 166))

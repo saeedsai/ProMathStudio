@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-QUIET-233 (silent successful validation)
+
+**Execution ledger:** Verified dev 4321602ba47bdd83888707e209385c2d541ed47c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42786596057. Add opt-in `--quiet` for non-chatty CI validation, preserving nonzero errors and diagnostics; add subprocess regression for valid default/JSON-summary combinations and malformed exports. No app JS or standalone index.html change. Frozen 166 gaps / 95 partial unchanged. New exact-head Quality pending.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality structural/Chromium jobs succeed for the new SHA; investigate failures.
+2. **P0 protected release:** eligible review and required checks for PR #189, ordinary merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html and Chromium confirmation/cancel, focus, storage-failure and future-schema tests.
+4. **P1 independent numerical references:** repeated roots, nonlinear fitting and unstable filters with tolerances and invalid-input regressions.
+5. **P1 obsolete branch audit:** prove full main containment, no open PR and unprotected status before deleting anything.
+
 ## 2026-11-10 — AUDIT-LEDGER-JSON-SUMMARY-232 (machine-readable audit output)
 
 **Execution ledger:** Inspected dev a7f36cfc99a0633f27968d1079e35ee964edaedd and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, PR #189 (zero reviews), and successful exact-head PR Quality #42765291438. Add opt-in --json-summary to the historical ledger CLI, retaining human-readable default and refusing malformed exports without emitting misleading JSON. Add subprocess success/failure regression. No application JS/index.html change or release; frozen 166 gaps / 95 partial unchanged. New exact-head CI pending.

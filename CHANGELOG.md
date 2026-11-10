@@ -1,3 +1,6 @@
+## 2026-11-10 — Quiet historical audit validation for CI
+- Add opt-in `--quiet` to suppress successful validator output without hiding invalid-input diagnostics. Add subprocess regression for quiet default/JSON-summary success and malformed failure. Frozen 166 gaps / 95 partial unchanged; no app bundle or Pages release. Exact-head QA pending.
+
 ## 2026-11-10 — Machine-readable validated historical ledger summary
 - Add opt-in `--json-summary` CLI output for automation consumers, retaining existing default text output and failing closed for malformed exports. Add subprocess success/error regression. Frozen 166 gaps / 95 partial unchanged; no application bundle or Pages release. Exact-head CI pending.
 

@@ -117,7 +117,7 @@ def load_ledger(path):
         while pending:
             current = pending.pop()
             if isinstance(current, str):
-                if "\\x00" in current:
+                if "\x00" in current:
                     raise ValueError("NUL character in feature ledger JSON")
                 if any(0xD800 <= ord(char) <= 0xDFFF for char in current):
                     raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")

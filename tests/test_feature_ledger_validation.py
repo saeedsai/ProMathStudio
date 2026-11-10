@@ -137,8 +137,9 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"
             for leaf, diagnostic in (('"ok"', None),
-                                     ('"\\\\u0000"', "NUL character"),
-                                     ('"\\\\ud800"', "Unpaired Unicode surrogate")):
+                                     ('"\\u0000"', "NUL character"),
+                                     ('"\\ud800"', "Unpaired Unicode surrogate"),
+                                     ('{"\\u0000key":"value"}', "NUL character")):
                 with self.subTest(leaf=leaf):
                     payload = "[" * 400 + leaf + "]" * 400
                     path.write_text(payload, encoding="utf-8")

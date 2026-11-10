@@ -1,3 +1,6 @@
+## 2026-11-10 — Restore decoded NUL detection and deep Unicode CI regressions
+- Fix iterative historical JSON Unicode validation to inspect actual U+0000 rather than literal backslash-x-zero; repair deep JSON escape fixtures and test nested NUL keys. Exact-head Quality pending; frozen 166 gaps / 95 partial unchanged. No application bundle or Pages deployment.
+
 ## 2026-11-10 — Iterative Unicode validation for nested historical JSON
 - Replace recursive NUL and surrogate walks with one iterative post-decode traversal; test 400-deep valid and invalid Unicode inputs. No app bundle change. Frozen 166 gaps / 95 partial unchanged; new exact-head CI pending.
 

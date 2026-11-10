@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-UNICODE-CI-228 (exact-head CI recovery)
+
+**Execution ledger:** Inspected dev 0769c2ad6d2e01191878f2d22bf42974a084db79, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical inventory, plan and PR #189 (zero reviews). Exact-head PR Quality #42739624722 failed structural testing: 518 tests, five failures; the new iterative Unicode walk checked literal backslash-x-zero instead of the decoded NUL character, and deep negative test fixtures double-escaped JSON Unicode sequences. Restore the real NUL check and use single JSON escape sequences in deep tests; add deep nested key rejection. This is a source + focused regression repair, no app JavaScript or standalone index.html changes. Full new-head CI pending; no authorized merge/Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality structural and Chromium jobs pass on this exact dev SHA; diagnose logs if not.
+2. **P0 authorized release:** obtain eligible PR #189 approval and green required checks, merge normally, verify main Quality and Pages publication.
+3. **P1 accessible preference reset:** synchronize src/ and standalone index.html, test confirm/cancel, focus, storage failure and schema preservation in Chromium.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting and unstable filters with independent expected values, residuals and invalid inputs.
+5. **P1 obsolete branch audit:** prove merged containment in main, no open PR and no protection before deleting anything.
+
 ## 2026-11-10 — AUDIT-LEDGER-ITERATIVE-UNICODE-227
 
 **Execution ledger:** Inspected dev b61d11a4401ed749aeabdb4063f59292b46ae673 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, repository contracts, frozen inventory, PR #189 (no submitted reviews) and successful exact-head PR Quality #42732534322. Replace two recursive post-parse Unicode walks with a single iterative walk to avoid recursion failures on deeply nested, decoder-accepted JSON; add nested valid, NUL and unpaired-surrogate regression. No application JS/index.html change; new exact-head CI pending, no release/Pages claim. Frozen historical 166 gaps / 95 partial unchanged.

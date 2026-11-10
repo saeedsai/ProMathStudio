@@ -1,3 +1,6 @@
+## 2026-11-10 — Normalize excessive JSON integer digit errors
+- Convert Python 3.11+ integer digit-limit failures to a stable audit ValueError; test 5,000-digit rejection and safe integer acceptance. No application bundle change. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending.
+
 ## 2026-11-10 — Restore decoded NUL detection and deep Unicode CI regressions
 - Fix iterative historical JSON Unicode validation to inspect actual U+0000 rather than literal backslash-x-zero; repair deep JSON escape fixtures and test nested NUL keys. Exact-head Quality pending; frozen 166 gaps / 95 partial unchanged. No application bundle or Pages deployment.
 

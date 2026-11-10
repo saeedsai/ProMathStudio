@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-INTEGER-DIGITS-229 (bounded decoder error)
+
+**Execution ledger:** Verified dev ad88b0665238fb85f0867513262b0986cd4fff77 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root contract, frozen inventory and PR #189 (zero reviews). Exact-head PR Quality #42746545304 succeeded including structural and browser checks. Normalize Python 3.11+ excessive-integer-digit conversion errors into an actionable feature-ledger ValueError; add 5,000-digit rejection and safe-boundary acceptance tests. New exact-head CI pending. No application JS/index.html changes, release or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality structural/Chromium jobs pass on the new dev SHA.
+2. **P0 reviewed release:** eligible approval on PR #189 and required checks; normal merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirmation/cancel, focus, storage failure and future-schema Chromium coverage.
+4. **P1 independent numerical reference tests:** repeated roots, nonlinear fitting, unstable filters with residuals, tolerances and invalid input.
+5. **P1 safe obsolete branch audit:** prove main containment, no open PR and unprotected before any deletion.
+
 ## 2026-11-10 — AUDIT-LEDGER-UNICODE-CI-228 (exact-head CI recovery)
 
 **Execution ledger:** Inspected dev 0769c2ad6d2e01191878f2d22bf42974a084db79, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical inventory, plan and PR #189 (zero reviews). Exact-head PR Quality #42739624722 failed structural testing: 518 tests, five failures; the new iterative Unicode walk checked literal backslash-x-zero instead of the decoded NUL character, and deep negative test fixtures double-escaped JSON Unicode sequences. Restore the real NUL check and use single JSON escape sequences in deep tests; add deep nested key rejection. This is a source + focused regression repair, no app JavaScript or standalone index.html changes. Full new-head CI pending; no authorized merge/Pages deployment. Frozen 166 gaps / 95 partial unchanged.

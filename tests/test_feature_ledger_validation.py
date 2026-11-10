@@ -204,6 +204,15 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                         with self.assertRaisesRegex(ValueError, "Underflowed feature ledger JSON number"):
                             validator.load_ledger(path)
 
+    def test_excessive_integer_digits_report_stable_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text('{"extra":' + '9' * 5000 + '}', encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "integer exceeds decoder digit limit"):
+                validator.load_ledger(path)
+            path.write_text('{"extra":9007199254740991}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path)["extra"], 9007199254740991)
+
     def test_unsafe_json_integers_are_rejected_at_any_depth(self):
         for payload in ('{"extra":9007199254740992}',
                         '{"nested":[-9007199254740992]}',

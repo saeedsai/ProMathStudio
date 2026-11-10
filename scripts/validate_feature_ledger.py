@@ -105,7 +105,12 @@ def load_ledger(path):
     def safe_integer(token):
         # JSON integers beyond IEEE-754's exact integer range lose precision
         # when the audit is consumed by JavaScript or spreadsheet tooling.
-        value = int(token)
+        try:
+            value = int(token)
+        except ValueError as exc:
+            # Python 3.11+ bounds decimal integer conversion; expose a stable
+            # audit diagnostic instead of leaking the interpreter limit error.
+            raise ValueError("Feature ledger JSON integer exceeds decoder digit limit") from exc
         if abs(value) > 9007199254740991:
             raise ValueError(f"Unsafe feature ledger JSON integer: {token}")
         return value

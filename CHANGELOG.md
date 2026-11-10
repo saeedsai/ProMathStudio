@@ -1,3 +1,6 @@
+## 2026-11-10 — Reject whitespace-ambiguous historical feature IDs
+- Require canonical feature IDs without surrounding whitespace; add positive and negative regression cases. Historical 166 gaps / 95 partial unchanged; no application bundle changes. Exact-head QA pending; no merge or Pages deployment.
+
 ## 2026-11-10 — Quiet historical audit validation for CI
 - Add opt-in `--quiet` to suppress successful validator output without hiding invalid-input diagnostics. Add subprocess regression for quiet default/JSON-summary success and malformed failure. Frozen 166 gaps / 95 partial unchanged; no app bundle or Pages release. Exact-head QA pending.
 

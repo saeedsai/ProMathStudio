@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-ID-WHITESPACE-234 (stable feature identifiers)
+
+**Execution ledger:** Verified dev 6ebfca8635789fa58fae5345afc29909103ed7a3, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical audit, PR #189 (zero reviews) and exact-head PR Quality #42820607841 (success). Reject leading/trailing whitespace in historical feature IDs before duplicate detection, preventing ambiguous external references; add negative whitespace and positive canonical-ID regression. No app JS/index.html change; frozen 166 gaps / 95 partial unchanged. New exact-head CI pending.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** verify push and PR structural/Chromium jobs pass on this exact SHA; fix observed failures.
+2. **P0 protected release:** obtain eligible review and all required checks on PR #189, ordinary merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronize src/index.html; browser test confirmation/cancel, focus, storage errors and future-schema preservation.
+4. **P1 independent numerical references:** repeated polynomial roots, nonlinear fits and unstable filters with residuals/tolerances and invalid-input cases.
+5. **P1 safe branch audit:** prove main containment, no open PR and unprotected status before deleting obsolete branches.
+
 ## 2026-11-10 — AUDIT-LEDGER-QUIET-233 (silent successful validation)
 
 **Execution ledger:** Verified dev 4321602ba47bdd83888707e209385c2d541ed47c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42786596057. Add opt-in `--quiet` for non-chatty CI validation, preserving nonzero errors and diagnostics; add subprocess regression for valid default/JSON-summary combinations and malformed exports. No app JS or standalone index.html change. Frozen 166 gaps / 95 partial unchanged. New exact-head Quality pending.

@@ -77,6 +77,18 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(bad.stdout, "")
             self.assertIn("Malformed feature ledger JSON", bad.stderr)
 
+    def test_feature_ids_reject_surrounding_whitespace(self):
+        # A visually identical ID with hidden spaces must not survive export.
+        for malformed in (" " + self.original["items"][0]["id"],
+                          self.original["items"][0]["id"] + " ",
+                          "\\t" + self.original["items"][0]["id"]):
+            with self.subTest(malformed=malformed):
+                changed = copy.deepcopy(self.original)
+                changed["items"][0]["id"] = malformed
+                with self.assertRaisesRegex(ValueError, "surrounding whitespace"):
+                    validator.validate(changed)
+        self.assertEqual(validator.validate(self.original)["gap"], 166)
+
     def test_historical_inventory_is_accepted(self):
         counts = validator.validate(self.original)
         self.assertEqual((counts["existing"], counts["gap"]), (158, 166))

@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-ITERATIVE-UNICODE-227
+
+**Execution ledger:** Inspected dev b61d11a4401ed749aeabdb4063f59292b46ae673 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, repository contracts, frozen inventory, PR #189 (no submitted reviews) and successful exact-head PR Quality #42732534322. Replace two recursive post-parse Unicode walks with a single iterative walk to avoid recursion failures on deeply nested, decoder-accepted JSON; add nested valid, NUL and unpaired-surrogate regression. No application JS/index.html change; new exact-head CI pending, no release/Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green for new SHA, including Python audit and Chromium jobs.
+2. **P0 reviewed release:** eligible PR #189 approval and required checks, ordinary merge, main Quality and Pages verified.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirmation/cancel, focus and storage-failure browser regressions.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with residuals, tolerances and invalid-input tests.
+5. **P1 branch audit:** prove obsolete Claude branch contained in main, unprotected and no open PR before deletion.
+
 ## 2026-11-10 — AUDIT-LEDGER-JSON-DIAGNOSTIC-226 fixture correction
 
 **Execution ledger:** Corrected malformed JSON test regex to match decimal line/column digits instead of literal backslash-d. Preserved strict error assertions and existing source behavior. New exact-head CI pending; frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, reviewed PR promotion, preference reset, numerical reference regressions and safe branch audit, with acceptance tests below.

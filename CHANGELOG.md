@@ -1,3 +1,6 @@
+## 2026-11-10 — Iterative Unicode validation for nested historical JSON
+- Replace recursive NUL and surrogate walks with one iterative post-decode traversal; test 400-deep valid and invalid Unicode inputs. No app bundle change. Frozen 166 gaps / 95 partial unchanged; new exact-head CI pending.
+
 ## 2026-11-10 — Correct malformed JSON regression regex
 - Fix line/column regex escaping in the newly added regression; no validator behavior or application bundle change. Exact-head CI pending.
 

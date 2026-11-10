@@ -110,33 +110,23 @@ def load_ledger(path):
             raise ValueError(f"Unsafe feature ledger JSON integer: {token}")
         return value
 
-    def reject_nul(value):
-        # Escaped U+0000 is legal JSON but can truncate text in C-backed
-        # export pipelines and make audit identifiers ambiguous.
-        if isinstance(value, str):
-            if "\x00" in value:
-                raise ValueError("NUL character in feature ledger JSON")
-        elif isinstance(value, list):
-            for item in value:
-                reject_nul(item)
-        elif isinstance(value, dict):
-            for key, item in value.items():
-                reject_nul(key)
-                reject_nul(item)
-
-    def reject_unpaired_surrogates(value):
-        # JSON escapes may decode to lone UTF-16 surrogate code points, which
-        # cannot be encoded as valid UTF-8 and corrupt downstream audit exports.
-        if isinstance(value, str):
-            if any(0xD800 <= ord(char) <= 0xDFFF for char in value):
-                raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
-        elif isinstance(value, list):
-            for item in value:
-                reject_unpaired_surrogates(item)
-        elif isinstance(value, dict):
-            for key, item in value.items():
-                reject_unpaired_surrogates(key)
-                reject_unpaired_surrogates(item)
+    def reject_invalid_unicode(value):
+        # Walk iteratively: valid JSON can be nested deeply enough to exhaust
+        # Python recursion while checking decoded strings.
+        pending = [value]
+        while pending:
+            current = pending.pop()
+            if isinstance(current, str):
+                if "\\x00" in current:
+                    raise ValueError("NUL character in feature ledger JSON")
+                if any(0xD800 <= ord(char) <= 0xDFFF for char in current):
+                    raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
+            elif isinstance(current, list):
+                pending.extend(current)
+            elif isinstance(current, dict):
+                for key, item in current.items():
+                    pending.append(key)
+                    pending.append(item)
 
     try:
         # UTF-8 BOM is emitted by some spreadsheet exports; accept it only at the start.
@@ -158,8 +148,7 @@ def load_ledger(path):
         raise ValueError(f"Cannot read feature ledger JSON: {exc.strerror or exc}") from exc
     except RecursionError as exc:
         raise ValueError("Feature ledger JSON nesting exceeds decoder limit") from exc
-    reject_unpaired_surrogates(data)
-    reject_nul(data)
+    reject_invalid_unicode(data)
     return data
 
 

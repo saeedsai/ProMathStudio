@@ -132,6 +132,22 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_bytes(bytes.fromhex("efbbbf") + b'{"ok":true}')
             self.assertEqual(validator.load_ledger(path), {"ok": True})
 
+    def test_nested_unicode_validation_is_iterative(self):
+        # Decoder-accepted nesting must not overflow the post-parse validator.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for leaf, diagnostic in (('"ok"', None),
+                                     ('"\\\\u0000"', "NUL character"),
+                                     ('"\\\\ud800"', "Unpaired Unicode surrogate")):
+                with self.subTest(leaf=leaf):
+                    payload = "[" * 400 + leaf + "]" * 400
+                    path.write_text(payload, encoding="utf-8")
+                    if diagnostic:
+                        with self.assertRaisesRegex(ValueError, diagnostic):
+                            validator.load_ledger(path)
+                    else:
+                        self.assertIsInstance(validator.load_ledger(path), list)
+
     def test_duplicate_json_keys_are_rejected_before_validation(self):
         # json.loads normally silently accepts the final duplicate key.
         cases = [

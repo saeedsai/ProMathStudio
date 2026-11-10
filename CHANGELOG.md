@@ -1,3 +1,6 @@
+## 2026-11-10 — Correct malformed JSON regression regex
+- Fix line/column regex escaping in the newly added regression; no validator behavior or application bundle change. Exact-head CI pending.
+
 ## 2026-11-10 — Actionable malformed historical JSON diagnostics
 - Report malformed JSON as ValueError with line/column context; add malformed fixture regressions and preserve BOM handling. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No application bundle or Pages change.
 

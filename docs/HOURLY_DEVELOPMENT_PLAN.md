@@ -1,3 +1,7 @@
+## 2026-11-10 — AUDIT-LEDGER-JSON-DIAGNOSTIC-226 fixture correction
+
+**Execution ledger:** Corrected malformed JSON test regex to match decimal line/column digits instead of literal backslash-d. Preserved strict error assertions and existing source behavior. New exact-head CI pending; frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, reviewed PR promotion, preference reset, numerical reference regressions and safe branch audit, with acceptance tests below.
+
 ## 2026-11-10 — AUDIT-LEDGER-JSON-DIAGNOSTIC-226
 
 **Execution ledger:** Inspected dev 3c99e3f5fc8a173f3caf23739fe0a222419180e6, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory and PR #189 (zero submitted reviews). Exact-head PR Quality #42724661707 succeeded. Normalize malformed JSON parse errors to actionable ValueError with line/column diagnostics; regression covers malformed JSON, misplaced BOM and valid BOM. No app JavaScript/index.html change; new exact-head QA pending, no release or Pages claim. Frozen historical 166 gaps / 95 partial unchanged.

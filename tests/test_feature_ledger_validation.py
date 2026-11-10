@@ -127,7 +127,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             for payload in ('{"items": [1,}', '{\n"ok": true,\n"bad": }'):
                 with self.subTest(payload=payload):
                     path.write_text(payload, encoding="utf-8")
-                    with self.assertRaisesRegex(ValueError, r"Malformed feature ledger JSON at line \\d+, column \\d+"):
+                    with self.assertRaisesRegex(ValueError, r"Malformed feature ledger JSON at line \d+, column \d+"):
                         validator.load_ledger(path)
             path.write_bytes(bytes.fromhex("efbbbf") + b'{"ok":true}')
             self.assertEqual(validator.load_ledger(path), {"ok": True})

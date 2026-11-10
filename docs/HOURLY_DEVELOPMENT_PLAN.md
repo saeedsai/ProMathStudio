@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-CLI-231 (external export validation)
+
+**Execution ledger:** Inspected dev 821522ba5dd510b614f0fd873c87c7cfa6fdf7ef, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, PR #189 (no reviews) and exact-head PR Quality #42759613806 (success). Add optional external JSON export CLI path, preserving canonical default and concise malformed-input diagnostics; subprocess regression. No app JS/index.html change, merge or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push/PR Quality structural and Chromium jobs pass on new dev SHA.
+2. **P0 reviewed release:** eligible PR #189 approval, required checks, ordinary merge, then main Quality and Pages verified.
+3. **P1 accessible preference reset:** synchronized source/index.html, confirm/cancel, focus, storage failure and future-schema Chromium tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with reference residuals, tolerances and invalid inputs.
+5. **P1 safe branch cleanup:** verify main containment, no open PR and unprotected status before deletion.
+
 ## 2026-11-10 — AUDIT-LEDGER-NEGATIVE-ZERO-230 (integer representation integrity)
 
 **Execution ledger:** Inspected dev e9f9d707bc3c49cac10a14b5e0b764f06e7c6c33, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root contract, frozen audit, PR #189 (no reviews), and exact-head PR Quality #42752743626 (success). Reject integer JSON -0 before Python silently normalizes it to 0; add nested negative-zero and ordinary integer/floating negative-zero acceptance regression. No application JS or standalone index.html changes. New exact-head CI pending; no release or Pages claim. Frozen 166 gaps / 95 partial unchanged.

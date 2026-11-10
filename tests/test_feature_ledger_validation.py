@@ -22,6 +22,21 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
     def setUpClass(cls):
         cls.original = json.loads(LEDGER.read_text(encoding="utf-8"))
 
+    def test_cli_supports_explicit_export_and_actionable_invalid_input(self):
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(self.original), encoding="utf-8")
+            good = subprocess.run([sys.executable, str(SCRIPT), str(export)],
+                                  capture_output=True, text=True, check=False)
+            self.assertEqual(good.returncode, 0, good.stderr)
+            self.assertIn("158 existing, 166 gaps", good.stdout)
+            export.write_text('{"items": [}', encoding="utf-8")
+            bad = subprocess.run([sys.executable, str(SCRIPT), str(export)],
+                                 capture_output=True, text=True, check=False)
+            self.assertNotEqual(bad.returncode, 0)
+            self.assertIn("Malformed feature ledger JSON at line", bad.stderr)
+            self.assertNotIn("Traceback", bad.stderr)
+
     def test_historical_inventory_is_accepted(self):
         counts = validator.validate(self.original)
         self.assertEqual((counts["existing"], counts["gap"]), (158, 166))

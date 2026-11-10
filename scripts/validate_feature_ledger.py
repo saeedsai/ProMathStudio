@@ -161,9 +161,17 @@ def load_ledger(path):
     return data
 
 
-def main():
-    data = load_ledger(LEDGER)
-    counts = validate(data)
+def main(argv=None):
+    # Validate external exports without modifying the canonical audit.
+    import argparse
+    parser = argparse.ArgumentParser(description="Validate a historical feature-ledger JSON export")
+    parser.add_argument("path", nargs="?", type=Path, default=LEDGER,
+                        help="JSON export to validate (default: frozen audit ledger)")
+    args = parser.parse_args(argv)
+    try:
+        counts = validate(load_ledger(args.path))
+    except ValueError as exc:
+        parser.error(str(exc))
     print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
 
 

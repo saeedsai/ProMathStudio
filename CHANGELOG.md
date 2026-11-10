@@ -1,3 +1,6 @@
+## 2026-11-10 — Validate external historical audit exports from CLI
+- Accept optional ledger JSON path while retaining canonical default; report malformed exports without tracebacks. Add subprocess acceptance/rejection regression. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No application bundle or Pages release.
+
 ## 2026-11-10 — Reject ambiguous negative-zero JSON integers in frozen audit
 - Reject JSON integer -0 before Python silently converts it to zero; add nested negative cases and valid zero/negative-one/negative-zero-float controls. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No runtime bundle or Pages deployment.
 

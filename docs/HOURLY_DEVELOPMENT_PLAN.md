@@ -1,3 +1,14 @@
+## 2026-11-10 — AUDIT-LEDGER-JSON-DIAGNOSTIC-226
+
+**Execution ledger:** Inspected dev 3c99e3f5fc8a173f3caf23739fe0a222419180e6, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory and PR #189 (zero submitted reviews). Exact-head PR Quality #42724661707 succeeded. Normalize malformed JSON parse errors to actionable ValueError with line/column diagnostics; regression covers malformed JSON, misplaced BOM and valid BOM. No app JavaScript/index.html change; new exact-head QA pending, no release or Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality pass structural and Chromium tests on new dev SHA.
+2. **P0 authorized promotion:** obtain eligible PR #189 review and required checks; ordinary merge, then main Quality and Pages verified.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirm/cancel, keyboard/focus and storage failure browser tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting, unstable filters with residual/tolerance and invalid-input checks.
+5. **P1 branch audit:** verify Claude branch fully contained in main, unprotected and no open PR before deletion.
+
 ## 2026-11-10 — AUDIT-LEDGER-SIZE-LIMIT-225
 
 **Execution ledger:** Inspected dev 10c294a93371db93b326f82b9d9225b16b325235, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, plan and PR #189 (no reviews). Exact-head PR Quality #42716245354 succeeded with static/browser job. Bound audit JSON imports to 8 MiB before decoding to prevent unbounded memory use, preserving UTF-8 BOM and strict validation; added oversized and valid-small regression. Full new-head CI pending; no application JS/index.html change, main merge or Pages verification. Frozen historical 166 gaps / 95 partial unchanged.

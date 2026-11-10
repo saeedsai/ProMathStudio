@@ -1,3 +1,6 @@
+## 2026-11-10 — Actionable malformed historical JSON diagnostics
+- Report malformed JSON as ValueError with line/column context; add malformed fixture regressions and preserve BOM handling. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No application bundle or Pages change.
+
 ## 2026-11-10 — Bound historical audit JSON input size
 - Limit untrusted ledger JSON input to 8 MiB before UTF-8 decoding, with oversized-file rejection and valid-small regression. Frozen 166 gaps / 95 partial unchanged; new exact-head CI pending. No application bundle or Pages release.
 

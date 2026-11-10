@@ -116,8 +116,21 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                             b" " + bytes.fromhex("efbbbf") + b"{}"):
                 with self.subTest(misplaced_bom=payload):
                     path.write_bytes(payload)
-                    with self.assertRaises(json.JSONDecodeError):
+                    with self.assertRaisesRegex(ValueError, "Malformed feature ledger JSON at line"):
                         validator.load_ledger(path)
+
+    def test_malformed_json_reports_line_and_column(self):
+        # Parse diagnostics should identify the location without exposing raw
+        # JSONDecodeError to callers; BOM and valid input still work.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for payload in ('{"items": [1,}', '{\n"ok": true,\n"bad": }'):
+                with self.subTest(payload=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, r"Malformed feature ledger JSON at line \\d+, column \\d+"):
+                        validator.load_ledger(path)
+            path.write_bytes(bytes.fromhex("efbbbf") + b'{"ok":true}')
+            self.assertEqual(validator.load_ledger(path), {"ok": True})
 
     def test_duplicate_json_keys_are_rejected_before_validation(self):
         # json.loads normally silently accepts the final duplicate key.

@@ -1,3 +1,6 @@
+## 2026-11-11 — Repair interior-whitespace regression fixtures and diagnostics
+- Use real tab/LF/CR/NBSP fixture characters and correctly escaped regex; validate whitespace before other invisible characters to preserve a stable diagnostic. Keep canonical acceptance and non-whitespace invisible rejection. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending, no Pages release.
+
 ## 2026-11-11 — Reject interior whitespace in historical audit feature IDs
 - Reject embedded whitespace that can make external feature-ID references ambiguous, with space/tab/newline/CR/NBSP regressions and frozen ledger acceptance. No app bundle changes; 166 gaps / 95 partial unchanged. Exact-head Quality pending; no release or Pages claim.
 

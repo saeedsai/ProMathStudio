@@ -1,3 +1,14 @@
+## 2026-11-11 — AUDIT-LEDGER-WHITESPACE-CI-238 (repair exact-head structural CI)
+
+**Execution ledger:** Inspected dev 8da29700326060803c3081305905b6e6d753a7e7, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, failed exact-head Quality #42942622071 and PR #189 without reviews. Correct interior-whitespace fixtures to real Unicode whitespace, repair error regex, and check whitespace before other nonprintable characters for consistent diagnostics; preserve rejection of other invisible controls. No app JS/standalone HTML changes. Local full-suite unavailable; new exact-head Quality pending. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** structural tests and Chromium regression pass on the new dev SHA; investigate any failure.
+2. **P0 reviewed release:** eligible PR #189 approval and required checks; ordinary merge; verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html and Chromium confirm/cancel, focus, storage and future-schema tests.
+4. **P1 numerical reference cases:** repeated roots, nonlinear fitting and unstable filters with tolerances and invalid-input tests.
+5. **P1 branch audit:** verify main containment, no open PR and no protection before any deletion.
+
 ## 2026-11-11 — AUDIT-LEDGER-INTERIOR-WHITESPACE-237 (stable canonical references)
 
 **Execution ledger:** Verified dev cfcc5318fd05dcffecf1957b11d1b1544f106fa4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 with zero reviews, and successful exact-head PR Quality #42935739993. Reject whitespace embedded within audit IDs (space, tab, LF, CR, NBSP), not just leading/trailing whitespace; add focused regression and canonical positive control. No application JS or standalone HTML change. New exact-head structural/Chromium CI pending; no merge or Pages claim. Frozen 166 gaps / 95 partial unchanged.

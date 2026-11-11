@@ -105,12 +105,14 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
 
     def test_feature_ids_reject_interior_whitespace(self):
         original_id = self.original["items"][0]["id"]
-        for separator in (" ", "\\t", "\\n", "\\r", "\\u00a0"):
+        # Real Unicode whitespace characters, not literal backslash escapes.
+        for separator in (" ", "\t", "\n", "\r", "\u00a0"):
             with self.subTest(separator=repr(separator)):
                 changed = copy.deepcopy(self.original)
                 changed["items"][0]["id"] = original_id[:5] + separator + original_id[5:]
-                with self.assertRaisesRegex(ValueError, r"interior whitespace \\(item 0\\)"):
+                with self.assertRaisesRegex(ValueError, r"interior whitespace \(item 0\)"):
                     validator.validate(changed)
+        # The validator still accepts canonical IDs after each negative case.
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 
     def test_historical_inventory_is_accepted(self):

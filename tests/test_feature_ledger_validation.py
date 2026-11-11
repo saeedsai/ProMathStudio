@@ -92,6 +92,17 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 
+    def test_feature_ids_reject_interior_invisible_characters(self):
+        # strip() does not remove embedded format characters or controls.
+        original_id = self.original["items"][0]["id"]
+        for hidden in ("\\u200b", "\\u202e", "\\x1f", "\\u2060"):
+            with self.subTest(hidden=repr(hidden)):
+                changed = copy.deepcopy(self.original)
+                changed["items"][0]["id"] = original_id[:2] + hidden + original_id[2:]
+                with self.assertRaisesRegex(ValueError, r"invisible characters \\(item 0\\)"):
+                    validator.validate(changed)
+        self.assertEqual(validator.validate(self.original)["existing"], 158)
+
     def test_historical_inventory_is_accepted(self):
         counts = validator.validate(self.original)
         self.assertEqual((counts["existing"], counts["gap"]), (158, 166))

@@ -1,3 +1,6 @@
+## 2026-11-11 — Reject invisible interior feature-ID characters
+- Reject zero-width, bidirectional format, control and word-joiner characters in historical audit IDs; focused regression plus valid canonical control. Frozen 166 gaps / 95 partial unchanged; no application bundle change. Exact-head Quality pending; no merge or Pages claim.
+
 ## 2026-11-10 — Repair whitespace-ID CI fixture and improve diagnostics
 - Replace literal backslash-t fixture with real tab, add trailing tab/newline negative cases, and include offending item index in validator error. Frozen 166 gaps / 95 partial unchanged. Exact-head CI pending; no app bundle, main release or Pages claim.
 

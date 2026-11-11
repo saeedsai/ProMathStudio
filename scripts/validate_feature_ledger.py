@@ -41,6 +41,11 @@ def validate(data):
     for index, item in enumerate(items):
         require(bool(item["id"]) and item["id"] == item["id"].strip(),
                 f"Feature IDs must not have surrounding whitespace (item {index})")
+    # Invisible format/control characters can survive strip() inside IDs and
+    # make visually identical audit references resolve to different features.
+    for index, item in enumerate(items):
+        require(item["id"].isprintable(),
+                f"Feature IDs must not contain invisible characters (item {index})")
     ids = [item["id"] for item in items]
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
     counts = Counter(item["kind"] for item in items)

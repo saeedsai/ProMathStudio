@@ -1,3 +1,14 @@
+## 2026-11-11 — AUDIT-LEDGER-INVISIBLE-ID-236 (canonical reference integrity)
+
+**Execution ledger:** Verified dev 395982cd1d317c2ef1a12237b902f4238678b965, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical audit, PR #189 (zero reviews), and successful exact-head PR Quality #42891668782. Reject interior Unicode format/control characters in feature IDs, which surrounding-whitespace checks miss; add zero-width, bidirectional-format, control and word-joiner regressions plus valid canonical acceptance. No application JavaScript or standalone HTML change. New exact-head structural/Chromium CI pending; no merge/Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify new dev SHA has green structural and Chromium Quality; diagnose and fix any observed failures.
+2. **P0 protected release:** eligible review plus required exact-head PR #189 checks; ordinary dev-to-main merge, verify main Quality and Pages publication.
+3. **P1 accessible preference reset:** synchronize src/ and standalone index.html; Chromium confirm/cancel, keyboard focus, storage failure and future-schema preservation.
+4. **P1 numerical reference tests:** repeated roots, nonlinear fitting and unstable digital filters, with residual/tolerance and invalid-input cases.
+5. **P1 branch audit:** verify full main containment, no open PR and unprotected status before deleting obsolete branches.
+
 ## 2026-11-10 — AUDIT-LEDGER-WHITESPACE-CI-235 (repair exact-head CI)
 
 **Execution ledger:** Inspected dev 0902335b699a99d3cc81f8f6c102e432d450efda, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 (zero reviews) and failed exact-head Quality #42840129606 (structural failure, browser skipped). Fix the literal-backslash-t test fixture to real tab and add trailing-tab/newline boundary cases; identify invalid item index in validator diagnostics. Isolated local boundary checks only; full exact-head GitHub structural/Chromium CI pending. No application JS/index.html changes, release or Pages claim. Frozen 166 gaps / 95 partial unchanged.

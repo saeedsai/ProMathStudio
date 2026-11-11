@@ -1,3 +1,14 @@
+## 2026-11-11 — AUDIT-LEDGER-ASCII-SEPARATORS-CI-239 (exact-head structural regression repair)
+
+**Execution ledger:** Verified dev beadda4066664915aeaa99fd1b984a35c1b1ff3c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 without reviews, and failed exact-head push/PR Quality #42956025190/#42956029484. Root cause: Python str.isspace() treats U+001F as whitespace, so the existing invisible-control regression expected the wrong diagnostic. Keep rejection intact; explicitly classify U+001C–U+001F as invisible controls and add all four regression fixtures. Full CI structural/Chromium on this new commit pending; no merge/Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify structural and Chromium Quality on new dev SHA; fix observed failures without weakening tests.
+2. **P0 reviewed release:** eligible approval and required PR #189 checks; ordinary merge; verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html; Chromium confirm/cancel, focus, storage and future-schema cases.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with residual/tolerance and invalid-input tests.
+5. **P1 safe branch audit:** verify main containment, no open PR and unprotected state before deletion.
+
 ## 2026-11-11 — AUDIT-LEDGER-WHITESPACE-CI-238 (repair exact-head structural CI)
 
 **Execution ledger:** Inspected dev 8da29700326060803c3081305905b6e6d753a7e7, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, failed exact-head Quality #42942622071 and PR #189 without reviews. Correct interior-whitespace fixtures to real Unicode whitespace, repair error regex, and check whitespace before other nonprintable characters for consistent diagnostics; preserve rejection of other invisible controls. No app JS/standalone HTML changes. Local full-suite unavailable; new exact-head Quality pending. Historical 166 gaps / 95 partial unchanged.

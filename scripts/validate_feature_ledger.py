@@ -41,10 +41,10 @@ def validate(data):
     for index, item in enumerate(items):
         require(bool(item["id"]) and item["id"] == item["id"].strip(),
                 f"Feature IDs must not have surrounding whitespace (item {index})")
-    # Check whitespace first so tabs/newlines have a consistent diagnostic;
+    # Check whitespace first so tabs/newlines have a consistent diagnostic;\n    # ASCII information separators (U+001C..U+001F) are control characters\n    # despite Python isspace() classifying them as whitespace.
     # non-whitespace format/control characters remain separately rejected.
     for index, item in enumerate(items):
-        require(not any(char.isspace() for char in item["id"]),
+        require(not any(char.isspace() and char not in "\x1c\x1d\x1e\x1f" for char in item["id"]),
                 f"Feature IDs must not contain interior whitespace (item {index})")
     for index, item in enumerate(items):
         require(item["id"].isprintable(),

@@ -1,3 +1,14 @@
+## 2026-11-11 — AUDIT-LEDGER-SIGNED-ZERO-241 (preserve numeric export semantics)
+
+**Execution ledger:** Verified dev c076588e9758c87841bddc68e25d7cc77cb527d6, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen audit and exact-head PR Quality #43007611518 successful; PR #189 open without submitted reviews. Reject negative-zero JSON floating literals consistently with existing integer -0 rejection; cover exponent, decimal, nested, positive-zero and negative-nonzero controls. Update validator, regression, plan and changelog atomically; new exact-head CI pending. Historical 166 gaps / 95 partial unchanged; no main release or Pages verification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** structural and Chromium Quality pass on new dev SHA; fix any observed failure.
+2. **P0 reviewed release:** eligible PR #189 review and required checks, ordinary merge, main Quality and Pages verified.
+3. **P1 accessible preference reset:** synchronized src/index.html; Chromium confirm/cancel, focus, storage/future-schema cases.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with tolerances and invalid-input cases.
+5. **P1 branch hygiene:** prove main containment, no open PR and no protection before any deletion.
+
 ## 2026-11-11 — AUDIT-LEDGER-CONTROL-COMMENT-240 (invisible-ID control coverage)
 
 **Execution ledger:** Verified dev ec771256d9d92d40702248f6f8bb39c424c85d3b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory and green exact-head Quality #42963004544; PR #189 open without reviews. Repair literal backslash-n sequences in validator comments and extend invisible-control regressions to DEL U+007F and zero-width joiner U+200D without weakening rejection. Source, test, plan and changelog updated atomically; new exact-head Quality pending. Frozen historical inventory remains 166 gaps / 95 partial; no main release or Pages verification.

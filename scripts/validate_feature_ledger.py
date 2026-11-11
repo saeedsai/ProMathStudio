@@ -92,6 +92,10 @@ def load_ledger(path):
 
     def finite_float(token):
         value = float(token)
+        # Preserve signed zero: binary64 distinguishes -0.0 from +0.0,
+        # but normalized exports and comparisons often discard that sign.
+        if value == 0.0 and token.lstrip().startswith("-") and Decimal(token).is_zero():
+            raise ValueError(f"Negative-zero feature ledger JSON float is ambiguous: {token}")
         if not math.isfinite(value):
             raise ValueError(f"Non-finite feature ledger JSON number: {token}")
         # JSON decimal/exponent notation can bypass parse_int and silently

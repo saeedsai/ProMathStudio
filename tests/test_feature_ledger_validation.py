@@ -282,13 +282,13 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         for payload in ('{"extra":1e-999}', '{"nested":[-1e-999]}',
                         '{"extra":1e-324}', '{"nested":[-1e-324]}',
                         '{"counts":{"gaps":0.000e-999}}', '{"extra":0e-999}',
-                        '{"extra":-0e-999}', '{"extra":0.000000e-999}'):
+                        '{"extra":0.000000e-999}'):
             with self.subTest(payload=payload):
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / "ledger.json"
                     path.write_text(payload, encoding="utf-8")
                     if payload in ('{"counts":{"gaps":0.000e-999}}',
-                                   '{"extra":0e-999}', '{"extra":-0e-999}',
+                                   '{"extra":0e-999}',
                                    '{"extra":0.000000e-999}'):
                         decoded = validator.load_ledger(path)
                         value = decoded["counts"]["gaps"] if "counts" in decoded else decoded["extra"]
@@ -305,10 +305,23 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     path.write_text(payload, encoding="utf-8")
                     with self.assertRaisesRegex(ValueError, "Negative-zero"):
                         validator.load_ledger(path)
-            for payload in ('{"value":0}', '{"value":-1}', '{"value":-0.0}'):
+            for payload in ('{"value":0}', '{"value":-1}'):
                 with self.subTest(valid=payload):
                     path.write_text(payload, encoding="utf-8")
                     self.assertIn("value", validator.load_ledger(path))
+
+    def test_negative_zero_floats_are_not_silently_normalized(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for token in ("-0.0", "-0e3", "-0.000e-999", "-0E+4"):
+                with self.subTest(token=token):
+                    path.write_text('{"nested":[' + token + ']}', encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Negative-zero feature ledger JSON float"):
+                        validator.load_ledger(path)
+            for token in ("0.0", "0e3", "0.000e-999", "-1.0"):
+                with self.subTest(valid=token):
+                    path.write_text('{"value":' + token + '}', encoding="utf-8")
+                    self.assertEqual(validator.load_ledger(path)["value"], float(token))
 
     def test_excessive_integer_digits_report_stable_error(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -370,7 +383,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"
             path.write_text('{"a":0.1,"b":1e-1,"c":1.2345678901234567,'
-                            '"subnormal":5e-324,"zero":-0.000e-999}', encoding="utf-8")
+                            '"subnormal":5e-324,"zero":0.000e-999}', encoding="utf-8")
             decoded = validator.load_ledger(path)
             self.assertEqual(decoded["a"], decoded["b"])
             self.assertEqual(decoded["c"], 1.2345678901234567)

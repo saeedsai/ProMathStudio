@@ -125,7 +125,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["existing"], 158)
 
-    def test_historical_inventory_is_accepted(self):
+    def test_scope_and_section_reject_invisible_export_labels(self):\n        for field in ("scope", "section"):\n            for hidden in ("\\u200b", "\\u202e", "\\x00", "\\n", "\\x7f"):\n                with self.subTest(field=field, hidden=repr(hidden)):\n                    changed = copy.deepcopy(self.original)\n                    changed["items"][0][field] += hidden\n                    with self.assertRaisesRegex(ValueError,\n                            rf"Feature {field} must not contain invisible characters \\(item 0\\)"):\n                        validator.validate(changed)\n        self.assertEqual(validator.validate(self.original)["gap"], 166)\n\n    def test_historical_inventory_is_accepted(self):
         counts = validator.validate(self.original)
         self.assertEqual((counts["existing"], counts["gap"]), (158, 166))
 

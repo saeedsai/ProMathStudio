@@ -58,7 +58,7 @@ def validate(data):
         if isinstance(title, str):
             require(title.isprintable(),
                     f"Feature titles must not contain invisible characters (item {index})")
-    ids = [item["id"] for item in items]
+    # Scope and section are exported audit labels too; hidden format and\n    # control characters can misrepresent their meaning downstream.\n    for index, item in enumerate(items):\n        for field in ("scope", "section"):\n            value = item.get(field)\n            if isinstance(value, str):\n                require(value.isprintable(),\n                        f"Feature {field} must not contain invisible characters (item {index})")\n    ids = [item["id"] for item in items]
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
     counts = Counter(item["kind"] for item in items)
     require(counts == {"existing": 158, "gap": 166}, f"Unexpected feature kinds/counts: {counts}")

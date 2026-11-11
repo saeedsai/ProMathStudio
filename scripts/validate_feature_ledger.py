@@ -51,6 +51,13 @@ def validate(data):
     for index, item in enumerate(items):
         require(item["id"].isprintable(),
                 f"Feature IDs must not contain invisible characters (item {index})")
+    # Titles appear in the UI and exports: reject hidden controls rather than
+    # allowing visually identical labels with different machine values.
+    for index, item in enumerate(items):
+        title = item.get("title")
+        if isinstance(title, str):
+            require(title.isprintable(),
+                    f"Feature titles must not contain invisible characters (item {index})")
     ids = [item["id"] for item in items]
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
     counts = Counter(item["kind"] for item in items)

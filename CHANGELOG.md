@@ -1,3 +1,4 @@
+- 2026-11-11: Reject invisible/control characters in historical audit feature titles, with direct regression and canonical acceptance. Frozen 166 gaps / 95 partial unchanged; exact-head Quality pending, no release claim.
 - 2026-11-11: Reject negative-zero floating JSON tokens in frozen ledger exports (including exponent notation), with nested negative cases and positive-zero controls; maintain 166 gaps / 95 partial. Exact-head QA pending; no release claim.
 - 2026-11-11: Restore readable validator comments and extend invisible-ID regressions to DEL U+007F and zero-width joiner U+200D. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending, no release claim.
 - 2026-11-11: Repair feature-ledger CI classification for ASCII information separators U+001C–U+001F; preserve invisible-control rejection and add regression coverage. Exact-head QA pending.

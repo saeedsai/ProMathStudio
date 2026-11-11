@@ -1,3 +1,14 @@
+## 2026-11-11 — AUDIT-LEDGER-TITLE-CONTROLS-242 (export label integrity)
+
+**Execution ledger:** Inspected AGENTS.md, frozen inventory, dev 0e1f805a6d2aae6f65591e016b85743c6a175739, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, successful exact-head Quality #43016838165, and PR #189 (no reviews). Reject invisible/control characters in user-visible historical feature titles, preserving Unicode printable titles and the frozen 166-gap / 95-partial inventory. Added direct negative controls and canonical positive regression. Atomic validator/test/plan/changelog commit; new exact-head Quality pending. No main release or Pages verification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify structural, historical-ledger and Chromium Quality on the new dev SHA; fix observed failures.
+2. **P0 reviewed release:** obtain eligible PR #189 review, verify required checks, merge ordinarily and verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronize src and standalone index.html; Chromium confirm/cancel, focus and storage-compatibility tests.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting and unstable filters with tolerances, residuals and failure paths.
+5. **P1 safe branch hygiene:** prove main containment, absence of open PR and lack of protection before any deletion.
+
 ## 2026-11-11 — AUDIT-LEDGER-SIGNED-ZERO-241 (preserve numeric export semantics)
 
 **Execution ledger:** Verified dev c076588e9758c87841bddc68e25d7cc77cb527d6, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen audit and exact-head PR Quality #43007611518 successful; PR #189 open without submitted reviews. Reject negative-zero JSON floating literals consistently with existing integer -0 rejection; cover exponent, decimal, nested, positive-zero and negative-nonzero controls. Update validator, regression, plan and changelog atomically; new exact-head CI pending. Historical 166 gaps / 95 partial unchanged; no main release or Pages verification.

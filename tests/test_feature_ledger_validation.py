@@ -127,8 +127,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
 
     def test_scope_and_section_reject_invisible_export_labels(self):
         for field in ("scope", "section"):
-            for hidden in ("\u200b", "\u202e", "\x00", "\
-", "\x7f"):
+            for hidden in ("\u200b", "\u202e", "\x00", "\n", "\x7f"):
                 with self.subTest(field=field, hidden=repr(hidden)):
                     changed = copy.deepcopy(self.original)
                     changed["items"][0][field] += hidden

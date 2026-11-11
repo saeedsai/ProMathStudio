@@ -1,3 +1,5 @@
+**Fixture correction:** Restored the newline negative case as the Python escape `"\\n"` instead of an actual physical line break inside a quoted literal; the regression now remains parseable. Exact-head CI still pending.
+
 ## 2026-11-11 — AUDIT-LEDGER-CI-REPAIR-246 (restore executable validator and test fixtures)
 
 **Execution ledger:** Inspected dev 7a496510080293da5ffaa7f9e397466a01a09381, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, failed exact-head Quality #43082907780/#43082898538 and PR #189 (zero reviews). Repair accidental literal backslash-n source segments that commented out the `ids` assignment and collapsed the scope/section regression method. Preserve actual Unicode escape fixtures and regex matching. Atomic source/test/plan/changelog change; new exact-head Quality must pass before any release. Historical 166 gaps / 95 partial unchanged.

@@ -1,3 +1,14 @@
+## 2026-11-11 — AUDIT-LEDGER-CONTROL-COMMENT-240 (invisible-ID control coverage)
+
+**Execution ledger:** Verified dev ec771256d9d92d40702248f6f8bb39c424c85d3b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory and green exact-head Quality #42963004544; PR #189 open without reviews. Repair literal backslash-n sequences in validator comments and extend invisible-control regressions to DEL U+007F and zero-width joiner U+200D without weakening rejection. Source, test, plan and changelog updated atomically; new exact-head Quality pending. Frozen historical inventory remains 166 gaps / 95 partial; no main release or Pages verification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify structural and Chromium Quality for the new dev SHA; repair observed failures.
+2. **P0 reviewed release:** obtain eligible approval for PR #189 and required checks, ordinary merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronize src and index.html, browser tests for confirm/cancel, focus and storage compatibility.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fits and unstable filters with reference tolerances and invalid-input tests.
+5. **P1 branch hygiene:** audit main containment, open PRs and protections before any deletion.
+
 ## 2026-11-11 — AUDIT-LEDGER-ASCII-SEPARATORS-CI-239 (exact-head structural regression repair)
 
 **Execution ledger:** Verified dev beadda4066664915aeaa99fd1b984a35c1b1ff3c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 without reviews, and failed exact-head push/PR Quality #42956025190/#42956029484. Root cause: Python str.isspace() treats U+001F as whitespace, so the existing invisible-control regression expected the wrong diagnostic. Keep rejection intact; explicitly classify U+001C–U+001F as invisible controls and add all four regression fixtures. Full CI structural/Chromium on this new commit pending; no merge/Pages claim. Frozen 166 gaps / 95 partial unchanged.

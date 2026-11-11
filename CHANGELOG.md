@@ -1,3 +1,4 @@
+- 2026-11-11: Restore readable validator comments and extend invisible-ID regressions to DEL U+007F and zero-width joiner U+200D. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending, no release claim.
 - 2026-11-11: Repair feature-ledger CI classification for ASCII information separators U+001C–U+001F; preserve invisible-control rejection and add regression coverage. Exact-head QA pending.
 ## 2026-11-11 — Repair interior-whitespace regression fixtures and diagnostics
 - Use real tab/LF/CR/NBSP fixture characters and correctly escaped regex; validate whitespace before other invisible characters to preserve a stable diagnostic. Keep canonical acceptance and non-whitespace invisible rejection. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending, no Pages release.

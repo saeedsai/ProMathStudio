@@ -1,3 +1,5 @@
+**Fixture correction:** Before full CI, repaired test-source escaped control fixtures to actual Python Unicode escape literals and the regex to match literal parentheses. No production behavior change; exact-head QA pending.
+
 ## 2026-11-11 — AUDIT-LEDGER-TITLE-CONTROLS-242 (export label integrity)
 
 **Execution ledger:** Inspected AGENTS.md, frozen inventory, dev 0e1f805a6d2aae6f65591e016b85743c6a175739, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, successful exact-head Quality #43016838165, and PR #189 (no reviews). Reject invisible/control characters in user-visible historical feature titles, preserving Unicode printable titles and the frozen 166-gap / 95-partial inventory. Added direct negative controls and canonical positive regression. Atomic validator/test/plan/changelog commit; new exact-head Quality pending. No main release or Pages verification.

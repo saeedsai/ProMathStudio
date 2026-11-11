@@ -117,11 +117,11 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
 
     def test_feature_titles_reject_invisible_controls(self):
         original_title = self.original["items"][0]["title"]
-        for hidden in ("\\u200b", "\\u202e", "\\x00", "\\n", "\\x7f"):
+        for hidden in ("\u200b", "\u202e", "\x00", "\n", "\x7f"):
             with self.subTest(hidden=repr(hidden)):
                 changed = copy.deepcopy(self.original)
                 changed["items"][0]["title"] = original_title + hidden
-                with self.assertRaisesRegex(ValueError, r"Feature titles must not contain invisible characters \\(item 0\\)"):
+                with self.assertRaisesRegex(ValueError, r"Feature titles must not contain invisible characters \(item 0\)"):
                     validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["existing"], 158)
 

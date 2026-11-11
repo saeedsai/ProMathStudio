@@ -46,6 +46,9 @@ def validate(data):
     for index, item in enumerate(items):
         require(item["id"].isprintable(),
                 f"Feature IDs must not contain invisible characters (item {index})")
+    for index, item in enumerate(items):
+        require(not any(char.isspace() for char in item["id"]),
+                f"Feature IDs must not contain interior whitespace (item {index})")
     ids = [item["id"] for item in items]
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
     counts = Counter(item["kind"] for item in items)

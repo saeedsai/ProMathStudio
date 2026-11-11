@@ -1,3 +1,6 @@
+## 2026-11-11 — Reject interior whitespace in historical audit feature IDs
+- Reject embedded whitespace that can make external feature-ID references ambiguous, with space/tab/newline/CR/NBSP regressions and frozen ledger acceptance. No app bundle changes; 166 gaps / 95 partial unchanged. Exact-head Quality pending; no release or Pages claim.
+
 ## 2026-11-11 — Reject invisible interior feature-ID characters
 - Reject zero-width, bidirectional format, control and word-joiner characters in historical audit IDs; focused regression plus valid canonical control. Frozen 166 gaps / 95 partial unchanged; no application bundle change. Exact-head Quality pending; no merge or Pages claim.
 

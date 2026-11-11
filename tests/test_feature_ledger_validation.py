@@ -103,6 +103,16 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["existing"], 158)
 
+    def test_feature_ids_reject_interior_whitespace(self):
+        original_id = self.original["items"][0]["id"]
+        for separator in (" ", "\\t", "\\n", "\\r", "\\u00a0"):
+            with self.subTest(separator=repr(separator)):
+                changed = copy.deepcopy(self.original)
+                changed["items"][0]["id"] = original_id[:5] + separator + original_id[5:]
+                with self.assertRaisesRegex(ValueError, r"interior whitespace \\(item 0\\)"):
+                    validator.validate(changed)
+        self.assertEqual(validator.validate(self.original)["gap"], 166)
+
     def test_historical_inventory_is_accepted(self):
         counts = validator.validate(self.original)
         self.assertEqual((counts["existing"], counts["gap"]), (158, 166))

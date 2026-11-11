@@ -1,3 +1,14 @@
+## 2026-11-11 — AUDIT-LEDGER-INTERIOR-WHITESPACE-237 (stable canonical references)
+
+**Execution ledger:** Verified dev cfcc5318fd05dcffecf1957b11d1b1544f106fa4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 with zero reviews, and successful exact-head PR Quality #42935739993. Reject whitespace embedded within audit IDs (space, tab, LF, CR, NBSP), not just leading/trailing whitespace; add focused regression and canonical positive control. No application JS or standalone HTML change. New exact-head structural/Chromium CI pending; no merge or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new dev SHA must pass structural and Chromium Quality; diagnose observed failures.
+2. **P0 reviewed release:** obtain eligible review and all required checks on PR #189, merge ordinarily, verify main Quality and published Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html; Chromium confirm/cancel, focus, storage errors and schema-preservation tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable digital filters with residual/tolerance and invalid-input tests.
+5. **P1 branch audit:** prove main containment, no open PR and unprotected state before any deletion.
+
 ## 2026-11-11 — AUDIT-LEDGER-INVISIBLE-ID-236 (canonical reference integrity)
 
 **Execution ledger:** Verified dev 395982cd1d317c2ef1a12237b902f4238678b965, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical audit, PR #189 (zero reviews), and successful exact-head PR Quality #42891668782. Reject interior Unicode format/control characters in feature IDs, which surrounding-whitespace checks miss; add zero-width, bidirectional-format, control and word-joiner regressions plus valid canonical acceptance. No application JavaScript or standalone HTML change. New exact-head structural/Chromium CI pending; no merge/Pages claim. Frozen 166 gaps / 95 partial unchanged.

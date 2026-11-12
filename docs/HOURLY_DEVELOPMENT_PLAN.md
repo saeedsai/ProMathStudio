@@ -1,3 +1,14 @@
+## 2026-11-12 — AUDIT-EXPORT-TITLE-DIAGNOSTIC-CI-251
+
+**Execution ledger:** Inspected exact dev 0e57723aa0688228c9a33adb06e6d4da29ed21fc, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 (zero reviews) and failed Quality #43145211896. Structural suite ran 530 tests; two failures arise solely from the plural "Feature titles" diagnostic for tab/newline title inputs. Keep validator behavior unchanged; correct the focused test to match the established title diagnostic and retain scope/section cases. Full structural and Chromium Quality for this new commit pending. Historical 166 gaps / 95 partial unchanged. No main promotion or Pages verification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head Quality:** historical ledger, all structural tests and Chromium smoke pass on this SHA.
+2. **P0 reviewed promotion:** PR #189 obtains eligible approval and required exact-head checks; ordinary merge only.
+3. **P0 release verification:** main Quality and Pages deployment SHA/behavior confirmed after approved merge.
+4. **P1 accessible preference reset:** synchronized modular and standalone HTML with confirm/cancel, focus and storage tests.
+5. **P1 numerical references:** independent repeated-root, nonlinear-fit and unstable-filter tolerances and invalid-input tests.
+
 ## 2026-11-12 — AUDIT-EXPORT-DIAGNOSTIC-CI-249
 
 **Execution ledger:** Verified dev 71710dc0e78c018ea3b79bdf792d4260f02b7c01, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, failed exact-head Quality #43132078952, and PR #189 without reviews. Repair six regression expectation failures: edge tab/LF are correctly rejected by the earlier nonprintable-character guard; edge spaces are rejected by the surrounding-whitespace guard. Preserve both validation rules and assert the specific diagnostic for each negative case. No application bundle change. Frozen 166 gaps / 95 partial unchanged. Exact new-head CI pending; no merge or Pages claim.

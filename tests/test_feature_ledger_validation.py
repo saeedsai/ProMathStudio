@@ -149,7 +149,9 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                                   else "surrounding whitespace")
                     with self.assertRaisesRegex(
                             ValueError,
-                            rf"Feature {field} must not (?:contain |have ){diagnostic} \(item 0\)"):
+                            (rf"Feature titles must not contain invisible characters \(item 0\)"
+                             if field == "title" and diagnostic == "invisible characters"
+                             else rf"Feature {field} must not (?:contain |have ){diagnostic} \(item 0\)")):
                         validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 

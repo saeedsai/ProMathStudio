@@ -1,3 +1,14 @@
+## 2026-11-12 — AUDIT-EXPORT-DIAGNOSTIC-CI-249
+
+**Execution ledger:** Verified dev 71710dc0e78c018ea3b79bdf792d4260f02b7c01, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, failed exact-head Quality #43132078952, and PR #189 without reviews. Repair six regression expectation failures: edge tab/LF are correctly rejected by the earlier nonprintable-character guard; edge spaces are rejected by the surrounding-whitespace guard. Preserve both validation rules and assert the specific diagnostic for each negative case. No application bundle change. Frozen 166 gaps / 95 partial unchanged. Exact new-head CI pending; no merge or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head Quality:** focused historical-ledger, full structural and Chromium steps pass on this commit; repair observed failures.
+2. **P0 protected promotion:** eligible PR #189 approval and all required exact-head checks; ordinary merge only, then verify main Quality.
+3. **P0 Pages:** verify GitHub Pages deployment SHA and published behavior after approved main promotion.
+4. **P1 accessible preference reset:** synchronize modular source and standalone index.html; browser confirmation, cancel, keyboard focus and persisted-settings regressions.
+5. **P1 numerical reference cases:** repeated roots, nonlinear fitting and unstable filters with independent tolerances and invalid-input cases.
+
 ## 2026-11-12 — AUDIT-EXPORT-EDGE-LABELS-248
 
 **Execution ledger:** Inspected dev 2585a8991b5cbf4854d88975c064fde3231e7e9b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, green exact-head Quality #43099168208 and open PR #189 with zero reviews. 2026-11-12 — AUDIT-EXPORT-EDGE-LABELS-248: Reject surrounding whitespace on exported title/scope/section labels while preserving interior spaces and the canonical historical ledger. Add negative leading/trailing space, tab and newline regression fixtures. Frozen inventory remains 166 gaps / 95 partial. Local checkout unavailable (github.com DNS); exact-head CI pending; no release claimed.

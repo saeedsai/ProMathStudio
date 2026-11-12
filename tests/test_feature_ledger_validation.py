@@ -143,8 +143,13 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 with self.subTest(field=field, value=repr(value)):
                     changed = copy.deepcopy(self.original)
                     changed["items"][0][field] = value
+                    # Nonprintable tab/LF are rejected by the earlier invisible
+                    # control guard; ordinary edge spaces reach the edge guard.
+                    diagnostic = ("invisible characters" if not value.isprintable()
+                                  else "surrounding whitespace")
                     with self.assertRaisesRegex(
-                            ValueError, rf"Feature {field} must not have surrounding whitespace \(item 0\)"):
+                            ValueError,
+                            rf"Feature {field} must not (?:contain |have ){diagnostic} \(item 0\)"):
                         validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 

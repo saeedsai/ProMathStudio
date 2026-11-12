@@ -538,12 +538,25 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "NUL character"):
                         validator.load_ledger(path)
 
-    def test_non_nul_control_escapes_remain_supported(self):
+    def test_decoded_control_escapes_are_rejected_with_codepoint(self):
+        # Escaped JSON controls are legal syntax but unsafe in audit metadata.
+        for payload, codepoint in ((r'{"label":"line\nnext"}', "U+000A"),
+                                   (r'{"nested":[{"tab":"a\tb"}]}', "U+0009"),
+                                   (r'{"\u0085":"value"}', "U+0085"),
+                                   (r'{"nested":["\u009f"]}', "U+009F")):
+            with self.subTest(codepoint=codepoint):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Control character " + codepoint):
+                        validator.load_ledger(path)
+
+    def test_printable_json_strings_remain_supported(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"
-            path.write_text(r'{"label":"line\nnext","tab":"a\tb"}', encoding="utf-8")
+            path.write_text('{"label":"line next","tab":"a b","nested":["café"]}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path),
-                             {"label": "line\nnext", "tab": "a\tb"})
+                             {"label": "line next", "tab": "a b", "nested": ["café"]})
 
     def test_valid_unicode_surrogate_pair_is_accepted(self):
         with tempfile.TemporaryDirectory() as directory:

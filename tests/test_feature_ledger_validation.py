@@ -108,9 +108,9 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         for field in ("title", "scope", "section"):
             with self.subTest(field=field):
                 changed = copy.deepcopy(self.original)
-                changed["items"][0][field] = "Cafe\\u0301"
+                changed["items"][0][field] = "Cafe\u0301"
                 with self.assertRaisesRegex(
-                        ValueError, rf"Feature {field} must use NFC Unicode normalization \\(item 0\\)"):
+                        ValueError, rf"Feature {field} must use NFC Unicode normalization \(item 0\)"):
                     validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 

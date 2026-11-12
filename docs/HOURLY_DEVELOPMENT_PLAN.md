@@ -1,6 +1,6 @@
 ## 2026-11-12 — AUDIT-LABEL-NFC-254
 
-**Execution ledger:** Verified dev 1a493fa2d82f48b40c8f0a356945dfe014e6e401, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; root AGENTS.md, living plan, frozen inventory, green exact-head Quality #43222633189, open PR #189 with no reviews. Tighten exported title/scope/section Unicode normalization to NFC after existing printable and edge-spacing guards. Add negative decomposed-label fixtures and canonical historical-ledger positive acceptance. Source and tests are standalone Python; no bundled application change. New exact-head CI pending; no merge or Pages claim. Historical 166 gaps / 95 partial unchanged.
+**Execution ledger:** Focused fixture escape repair following 54c16cd9 (real decomposed Unicode and literal regex parentheses); verified dev 1a493fa2d82f48b40c8f0a356945dfe014e6e401, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; root AGENTS.md, living plan, frozen inventory, green exact-head Quality #43222633189, open PR #189 with no reviews. Tighten exported title/scope/section Unicode normalization to NFC after existing printable and edge-spacing guards. Add negative decomposed-label fixtures and canonical historical-ledger positive acceptance. Source and tests are standalone Python; no bundled application change. New exact-head CI pending; no merge or Pages claim. Historical 166 gaps / 95 partial unchanged.
 
 **NEXT FIVE (priority / acceptance tests):**
 1. P0: exact-head Python/structural/Chromium Quality passes, including NFC descriptive-label regression.

@@ -321,9 +321,9 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         # metadata; do not permit these in audit keys or values.
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"
-            for payload in ('{"meta":"a\\\\nb"}',
-                            '{"nested":{"a\\\\tb":1}}',
-                            '{"items":["\\\\u0085"]}'):
+            for payload in ('{"meta":"a\\nb"}',
+                            '{"nested":{"a\\tb":1}}',
+                            '{"items":["\\u0085"]}'):
                 with self.subTest(payload=payload):
                     path.write_text(payload, encoding="utf-8")
                     with self.assertRaisesRegex(ValueError, "Control character in feature ledger JSON string"):

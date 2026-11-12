@@ -186,6 +186,8 @@ def load_ledger(path):
             if isinstance(current, str):
                 if "\x00" in current:
                     raise ValueError("NUL character in feature ledger JSON")
+                if "\ufeff" in current:
+                    raise ValueError("Embedded BOM character in feature ledger JSON string")
                 if any(0xD800 <= ord(char) <= 0xDFFF for char in current):
                     raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
             elif isinstance(current, list):

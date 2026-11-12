@@ -300,6 +300,22 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_bytes(bytes.fromhex("efbbbf") + b'{"ok":true}')
             self.assertEqual(validator.load_ledger(path), {"ok": True})
 
+    def test_embedded_bom_in_json_strings_is_rejected(self):
+        # Only a leading UTF-8 transport BOM is valid, never an invisible
+        # U+FEFF embedded in an audit string or nested object key.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for payload in ('{"title":"a\\ufeffb"}',
+                            '{"nested":{"a\\ufeffb":1}}',
+                            '{"items":["\\ufeff"]}'):
+                with self.subTest(payload=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Embedded BOM character"):
+                        validator.load_ledger(path)
+            path.write_bytes(bytes.fromhex("efbbbf") + b'{"title":"valid"}')
+            self.assertEqual(validator.load_ledger(path), {"title": "valid"})
+        self.assertEqual(validator.validate(self.original)["gap"], 166)
+
     def test_nested_unicode_validation_is_iterative(self):
         # Decoder-accepted nesting must not overflow the post-parse validator.
         with tempfile.TemporaryDirectory() as directory:

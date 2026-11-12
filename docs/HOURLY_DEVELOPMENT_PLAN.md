@@ -1,3 +1,14 @@
+## 2026-11-12 — AUDIT-EMBEDDED-BOM-256
+
+**Execution ledger:** Inspected dev 8bc765d84acfce1e2971311139941242cb9efe44, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, successful exact-head PR Quality #43253538777, PR #189 with zero reviews. Reject invisible U+FEFF inside decoded JSON strings (including nested keys/values) while retaining permitted leading UTF-8 transport BOM. Focused positive/negative regression added; standalone Python only, no index.html bundle change. Local repository checkout unavailable; new exact-head CI pending. Frozen historical 166 gaps / 95 partial unchanged; no main promotion or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Python historical-ledger, structural and Chromium Quality green; fix any observed failure.
+2. P0: eligible PR #189 review and all required checks; ordinary protected dev-to-main merge only.
+3. P0: verify merged main Quality, GitHub Pages published SHA and hosted browser smoke.
+4. P1: accessible preferences reset synchronized in src and standalone index.html, with confirm/cancel/focus/storage browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference/invalid-input tests.
+
 ## 2026-11-12 — AUDIT-LABEL-NFC-254
 
 **Execution ledger:** Focused fixture escape repair following 54c16cd9 (real decomposed Unicode and literal regex parentheses); verified dev 1a493fa2d82f48b40c8f0a356945dfe014e6e401, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; root AGENTS.md, living plan, frozen inventory, green exact-head Quality #43222633189, open PR #189 with no reviews. Tighten exported title/scope/section Unicode normalization to NFC after existing printable and edge-spacing guards. Add negative decomposed-label fixtures and canonical historical-ledger positive acceptance. Source and tests are standalone Python; no bundled application change. New exact-head CI pending; no merge or Pages claim. Historical 166 gaps / 95 partial unchanged.

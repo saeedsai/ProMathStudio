@@ -66,6 +66,14 @@ def validate(data):
             if isinstance(value, str):
                 require(value.isprintable(),
                         f"Feature {field} must not contain invisible characters (item {index})")
+    # Exported labels should not have invisible-looking edge spacing:
+    # preserve legitimate interior spaces in descriptive text.
+    for index, item in enumerate(items):
+        for field in ("title", "scope", "section"):
+            value = item.get(field)
+            if isinstance(value, str):
+                require(value == value.strip(),
+                        f"Feature {field} must not have surrounding whitespace (item {index})")
     ids = [item["id"] for item in items]
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
     counts = Counter(item["kind"] for item in items)

@@ -1,3 +1,14 @@
+## 2026-11-12 — AUDIT-EXPORT-EDGE-LABELS-248
+
+**Execution ledger:** Inspected dev 2585a8991b5cbf4854d88975c064fde3231e7e9b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, green exact-head Quality #43099168208 and open PR #189 with zero reviews. 2026-11-12 — AUDIT-EXPORT-EDGE-LABELS-248: Reject surrounding whitespace on exported title/scope/section labels while preserving interior spaces and the canonical historical ledger. Add negative leading/trailing space, tab and newline regression fixtures. Frozen inventory remains 166 gaps / 95 partial. Local checkout unavailable (github.com DNS); exact-head CI pending; no release claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** historical ledger, Python structural and Chromium checks all pass on the new dev SHA; investigate any failure.
+2. **P0 reviewed promotion:** obtain eligible PR #189 review and required checks; ordinary merge, then verify main Quality and Pages.
+3. **P1 accessible preferences reset:** synchronized src/index.html with confirmation, cancellation, keyboard focus and storage regressions.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with reference tolerances and invalid-input cases.
+5. **P1 safe branch audit:** verify full main containment, absence of open PR and unprotected status before deletion.
+
 **Fixture correction:** Restored the newline negative case as the Python escape `"\\n"` instead of an actual physical line break inside a quoted literal; the regression now remains parseable. Exact-head CI still pending.
 
 ## 2026-11-11 — AUDIT-LEDGER-CI-REPAIR-246 (restore executable validator and test fixtures)

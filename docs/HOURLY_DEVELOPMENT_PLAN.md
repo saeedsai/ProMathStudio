@@ -1,3 +1,14 @@
+## 2026-11-12 — AUDIT-ID-NFC-252
+
+**Execution ledger:** Verified dev b1d8939adbb246337e1c3d73c127372efdf109bb, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, green Quality #43151986648 and open PR #189 with no reviews. Reject decomposed Unicode feature IDs before exact-string duplicate checking; preserve printable Unicode and frozen historical 166 gaps / 95 partial. Add focused decomposed-ID negative and canonical positive regression. Exact new-head CI pending; no merge or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head historical-ledger, structural and Chromium Quality all pass; repair failures without weakening tests.
+2. P0: PR #189 eligible approval and required checks, then ordinary protected dev-to-main merge.
+3. P0: verify main Quality and GitHub Pages published SHA and browser behavior.
+4. P1: accessible preferences reset with synchronized modular and standalone HTML, confirmation, cancellation, focus and storage regressions.
+5. P1: numerical reference regressions for repeated roots, nonlinear fits and unstable filters with tolerances and invalid-input cases.
+
 ## 2026-11-12 — AUDIT-EXPORT-TITLE-DIAGNOSTIC-CI-251
 
 **Execution ledger:** Inspected exact dev 0e57723aa0688228c9a33adb06e6d4da29ed21fc, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 (zero reviews) and failed Quality #43145211896. Structural suite ran 530 tests; two failures arise solely from the plural "Feature titles" diagnostic for tab/newline title inputs. Keep validator behavior unchanged; correct the focused test to match the established title diagnostic and retain scope/section cases. Full structural and Chromium Quality for this new commit pending. Historical 166 gaps / 95 partial unchanged. No main promotion or Pages verification.

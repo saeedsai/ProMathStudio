@@ -6,6 +6,7 @@ This checks historical audit data integrity, not current implementation status.
 """
 import json
 import math
+import unicodedata
 from decimal import Decimal
 from collections import Counter
 from pathlib import Path
@@ -74,6 +75,10 @@ def validate(data):
             if isinstance(value, str):
                 require(value == value.strip(),
                         f"Feature {field} must not have surrounding whitespace (item {index})")
+    # Canonically equivalent Unicode IDs must not evade exact-string duplicate checks.
+    for index, item in enumerate(items):
+        require(unicodedata.is_normalized("NFC", item["id"]),
+                f"Feature IDs must use NFC Unicode normalization (item {index})")
     ids = [item["id"] for item in items]
     require(len(ids) == len(set(ids)), "Duplicate feature IDs")
     counts = Counter(item["kind"] for item in items)

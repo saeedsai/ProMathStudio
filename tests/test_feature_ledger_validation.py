@@ -103,6 +103,14 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["existing"], 158)
 
+    def test_feature_ids_reject_noncanonical_unicode_normalization(self):
+        # A decomposed accent is printable but can alias a composed ID in exports.
+        changed = copy.deepcopy(self.original)
+        changed["items"][0]["id"] = "audit-cafe\u0301"
+        with self.assertRaisesRegex(ValueError, r"NFC Unicode normalization \(item 0\)"):
+            validator.validate(changed)
+        self.assertEqual(validator.validate(self.original)["gap"], 166)
+
     def test_feature_ids_reject_interior_whitespace(self):
         original_id = self.original["items"][0]["id"]
         # Real Unicode whitespace characters, not literal backslash escapes.

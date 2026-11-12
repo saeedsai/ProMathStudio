@@ -163,6 +163,22 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                         validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 
+    def test_json_object_keys_require_nfc_even_when_nested(self):
+        # JSON permits canonically equivalent raw keys; reject ambiguous
+        # decomposed spellings without altering ordinary Unicode values.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for payload in ('{"cafe\\u0301": 1}',
+                            '{"nested": {"cafe\\u0301": 1}}',
+                            '{"café": 1, "cafe\\u0301": 2}'):
+                with self.subTest(payload=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Non-NFC feature ledger JSON key"):
+                        validator.load_ledger(path)
+            path.write_text('{"café": {"title": "cafe\\u0301"}}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), {"café": {"title": "café"}})
+        self.assertEqual(validator.validate(self.original)["gap"], 166)
+
     def test_historical_inventory_is_accepted(self):
         counts = validator.validate(self.original)
         self.assertEqual((counts["existing"], counts["gap"]), (158, 166))

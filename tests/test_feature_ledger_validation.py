@@ -88,7 +88,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             with self.subTest(malformed=malformed):
                 changed = copy.deepcopy(self.original)
                 changed["items"][0]["id"] = malformed
-                with self.assertRaisesRegex(ValueError, "surrounding whitespace \\(item 0\\)"):
+                with self.assertRaisesRegex(ValueError, "surrounding whitespace \(item 0\)"):
                     validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 
@@ -139,12 +139,12 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
     def test_export_labels_reject_surrounding_whitespace(self):
         for field in ("title", "scope", "section"):
             original = self.original["items"][0][field]
-            for value in (" " + original, original + " ", "\\t" + original, original + "\\n"):
+            for value in (" " + original, original + " ", "\t" + original, original + "\n"):
                 with self.subTest(field=field, value=repr(value)):
                     changed = copy.deepcopy(self.original)
                     changed["items"][0][field] = value
                     with self.assertRaisesRegex(
-                            ValueError, rf"Feature {field} must not have surrounding whitespace \\(item 0\\)"):
+                            ValueError, rf"Feature {field} must not have surrounding whitespace \(item 0\)"):
                         validator.validate(changed)
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 

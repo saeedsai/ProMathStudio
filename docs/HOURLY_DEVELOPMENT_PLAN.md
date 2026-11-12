@@ -1,3 +1,14 @@
+## 2026-11-12 — AUDIT-JSON-CONTROLS-257
+
+**Execution ledger:** Verified dev de9fe27d8c561b55e7b03f4ae07a1ed20a96845b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, green exact-head Quality #43286403803 and PR #189 without reviews. Reject escaped C0/C1 control characters in decoded JSON keys and values, including nested metadata, while retaining existing NUL/BOM diagnostics. Focused positive/negative regression included; standalone Python only, no application bundle change. Local checkout unavailable; new exact-head CI pending. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python feature-ledger, structural and Chromium Quality pass; repair observed failures.
+2. P0: obtain eligible PR #189 approval, verify required checks, and perform ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, Pages published SHA and hosted browser smoke.
+4. P1: accessible preferences reset synchronized in src and standalone index.html; confirm/cancel/focus/storage tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input tests.
+
 ## 2026-11-12 — AUDIT-EMBEDDED-BOM-256
 
 **Execution ledger:** Inspected dev 8bc765d84acfce1e2971311139941242cb9efe44, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, successful exact-head PR Quality #43253538777, PR #189 with zero reviews. Reject invisible U+FEFF inside decoded JSON strings (including nested keys/values) while retaining permitted leading UTF-8 transport BOM. Focused positive/negative regression added; standalone Python only, no index.html bundle change. Local repository checkout unavailable; new exact-head CI pending. Frozen historical 166 gaps / 95 partial unchanged; no main promotion or Pages claim.

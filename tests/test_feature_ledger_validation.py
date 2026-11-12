@@ -316,6 +316,22 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path), {"title": "valid"})
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 
+    def test_escaped_control_characters_in_nested_json_are_rejected(self):
+        # JSON escapes may decode to invisible C0/C1 controls even in nested
+        # metadata; do not permit these in audit keys or values.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for payload in ('{"meta":"a\\\\nb"}',
+                            '{"nested":{"a\\\\tb":1}}',
+                            '{"items":["\\\\u0085"]}'):
+                with self.subTest(payload=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Control character in feature ledger JSON string"):
+                        validator.load_ledger(path)
+            path.write_text('{"meta":"visible text"}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), {"meta": "visible text"})
+        self.assertEqual(validator.validate(self.original)["gap"], 166)
+
     def test_nested_unicode_validation_is_iterative(self):
         # Decoder-accepted nesting must not overflow the post-parse validator.
         with tempfile.TemporaryDirectory() as directory:

@@ -75,6 +75,14 @@ def validate(data):
             if isinstance(value, str):
                 require(value == value.strip(),
                         f"Feature {field} must not have surrounding whitespace (item {index})")
+    # Exported descriptive labels should use one canonical spelling; otherwise
+    # visually identical labels can compare differently across consumers.
+    for index, item in enumerate(items):
+        for field in ("title", "scope", "section"):
+            value = item.get(field)
+            if isinstance(value, str):
+                require(unicodedata.is_normalized("NFC", value),
+                        f"Feature {field} must use NFC Unicode normalization (item {index})")
     # Canonically equivalent Unicode IDs must not evade exact-string duplicate checks.
     for index, item in enumerate(items):
         require(unicodedata.is_normalized("NFC", item["id"]),

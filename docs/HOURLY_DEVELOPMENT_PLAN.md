@@ -1,3 +1,14 @@
+## 2026-11-12 — AUDIT-LABEL-NFC-254
+
+**Execution ledger:** Verified dev 1a493fa2d82f48b40c8f0a356945dfe014e6e401, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; root AGENTS.md, living plan, frozen inventory, green exact-head Quality #43222633189, open PR #189 with no reviews. Tighten exported title/scope/section Unicode normalization to NFC after existing printable and edge-spacing guards. Add negative decomposed-label fixtures and canonical historical-ledger positive acceptance. Source and tests are standalone Python; no bundled application change. New exact-head CI pending; no merge or Pages claim. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python/structural/Chromium Quality passes, including NFC descriptive-label regression.
+2. P0: obtain eligible PR #189 approval, verify protected required checks and ordinary dev-to-main merge.
+3. P0: verify merged main Quality, GitHub Pages published SHA and browser smoke.
+4. P1: accessible preferences reset with synchronized src and standalone index.html; confirm/cancel/focus/storage browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
 ## 2026-11-12 — AUDIT-JSON-KEY-NFC-253
 
 **Execution ledger:** Verified dev 76df6887ecdc44e832f6acfb4cdab98e10437ee5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, green exact-head Quality #43164655900 and PR #189 with zero submitted reviews. Tighten imported historical audit JSON object keys to NFC (including nested keys) before duplicate-key checks, with focused negative fixtures, a canonical Unicode-key/Unicode-value positive and frozen inventory acceptance. Source and regression are standalone Python; no modular app or index.html changes. New exact-head Quality pending; no promotion or Pages claim. Historical 166 gaps / 95 partial unchanged.

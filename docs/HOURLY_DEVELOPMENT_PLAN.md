@@ -1,3 +1,14 @@
+## 2026-11-13 — AUDIT-JSON-FORMAT-CONTROLS-263
+
+**Execution ledger:** Verified dev a9a45131d21506c2cecb27dda0229522a8369cf2, main 70fc483cb1cec3d2372d37484e4a8ef7942343da and exact-head successful Quality #43397969613. PR #189 still has zero reviews. Reject Unicode category Cf format controls (including bidi overrides and zero-width marks) in nested historical JSON keys/values. Preserve NFC and noncharacter rules; add negative nested key/value fixtures and a printable positive. Isolated source/fixture checks performed; full new exact-head CI pending. No main or Pages promotion. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality green including new format-control regression, structural/Python/Chromium checks.
+2. P0: eligible PR #189 approval and verified required exact-head checks before ordinary protected merge.
+3. P0: merged main Quality green, Pages published SHA and hosted smoke tests.
+4. P1: accessible preferences reset synchronized across src and standalone index.html with confirm/cancel/focus/persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference/invalid-input regressions.
+
 ## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-CI-262
 
 **Execution ledger:** On exact dev 7fcfca9793d1c8c9d5a49b48c2a89b6bf229ba2e, Quality #43348726967 failed three structural assertions because test JSON contained literal placeholder tokens. Corrected fixtures to exercise U+FDD0 in a value, U+FFFE in a nested key and U+10FFFF via a valid UTF-16 surrogate pair in a nested value; retain validator and negative assertions. Isolated JSON decoding verified; exact new-head structural/Python/Chromium CI pending. No main or Pages promotion. Frozen historical inventory remains 166 gaps / 95 partial.

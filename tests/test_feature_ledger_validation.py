@@ -332,6 +332,24 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path), {"meta": "visible text"})
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 
+    def test_nested_unicode_format_controls_are_rejected(self):
+        # JSON escapes can hide bidi overrides and zero-width formatting in
+        # arbitrary metadata, even when the frozen item fields are valid.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for payload in ('{"meta":"a\\u202eb"}',
+                            '{"nested":{"a\\u200bb":1}}',
+                            '{"items":["\\u2060"]}'):
+                with self.subTest(payload=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Unicode format character"):
+                        validator.load_ledger(path)
+            path.write_text('{"meta":"visible text","nested":{"café":1}}',
+                            encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"meta": "visible text", "nested": {"café": 1}})
+        self.assertEqual(validator.validate(self.original)["gap"], 166)
+
     def test_nested_unicode_validation_is_iterative(self):
         # Decoder-accepted nesting must not overflow the post-parse validator.
         with tempfile.TemporaryDirectory() as directory:

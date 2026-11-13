@@ -192,6 +192,10 @@ def load_ledger(path):
                     codepoint = ord(char)
                     if codepoint < 32 or 0x7f <= codepoint <= 0x9f:
                         raise ValueError(f"Control character in feature ledger JSON string (U+{codepoint:04X})")
+                # Format controls (including bidi overrides and zero-width
+                # joiners) can visually spoof arbitrary nested audit metadata.
+                if any(unicodedata.category(char) == "Cf" for char in current):
+                    raise ValueError("Unicode format character in feature ledger JSON string")
                 if any(0xD800 <= ord(char) <= 0xDFFF for char in current):
                     raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
                 # Unicode noncharacters are legal scalar values but unsuitable

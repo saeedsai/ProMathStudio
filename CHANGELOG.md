@@ -1,3 +1,4 @@
+- 2026-11-13 (dev, CI pending): Audit JSON import rejects U+2028/U+2029 in nested keys/values (escaped or literal), with focused negative and positive regression. Frozen 166 gaps / 95 partial remain historical; release not claimed.
 - 2026-11-13: Reject Unicode format controls in nested audit JSON metadata keys and values; add positive/negative regression; frozen 166 gaps / 95 partial unchanged; new exact-head CI pending.
 - 2026-11-13: Repair three failing Unicode noncharacter regression fixtures (U+FDD0, U+FFFE, U+10FFFF) without weakening validator assertions; exact-head CI pending; frozen 166 gaps / 95 partial unchanged.
 - 2026-11-13: Correct Unicode noncharacter JSON regression fixtures to decode real noncharacters rather than literal escape strings; exact-head CI pending.

@@ -192,6 +192,10 @@ def load_ledger(path):
                     codepoint = ord(char)
                     if codepoint < 32 or 0x7f <= codepoint <= 0x9f:
                         raise ValueError(f"Control character in feature ledger JSON string (U+{codepoint:04X})")
+                # Unicode line/paragraph separators can create misleading
+                # rendered audit rows even though JSON allows them in strings.
+                if any(char in "\u2028\u2029" for char in current):
+                    raise ValueError("Unicode line separator in feature ledger JSON string")
                 # Format controls (including bidi overrides and zero-width
                 # joiners) can visually spoof arbitrary nested audit metadata.
                 if any(unicodedata.category(char) == "Cf" for char in current):

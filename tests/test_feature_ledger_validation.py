@@ -18,6 +18,25 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_nested_json_rejects_unicode_line_separators(self):
+        # Both escaped and literal separators are valid JSON but unsafe in
+        # human-readable exported audit metadata and nested keys.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for separator in ("\\u2028", "\\u2029", "\u2028", "\u2029"):
+                for key_position in (False, True):
+                    with self.subTest(separator=repr(separator), key=key_position):
+                        payload = ('{"nested": {"bad' + separator + 'key": 1}}'
+                                   if key_position else
+                                   '{"nested": ["bad' + separator + 'value"]}')
+                        path.write_text(payload, encoding="utf-8")
+                        with self.assertRaisesRegex(ValueError, "Unicode line separator"):
+                            validator.load_ledger(path)
+            path.write_text('{"nested": {"safe key": "safe value"}}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"nested": {"safe key": "safe value"}})
+
+
     @classmethod
     def setUpClass(cls):
         cls.original = json.loads(LEDGER.read_text(encoding="utf-8"))

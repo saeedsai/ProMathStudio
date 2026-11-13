@@ -18,6 +18,19 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_decimal_exponents_beyond_decoder_limit_fail_cleanly(self):
+        # JSON accepts large exponent digit sequences; Decimal can reject
+        # them even when float() silently underflows to zero.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for token in ("1e-999999999999999999999", "0e-999999999999999999999"):
+                with self.subTest(token=token):
+                    path.write_text('{"nested": [' + token + ']}', encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "decimal exponent exceeds decoder limit"):
+                        validator.load_ledger(path)
+            path.write_text('{"nested": [0.0, 1e-5]}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), {"nested": [0.0, 1e-5]})
+
     def test_nested_json_rejects_unicode_line_separators(self):
         # Both escaped and literal separators are valid JSON but unsafe in
         # human-readable exported audit metadata and nested keys.

@@ -7,7 +7,7 @@ This checks historical audit data integrity, not current implementation status.
 import json
 import math
 import unicodedata
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from collections import Counter
 from pathlib import Path
 
@@ -132,9 +132,13 @@ def load_ledger(path):
 
     def finite_float(token):
         value = float(token)
+        try:
+            exact = Decimal(token)
+        except InvalidOperation as exc:
+            raise ValueError("Feature ledger JSON decimal exponent exceeds decoder limit") from exc
         # Preserve signed zero: binary64 distinguishes -0.0 from +0.0,
         # but normalized exports and comparisons often discard that sign.
-        if value == 0.0 and token.lstrip().startswith("-") and Decimal(token).is_zero():
+        if value == 0.0 and token.lstrip().startswith("-") and exact.is_zero():
             raise ValueError(f"Negative-zero feature ledger JSON float is ambiguous: {token}")
         if not math.isfinite(value):
             raise ValueError(f"Non-finite feature ledger JSON number: {token}")
@@ -146,17 +150,17 @@ def load_ledger(path):
         # rounded-fraction check: tiny nonzero tokens also round to integer 0.
         # Decimal distinguishes exact zero from nonzero subnormal literals
         # without inspecting exponent digits or losing mantissa precision.
-        if value == 0.0 and not Decimal(token).is_zero():
+        if value == 0.0 and not exact.is_zero():
             raise ValueError(f"Underflowed feature ledger JSON number: {token}")
         # A decimal fraction can round to an integer in binary64 even when
         # the integer is inside the safe range (e.g. 1.0000000000000001).
-        if value.is_integer() and Decimal(token) != Decimal(int(value)):
+        if value.is_integer() and exact != Decimal(int(value)):
             raise ValueError(f"Rounded feature ledger JSON fraction to integer: {token}")
         # Also reject non-integer decimal tokens with more significant digits
         # than binary64 retains, rather than silently changing audit values.
         # str(value) is Python's shortest round-tripping decimal representation;
         # compare numeric Decimal values so equivalent exponent notation works.
-        if not value.is_integer() and Decimal(token) != Decimal(str(value)):
+        if not value.is_integer() and exact != Decimal(str(value)):
             raise ValueError(f"Rounded feature ledger JSON fractional precision: {token}")
         return value
 

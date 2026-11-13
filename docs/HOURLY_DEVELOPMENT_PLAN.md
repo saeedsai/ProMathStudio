@@ -1,3 +1,14 @@
+## 2026-11-13 — AUDIT-DECIMAL-EXPONENT-265
+
+**Execution ledger:** Verified dev 95d3a85b4e6f832bb58d128784b9b3a4b6c795c6 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; exact-head Quality #43430508066 passed and PR #189 has zero reviews. Handle decimal.InvalidOperation for JSON float exponents beyond Decimal's decoder limit with a stable ValueError rather than an uncaught exception. Add focused negative huge-exponent fixtures and finite positive control. No application bundle changes. Frozen historical 166 gaps / 95 partial unchanged. New exact-head CI pending; no main/Pages promotion claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Python structural and Chromium Quality green, including oversized-decimal-exponent regression.
+2. P0: eligible PR #189 approval plus all required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, Pages published SHA and hosted smoke tests.
+4. P1: accessible preferences reset synchronized across src and standalone index.html with confirm/cancel/focus/persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
 ## 2026-11-13 — AUDIT-JSON-LINE-SEPARATORS-264
 
 **Execution ledger:** Verified dev a4014b900b6be2c77d479d60ed0b0bce5e82396d, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; exact-head Quality #43405233233 green, PR #189 has no submitted approvals. Harden standalone audit JSON import against U+2028/U+2029 line/paragraph separators in nested keys and values (escaped or literal), with positive safe-metadata control. No application bundle changes. Frozen historical baseline 166 gaps / 95 partial unchanged. New exact-head CI pending; no merge or Pages publication claimed.

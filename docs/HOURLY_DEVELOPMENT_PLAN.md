@@ -1,3 +1,14 @@
+## 2026-11-13 — AUDIT-NONSTANDARD-SPACE-266
+
+**Execution ledger:** Verified dev fcee64f3139183ca27f8dea80dee03383d9a8893 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head successful Quality #43448073887 and open PR #189 with zero submitted reviews. Reject non-ASCII Unicode category Zs spacing in nested imported JSON keys/values while preserving ordinary ASCII spaces; focused negative key/value cases and positive control. Standalone audit validator/test only; application index.html untouched. Frozen historical inventory 166 gaps / 95 partial unchanged. New exact-head CI pending; no merge or Pages release claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python, structural and Chromium Quality green including nested nonstandard-space cases.
+2. P0: obtain eligible PR #189 approval and verify required checks before ordinary protected dev-to-main merge.
+3. P0: verify main Quality, Pages published SHA and hosted smoke after merge.
+4. P1: accessible preferences reset in synchronized modular source and standalone index.html with confirm/cancel/focus/persistence browser regressions.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter reference and invalid-input regressions.
+
 ## 2026-11-13 — AUDIT-DECIMAL-EXPONENT-265
 
 **Execution ledger:** Verified dev 95d3a85b4e6f832bb58d128784b9b3a4b6c795c6 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; exact-head Quality #43430508066 passed and PR #189 has zero reviews. Handle decimal.InvalidOperation for JSON float exponents beyond Decimal's decoder limit with a stable ValueError rather than an uncaught exception. Add focused negative huge-exponent fixtures and finite positive control. No application bundle changes. Frozen historical 166 gaps / 95 partial unchanged. New exact-head CI pending; no main/Pages promotion claimed.

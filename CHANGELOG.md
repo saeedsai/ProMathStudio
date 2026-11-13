@@ -1,3 +1,4 @@
+- 2026-11-13 (dev, CI pending): Reject visually ambiguous non-ASCII Unicode spaces in nested audit JSON keys/values, preserving ordinary spaces; add focused positive/negative regression. Historical 166 gaps / 95 partial unchanged; no main/Pages release claimed.
 - 2026-11-13 (dev, CI pending): Audit JSON float parsing now reports stable validation errors for decimal exponents beyond the Decimal decoder limit, with negative/positive regression; frozen 166 gaps / 95 partial unchanged, release not claimed.
 - 2026-11-13 (dev, CI pending): Audit JSON import rejects U+2028/U+2029 in nested keys/values (escaped or literal), with focused negative and positive regression. Frozen 166 gaps / 95 partial remain historical; release not claimed.
 - 2026-11-13: Reject Unicode format controls in nested audit JSON metadata keys and values; add positive/negative regression; frozen 166 gaps / 95 partial unchanged; new exact-head CI pending.

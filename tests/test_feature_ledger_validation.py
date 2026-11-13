@@ -31,6 +31,23 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_text('{"nested": [0.0, 1e-5]}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path), {"nested": [0.0, 1e-5]})
 
+    def test_nested_json_rejects_nonstandard_unicode_spaces(self):
+        # Ordinary ASCII spaces remain valid; visually ambiguous Unicode
+        # spaces are rejected in both nested object keys and values.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for separator in ("\\u00a0", "\\u202f", "\\u3000"):
+                for in_key in (False, True):
+                    with self.subTest(separator=separator, in_key=in_key):
+                        payload = ({"nested": {"bad" + separator + "key": 1}}
+                                   if in_key else {"nested": ["bad" + separator + "value"]})
+                        path.write_text(json.dumps(payload), encoding="utf-8")
+                        with self.assertRaisesRegex(ValueError, "Nonstandard Unicode space"):
+                            validator.load_ledger(path)
+            path.write_text('{"nested": {"ordinary key": "ordinary value"}}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"nested": {"ordinary key": "ordinary value"}})
+
     def test_nested_json_rejects_unicode_line_separators(self):
         # Both escaped and literal separators are valid JSON but unsafe in
         # human-readable exported audit metadata and nested keys.

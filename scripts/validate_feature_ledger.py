@@ -191,7 +191,7 @@ def load_ledger(path):
                 for char in current:
                     codepoint = ord(char)
                     if codepoint < 32 or 0x7f <= codepoint <= 0x9f:
-                        raise ValueError(f"Control character U+{codepoint:04X} in feature ledger JSON string")
+                        raise ValueError(f"Control character in feature ledger JSON string (U+{codepoint:04X})")
                 if any(0xD800 <= ord(char) <= 0xDFFF for char in current):
                     raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
             elif isinstance(current, list):

@@ -1,3 +1,14 @@
+## 2026-11-13 — AUDIT-CONTROL-CI-259
+
+**Execution ledger:** Verified dev 5ed71389d00e778916cb321fb2e16302c9535f06, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; reviewed AGENTS.md, living plan, frozen inventory, PR #189 (zero reviews), and failing exact-head PR Quality #43314953850 (536 structural tests; seven control-diagnostic assertions failed). Preserve the established diagnostic prefix and append literal U+XXXX in parentheses; correct the four regex fixtures to escape plus and parentheses. Isolated Python regex compatibility check passed (one test, four code points); full exact-head structural and Chromium CI pending. No standalone bundle changes. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python/structural and Chromium CI green with all control diagnostics and 536+ structural tests.
+2. P0: eligible PR #189 approval, exact-head checks and ordinary protected dev-to-main merge.
+3. P0: verify new main Quality, Pages published SHA and hosted browser smoke.
+4. P1: accessible preferences reset synchronized between src and index.html; confirmation/cancellation/focus/storage browser regressions.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
 ## 2026-11-12 — AUDIT-CONTROL-CI-258
 
 **Execution ledger:** Verified dev 92b454bb0416624ddd23746c3c705dc9cf751025, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory and failed exact-head PR Quality #43306382782 (535 structural tests, one stale positive escaped-control expectation). Replace obsolete positive regression with negative nested C0/C1 cases, improve diagnostics with offending Unicode code point, and retain printable-string positive acceptance. Local checkout unavailable; exact-head CI pending. PR #189 has zero submitted reviews; no merge or Pages claim. Frozen historical 166 gaps / 95 partial unchanged.

@@ -548,7 +548,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / "ledger.json"
                     path.write_text(payload, encoding="utf-8")
-                    with self.assertRaisesRegex(ValueError, "Control character " + codepoint):
+                    with self.assertRaisesRegex(ValueError, r"Control character in feature ledger JSON string \(U\+" + codepoint[2:] + r"\)"):
                         validator.load_ledger(path)
 
     def test_printable_json_strings_remain_supported(self):

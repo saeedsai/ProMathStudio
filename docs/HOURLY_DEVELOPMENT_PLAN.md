@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-NESTED-VALUE-NFC-268
+
+**Execution ledger:** Exact dev 65ff495ec10bf5edcfc0490f994f90c816c099c9, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, successful Quality #43506826108 and PR #189 without reviews. Normalize validation of all nested JSON strings: reject non-NFC decoded values as well as keys, including escaped and literal representations. Add eight negative subcases and canonical positive control. Historical inventory 166 gaps / 95 partial unchanged. New exact-head CI pending; no release/Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes historical-ledger, structural and Chromium checks including nested non-NFC cases.
+2. P0: obtain eligible PR #189 review approval and verify all required checks before protected ordinary merge.
+3. P0: verify main Quality, Pages published SHA and hosted smoke after promotion.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html with confirmation, cancellation, focus and persistence browser checks.
+5. P1: independent numerical reference and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-13 — AUDIT-SPACE-FIXTURE-CI-267
 
 **Execution ledger:** Inspected dev b9718d83565431946c4f434c65466dc460cb6005 (base tree 47a88d58396cf330b5d2ebbc131c3c6e6f70ceb8), main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical inventory, failed exact-head Quality #43468820011 and PR #189 (zero reviews). Correct six failing Unicode-space fixtures by constructing actual code points and testing JSON escaped and literal representations in nested keys/values. Improve validator diagnostics to include U+XXXX while retaining prior diagnostic prefix. Twelve isolated JSON decoding/Unicode classification cases passed; full exact-head Python/structural/Chromium CI pending. No application bundle changes. Frozen 166 gaps / 95 partial unchanged; no main/Pages promotion claimed.

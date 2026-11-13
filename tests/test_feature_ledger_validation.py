@@ -53,6 +53,22 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path),
                              {"nested": {"ordinary key": "ordinary value"}})
 
+    def test_nested_json_rejects_non_nfc_values_and_keys(self):
+        # JSON decoding preserves decomposed accents in nested metadata.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for ensure_ascii in (True, False):
+                for in_key in (False, True):
+                    with self.subTest(escaped=ensure_ascii, in_key=in_key):
+                        payload = ({"nested": {"cafe\u0301": 1}} if in_key
+                                   else {"nested": ["cafe\u0301"]})
+                        path.write_text(json.dumps(payload, ensure_ascii=ensure_ascii),
+                                        encoding="utf-8")
+                        with self.assertRaisesRegex(ValueError, "Non-NFC feature ledger JSON string"):
+                            validator.load_ledger(path)
+            path.write_text(json.dumps({"nested": {"caf\u00e9": "caf\u00e9"}}), encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), {"nested": {"caf\u00e9": "caf\u00e9"}})
+
     def test_nested_json_rejects_unicode_line_separators(self):
         # Both escaped and literal separators are valid JSON but unsafe in
         # human-readable exported audit metadata and nested keys.

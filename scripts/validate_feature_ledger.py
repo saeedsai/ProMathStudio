@@ -188,6 +188,8 @@ def load_ledger(path):
         while pending:
             current = pending.pop()
             if isinstance(current, str):
+                if not unicodedata.is_normalized("NFC", current):
+                    raise ValueError("Non-NFC feature ledger JSON string")
                 if "\x00" in current:
                     raise ValueError("NUL character in feature ledger JSON")
                 if "\ufeff" in current:

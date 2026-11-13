@@ -1,3 +1,14 @@
+## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-CI-262
+
+**Execution ledger:** On exact dev 7fcfca9793d1c8c9d5a49b48c2a89b6bf229ba2e, Quality #43348726967 failed three structural assertions because test JSON contained literal placeholder tokens. Corrected fixtures to exercise U+FDD0 in a value, U+FFFE in a nested key and U+10FFFF via a valid UTF-16 surrogate pair in a nested value; retain validator and negative assertions. Isolated JSON decoding verified; exact new-head structural/Python/Chromium CI pending. No main or Pages promotion. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality must pass structural suite (including all three noncharacter cases), Python and Chromium checks.
+2. P0: eligible review approval for PR #189 and all required exact-head checks green before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, GitHub Pages published commit and hosted smoke tests.
+4. P1: accessible preferences reset synchronized across src and standalone index.html; browser tests for confirm/cancel, focus and persistence.
+5. P1: numerical reference regressions for repeated roots, nonlinear fits and unstable filters with independent expected results.
+
 ## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-FIXTURE-261
 
 **Execution ledger:** Correct the new Unicode noncharacter JSON regression to use single escaped JSON code points rather than double-escaped literal backslashes. The validator source and frozen historical inventory remain unchanged (166 gaps / 95 partial). Full exact-head CI pending; no main or Pages promotion. NEXT FIVE remain: exact-head Python/structural/Chromium QA; eligible PR #189 approval and protected merge; main Quality/Pages/hosted smoke; synchronized accessible preferences reset; numerical reference regressions. Each requires its corresponding automated checks.

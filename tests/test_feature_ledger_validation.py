@@ -560,7 +560,9 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
 
     def test_unicode_noncharacters_are_rejected_in_nested_keys_and_values(self):
         # Noncharacters are valid Unicode scalars but not portable audit metadata.
-        for payload in (r'{"label":"\${code}"}',
+        for payload in (r'{"label":"\ufdd0"}',
+                        r'{"nested":[{"\ufffe":"value"}]}',
+                        r'{"nested":["\udbff\udfff"]}'):"\${code}"}',
                         r'{"nested":[{"\${code}":"value"}]}',
                         r'{"nested":["\${code}\${code}"]}'):
             with self.subTest(payload=payload):

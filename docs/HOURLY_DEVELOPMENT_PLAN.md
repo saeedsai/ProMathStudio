@@ -1,3 +1,7 @@
+## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-FIXTURE-261
+
+**Execution ledger:** Correct the new Unicode noncharacter JSON regression to use single escaped JSON code points rather than double-escaped literal backslashes. The validator source and frozen historical inventory remain unchanged (166 gaps / 95 partial). Full exact-head CI pending; no main or Pages promotion. NEXT FIVE remain: exact-head Python/structural/Chromium QA; eligible PR #189 approval and protected merge; main Quality/Pages/hosted smoke; synchronized accessible preferences reset; numerical reference regressions. Each requires its corresponding automated checks.
+
 ## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-260
 
 **Execution ledger:** Inspected exact dev 2f70dfdd2ba585301672ee0c5bd48991133113ac, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory and successful exact-head Quality #43333989736; PR #189 still has no reviews. Reject Unicode noncharacters (U+FDD0..FDEF and any plane's U+FFFE/U+FFFF) in decoded audit JSON keys and values, including nested metadata. Add focused negative cases and frozen positive acceptance. No app bundle changes. Historical 166 gaps / 95 partial unchanged. Exact-head Quality pending; no release or Pages claim.

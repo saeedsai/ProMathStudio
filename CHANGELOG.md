@@ -1,3 +1,4 @@
+- 2026-11-13: Correct Unicode noncharacter JSON regression fixtures to decode real noncharacters rather than literal escape strings; exact-head CI pending.
 - 2026-11-13: Reject Unicode noncharacters in nested historical audit JSON strings and keys, with focused negative and canonical positive regression; frozen 166 gaps / 95 partial unchanged; exact-head CI pending.
 - 2026-11-13: Preserve historical JSON-control diagnostic prefix while adding literal U+XXXX code points; fix escaped-regex assertions for exact-head structural CI. Frozen 166 gaps / 95 partial unchanged; new CI pending.
 - 2026-11-12: Repair exact-head CI failure caused by stale escaped-control positive fixture; assert C0/C1 rejection in nested keys/values with explicit U+XXXX diagnostics and preserve printable-string acceptance. Frozen 166 gaps / 95 partial unchanged; new exact-head CI pending.

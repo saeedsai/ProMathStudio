@@ -562,9 +562,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         # Noncharacters are valid Unicode scalars but not portable audit metadata.
         for payload in (r'{"label":"\ufdd0"}',
                         r'{"nested":[{"\ufffe":"value"}]}',
-                        r'{"nested":["\udbff\udfff"]}'):"\${code}"}',
-                        r'{"nested":[{"\${code}":"value"}]}',
-                        r'{"nested":["\${code}\${code}"]}'):
+                        r'{"nested":["\udbff\udfff"]}'):
             with self.subTest(payload=payload):
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / "ledger.json"

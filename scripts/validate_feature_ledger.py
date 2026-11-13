@@ -194,6 +194,11 @@ def load_ledger(path):
                         raise ValueError(f"Control character in feature ledger JSON string (U+{codepoint:04X})")
                 if any(0xD800 <= ord(char) <= 0xDFFF for char in current):
                     raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
+                # Unicode noncharacters are legal scalar values but unsuitable
+                # for portable human-readable audit identifiers and metadata.
+                if any(0xFDD0 <= ord(char) <= 0xFDEF or
+                       (ord(char) & 0xFFFE) == 0xFFFE for char in current):
+                    raise ValueError("Unicode noncharacter in feature ledger JSON string")
             elif isinstance(current, list):
                 pending.extend(current)
             elif isinstance(current, dict):

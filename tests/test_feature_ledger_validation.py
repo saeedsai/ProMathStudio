@@ -558,6 +558,19 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path),
                              {"label": "line next", "tab": "a b", "nested": ["café"]})
 
+    def test_unicode_noncharacters_are_rejected_in_nested_keys_and_values(self):
+        # Noncharacters are valid Unicode scalars but not portable audit metadata.
+        for payload in (r'{"label":"\\ufdd0"}',
+                        r'{"nested":[{"\\ufffe":"value"}]}',
+                        r'{"nested":["\\udbff\\udfff"]}'):
+            with self.subTest(payload=payload):
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Unicode noncharacter"):
+                        validator.load_ledger(path)
+        self.assertEqual(validator.validate(self.original)["gap"], 166)
+
     def test_valid_unicode_surrogate_pair_is_accepted(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.json"

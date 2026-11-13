@@ -1,3 +1,14 @@
+## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-260
+
+**Execution ledger:** Inspected exact dev 2f70dfdd2ba585301672ee0c5bd48991133113ac, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory and successful exact-head Quality #43333989736; PR #189 still has no reviews. Reject Unicode noncharacters (U+FDD0..FDEF and any plane's U+FFFE/U+FFFF) in decoded audit JSON keys and values, including nested metadata. Add focused negative cases and frozen positive acceptance. No app bundle changes. Historical 166 gaps / 95 partial unchanged. Exact-head Quality pending; no release or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head structural/Python and Chromium Quality green including Unicode noncharacter regressions.
+2. P0: obtain eligible PR #189 approval and verify required checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, Pages publication SHA and hosted browser smoke.
+4. P1: accessible preferences reset with synchronized src and standalone index.html; confirmation, cancellation, focus and persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
 ## 2026-11-13 — AUDIT-CONTROL-CI-259
 
 **Execution ledger:** Verified dev 5ed71389d00e778916cb321fb2e16302c9535f06, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; reviewed AGENTS.md, living plan, frozen inventory, PR #189 (zero reviews), and failing exact-head PR Quality #43314953850 (536 structural tests; seven control-diagnostic assertions failed). Preserve the established diagnostic prefix and append literal U+XXXX in parentheses; correct the four regex fixtures to escape plus and parentheses. Isolated Python regex compatibility check passed (one test, four code points); full exact-head structural and Chromium CI pending. No standalone bundle changes. Frozen historical 166 gaps / 95 partial unchanged.

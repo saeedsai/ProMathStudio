@@ -202,8 +202,11 @@ def load_ledger(path):
                     raise ValueError("Unicode line separator in feature ledger JSON string")
                 # Non-ASCII spacing can look like an ordinary space in exported
                 # audit metadata but compare differently across consumers.
-                if any(unicodedata.category(char) == "Zs" and char != " " for char in current):
-                    raise ValueError("Nonstandard Unicode space in feature ledger JSON string")
+                for char in current:
+                    if unicodedata.category(char) == "Zs" and char != " ":
+                        raise ValueError(
+                            f"Nonstandard Unicode space in feature ledger JSON string (U+{ord(char):04X})"
+                        )
                 # Format controls (including bidi overrides and zero-width
                 # joiners) can visually spoof arbitrary nested audit metadata.
                 if any(unicodedata.category(char) == "Cf" for char in current):

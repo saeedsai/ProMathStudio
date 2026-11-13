@@ -1,3 +1,14 @@
+## 2026-11-13 — AUDIT-SPACE-FIXTURE-CI-267
+
+**Execution ledger:** Inspected dev b9718d83565431946c4f434c65466dc460cb6005 (base tree 47a88d58396cf330b5d2ebbc131c3c6e6f70ceb8), main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical inventory, failed exact-head Quality #43468820011 and PR #189 (zero reviews). Correct six failing Unicode-space fixtures by constructing actual code points and testing JSON escaped and literal representations in nested keys/values. Improve validator diagnostics to include U+XXXX while retaining prior diagnostic prefix. Twelve isolated JSON decoding/Unicode classification cases passed; full exact-head Python/structural/Chromium CI pending. No application bundle changes. Frozen 166 gaps / 95 partial unchanged; no main/Pages promotion claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python feature-ledger, structural and Chromium Quality green including 12 Unicode-space negative cases and ASCII positive control.
+2. P0: obtain eligible PR #189 approval and verify required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, GitHub Pages publication SHA and hosted browser smoke.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html; confirmation, cancellation, focus and storage persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
 ## 2026-11-13 — AUDIT-NONSTANDARD-SPACE-266
 
 **Execution ledger:** Verified dev fcee64f3139183ca27f8dea80dee03383d9a8893 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head successful Quality #43448073887 and open PR #189 with zero submitted reviews. Reject non-ASCII Unicode category Zs spacing in nested imported JSON keys/values while preserving ordinary ASCII spaces; focused negative key/value cases and positive control. Standalone audit validator/test only; application index.html untouched. Frozen historical inventory 166 gaps / 95 partial unchanged. New exact-head CI pending; no merge or Pages release claimed.

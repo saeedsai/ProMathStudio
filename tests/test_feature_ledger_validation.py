@@ -32,18 +32,23 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path), {"nested": [0.0, 1e-5]})
 
     def test_nested_json_rejects_nonstandard_unicode_spaces(self):
-        # Ordinary ASCII spaces remain valid; visually ambiguous Unicode
-        # spaces are rejected in both nested object keys and values.
+        # Decode real Unicode characters, testing both JSON escape sequences
+        # and literal UTF-8 representations in nested keys and values.
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "export.json"
-            for separator in ("\\u00a0", "\\u202f", "\\u3000"):
-                for in_key in (False, True):
-                    with self.subTest(separator=separator, in_key=in_key):
-                        payload = ({"nested": {"bad" + separator + "key": 1}}
-                                   if in_key else {"nested": ["bad" + separator + "value"]})
-                        path.write_text(json.dumps(payload), encoding="utf-8")
-                        with self.assertRaisesRegex(ValueError, "Nonstandard Unicode space"):
-                            validator.load_ledger(path)
+            for codepoint in (0x00A0, 0x202F, 0x3000):
+                separator = chr(codepoint)
+                for ensure_ascii in (True, False):
+                    for in_key in (False, True):
+                        with self.subTest(codepoint=hex(codepoint),
+                                          escaped=ensure_ascii, in_key=in_key):
+                            payload = ({"nested": {"bad" + separator + "key": 1}}
+                                       if in_key else {"nested": ["bad" + separator + "value"]})
+                            path.write_text(json.dumps(payload, ensure_ascii=ensure_ascii),
+                                            encoding="utf-8")
+                            with self.assertRaisesRegex(
+                                    ValueError, "Nonstandard Unicode space.*U\\+%04X" % codepoint):
+                                validator.load_ledger(path)
             path.write_text('{"nested": {"ordinary key": "ordinary value"}}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path),
                              {"nested": {"ordinary key": "ordinary value"}})

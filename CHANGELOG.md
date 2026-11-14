@@ -1,3 +1,4 @@
+- 2026-11-14 (dev, CI pending): Repair UTF-8 positive Unicode assertion from failed Quality #43640573911; include offending raw bytes in invalid UTF-8 diagnostics with leading/truncated regressions. Frozen 166 gaps / 95 partial unchanged; no release.
 - 2026-11-14 (dev, CI pending): Correct malformed UTF-8 regression fixtures to use raw invalid bytes, retaining decoder-reason and offset assertions. No release.
 - 2026-11-14 (dev, CI pending): Include the UTF-8 decoder reason alongside exact malformed byte offsets in historical audit imports; test invalid leading bytes, truncated multibyte sequences and valid Unicode. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.
 - 2026-11-14 (dev, CI pending): Report first invalid UTF-8 byte offset in historical JSON imports; add two malformed raw-byte regressions and a valid initial BOM control. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.

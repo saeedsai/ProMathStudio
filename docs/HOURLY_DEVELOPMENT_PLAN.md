@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-UTF8-HEX-CI-REPAIR-282
+
+**Execution ledger:** Exact dev 3eae99d45629bbb71f21183132d15d70de88f9a1; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. PR #189 has no submitted reviews. Quality #43640573911 failed 1/550 structural tests: positive Unicode escape decoded to café but fixture expected literal backslash-u. Fix positive expectation, add malformed UTF-8 offending-byte hex diagnostics and focused leading/truncated byte regressions. Isolated fixture checks only; exact-head full Quality pending. No main/Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes 550+ structural tests, historical ledger and Chromium checks.
+2. P0: obtain eligible PR #189 approval; verify all required exact-head checks and protections.
+3. P0: ordinary protected dev-to-main promotion only after gates; verify main Quality.
+4. P0: verify Pages published SHA and hosted smoke against promoted main.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-14 — AUDIT-UTF8-REASON-281
 
 **Execution ledger:** Verified dev 402c6b7761b957fcd60ee2d982ac0cc8c5b5e76d, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, passing exact-head Quality #43618403524 and PR #189 without reviews. Improve malformed UTF-8 audit import errors to include the decoder reason alongside the exact byte offset; add invalid-leading-byte and truncated-sequence regressions with valid Unicode control. Full new-head Quality pending; no main/Pages release. Frozen historical 166 gaps / 95 partial unchanged.

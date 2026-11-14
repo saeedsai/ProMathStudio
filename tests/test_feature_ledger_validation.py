@@ -37,18 +37,18 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "export.json"
             prefix = b'{"nested": "'
-            for suffix, expected in (
-                (b"\xff" + b'"}', "invalid start byte"),
-                (b"\xe2\x82", "unexpected end of data"),
+            for suffix, expected, hex_bytes in (
+                (b"\xff" + b'"}', "invalid start byte", "ff"),
+                (b"\xe2\x82", "unexpected end of data", "e282"),
             ):
                 with self.subTest(suffix=suffix):
                     path.write_bytes(prefix + suffix)
                     with self.assertRaisesRegex(
                             ValueError,
-                            rf"valid UTF-8 at byte offset {len(prefix)}: {expected}"):
+                            rf"valid UTF-8 at byte offset {len(prefix)}: {expected}; offending bytes: {hex_bytes}"):
                         validator.load_ledger(path)
-            path.write_text('{"nested": "caf\\u00e9"}', encoding="utf-8")
-            self.assertEqual(validator.load_ledger(path), {"nested": "caf\\u00e9"})
+            path.write_text('{"nested": "café"}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), {"nested": "café"})
 
     def test_decimal_exponents_beyond_decoder_limit_fail_cleanly(self):
         # JSON accepts large exponent digit sequences; Decimal can reject

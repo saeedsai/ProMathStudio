@@ -111,6 +111,29 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path),
                              {"nested": {"caf\\u00e9": "valid"}})
 
+    def test_nested_json_rejects_private_use_unicode(self):
+        # Both literal and escaped private-use characters must be rejected
+        # in keys and values; ordinary assigned NFC text remains valid.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for codepoint in (0xE000, 0xF0000):
+                for escaped in (True, False):
+                    for in_key in (False, True):
+                        with self.subTest(codepoint=hex(codepoint), escaped=escaped,
+                                          in_key=in_key):
+                            value = "audit" + chr(codepoint)
+                            payload = ({"nested": {value: 1}} if in_key
+                                       else {"nested": [value]})
+                            path.write_text(json.dumps(payload, ensure_ascii=escaped),
+                                            encoding="utf-8")
+                            with self.assertRaisesRegex(
+                                    ValueError,
+                                    r"Private-use Unicode code point.*U[+]" + format(codepoint, "04X")):
+                                validator.load_ledger(path)
+            valid = {"nested": {"caf\\u00e9": "valid"}}
+            path.write_text(json.dumps(valid, ensure_ascii=False), encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), valid)
+
     def test_nested_json_surrogate_diagnostics_and_valid_pair(self):
         # Escaped lone UTF-16 halves are invalid in keys and values, while
         # a valid escaped surrogate pair decodes to a single Unicode scalar.

@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-PRIVATE-USE-UNICODE-278
+
+**Execution ledger:** Inspected dev `667ed85e7aee35f075c0fb814d840267cb75cdad`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, PR #189 (zero reviews), and passing exact-head PR Quality #43597335478. Reject Unicode private-use characters in nested historical JSON keys and values with escaped/literal BMP and supplementary-plane cases; accept assigned NFC Unicode. Local full repository/browser tests unavailable; new exact-head Quality pending. No application bundle change or Pages release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-head Quality for private-use regressions, canonical ledger, structural tests and Chromium smoke.
+2. P0: obtain eligible PR #189 approval and confirm required checks and branch protection before merge.
+3. P0: ordinary dev-to-main PR merge only after all gates; verify main Quality and Pages publication SHA/hosted smoke.
+4. P1: accessible preferences reset in synchronized modular and standalone sources; confirmation, cancel, focus and persistence browser checks.
+5. P1: numerical reference/invalid-input tests for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-UNASSIGNED-UNICODE-277
 
 **Execution ledger:** Inspected exact dev `ffa9e56c2d438241bde4880ffa0aa4180a2d2a68`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen audit, PR #189 and successful exact-head Quality #43592939434. Reject unassigned Unicode code points in nested historical ledger JSON keys/values with escaped/literal negative cases and canonical positive control. Preserve separate noncharacter diagnostics, 166 historical gaps and 95 partials. Full CI for this commit pending; no main/Pages release claimed.

@@ -234,6 +234,13 @@ def load_ledger(path):
                         raise ValueError(
                             f"Unassigned Unicode code point in feature ledger JSON string (U+{ord(char):04X})"
                         )
+                # Private-use code points have no interoperable published
+                # meaning in portable historical audit identifiers/metadata.
+                for char in current:
+                    if unicodedata.category(char) == "Co":
+                        raise ValueError(
+                            f"Private-use Unicode code point in feature ledger JSON string (U+{ord(char):04X})"
+                        )
                 # Unicode noncharacters are legal scalar values but unsuitable
                 # for portable human-readable audit identifiers and metadata.
                 for char in current:

@@ -436,7 +436,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                         path.write_text(json.dumps(payload, ensure_ascii=escaped),
                                         encoding="utf-8")
                         with self.assertRaisesRegex(
-                                ValueError, rf"Unicode format character.*U\\+{codepoint:04X}"):
+                                ValueError, rf"Unicode format character.*U[+]{codepoint:04X}"):
                             validator.load_ledger(path)
             path.write_text('{"nested":["safe visible text"]}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path),

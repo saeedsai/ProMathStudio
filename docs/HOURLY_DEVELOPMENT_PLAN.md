@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-UTF8-REASON-281
+
+**Execution ledger:** Verified dev 402c6b7761b957fcd60ee2d982ac0cc8c5b5e76d, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, passing exact-head Quality #43618403524 and PR #189 without reviews. Improve malformed UTF-8 audit import errors to include the decoder reason alongside the exact byte offset; add invalid-leading-byte and truncated-sequence regressions with valid Unicode control. Full new-head Quality pending; no main/Pages release. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Quality including UTF-8 reason/offset cases, canonical ledger, structural and Chromium checks.
+2. P0: obtain eligible PR #189 approval and verify required exact-head checks and protection before merging.
+3. P0: promote via ordinary protected dev-to-main PR only after gates; verify main Quality, Pages SHA and hosted smoke.
+4. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+5. P1: add independent numerical reference and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-UTF8-OFFSET-280
 
 **Execution ledger:** Inspected exact dev 69fcbc2adb59c5778bced6dd3a70abacd065dd45, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, successful exact-head PR Quality #43613595679 and PR #189 (zero submitted reviews). Improve malformed UTF-8 historical JSON import diagnostics to report the first invalid byte offset. Add two raw-byte negative regressions and an initial UTF-8 BOM positive control. Isolated Python UTF-8 decoding/offset checks passed; new exact-head Quality pending. Standalone application bundle unaffected. Frozen historical 166 gaps / 95 partial unchanged; no main/Pages release.

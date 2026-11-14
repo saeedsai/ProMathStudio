@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-UTF8-OFFSET-280
+
+**Execution ledger:** Inspected exact dev 69fcbc2adb59c5778bced6dd3a70abacd065dd45, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, successful exact-head PR Quality #43613595679 and PR #189 (zero submitted reviews). Improve malformed UTF-8 historical JSON import diagnostics to report the first invalid byte offset. Add two raw-byte negative regressions and an initial UTF-8 BOM positive control. Isolated Python UTF-8 decoding/offset checks passed; new exact-head Quality pending. Standalone application bundle unaffected. Frozen historical 166 gaps / 95 partial unchanged; no main/Pages release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes historical ledger, malformed UTF-8 byte-offset regressions, structural tests and Chromium smoke.
+2. P0: obtain eligible PR #189 approval and verify exact-head required checks and protection before any merge.
+3. P0: ordinary protected dev-to-main PR promotion after gates; verify main Quality, Pages publication SHA and hosted smoke.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html, with confirm/cancel/focus/persistence browser regressions.
+5. P1: independent numerical references and invalid-input cases for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-RENDERING-MODIFIERS-279
 
 **Execution ledger:** Verified dev bd81063e435adc2bdb4009f02877f3ef240a7c93 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, repository contract, frozen inventory, successful exact-head PR Quality #43602445087 and PR #189 without submitted reviews. Reject invisible combining grapheme joiner and Unicode variation selectors in nested historical JSON keys/values, preserving assigned NFC Unicode; add 12 escaped/literal negative cases and positive control. Full exact-head Quality pending; no main/Pages release. Frozen historical 166 gaps / 95 partial unchanged.

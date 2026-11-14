@@ -279,7 +279,7 @@ def load_ledger(path):
     except json.JSONDecodeError as exc:
         raise ValueError(f"Malformed feature ledger JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}") from exc
     except UnicodeDecodeError as exc:
-        raise ValueError("Feature ledger JSON must be valid UTF-8") from exc
+        raise ValueError(f"Feature ledger JSON must be valid UTF-8 at byte offset {exc.start}") from exc
     except OSError as exc:
         raise ValueError(f"Cannot read feature ledger JSON: {exc.strerror or exc}") from exc
     except RecursionError as exc:

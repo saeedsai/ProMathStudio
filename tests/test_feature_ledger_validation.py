@@ -18,6 +18,19 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_invalid_utf8_reports_byte_offset_and_accepts_initial_bom(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            prefix = b'{"nested": ["'
+            for invalid_byte in (0xFF, 0xC3):
+                with self.subTest(invalid_byte=invalid_byte):
+                    path.write_bytes(prefix + bytes([invalid_byte]) + b'"]}')
+                    with self.assertRaisesRegex(
+                            ValueError, rf"valid UTF-8 at byte offset {len(prefix)}"):
+                        validator.load_ledger(path)
+            path.write_bytes(bytes([0xEF, 0xBB, 0xBF]) + b'{"nested": ["valid"]}')
+            self.assertEqual(validator.load_ledger(path), {"nested": ["valid"]})
+
     def test_decimal_exponents_beyond_decoder_limit_fail_cleanly(self):
         # JSON accepts large exponent digit sequences; Decimal can reject
         # them even when float() silently underflows to zero.

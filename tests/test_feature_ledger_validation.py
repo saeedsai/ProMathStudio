@@ -38,8 +38,8 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path = Path(directory) / "export.json"
             prefix = b'{"nested": "'
             for suffix, expected in (
-                (b"\\xff" + b'"}', "invalid start byte"),
-                (b"\\xe2\\x82", "unexpected end of data"),
+                (b"\xff" + b'"}', "invalid start byte"),
+                (b"\xe2\x82", "unexpected end of data"),
             ):
                 with self.subTest(suffix=suffix):
                     path.write_bytes(prefix + suffix)

@@ -1,3 +1,4 @@
+- 2026-11-14 (dev, CI pending): Correct malformed UTF-8 regression fixtures to use raw invalid bytes, retaining decoder-reason and offset assertions. No release.
 - 2026-11-14 (dev, CI pending): Include the UTF-8 decoder reason alongside exact malformed byte offsets in historical audit imports; test invalid leading bytes, truncated multibyte sequences and valid Unicode. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.
 - 2026-11-14 (dev, CI pending): Report first invalid UTF-8 byte offset in historical JSON imports; add two malformed raw-byte regressions and a valid initial BOM control. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.
 - 2026-11-14 (dev, CI pending): Reject Unicode combining grapheme joiner and variation selectors in nested historical JSON keys/values, with 12 escaped/literal negative cases and canonical positive control; frozen 166 gaps / 95 partial unchanged. No main/Pages release.

@@ -442,6 +442,23 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path),
                              {"nested": ["safe visible text"]})
 
+    def test_noncharacter_diagnostic_identifies_codepoint(self):
+        # Escaped and literal JSON must identify the actual decoded scalar.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for codepoint in (0xFDD0, 0xFFFE, 0x10FFFF):
+                for escaped in (True, False):
+                    with self.subTest(codepoint=codepoint, escaped=escaped):
+                        payload = {"nested": ["safe" + chr(codepoint)]}
+                        path.write_text(json.dumps(payload, ensure_ascii=escaped),
+                                        encoding="utf-8")
+                        with self.assertRaisesRegex(
+                                ValueError, rf"Unicode noncharacter.*U[+]{codepoint:04X}"):
+                            validator.load_ledger(path)
+            path.write_text('{"nested":["safe visible text"]}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"nested": ["safe visible text"]})
+
     def test_nested_unicode_validation_is_iterative(self):
         # Decoder-accepted nesting must not overflow the post-parse validator.
         with tempfile.TemporaryDirectory() as directory:

@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-NONCHARACTER-DIAGNOSTIC-272
+
+**Execution ledger:** Inspected exact dev 99dcdb3084e229faf5806ba45fe617cd3e4adaf4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical inventory and successful exact-head Quality #43549423087. PR #189 remains open with zero submitted reviews; no main/Pages release verified. Improve nested audit JSON noncharacter errors with literal U+XXXX code points, add six escaped/literal negative cases for U+FDD0, U+FFFE and U+10FFFF plus printable positive control. Six isolated JSON decode/regex checks passed; full new exact-head Python/structural/Chromium CI pending. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes historical-ledger, structural and Chromium tests including six noncharacter diagnostic cases.
+2. P0: obtain eligible PR #189 approval and verify all required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, GitHub Pages published SHA and hosted smoke tests after promotion.
+4. P1: implement accessible preferences reset with synchronized modular source and standalone index.html; browser regressions for confirmation, cancellation, focus and persistence.
+5. P1: independent numerical reference and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-FORMAT-REGEX-FIX-271
 
 **Execution ledger:** Correct the focused format-control regression's literal-plus regex to use `U[+]` so it matches diagnostics such as U+202E, not a backslash. No validator behavior changes; retain all six negative and one positive cases. Exact-head CI pending. Historical 166 gaps / 95 partial unchanged; PR #189 approval and Pages promotion remain pending.

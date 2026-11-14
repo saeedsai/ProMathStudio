@@ -134,6 +134,27 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_text(json.dumps(valid, ensure_ascii=False), encoding="utf-8")
             self.assertEqual(validator.load_ledger(path), valid)
 
+    def test_nested_json_rejects_invisible_rendering_modifiers(self):
+        # NFC does not remove grapheme joiners or variation selectors.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for codepoint in (0x034F, 0xFE0F, 0xE0100):
+                for escaped in (True, False):
+                    for in_key in (False, True):
+                        with self.subTest(codepoint=hex(codepoint), escaped=escaped,
+                                          in_key=in_key):
+                            value = "audit" + chr(codepoint)
+                            payload = ({"nested": {value: 1}} if in_key
+                                       else {"nested": [value]})
+                            path.write_text(json.dumps(payload, ensure_ascii=escaped),
+                                            encoding="utf-8")
+                            with self.assertRaisesRegex(
+                                    ValueError, r"Unicode rendering modifier.*U[+]" + format(codepoint, "04X")):
+                                validator.load_ledger(path)
+            valid = {"nested": {"caf\\u00e9": "valid"}}
+            path.write_text(json.dumps(valid, ensure_ascii=False), encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), valid)
+
     def test_nested_json_surrogate_diagnostics_and_valid_pair(self):
         # Escaped lone UTF-16 halves are invalid in keys and values, while
         # a valid escaped surrogate pair decodes to a single Unicode scalar.

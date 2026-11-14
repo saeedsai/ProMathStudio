@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-RENDERING-MODIFIERS-279
+
+**Execution ledger:** Verified dev bd81063e435adc2bdb4009f02877f3ef240a7c93 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, repository contract, frozen inventory, successful exact-head PR Quality #43602445087 and PR #189 without submitted reviews. Reject invisible combining grapheme joiner and Unicode variation selectors in nested historical JSON keys/values, preserving assigned NFC Unicode; add 12 escaped/literal negative cases and positive control. Full exact-head Quality pending; no main/Pages release. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Quality for rendering modifiers, canonical ledger, structural and Chromium regressions.
+2. P0: obtain eligible approval on PR #189 and verify exact-head required checks and protection before merge.
+3. P0: ordinary protected dev-to-main PR promotion after gates, then main Quality and Pages SHA/hosted smoke.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html, with confirm/cancel/focus/persistence browser tests.
+5. P1: independent numerical references and invalid-input cases for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-PRIVATE-USE-UNICODE-278
 
 **Execution ledger:** Inspected dev `667ed85e7aee35f075c0fb814d840267cb75cdad`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, PR #189 (zero reviews), and passing exact-head PR Quality #43597335478. Reject Unicode private-use characters in nested historical JSON keys and values with escaped/literal BMP and supplementary-plane cases; accept assigned NFC Unicode. Local full repository/browser tests unavailable; new exact-head Quality pending. No application bundle change or Pages release. Historical 166 gaps / 95 partial unchanged.

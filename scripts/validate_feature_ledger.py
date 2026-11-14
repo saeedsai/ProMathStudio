@@ -234,6 +234,14 @@ def load_ledger(path):
                         raise ValueError(
                             f"Unassigned Unicode code point in feature ledger JSON string (U+{ord(char):04X})"
                         )
+                # Variation selectors and the combining grapheme joiner can
+                # change or hide rendered audit labels without changing NFC.
+                for char in current:
+                    codepoint = ord(char)
+                    if codepoint == 0x034F or 0xFE00 <= codepoint <= 0xFE0F or 0xE0100 <= codepoint <= 0xE01EF:
+                        raise ValueError(
+                            f"Unicode rendering modifier in feature ledger JSON string (U+{codepoint:04X})"
+                        )
                 # Private-use code points have no interoperable published
                 # meaning in portable historical audit identifiers/metadata.
                 for char in current:

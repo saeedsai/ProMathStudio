@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-UNASSIGNED-UNICODE-277
+
+**Execution ledger:** Inspected exact dev `ffa9e56c2d438241bde4880ffa0aa4180a2d2a68`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen audit, PR #189 and successful exact-head Quality #43592939434. Reject unassigned Unicode code points in nested historical ledger JSON keys/values with escaped/literal negative cases and canonical positive control. Preserve separate noncharacter diagnostics, 166 historical gaps and 95 partials. Full CI for this commit pending; no main/Pages release claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-head Quality for unassigned Unicode cases, canonical ledger, structural and Chromium suites.
+2. P0: obtain eligible PR #189 approval and confirm required checks before any merge.
+3. P0: ordinary protected dev-to-main promotion, then verify main Quality and Pages SHA/hosted smoke.
+4. P1: accessible preferences reset with synchronized modular/standalone source, confirmation, focus, cancel and persistence browser checks.
+5. P1: independent numerical reference and invalid-input tests for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-SURROGATE-ASSERTION-CI-REPAIR-276
 
 **Execution ledger:** Inspected dev `09222eebe4ddb8fce3ffa03f58aeffa6e8fc702e`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, PR #189 (zero reviews), and failed exact-head Quality #43582928342 (545 structural tests; one failure). Correct the positive surrogate-pair regression expectation to the actual decoded U+1F600 scalar rather than a literal backslash-U sequence. Preserve four negative lone-surrogate cases. Local isolated JSON round-trip and equality check passed; exact-head full structural/Chromium CI pending. No standalone bundle changes. Frozen 166 gaps / 95 partial unchanged.

@@ -224,6 +224,16 @@ def load_ledger(path):
                         raise ValueError(
                             f"Unpaired Unicode surrogate in feature ledger JSON (U+{ord(char):04X})"
                         )
+                # Unassigned code points have no stable published character
+                # meaning and should not enter portable historical audit exports.
+                for char in current:
+                    if unicodedata.category(char) == "Cn" and not (
+                        0xFDD0 <= ord(char) <= 0xFDEF or
+                        (ord(char) & 0xFFFE) == 0xFFFE
+                    ):
+                        raise ValueError(
+                            f"Unassigned Unicode code point in feature ledger JSON string (U+{ord(char):04X})"
+                        )
                 # Unicode noncharacters are legal scalar values but unsuitable
                 # for portable human-readable audit identifiers and metadata.
                 for char in current:

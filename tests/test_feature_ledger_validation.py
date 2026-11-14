@@ -91,6 +91,26 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                              {"nested": {"safe key": "safe value"}})
 
 
+    def test_nested_json_rejects_unassigned_unicode_codepoints(self):
+        # U+0378 is permanently unassigned in current Unicode data.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for escaped in (True, False):
+                for in_key in (False, True):
+                    with self.subTest(escaped=escaped, in_key=in_key):
+                        value = "audit" + chr(0x0378)
+                        payload = ({"nested": {value: 1}} if in_key
+                                   else {"nested": [value]})
+                        path.write_text(json.dumps(payload, ensure_ascii=escaped),
+                                        encoding="utf-8")
+                        with self.assertRaisesRegex(
+                                ValueError, r"Unassigned Unicode code point.*U[+]0378"):
+                            validator.load_ledger(path)
+            path.write_text(json.dumps({"nested": {"caf\\u00e9": "valid"}}),
+                            encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"nested": {"caf\\u00e9": "valid"}})
+
     def test_nested_json_surrogate_diagnostics_and_valid_pair(self):
         # Escaped lone UTF-16 halves are invalid in keys and values, while
         # a valid escaped surrogate pair decodes to a single Unicode scalar.

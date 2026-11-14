@@ -64,8 +64,10 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                                    else {"nested": ["cafe\u0301"]})
                         path.write_text(json.dumps(payload, ensure_ascii=ensure_ascii),
                                         encoding="utf-8")
-                        with self.assertRaisesRegex(ValueError, "Non-NFC feature ledger JSON string"):
+                        with self.assertRaisesRegex(ValueError, "Non-NFC feature ledger JSON (?:key|string value)") as error:
                             validator.load_ledger(path)
+                        expected = "key" if in_key else "string value"
+                        self.assertIn("Non-NFC feature ledger JSON " + expected, str(error.exception))
             path.write_text(json.dumps({"nested": {"caf\u00e9": "caf\u00e9"}}), encoding="utf-8")
             self.assertEqual(validator.load_ledger(path), {"nested": {"caf\u00e9": "caf\u00e9"}})
 
@@ -246,7 +248,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
 
     def test_json_object_keys_require_nfc_even_when_nested(self):
         # JSON permits canonically equivalent raw keys; reject ambiguous
-        # decomposed spellings without altering ordinary Unicode values.
+        # decomposed spellings, including in nested JSON objects.
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "export.json"
             for payload in ('{"cafe\\u0301": 1}',
@@ -257,7 +259,10 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "Non-NFC feature ledger JSON key"):
                         validator.load_ledger(path)
             path.write_text('{"café": {"title": "cafe\\u0301"}}', encoding="utf-8")
-            self.assertEqual(validator.load_ledger(path), {"café": {"title": "café"}})
+            with self.assertRaisesRegex(ValueError, "Non-NFC feature ledger JSON string value"):
+                validator.load_ledger(path)
+            path.write_text('{"café": {"title": "café"}}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), {"café": {"title": "café"}})
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 
     def test_historical_inventory_is_accepted(self):

@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-NFC-CI-REPAIR-269
+
+**Execution ledger:** Inspected exact dev bfd14609c3d7be3a40f2aacfca9aed9125a06342, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md and frozen inventory. Quality #43530946098 failed structural tests (542 tests, two failures and one error): key-position cases incorrectly expected value diagnostics, and an older test accepted a non-NFC nested value. Correct both assertions without weakening validation; clarify the validator's value-specific error message. CI for this commit pending. PR #189 has zero reviews; no merge or Pages claim. Historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes structural tests including both key/value NFC diagnostics, historical ledger and Chromium browser checks.
+2. P0: eligible PR #189 approval and all required exact-head checks verified before ordinary protected merge.
+3. P0: verify main Quality, GitHub Pages published SHA and hosted smoke after promotion.
+4. P1: accessible preferences reset synchronized between modular source and standalone index.html; confirmation, cancellation, focus and persistence browser tests.
+5. P1: independent numerical references and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-NESTED-VALUE-NFC-268
 
 **Execution ledger:** Exact dev 65ff495ec10bf5edcfc0490f994f90c816c099c9, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, successful Quality #43506826108 and PR #189 without reviews. Normalize validation of all nested JSON strings: reject non-NFC decoded values as well as keys, including escaped and literal representations. Add eight negative subcases and canonical positive control. Historical inventory 166 gaps / 95 partial unchanged. New exact-head CI pending; no release/Pages claim.

@@ -107,7 +107,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                                 ValueError, r"Unpaired Unicode surrogate.*U[+]" + format(codepoint, "04X")):
                             validator.load_ledger(path)
             path.write_text(json.dumps({"nested": ["\U0001f600"]}), encoding="utf-8")
-            self.assertEqual(validator.load_ledger(path), {"nested": ["\\U0001f600"]})
+            self.assertEqual(validator.load_ledger(path), {"nested": ["\U0001f600"]})
 
     @classmethod
     def setUpClass(cls):

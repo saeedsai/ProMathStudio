@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-SURROGATE-ASSERTION-CI-REPAIR-276
+
+**Execution ledger:** Inspected dev `09222eebe4ddb8fce3ffa03f58aeffa6e8fc702e`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, PR #189 (zero reviews), and failed exact-head Quality #43582928342 (545 structural tests; one failure). Correct the positive surrogate-pair regression expectation to the actual decoded U+1F600 scalar rather than a literal backslash-U sequence. Preserve four negative lone-surrogate cases. Local isolated JSON round-trip and equality check passed; exact-head full structural/Chromium CI pending. No standalone bundle changes. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes ledger, structural tests (including four lone-surrogate negatives and scalar positive), embedded Python compile and Chromium smoke.
+2. P0: obtain eligible approval for PR #189 and verify all required exact-head checks; do not merge without approval.
+3. P0: ordinary protected dev-to-main promotion after gates; verify main Quality and Pages published SHA plus hosted smoke.
+4. P1: implement accessible preferences reset in synchronized modular source and standalone index.html; confirm/cancel/focus/persistence browser tests.
+5. P1: add independent numerical reference and invalid-input tests for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-SURROGATE-PAIR-CI-REPAIR-275
 
 **Execution ledger:** Inspected exact dev a086d11d7781810505b8ee9694d1bf716dd0397c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical inventory, PR #189 (zero submitted reviews), and exact-head PR Quality #43578315570. Quality failed structural tests (545 run, one failure) because the positive surrogate-pair fixture wrote literal escaped backslashes instead of a JSON surrogate pair. Replace it with json.dumps of the real U+1F600 scalar so the decoder receives the escaped pair; preserve the four lone-surrogate negative checks. Isolated local Python JSON round-trip passed; full exact-head Quality and Chromium pending. Standalone index.html unaffected. Frozen historical 166 gaps / 95 partial unchanged.

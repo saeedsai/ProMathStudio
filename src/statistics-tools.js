@@ -184,7 +184,163 @@ function describeTable({table,column,column2=null}={}){
  const out=describeColumns(rows,c1,c2);out.table=t.name;out.column=t.columns[c1];out.column2=c2===null?null:t.columns[c2];return out;
 }
 
-M.statistics={logGamma,gammaP,gammaQ,betaI,erf,erfc,distribution,evaluate,describe,correlate,describeColumns,describeTable,quantile7};
+/* ---------- hypothesis tests and confidence intervals ---------- */
+const ALTERNATIVES=['two-sided','less','greater'];
+function alternativeOf(a){a=String(a||'two-sided').toLowerCase();if(!ALTERNATIVES.includes(a))throw Error('Alternative must be two-sided, less or greater.');return a;}
+function confidenceOf(c){const v=num(c??0.95,'Confidence level');if(!(v>0&&v<1))throw Error('Confidence level must be strictly between 0 and 1.');return v;}
+function sample(values,name,min=2){
+ const v=Array.from(values||[],x=>{const n=toNumber(x);if(n===null)throw Error(name+' must contain only finite numbers.');return n;});
+ if(v.length<min)throw Error(name+' needs at least '+min+' values.');if(v.length>1e6)throw Error(name+' may contain at most 1,000,000 values.');
+ const mean=meanOf(v);let m2=0;for(const x of v){const d=x-mean;m2+=d*d;}return {n:v.length,mean,variance:m2/(v.length-1)};
+}
+/** p-value of a statistic under a symmetric (t/normal) reference distribution. */
+function pValue(d,stat,alt){if(alt==='less')return d.cdf(stat);if(alt==='greater')return d.sf(stat);return Math.min(1,2*d.sf(Math.abs(stat)));}
+function symmetricInterval(d,est,se,alt,conf){
+ if(alt==='less')return [-Infinity,est+d.quantile(conf)*se];if(alt==='greater')return [est-d.quantile(conf)*se,Infinity];
+ const q=d.quantile(1-(1-conf)/2);return [est-q*se,est+q*se];
+}
+const T_NOTE='Assumes independent observations from (approximately) normal populations; the t procedure is robust to moderate non-normality for larger n but not to outliers or dependence.';
+function tResult(test,stat,df,alt,conf,est,se,extra){
+ const d=builders.t({nu:df});
+ return Object.assign({type:'hypothesis',test,statisticName:'t',statistic:stat,df,pValue:pValue(d,stat,alt),alternative:alt,confidence:conf,estimate:est,standardError:se,ci:symmetricInterval(d,est,se,alt,conf),warnings:[]},extra);
+}
+function ttestOne(values,{mu=0,alternative,confidence}={}){
+ const s=sample(values,'Sample');mu=num(mu,'Hypothesized mean μ0');const alt=alternativeOf(alternative),conf=confidenceOf(confidence);
+ if(!(s.variance>0))throw Error('Sample has zero variance; the t statistic is undefined.');
+ const sd=Math.sqrt(s.variance),se=sd/Math.sqrt(s.n);
+ return tResult('One-sample t-test',(s.mean-mu)/se,s.n-1,alt,conf,s.mean,se,{n:s.n,mu,sampleStd:sd,ciLabel:'Confidence interval for the mean',effectSize:{name:"Cohen's d",value:(s.mean-mu)/sd},assumptions:T_NOTE});
+}
+function ttestTwo(x,y,{equalVariance=false,mu=0,alternative,confidence}={}){
+ const a=sample(x,'Sample 1'),b=sample(y,'Sample 2');mu=num(mu,'Hypothesized difference Δ0');const alt=alternativeOf(alternative),conf=confidenceOf(confidence);
+ if(!(a.variance>0)&&!(b.variance>0))throw Error('Both samples have zero variance; the t statistic is undefined.');
+ const diff=a.mean-b.mean;let se,df,effect,test,note;
+ if(equalVariance){
+  df=a.n+b.n-2;const sp2=((a.n-1)*a.variance+(b.n-1)*b.variance)/df;se=Math.sqrt(sp2*(1/a.n+1/b.n));effect={name:"Cohen's d (pooled SD)",value:diff/Math.sqrt(sp2)};test='Pooled-variance two-sample t-test';
+  note=T_NOTE+' The pooled test additionally assumes equal population variances; prefer Welch when unsure.';
+ }else{
+  const va=a.variance/a.n,vb=b.variance/b.n;se=Math.sqrt(va+vb);df=(va+vb)*(va+vb)/(va*va/(a.n-1)+vb*vb/(b.n-1));effect={name:"Cohen's d (average-variance SD)",value:diff/Math.sqrt((a.variance+b.variance)/2)};test='Welch two-sample t-test';
+  note=T_NOTE+' The Welch test does not assume equal variances; df is the Welch–Satterthwaite approximation.';
+ }
+ return tResult(test,(diff-mu)/se,df,alt,conf,diff,se,{n:a.n,n2:b.n,mean1:a.mean,mean2:b.mean,variance1:a.variance,variance2:b.variance,mu,ciLabel:'Confidence interval for mean1 − mean2',effectSize:effect,assumptions:note});
+}
+function ttestPaired(x,y,{mu=0,alternative,confidence}={}){
+ x=Array.from(x||[]);y=Array.from(y||[]);if(x.length!==y.length)throw Error('Paired samples must have equal length.');
+ const d=x.map((v,i)=>{const a=toNumber(v),b=toNumber(y[i]);if(a===null||b===null)throw Error('Paired samples must contain only finite numbers.');return a-b;});
+ const r=ttestOne(d,{mu,alternative,confidence});
+ return Object.assign(r,{test:'Paired t-test',ciLabel:'Confidence interval for the mean difference (sample 1 − sample 2)',effectSize:{name:"Cohen's d_z",value:r.effectSize.value},
+  assumptions:'Assumes independent pairs whose differences are (approximately) normal; observations within a pair may be dependent.'});
+}
+function counts(values,name){
+ return Array.from(values||[],x=>{const n=toNumber(x);if(n===null)throw Error(name+' must contain only finite numbers.');if(n<0)throw Error(name+' must not contain negative counts.');return n;});
+}
+const CHI_NOTE='Assumes independent observations, each counted in exactly one cell; the chi-square approximation needs expected counts ≥ 5 in (nearly) all cells.';
+function chisqGof(observed,expected=null,{ddof=0}={}){
+ const o=counts(observed,'Observed counts');if(o.length<2)throw Error('Goodness-of-fit needs at least two categories.');if(o.length>1000)throw Error('At most 1,000 categories are supported.');
+ const total=o.reduce((s,x)=>s+x,0);if(!(total>0))throw Error('Observed counts must have a positive total.');
+ let e;
+ if(expected===null||expected===undefined||(Array.isArray(expected)&&!expected.length))e=o.map(()=>total/o.length);
+ else{
+  const raw=counts(expected,'Expected counts');if(raw.length!==o.length)throw Error('Expected counts must have the same number of categories as observed counts.');
+  if(raw.some(x=>x===0))throw Error('Expected counts must be positive; an expected count of 0 makes the statistic undefined.');
+  const sum=raw.reduce((s,x)=>s+x,0);e=raw.map(x=>x*total/sum);
+ }
+ ddof=count(ddof,'ddof',o.length-2);const df=o.length-1-ddof;let stat=0;for(let i=0;i<o.length;i++){const d=o[i]-e[i];stat+=d*d/e[i];}
+ const warnings=e.some(x=>x<5)?['Some expected counts are below 5; the chi-square approximation may be unreliable.']:[];
+ return {type:'hypothesis',test:'Chi-square goodness-of-fit',statisticName:'χ²',statistic:stat,df,pValue:builders.chisquare({k:df}).sf(stat),alternative:'greater',n:total,categories:o.length,observed:o,expected:e,
+  effectSize:{name:"Cohen's w",value:Math.sqrt(stat/total)},ci:null,warnings,assumptions:CHI_NOTE+' Expected values are rescaled proportionally to the observed total (blank = uniform).'};
+}
+function chisqIndependence(table,{yates=false}={}){
+ if(!Array.isArray(table)||table.length<2)throw Error('Contingency table needs at least two rows.');if(table.length>10)throw Error('Contingency table may have at most 10 rows.');
+ const rows=table.map((r,i)=>counts(r,'Row '+(i+1))),c=rows[0].length;
+ if(c<2)throw Error('Contingency table needs at least two columns.');if(c>10)throw Error('Contingency table may have at most 10 columns.');
+ if(rows.some(r=>r.length!==c))throw Error('Every contingency-table row must have the same number of columns.');
+ const rs=rows.map(r=>r.reduce((s,x)=>s+x,0)),cs=rows[0].map((_,j)=>rows.reduce((s,r)=>s+r[j],0)),N=rs.reduce((s,x)=>s+x,0);
+ if(rs.some(x=>x===0)||cs.some(x=>x===0))throw Error('A row or column total is 0, giving an expected count of 0; remove empty rows/columns.');
+ const df=(rows.length-1)*(c-1),correct=!!yates&&df===1,expected=rows.map((_,i)=>cs.map(cj=>rs[i]*cj/N));let stat=0;
+ for(let i=0;i<rows.length;i++)for(let j=0;j<c;j++){let d=Math.abs(rows[i][j]-expected[i][j]);if(correct)d-=Math.min(0.5,d);stat+=d*d/expected[i][j];}
+ const warnings=expected.some(r=>r.some(x=>x<5))?['Some expected counts are below 5; the chi-square approximation may be unreliable (consider an exact test).']:[];
+ return {type:'hypothesis',test:'Chi-square test of independence'+(correct?' (Yates continuity correction)':''),statisticName:'χ²',statistic:stat,df,pValue:builders.chisquare({k:df}).sf(stat),alternative:'greater',n:N,rows:rows.length,columns:c,expected,
+  effectSize:{name:"Cramér's V",value:Math.sqrt(stat/(N*Math.min(rows.length-1,c-1)))},ci:null,warnings,assumptions:CHI_NOTE+' Tests independence of the row and column classifications.'};
+}
+function successes(k,n){n=count(n,'Trials n',1e7);if(n<1)throw Error('Trials n must be at least 1.');k=count(k,'Successes k',1e7);if(k>n)throw Error('Successes k cannot exceed trials n.');return [k,n];}
+function nullProportion(p){const v=num(p,'Null proportion p0');if(!(v>0&&v<1))throw Error('Null proportion p0 must be strictly between 0 and 1.');return v;}
+/** Wilson score interval; one-sided alternatives give the matching one-sided bound. */
+function wilson(k,n,{confidence,alternative}={}){
+ [k,n]=successes(k,n);const conf=confidenceOf(confidence),alt=alternativeOf(alternative),N=builders.normal({});
+ const z=N.quantile(alt==='two-sided'?1-(1-conf)/2:conf),ph=k/n,z2=z*z,den=1+z2/n,centre=(ph+z2/(2*n))/den,half=z/den*Math.sqrt(ph*(1-ph)/n+z2/(4*n*n));
+ const lo=Math.max(0,centre-half),hi=Math.min(1,centre+half);return alt==='less'?[0,hi]:alt==='greater'?[lo,1]:[lo,hi];
+}
+function propZTest(k,n,{p0=0.5,alternative,confidence}={}){
+ [k,n]=successes(k,n);p0=nullProportion(p0);const alt=alternativeOf(alternative),conf=confidenceOf(confidence),ph=k/n,se=Math.sqrt(p0*(1-p0)/n),z=(ph-p0)/se;
+ const warnings=n*p0<10||n*(1-p0)<10?['n·p0 or n·(1 − p0) is below 10; the normal approximation may be poor — prefer the exact binomial test.']:[];
+ return {type:'hypothesis',test:'One-proportion z-test',statisticName:'z',statistic:z,df:null,pValue:pValue(builders.normal({}),z,alt),alternative:alt,confidence:conf,estimate:ph,k,n,p0,standardError:se,
+  ci:wilson(k,n,{confidence:conf,alternative:alt}),ciLabel:'Wilson score interval for p',effectSize:{name:"Cohen's h",value:2*Math.asin(Math.sqrt(ph))-2*Math.asin(Math.sqrt(p0))},warnings,
+  assumptions:'Assumes n independent Bernoulli trials with constant success probability; the z statistic uses the null standard error and a normal approximation.'};
+}
+function bisect(f,lo,hi){for(let i=0;i<200;i++){const mid=(lo+hi)/2;if(mid===lo||mid===hi)break;if(f(mid))hi=mid;else lo=mid;}return (lo+hi)/2;}
+/** Clopper–Pearson exact interval by bisection on regularized incomplete beta tail probabilities. */
+function clopperPearson(k,n,conf=0.95,alt='two-sided'){
+ [k,n]=successes(k,n);conf=confidenceOf(conf);alt=alternativeOf(alt);const a=alt==='two-sided'?(1-conf)/2:1-conf;
+ const lower=k===0?0:bisect(p=>betaI(k,n-k+1,p,1-p)>=a,0,1),upper=k===n?1:bisect(p=>betaI(n-k,k+1,1-p,p)<=a,0,1);
+ return alt==='less'?[0,upper]:alt==='greater'?[lower,1]:[lower,upper];
+}
+function binomTest(k,n,{p=0.5,alternative,confidence}={}){
+ [k,n]=successes(k,n);if(n>1e6)throw Error('Exact binomial test supports at most 1,000,000 trials.');
+ const p0=nullProportion(p),alt=alternativeOf(alternative),conf=confidenceOf(confidence),B=builders.binomial({n,p:p0});
+ const upperTail=x=>x<0?1:x>=n?0:betaI(x+1,n-x,p0,1-p0);let pv;
+ if(alt==='less')pv=B.cdf(k);else if(alt==='greater')pv=upperTail(k-1);
+ else{
+  const d=B.pdf(k)*(1+1e-7),mode=n*p0;
+  if(k===mode)pv=1;
+  else if(k<mode){let lo=Math.ceil(mode),hi=n+1;while(lo<hi){const m=Math.floor((lo+hi)/2);if(B.pdf(m)<=d)hi=m;else lo=m+1;}pv=B.cdf(k)+upperTail(lo-1);}
+  else{/* pmf is non-decreasing on 0..floor(np): y = count of those outcomes with pmf ≤ d. */
+   let y=0,hi=Math.floor(mode)+1;while(y<hi){const m=Math.floor((y+hi)/2);if(B.pdf(m)<=d)y=m+1;else hi=m;}
+   pv=(y>0?B.cdf(y-1):0)+upperTail(k-1);}
+  pv=Math.min(1,pv);
+ }
+ return {type:'hypothesis',test:'Exact binomial test',statisticName:'k',statistic:k,df:null,pValue:pv,alternative:alt,confidence:conf,estimate:k/n,k,n,p0,ci:clopperPearson(k,n,conf,alt),ciLabel:'Clopper–Pearson exact interval for p',
+  effectSize:{name:"Cohen's h",value:2*Math.asin(Math.sqrt(k/n))-2*Math.asin(Math.sqrt(p0))},warnings:[],
+  assumptions:'Assumes n independent Bernoulli trials with constant success probability. The two-sided p sums all outcomes no more likely than k (relative tolerance 1 + 1e-7); the Clopper–Pearson interval is conservative.'};
+}
+function varianceTest(values,{sigma2=null,alternative,confidence}={}){
+ const s=sample(values,'Sample'),alt=alternativeOf(alternative),conf=confidenceOf(confidence);if(!(s.variance>0))throw Error('Sample has zero variance; a variance interval needs spread in the data.');
+ const df=s.n-1,C=builders.chisquare({k:df}),ss=df*s.variance;let ci;
+ if(alt==='less')ci=[0,ss/C.quantile(1-conf)];else if(alt==='greater')ci=[ss/C.quantile(conf),Infinity];else ci=[ss/C.quantile(1-(1-conf)/2),ss/C.quantile((1-conf)/2)];
+ const has=sigma2!==null&&sigma2!==undefined&&String(sigma2).trim()!=='';let stat=null,pv=null,s2=null;
+ if(has){s2=positive(sigma2,'Null variance σ0²');stat=ss/s2;pv=alt==='less'?C.cdf(stat):alt==='greater'?C.sf(stat):Math.min(1,2*Math.min(C.cdf(stat),C.sf(stat)));}
+ return {type:'hypothesis',test:'Chi-square variance test / interval',statisticName:'χ²',statistic:stat,df,pValue:pv,alternative:alt,confidence:conf,estimate:s.variance,n:s.n,sigma2:s2,ci,ciLabel:'Confidence interval for σ²',
+  effectSize:has?{name:'Variance ratio s²/σ0²',value:s.variance/s2}:null,warnings:[],
+  assumptions:'Assumes independent observations from a normal population; unlike the t-test, this interval is NOT robust to non-normality.'};
+}
+/** Parse a comma/space/semicolon separated list of numbers (plain numeric literals only, no expression evaluation). */
+function parseList(text,name='List'){
+ return String(text??'').split(/[\s,;]+/).filter(Boolean).map(s=>{const n=Number(s);if(!Number.isFinite(n))throw Error(name+': "'+s.slice(0,24)+'" is not a finite number.');return n;});
+}
+/** Parse a contingency table: rows separated by ';' or newlines, cells by commas or spaces. */
+function parseMatrix(text){return String(text??'').split(/[;\n]+/).map(r=>r.trim()).filter(Boolean).map((r,i)=>parseList(r,'Row '+(i+1)));}
+function tableOf(name){const T=M.dataTables;if(!T)throw Error('Data Tables are unavailable.');const t=T.tables.find(s=>s.name===name||s.id===name);if(!t)throw Error('Choose an existing data table.');return {t,rows:typeof T.calculate==='function'?T.calculate(t):t.rows};}
+/** Numeric values of a Data Tables column (blank and text cells ignored, as in describeTable). */
+function tableColumn(table,column){const {t,rows}=tableOf(table),i=t.columns.indexOf(String(column??''));if(i<0)throw Error('Choose an existing column.');return columnValues(rows.map(r=>r?.[i])).values;}
+/** Complete numeric pairs from two Data Tables columns. */
+function tablePairs(table,c1,c2){
+ const {t,rows}=tableOf(table),i=t.columns.indexOf(String(c1??'')),j=t.columns.indexOf(String(c2??''));
+ if(i<0||j<0)throw Error('Choose two existing columns.');if(i===j)throw Error('Choose two different columns.');
+ const xs=[],ys=[];for(const r of rows){const a=toNumber(r?.[i]),b=toNumber(r?.[j]);if(a!==null&&b!==null){xs.push(a);ys.push(b);}}return [xs,ys];
+}
+/** Contingency table from every numeric column of a Data Table (text label columns and blank rows skipped). */
+function tableMatrix(table){
+ const {t,rows}=tableOf(table),cols=t.columns.map((_,j)=>j).filter(j=>{let any=false;for(const r of rows){const s=String(r?.[j]??'').trim();if(!s)continue;if(toNumber(s)===null)return false;any=true;}return any;});
+ if(cols.length<2)throw Error('The table needs at least two numeric columns for a contingency table.');
+ return rows.filter(r=>cols.some(j=>String(r?.[j]??'').trim()!=='')).map((r,i)=>cols.map(j=>{const n=toNumber(r?.[j]);if(n===null)throw Error('Contingency cell in row '+(i+1)+' is blank.');return n;}));
+}
+const TESTS={
+ t1:o=>ttestOne(o.x,o),welch:o=>ttestTwo(o.x,o.y,{...o,equalVariance:false}),pooled:o=>ttestTwo(o.x,o.y,{...o,equalVariance:true}),paired:o=>ttestPaired(o.x,o.y,o),
+ gof:o=>chisqGof(o.x,o.y,o),independence:o=>chisqIndependence(o.table,o),prop:o=>propZTest(o.k,o.n,o),binom:o=>binomTest(o.k,o.n,{...o,p:o.p0}),variance:o=>varianceTest(o.x,o)
+};
+function hypothesisTest(test,options={}){const f=TESTS[test];if(!f)throw Error('Unknown test: '+test+'.');return f(options||{});}
+
+M.statistics={logGamma,gammaP,gammaQ,betaI,erf,erfc,distribution,evaluate,describe,correlate,describeColumns,describeTable,quantile7,
+ ttestOne,ttestTwo,ttestPaired,chisqGof,chisqIndependence,propZTest,wilson,binomTest,clopperPearson,varianceTest,parseList,parseMatrix,tableColumn,tablePairs,tableMatrix,hypothesisTest};
 
 /* ---------- UI ---------- */
 const panel=document.getElementById('numerical-panel');if(!panel)return;
@@ -192,8 +348,8 @@ const $=id=>document.getElementById(id);
 const fmt=v=>v===null||v===undefined?'undefined':typeof v==='number'?(Number.isFinite(v)?(Number.isInteger(v)&&Math.abs(v)<1e15?String(v):Number(v.toPrecision(12)).toString()):String(v)):String(v);
 const PARAMS={normal:[['mu','Mean μ','0'],['sigma','Standard deviation σ','1']],t:[['nu','Degrees of freedom ν','10']],chisquare:[['k','Degrees of freedom k','2']],exponential:[['lambda','Rate λ','1']],binomial:[['n','Trials n','10'],['p','Success probability p','0.3']],poisson:[['lambda','Rate λ','4']]};
 const area=document.createElement('details');area.id='stats-details';
-area.innerHTML='<summary>Statistics · distributions and descriptive statistics</summary>'+
- '<p>Density/mass, CDF, survival and quantile for common distributions; summary statistics for Data Tables columns.</p>'+
+area.innerHTML='<summary>Statistics · distributions, descriptive statistics and hypothesis tests</summary>'+
+ '<p>Density/mass, CDF, survival and quantile for common distributions; summary statistics for Data Tables columns; t, chi-square, proportion, binomial and variance tests with confidence intervals.</p>'+
  '<div class="num-fields"><label>Distribution<select id="stats-dist"><option value="normal">Normal</option><option value="t">Student t</option><option value="chisquare">Chi-square</option><option value="exponential">Exponential</option><option value="binomial">Binomial</option><option value="poisson">Poisson</option></select></label>'+
  '<label id="stats-param1-label"><span id="stats-param1-name">Mean μ</span><input id="stats-param1" type="number" step="any" value="0"></label>'+
  '<label id="stats-param2-label"><span id="stats-param2-name">Standard deviation σ</span><input id="stats-param2" type="number" step="any" value="1"></label>'+
@@ -205,6 +361,19 @@ area.innerHTML='<summary>Statistics · distributions and descriptive statistics<
  '<label>Second column (optional)<select id="stats-column2"></select></label></div>'+
  '<div class="data-toolbar"><button id="stats-desc-run" class="primary" type="button">Describe column</button>'+
  '<button id="stats-to-table" class="secondary" type="button" disabled>Save to Data Tables</button></div>'+
+ '<h4 id="stats-ht-heading">Hypothesis test</h4>'+
+ '<div class="num-fields" role="group" aria-labelledby="stats-ht-heading"><label>Test<select id="stats-test"><option value="t1">One-sample t-test (mean)</option><option value="welch">Welch two-sample t-test</option><option value="pooled">Pooled-variance two-sample t-test</option><option value="paired">Paired t-test</option>'+
+ '<option value="gof">Chi-square goodness-of-fit</option><option value="independence">Chi-square independence (r×c)</option><option value="prop">One-proportion z-test (Wilson CI)</option><option value="binom">Exact binomial test</option><option value="variance">Variance interval / chi-square test</option></select></label>'+
+ '<label id="stats-ht-source-label">Data source<select id="stats-ht-source"><option value="typed">Typed lists</option><option value="table">Data table and columns above</option></select></label>'+
+ '<label id="stats-ht-a-label"><span id="stats-ht-a-name">Sample</span><input id="stats-ht-a" type="text" autocomplete="off" spellcheck="false"></label>'+
+ '<label id="stats-ht-b-label"><span id="stats-ht-b-name">Sample 2</span><input id="stats-ht-b" type="text" autocomplete="off" spellcheck="false"></label>'+
+ '<label id="stats-ht-k-label">Successes k<input id="stats-ht-k" type="number" step="1" min="0"></label>'+
+ '<label id="stats-ht-n-label">Trials n<input id="stats-ht-n" type="number" step="1" min="1"></label>'+
+ '<label id="stats-ht-param-label"><span id="stats-ht-param-name">Hypothesized mean μ0</span><input id="stats-ht-param" type="number" step="any"></label>'+
+ '<label id="stats-ht-alt-label">Alternative<select id="stats-ht-alt"><option value="two-sided">Two-sided (≠)</option><option value="less">Less (&lt;)</option><option value="greater">Greater (&gt;)</option></select></label>'+
+ '<label id="stats-ht-conf-label">Confidence level<input id="stats-ht-conf" type="number" step="any" min="0" max="1" value="0.95"></label>'+
+ '<label id="stats-ht-yates-label">Continuity correction<select id="stats-ht-yates"><option value="">None</option><option value="yates">Yates (2×2 only)</option></select></label></div>'+
+ '<div class="data-toolbar"><button id="stats-ht-run" class="primary" type="button">Run test</button></div>'+
  '<pre id="stats-output" role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%">Choose a distribution or a data column.</pre>';
 panel.append(area);let last=null;
 const output=$('stats-output');
@@ -256,5 +425,53 @@ $('stats-desc-run').addEventListener('click',()=>{
  }catch(err){fail(err);}
 });
 $('stats-to-table').addEventListener('click',()=>{try{if(!last)throw Error('Run a statistics calculation first.');M.dataTables.importData({headers:last.headers,rows:last.rows},last.name);if(M.advanced?.mode)M.advanced.mode('data');}catch(err){output.classList.add('error');output.textContent=err.message;}});
+const HT={
+ t1:{a:['Sample (comma-separated)','5.1, 4.9, 5.6, 5.8, 6.0, 5.2'],param:['Hypothesized mean μ0','5'],alt:1,source:1},
+ welch:{a:['Sample 1','1, 2, 3, 4, 5'],b:['Sample 2','2, 4, 6, 8, 10'],param:['Hypothesized difference Δ0','0'],alt:1,source:1},
+ pooled:{a:['Sample 1','1, 2, 3, 4, 5'],b:['Sample 2','2, 4, 6, 8, 10'],param:['Hypothesized difference Δ0','0'],alt:1,source:1},
+ paired:{a:['Sample 1 (before)','1, 2, 3, 4, 5.5'],b:['Sample 2 (after)','2, 4, 6, 8, 10'],param:['Hypothesized mean difference Δ0','0'],alt:1,source:1},
+ gof:{a:['Observed counts','16, 18, 16, 14, 12, 12'],b:['Expected counts or proportions (blank = uniform)',''],source:1,noConf:1},
+ independence:{a:['Contingency table (rows separated by ;)','10, 20; 20, 40'],source:1,yates:1,noConf:1},
+ prop:{kn:['81','263'],param:['Null proportion p0','0.25'],alt:1},
+ binom:{kn:['7','20'],param:['Null proportion p0','0.5'],alt:1},
+ variance:{a:['Sample (comma-separated)','5.1, 4.9, 5.6, 5.8, 6.0, 5.2'],param:['Null variance σ0² (optional)',''],alt:1,source:1}
+};
+function syncTest(){
+ const s=HT[$('stats-test').value],show=(id,on)=>{$(id).hidden=!on;};
+ show('stats-ht-a-label',s.a);show('stats-ht-b-label',s.b);show('stats-ht-k-label',s.kn);show('stats-ht-n-label',s.kn);show('stats-ht-param-label',s.param);
+ show('stats-ht-alt-label',s.alt);show('stats-ht-conf-label',!s.noConf);show('stats-ht-yates-label',s.yates);show('stats-ht-source-label',s.source);
+ if(s.a){$('stats-ht-a-name').textContent=s.a[0];$('stats-ht-a').value=s.a[1];}if(s.b){$('stats-ht-b-name').textContent=s.b[0];$('stats-ht-b').value=s.b[1];}
+ if(s.param){$('stats-ht-param-name').textContent=s.param[0];$('stats-ht-param').value=s.param[1];}if(s.kn){$('stats-ht-k').value=s.kn[0];$('stats-ht-n').value=s.kn[1];}
+ if(!s.source)$('stats-ht-source').value='typed';$('stats-ht-alt').value='two-sided';
+}
+function testInputs(test){
+ const s=HT[test],fromTable=s.source&&$('stats-ht-source').value==='table',table=$('stats-table').value,c1=$('stats-column').value,c2=$('stats-column2').value;
+ const o={alternative:$('stats-ht-alt').value,confidence:$('stats-ht-conf').value,yates:$('stats-ht-yates').value==='yates'};
+ if(s.param){const v=$('stats-ht-param').value;if(test==='prop'||test==='binom')o.p0=v;else if(test==='variance')o.sigma2=v;else o.mu=v;}
+ if(s.kn){o.k=$('stats-ht-k').value;o.n=$('stats-ht-n').value;return o;}
+ if(test==='independence'){o.table=fromTable?tableMatrix(table):parseMatrix($('stats-ht-a').value);return o;}
+ if(!fromTable){o.x=parseList($('stats-ht-a').value,s.a[0]);if(s.b){const b=parseList($('stats-ht-b').value,s.b[0]);o.y=test==='gof'&&!b.length?null:b;}return o;}
+ if(test==='paired'||(test==='gof'&&c2)){[o.x,o.y]=tablePairs(table,c1,c2);return o;}
+ o.x=tableColumn(table,c1);if(test==='welch'||test==='pooled'){if(!c2)throw Error('Choose a second column for sample 2.');if(c2===c1)throw Error('Choose two different columns.');o.y=tableColumn(table,c2);}
+ return o;
+}
+const cell=v=>typeof v==='number'&&Number.isFinite(v)?v:fmt(v);
+$('stats-test').addEventListener('change',()=>{syncTest();invalidate();});
+$('stats-ht-run').addEventListener('click',()=>{
+ try{
+  const test=$('stats-test').value,r=hypothesisTest(test,testInputs(test)),lines=[r.test],rows=[['test',r.test]];
+  const add=(label,key,v)=>{lines.push(label+' = '+fmt(v));rows.push([key,cell(v)]);};
+  if(r.n!==undefined)add(r.n2!==undefined?'n1':'n','n',r.n);if(r.n2!==undefined)add('n2','n2',r.n2);
+  if(r.statistic!==null)add(r.statisticName+' statistic','statistic_'+r.statisticName,r.statistic);if(r.df!==null&&r.df!==undefined)add('Degrees of freedom','df',r.df);
+  if(r.pValue!==null){lines.push('p-value ('+r.alternative+') = '+fmt(r.pValue));rows.push(['alternative',r.alternative],['p_value',r.pValue]);}
+  if(r.estimate!==undefined)add('Estimate','estimate',r.estimate);
+  if(r.ci){const pct=Number((r.confidence*100).toPrecision(10))+'%';lines.push(r.ciLabel+' ('+pct+') = ['+fmt(r.ci[0])+', '+fmt(r.ci[1])+']');rows.push(['confidence',r.confidence],['ci_lower',cell(r.ci[0])],['ci_upper',cell(r.ci[1])]);}
+  if(r.effectSize)add('Effect size '+r.effectSize.name,'effect_size',r.effectSize.value);
+  for(const w of r.warnings){lines.push('Warning: '+w);rows.push(['warning',w]);}
+  lines.push('Assumptions: '+r.assumptions);rows.push(['assumptions',r.assumptions]);
+  last={headers:['quantity','value'],rows,name:'Statistics_HypothesisTest'};output.classList.remove('error');output.textContent=lines.join('\n');$('stats-to-table').disabled=false;
+ }catch(err){fail(err);}
+});
+syncTest();
 syncParams();syncTables();
 })();

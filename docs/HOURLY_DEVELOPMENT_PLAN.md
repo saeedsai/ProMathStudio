@@ -1,3 +1,1529 @@
+## 2026-11-14 — AUDIT-UTF8-HEX-CI-REPAIR-282
+
+**Execution ledger:** Exact dev 3eae99d45629bbb71f21183132d15d70de88f9a1; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. PR #189 has no submitted reviews. Quality #43640573911 failed 1/550 structural tests: positive Unicode escape decoded to café but fixture expected literal backslash-u. Fix positive expectation, add malformed UTF-8 offending-byte hex diagnostics and focused leading/truncated byte regressions. Isolated fixture checks only; exact-head full Quality pending. No main/Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes 550+ structural tests, historical ledger and Chromium checks.
+2. P0: obtain eligible PR #189 approval; verify all required exact-head checks and protections.
+3. P0: ordinary protected dev-to-main promotion only after gates; verify main Quality.
+4. P0: verify Pages published SHA and hosted smoke against promoted main.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+
+## 2026-11-14 — AUDIT-UTF8-REASON-281
+
+**Execution ledger:** Verified dev 402c6b7761b957fcd60ee2d982ac0cc8c5b5e76d, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, passing exact-head Quality #43618403524 and PR #189 without reviews. Improve malformed UTF-8 audit import errors to include the decoder reason alongside the exact byte offset; add invalid-leading-byte and truncated-sequence regressions with valid Unicode control. Full new-head Quality pending; no main/Pages release. Frozen historical 166 gaps / 95 partial unchanged.
+
+**Regression fixture correction:** Use actual malformed UTF-8 byte escapes rather than literal backslash text in the new negative cases. Exact-head CI pending.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Quality including UTF-8 reason/offset cases, canonical ledger, structural and Chromium checks.
+2. P0: obtain eligible PR #189 approval and verify required exact-head checks and protection before merging.
+3. P0: promote via ordinary protected dev-to-main PR only after gates; verify main Quality, Pages SHA and hosted smoke.
+4. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+5. P1: add independent numerical reference and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-UTF8-OFFSET-280
+
+**Execution ledger:** Inspected exact dev 69fcbc2adb59c5778bced6dd3a70abacd065dd45, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, successful exact-head PR Quality #43613595679 and PR #189 (zero submitted reviews). Improve malformed UTF-8 historical JSON import diagnostics to report the first invalid byte offset. Add two raw-byte negative regressions and an initial UTF-8 BOM positive control. Isolated Python UTF-8 decoding/offset checks passed; new exact-head Quality pending. Standalone application bundle unaffected. Frozen historical 166 gaps / 95 partial unchanged; no main/Pages release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes historical ledger, malformed UTF-8 byte-offset regressions, structural tests and Chromium smoke.
+2. P0: obtain eligible PR #189 approval and verify exact-head required checks and protection before any merge.
+3. P0: ordinary protected dev-to-main PR promotion after gates; verify main Quality, Pages publication SHA and hosted smoke.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html, with confirm/cancel/focus/persistence browser regressions.
+5. P1: independent numerical references and invalid-input cases for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-RENDERING-MODIFIERS-279
+
+**Execution ledger:** Verified dev bd81063e435adc2bdb4009f02877f3ef240a7c93 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, repository contract, frozen inventory, successful exact-head PR Quality #43602445087 and PR #189 without submitted reviews. Reject invisible combining grapheme joiner and Unicode variation selectors in nested historical JSON keys/values, preserving assigned NFC Unicode; add 12 escaped/literal negative cases and positive control. Full exact-head Quality pending; no main/Pages release. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Quality for rendering modifiers, canonical ledger, structural and Chromium regressions.
+2. P0: obtain eligible approval on PR #189 and verify exact-head required checks and protection before merge.
+3. P0: ordinary protected dev-to-main PR promotion after gates, then main Quality and Pages SHA/hosted smoke.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html, with confirm/cancel/focus/persistence browser tests.
+5. P1: independent numerical references and invalid-input cases for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-PRIVATE-USE-UNICODE-278
+
+**Execution ledger:** Inspected dev `667ed85e7aee35f075c0fb814d840267cb75cdad`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, PR #189 (zero reviews), and passing exact-head PR Quality #43597335478. Reject Unicode private-use characters in nested historical JSON keys and values with escaped/literal BMP and supplementary-plane cases; accept assigned NFC Unicode. Local full repository/browser tests unavailable; new exact-head Quality pending. No application bundle change or Pages release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-head Quality for private-use regressions, canonical ledger, structural tests and Chromium smoke.
+2. P0: obtain eligible PR #189 approval and confirm required checks and branch protection before merge.
+3. P0: ordinary dev-to-main PR merge only after all gates; verify main Quality and Pages publication SHA/hosted smoke.
+4. P1: accessible preferences reset in synchronized modular and standalone sources; confirmation, cancel, focus and persistence browser checks.
+5. P1: numerical reference/invalid-input tests for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-UNASSIGNED-UNICODE-277
+
+**Execution ledger:** Inspected exact dev `ffa9e56c2d438241bde4880ffa0aa4180a2d2a68`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen audit, PR #189 and successful exact-head Quality #43592939434. Reject unassigned Unicode code points in nested historical ledger JSON keys/values with escaped/literal negative cases and canonical positive control. Preserve separate noncharacter diagnostics, 166 historical gaps and 95 partials. Full CI for this commit pending; no main/Pages release claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-head Quality for unassigned Unicode cases, canonical ledger, structural and Chromium suites.
+2. P0: obtain eligible PR #189 approval and confirm required checks before any merge.
+3. P0: ordinary protected dev-to-main promotion, then verify main Quality and Pages SHA/hosted smoke.
+4. P1: accessible preferences reset with synchronized modular/standalone source, confirmation, focus, cancel and persistence browser checks.
+5. P1: independent numerical reference and invalid-input tests for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-SURROGATE-ASSERTION-CI-REPAIR-276
+
+**Execution ledger:** Inspected dev `09222eebe4ddb8fce3ffa03f58aeffa6e8fc702e`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, PR #189 (zero reviews), and failed exact-head Quality #43582928342 (545 structural tests; one failure). Correct the positive surrogate-pair regression expectation to the actual decoded U+1F600 scalar rather than a literal backslash-U sequence. Preserve four negative lone-surrogate cases. Local isolated JSON round-trip and equality check passed; exact-head full structural/Chromium CI pending. No standalone bundle changes. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes ledger, structural tests (including four lone-surrogate negatives and scalar positive), embedded Python compile and Chromium smoke.
+2. P0: obtain eligible approval for PR #189 and verify all required exact-head checks; do not merge without approval.
+3. P0: ordinary protected dev-to-main promotion after gates; verify main Quality and Pages published SHA plus hosted smoke.
+4. P1: implement accessible preferences reset in synchronized modular source and standalone index.html; confirm/cancel/focus/persistence browser tests.
+5. P1: add independent numerical reference and invalid-input tests for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-SURROGATE-PAIR-CI-REPAIR-275
+
+**Execution ledger:** Inspected exact dev a086d11d7781810505b8ee9694d1bf716dd0397c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical inventory, PR #189 (zero submitted reviews), and exact-head PR Quality #43578315570. Quality failed structural tests (545 run, one failure) because the positive surrogate-pair fixture wrote literal escaped backslashes instead of a JSON surrogate pair. Replace it with json.dumps of the real U+1F600 scalar so the decoder receives the escaped pair; preserve the four lone-surrogate negative checks. Isolated local Python JSON round-trip passed; full exact-head Quality and Chromium pending. Standalone index.html unaffected. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes historical-ledger, all structural tests including lone-surrogate and valid-pair cases, embedded Python compile and Chromium smoke.
+2. P0: obtain eligible PR #189 approval and verify required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: after protected merge, verify main Quality, GitHub Pages published SHA and hosted smoke.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html; browser checks for confirmation, cancellation, focus and persistence.
+5. P1: independent numerical references and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-SURROGATE-DIAGNOSTIC-274
+
+**Execution ledger:** Inspected exact dev b9645288206b751babefcb6860da31920bb462b4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical inventory, successful exact-head PR Quality #43564439403 and PR #189 (zero submitted reviews). Improve lone UTF-16 surrogate diagnostics to report exact U+XXXX code points in nested JSON keys/values. Add four focused negative cases and a valid escaped surrogate-pair positive control. Local isolated Python JSON decoding checks passed; new exact-head structural/Chromium CI pending. Standalone index.html unaffected. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes historical-ledger, structural and Chromium checks including lone-surrogate diagnostics and valid surrogate pair.
+2. P0: obtain eligible approval on PR #189 and verify all required exact-head checks before ordinary protected merge.
+3. P0: verify merged main Quality, GitHub Pages published SHA and hosted smoke after release.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html; confirmation, cancellation, focus and persistence browser regressions.
+5. P1: independent numerical references and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-LINE-SEPARATOR-DIAGNOSTIC-273
+
+**Execution ledger:** Verified dev 2dd045dc384c18b29dd091630724576bcd99c39c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical inventory and exact-head successful PR Quality #43559165151. PR #189 has zero reviews; main/Pages promotion remains unverified. Improved nested JSON U+2028/U+2029 line-separator diagnostics to include exact code points and strengthened the existing eight escaped/literal key/value regression cases. Eight isolated JSON decoding/diagnostic checks passed; full exact-head CI pending. Standalone bundle unchanged. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality green for historical-ledger, structural and Chromium checks including eight line-separator diagnostics.
+2. P0: eligible approval on PR #189 and all required exact-head checks verified before ordinary protected merge.
+3. P0: merged main Quality green, GitHub Pages published SHA and hosted smoke verified.
+4. P1: accessible preferences reset synchronized between modular source and standalone index.html; confirm/cancel/focus/persistence browser regressions.
+5. P1: independent numerical reference and invalid-input tests for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-NONCHARACTER-DIAGNOSTIC-272
+
+**Execution ledger:** Inspected exact dev 99dcdb3084e229faf5806ba45fe617cd3e4adaf4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical inventory and successful exact-head Quality #43549423087. PR #189 remains open with zero submitted reviews; no main/Pages release verified. Improve nested audit JSON noncharacter errors with literal U+XXXX code points, add six escaped/literal negative cases for U+FDD0, U+FFFE and U+10FFFF plus printable positive control. Six isolated JSON decode/regex checks passed; full new exact-head Python/structural/Chromium CI pending. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes historical-ledger, structural and Chromium tests including six noncharacter diagnostic cases.
+2. P0: obtain eligible PR #189 approval and verify all required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, GitHub Pages published SHA and hosted smoke tests after promotion.
+4. P1: implement accessible preferences reset with synchronized modular source and standalone index.html; browser regressions for confirmation, cancellation, focus and persistence.
+5. P1: independent numerical reference and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-FORMAT-REGEX-FIX-271
+
+**Execution ledger:** Correct the focused format-control regression's literal-plus regex to use `U[+]` so it matches diagnostics such as U+202E, not a backslash. No validator behavior changes; retain all six negative and one positive cases. Exact-head CI pending. Historical 166 gaps / 95 partial unchanged; PR #189 approval and Pages promotion remain pending.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head historical-ledger, structural and Chromium Quality green, including six format-control diagnostics.
+2. P0: obtain eligible approval on PR #189 and verify all required checks before ordinary protected merge.
+3. P0: verify main Quality, GitHub Pages published SHA and hosted smoke after promotion.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html with confirmation, cancellation, focus and persistence tests.
+5. P1: independent reference/invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-FORMAT-CODEPOINT-270
+
+**Execution ledger:** Verified dev 1bbd8465b7a2c68befcfa1f468102a134064d0a9, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, successful exact-head Quality #43537736872, and open PR #189 without submitted reviews. Improve nested JSON format-control rejection diagnostics to identify the exact Unicode U+XXXX code point; add six escaped/literal negative regressions for U+200B, U+202E, U+2060 and one valid positive control. This audit-only change does not touch the standalone application. Frozen historical 166 gaps / 95 partial remain unchanged. New exact-head CI pending; no merge or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head historical-ledger, structural and Chromium Quality green, including six format-control diagnostics.
+2. P0: obtain eligible approval on PR #189 and verify all required checks before ordinary protected merge.
+3. P0: verify main Quality, GitHub Pages published SHA and hosted smoke after promotion.
+4. P1: implement accessible preferences reset in synchronized modular source and standalone index.html; test confirmation, cancellation, focus and persistence.
+5. P1: independent reference and invalid-input numerical regressions for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-NFC-CI-REPAIR-269
+
+**Execution ledger:** Inspected exact dev bfd14609c3d7be3a40f2aacfca9aed9125a06342, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md and frozen inventory. Quality #43530946098 failed structural tests (542 tests, two failures and one error): key-position cases incorrectly expected value diagnostics, and an older test accepted a non-NFC nested value. Correct both assertions without weakening validation; clarify the validator's value-specific error message. CI for this commit pending. PR #189 has zero reviews; no merge or Pages claim. Historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes structural tests including both key/value NFC diagnostics, historical ledger and Chromium browser checks.
+2. P0: eligible PR #189 approval and all required exact-head checks verified before ordinary protected merge.
+3. P0: verify main Quality, GitHub Pages published SHA and hosted smoke after promotion.
+4. P1: accessible preferences reset synchronized between modular source and standalone index.html; confirmation, cancellation, focus and persistence browser tests.
+5. P1: independent numerical references and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-14 — AUDIT-NESTED-VALUE-NFC-268
+
+**Execution ledger:** Exact dev 65ff495ec10bf5edcfc0490f994f90c816c099c9, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, successful Quality #43506826108 and PR #189 without reviews. Normalize validation of all nested JSON strings: reject non-NFC decoded values as well as keys, including escaped and literal representations. Add eight negative subcases and canonical positive control. Historical inventory 166 gaps / 95 partial unchanged. New exact-head CI pending; no release/Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes historical-ledger, structural and Chromium checks including nested non-NFC cases.
+2. P0: obtain eligible PR #189 review approval and verify all required checks before protected ordinary merge.
+3. P0: verify main Quality, Pages published SHA and hosted smoke after promotion.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html with confirmation, cancellation, focus and persistence browser checks.
+5. P1: independent numerical reference and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
+## 2026-11-13 — AUDIT-SPACE-FIXTURE-CI-267
+
+**Execution ledger:** Inspected dev b9718d83565431946c4f434c65466dc460cb6005 (base tree 47a88d58396cf330b5d2ebbc131c3c6e6f70ceb8), main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical inventory, failed exact-head Quality #43468820011 and PR #189 (zero reviews). Correct six failing Unicode-space fixtures by constructing actual code points and testing JSON escaped and literal representations in nested keys/values. Improve validator diagnostics to include U+XXXX while retaining prior diagnostic prefix. Twelve isolated JSON decoding/Unicode classification cases passed; full exact-head Python/structural/Chromium CI pending. No application bundle changes. Frozen 166 gaps / 95 partial unchanged; no main/Pages promotion claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python feature-ledger, structural and Chromium Quality green including 12 Unicode-space negative cases and ASCII positive control.
+2. P0: obtain eligible PR #189 approval and verify required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, GitHub Pages publication SHA and hosted browser smoke.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html; confirmation, cancellation, focus and storage persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
+## 2026-11-13 — AUDIT-NONSTANDARD-SPACE-266
+
+**Execution ledger:** Verified dev fcee64f3139183ca27f8dea80dee03383d9a8893 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head successful Quality #43448073887 and open PR #189 with zero submitted reviews. Reject non-ASCII Unicode category Zs spacing in nested imported JSON keys/values while preserving ordinary ASCII spaces; focused negative key/value cases and positive control. Standalone audit validator/test only; application index.html untouched. Frozen historical inventory 166 gaps / 95 partial unchanged. New exact-head CI pending; no merge or Pages release claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python, structural and Chromium Quality green including nested nonstandard-space cases.
+2. P0: obtain eligible PR #189 approval and verify required checks before ordinary protected dev-to-main merge.
+3. P0: verify main Quality, Pages published SHA and hosted smoke after merge.
+4. P1: accessible preferences reset in synchronized modular source and standalone index.html with confirm/cancel/focus/persistence browser regressions.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter reference and invalid-input regressions.
+
+## 2026-11-13 — AUDIT-DECIMAL-EXPONENT-265
+
+**Execution ledger:** Verified dev 95d3a85b4e6f832bb58d128784b9b3a4b6c795c6 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; exact-head Quality #43430508066 passed and PR #189 has zero reviews. Handle decimal.InvalidOperation for JSON float exponents beyond Decimal's decoder limit with a stable ValueError rather than an uncaught exception. Add focused negative huge-exponent fixtures and finite positive control. No application bundle changes. Frozen historical 166 gaps / 95 partial unchanged. New exact-head CI pending; no main/Pages promotion claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Python structural and Chromium Quality green, including oversized-decimal-exponent regression.
+2. P0: eligible PR #189 approval plus all required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, Pages published SHA and hosted smoke tests.
+4. P1: accessible preferences reset synchronized across src and standalone index.html with confirm/cancel/focus/persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
+## 2026-11-13 — AUDIT-JSON-LINE-SEPARATORS-264
+
+**Execution ledger:** Verified dev a4014b900b6be2c77d479d60ed0b0bce5e82396d, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; exact-head Quality #43405233233 green, PR #189 has no submitted approvals. Harden standalone audit JSON import against U+2028/U+2029 line/paragraph separators in nested keys and values (escaped or literal), with positive safe-metadata control. No application bundle changes. Frozen historical baseline 166 gaps / 95 partial unchanged. New exact-head CI pending; no merge or Pages publication claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Python structural and Chromium Quality green, including escaped/raw nested line-separator cases.
+2. P0: eligible PR #189 approval and required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, Pages deployment SHA and hosted smoke checks.
+4. P1: accessible preferences reset synchronized across src and standalone index.html with confirm/cancel/focus/persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
+## 2026-11-13 — AUDIT-JSON-FORMAT-CONTROLS-263
+
+**Execution ledger:** Verified dev a9a45131d21506c2cecb27dda0229522a8369cf2, main 70fc483cb1cec3d2372d37484e4a8ef7942343da and exact-head successful Quality #43397969613. PR #189 still has zero reviews. Reject Unicode category Cf format controls (including bidi overrides and zero-width marks) in nested historical JSON keys/values. Preserve NFC and noncharacter rules; add negative nested key/value fixtures and a printable positive. Isolated source/fixture checks performed; full new exact-head CI pending. No main or Pages promotion. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality green including new format-control regression, structural/Python/Chromium checks.
+2. P0: eligible PR #189 approval and verified required exact-head checks before ordinary protected merge.
+3. P0: merged main Quality green, Pages published SHA and hosted smoke tests.
+4. P1: accessible preferences reset synchronized across src and standalone index.html with confirm/cancel/focus/persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference/invalid-input regressions.
+
+## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-CI-262
+
+**Execution ledger:** On exact dev 7fcfca9793d1c8c9d5a49b48c2a89b6bf229ba2e, Quality #43348726967 failed three structural assertions because test JSON contained literal placeholder tokens. Corrected fixtures to exercise U+FDD0 in a value, U+FFFE in a nested key and U+10FFFF via a valid UTF-16 surrogate pair in a nested value; retain validator and negative assertions. Isolated JSON decoding verified; exact new-head structural/Python/Chromium CI pending. No main or Pages promotion. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality must pass structural suite (including all three noncharacter cases), Python and Chromium checks.
+2. P0: eligible review approval for PR #189 and all required exact-head checks green before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, GitHub Pages published commit and hosted smoke tests.
+4. P1: accessible preferences reset synchronized across src and standalone index.html; browser tests for confirm/cancel, focus and persistence.
+5. P1: numerical reference regressions for repeated roots, nonlinear fits and unstable filters with independent expected results.
+
+## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-FIXTURE-261
+
+**Execution ledger:** Correct the new Unicode noncharacter JSON regression to use single escaped JSON code points rather than double-escaped literal backslashes. The validator source and frozen historical inventory remain unchanged (166 gaps / 95 partial). Full exact-head CI pending; no main or Pages promotion. NEXT FIVE remain: exact-head Python/structural/Chromium QA; eligible PR #189 approval and protected merge; main Quality/Pages/hosted smoke; synchronized accessible preferences reset; numerical reference regressions. Each requires its corresponding automated checks.
+
+## 2026-11-13 — AUDIT-UNICODE-NONCHARACTER-260
+
+**Execution ledger:** Inspected exact dev 2f70dfdd2ba585301672ee0c5bd48991133113ac, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory and successful exact-head Quality #43333989736; PR #189 still has no reviews. Reject Unicode noncharacters (U+FDD0..FDEF and any plane's U+FFFE/U+FFFF) in decoded audit JSON keys and values, including nested metadata. Add focused negative cases and frozen positive acceptance. No app bundle changes. Historical 166 gaps / 95 partial unchanged. Exact-head Quality pending; no release or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head structural/Python and Chromium Quality green including Unicode noncharacter regressions.
+2. P0: obtain eligible PR #189 approval and verify required checks before ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, Pages publication SHA and hosted browser smoke.
+4. P1: accessible preferences reset with synchronized src and standalone index.html; confirmation, cancellation, focus and persistence browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
+## 2026-11-13 — AUDIT-CONTROL-CI-259
+
+**Execution ledger:** Verified dev 5ed71389d00e778916cb321fb2e16302c9535f06, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; reviewed AGENTS.md, living plan, frozen inventory, PR #189 (zero reviews), and failing exact-head PR Quality #43314953850 (536 structural tests; seven control-diagnostic assertions failed). Preserve the established diagnostic prefix and append literal U+XXXX in parentheses; correct the four regex fixtures to escape plus and parentheses. Isolated Python regex compatibility check passed (one test, four code points); full exact-head structural and Chromium CI pending. No standalone bundle changes. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python/structural and Chromium CI green with all control diagnostics and 536+ structural tests.
+2. P0: eligible PR #189 approval, exact-head checks and ordinary protected dev-to-main merge.
+3. P0: verify new main Quality, Pages published SHA and hosted browser smoke.
+4. P1: accessible preferences reset synchronized between src and index.html; confirmation/cancellation/focus/storage browser regressions.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
+## 2026-11-12 — AUDIT-CONTROL-CI-258
+
+**Execution ledger:** Verified dev 92b454bb0416624ddd23746c3c705dc9cf751025, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory and failed exact-head PR Quality #43306382782 (535 structural tests, one stale positive escaped-control expectation). Replace obsolete positive regression with negative nested C0/C1 cases, improve diagnostics with offending Unicode code point, and retain printable-string positive acceptance. Local checkout unavailable; exact-head CI pending. PR #189 has zero submitted reviews; no merge or Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head structural, historical-ledger and Chromium Quality pass, including C0/C1 diagnostics and printable positive control.
+2. P0: eligible PR #189 approval plus required green exact-head checks; ordinary protected dev-to-main merge only.
+3. P0: verify main Quality, Pages published SHA and hosted browser smoke after merge.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html; confirmation, cancellation, focus and storage browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference/invalid-input regressions.
+
+## 2026-11-12 — AUDIT-JSON-CONTROLS-257
+
+**Execution ledger:** Verified dev de9fe27d8c561b55e7b03f4ae07a1ed20a96845b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, green exact-head Quality #43286403803 and PR #189 without reviews. Reject escaped C0/C1 control characters in decoded JSON keys and values, including nested metadata, while retaining existing NUL/BOM diagnostics. Focused positive/negative regression included; standalone Python only, no application bundle change. Local checkout unavailable; new exact-head CI pending. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python feature-ledger, structural and Chromium Quality pass; repair observed failures.
+2. P0: obtain eligible PR #189 approval, verify required checks, and perform ordinary protected dev-to-main merge.
+3. P0: verify merged main Quality, Pages published SHA and hosted browser smoke.
+4. P1: accessible preferences reset synchronized in src and standalone index.html; confirm/cancel/focus/storage tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input tests.
+
+## 2026-11-12 — AUDIT-EMBEDDED-BOM-256
+
+**Execution ledger:** Inspected dev 8bc765d84acfce1e2971311139941242cb9efe44, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, successful exact-head PR Quality #43253538777, PR #189 with zero reviews. Reject invisible U+FEFF inside decoded JSON strings (including nested keys/values) while retaining permitted leading UTF-8 transport BOM. Focused positive/negative regression added; standalone Python only, no index.html bundle change. Local repository checkout unavailable; new exact-head CI pending. Frozen historical 166 gaps / 95 partial unchanged; no main promotion or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Python historical-ledger, structural and Chromium Quality green; fix any observed failure.
+2. P0: eligible PR #189 review and all required checks; ordinary protected dev-to-main merge only.
+3. P0: verify merged main Quality, GitHub Pages published SHA and hosted browser smoke.
+4. P1: accessible preferences reset synchronized in src and standalone index.html, with confirm/cancel/focus/storage browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference/invalid-input tests.
+
+## 2026-11-12 — AUDIT-LABEL-NFC-254
+
+**Execution ledger:** Focused fixture escape repair following 54c16cd9 (real decomposed Unicode and literal regex parentheses); verified dev 1a493fa2d82f48b40c8f0a356945dfe014e6e401, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; root AGENTS.md, living plan, frozen inventory, green exact-head Quality #43222633189, open PR #189 with no reviews. Tighten exported title/scope/section Unicode normalization to NFC after existing printable and edge-spacing guards. Add negative decomposed-label fixtures and canonical historical-ledger positive acceptance. Source and tests are standalone Python; no bundled application change. New exact-head CI pending; no merge or Pages claim. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Python/structural/Chromium Quality passes, including NFC descriptive-label regression.
+2. P0: obtain eligible PR #189 approval, verify protected required checks and ordinary dev-to-main merge.
+3. P0: verify merged main Quality, GitHub Pages published SHA and browser smoke.
+4. P1: accessible preferences reset with synchronized src and standalone index.html; confirm/cancel/focus/storage browser tests.
+5. P1: independent repeated-root, nonlinear-fit and unstable-filter numerical reference and invalid-input regressions.
+
+## 2026-11-12 — AUDIT-JSON-KEY-NFC-253
+
+**Execution ledger:** Verified dev 76df6887ecdc44e832f6acfb4cdab98e10437ee5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, green exact-head Quality #43164655900 and PR #189 with zero submitted reviews. Tighten imported historical audit JSON object keys to NFC (including nested keys) before duplicate-key checks, with focused negative fixtures, a canonical Unicode-key/Unicode-value positive and frozen inventory acceptance. Source and regression are standalone Python; no modular app or index.html changes. New exact-head Quality pending; no promotion or Pages claim. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Python/structural/Chromium Quality passes including NFC JSON-key regression.
+2. P0: obtain eligible PR #189 approval, verify required checks and protected ordinary dev-to-main merge.
+3. P0: verify merged main Quality and GitHub Pages published SHA and browser smoke.
+4. P1: accessible preferences reset with synchronized src and standalone index.html, confirm/cancel/focus/storage browser tests.
+5. P1: independent numerical reference cases for repeated roots, nonlinear fitting and unstable filters with invalid-input tests.
+
+## 2026-11-12 — AUDIT-ID-NFC-252
+
+**Execution ledger:** Verified dev b1d8939adbb246337e1c3d73c127372efdf109bb, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, green Quality #43151986648 and open PR #189 with no reviews. Reject decomposed Unicode feature IDs before exact-string duplicate checking; preserve printable Unicode and frozen historical 166 gaps / 95 partial. Add focused decomposed-ID negative and canonical positive regression. Exact new-head CI pending; no merge or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head historical-ledger, structural and Chromium Quality all pass; repair failures without weakening tests.
+2. P0: PR #189 eligible approval and required checks, then ordinary protected dev-to-main merge.
+3. P0: verify main Quality and GitHub Pages published SHA and browser behavior.
+4. P1: accessible preferences reset with synchronized modular and standalone HTML, confirmation, cancellation, focus and storage regressions.
+5. P1: numerical reference regressions for repeated roots, nonlinear fits and unstable filters with tolerances and invalid-input cases.
+
+## 2026-11-12 — AUDIT-EXPORT-TITLE-DIAGNOSTIC-CI-251
+
+**Execution ledger:** Inspected exact dev 0e57723aa0688228c9a33adb06e6d4da29ed21fc, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 (zero reviews) and failed Quality #43145211896. Structural suite ran 530 tests; two failures arise solely from the plural "Feature titles" diagnostic for tab/newline title inputs. Keep validator behavior unchanged; correct the focused test to match the established title diagnostic and retain scope/section cases. Full structural and Chromium Quality for this new commit pending. Historical 166 gaps / 95 partial unchanged. No main promotion or Pages verification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head Quality:** historical ledger, all structural tests and Chromium smoke pass on this SHA.
+2. **P0 reviewed promotion:** PR #189 obtains eligible approval and required exact-head checks; ordinary merge only.
+3. **P0 release verification:** main Quality and Pages deployment SHA/behavior confirmed after approved merge.
+4. **P1 accessible preference reset:** synchronized modular and standalone HTML with confirm/cancel, focus and storage tests.
+5. **P1 numerical references:** independent repeated-root, nonlinear-fit and unstable-filter tolerances and invalid-input tests.
+
+## 2026-11-12 — AUDIT-EXPORT-DIAGNOSTIC-CI-249
+
+**Execution ledger:** Verified dev 71710dc0e78c018ea3b79bdf792d4260f02b7c01, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, failed exact-head Quality #43132078952, and PR #189 without reviews. Repair six regression expectation failures: edge tab/LF are correctly rejected by the earlier nonprintable-character guard; edge spaces are rejected by the surrounding-whitespace guard. Preserve both validation rules and assert the specific diagnostic for each negative case. No application bundle change. Frozen 166 gaps / 95 partial unchanged. Exact new-head CI pending; no merge or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head Quality:** focused historical-ledger, full structural and Chromium steps pass on this commit; repair observed failures.
+2. **P0 protected promotion:** eligible PR #189 approval and all required exact-head checks; ordinary merge only, then verify main Quality.
+3. **P0 Pages:** verify GitHub Pages deployment SHA and published behavior after approved main promotion.
+4. **P1 accessible preference reset:** synchronize modular source and standalone index.html; browser confirmation, cancel, keyboard focus and persisted-settings regressions.
+5. **P1 numerical reference cases:** repeated roots, nonlinear fitting and unstable filters with independent tolerances and invalid-input cases.
+
+## 2026-11-12 — AUDIT-EXPORT-EDGE-LABELS-248
+
+**Execution ledger:** Inspected dev 2585a8991b5cbf4854d88975c064fde3231e7e9b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, green exact-head Quality #43099168208 and open PR #189 with zero reviews. 2026-11-12 — AUDIT-EXPORT-EDGE-LABELS-248: Reject surrounding whitespace on exported title/scope/section labels while preserving interior spaces and the canonical historical ledger. Add negative leading/trailing space, tab and newline regression fixtures. Frozen inventory remains 166 gaps / 95 partial. Local checkout unavailable (github.com DNS); exact-head CI pending; no release claimed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** historical ledger, Python structural and Chromium checks all pass on the new dev SHA; investigate any failure.
+2. **P0 reviewed promotion:** obtain eligible PR #189 review and required checks; ordinary merge, then verify main Quality and Pages.
+3. **P1 accessible preferences reset:** synchronized src/index.html with confirmation, cancellation, keyboard focus and storage regressions.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with reference tolerances and invalid-input cases.
+5. **P1 safe branch audit:** verify full main containment, absence of open PR and unprotected status before deletion.
+
+**Fixture correction:** Restored the newline negative case as the Python escape `"\\n"` instead of an actual physical line break inside a quoted literal; the regression now remains parseable. Exact-head CI still pending.
+
+## 2026-11-11 — AUDIT-LEDGER-CI-REPAIR-246 (restore executable validator and test fixtures)
+
+**Execution ledger:** Inspected dev 7a496510080293da5ffaa7f9e397466a01a09381, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, failed exact-head Quality #43082907780/#43082898538 and PR #189 (zero reviews). Repair accidental literal backslash-n source segments that commented out the `ids` assignment and collapsed the scope/section regression method. Preserve actual Unicode escape fixtures and regex matching. Atomic source/test/plan/changelog change; new exact-head Quality must pass before any release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** ledger validator, Python regression suite, structural and Chromium checks pass on the new dev SHA; investigate failures without weakening tests.
+2. **P0 reviewed promotion:** eligible PR #189 approval plus required checks, ordinary dev-to-main merge, then verify main Quality and GitHub Pages.
+3. **P1 accessible preferences reset:** synchronized modular and standalone HTML; browser confirmation, cancellation, keyboard focus and storage migration checks.
+4. **P1 independent numerical references:** repeated roots, nonlinear fitting and unstable filters with tolerances and invalid-input cases.
+5. **P1 safe branch audit:** verify main containment, no open PRs and unprotected status before any cleanup.
+
+## 2026-11-11 — AUDIT-LEDGER-LABEL-CONTROLS-245 (scope/section export integrity)\n\n**Execution ledger:** Verified dev 74f6c8085d94f328a3df7c44d40ebdffeec4ec9d and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; read root AGENTS.md, frozen inventory, exact-head failed Quality #43034504958 and PR #189 (zero reviews). Browser install failed on external Ubuntu DNS, not application assertions. Extend invisible/control-character rejection to scope and section export labels; add five negative fixtures for each and frozen positive acceptance. Source, tests, plan and changelog are one atomic change; exact-head CI remains pending until it completes. Frozen 166 gaps / 95 partial unchanged.\n\n**NEXT FIVE (priority / acceptance tests):**\n1. **P0 CI infrastructure:** Chromium dependency installation and all browser steps pass on exact new dev SHA; investigate any failed step without disabling tests.\n2. **P0 release review:** eligible approval on PR #189, required checks green, ordinary merge, then verify main Quality and Pages.\n3. **P1 accessible preference reset:** synchronized src and standalone index.html, browser confirm/cancel, focus, keyboard and storage migration checks.\n4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with tolerances, residuals and invalid-input cases.\n5. **P1 branch hygiene:** verify containment in main, no open PR and unprotected status before deletion.\n\n**Fixture correction:** Before full CI, repaired test-source escaped control fixtures to actual Python Unicode escape literals and the regex to match literal parentheses. No production behavior change; exact-head QA pending.
+
+## 2026-11-11 — AUDIT-LEDGER-TITLE-CONTROLS-242 (export label integrity)
+
+**Execution ledger:** Inspected AGENTS.md, frozen inventory, dev 0e1f805a6d2aae6f65591e016b85743c6a175739, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, successful exact-head Quality #43016838165, and PR #189 (no reviews). Reject invisible/control characters in user-visible historical feature titles, preserving Unicode printable titles and the frozen 166-gap / 95-partial inventory. Added direct negative controls and canonical positive regression. Atomic validator/test/plan/changelog commit; new exact-head Quality pending. No main release or Pages verification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify structural, historical-ledger and Chromium Quality on the new dev SHA; fix observed failures.
+2. **P0 reviewed release:** obtain eligible PR #189 review, verify required checks, merge ordinarily and verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronize src and standalone index.html; Chromium confirm/cancel, focus and storage-compatibility tests.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting and unstable filters with tolerances, residuals and failure paths.
+5. **P1 safe branch hygiene:** prove main containment, absence of open PR and lack of protection before any deletion.
+
+## 2026-11-11 — AUDIT-LEDGER-SIGNED-ZERO-241 (preserve numeric export semantics)
+
+**Execution ledger:** Verified dev c076588e9758c87841bddc68e25d7cc77cb527d6, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen audit and exact-head PR Quality #43007611518 successful; PR #189 open without submitted reviews. Reject negative-zero JSON floating literals consistently with existing integer -0 rejection; cover exponent, decimal, nested, positive-zero and negative-nonzero controls. Update validator, regression, plan and changelog atomically; new exact-head CI pending. Historical 166 gaps / 95 partial unchanged; no main release or Pages verification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** structural and Chromium Quality pass on new dev SHA; fix any observed failure.
+2. **P0 reviewed release:** eligible PR #189 review and required checks, ordinary merge, main Quality and Pages verified.
+3. **P1 accessible preference reset:** synchronized src/index.html; Chromium confirm/cancel, focus, storage/future-schema cases.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with tolerances and invalid-input cases.
+5. **P1 branch hygiene:** prove main containment, no open PR and no protection before any deletion.
+
+## 2026-11-11 — AUDIT-LEDGER-CONTROL-COMMENT-240 (invisible-ID control coverage)
+
+**Execution ledger:** Verified dev ec771256d9d92d40702248f6f8bb39c424c85d3b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory and green exact-head Quality #42963004544; PR #189 open without reviews. Repair literal backslash-n sequences in validator comments and extend invisible-control regressions to DEL U+007F and zero-width joiner U+200D without weakening rejection. Source, test, plan and changelog updated atomically; new exact-head Quality pending. Frozen historical inventory remains 166 gaps / 95 partial; no main release or Pages verification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify structural and Chromium Quality for the new dev SHA; repair observed failures.
+2. **P0 reviewed release:** obtain eligible approval for PR #189 and required checks, ordinary merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronize src and index.html, browser tests for confirm/cancel, focus and storage compatibility.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fits and unstable filters with reference tolerances and invalid-input tests.
+5. **P1 branch hygiene:** audit main containment, open PRs and protections before any deletion.
+
+## 2026-11-11 — AUDIT-LEDGER-ASCII-SEPARATORS-CI-239 (exact-head structural regression repair)
+
+**Execution ledger:** Verified dev beadda4066664915aeaa99fd1b984a35c1b1ff3c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 without reviews, and failed exact-head push/PR Quality #42956025190/#42956029484. Root cause: Python str.isspace() treats U+001F as whitespace, so the existing invisible-control regression expected the wrong diagnostic. Keep rejection intact; explicitly classify U+001C–U+001F as invisible controls and add all four regression fixtures. Full CI structural/Chromium on this new commit pending; no merge/Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify structural and Chromium Quality on new dev SHA; fix observed failures without weakening tests.
+2. **P0 reviewed release:** eligible approval and required PR #189 checks; ordinary merge; verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html; Chromium confirm/cancel, focus, storage and future-schema cases.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with residual/tolerance and invalid-input tests.
+5. **P1 safe branch audit:** verify main containment, no open PR and unprotected state before deletion.
+
+## 2026-11-11 — AUDIT-LEDGER-WHITESPACE-CI-238 (repair exact-head structural CI)
+
+**Execution ledger:** Inspected dev 8da29700326060803c3081305905b6e6d753a7e7, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, failed exact-head Quality #42942622071 and PR #189 without reviews. Correct interior-whitespace fixtures to real Unicode whitespace, repair error regex, and check whitespace before other nonprintable characters for consistent diagnostics; preserve rejection of other invisible controls. No app JS/standalone HTML changes. Local full-suite unavailable; new exact-head Quality pending. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** structural tests and Chromium regression pass on the new dev SHA; investigate any failure.
+2. **P0 reviewed release:** eligible PR #189 approval and required checks; ordinary merge; verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html and Chromium confirm/cancel, focus, storage and future-schema tests.
+4. **P1 numerical reference cases:** repeated roots, nonlinear fitting and unstable filters with tolerances and invalid-input tests.
+5. **P1 branch audit:** verify main containment, no open PR and no protection before any deletion.
+
+## 2026-11-11 — AUDIT-LEDGER-INTERIOR-WHITESPACE-237 (stable canonical references)
+
+**Execution ledger:** Verified dev cfcc5318fd05dcffecf1957b11d1b1544f106fa4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 with zero reviews, and successful exact-head PR Quality #42935739993. Reject whitespace embedded within audit IDs (space, tab, LF, CR, NBSP), not just leading/trailing whitespace; add focused regression and canonical positive control. No application JS or standalone HTML change. New exact-head structural/Chromium CI pending; no merge or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new dev SHA must pass structural and Chromium Quality; diagnose observed failures.
+2. **P0 reviewed release:** obtain eligible review and all required checks on PR #189, merge ordinarily, verify main Quality and published Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html; Chromium confirm/cancel, focus, storage errors and schema-preservation tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable digital filters with residual/tolerance and invalid-input tests.
+5. **P1 branch audit:** prove main containment, no open PR and unprotected state before any deletion.
+
+## 2026-11-11 — AUDIT-LEDGER-INVISIBLE-ID-236 (canonical reference integrity)
+
+**Execution ledger:** Verified dev 395982cd1d317c2ef1a12237b902f4238678b965, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical audit, PR #189 (zero reviews), and successful exact-head PR Quality #42891668782. Reject interior Unicode format/control characters in feature IDs, which surrounding-whitespace checks miss; add zero-width, bidirectional-format, control and word-joiner regressions plus valid canonical acceptance. No application JavaScript or standalone HTML change. New exact-head structural/Chromium CI pending; no merge/Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify new dev SHA has green structural and Chromium Quality; diagnose and fix any observed failures.
+2. **P0 protected release:** eligible review plus required exact-head PR #189 checks; ordinary dev-to-main merge, verify main Quality and Pages publication.
+3. **P1 accessible preference reset:** synchronize src/ and standalone index.html; Chromium confirm/cancel, keyboard focus, storage failure and future-schema preservation.
+4. **P1 numerical reference tests:** repeated roots, nonlinear fitting and unstable digital filters, with residual/tolerance and invalid-input cases.
+5. **P1 branch audit:** verify full main containment, no open PR and unprotected status before deleting obsolete branches.
+
+## 2026-11-10 — AUDIT-LEDGER-WHITESPACE-CI-235 (repair exact-head CI)
+
+**Execution ledger:** Inspected dev 0902335b699a99d3cc81f8f6c102e432d450efda, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 (zero reviews) and failed exact-head Quality #42840129606 (structural failure, browser skipped). Fix the literal-backslash-t test fixture to real tab and add trailing-tab/newline boundary cases; identify invalid item index in validator diagnostics. Isolated local boundary checks only; full exact-head GitHub structural/Chromium CI pending. No application JS/index.html changes, release or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 CI repair:** verify exact new dev SHA has green push/PR structural and Chromium suites; inspect any failure logs.
+2. **P0 protected release:** obtain eligible review and required exact-head checks on PR #189, ordinary merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronize src/index.html, browser-test confirmation/cancel, keyboard focus, storage errors and future-schema preservation.
+4. **P1 numerical reference tests:** repeated polynomial roots, nonlinear fitting and unstable filters, including residuals, tolerances and invalid input.
+5. **P1 obsolete branch audit:** verify main containment, no open PR and no protection before deletion.
+
+## 2026-11-10 — AUDIT-LEDGER-ID-WHITESPACE-234 (stable feature identifiers)
+
+**Execution ledger:** Verified dev 6ebfca8635789fa58fae5345afc29909103ed7a3, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical audit, PR #189 (zero reviews) and exact-head PR Quality #42820607841 (success). Reject leading/trailing whitespace in historical feature IDs before duplicate detection, preventing ambiguous external references; add negative whitespace and positive canonical-ID regression. No app JS/index.html change; frozen 166 gaps / 95 partial unchanged. New exact-head CI pending.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** verify push and PR structural/Chromium jobs pass on this exact SHA; fix observed failures.
+2. **P0 protected release:** obtain eligible review and all required checks on PR #189, ordinary merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronize src/index.html; browser test confirmation/cancel, focus, storage errors and future-schema preservation.
+4. **P1 independent numerical references:** repeated polynomial roots, nonlinear fits and unstable filters with residuals/tolerances and invalid-input cases.
+5. **P1 safe branch audit:** prove main containment, no open PR and unprotected status before deleting obsolete branches.
+
+## 2026-11-10 — AUDIT-LEDGER-QUIET-233 (silent successful validation)
+
+**Execution ledger:** Verified dev 4321602ba47bdd83888707e209385c2d541ed47c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42786596057. Add opt-in `--quiet` for non-chatty CI validation, preserving nonzero errors and diagnostics; add subprocess regression for valid default/JSON-summary combinations and malformed exports. No app JS or standalone index.html change. Frozen 166 gaps / 95 partial unchanged. New exact-head Quality pending.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality structural/Chromium jobs succeed for the new SHA; investigate failures.
+2. **P0 protected release:** eligible review and required checks for PR #189, ordinary merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html and Chromium confirmation/cancel, focus, storage-failure and future-schema tests.
+4. **P1 independent numerical references:** repeated roots, nonlinear fitting and unstable filters with tolerances and invalid-input regressions.
+5. **P1 obsolete branch audit:** prove full main containment, no open PR and unprotected status before deleting anything.
+
+## 2026-11-10 — AUDIT-LEDGER-JSON-SUMMARY-232 (machine-readable audit output)
+
+**Execution ledger:** Inspected dev a7f36cfc99a0633f27968d1079e35ee964edaedd and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen audit, PR #189 (zero reviews), and successful exact-head PR Quality #42765291438. Add opt-in --json-summary to the historical ledger CLI, retaining human-readable default and refusing malformed exports without emitting misleading JSON. Add subprocess success/failure regression. No application JS/index.html change or release; frozen 166 gaps / 95 partial unchanged. New exact-head CI pending.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push/PR Quality structural and Chromium jobs pass for this commit SHA; diagnose any failure.
+2. **P0 authorized release:** obtain eligible PR #189 review and required checks, merge ordinarily, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirmation/cancel, focus, storage failure and future-schema Chromium tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters against independent tolerances and invalid-input cases.
+5. **P1 obsolete branch audit:** prove full main containment, unprotected status and no open PR before any deletion.
+
+## 2026-11-10 — AUDIT-LEDGER-CLI-231 (external export validation)
+
+**Execution ledger:** Inspected dev 821522ba5dd510b614f0fd873c87c7cfa6fdf7ef, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, PR #189 (no reviews) and exact-head PR Quality #42759613806 (success). Add optional external JSON export CLI path, preserving canonical default and concise malformed-input diagnostics; subprocess regression. No app JS/index.html change, merge or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push/PR Quality structural and Chromium jobs pass on new dev SHA.
+2. **P0 reviewed release:** eligible PR #189 approval, required checks, ordinary merge, then main Quality and Pages verified.
+3. **P1 accessible preference reset:** synchronized source/index.html, confirm/cancel, focus, storage failure and future-schema Chromium tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with reference residuals, tolerances and invalid inputs.
+5. **P1 safe branch cleanup:** verify main containment, no open PR and unprotected status before deletion.
+
+## 2026-11-10 — AUDIT-LEDGER-NEGATIVE-ZERO-230 (integer representation integrity)
+
+**Execution ledger:** Inspected dev e9f9d707bc3c49cac10a14b5e0b764f06e7c6c33, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root contract, frozen audit, PR #189 (no reviews), and exact-head PR Quality #42752743626 (success). Reject integer JSON -0 before Python silently normalizes it to 0; add nested negative-zero and ordinary integer/floating negative-zero acceptance regression. No application JS or standalone index.html changes. New exact-head CI pending; no release or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality structural and Chromium jobs pass on new dev SHA.
+2. **P0 reviewed release:** eligible PR #189 approval and required exact-head checks; normal merge, then main Quality and Pages verification.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirmation/cancel, focus, storage failure and future-schema Chromium tests.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting and unstable filters against independent references, tolerances and invalid inputs.
+5. **P1 obsolete branch audit:** verify full main containment, unprotected status and no open PR before cleanup.
+
+## 2026-11-10 — AUDIT-LEDGER-INTEGER-DIGITS-229 (bounded decoder error)
+
+**Execution ledger:** Verified dev ad88b0665238fb85f0867513262b0986cd4fff77 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root contract, frozen inventory and PR #189 (zero reviews). Exact-head PR Quality #42746545304 succeeded including structural and browser checks. Normalize Python 3.11+ excessive-integer-digit conversion errors into an actionable feature-ledger ValueError; add 5,000-digit rejection and safe-boundary acceptance tests. New exact-head CI pending. No application JS/index.html changes, release or Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality structural/Chromium jobs pass on the new dev SHA.
+2. **P0 reviewed release:** eligible approval on PR #189 and required checks; normal merge, verify main Quality and Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirmation/cancel, focus, storage failure and future-schema Chromium coverage.
+4. **P1 independent numerical reference tests:** repeated roots, nonlinear fitting, unstable filters with residuals, tolerances and invalid input.
+5. **P1 safe obsolete branch audit:** prove main containment, no open PR and unprotected before any deletion.
+
+## 2026-11-10 — AUDIT-LEDGER-UNICODE-CI-228 (exact-head CI recovery)
+
+**Execution ledger:** Inspected dev 0769c2ad6d2e01191878f2d22bf42974a084db79, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical inventory, plan and PR #189 (zero reviews). Exact-head PR Quality #42739624722 failed structural testing: 518 tests, five failures; the new iterative Unicode walk checked literal backslash-x-zero instead of the decoded NUL character, and deep negative test fixtures double-escaped JSON Unicode sequences. Restore the real NUL check and use single JSON escape sequences in deep tests; add deep nested key rejection. This is a source + focused regression repair, no app JavaScript or standalone index.html changes. Full new-head CI pending; no authorized merge/Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality structural and Chromium jobs pass on this exact dev SHA; diagnose logs if not.
+2. **P0 authorized release:** obtain eligible PR #189 approval and green required checks, merge normally, verify main Quality and Pages publication.
+3. **P1 accessible preference reset:** synchronize src/ and standalone index.html, test confirm/cancel, focus, storage failure and schema preservation in Chromium.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting and unstable filters with independent expected values, residuals and invalid inputs.
+5. **P1 obsolete branch audit:** prove merged containment in main, no open PR and no protection before deleting anything.
+
+## 2026-11-10 — AUDIT-LEDGER-ITERATIVE-UNICODE-227
+
+**Execution ledger:** Inspected dev b61d11a4401ed749aeabdb4063f59292b46ae673 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, repository contracts, frozen inventory, PR #189 (no submitted reviews) and successful exact-head PR Quality #42732534322. Replace two recursive post-parse Unicode walks with a single iterative walk to avoid recursion failures on deeply nested, decoder-accepted JSON; add nested valid, NUL and unpaired-surrogate regression. No application JS/index.html change; new exact-head CI pending, no release/Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green for new SHA, including Python audit and Chromium jobs.
+2. **P0 reviewed release:** eligible PR #189 approval and required checks, ordinary merge, main Quality and Pages verified.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirmation/cancel, focus and storage-failure browser regressions.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with residuals, tolerances and invalid-input tests.
+5. **P1 branch audit:** prove obsolete Claude branch contained in main, unprotected and no open PR before deletion.
+
+## 2026-11-10 — AUDIT-LEDGER-JSON-DIAGNOSTIC-226 fixture correction
+
+**Execution ledger:** Corrected malformed JSON test regex to match decimal line/column digits instead of literal backslash-d. Preserved strict error assertions and existing source behavior. New exact-head CI pending; frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, reviewed PR promotion, preference reset, numerical reference regressions and safe branch audit, with acceptance tests below.
+
+## 2026-11-10 — AUDIT-LEDGER-JSON-DIAGNOSTIC-226
+
+**Execution ledger:** Inspected dev 3c99e3f5fc8a173f3caf23739fe0a222419180e6, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory and PR #189 (zero submitted reviews). Exact-head PR Quality #42724661707 succeeded. Normalize malformed JSON parse errors to actionable ValueError with line/column diagnostics; regression covers malformed JSON, misplaced BOM and valid BOM. No app JavaScript/index.html change; new exact-head QA pending, no release or Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality pass structural and Chromium tests on new dev SHA.
+2. **P0 authorized promotion:** obtain eligible PR #189 review and required checks; ordinary merge, then main Quality and Pages verified.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirm/cancel, keyboard/focus and storage failure browser tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting, unstable filters with residual/tolerance and invalid-input checks.
+5. **P1 branch audit:** verify Claude branch fully contained in main, unprotected and no open PR before deletion.
+
+## 2026-11-10 — AUDIT-LEDGER-SIZE-LIMIT-225
+
+**Execution ledger:** Inspected dev 10c294a93371db93b326f82b9d9225b16b325235, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, plan and PR #189 (no reviews). Exact-head PR Quality #42716245354 succeeded with static/browser job. Bound audit JSON imports to 8 MiB before decoding to prevent unbounded memory use, preserving UTF-8 BOM and strict validation; added oversized and valid-small regression. Full new-head CI pending; no application JS/index.html change, main merge or Pages verification. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality pass structural and Chromium checks for the new dev SHA.
+2. **P0 reviewed release:** eligible review and exact-head checks for PR #189; ordinary merge and verified main Quality/Pages.
+3. **P1 accessible preference reset:** synchronized src/index.html, confirm/cancel, keyboard focus, storage errors and future-schema browser regressions.
+4. **P1 numerical reference coverage:** repeated roots, nonlinear fits and unstable filters with residual/tolerance and invalid-input cases.
+5. **P1 safe branch audit:** verify obsolete branches contained in main, unprotected and without open PR before deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-READ-ERROR-224
+
+**Execution ledger:** Verified dev cb52aed28e860eb94e84b0c245df05b5752829b4 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 has no submitted reviews. Previous exact-head PR Quality #42707708665 passed (static/browser job). Hardened historical audit input loading so missing or directory paths produce a stable actionable ValueError rather than a raw OS exception; added missing-path and directory regression cases. New exact-head CI pending; no app JS/index.html or production release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** verify push and PR Quality at the new dev SHA, including structural and Chromium jobs.
+2. **P0 authorized release:** obtain eligible PR #189 review and green exact-head checks, merge through ordinary PR, verify main Quality and Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, focus, storage failure, future-schema retention, synchronized src/index.html, browser regressions.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with residual and invalid-input tests.
+5. **P1 safe branch cleanup:** confirm obsolete branch fully contained in main, unprotected and without open PR before deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-BOM-SYNTAX-223 (restore exact-head CI)
+
+**Execution ledger:** Inspected dev 55e6c70bcc1d6db3cd5e502e791a01e68aa7e25e, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, living plan, PR #189 and failed exact-head push/PR Quality #42697648774/#42697656788. Root cause: BOM change left invalid Python assignment `data = # ...` in scripts/validate_feature_ledger.py, preventing the historical audit validation step and all downstream QA. Restore the comment on its own line and retain one JSON assignment. Add explicit misplaced/double-BOM rejection regression while preserving valid initial BOM and malformed UTF-8 cases. No app JS/index.html change. Full exact-head CI pending; PR #189 still review-blocked; no main/Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new dev push and PR Quality both pass Python audit validation, structural suite and Chromium browser regressions.
+2. **P0 authorized promotion:** eligible submitted PR #189 approval plus green exact-head checks; ordinary merge, then main Quality and published Pages verified.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage failure and future-schema preservation; synchronized src/index.html and Chromium tests.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with reference tolerances, residuals and invalid-input tests.
+5. **P1 safe branch cleanup:** confirm Claude branch contained in main, no open PR and unprotected before deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-UTF8-BOM-222 fixture correction
+
+**Execution ledger:** Corrected the new malformed post-BOM fixture to append byte FF via bytes.fromhex rather than a literal backslash escape; strict UTF-8 negative assertion unchanged. Previous exact-head CI success remains #42688061448/#42688074034; new exact-head CI pending. Frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, reviewed PR promotion, accessible preference reset, numerical reference regressions, and safe branch audit with acceptance tests below.
+
+## 2026-11-09 — AUDIT-LEDGER-UTF8-BOM-222 (spreadsheet JSON interoperability)
+
+**Execution ledger:** Verified dev fc43225e828a102703ea3ddd6dc3eed635cb1dce, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, frozen 2026-10-26 inventory and PR #189 (zero reviews). Exact-head push Quality #42688061448 and PR Quality #42688074034 both succeeded. Historical JSON loader now accepts an optional UTF-8 BOM at file start (common in spreadsheet exports) without weakening strict UTF-8 rejection. Added BOM/plain UTF-8 positive tests and malformed post-BOM negative regression. Local isolated Python JSON/encoding smoke passed; full structural/Chromium CI pending new SHA. No app JavaScript/index.html change, main merge, or Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new push and PR Quality both pass on this exact SHA, including BOM, strict UTF-8 and Chromium checks.
+2. **P0 reviewed release:** obtain eligible approval on PR #189, recheck exact-head checks, ordinary dev-to-main PR merge, verify main Quality and Pages deployment.
+3. **P1 accessible preference reset:** confirm/cancel, keyboard focus, storage error and future-schema preservation; synchronized src/index.html and browser tests.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting, unstable filters with independent residuals/tolerances and invalid-input cases.
+5. **P1 safe obsolete branch audit:** prove main contains the Claude branch and there are no open PRs/protection before deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-UTF8-221 (malformed audit encoding)
+
+**Execution ledger:** Inspected dev 150813900c07ccc54e1f10810613100e371b6fe5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, living plan, frozen inventory, PR #189 (no reviews) and successful exact-head push/PR Quality #42679684395/#42679694866. Convert invalid UTF-8 ledger bytes into actionable ValueError and add two malformed-byte regressions plus valid UTF-8 acceptance. No application JS/index.html changes; new exact-head CI pending, Pages unchanged. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green at new SHA, including UTF-8 regression and Chromium.
+2. **P0 reviewed release:** eligible review and green exact-head checks on PR #189, ordinary merge, main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage failure and future-schema preservation; synchronized src/index.html and browser regressions.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with residual/tolerance and invalid-input cases.
+5. **P1 safe branch audit:** confirm Claude branch contained in main, unprotected and no open PR before deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-DEEP-NESTING-220 (bounded JSON decoder error)
+
+**Execution ledger:** Inspected dev b780046e18d1a74529d7b221dc13d13c61dc0a90, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, living plan, frozen inventory and PR #189 (no reviews). Exact-head push Quality #42671688174 succeeded; PR Quality #42671699698 failed before jobs were created (GitHub returned zero jobs), so no source-test failure can be inferred from that PR run. Hardened historical JSON loading to translate excessive-nesting RecursionError into an actionable ValueError and added a direct 12,000-level nested fixture regression. No app JS/index.html changes. Exact-head new CI and Pages pending; frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green at the same new SHA, including deep-nesting regression and Chromium checks; investigate zero-job PR failure if repeated.
+2. **P0 reviewed release:** eligible PR #189 approval, exact-head checks, ordinary dev-to-main merge, then main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage errors and future-schema preservation, synchronized src/index.html and browser tests.
+4. **P1 numerical reference tests:** repeated roots, nonlinear fits and unstable filters with residuals, tolerances and invalid inputs.
+5. **P1 safe branch audit:** prove main contains Claude branch, no open PR/protection before any deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-CONTROL-ESCAPES-219 (repair exact-head CI fixture)
+
+**Execution ledger:** Inspected dev e8a39b4ef313c912952052931496a82ae960e472, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, frozen historical inventory, PR #189 (no submitted reviews), and failing exact-head push/PR Quality #42659891450/#42659905006. Structural run reported 511 tests with one failure in test_non_nul_control_escapes_remain_supported: the fixture used double-backslash JSON escapes and therefore decoded literal backslash+n/tab, not newline/tab. Corrected the fixture to use single-backslash JSON escapes, retaining strict positive assertions for actual newline and tab. No application JavaScript or standalone index.html changed. New exact-head CI pending; no merge, branch deletion, or Pages verification. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality both pass the repaired control-escape regression, full structural suite and Chromium checks at the new SHA.
+2. **P0 reviewed promotion:** obtain eligible PR #189 approval, verify required exact-head checks and reviews, ordinary dev-to-main merge, then main Quality and live Pages verification.
+3. **P1 accessible preference reset:** confirm/cancel, keyboard focus, storage error and future-schema preservation; synchronized src/index.html plus browser regression.
+4. **P1 independent numerical references:** repeated roots, nonlinear fitting, unstable filters with residual/tolerance and invalid-input coverage.
+5. **P1 safe obsolete-branch cleanup:** prove main contains the Claude branch and no open PR/protection before deleting it.
+
+## 2026-11-09 — AUDIT-LEDGER-NUL-218 (reject escaped NUL in historical JSON)
+
+**Execution ledger:** Inspected dev 91e1e3f419c5e826ee3f7516005ce82f66de3ccf, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical audit, living plan, PR #189 (zero reviews), and successful exact-head push/PR Quality #42649730769/#42649740066. Added recursive rejection of escaped U+0000 in historical JSON keys/values to prevent NUL-truncated audit exports; preserved valid newline/tab escapes. Focused regression covers nested values, keys, and accepted controls. No app JS/index.html changes. New exact-head CI pending; no release or Pages verification. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** both push and PR Quality pass the new NUL regression, validator and Chromium suite on the same SHA.
+2. **P0 reviewed promotion:** obtain eligible PR #189 approvals; verify required checks; ordinary dev-to-main merge, then main Quality and Pages live verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage failure and future-schema preservation; synchronized src/index.html plus Chromium tests.
+4. **P1 numerical references:** repeated roots, nonlinear fitting and unstable filters with independent tolerances, residuals and invalid-input tests.
+5. **P1 safe branch cleanup:** confirm main contains the Claude branch, no open PR or protection before deleting it.
+
+## 2026-11-09 — AUDIT-LEDGER-FRACTION-PRECISION-217 (preserve fractional decimal precision)
+
+**Execution ledger:** Verified dev 6a6cbb4adde806a569b7000854489e194bfa951a, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, PR #189 with no submitted reviews, and successful exact-head push/PR Quality #42644694190/#42644707325. Added a bounded historical JSON integrity fix: reject fractional decimal literals whose extra significant digits are silently discarded by binary64, while retaining equivalent exponent notation, representable subnormals and signed decimal zero. Added positive and negative automated regression tests. Isolated decimal comparison checks passed; new exact-head GitHub Quality/Chromium pending. No application JS/index.html change, merge, branch deletion or Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality green at new dev SHA, including fractional precision regression, structural and Chromium checks.
+2. **P0 reviewed promotion:** eligible submitted PR #189 review(s), exact-head checks and ordinary merge; verify main Quality and published Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage failure and future-schema preservation with synchronized src/index.html and Chromium regression.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with independent tolerances, residuals and invalid-input tests.
+5. **P1 obsolete branch audit:** verify main contains all Claude branch commits, no open PR or protection before any deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-ZERO-TEST-216 fixture selector correction
+
+**Execution ledger:** Before exact-head QA completed, corrected the new zero-mantissa fixture selector to explicitly include the longer zero-mantissa token, preventing a false underflow assertion. Previous commit 63c02749c20fef3d0b826843579b9b0f4323160b; current exact-head Quality must be rerun. No application bundle change, no release or Pages deployment. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality green including zero-mantissa and underflow tests and browser checks.
+2. **P0 reviewed release:** required reviews, exact-head checks, ordinary PR #189 merge, main Quality and Pages verification.
+3. **P1 accessible preference reset:** focus/keyboard, cancel, storage and future-schema cases, synchronized src/index.html and Chromium.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters with independent reference tolerances.
+5. **P1 obsolete branch audit:** verify main containment, no open PR or protection before deleting the inherited Claude branch.
+
+## 2026-11-09 — AUDIT-LEDGER-ZERO-TEST-216 (repair exact-head CI and precise underflow parsing)
+
+**Execution ledger:** Inspected dev becef1ecbe8dcfefc359e05e1d8aeb403ea98a8c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, PR #189 (no submitted reviews), and failed exact-head push/PR Quality #42639846795/#42639858321. Job 129237755446 ran 507 structural tests: one KeyError arose in the valid-zero test fixture because it read counts.gaps from an extra-only payload. Fixed the test to read the actual fixture field, added negative-zero and longer-zero-mantissa acceptance cases, and hardened the validator with exact Decimal zero detection instead of a mantissa digit heuristic. Local isolated JSON checks passed; new exact-head full CI/Chromium pending. No JS/index.html change, PR merge or Pages deployment. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality both green at this commit, including 507+ structural tests and browser checks.
+2. **P0 authorized promotion:** submitted eligible review(s), required exact-head checks and ordinary PR #189 merge; verify new main Quality and Pages.
+3. **P1 accessible preference reset:** confirm/cancel, focus, keyboard, storage failures and future-schema preservation with synchronized src/index.html and browser tests.
+4. **P1 numerical reference cases:** repeated roots, nonlinear fits and unstable filters with independent tolerances, residuals and invalid inputs.
+5. **P1 safe branch cleanup:** verify inherited Claude branch is fully contained in main, no open PR and unprotected before deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-UNDERFLOW-CI-215 (fix exact-head Quality regression)
+
+**Execution ledger:** Diagnosed failed exact-head push Quality #42621218800 and PR Quality #42621226312 at dev fbab98c3411d1452e418ea74a9f96970b1d417b2: 507 structural tests ran; two underflow tests failed because the newer rounded-fraction guard intercepted 1e-999 before the established underflow diagnostic. Reordered the two checks without weakening either validation, added 1e-324/-1e-324 and zero-exponent regression cases, and preserved the historical 166 gaps / 95 partial. Main remained 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 still review-gated. New exact-head CI must be verified before promotion.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality pass on this fix's exact SHA, including all underflow/fraction cases, structural and browser suites.
+2. **P0 reviewed release:** obtain required submitted review(s) on PR #189; merge through ordinary PR only after exact-head green, verify main Quality and Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard focus, storage errors, future-schema preservation; synchronized src/index.html and browser tests.
+4. **P1 numerical reference cases:** repeated roots, nonlinear fitting and unstable filters with independent reference tolerances, residuals and invalid inputs.
+5. **P1 branch cleanup:** after authorized release, verify Claude branch fully contained in main and no PR/protection before removal.
+
+## 2026-11-09 — AUDIT-LEDGER-FRACTION-ROUNDING-214 formatting correction
+
+**Execution ledger:** Corrected literal backslash-n sequences accidentally introduced in the previous validator patch into actual Python newlines before exact-head QA. No algorithm or test behavior changed. Full CI pending. Frozen 166 gaps / 95 partial unchanged. NEXT FIVE remain exact-head QA, authorized PR release, accessible preference reset, numerical reference regressions, and safe branch cleanup with the acceptance criteria immediately below.
+
+## 2026-11-09 — AUDIT-LEDGER-FRACTION-ROUNDING-214 (reject rounded decimal fractions)
+
+**Execution ledger:** Rechecked dev f8adac70c1ff359b0be0a2f3e2f526d6b2f46d84, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, PR #189 (zero submitted reviews), and exact-head successful push/PR Quality #42613188434/#42613193591. Confirmed inherited Claude branch is fully contained in dev; release remains review-gated. Fixed an audit JSON precision loophole where non-integral decimal tokens (1.0000000000000001, -2.0000000000000001, 9007199254740991.1) silently round to exact integers under binary64. Added focused nested and boundary regression. No app JS or standalone index.html changes; new exact-head CI pending, no release/Pages update. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new dev SHA push and PR Quality successful, including historical validator and browser/structural suites.
+2. **P0 authorized release:** PR #189 receives submitted required review(s), exact-head checks green, ordinary PR merge; confirm main Quality and Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage failure and future-schema preservation with synchronized src/index.html and browser regression.
+4. **P1 numerical references:** repeated roots, nonlinear fitting, unstable filters with independent reference tolerances, residual and invalid-input tests.
+5. **P1 branch cleanup:** verify Claude branch contained in main after approved release, no open PR/protection, then remove only if safe.
+
+## 2026-11-09 — AUDIT-LEDGER-FLOAT-SAFE-213 (integer-valued JSON float precision)
+
+**Execution ledger:** Inspected dev eefd7e096260a412b084ffb0229665a9828c735d, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, PR #189 (no submitted reviews), and successful exact-head push/PR Quality #42604896376/#42604904388. Closed a precision loophole: JSON decimal/exponent tokens such as 9007199254740992.0 bypass parse_int and may be silently rounded in JavaScript. Added three rejection and four acceptance assertions in focused regressions. No application JS/index.html change. New exact-head CI pending; no release or Pages update. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new dev SHA push and PR Quality both green, including feature-ledger, structural and Chromium regressions.
+2. **P0 reviewed release:** PR #189 submitted approvals, exact-head checks green, ordinary merge; verify main Quality and published Pages.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage failure, future-schema preservation; synchronized src/index.html and browser test.
+4. **P1 numerical references:** repeated roots, nonlinear fits and unstable filters; reference tolerances, invalid inputs and residual tests.
+5. **P1 safe branch audit:** demonstrate main containment, no unique work, open PR or protection before any deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-COUNT-TYPES-212 (strict historical count types)
+
+**Execution ledger:** Verified dev e922f06b3f472044adfb342d5f475c67948239e7, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, living plan, PR #189 (no reviews) and exact-head push/PR Quality success #42597948495/#42600567693. Fixed Python numeric equality allowing floating-point and boolean historical count fields to masquerade as frozen integer counts. Added four focused regressions. No JS/index.html change; new exact-head CI pending. Frozen 166 gaps / 95 partial unchanged. No release or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green at new dev SHA, including strict count tests, structural and Chromium checks.
+2. **P0 reviewed release:** obtain submitted approvals for PR #189, verify exact-head gates, ordinary PR merge, then main Quality and Pages confirmation.
+3. **P1 accessible preference reset:** confirmation/cancel, focus, storage failure and future-schema preservation, with synchronized src and standalone HTML and browser regression.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting, unstable filters with tolerances, residuals and invalid inputs.
+5. **P1 safe branch audit:** prove main containment, no open PR, unique commits or protection before deleting obsolete branches.
+
+## 2026-11-09 — AUDIT-LEDGER-SAFE-INTEGERS-211 (preserve exact JSON integers)
+
+**Execution ledger:** Inspected dev 172b5589eb6c7d0b66223e1a856ab246f8ab2fd5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical audit, living plan, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42594433079. JSON integer tokens beyond IEEE-754 exact range could be silently rounded by downstream browser/spreadsheet consumers. Added strict recursive parse_int guard and focused positive/negative boundary tests. No runtime JS/index.html changes. New exact-head CI pending; no PR merge or Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green on this SHA, including audit validator, structural and Chromium checks.
+2. **P0 authorized release:** required PR #189 reviews and exact-head checks; ordinary PR merge, then main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirm/cancel, focus, storage errors, future-schema preservation; synchronized source and index.html with browser regression.
+4. **P1 numerical references:** repeated roots, nonlinear fitting, unstable filters; independent tolerances and invalid-input tests.
+5. **P1 branch audit:** prove main containment, no unique commits, open PRs or protections before deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-UNICODE-210 test fixture correction
+
+**Execution ledger:** Corrected JSON escape fixture spelling to exercise decoded surrogate code points rather than literal backslashes; no change to validation logic. Exact-head CI pending; frozen 166 gaps/95 partial unchanged. NEXT FIVE remain exact-head CI, authorized PR release, accessible preference reset, numerical reference tests and safe branch audit, with acceptance gates documented below.
+
+## 2026-11-09 — AUDIT-LEDGER-UNICODE-210 (reject unpaired surrogate escapes)
+
+**Execution ledger:** Verified AGENTS.md, frozen audit, living plan, dev aef5d7c1b098e17a2aa527d108aa199cfa538578 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, PR #189 with zero reviews, and successful exact-head push/PR Quality #42570211545/#42570216695. Added recursive rejection of invalid lone Unicode surrogate escapes in historical JSON keys/values, retaining valid surrogate pairs; four focused negative/positive cases. No runtime JS or index.html changes. New exact-head QA pending; no release or Pages update. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green at new dev SHA, including validator, structural and Chromium suites.
+2. **P0 authorized release:** required submitted approvals and exact-head checks for PR #189; ordinary PR merge, then main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage errors and future-schema preservation; synchronized src/index.html.
+4. **P1 numerical reference regressions:** repeated roots, nonlinear fitting and unstable filters, with residual and invalid-input checks.
+5. **P1 safe branch audit:** prove main containment, no unique work, open PRs or protection before deleting any branch.
+
+## 2026-11-09 — AUDIT-LEDGER-FLOAT-UNDERFLOW-209 (preserve nonzero numeric audit inputs)
+
+**Execution ledger:** Verified dev 41e437a6c6a826ba21f365c87c9b0f6076833f46 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; read AGENTS.md, living plan, frozen historical inventory, PR #189 (zero reviews), and successful exact-head PR Quality #42553829518. Hardened JSON float decoding to reject nonzero values silently underflowing to zero (1e-999, -1e-999) while retaining legitimate zero literals; added focused nested and zero-value regression. No application JS or standalone HTML changed. New exact-head CI pending; no merge or Pages deployment. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** structural/validator and Chromium Quality pass at the new dev SHA.
+2. **P0 authorized release:** PR #189 submitted approvals and required exact-head checks; ordinary merge then main Quality and Pages verification.
+3. **P1 accessible preference reset:** confirmation/cancel, keyboard/focus, storage errors and future-schema preservation with synchronized source and index.html.
+4. **P1 numerical references:** repeated-root, nonlinear-fit and unstable-filter tolerance/domain/invalid-input cases.
+5. **P1 branch audit:** verify main containment, open PRs, protection and unique work before any deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-FLOAT-OVERFLOW-208 (finite numeric JSON)
+
+**Execution ledger:** Inspected AGENTS.md, living plan, frozen historical audit, dev ab70cbacdfe7bdc42eabebaf669062b7c0d0661a, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, PR #189 (zero submitted reviews), and successful exact-head PR Quality #42548374443. JSON finite-constant validation still accepted syntactically valid overflowed float literals such as 1e999 as infinity in otherwise ignored nested fields. Reject non-finite decoded floats at any depth and add three negative temporary-file regressions. Local full checkout unavailable; new exact-head structural/Chromium QA pending. No application JS/HTML, release or Pages change; frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality pass structural, new overflow regressions, standalone source/bundle consistency and Chromium at the same SHA.
+2. **P0 authorized release:** required submitted reviews and exact-head green checks for PR #189; ordinary PR merge, then main Quality and Pages verification.
+3. **P1 accessible future-schema preference reset:** confirmation/cancel, focus/keyboard, storage errors and preservation; synchronized src/index.html and Chromium.
+4. **P1 numerical references:** repeated-root, nonlinear-fit and unstable-filter tolerance/domain/invalid-input cases.
+5. **P1 branch audit:** verify full main containment, no PRs/protection/unique commits before deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-NONFINITE-207 (strict historical JSON constants)
+
+**Execution ledger:** Verified dev 03c4b1537f353505edeee6673db05a92c9b62f80, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical audit, plan, PR #189 (zero submitted reviews), and exact-head PR Quality #42537990901 successful. Local git could not resolve github.com; used connector fallback. Hardened frozen-ledger JSON loader to reject nonstandard NaN/Infinity/-Infinity constants at any depth, with three negative temporary-file regressions. No JS/standalone HTML changes. Local full checkout unavailable; new exact-head Quality/Chromium and Pages remain unverified; PR promotion review-gated. Frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green on the new SHA, including strict JSON validator regressions, source/bundle check and full Chromium smoke.
+2. **P0 authorized PR release:** obtain required submitted reviews and exact-head checks on PR #189; ordinary PR merge only, then verify main Quality and Pages.
+3. **P1 accessible future-schema preference reset:** confirmation/cancel, keyboard/focus, storage failure and future-schema preservation, with synchronized src and index.html plus Chromium coverage.
+4. **P1 numerical references:** repeated-root, nonlinear-fit and unstable-filter independent tolerance/domain/negative tests.
+5. **P1 safe branch audit:** verify main containment, open PRs, protection and unique commits before any deletion.
+
+## 2026-11-09 — AUDIT-LEDGER-DUPLICATE-KEYS-206 (unambiguous historical JSON)
+
+**Execution ledger:** Inspected dev 6774e2844745209072effac7cb0ea15a42e0f522, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, plan, frozen audit, PR #189 and successful exact-head push/PR Quality #42533015898/#42533020995. Found that standard JSON parsing silently accepts duplicate object keys, potentially hiding conflicting frozen counts, IDs or statuses. Added duplicate-key rejection at all JSON object depths in the audit loader and a focused top-level/nested regression. Frozen inventory and application JS/HTML unchanged. Exact-new-head CI pending; PR remains review-gated, no release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** new push and PR Quality pass structural, feature-ledger tests, source/bundle check and Chromium smoke at the same SHA.
+2. **P0 authorized release:** PR #189 has required submitted approvals and exact-head checks; merge only through ordinary PR then verify main Quality and Pages.
+3. **P1 accessible preference reset:** confirm/cancel, keyboard focus, storage failures and future-schema preservation; synchronize modular JS and standalone HTML.
+4. **P1 numerical references:** repeated roots, nonlinear-fit and unstable-filter reference/tolerance and invalid-input tests.
+5. **P1 branch audit:** verify full main containment, no open PR or protection and no unique work before deleting obsolete refs.
+
+## 2026-11-08 — AUDIT-LEDGER-JSON-TYPES-205 (malformed JSON diagnostics)
+
+**Execution ledger:** Verified exact dev 3f6a0a3bb068071c908e9b53c7772ccdcdff61b9, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, historical frozen audit (166 gaps, 95 partial), PR #189 (open, no submitted reviews), and successful exact-head push/PR Quality #42527989177/#42527993936. Identified a follow-on integrity defect in `scripts/validate_feature_ledger.py`: list/object values in JSON `id`, `kind`, `status` or `priority` can raise incidental `TypeError: unhashable type` during set/Counter rather than actionable audit errors; JSON `true` also compares equal to schema version integer 1 in Python. Added explicit type guards before hash operations and exact integer schema validation. Extended `tests/test_feature_ledger_validation.py` with negative cases for unhashable fields and boolean schema. Frozen data unchanged. No JS/HTML change. New exact-head CI required, no local full checkout. PR remains review-gated; Pages not redeployed.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head QA:** push and PR Quality green at new SHA, including `python scripts/validate_feature_ledger.py`, `python -m unittest discover -s tests -p 'test_feature_ledger_validation.py' -v`, full structural/browser checks.
+2. **P0 reviewed release:** inspect PR #189 exact-head checks, submitted reviews and protections; merge only by authorized normal PR; verify main Quality, Pages and hosted critical paths.
+3. **P1 preference reset UI:** explicit confirmation/cancel, keyboard/focus, quota and future-schema retention tests; keep source/bundle synchronized.
+4. **P1 numerical references:** repeated-root, nonlinear-fit and unstable-filter domain/tolerance/invalid-input regression coverage.
+5. **P1 safe branch cleanup:** confirm complete containment in main, no open PR, no protection and no unique work before deletion.
+
+## 2026-11-08 — AUDIT-LEDGER-OPTIMIZATION-204 (immutable historical inventory gate)
+
+**Execution ledger:** Verified exact dev 3613ce8401b08015a7574ec323b582777d12cbee, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen audit (166 gaps, 95 partial), plan, PR #189 (open, zero submitted reviews), and successful exact-head push/PR Quality #42522954161/#42522959154. Found that `scripts/validate_feature_ledger.py` used Python `assert` statements for every historical-inventory invariant: `python -O` removes those checks entirely and can falsely accept modified audit data. Replaced assertions with explicit ValueError guards, including typed top-level/item validation and clear diagnostic errors; preserved all frozen counts and statuses. Added `tests/test_feature_ledger_validation.py` covering valid audit, corrupt schema/counts/IDs/kinds/source/scope and an actual optimized-Python subprocess rejecting corrupted data. No application JavaScript or bundled HTML changes. Full local checkout unavailable; exact-head CI pending. No merge or Pages release; PR review-gated.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head Quality:** `python scripts/validate_feature_ledger.py`, `python -m unittest discover -s tests -p 'test_feature_ledger_validation.py' -v`, full structural tests and Chromium suites pass on exact dev SHA in both push/PR Quality.
+2. **P0 reviewed PR release:** confirm exact-head required checks, authorized submitted approvals and protections; only ordinary dev-to-main PR merge; verify main Quality, Pages and hosted critical paths.
+3. **P1 accessible future-schema reset UI:** confirm/cancel and keyboard/focus, quota-failure and newer-schema preservation regressions; synchronize source and bundled index.
+4. **P1 numerical correctness:** repeated-root, nonlinear-fit and unstable-filter reference cases with residual/tolerance/domain and invalid-input checks.
+5. **P1 safe branch cleanup:** inspect full commit containment in main, protection, open PRs and unique work before deleting any obsolete branch.
+
+## 2026-11-08 — BUILD-MODULE-REMOVAL-203 (explicit stale-source recovery)
+
+**Execution ledger:** Verified dev 52dad5e6f016ad2cc2fa5549749825fe4e8a1846, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen 166-gap/95-partial historical inventory, living plan, PR #189 (open; zero submitted reviews), and successful exact-head push/PR Quality #42518007258/#42518011853. Chose a bounded build-integrity failure path: if a module disappears or becomes invalid UTF-8 between assembly and snapshot verification, report the same actionable stale-source/retry error as other concurrent changes, rather than leaking an incidental raw exception. Added focused subprocess `--check` regression deleting a module after assembly and asserting no false success, index preservation and no temporary artifacts. No application JS or bundle change. Full local checkout unavailable; exact-head CI required for new commit; PR remains review-gated.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 new exact-head QA:** both push/PR Quality green; focused `python -m unittest discover -s tests -p 'test_build_atomic_write.py' -v`, full structural suite, `python scripts/build.py --check`, and Chromium regressions.
+2. **P0 reviewed release:** inspect required checks, PR #189 reviews and protections; merge only via authorized ordinary PR, then verify main Quality, Pages and hosted critical paths.
+3. **P1 future-schema reset UI:** explicit confirmation/cancellation, keyboard/focus, quota-failure and newer-schema preservation tests; source/bundle parity.
+4. **P1 numerical correctness:** independent repeated-root, nonlinear fit and unstable-filter reference/invalid-input tests.
+5. **P1 branch cleanup:** compare containment in main, open PRs, protection and unique commits before deleting any obsolete ref.
+
+## 2026-11-08 — BUILD-TEST-CI-202 (guard-injection preflight correction)
+
+**Execution ledger:** Follow-up preflight of a8b12ef82e6521ac1c1bd2b307e8802150be61c7 found that including indentation in the replacement token would strip indentation from the injected Python statement. Corrected the test to count both guard occurrences and deliberately inject at the first (publish) guard, retaining the original valid indentation strategy and the strict concurrent-write rollback assertion. No application or builder source changes; exact-head CI is required. PR #189 still review-gated; frozen historical 166 gaps/95 partial unchanged.
+
+**NEXT FIVE:** (1) exact-head push/PR structural, focused atomic-write and browser Quality green; (2) authorized reviewed PR #189 merge only after all gates, then main Quality/Pages/hosted verification; (3) accessible future-schema reset UI with confirmation, keyboard and storage regressions plus synchronized bundle; (4) numerical root/fit/filter independent reference and invalid-input tests; (5) protected/unmerged/open-PR branch audit before cleanup.
+
+## 2026-11-08 — BUILD-TEST-CI-201 (repair two exact-head structural regressions)
+
+**Execution ledger:** Read dev f56db529fe639732dcf9843ad4de9c609ecfe90f, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, plan, frozen 166-gap/95-partial inventory, PR #189 and exact-head push/PR Quality #42517673686/#42517679751. Both failed in structural tests. Read job #128844156973 logs: (1) `test_concurrent_index_edit_is_not_overwritten` asserted a unique unindented `with index.open(...)` guard, but the newer no-op path adds a second occurrence; (2) `test_noop_rebuild_rejects_external_index_edit` expected literal backslash-n while the injected write produces a real newline. Fixed the test fixture to target the twelve-space publish-path guard only, and to expect the actual newline; kept failure rollback, stale-snapshot, symlink and cleanup assertions unchanged. No application or builder source change. GitHub CI will run focused and full structural/browser regressions for new SHA; local checkout remains unavailable. PR #189 review-gated; no main/Pages release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 exact-head CI:** push and PR Quality green on this commit, including `python -m unittest discover -s tests -p 'test_build_atomic_write.py' -v`, all structural tests, `python scripts/build.py --check`, and Chromium suites; investigate any failures from logs.
+2. **P0 PR #189 promotion:** confirm authorized reviews, required exact-head checks, branch rules and diff before ordinary PR merge; then verify new main Quality, Pages and hosted smoke.
+3. **P1 accessible future-schema preference reset UI:** confirm/cancel and keyboard/focus, storage failure and unsupported schema preservation tests, synchronize `src/` and `index.html`.
+4. **P1 numerical correctness:** repeated roots, nonlinear fit conditioning, unstable filters with independent references, tolerances, residuals and invalid-input tests.
+5. **P1 cleanup:** inspect extra branches for main containment, unique commits, open PRs and protections before any deletion.
+
+## 2026-11-08 — BUILD-NOOP-INDEX-RACE-199 (no-op destination freshness)
+
+**Execution ledger:** Rechecked exact dev 3c65769cb8b8e92238a2df3e8310f508dbfcf771, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen 166-gap/95-partial inventory, plan, PR #189 (open; zero reviews), and successful exact-head push/PR Quality #42512843239/#42512847951. Found that the normal no-op path verified source snapshots but did not recheck whether the destination HTML was edited or replaced by a symlink after the initial read. This could incorrectly report the bundle "already up to date" even when the current HTML was independently changed. Added a no-op destination symlink/content guard, preserving read-only `--check` snapshot semantics, plus a focused subprocess regression injecting an external edit after assembly and verifying nonzero exit, no false success, and no temporary artifacts. No JavaScript module or bundled HTML change. Full local repository checkout unavailable; exact-head CI pending. PR #189 remains review-gated; no release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** new push and PR Quality green, structural `python -m unittest discover -s tests -p 'test_*.py'`, focused `python -m unittest discover -s tests -p 'test_build_atomic_write.py' -v`, source/bundle check and Chromium regressions.
+2. **P0 PR #189 promotion (review-gated):** verify exact-head CI, authorized reviews and protection; ordinary PR merge only after all gates, then main Quality, Pages and hosted smoke.
+3. **P1 Accessible future-schema preferences reset UI (planned):** confirm/cancel, keyboard/focus, failed storage and unsupported-schema preservation Node/Chromium tests; synchronize modular source and standalone HTML.
+4. **P1 Numerical correctness (planned):** repeated polynomial roots, nonlinear fit conditioning and unstable filters with independent references, tolerances, residuals and invalid inputs.
+5. **P1 Branch audit (pending):** confirm extra branches contained in main, unprotected, no open PR or unique commits before any deletion.
+
+## 2026-11-08 — BUILD-SYMLINK-SWAP-198 (pre-publish symlink guard)
+
+**Execution ledger:** Verified dev 371bbc23d03d8b185f873c8cd90936a95aa7e3f8, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, frozen 166-gap/95-partial audit, PR #189 open/zero reviews, and exact-head push/PR Quality #42507444238/#42507448592 successful. Identified a remaining build-integrity hazard: after checking index.html at startup and before publishing, an external editor could replace the destination path with a symlink; atomic replace would then overwrite the link rather than preserve that newer path. Added a pre-publish symlink guard and focused subprocess regression injecting the path swap, asserting the external target survives, index remains a symlink, nonzero exit, and no temporary artifacts. This is a best-effort check, not a race-free filesystem lock. No JS or standalone HTML change. Local full repository tests unavailable without checkout; exact-head GitHub Actions pending. PR release remains review-gated; no main/Pages promotion.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Exact-head Quality (pending):** push and PR workflows green for new SHA, including structural `python -m unittest discover -s tests -p 'test_*.py'`, symlink-swap regression, `python scripts/build.py --check` and browser suite.
+2. **P0 PR #189 (review-gated):** verify required checks, authorized submitted reviews, protections and full diff; ordinary PR merge only after approval, then main Quality, Pages and hosted smoke.
+3. **P1 Future-schema preference reset UI (planned):** explicit confirmation/cancel, accessible focus and keyboard, failed storage recovery, unsupported-schema preservation; synchronized source/bundle.
+4. **P1 Numerical correctness (planned):** repeated polynomial roots, nonlinear fit conditioning and unstable filters with independent reference, residual and invalid-input tests.
+5. **P1 Branch audit (pending):** verify main containment, no open PRs, protection, unique commits or dependencies before obsolete branch deletion.
+
+## 2026-11-08 — BUILD-NOOP-SNAPSHOT-197 (source freshness on unchanged bundle)
+
+**Execution ledger:** Inspected exact dev 0aefe20b1a4f16e5975698e694d42beb4f084773, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen 166-gap/95-partial inventory, current plan, PR #189 (open, zero reviews), and exact-head successful push/PR Quality #42502772591/#42502778355. Found that normal `python scripts/build.py` skipped `verify_source_snapshots()` when assembled output initially matched `index.html`, so a module changed during assembly could be falsely reported as up-to-date. Added snapshot verification to the normal no-op path, and focused injected concurrent-edit regression verifying nonzero exit, preserved bundle, no false success and no staging debris. No JS modules or standalone HTML changed. Local repository checkout unavailable; exact-commit CI must verify structural and browser suites. PR review gate still prevents release; no main/Pages deployment.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Exact-head CI (pending):** both push and PR Quality for new SHA succeed, including `python -m unittest discover -s tests -p 'test_*.py'`, the no-op snapshot regression, `python scripts/build.py --check` and browser smoke.
+2. **P0 Release PR #189 (review-gated):** verify required authorized reviews, exact-head checks, branch rules; ordinary PR merge only after green, then main Quality, Pages and hosted smoke.
+3. **P1 Future-schema preference reset UI (planned):** explicit confirmation and accessible keyboard/focus/cancel behavior, storage failure and unsupported-schema preservation tests; synchronize modular JS and standalone bundle.
+4. **P1 Numerical reference tests (planned):** repeated polynomial roots, ill-conditioned nonlinear fitting and unstable filters with reference values, tolerances, residuals and invalid domains.
+5. **P1 Cleanup audit (pending):** confirm all extra-branch commits in main, no open PR, protection or unique work before any deletion.
+
+## 2026-11-08 — BUILD-RACE-TEST-FIX-196 (complete injected newline alignment)
+
+**Execution ledger:** During preflight inspection of 68cf8fad01238be37ef7c68c9db684a901ff853f, detected that its fixture's literal backslash-n conversion still targeted twelve-space indentation even though the injected loop had been corrected to four spaces. Updated the conversion to match the four-space `verify_source_snapshots` body; explicit fixture compilation remains, as do strict rollback and cleanup assertions. No production or standalone JS changes. Exact-head CI required; previous #42498036210/#42498040457 failed from test-only indentation. Main remains 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 review-gated. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE:** (1) exact-head push/PR Quality and 488+ structural regressions green, including injected source edit; (2) approved PR #189 review/check gates, main Quality/Pages/hosted smoke; (3) future-schema preference reset UI with confirmation, keyboard, storage-failure tests and bundle sync; (4) independent numerical references for roots, nonlinear fits and filters; (5) verified containment/protection/PR audit before obsolete branch cleanup.
+
+## 2026-11-08 — BUILD-RACE-TEST-FIX-195 (repair exact-head structural failure)
+
+**Execution ledger:** Exact dev 3b0ad752246237d3fad09dea1a73c304610e2775, main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Both exact-head push Quality #42498036210 and PR Quality #42498040457 failed at structural unittest: `test_concurrent_module_edit_does_not_publish_stale_bundle` generated a syntactically invalid instrumented builder (`IndentationError` at the four-space `verify_source_snapshots` loop). The prior test injected a 12-space indentation borrowed from a different builder location; corrected injection to the actual four-space function body and added explicit `compile(instrumented, ...)` before the subprocess so syntax regressions fail directly. No production builder, JS modules, or standalone bundle changes; regression assertions remain strict. New exact-head push/PR CI pending. PR #189 has no submitted reviews, so no merge or Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Exact-head structural recovery (pending):** both new push/PR Quality green; `python -m unittest discover -s tests -p 'test_*.py'` passes the concurrent-source-edit and read-only snapshot regressions; `python scripts/build.py --check` green.
+2. **P0 Release PR #189 (review-gated):** verify authorized submitted reviews, rulesets and exact-head checks; merge only through ordinary PR, then verify main Quality, Pages and hosted smoke.
+3. **P1 Future-schema preferences reset UI (planned):** explicit confirmation, cancellation, keyboard/focus, storage-failure regressions, and synchronized JS/bundle.
+4. **P1 Numerical references (planned):** repeated roots, nonlinear-fit conditioning and unstable filters with reference/residual/domain tests.
+5. **P1 Cleanup audit (pending):** prove obsolete branch containment in main, absence of open PRs/protection/unique work before deletion.
+
+## 2026-11-08 — BUILD-CHECK-SNAPSHOT-194 (read-only check freshness)
+
+**Execution ledger:** Rechecked dev 59bab1d7442dd38e91fd597b72de69c9a57d9193, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory 166 gaps/95 partial, PR #189 (open, zero reviews), and successful exact-head push/PR Quality #42492393106/#42492396772. Local `timeout 5 git ls-remote` failed with `Could not resolve host: github.com`; GitHub connector fallback used. Identified that `scripts/build.py --check` could report success when a source module changed after its initial read, while normal build already reverified snapshots. Refactored source-snapshot verification into a shared helper called by both check and rebuild, and added a read-only check regression injecting a source edit before verification. No JS module or standalone bundle change. New exact-commit CI pending; no merge or Pages deployment.
+
+**NEXT FIVE (priority/status/acceptance):**
+1. **P0 Exact-head Quality (pending):** New dev SHA push and PR workflows green, especially `python -m unittest discover -s tests -p 'test_*.py'`, snapshot-race regression, `python scripts/build.py --check` and browser suites.
+2. **P0 PR #189 release (review-gated):** Verify authorized reviews, required exact-head checks and branch rules; ordinary PR merge only, followed by main Quality, Pages and hosted smoke.
+3. **P1 Accessible future-schema preference reset (planned):** Opt-in confirmation/cancellation, keyboard and focus behavior, quota/storage-failure regression; source/bundle synchronization.
+4. **P1 Numerical reference coverage (planned):** Repeated polynomial roots, nonlinear fit conditioning and unstable filters, with independent numerical references and invalid-domain tests.
+5. **P1 Branch cleanup audit (pending):** Verify main containment, open PRs, protection, unique commits and dependencies before deleting any obsolete branch.
+
+## 2026-11-08 — BUILD-MODULE-RACE-193 (source-snapshot protection)
+
+**Execution ledger:** Inspected dev 58a8d83e72fa2b54d7e6efd5ede0baf6138ca609, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, living plan, frozen inventory (166 historical gaps/95 partial), PR #189 (open, zero reviews) and exact-head push Quality #42487293944 / PR Quality #42487298107, both successful. Main Quality #41730966059 and Pages #41730962844 remain last verified release runs. The builder previously checked concurrent index edits but could still publish stale JavaScript when an individual `src/` module changed after its initial read. Captured each module's full source snapshot and rechecked all source files before atomic index replacement; an intervening module edit or symlink swap aborts and cleans the staged HTML. Added focused subprocess regression for concurrent module edits. This is a best-effort snapshot check, not an interprocess lock; an edit between final comparison and rename remains possible. No application runtime or standalone bundle change. Full repository CI for new commit pending; local checkout unavailable. No merge or branch deletion.
+
+**NEXT FIVE (status / acceptance):**
+1. **P0 Exact-head build QA (pending):** push and PR Quality green on new dev SHA, including `python -m unittest discover -s tests -p 'test_*.py'`, new module-edit rollback test, `python scripts/build.py --check` and browser regressions.
+2. **P0 PR #189 release (review-gated):** verify authorized reviews and all required exact-head checks/protections before ordinary dev-to-main PR merge; then verify main Quality, Pages and hosted smoke.
+3. **P1 Accessible future-schema preference reset UI (planned):** explicit opt-in, keyboard/focus, cancellation and quota-failure regressions; synchronize `src/` and standalone `index.html`.
+4. **P1 Independent numerical correctness (planned):** repeated roots, nonlinear fit conditioning and unstable digital-filter references with residual/tolerance and invalid-input cases.
+5. **P1 Safe cleanup (pending):** inspect extra branches for main containment, open PRs, protections and unique work before deletion.
+
+## 2026-11-08 — BUILD-CONCURRENT-192 (protect concurrent index edits)
+
+**Execution ledger:** Verified dev 39235a3c9fe55dd05e916d022c088da4761d430f, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical inventory (frozen 166 gaps / 95 partial), living plan, PR #189 with zero submitted reviews, exact-head push Quality #42485007089 and PR Quality #42485010736 both successful with full browser and structural jobs. Identified a remaining build race: after reading the original standalone HTML, the atomic builder could replace an independent editor's newer index.html changes with a stale generated snapshot. Added a final read-only original-content comparison immediately before os.replace; if index.html changed, abort with actionable retry error and remove the temporary file. Added a subprocess regression simulating concurrent external edit, verifying preservation and cleanup. This is a best-effort lost-update guard, not a cross-process lock; a simultaneous edit between comparison and rename remains possible. No JavaScript bundle changes. Local full checkout unavailable due to execution DNS; new exact-head CI required before release. No merge or branch deletion.
+
+**NEXT FIVE (status / acceptance):**
+1. **P0 New exact-head Quality (pending):** Both push/PR Quality and all browser/structural checks green on new dev SHA, especially `python -m unittest discover -s tests -p 'test_*.py'`, `python scripts/build.py --check`, and concurrent-edit rollback test.
+2. **P0 PR #189 promotion (review-gated):** Verify required checks, rulesets and authorized approvals; ordinary PR merge only, then verify new main Quality, Pages publication and hosted smoke.
+3. **P1 Accessible future-schema preferences reset UI (planned):** User confirmation, cancellation, keyboard and quota-failure tests; preserve unsupported saved schema until successful explicit reset; synchronize bundled index.
+4. **P1 Numerical reference cases (planned):** Repeated polynomial roots, nonlinear-fit conditioning, unstable filter invalid inputs; independent reference/tolerance/residual assertions.
+5. **P1 Safe obsolete branch audit (pending):** Verify containment in main, no unique commits/open PRs/protection and dependent references before cleanup.
+
+## 2026-11-08 — BUILD-ATOMIC-191 (GitHub-connector fallback; CI pending)
+
+**Execution ledger:** Rechecked exact dev 59bf81e0e75bc387cc9bc78dd13508b07e549cbe and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen 166-gap/95-partial historical inventory, plan, PR #189 (open without submitted reviews) and both successful push/PR Quality #42165705858/#42165711308. Root cause of repeated hourly checkout failures was execution-container DNS resolution (`Could not resolve host: github.com`); connector access remains functional. Identified a separate real build-integrity defect: `scripts/build.py` opened the published standalone index directly for writing, allowing write/rename failures to leave truncated HTML. Changed the builder to stage LF-encoded content in the same directory, fsync, preserve file permissions, atomically replace and always remove an abandoned staging file. Added `tests/test_build_atomic_write.py` covering failed replacement rollback and successful atomic rebuild/mode preservation. Isolated atomic-write prototype passed locally; repository tests cannot run locally without a checkout. GitHub exact-head CI after this commit must verify both regressions, structural/browser suite and source-bundle consistency. No application bundle/source-module change, merge or Pages release; no deletion.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head build safety QA (pending):** `python -m unittest tests.test_build_atomic_write`, `python -m unittest discover -s tests -p 'test_*.py'`, `python scripts/build.py --check`, and push/PR Quality all green for new dev SHA; investigate failures without weakening tests.
+2. **P0 PR #189 release (review-gated):** Verify required exact-head checks, authorized submitted reviews, rulesets/protections and diff; only ordinary approved dev-to-main PR merge, then new main Quality, Pages and hosted smoke checks.
+3. **P1 Accessible preference reset UI (planned):** explicit confirmation of `toolPrefs.resetUnsupported(true)`; Node/Chromium cancellation, keyboard, storage-quota and saved-newer-schema-preservation tests; synchronize `index.html`.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, ill-conditioned nonlinear fit and unstable digital-filter reference/invalid-input regressions with domains/tolerances/residuals.
+5. **P1 Cleanup audit (pending):** verify any extra branch's commits contained in validated main, no open PR, protection, unique work or tracked dependencies before deletion.
+
+## 2026-11-06 — PROJECT-IMPORT-POLL-190 (new exact-head QA pending)
+
+**Execution ledger:** Inspected dev 7dacba6f389a3cc2c92c9101835c72badc54626a and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen 166-gap/95-partial audit, living plan, PR #189 (open, no submitted reviews), main Quality #41730966059 / Pages #41730962844 (success for unchanged main). Exact-head push Quality #42159635636 failed in project migration/rollback browser regression: `graph.dataset` was temporarily null, causing the wait predicate to throw before import completion; PR Quality #42159640300 was cancelled. Changed the browser wait to null-safe optional chaining, retained the two-row assertion, and additionally verified imported graph headers. Added a bounded production API `toolPrefs.resetUnsupported(true)` for explicit opt-in recovery of unsupported future preference schema; no implicit reset, failed writes preserve original data, successful reset transitions to v1. Added executable Node regression covering refusal, write failure, retry and success; synchronized standalone HTML and updated changelog. No user-facing reset control yet: API-only. Local checkout/browser suite unavailable; full exact-head CI pending. No release or branch deletion. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (pending):** `python tests/smoke_project_schema.py` completes import/migration/rollback with null-safe polling and validates headers; `python -m unittest tests.test_tool_search_favorites` verifies future-schema opt-in and failure recovery; push/PR Quality and source/bundle checks green on final SHA.
+2. **P0 PR #189 release (review/protection blocked):** verify all required checks and authorized approvals, ordinary dev-to-main merge only; confirm main Quality, Pages build/deploy and hosted critical paths.
+3. **P1 Explicit future-schema reset UI (planned):** accessible confirmation dialog and keyboard workflow, preserve v2 bytes unless user confirms, report quota failures; browser smoke on desktop/mobile.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, ill-conditioned nonlinear fitting and unstable filters against independent references, with invalid-domain checks.
+5. **P1 Safe cleanup audit (pending):** confirm extra branch is reachable from main, unprotected, no open PR or unique work, before any deletion.
+
+## 2026-11-06 — UI-PREFS-V1-COMPLETE-189 (exact-head CI pending)
+
+**Execution ledger:** Inspected dev 7402cb86d54e345eb440f13b7e0a9468c4e7fbef and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory and plan. Exact-head push Quality #42154342867 and PR Quality #42154352048 both FAILED at structural unittest: stale test_safety assertion expected `let persisted=true;` while production correctly added `unsupportedVersion=false`. Corrected the assertion to accept the optional additional state variable without weakening the requirement that persisted be initialized before read(). Added production recovery for version-1 preference objects missing either required array: report session-only until rewritten; executable Node regression verifies preservation and recovery. Updated standalone bundle in lockstep, changelog and next five. Local GitHub checkout failed DNS; Python/Chromium full checks not run locally; new exact-head CI pending. PR #189 still open with no reviews; main Pages remains unchanged. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** structural unittest (including state initialization), Node missing-v1-list repair and browser regression, bundle consistency, and push/PR Quality all green on final dev SHA.
+2. **P0 PR #189 release (review-blocked):** verify exact-head checks, required reviews and protection, ordinary authorized PR merge only; verify main Quality, Pages and hosted smoke afterward.
+3. **P1 Explicit future-schema reset (planned):** user-triggered opt-in reset preserves unsupported v2 data until confirmed; keyboard and browser regressions.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fitting and unstable filter reference/invalid cases.
+5. **P1 Safe cleanup (pending):** prove extra branch contained in main, unprotected, no open PR and no unique commits before deleting.
+
+## 2026-11-06 — UI-PREFS-VERSION-188 (exact-head QA pending)
+
+**Execution ledger:** Inspected dev 5af8126cdcd75299a335620b7f8e62aa3b6c0636 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, plan, successful exact-head push Quality #42147267403 and PR Quality #42147271856, PR #189 (open, no reviews, mergeable clean), and previous main Quality/Pages evidence. Added forward-compatible preference schema handling: unsupported future versions stay session-only without overwriting unknown saved data; unversioned legacy lists remain readable and migrate to v1 on a successful write. Added Node and Chromium regression assertions, rebuilt synchronized standalone module, updated ledger/changelog. Local full suite and browser checks not executed; new exact-head CI pending. No merge, deployment, or branch deletion. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** schema v2 no-overwrite, legacy migration Node/Chromium, Python structural suite, source/bundle parity and full push/PR Quality pass for new dev SHA.
+2. **P0 PR #189 release (review-gated):** verify authorized approvals, branch protections and exact-head checks, ordinary dev-to-main PR merge, then main Quality, Pages and hosted smoke.
+3. **P1 Preference version recovery (planned):** explicit safe reset workflow for unsupported future schema only with user action, preserving unknown fields until then; browser and keyboard regression.
+4. **P1 Numerical reference QA (planned):** polynomial repeated roots, ill-conditioned nonlinear fitting and unstable filters against independent reference and invalid inputs.
+5. **P1 Safe cleanup (pending):** verify legacy branch containment in validated main, open PRs, protections and references before any deletion.
+
+## 2026-11-06 — UI-PREFS-NESTED-INTEGRITY-187 (new exact-head CI pending)
+
+**Execution ledger:** Inspected dev 9e9369dee6a50ad78d241f0cc1a2ab109c435d6f and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, living plan, exact-head push Quality #42140368695 and PR Quality #42140374316 (both successful), PR #189 (open, no reviews, clean), and last main Quality #41730966059 / Pages #41730962844 (successful for unchanged main). Identified that invalid, repeated or over-limit nested saved IDs were silently sanitized without flagging persistence as requiring repair. Now compare cleaned list lengths with original arrays, preserve valid sibling IDs and mark session-only until a successful rewrite. Added focused executable Node cases for malformed/duplicate and over-limit lists, Chromium browser restoration and recovery coverage, and synchronized standalone HTML. New exact-head CI pending; local full Python/Chromium not executed because repository checkout unavailable. No release, merge or branch cleanup. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** Node nested-list corruption and over-limit reference tests, Chromium saved-state repair/recovery smoke, Python structural suite and full push/PR Quality green on new dev SHA.
+2. **P0 PR #189 release (review-gated):** verify required reviews/protections and exact-head PR checks; merge only by ordinary authorized PR, then confirm main Quality, Pages and hosted smoke.
+3. **P1 Preference version/integrity (planned):** unknown schema versions and missing fields preserve supported legacy preferences without falsely reporting persistence; Node and browser regression.
+4. **P1 Numerical reference QA (planned):** polynomial repeated roots, ill-conditioned nonlinear fitting and unstable digital-filter reference and invalid-input tests.
+5. **P1 Safe cleanup (pending):** prove legacy branch ancestry into validated main, no unique commits/open PRs/protections or tracked references before any deletion.
+
+## 2026-11-06 — UI-PREFS-OVERSIZE-186 (exact-head QA pending)
+
+**Execution ledger:** Inspected dev 54dc353c73acaa9f47318eca7d3d06d632b16845 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, living plan, frozen audit, exact-head push Quality #42133233110 and PR Quality #42133237537 (both successful), PR #189 (open, zero reviews), and main Quality #41730966059 / Pages #41730962844 (successful for unchanged main). Bounded tool-preference JSON restore to 16,384 UTF-16 code units and rejected non-string storage returns, avoiding unbounded parsing and treating invalid restore as session-only. Valid saved sibling lists in ordinary malformed-but-bounded payloads retain the previous salvage behavior. Added focused Node and Chromium oversize/recovery regressions and synchronized standalone HTML. New exact-head Quality and local full browser checks pending; no merge or deletion. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** Node oversize/non-string recovery regression, Chromium oversize/recovery smoke, Python structural checks and full push/PR Quality pass on the new exact dev SHA.
+2. **P0 Protected release PR #189 (review-blocked):** verify required approvals/protections and exact-head PR checks, ordinary merge only when authorized; verify new main Quality, Pages build and live smoke.
+3. **P1 Storage integrity (planned):** reject malformed nested preference IDs and report repairs while preserving valid siblings; assert session and persistent state in browser.
+4. **P1 Numerical reference QA (planned):** repeated-root polynomial, nonlinear-fit conditioning and unstable digital filter reference/negative tests with tolerances.
+5. **P1 Cleanup audit (pending):** prove legacy branch reachable from validated main, no unique commits, open PRs or protections before any deletion.
+
+## 2026-11-06 — UI-PREFS-PARTIAL-CORRUPTION-185 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, living plan, frozen inventory, dev f80ff900 and main 70fc483, PR #189 (open, zero reviews, clean), dev push Quality #42126789186 and PR Quality #42126793454 (both success on exact f80ff900), previous main Quality #41730966059 and Pages #41730962844 (both success for unchanged main). Identified malformed preference object fields: a valid JSON object with a non-array recents or pins field was silently sanitized but persisted() remained true until the next write. Implemented partial salvage of valid sibling list while marking persistence as needing repair; a successful save restores persisted status. Added Node state-transition regression and Chromium persisted-state assertion for corrupt pins, and synchronized standalone index. New exact-head CI pending; local full browser suite not executed. No release merge or cleanup; frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** new Node malformed-list and Chromium corrupted-storage regressions, full Python/structural and Chromium suites, and push/PR Quality green on the exact new dev SHA.
+2. **P0 PR #189 release (review-gated):** obtain authorized required review(s) and inspect protections/checks; ordinary dev→main PR merge only when gates green, then verify main Quality, Pages deployment and live hosted smoke.
+3. **P1 Storage schema hardening (planned):** validate oversized and malformed preference payloads without dropping valid sibling data; verify bounded IDs and recoverable persistence with browser regressions.
+4. **P1 Numerical reference QA (planned):** repeated-root polynomial, nonlinear-fit ill-conditioning and unstable filter negative/reference tests with explicit tolerances.
+5. **P1 Cleanup audit (pending):** prove legacy branch contained in validated main, no open PR or protections and no unique commits before deletion.
+
+## 2026-11-06 — UI-PREFS-QUOTA-FIXTURE-184 (exact-head QA pending)
+
+**Execution ledger:** Read AGENTS.md, living plan, frozen inventory, dev 260044a and main 70fc483, PR #189 (no reviews), exact-head push Quality #42117774224 and PR Quality #42117785366 (both failed). Read failed job steps and logs: the only observed failure was tests/smoke_tool_search_favorites.py:244, the first 'session only' assertion in the quota-recovery browser case. Root cause is a nondeterministic fixture: a global one-shot Storage.setItem failure was armed before app initialization, allowing unrelated startup writes to consume it. Scope interception to the preferences storage key and arm immediately before the intended Alt+P pin write; assert persisted() false before checking the session-only live status, and retain the subsequent recovery assertion. Production source/bundle unchanged. Local checkout/Chromium unavailable; exact-head CI pending. No merge or cleanup. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** new quota fixture passes targeted Chromium browser regression; complete dev push and PR Quality both green for the same SHA, with no weakened product assertions.
+2. **P0 PR #189 release (review-gated):** verify required approvals/protections and exact-head checks; ordinary dev-to-main PR merge only when permitted, then verify main Quality and Pages/live smoke.
+3. **P1 Storage failure UX (planned):** deterministic keyboard, live region, quota and blocked-read recovery on desktop/390px with persisted-state assertions.
+4. **P1 Numerical correctness (planned):** independent repeated-root, nonlinear fitting and unstable-filter reference/negative regressions.
+5. **P1 Cleanup audit (pending):** verify old branch ancestry/unique commits, protections and open PRs before any deletion.
+
+## 2026-11-05 — UI-PREFS-RECOVERY-183 (exact-head CI pending)
+
+**Execution ledger:** Inspected dev 474132b and main 70fc483, AGENTS.md, frozen inventory, living plan, exact-head push Quality #42108727954 and PR Quality #42108738708 (both successful), PR #189 (open, no reviews), and existing Pages evidence. Fixed a user-facing ambiguity: after a quota/storage write failure, successful later pinning silently restored persistence without announcing recovery. The pin live region now says preferences are saved to the browser when persistence changes false→true. Added source/bundle parity, focused structural assertion and 390px Chromium failed-write/recovery regression. Local full suite unavailable; exact-head CI pending. No merge or cleanup; frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** push and PR workflows pass new SHA, including 390px quota recovery, standalone parity and full browser suite.
+2. **P0 Protected release PR #189 (review-gated):** verify required approvals and checks before ordinary merge; confirm new main Quality, Pages build and live smoke.
+3. **P1 Storage recovery keyboard UX (planned):** verify screen-reader live status, quota/blocked transitions and persistence on reload across desktop/mobile.
+4. **P1 Numerical reference regressions (planned):** repeated polynomial roots, nonlinear fit conditioning and unstable digital filters pass independent reference/negative cases.
+5. **P1 Safe cleanup audit (pending):** verify old branch fully contained in main, no PR, no protections or unique commits before deletion.
+
+## 2026-11-05 — UI-PREFS-INVALID-IDS-182 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen inventory, living plan, dev 5ced1f4 and main 70fc483, PR #189 (open, no submitted reviews) and exact-head push Quality #42099749807 plus PR Quality #42099754874 (both successful). Identified invalid whitespace-only and control-character preference IDs accepted by the direct preference API and corrupted storage. Reject them on restore and mutation without changing valid tool IDs, caps or legacy compatibility. Updated source, standalone bundle, focused Node regression, Chromium coverage, plan and changelog. New exact-head CI and local full-suite verification pending; no release, Pages deployment or cleanup. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** push and PR workflows green on final SHA, including Node invalid-ID tests, Chromium pin flow and standalone parity.
+2. **P0 Release PR #189 (review-gated):** authorized reviews/protections and exact-head checks verified; ordinary merge, then main Quality, Pages build and hosted smoke verified.
+3. **P1 Storage recovery UX (planned):** blocked/quota/corrupt storage accurately announces session-only and recovery status in 390px and desktop Chromium checks.
+4. **P1 Numerical references (planned):** repeated-root residuals, nonlinear-fit conditioning and unstable filter rejection pass independent fixtures and negative cases.
+5. **P1 Cleanup audit (pending):** prove ancestry, no open PR, no protection and no unique commits before any deletion.
+
+## 2026-11-05 — UI-PREFS-INVALID-ROOT-181 (exact-head QA pending)
+
+**Execution ledger:** Re-read AGENTS.md, frozen feature inventory, living plan, dev/main and latest CI/PR/Pages evidence. Prior exact-head b5a02ea had dev push and PR Quality still running, no failed steps at inspection; PR #189 remained open without reviews, main remained 70fc483. Discovered malformed but valid JSON preference roots (null, array, string, number) returned a fresh in-memory state while falsely reporting persisted=true. Changed preference restore to mark persisted=false for unsupported roots; subsequent valid saves recover true. Added focused Node execution cases for four root types and extended Chromium round-trip assertions, synchronized standalone index.html. Local git checkout failed DNS resolution; local structural/Chromium suites unavailable, exact-head CI pending. No PR merge, Pages deployment, or branch cleanup. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (pending):** both push and PR Quality on final dev SHA succeed, including Node storage transition test, Chromium corrupt/blocked storage tests and standalone bundle parity.
+2. **P0 PR #189 release (review-gated):** required exact-head checks and authorized reviews green; ordinary PR merge, then new main Quality, Pages build and hosted smoke verified.
+3. **P1 Storage UI accessibility (planned):** show accurate session-only status for read, schema and quota failures; verify keyboard pinning, ARIA live text and recovery.
+4. **P1 Numerical reference tests (planned):** independent repeated-root residuals, nonlinear-fit ill-conditioning, unstable filter rejection, with valid/invalid fixtures.
+5. **P1 Cleanup audit (pending):** prove ancestry, lack of open PR and protection, and no unique content before any obsolete branch/file deletion.
+
+## 2026-11-05 — UI-PREFS-READ-FAILURE-180 (dev QA pending)
+
+**Execution ledger:** Inspected exact dev/main heads (25cea905 / 70fc483), root AGENTS.md, frozen 166-gap/95-partial audit, living plan, Quality #42070115621 (successful push) and #42070125639 (cancelled PR), PR #189 (open, no reviews), and previous main Quality/Pages success for 70fc483. Confirmed a real storage-state defect: localStorage getItem exceptions or corrupt preference JSON initially left persisted() true. Moved persistence initialization before read(), set persisted=false on failed restore, kept session recents/pins usable and allowed subsequent successful saves to recover. Added an accessible "This session only; browser storage is unavailable" pin announcement, synchronized modular sources and standalone index, strengthened existing Chromium blocked/corrupt-storage coverage, and added an executable Node state-transition reference test. Local git checkout remained unavailable (github.com DNS); focused repo unit/browser commands not run locally; new exact-head CI pending. No merge, branch deletion, or Pages release attempted. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head QA for UI-PREFS-READ-FAILURE-180 (pending):** structural/unit checks including Node read/write failure test, source/bundle parity, and complete Chromium suite (blocked/corrupt/recovered storage, keyboard and 390px smoke) must pass for new dev/PR SHA.
+2. **P0 PR #189 release (review/PR-Quality blocked):** only after exact SHA's dev and PR Quality are successful, review/protection requirements verified and relevant behavior checked, ordinary PR merge; verify new main Quality, Pages deployment and hosted functionality.
+3. **P1 Numerical regression hardening (planned):** independent polynomial repeated-root/backward-error, nonlinear-fit ill-conditioning, and FIR/IIR unstable-pole references, preserving current solver error semantics.
+4. **P1 Accessible search fallback (planned):** verify session-only announcement for quota/read failure, recovery, recent/pin keyboard controls and no horizontal overflow at 390px.
+5. **P1 Safe branch/files cleanup (pending):** prove stray branch fully reachable from validated main, no open PR, no protection, and no references before any authorized deletion.
+
+## 2026-11-05 — BUILD-LF-179 (CI pending)
+
+**Execution ledger:** Read AGENTS.md, frozen inventory, living plan, current dev/main comparison (172 ahead / 0 behind), exact-head Quality #42051332141 (cancelled), and PR #189 reviews (none). Changed standalone builder to write explicit LF on every platform; added a byte-level regression for generated output and preserved the no-op timestamp assertion. Local checkout unavailable (github.com DNS); new exact-head CI and Chromium pending. No merge or Pages verification. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** builder LF byte regression, Python structural suite and Chromium browser checks green on final dev SHA.
+2. **P0 Protected PR #189 (review-blocked):** authorized reviews and required checks green, ordinary PR merge, then main Quality and Pages smoke verified.
+3. **P1 Search-storage fallback (planned):** corrupt/blocked localStorage leaves navigation functional and reports session-only status; browser regression and source/bundle parity.
+4. **P1 Numerical reference coverage (planned):** repeated roots, nonlinear fits and unstable filters match independent references and reject invalid inputs.
+5. **P1 Cleanup audit (pending):** confirm ancestry, PRs, protections and references before removing obsolete files/branches.
+
+## 2026-11-05 — BUILD-DRIFT-SOURCES-178 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen inventory, living plan, dev/main comparison (171 ahead, zero behind), exact-head workflow (cancelled) and PR #189 reviews (none). Improved read-only drift diagnostic to list up to three mismatched module paths with total count and ellipsis for additional paths; focused two-source regression. Local checkout and Chromium execution unavailable. No merge or Pages verification. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head QA (pending):** focused builder Python regression, structural and Chromium suites green on final dev SHA; cancelled runs do not count.
+2. **P0 PR #189 release (review-blocked):** authorized approvals and exact-head checks green; ordinary merge, then main Quality and Pages smoke verified.
+3. **P1 Search-storage resilience (planned):** blocked/corrupt localStorage retains session navigation with accurate persistence status; browser regression and bundle parity.
+4. **P1 Numerical QA (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filters pass independent references and invalid-input cases.
+5. **P1 Safe cleanup (pending):** verify ancestry, protections, PRs and tracked references before deletion.
+
+## 2026-11-05 — BUILD-DRIFT-COUNT-177 (exact-head QA pending)
+
+**Execution ledger:** Re-read AGENTS.md, frozen inventory and living plan; verified dev dd75b89dde4cc8f16bb2eb6aac7cea2cb52162f1 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head Quality [42023181030](https://github.com/saeedsai/ProMathStudio/actions/runs/42023181030) success, and PR #189 with no submitted reviews. Improved read-only builder diagnostics to report the number of mismatched embedded modules, retaining first-source and line/column information; added a two-module drift regression and byte-preservation assertion. Local git checkout failed DNS resolution; Python/Chromium execution and new exact-head Quality remain pending. No merge/Pages verification. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head QA (pending):** run focused Python builder regression, structural suite and Chromium checks for the final dev SHA; all green.
+2. **P0 PR #189 release (review-blocked):** authorized submitted approvals and required exact-head checks verified, ordinary PR merge, then main Quality and Pages smoke green.
+3. **P1 Search-storage resilience (planned):** blocked/corrupt localStorage retains session navigation with accurate persistence status; source/bundle parity and browser regression.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fits and unstable filters pass independent references and invalid-input checks.
+5. **P1 Safe cleanup (pending):** verify ancestry, protections, open PRs and tracked references before any deletion.
+
+## 2026-11-05 — BUILD-SNAPSHOT-176 (exact-head QA pending)
+
+**Execution ledger:** Inspected dev/main (164 ahead, 0 behind), AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and exact-head Quality [42014883879](https://github.com/saeedsai/ProMathStudio/actions/runs/42014883879) (success for ca8cebc). Changed read-only build consistency checking to use its original index snapshot rather than reopening the file after module processing; added a regression simulating a concurrent index move. Local full checkout/Chromium checks not executed; new exact-head CI pending. PR review gate remains; no merge or Pages verification. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** snapshot regression, Python structural checks and Chromium suite pass for final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized reviews and branch protections satisfied; required exact-head checks green; ordinary merge and main Quality/Pages smoke verified.
+3. **P1 Search-storage resilience (planned):** blocked/corrupt storage retains session-only navigation with accurate persistence status; source/bundle parity and browser regression pass.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filters pass independent reference and invalid-input tests.
+5. **P1 Safe cleanup (pending):** verify ancestry, open PRs, protections and file references before deleting obsolete branches/files.
+
+## 2026-11-05 — BUILD-IDEMPOTENT-175 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, historical inventory, living plan, dev/main comparison (163 ahead, 0 behind), PR #189 review submissions (none) and exact-head Quality [41999177480](https://github.com/saeedsai/ProMathStudio/actions/runs/41999177480) (success for 3d9a88d). Normal standalone rebuild now skips rewriting an already synchronized index.html, preventing unnecessary mtime churn; focused regression checks unchanged bytes, timestamp and success message. GitHub connector supports atomic tree commit; local browser/structural execution unavailable at this checkpoint. New-head exact CI pending. No merge or Pages verification. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (pending):** idempotent-build Python regression, structural checks and Chromium checks pass for final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized approvals, branch protection and exact-head checks verified; ordinary PR merge followed by main Quality and Pages smoke.
+3. **P1 Search-storage resilience (planned):** blocked/corrupt localStorage preserves session-only navigation with accurate status; browser test and source/bundle parity.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fits and unstable digital filters pass reference and invalid-input tests.
+5. **P1 Safe cleanup (pending):** verify ancestry, open PRs, protection and references before removing any obsolete branch/file.
+
+## 2026-11-05 — BUILD-DRIFT-MODULE-174 (exact-head CI pending)
+
+**Execution ledger:** Read root AGENTS.md, frozen inventory, current plan, dev/main comparison (162 ahead / 0 behind before changes), PR #189 reviews (none), and exact-head Quality run [41990683493](https://github.com/saeedsai/ProMathStudio/actions/runs/41990683493), successful for af1b17ed. Added the first mismatched modular source path to read-only standalone drift diagnostics and a focused regression asserting it for a changed embedded script. Local git DNS failure prevented checkout and local test execution; exact new-head CI pending. No release or Pages verification. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (pending):** new module-path regression, structural tests and all Chromium checks pass for final dev SHA.
+2. **P0 PR #189 release (review-blocked):** verify authorized reviews, branch protections and exact-head checks; ordinary merge only; main Quality and Pages smoke green.
+3. **P1 Search preference resilience (planned):** blocked/corrupt localStorage remains session-functional with honest status; source/bundle parity and browser regression pass.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fit and unstable filters with tolerances and invalid-input tests pass.
+5. **P1 Safe cleanup (pending):** verify ancestry, open PRs, protections and references before deleting any obsolete branch/file.
+
+## 2026-11-05 — BUILD-DRIFT-COLUMN-173 (exact-head CI pending)
+
+**Execution ledger:** Inspected dev/main (158 ahead / 0 behind before edits), root AGENTS.md, frozen inventory, plan, PR #189 (open; zero reviews), and exact-head Quality [41984214066](https://github.com/saeedsai/ProMathStudio/actions/runs/41984214066) successful for 54ad159. Improved read-only standalone builder drift diagnostics with 1-based mismatch column in addition to line, with focused regression for changed embedded module text. Source and test were pushed as sequential commits because the available contents API does not support atomic multi-file commits. Local git checkout failed DNS; full local tests and Chromium unavailable. New exact-head Quality pending; PR reviews block release, Pages unverified. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** drift-line-and-column regression, structural checks and complete Chromium suite green at final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized submitted approvals and required exact-head checks green, ordinary PR merge, then main Quality and Pages smoke.
+3. **P1 Search-storage fallback (planned):** blocked/corrupt localStorage retains session-only behavior, with source/bundle parity and browser regression.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filters pass reference and invalid-input cases.
+5. **P1 Safe cleanup (pending):** verify branch ancestry, protection, open PRs and tracked file references before deletion.
+
+## 2026-11-05 — BUILD-DRIFT-DIAGNOSTIC-172 (CI pending)
+
+**Execution ledger:** Inspected dev/main (153 ahead / 0 behind), AGENTS.md, historical inventory, living plan, PR #189 (open; zero reviews) and exact-head Quality #41977921641 (success at 21b896a). Improved read-only builder drift diagnostic to report the first differing line; added focused regression asserting line 2 for a changed first embedded script. Local GitHub clone DNS failed, so unit/Chromium execution unavailable; new exact-head Quality pending. No merge or Pages verification. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** builder drift-line test, structural checks and full Chromium suite green at final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized approvals and exact-head required checks verified; ordinary PR merge and main Quality/Pages smoke.
+3. **P1 Search storage fallback (planned):** blocked/corrupt localStorage retains session behavior; browser regression and source/index parity.
+4. **P1 Numerical references (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filters have reference and invalid-input tests.
+5. **P1 Safe cleanup (pending):** confirm ancestry, open PRs, protection and tracked references before deletion.
+
+## 2026-11-05 — BUILD-CLI-171 (exact-head CI pending)
+
+**Execution ledger:** Verified previous exact dev head b540071 Quality #41971023436 success; dev/main 149 ahead, 0 behind; PR #189 has zero submitted reviews. Hardened standalone builder CLI to reject unsupported flags before reading or writing index.html; added regression for unknown and mixed flags preserving index content. No local full checkout/browser execution; new exact-head CI pending. No merge or Pages release. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** builder CLI regression, structural suite and Chromium suite all pass at final dev SHA.
+2. **P0 PR #189 release (review-blocked):** authorized reviews and required checks green; ordinary PR merge and verified main Quality/Pages smoke.
+3. **P1 Search-storage fallback (planned):** blocked/corrupt localStorage retains session behavior and displays accurate persistence state, with browser test and source/bundle parity.
+4. **P1 Numerical QA (planned):** repeated polynomial roots, nonlinear fitting and unstable digital filter references plus invalid-input tests.
+5. **P1 Safe cleanup (pending):** confirm ancestry, open PRs, protections and tracked references before any removal.
+
+## 2026-11-05 — BUILD-CHECK-170 (CI pending)
+
+**Execution ledger:** Inspected dev/main (145 ahead / 0 behind before implementation), AGENTS.md, frozen inventory, living plan, and PR #189 reviews (none). Exact previous head 4626245 Quality #41964869817 completed successfully. Added read-only `python scripts/build.py --check` source/bundle consistency mode in commit d675a889 and isolated positive/drift/no-write/repair regression in 814f0db. Git clone DNS failed (`Could not resolve host: github.com`); local repository/browser checks unavailable. New exact-head CI pending. PR review gate remains; no merge or Pages deployment. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Verify new exact-head Quality (pending):** structural and complete Chromium checks green on final dev SHA; run `python -m unittest tests/test_build_check_mode.py` and `python scripts/build.py --check` when checkout is available.
+2. **P0 PR #189 release (review-blocked):** required approvals and exact-head checks verified; ordinary PR merge; main Quality and live Pages smoke green.
+3. **P1 Search-storage fallback (planned):** corrupt/blocked storage accurately reports session-only persistence; source/index parity and browser regression.
+4. **P1 Numerical QA (planned):** polynomial repeated roots, nonlinear fit and digital filter reference/invalid-input cases with tolerances.
+5. **P1 Safe cleanup (pending):** audit ancestry, open PRs, protections and file references before deletion.
+
+## 2026-11-05 — CI-GREEN-169 (source checkout DNS blocked)
+
+**Execution ledger:** Inspected dev/main comparison (143 ahead, 0 behind), root AGENTS.md, frozen historical inventory, living plan, PR #189 (open, mergeable, no submitted reviews), and exact-head Quality run [41945883245](https://github.com/saeedsai/ProMathStudio/actions/runs/41945883245) at dev 20c89b114d47f3d9fd09c929392b26fae7919325 (success). Main remains 70fc483cb1cec3d2372d37484e4a8ef7942343da. Local git ls-remote failed: Could not resolve host github.com. Source/bundle parity requires editing both src/tool-prefs.js and standalone index.html; no unverified source/test edits or release were attempted. No local tests; no Pages/main deployment verified. Historical 166 gaps / 95 partial unchanged. This documentation update will create a new head requiring its own Quality check.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (pending):** complete structural and Chromium checks pass for the newest dev commit SHA.
+2. **P0 Release PR #189 (review-blocked):** verify required approvals/protection and exact-head checks; ordinary PR merge; verify main Quality and Pages deployment/live smoke.
+3. **P1 Storage fallback (blocked on source checkout):** initialize persistence status accurately when localStorage read throws or JSON corrupt; retain session state; source/bundle parity, blocked-storage browser and unit tests pass.
+4. **P1 Numerical QA (planned):** repeated-root polynomial, ill-conditioned nonlinear fit and unstable filter references with explicit tolerance and invalid-input checks pass.
+5. **P1 Safe cleanup (pending):** audit ancestry, protections, open PRs and tracked references before deleting anything.
+
+## 2026-11-05 — CI-GREEN-168 (release review gate)
+
+**Execution ledger:** Re-read AGENTS.md, historical inventory and plan; compared dev/main (141 ahead, 0 behind), inspected open PR #189 and its review submissions (none), and verified exact dev head 262ba648be1fa99959a4a79a84d6bf5231275f1f Quality run [41937533190](https://github.com/saeedsai/ProMathStudio/actions/runs/41937533190): completed SUCCESS, including structural and browser regressions. GitHub-hosted source checkout from this runtime failed DNS resolution, preventing local build/browser tests and safe source/bundle editing; no app source or regression was changed this iteration. Protected PR release not attempted without reviews; main Quality/Pages unverified. Historical 166 gaps / 95 partial unchanged. This ledger commit creates a newer dev SHA whose own Quality must be verified before promotion.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending after ledger update):** verify all required structural and Chromium checks green for the newest dev SHA, not merely prior 262ba648.
+2. **P0 PR #189 release (review-blocked):** obtain authorized submitted reviews and verify protections/checks; ordinary PR merge only; confirm main Quality and live Pages.
+3. **P1 Search storage resilience (planned):** make blocked/corrupt storage state explicit without losing session behavior; focused browser regression and source/bundle parity.
+4. **P1 Numerical reference QA (planned):** independent repeated polynomial-root, nonlinear-fit and unstable-filter positive/negative tests with tolerances.
+5. **P1 Cleanup (pending):** ancestry, open-PR, protection and tracked-reference audit before any deletion.
+
+## 2026-11-05 — CI-PIPE-CATALOG-167 (exact-head recheck pending)
+
+**Execution ledger:** Inspected root AGENTS.md, frozen inventory, living plan, main/dev ancestry (138 ahead / 0 behind before edit), and GitHub Quality run [41930385695](https://github.com/saeedsai/ProMathStudio/actions/runs/41930385695). The run was reported cancelled, but its job log identifies an actual step 211 failure at `tests/smoke_engineering_pipe_logic.py:218`: obsolete expectations classified implemented GNSS positioning and control frequency response as planned. Steps 1–210 succeeded, including favourites/Browse All Tools. Updated the focused browser regression to assert these two tools available while preserving the genuinely planned spectral-analysis assertion; commit ab7fa841. No local tests executed; corrected exact-head Chromium run pending. PR #189 reviews/protection and main Pages not verified. Historical 166 gaps / 95 partial unchanged. No app source feature in this bounded CI-repair iteration.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** full structural and Chromium suite green on final dev SHA, including pipe/digital-logic and every earlier browser regression; inspect exact failed logs.
+2. **P0 Protected PR #189 (blocked):** verify exact-head required checks, submitted reviews and protections; merge only via ordinary dev-to-main PR, then main Quality and live Pages smoke.
+3. **P1 Search preference storage resilience (planned):** implement observable blocked/corrupt localStorage session-only status with positive/negative browser tests and source/bundle parity.
+4. **P1 Numerical reference QA (planned):** independent repeated-root polynomial, ill-conditioned nonlinear fit and unstable-filter references, with tolerances and invalid-input tests.
+5. **P1 Branch/file cleanup (pending):** verify ancestry, protection, open PRs and file references before deleting anything; preserve unique contributions.
+
+## 2026-11-05 — CI-BROWSE-GNSS-166 (exact-head recheck pending)
+
+**Execution ledger:** Inspected dev/main comparison (134 ahead, 0 behind before edit), root AGENTS.md, frozen inventory, plan, PR #189 (open, mergeable, zero submitted reviews), and exact-head Quality [41921062294](https://github.com/saeedsai/ProMathStudio/actions/runs/41921062294) at 7ed82f81b66859cbf7504ee2b7698cde63c7effd. Structural tests and browser steps 1–209 passed. Step 210 failed at smoke_tool_search_favorites.py:248 because Browse All Tools correctly includes implemented GNSS; the old assertion treated all GNSS as planned. Replaced it with the canonical implemented GNSS least-squares ID and explicit exclusion of planned-only spectral analysis. Regression commits ccd0db2 and 509821c; exact-head Chromium rerun pending. No local tests executed; no merge or Pages release. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** structural tests and all Chromium steps including browse GNSS and pipe/digital logic pass at the final dev SHA; repair first observed failure.
+2. **P0 PR #189 release (blocked):** required exact-head checks, reviews and protections green; ordinary dev-to-main merge only then verify main Quality and Pages live critical paths.
+3. **P1 Search preference resilience (planned):** improve blocked/corrupt localStorage startup status, preserve in-memory state; test 390px and source/bundle parity.
+4. **P1 Numerical reference QA (planned):** repeated polynomial roots, ill-conditioned nonlinear fit and unstable filter reference/negative tests with explicit tolerances.
+5. **P1 Safe cleanup (pending):** verify branch ancestry, protection and open PR status and tracked-file references before deletion.
+
+## 2026-11-04 — CI-BROWSE-TOGGLE-165 (exact-head recheck pending)
+
+**Execution ledger:** Inspected dev/main (131 ahead / 0 behind before this fix; main 70fc483cb1cec3d2372d37484e4a8ef7942343da), root AGENTS.md, frozen inventory, plan, PR #189 (zero reviews), and Quality run [41911514968](https://github.com/saeedsai/ProMathStudio/actions/runs/41911514968). Structural checks and browser steps 1–209 passed; step 210 failed at smoke_tool_search_favorites.py:239 because native details toggle dispatches asynchronously and browse groups were queried before renderBrowse ran. Added an explicit bounded wait for five browse groups, preserving all browse keyboard, routing and mobile assertions. No application source change; local Chromium/unit tests unavailable, exact-head rerun pending. No merge/Pages claim. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head Quality:** all structural and Chromium steps green, including browse disclosure and subsequent pipe/digital logic smoke.
+2. **P0 PR #189 release:** exact-head required checks, reviews and protections verified, ordinary merge then main Quality and Pages live smoke.
+3. **P1 Search storage resilience:** blocked/corrupt persistence with session fallback and 390px browser assertions; source/bundle parity.
+4. **P1 Numerical reference QA:** repeated polynomial roots, nonlinear-fit conditioning and unstable digital filter rejection with tolerances.
+5. **P1 Safe cleanup:** ancestry, PR and protection audit before any branch/file deletion.
+
+## 2026-11-04 — CI-PINS-GNSS-164 (exact-head recheck pending)
+
+**Execution ledger:** Reviewed dev/main ancestry (main 70fc483cb1cec3d2372d37484e4a8ef7942343da; dev 128 commits ahead before edit), AGENTS.md, historical inventory, PR #189 (zero reviews) and exact-head Quality run 41902185760 for 105676e95453a527864e3b2bc401144923a6c93b. Structural and browser steps through 209 passed, including thermo/circuits. Step 210 failed at tests/smoke_tool_search_favorites.py:167 because the test still treated implemented GNSS positioning as unpinnable. Updated the capacity assertion to expect refusal from a full 20-pin list, and added an explicit genuinely planned spectral-analysis refusal assertion; preserved the existing unknown-ID negative case. Source behavior unchanged. No local Chromium or unit tests; new-head CI pending. PR #189 and Pages not released. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head Quality:** full structural and Chromium checks green on new dev SHA; verify pin-cap test and all later smoke tests.
+2. **P0 Protected release PR #189:** exact-head checks and reviews/protection satisfied, ordinary merge, then main Quality and live Pages smoke.
+3. **P1 Search persistence robustness:** verify blocked/corrupt storage fallback, session-only state and source/bundle parity with focused browser regression.
+4. **P1 Numerical references:** repeated polynomial roots, ill-conditioned nonlinear fit and unstable filter rejection with explicit tolerances.
+5. **P1 Safe cleanup:** verify branch ancestry, no open PR and no protection, plus tracked-file reference audit before any deletion.
+
+## 2026-11-04 — CI-THERMO-CATALOG-163 (browser recheck pending)
+
+**Execution ledger:** Inspected dev 4af74fbcb6dbb9e53b51aa42e1c2484ca063b734, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, this plan, frozen inventory, PR #189 (zero reviews), and exact-head Quality [41892196257](https://github.com/saeedsai/ProMathStudio/actions/runs/41892196257). The engineering thermo/circuits browser step failed; its test still asserted control.frequency.response was planned although prior catalog QA established it is implemented and available. Updated that stale status assertion in commit 47943e29c87bd310183e302a0e997207b225d018, retaining numerical and UI assertions. The GitHub job summary does not expose a traceback, so the exact failing line is unconfirmed. Local git checkout failed DNS resolution; no local tests. Exact-head CI rerun pending. No merge or Pages verification. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** all structural and Chromium checks green on current dev SHA; inspect actual thermo/circuits traceback and correct remaining failures without weakening coverage.
+2. **P0 PR #189 protected release (blocked):** verify exact-head required checks, reviews, protections; ordinary PR merge, then main Quality and Pages verification.
+3. **P1 Search storage fallback (planned):** handle unavailable/corrupt localStorage with no uncaught errors; add source/bundle parity and 390px browser regression.
+4. **P1 Numerical references (planned):** repeated polynomial roots, ill-conditioned nonlinear fitting and unstable digital-filter rejection with explicit tolerances.
+5. **P1 Cleanup (pending):** delete only fully merged unprotected PR-free obsolete branches/files after reference audit.
+
+## 2026-11-04 — CI-SEARCH-DISABLED-162 (exact-head browser recheck pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen audit, dev/main (dev 6e26c479e6752460d4f988f35f7f22034c57165b; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; 122 ahead/0 behind), PR #189 (zero reviews) and exact-head Quality [41883559378](https://github.com/saeedsai/ProMathStudio/actions/runs/41883559378). Structural and browser steps 1–196 passed; step 197 failed because Playwright's ordinary click refuses an aria-disabled planned option (30-second timeout), not because the app opened it. The focused regression now uses a forced pointer click while asserting aria-disabled, non-selection, planned status announcement, and unchanged workspace. Test commit eaac95e549ba264f563e0c20626d715b8371907f. Local Chromium and unit checks not executed; exact new-head Quality pending. No application source change or production release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** structural and every Chromium step green at latest dev SHA, especially disabled planned-option pointer refusal and numerical steps 198+; repair first observed failure.
+2. **P0 PR #189 protected release (blocked):** verify required checks, reviews and protections, ordinary dev-to-main merge only then validate main Quality and Pages.
+3. **P1 Search storage fallback (planned):** handle blocked/corrupt localStorage without errors; add browser regression at 390px and source/bundle parity.
+4. **P1 Numerical references (planned):** repeated polynomial roots, ill-conditioned nonlinear fits and unstable filter rejection with explicit tolerances.
+5. **P1 Safe cleanup (pending):** only delete fully merged unprotected branches with no open PR, and unused files after reference audit.
+
+## 2026-11-04 — CI-SEARCH-VISIBILITY-161 (browser recheck pending)
+
+**Execution ledger:** Read root AGENTS.md, frozen inventory, living plan, PR #189 and reviews, and exact-head Quality [41872973294](https://github.com/saeedsai/ProMathStudio/actions/runs/41872973294) for dev e84fc238ce844bf0f3c93dfd83d38849e57d551c (main 70fc483cb1cec3d2372d37484e4a8ef7942343da, 119 ahead/0 behind). Structural checks and browser steps 1–196 succeeded; step 197 failed at `tests/smoke_tool_search.py:121` because Enter legitimately opened an available spectral result and hid the popup before the planned-result click. Fixed the test ordering so the disabled planned result is clicked while visible, preserving disabled ARIA, keyboard navigation, status announcement, workspace non-navigation, and API refusal assertions. Commit e27190629ab2e6f150d689b772d5eba0f4fe1559. Local git checkout unavailable (DNS: github.com unresolved); no local Chromium or unit execution. New exact-head CI is pending; PR #189 has zero submitted reviews, so no merge or Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality (pending):** all structural and Chromium jobs green for the current dev SHA, including search planned-result refusal and later skipped numerical browser checks; inspect and repair first observed failure.
+2. **P0 PR #189 release (blocked):** required exact-head checks and reviews/protection verified, inspect diff, ordinary dev-to-main merge, then verify main Quality and Pages live critical paths.
+3. **P1 Search preference persistence (planned):** add source + bundled change and focused browser regression for blocked/corrupt localStorage, session-only fallback, no console errors at 390px.
+4. **P1 Numerical reference hardening (planned):** repeated-root, ill-conditioned LM, filter stability reference and failure tests with explicit tolerances.
+5. **P1 Safe cleanup (pending):** verify containment in main, no open PR, unprotected branch and no references before deleting any legacy branch/file.
+
+## 2026-11-04 — CI-CANCELLED-160 (exact-head QA blocked)
+
+**Execution ledger:** Inspected current dev/main comparison (dev d6422e85477d5cb90ab19d5a4ccb47682d3a5a68, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; 117 ahead, zero behind), AGENTS.md, frozen 26-Oct inventory, PR #189 (open, mergeable, zero reviews), and exact-head Quality run [41863330816](https://github.com/saeedsai/ProMathStudio/actions/runs/41863330816). The run was **cancelled** during browser dependency installation (job 126691448442, step 7), after structural/ledger/registry checks succeeded; all browser regressions were skipped. This is not evidence of a test failure or green browser QA. Local git access failed with 'Could not resolve host: github.com'; therefore no testable checkout, source change, or locally executed regression this iteration. Release, main Quality, and Pages remain unverified. Frozen 166 gaps / 95 partial unchanged. Keep recurring development enabled.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI (blocked by cancelled run):** obtain completed Quality on exact dev SHA, with structural and all Chromium smoke steps green; inspect first observed failure and repair with focused regression.
+2. **P0 PR #189 release (pending):** confirm required reviews/protections and exact-head green PR checks, inspect full diff, merge only ordinarily; verify main Quality and live Pages critical paths.
+3. **P1 Search mixed-result accessibility (planned):** ensure disabled planned entries never become active through Arrow/Home/End, and mouse refusal leaves workspace unchanged at 390px/1280px.
+4. **P1 Numerical reference hardening (planned):** add independent repeated-root, ill-conditioned LM and filter-stability reference/negative tests with explicit tolerances.
+5. **P1 Safe cleanup (pending):** prove each obsolete branch fully merged, unprotected, and PR-free before deletion; audit references before removing tracked files.
+
+## 2026-11-04 — CI-SEARCH-MIXED-159 (exact-head QA pending)
+
+**Execution ledger:** Inspected dev/main (114 ahead, zero behind before edit), AGENTS.md, historical inventory, living plan, open PR #189 (zero reviews), and exact-head Quality run [41852963430](https://github.com/saeedsai/ProMathStudio/actions/runs/41852963430) for f6810f2. Structural and browser steps 1–196 succeeded; step 197 failed at tests/smoke_tool_search.py:108 because a mixed query for 'signal spectral analysis' also matches available tools and legitimately selects an available option. Strengthened the focused regression to check all active descendants after ArrowDown, ArrowUp, Home and End are never disabled, while preserving the planned-only refusal assertions. Commit 3f9fbf4. No local Chromium available; new exact-head CI pending. No merge or Pages claim. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head CI:** full structural and browser suite green at 3f9fbf4 or subsequent dev SHA; inspect first failing job and fix root cause.
+2. **P0 PR #189 release:** verify reviews, branch protections and required exact-head checks; ordinary PR merge only after gates, then main Quality and Pages verified.
+3. **P1 Search accessibility:** mixed available/planned results, pinned/recent persistence failure and 390px keyboard/touch smoke.
+4. **P1 Numerical references:** polynomial repeated roots, LM ill-conditioning and FIR/IIR stability against known solutions.
+5. **P1 Safe cleanup:** prove obsolete branches fully contained, unprotected and PR-free before deletion; remove only unused tracked files with reference audit.
+
+## 2026-11-04 — CI-SEARCH-CATALOG-158 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen inventory, dev/main ancestry (111 ahead/0 behind at 84b09ad), PR #189 (no submitted reviews) and exact-head Quality run [41831603088](https://github.com/saeedsai/ProMathStudio/actions/runs/41831603088). Structural and 190+ browser steps passed until `tests/smoke_tool_search.py:103` asserted the now-implemented digital-logic simulation was still planned; later browser steps were skipped. Updated browser regression to require available digital logic and to test the genuinely planned signal spectral analysis entry's disabled pointer/keyboard/open behavior. Commit 38b7141. Local checkout and Chromium unavailable; new exact-head CI and Pages not yet verified. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 Exact-head CI:** confirm structural and all browser smoke steps green on the new dev SHA; diagnose first failure with logs and preserve regression coverage.
+2. **P0 PR #189 release:** verify reviews, protection and exact-head checks, ordinary dev-to-main merge only when authorized; verify main Quality and Pages.
+3. **P0 Branch cleanup:** confirm obsolete branch commits contained, no open PR and no protection before deletion.
+4. **P1 Numerical QA:** polynomial roots/repeated roots, LM conditioning, FIR/IIR stability, GNSS and pipe residual references.
+5. **P1 Search accessibility:** planned-only, favourites, storage failure, Home/End and 390px mobile smoke.
+
+## 2026-11-04 — CI-CATALOG-STATUS-157 (exact-head QA pending)
+
+**Execution ledger:** After two failed exact-head Quality runs (41831147188 and 41831141719) for merge d578398a, inspected jobs 126578355230 and 126578336365. Structural tests passed; `tests/smoke_engineering_catalog.py` failed at its legacy expectation that `control.frequency.response` has no Open button. This tool is implemented with a real `ct-frequency` route, so corrected the outdated smoke assertion to require one real Open button and no planned label; retained the separate genuinely planned `signals.spectral.analysis` refusal test. Also reconciled main's history-only merge commit into dev through a non-force two-parent commit; main tree matches existing ancestor, so no production source was replaced. Exact-head structural/browser CI and dev-to-main PR #189 release pending. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Consolidated exact-head CI (pending):** verify all structural/unit and Chromium workflow steps at new dev/PR head including catalog honesty, builder safety, new engineering solvers, tool-search favourites and Home/End; fix any observed failures without weakening coverage.
+2. **P0 Ordinary dev-to-main release (pending):** only after exact-head CI, required reviews, protections and diff pass; verify new main SHA Quality and GitHub Pages including live functional smoke.
+3. **P0 Obsolete branch cleanup (pending):** verify Claude commit reachable from dev/main, no open PR, branch unprotected; delete only via authorized branch deletion action, preserving full history.
+4. **P1 Numerical solver QA (planned):** polynomial roots, LM fitting, FIR/IIR poles, GNSS and fluid pipe residual and failure references.
+5. **P1 Tool search accessibility (planned):** fav/recent persistence fallback, planned-only pointer + arrow and Home/End keyboard controls at 390px.
+
+## 2026-11-04 — BRANCH-CONSOLIDATION-156 (dev; exact-head CI pending)
+
+**Execution ledger:** Audited all three remote branches; 34 commits unique to `claude/sharp-babbage-pqhvgr`, 53 unique to the previous `dev` SHA, plus one history-only main merge commit whose tree matches the common release baseline. Reconciled six overlapping files: append both living ledger and changelog prefixes; retain hardened builder validation while adding all 42 module registrations; retain Claude favourites/recents and engineering search while preserving dev Home/End, planned-item pointer and keyboard fixes; update the synchronized standalone HTML and combine browser assertions. Retained 53 other-branch-only file versions verbatim and both Git parent histories. Exact-head Quality and browser checks pending; no new production merge/Pages deployment claimed. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Consolidated exact-head QA and release (pending):** full structural and Chromium Quality green on merged dev and dev→main PR #189; Python builder source/bundle consistency, planned-only + favourites/recents navigation, every newly integrated engineering numerical reference; check reviews/protections; merge only through normal PR and verify main Quality and Pages.
+2. **P0 Main ancestry and obsolete-branch cleanup (pending):** reconcile main's history-only merge commit without rewriting work; after validated release prove all prior branches' commits reachable from dev/main, verify no open PR and unprotected status, then remove obsolete branch only through permitted deletion action.
+3. **P1 Polynomial solver numerical hardening (planned):** compare real/complex roots against reference polynomials, repeated roots, residual limits, nonconvergence errors.
+4. **P1 Nonlinear fit and digital filters QA (planned):** verify Levenberg–Marquardt ill-conditioning and FIR/IIR pole/stability reference tests, plus browser mobile layout.
+5. **P1 Tool search favourites accessibility (planned):** offline/localStorage failure fallback, planned-only item keyboard and pointer behavior, Home/End and 390px smoke.
+
+## 2026-11-04 — CI-SYMLINK-FIX-155 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen historical inventory, current living plan, dev/main divergence (70 ahead / one behind before edits), PR #189 review submissions (none), and failed exact-head Quality run [41817935010](https://github.com/saeedsai/ProMathStudio/actions/runs/41817935010) at b2877e6. Job 126533675687 failed in structural tests: the new symlink fixture used literal backslash-n bytes instead of actual newlines, so the builder rejected the missing marker before reaching the symlink guard. Corrected the fixture (0e135cb). Hardened the source guard to reject a symlinked immediate module parent directory (c817db9), with an isolated regression asserting refusal and byte-for-byte unchanged external JS and index (516aa99). Local git checkout blocked by GitHub DNS; Python/Chromium suites not executed locally. New exact-head CI, PR review/merge, main Quality and Pages remain unverified. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head CI and safe PR #189 release (pending):** structural and browser checks green on exact dev/PR SHA including both symlink regressions; reconcile diverged main without rewriting history; verify required reviews and protections; ordinary PR merge only after all gates; verify new main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex roots with reference residuals, repeated-root and convergence-failure tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable solver with analytic reference fit, ill-conditioning refusal and 390px keyboard smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, unstable-pole rejection and responsive browser regression.
+5. **P1 Tool-search favourites (planned):** bounded persisted pins, storage-failure fallback, keyboard and mobile regression.
+
+## 2026-11-04 — BUILD-MODULE-SYMLINK-154 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected dev/main comparison (66 ahead, one behind at start), root AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and successful prior exact-head Quality run 41811306368 for 6a7b88a. Refused symlinked JavaScript module sources before reading them, preventing external source inclusion in the standalone HTML. Added subprocess regression for rejection, symlink preservation, unchanged external JS and unchanged index bytes. Source commit 6299b02; test commit 8a3f897. Local Python/Chromium suites were not executed; new exact-head Quality and Pages remain unverified. No merge. Historical inventory frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality and PR #189 release (pending):** structural/browser checks green for exact dev/PR SHA; reconcile diverged main ancestry without rewrite; verify reviews/protections; merge only via ordinary PR; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver, reference roots/residuals, repeated-root and nonconvergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable kernel, analytic reference fit, conditioning refusal and 390px keyboard smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, unstable-pole rejection and responsive smoke.
+5. **P1 Tool-search favourites (planned):** bounded persisted pins, storage failure fallback and keyboard/mobile tests.
+
+## 2026-11-04 — BUILD-SYMLINK-153 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected dev/main, root AGENTS.md, frozen historical inventory, living plan, PR #189 reviews (none), and exact-head Quality 41804455015 (successful on 9a6d1ef). Added a fail-fast refusal to rewrite symlinked index.html so a build cannot alter an external target, plus an isolated subprocess regression that asserts failure, symlink preservation and byte-for-byte unchanged target. Source commit c1565e2; regression commit bc884f7. Local Python/Chromium suites were not executed; exact new-head CI remains pending. No merge or Pages release claimed. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head Quality and PR #189 release (pending):** full structural/browser checks green for the exact dev/PR SHA; reconcile main divergence without history rewrite; verify required reviews/protections; ordinary dev-to-main PR merge only after all gates; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver with reference roots, residual tolerance, repeated roots and failure/convergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable kernel with analytic reference, ill-conditioning refusal, keyboard and 390px smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, unstable-pole rejection and mobile regression.
+5. **P1 Tool-search favourites (planned):** bounded persisted pins, storage failure fallback, keyboard/mobile tests.
+
+## 2026-11-04 — UI-SEARCH-HOME-END-152 (dev; exact-head CI pending)
+
+**Execution ledger:** Read AGENTS.md, frozen audit, living plan, dev/main divergence (57 ahead/1 behind), PR #189 reviews (none), and prior exact-head Quality run 41796667931 (success at 33e85da). Local git DNS failed. Added Home/End keyboard navigation to first/last available result without selecting planned-only entries; source and standalone bundle synchronized; focused source/bundle regression. Local Python/Chromium and new exact-head Quality remain pending. No merge or Pages claim. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0 Exact-head Quality and safe PR release: structural/browser green on exact SHA, reconcile divergent ancestry without rewriting history, verify reviews/protections, ordinary PR merge, then main Quality and Pages success.
+2. P1 Polynomial roots: real/complex reference roots, residuals, repeated roots and bounded nonconvergence regression.
+3. P1 Levenberg–Marquardt fitting: analytic fit reference, ill-conditioning refusal, keyboard and 390px smoke.
+4. P1 FIR/IIR digital filters: reference frequency response, unstable-pole rejection and responsive smoke.
+5. P1 Tool-search favourites: bounded persistence, storage failure fallback, keyboard/mobile regression.
+
+## 2026-11-04 — UI-SEARCH-DISABLED-151 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected root AGENTS.md, frozen inventory, current dev/main comparison (52 ahead/1 behind), prior exact-head Quality 41789155471 (success for 87444df), and PR review evidence (no submitted reviews). Fixed planned-only mouse clicks from activating an aria-disabled search result; the live-region diagnostic remains. Added focused source/bundle regression. Local checkout failed GitHub DNS; no local Python/Chromium pass claimed. Exact new-head CI, PR release, main Quality and Pages remain unverified. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0 Exact-head Quality and safe PR release: structural/browser green on exact SHA, reconcile main divergence without rewrite, verify reviews/protections, ordinary dev-to-main PR merge, then main Quality and Pages success.
+2. P1 Polynomial roots: real/complex reference roots, residuals, repeated roots and bounded nonconvergence regression.
+3. P1 Levenberg–Marquardt fitting: analytic fit reference, ill-conditioning refusal, keyboard and 390px smoke.
+4. P1 FIR/IIR digital filters: reference frequency response, unstable-pole rejection and responsive smoke.
+5. P1 Tool-search favourites: bounded persistence, storage failure fallback, keyboard/mobile regression.
+
+## 2026-11-04 — UI-SEARCH-KEYBOARD-150 (dev; exact-head QA pending)
+
+**Execution ledger:** Inspected root AGENTS.md, frozen inventory, dev/main (47 ahead/1 behind), PR #189 and exact-head Quality 41782489595/41782486746 (both successful on 05ed76b). Fixed global tool-search keyboard navigation to skip disabled planned-only entries while preserving their visibility/click diagnostic. Added browser regression for planned-only ArrowDown with no active descendant. Local Git checkout failed DNS; local Chromium/unit checks unavailable. Exact new-head CI, PR reviews, ancestry reconciliation, main Quality and Pages pending. Historical 166 gaps/95 partial frozen.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0 Exact-head dev/PR Quality and safe release: structural/browser green on exact candidate, reconcile diverged main ancestry without rewrite, verify reviews/protections, ordinary PR merge, then main Quality and Pages success.
+2. P1 Polynomial roots: real/complex reference roots, residuals, repeated roots and bounded nonconvergence regression.
+3. P1 Levenberg–Marquardt fitting: analytic reference, conditioning refusal, keyboard and 390px browser smoke.
+4. P1 FIR/IIR digital filters: reference response, unstable-pole rejection and responsive browser checks.
+5. P1 Tool-search favourites: bounded persistence, storage failure fallback, keyboard and mobile regression.
+
+## 2026-11-04 — BUILD-INDEX-CONTROL-149 (CI pending)
+
+**Execution ledger:** Read root contract, historical inventory, living plan and dev/main comparison (43 ahead/1 behind), confirmed previous dev-head PR Quality 41776832633 succeeded and PR #189 has no submitted reviews. GitHub DNS prevented local checkout. Added pre-write rejection of unexpected ASCII controls in index.html and isolated subprocess regression (SOH/BS/FF/US, unchanged bytes). New exact-head Quality and browser verification pending; no merge/Pages claim. Historical 166 gaps/95 partial remain frozen.
+
+**NEXT FIVE (priority / acceptance):**
+1. P0 Exact-head QA and PR #189 release: green structural/browser dev and PR checks on exact SHA, reconcile main ancestry without rewrite, verify reviews/protection, ordinary PR merge, verify main Quality/Pages.
+2. P1 Polynomial roots: real/complex reference roots, residuals, repeated-root and bounded failure tests.
+3. P1 Levenberg–Marquardt fitting: analytic reference, ill-conditioning refusal, keyboard/mobile smoke.
+4. P1 FIR/IIR filters: frequency reference, unstable-pole rejection and 390px browser smoke.
+5. P1 Tool-search favourites: persisted pins, storage-failure fallback, keyboard/mobile regression.
+
+## 2026-11-04 — BUILD-MODULE-CONTROL-148 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, historical audit, living plan, dev/main divergence (39 ahead/1 behind), PR #189 (open; no submitted reviews), and exact previous dev-head Quality run 41770415108 (success for fc36cc8). Added a fail-fast rejection of nonprinting ASCII controls other than permitted TAB/LF in modular JavaScript sources; committed source 32d8d60 and isolated subprocess negative regression 9b78833 (SOH, BS, FF, US; unchanged index bytes). Local repository unit and browser checks were not executed; exact new-head Quality pending. No merge or Pages deployment attempted. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / status / acceptance tests):**
+1. **P0 Exact-head QA and PR #189 release (pending):** structural and browser Quality green for exact dev/PR SHA; reconcile divergent main ancestry non-destructively, verify reviews/protections; ordinary PR merge only when all gates satisfied; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver; reference roots/residuals, repeated roots and failure/convergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable kernel with analytic reference fit, ill-conditioning refusal, keyboard/mobile smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, unstable-pole rejection and 390px browser regression.
+5. **P1 Tool-search favourites (planned):** bounded persisted pins, storage-failure fallback, keyboard and mobile regression.
+
+## 2026-11-04 — BUILD-MODULE-CRLF-147 (exact-head QA pending)
+
+**Execution ledger:** Read AGENTS.md, historical audit, current plan, PR #189 and exact-head Quality evidence. Prior dev head 1e2c1cfb2b8d99ed0add25affc7d4d409c91de7d had successful PR-triggered Quality run 41764210746. main 70fc483cb1cec3d2372d37484e4a8ef7942343da; 35 ahead/1 behind before changes. Fixed module-source universal-newline normalization in scripts/build.py by opening sources with newline="" and rejecting CR before any write. Added isolated subprocess regression for CRLF and lone CR in src/data-tables.js, checking error and unchanged index bytes. Source commit d9b1ca5; regression commit 73d470a. Local repository checkout/browser checks unavailable in this execution; exact new-head CI pending. PR #189 unmerged; no review approvals recorded. No main/Pages release claimed. Frozen inventory remains 166 gaps/95 partial.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Exact-head QA / PR #189 release (pending):** dev and PR Quality pass on same exact SHA, including new module CR tests and browser suite; reconcile main divergence without history rewrite; verify required reviews/protections; ordinary PR merge; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver with reference roots, residual tolerance, repeated-root and non-convergence regressions.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable kernel with reference fit, conditioning rejection, keyboard/mobile smoke.
+4. **P1 FIR/IIR filters (planned):** reference frequency response, stability rejection, and 390px browser checks.
+5. **P1 Tool-search favourites (planned):** persistent pins, storage-failure fallback, keyboard and mobile regression.
+
+## 2026-11-04 — CI-CRLF-146 (exact-head QA pending)
+
+**Execution ledger:** Inspected AGENTS.md, frozen audit, current dev/main and PR #189. The exact dev-head Quality run [41757292742](https://github.com/saeedsai/ProMathStudio/actions/runs/41757292742) failed structural unittest `test_crlf_index_rejected_without_overwrite`: universal-newline translation concealed CRLF, so builder proceeded until a missing module error. Changed `scripts/build.py` to open index with `newline=""`, preserving carriage returns for the existing pre-write guard. Added a focused lone-CR/mixed-newline subprocess regression; both cases assert no index mutation. Source commit b7f9ceb; test commit 567ad23. Raw-newline semantics locally verified in Python; full repository unit/browser suites and new exact-head CI remain pending. No release merge. dev/main divergence still requires non-destructive reconciliation. Historical 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 CI-CRLF-146 and PR #189 (pending):** exact-head dev and PR Quality pass, including CRLF/lone-CR tests and browser suites; reconcile diverged main ancestry without rewriting history; verify reviews/protections; ordinary PR merge; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver, known roots and residuals, repeated-root and non-convergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** shared numerical kernel, analytic references, ill-conditioning refusal, keyboard/mobile smoke.
+4. **P1 FIR/IIR digital filters (planned):** stability, frequency-response references and 390px browser checks.
+5. **P1 Tool-search favourites (planned):** bounded persistent pins, storage failure fallback, keyboard and mobile tests.
+
+## 2026-11-04 — BUILD-INDEX-CRLF-145 (exact-head QA pending)
+
+**Execution ledger:** Pre-change dev 654f5d6d8ed24bb17433284d1d55a65068057dc2; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; dev/main diverged 27 ahead/1 behind. Prior exact-head PR Quality run 41751753649 succeeded (static/browser job). PR #189 open. Standalone builder reads HTML through Python universal-newline translation, which can silently rewrite CRLF files. Added a fail-fast carriage-return guard before rewriting and an isolated subprocess regression asserting byte-identical rollback. Source 535c16c, test 91b83dc; local Python/Chromium not run, new exact-head Quality pending. No merge or Pages claim. Frozen 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Release reconciliation (pending):** green exact-head dev and PR Quality; non-destructively reconcile main ancestry; verify reviews and protections; ordinary dev-to-main PR merge; main Quality and Pages checks.
+2. **P1 Polynomial roots (planned):** bounded real/complex solver with known roots, repeated-root residuals and non-convergence tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** shared numerical kernel with analytic reference, ill-conditioning refusal and keyboard/mobile smoke.
+4. **P1 FIR/IIR digital filters (planned):** stability and reference frequency response tests, plus 390px browser checks.
+5. **P1 Tool-search favourites (planned):** bounded persistent pins, storage failure recovery, keyboard navigation and mobile smoke.
+
+## 2026-11-04 — BUILD-INDEX-BOM-144 (exact-head QA pending)
+
+**Change:** Reject a leading UTF-8 BOM in standalone index.html before any bundle rewriting. Focused isolated subprocess regression checks the diagnostic and unchanged HTML bytes. Existing dev Quality 41742985906 succeeded for BUILD-INDEX-NUL-143; PR #189 remains open with no reviews recorded and dev/main ancestry diverged (26 ahead, 1 behind before this commit). No merge without exact-head Quality, reviews/protections and ancestry reconciliation. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Exact-head CI and release reconciliation (pending):** green dev/PR Quality on this SHA; reconcile dev/main non-destructively; verify reviews/protection; ordinary PR merge; verify main Quality and Pages.
+2. **P1 Polynomial roots (planned):** bounded real/complex polynomial solver; reference roots and residuals, repeated roots and failure tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** reusable solver with analytic references, conditioning refusal and keyboard/mobile checks.
+4. **P1 Digital filters (planned):** FIR/IIR frequency and stability reference tests plus responsive browser checks.
+5. **P1 Tool-search favourites (planned):** persistent pinned tools, safe storage fallback, keyboard and 390px browser checks.
+
+## 2026-11-04 — BUILD-INDEX-NUL-143 (dev QA pending)
+
+**Change:** The standalone HTML builder now rejects a NUL character in the existing index before any module replacement; an isolated subprocess regression asserts the diagnostic and byte-for-byte preservation. The preceding spline NumPy CI correction succeeded on PR-triggered Quality run 41735564147 for 4c14043; no local clone was possible (github.com DNS resolution failed). The new exact-head Quality, PR checks, main Quality and Pages are not yet verified. PR #189 remains open and dev/main diverged (22 ahead/1 behind before this change); do not merge without reconciliation and verified gates. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance):**
+1. **P0 Release QA and ancestry reconciliation (pending):** green exact-head dev/PR Quality, review/protection verification, ordinary dev-to-main merge, then main Quality and Pages validation.
+2. **P1 Polynomial roots (planned):** real/complex roots with degree limits, reference residuals and repeated-root failure coverage.
+3. **P1 Levenberg–Marquardt fitting (planned):** shared solver, reference fits, ill-conditioned refusal, keyboard/browser tests.
+4. **P1 Digital filters (planned):** FIR/IIR responses, stability checks, frequency references and responsive browser tests.
+5. **P1 Tool search favourites (planned):** persisted pins with safe fallback, keyboard and 390px smoke, no duplicated actions.
+
+## 2026-11-03 — Parallel batch 142–149 (polynomials, nonlinear fit, filters, vector calculus, matrix extras, multivariate, vector fields, thermo cycles + DC circuits)
+
+**Release checkpoint:** PR #188 into dev at 2c60767; release PR #189 to main is waiting on exact-head Quality.
+
+**Implemented on branch (QA pending):** eight agents worked on disjoint modules, and all integrated without source conflicts. `thermal.cycle.analysis` and `circuits.network.analysis` move from planned to available under their narrowed scopes; `fluids.pipe.network`, `electronics.digital.logic`, `control.frequency.response` and `gnss.positioning.least.squares` stay planned. The frozen baseline is unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release batches 135–149 (pending):** exact-head Quality, PRs to main, main Quality and Pages.
+2. **P1 Pipe network (planned):** Hardy-Cross or Newton loop solver with Darcy–Weisbach/Colebrook; references from textbook loop networks.
+3. **P1 Digital logic simulation (planned):** gate netlists with truth tables and an animated timing diagram.
+4. **P1 Tool search favourites and recents (planned):** kept per viewer in try/catch localStorage.
+5. **P2 Offline symbolic gaps (blocked by CDN):** define an offline scope for nonlinear symbolic systems and series.
+## 2026-11-03 — CI-SPLINE-NUMPY-142 (exact-head QA pending)
+
+**Failure diagnosis:** dev exact-head Quality run 41734143560 at 2c607679 failed in the spline browser smoke step because the runner had no `numpy` package; all earlier structural and browser steps passed. The independent natural-cubic-spline reference previously used NumPy only to solve a small dense tridiagonal reference system. Replaced it with a pure-standard-library partial-pivot dense Gaussian elimination reference and `bisect_right`; retained the original nonuniform-data numerical comparisons and added pivot-required and singular-matrix reference controls. This is a CI test-harness dependency correction, not a change to the production spline implementation. Committed to existing dev at 297068eb. Local browser and Python suite not executed; exact-head CI required. PR #189 remains pending. Main 70fc483 and dev had diverged before this edit; do not merge without resolving ancestry through an ordinary protected PR. Frozen historical inventory: 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 CI-SPLINE-NUMPY-142 and PR #189 release (pending):** exact new dev/PR Quality pass including spline smoke; verify reviews, branch ancestry and protections, then ordinary dev-to-main PR and post-merge main Quality/Pages.
+2. **P1 Polynomial roots (planned):** real and complex polynomial roots with degree and convergence limits; reference residuals and repeated-root negative tests.
+3. **P1 Levenberg–Marquardt fitting (planned):** shared solver with analytic model references, ill-conditioned refusal and browser keyboard tests.
+4. **P1 Digital filters (planned):** reusable FIR/IIR response and stability checks with frequency-reference and mobile regression.
+5. **P1 Tool-search favourites and recent tools (planned):** bounded persisted pins, safe storage fallback, keyboard/390px browser tests and no duplicated actions.
+
+## 2026-11-03 — Parallel batch 135–141 (hypothesis tests, curve overlays, simulation units, BVP shooting, uncertainty, splines, tool search)
+
+**Release checkpoint:** PR #186 into dev at 657503c, then PR #187 to main at 70fc483. Main Quality 41730966059 and Pages 41730962844 succeeded.
+
+**Implemented on branch (QA pending):**
+- **Features:** six parallel features plus a global "Find a tool" search, built at the user's request for a modular, easy-to-find UI.
+- **Integration:** branches were merged and append-only workflow conflicts resolved. Four agent tests that required their own CI step to be last now check that it is present. Locally, 388 structural tests pass.
+- **Correction:** the statistics agent corrected two of the integrator's reference values against scipy/mpmath: the one-sample t p-value is 0.0574563 and the Welch p-value is 0.1075312.
+
+**NEXT FIVE (status / acceptance tests):**
+1. **P0 Release batch 135–141 (pending):** exact-head Quality, PR to main, main Quality and Pages.
+2. **P1 Wave 3 integration (in progress, parallel agents):**
+   - polynomial roots;
+   - Levenberg–Marquardt fitting;
+   - digital filters;
+   - vector calculus;
+   - Cholesky and null space;
+   - PCA and k-means;
+   - vector and slope fields;
+   - thermodynamic cycles and DC circuits.
+3. **P1 Tool search ranking feedback (planned):** recent tools and pinned favourites in the search, kept per viewer in try/catch localStorage.
+4. **P2 Symbolic CAS gaps (blocked offline):** nonlinear symbolic systems and series need the SymPy CDN; plan an offline fallback scope.
+5. **P2 Docs (planned):** a user guide page listing every tool with an example input.
+
 ## 2026-11-03 — Parallel batch: statistics, curves, optimization, units, multiple integrals, stiff ODE (129–134) + ENG-SIM-EXT-126, Brent pole guard 127, QR pivot 128
 
 **Releases since last entry:** PR #185 merged to main afd41a9 (simulations), with main Quality 41725388344 and Pages 41725387197 both successful.

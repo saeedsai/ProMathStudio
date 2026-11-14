@@ -22,9 +22,7 @@ def main():
   assert len(set(catalog['ids']))==len(catalog['ids'])
   assert 'matrix.solve.real.small' in catalog['available']
   assert page.locator('#eng-results article').count()==len(catalog['ids'])
-  for discipline, tool_id in [('gnss','gnss.positioning.least.squares'),
-                              ('signals','signals.spectral.analysis'),
-                              ('control','control.frequency.response')]:
+  for discipline, tool_id in [('signals','signals.spectral.analysis')]:
    page.locator('#eng-discipline').select_option(discipline)
    page.locator('#eng-search').fill(tool_id.split('.')[0])
    card=page.locator('#eng-results article[data-tool-id="'+tool_id+'"]')
@@ -43,16 +41,28 @@ def main():
   page.locator('#eng-search').fill('control orbit')
   assert page.locator('#eng-results article').count()==0
   page.locator('#eng-search').fill('GNSS positioning')
-  assert page.locator('#eng-results article[data-tool-id="gnss.positioning.least.squares"]').count()==1
-  assert page.locator('#eng-results article button').count()==0
+  gnss_card=page.locator('#eng-results article[data-tool-id="gnss.positioning.least.squares"]')
+  assert gnss_card.count()==1 and page.locator('#eng-results article').count()==1
+  # GNSS positioning is now a real numerical tool: exactly one honest, runnable card.
+  assert gnss_card.locator('button').count()==1 and 'planned' not in gnss_card.inner_text().lower()
+  assert 'No ionosphere' in gnss_card.inner_text()
+  page.locator('#eng-search').fill('Bode')
+  bode=page.locator('#eng-results article[data-tool-id="control.frequency.response"]')
+  # Frequency response (stability margins) is implemented: one honest, runnable card.
+  assert bode.count()==1 and bode.locator('button').count()==1 and 'planned' not in bode.inner_text().lower()
   page.locator('#eng-search').fill('')
-  page.locator('#eng-discipline').select_option('fluids')
-  page.locator('#eng-search').fill('pipe')
+  page.locator('#eng-discipline').select_option('gnss')
+  assert page.locator('#eng-results article').count()>=1
+  page.locator('#eng-search').fill('')
+  page.locator('#eng-discipline').select_option('control')
+  page.locator('#eng-search').fill('bode')
   assert page.locator('#eng-results article').count()==1
-  planned=page.locator('#eng-results article')
-  assert planned.get_attribute('data-tool-id')=='fluids.pipe.network'
-  assert planned.locator('button').count()==0
-  assert 'planned' in planned.inner_text().lower()
+  frequency=page.locator('#eng-results article')
+  assert frequency.get_attribute('data-tool-id')=='control.frequency.response'
+  # Frequency response became a real runnable tool: it must not regress to a fake planned card.
+  assert frequency.locator('button').count()==1,'Implemented frequency response needs its Open action'
+  assert 'planned' not in frequency.inner_text().lower()
+  page.locator('#eng-discipline').select_option('fluids')
   page.locator('#eng-search').fill('no-such-tool')
   assert 'No matching tools' in page.locator('#eng-results').inner_text()
   page.locator('#eng-search').fill('matrix')
@@ -73,6 +83,7 @@ def main():
   assert page.locator('#control-theory-toolbox').evaluate('(e)=>e.open')
   # Existing numerical tools route to their real, visible controls.
   for tool_id, selector in [('signals.fft.1d', '#fft-run'), ('numerical.root.brent', '#brent-run'),
+                            ('gnss.positioning.least.squares', '#gnss-run'),
                             ('numerical.interpolation.1d', '#interp-run'),
                             ('numerical.quadrature.adaptive', '#num-run'),
                             ('numerical.minimize.golden', '#minimize-run'),

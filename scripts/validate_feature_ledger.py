@@ -5,6 +5,9 @@ Usage: python3 scripts/validate_feature_ledger.py
 This checks historical audit data integrity, not current implementation status.
 """
 import json
+import math
+import unicodedata
+from decimal import Decimal, InvalidOperation
 from collections import Counter
 from pathlib import Path
 
@@ -12,36 +15,302 @@ ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "docs" / "feature-ledger-audit-20261026.json"
 
 
+def require(condition, message):
+    """Enforce audit invariants even when Python is invoked with -O."""
+    if not condition:
+        raise ValueError(message)
+
+
 def validate(data):
-    assert data["schemaVersion"] == 1
-    assert data["sourceAudit"] == "2026-10-26"
-    items = data["items"]
-    assert len(items) == 324, "Expected 158 existing and 166 gaps from frozen audit"
-    ids = [x["id"] for x in items]
-    assert len(ids) == len(set(ids)), "Duplicate feature IDs"
-    counts = Counter(x["kind"] for x in items)
-    assert counts == {"existing": 158, "gap": 166}, counts
-    assert data["counts"] == {"existing": 158, "gaps": 166}
-    assert Counter(x["status"] for x in items if x["kind"] == "existing") == {
-        "bounded-complete": 63, "partial": 95
-    }
-    assert Counter(x["priority"] for x in items if x["kind"] == "gap") == {
-        "P0": 22, "P1": 64, "P2": 53, "P3": 27
-    }
+    require(isinstance(data, dict), "Feature ledger must be a JSON object")
+    require(type(data.get("schemaVersion")) is int and data["schemaVersion"] == 1, "Expected feature ledger schemaVersion 1")
+    require(data.get("sourceAudit") == "2026-10-26", "Unexpected source audit date")
+    items = data.get("items")
+    require(isinstance(items, list), "Feature ledger items must be an array")
+    require(len(items) == 324, "Expected 158 existing and 166 gaps from frozen audit")
+    require(all(isinstance(item, dict) for item in items), "Every feature ledger item must be an object")
+    # Validate hash keys before Counter/set: malformed JSON can contain arrays or
+    # objects here, which must raise a useful audit error rather than TypeError.
+    for index, item in enumerate(items):
+        for key in ("id", "kind", "status"):
+            require(isinstance(item.get(key), str),
+                    f"Feature ledger item {index} has invalid {key}")
+        if "priority" in item:
+            require(isinstance(item["priority"], str),
+                    f"Feature ledger item {index} has invalid priority")
+    # Reject invisible ID differences that make cross-file references ambiguous.
+    for index, item in enumerate(items):
+        require(bool(item["id"]) and item["id"] == item["id"].strip(),
+                f"Feature IDs must not have surrounding whitespace (item {index})")
+    # Check whitespace first so tabs/newlines have a consistent diagnostic;
+    # ASCII information separators (U+001C..U+001F) are control characters
+    # despite Python isspace() classifying them as whitespace.
+    # non-whitespace format/control characters remain separately rejected.
+    for index, item in enumerate(items):
+        require(not any(char.isspace() and char not in "\x1c\x1d\x1e\x1f" for char in item["id"]),
+                f"Feature IDs must not contain interior whitespace (item {index})")
+    for index, item in enumerate(items):
+        require(item["id"].isprintable(),
+                f"Feature IDs must not contain invisible characters (item {index})")
+    # Titles appear in the UI and exports: reject hidden controls rather than
+    # allowing visually identical labels with different machine values.
+    for index, item in enumerate(items):
+        title = item.get("title")
+        if isinstance(title, str):
+            require(title.isprintable(),
+                    f"Feature titles must not contain invisible characters (item {index})")
+    # Scope and section are exported audit labels too; hidden format and
+    # control characters can misrepresent their meaning downstream.
+    for index, item in enumerate(items):
+        for field in ("scope", "section"):
+            value = item.get(field)
+            if isinstance(value, str):
+                require(value.isprintable(),
+                        f"Feature {field} must not contain invisible characters (item {index})")
+    # Exported labels should not have invisible-looking edge spacing:
+    # preserve legitimate interior spaces in descriptive text.
+    for index, item in enumerate(items):
+        for field in ("title", "scope", "section"):
+            value = item.get(field)
+            if isinstance(value, str):
+                require(value == value.strip(),
+                        f"Feature {field} must not have surrounding whitespace (item {index})")
+    # Exported descriptive labels should use one canonical spelling; otherwise
+    # visually identical labels can compare differently across consumers.
+    for index, item in enumerate(items):
+        for field in ("title", "scope", "section"):
+            value = item.get(field)
+            if isinstance(value, str):
+                require(unicodedata.is_normalized("NFC", value),
+                        f"Feature {field} must use NFC Unicode normalization (item {index})")
+    # Canonically equivalent Unicode IDs must not evade exact-string duplicate checks.
+    for index, item in enumerate(items):
+        require(unicodedata.is_normalized("NFC", item["id"]),
+                f"Feature IDs must use NFC Unicode normalization (item {index})")
+    ids = [item["id"] for item in items]
+    require(len(ids) == len(set(ids)), "Duplicate feature IDs")
+    counts = Counter(item["kind"] for item in items)
+    require(counts == {"existing": 158, "gap": 166}, f"Unexpected feature kinds/counts: {counts}")
+    require(isinstance(data.get("counts"), dict) and
+            all(type(data["counts"].get(key)) is int for key in ("existing", "gaps")),
+            "Frozen feature counts must be integer values")
+    require(data.get("counts") == {"existing": 158, "gaps": 166}, "Frozen feature counts mismatch")
+    statuses = Counter(item.get("status") for item in items if item["kind"] == "existing")
+    require(statuses == {"bounded-complete": 63, "partial": 95}, f"Frozen feature statuses mismatch: {statuses}")
+    priorities = Counter(item.get("priority") for item in items if item["kind"] == "gap")
+    require(priorities == {"P0": 22, "P1": 64, "P2": 53, "P3": 27},
+            f"Frozen gap priorities mismatch: {priorities}")
     for item in items:
-        assert all(item.get(k) for k in ("id", "title", "scope", "section", "source"))
-        assert item["source"] == "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+        require(all(isinstance(item.get(k), str) and item[k].strip()
+                    for k in ("id", "title", "scope", "section", "source")),
+                f"Missing/invalid required feature field: {item.get('id')!r}")
+        require(item["source"] == "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md",
+                f"Unexpected audit source for {item['id']}")
         if item["kind"] == "gap":
-            assert item["status"] == "planned"
+            require(item.get("status") == "planned", f"Gap must remain historically planned: {item['id']}")
         else:
-            assert "priority" not in item
+            require("priority" not in item, f"Existing feature must not have gap priority: {item['id']}")
     return counts
 
 
-def main():
-    data = json.loads(LEDGER.read_text(encoding="utf-8"))
-    counts = validate(data)
-    print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
+def load_ledger(path):
+    """Reject ambiguous duplicate JSON keys instead of silently using the last value."""
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            # Decomposed keys can look identical to canonical keys while
+            # comparing differently in JSON consumers.
+            if not unicodedata.is_normalized("NFC", key):
+                raise ValueError(f"Non-NFC feature ledger JSON key: {key}")
+            if key in result:
+                raise ValueError(f"Duplicate feature ledger JSON key: {key}")
+            result[key] = value
+        return result
+
+    def reject_nonfinite(token):
+        raise ValueError(f"Non-finite feature ledger JSON constant: {token}")
+
+    def finite_float(token):
+        value = float(token)
+        try:
+            exact = Decimal(token)
+        except InvalidOperation as exc:
+            raise ValueError("Feature ledger JSON decimal exponent exceeds decoder limit") from exc
+        # Preserve signed zero: binary64 distinguishes -0.0 from +0.0,
+        # but normalized exports and comparisons often discard that sign.
+        if value == 0.0 and token.lstrip().startswith("-") and exact.is_zero():
+            raise ValueError(f"Negative-zero feature ledger JSON float is ambiguous: {token}")
+        if not math.isfinite(value):
+            raise ValueError(f"Non-finite feature ledger JSON number: {token}")
+        # JSON decimal/exponent notation can bypass parse_int and silently
+        # round large integer-valued numbers in JavaScript consumers.
+        if value.is_integer() and abs(value) > 9007199254740991:
+            raise ValueError(f"Unsafe feature ledger JSON floating integer: {token}")
+        # Preserve the more specific underflow diagnostic before the general
+        # rounded-fraction check: tiny nonzero tokens also round to integer 0.
+        # Decimal distinguishes exact zero from nonzero subnormal literals
+        # without inspecting exponent digits or losing mantissa precision.
+        if value == 0.0 and not exact.is_zero():
+            raise ValueError(f"Underflowed feature ledger JSON number: {token}")
+        # A decimal fraction can round to an integer in binary64 even when
+        # the integer is inside the safe range (e.g. 1.0000000000000001).
+        if value.is_integer() and exact != Decimal(int(value)):
+            raise ValueError(f"Rounded feature ledger JSON fraction to integer: {token}")
+        # Also reject non-integer decimal tokens with more significant digits
+        # than binary64 retains, rather than silently changing audit values.
+        # str(value) is Python's shortest round-tripping decimal representation;
+        # compare numeric Decimal values so equivalent exponent notation works.
+        if not value.is_integer() and exact != Decimal(str(value)):
+            raise ValueError(f"Rounded feature ledger JSON fractional precision: {token}")
+        return value
+
+    def safe_integer(token):
+        # JSON -0 silently loses its sign when decoded as Python int 0.
+        # Preserve the audit's exact numeric representation instead.
+        if token == "-0":
+            raise ValueError("Negative-zero feature ledger JSON integer is ambiguous")
+        # JSON integers beyond IEEE-754's exact integer range lose precision
+        # when the audit is consumed by JavaScript or spreadsheet tooling.
+        try:
+            value = int(token)
+        except ValueError as exc:
+            # Python 3.11+ bounds decimal integer conversion; expose a stable
+            # audit diagnostic instead of leaking the interpreter limit error.
+            raise ValueError("Feature ledger JSON integer exceeds decoder digit limit") from exc
+        if abs(value) > 9007199254740991:
+            raise ValueError(f"Unsafe feature ledger JSON integer: {token}")
+        return value
+
+    def reject_invalid_unicode(value):
+        # Walk iteratively: valid JSON can be nested deeply enough to exhaust
+        # Python recursion while checking decoded strings.
+        pending = [value]
+        while pending:
+            current = pending.pop()
+            if isinstance(current, str):
+                if not unicodedata.is_normalized("NFC", current):
+                    raise ValueError("Non-NFC feature ledger JSON string value")
+                if "\x00" in current:
+                    raise ValueError("NUL character in feature ledger JSON")
+                if "\ufeff" in current:
+                    raise ValueError("Embedded BOM character in feature ledger JSON string")
+                for char in current:
+                    codepoint = ord(char)
+                    if codepoint < 32 or 0x7f <= codepoint <= 0x9f:
+                        raise ValueError(f"Control character in feature ledger JSON string (U+{codepoint:04X})")
+                # Unicode line/paragraph separators can create misleading
+                # rendered audit rows even though JSON allows them in strings.
+                for char in current:
+                    if char in "\u2028\u2029":
+                        raise ValueError(
+                            f"Unicode line separator in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                # Non-ASCII spacing can look like an ordinary space in exported
+                # audit metadata but compare differently across consumers.
+                for char in current:
+                    if unicodedata.category(char) == "Zs" and char != " ":
+                        raise ValueError(
+                            f"Nonstandard Unicode space in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                # Format controls (including bidi overrides and zero-width
+                # joiners) can visually spoof arbitrary nested audit metadata.
+                for char in current:
+                    if unicodedata.category(char) == "Cf":
+                        raise ValueError(
+                            f"Unicode format character in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                for char in current:
+                    if 0xD800 <= ord(char) <= 0xDFFF:
+                        raise ValueError(
+                            f"Unpaired Unicode surrogate in feature ledger JSON (U+{ord(char):04X})"
+                        )
+                # Unassigned code points have no stable published character
+                # meaning and should not enter portable historical audit exports.
+                for char in current:
+                    if unicodedata.category(char) == "Cn" and not (
+                        0xFDD0 <= ord(char) <= 0xFDEF or
+                        (ord(char) & 0xFFFE) == 0xFFFE
+                    ):
+                        raise ValueError(
+                            f"Unassigned Unicode code point in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                # Variation selectors and the combining grapheme joiner can
+                # change or hide rendered audit labels without changing NFC.
+                for char in current:
+                    codepoint = ord(char)
+                    if codepoint == 0x034F or 0xFE00 <= codepoint <= 0xFE0F or 0xE0100 <= codepoint <= 0xE01EF:
+                        raise ValueError(
+                            f"Unicode rendering modifier in feature ledger JSON string (U+{codepoint:04X})"
+                        )
+                # Private-use code points have no interoperable published
+                # meaning in portable historical audit identifiers/metadata.
+                for char in current:
+                    if unicodedata.category(char) == "Co":
+                        raise ValueError(
+                            f"Private-use Unicode code point in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                # Unicode noncharacters are legal scalar values but unsuitable
+                # for portable human-readable audit identifiers and metadata.
+                for char in current:
+                    codepoint = ord(char)
+                    if 0xFDD0 <= codepoint <= 0xFDEF or (codepoint & 0xFFFE) == 0xFFFE:
+                        raise ValueError(
+                            f"Unicode noncharacter in feature ledger JSON string (U+{codepoint:04X})"
+                        )
+            elif isinstance(current, list):
+                pending.extend(current)
+            elif isinstance(current, dict):
+                for key, item in current.items():
+                    pending.append(key)
+                    pending.append(item)
+
+    try:
+        # UTF-8 BOM is emitted by some spreadsheet exports; accept it only at the start.
+        # Cap untrusted audit imports before decoding to avoid unbounded memory use.
+        with Path(path).open("rb") as source:
+            payload = source.read(8 * 1024 * 1024 + 1)
+        if len(payload) > 8 * 1024 * 1024:
+            raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")
+        data = json.loads(payload.decode("utf-8-sig"),
+                          object_pairs_hook=unique_object,
+                          parse_constant=reject_nonfinite,
+                          parse_float=finite_float,
+                          parse_int=safe_integer)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Malformed feature ledger JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}") from exc
+    except UnicodeDecodeError as exc:
+        raise ValueError(
+            f"Feature ledger JSON must be valid UTF-8 at byte offset {exc.start}: {exc.reason}; offending bytes: {exc.object[exc.start:exc.end].hex()}"
+        ) from exc
+    except OSError as exc:
+        raise ValueError(f"Cannot read feature ledger JSON: {exc.strerror or exc}") from exc
+    except RecursionError as exc:
+        raise ValueError("Feature ledger JSON nesting exceeds decoder limit") from exc
+    reject_invalid_unicode(data)
+    return data
+
+
+def main(argv=None):
+    # Validate external exports without modifying the canonical audit.
+    import argparse
+    parser = argparse.ArgumentParser(description="Validate a historical feature-ledger JSON export")
+    parser.add_argument("path", nargs="?", type=Path, default=LEDGER,
+                        help="JSON export to validate (default: frozen audit ledger)")
+    parser.add_argument("--json-summary", action="store_true",
+                        help="Print validated historical counts as machine-readable JSON")
+    parser.add_argument("--quiet", action="store_true",
+                        help="Validate without success output (errors still go to stderr)")
+    args = parser.parse_args(argv)
+    try:
+        counts = validate(load_ledger(args.path))
+    except ValueError as exc:
+        parser.error(str(exc))
+    if args.quiet:
+        return
+    if args.json_summary:
+        print(json.dumps({"existing": counts["existing"], "gaps": counts["gap"]}, sort_keys=True))
+    else:
+        print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
 
 
 if __name__ == "__main__":

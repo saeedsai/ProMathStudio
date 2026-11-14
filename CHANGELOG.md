@@ -1,3 +1,340 @@
+- 2026-11-14 (dev, CI pending): Repair UTF-8 positive Unicode assertion from failed Quality #43640573911; include offending raw bytes in invalid UTF-8 diagnostics with leading/truncated regressions. Frozen 166 gaps / 95 partial unchanged; no release.
+- 2026-11-14 (dev, CI pending): Correct malformed UTF-8 regression fixtures to use raw invalid bytes, retaining decoder-reason and offset assertions. No release.
+- 2026-11-14 (dev, CI pending): Include the UTF-8 decoder reason alongside exact malformed byte offsets in historical audit imports; test invalid leading bytes, truncated multibyte sequences and valid Unicode. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.
+- 2026-11-14 (dev, CI pending): Report first invalid UTF-8 byte offset in historical JSON imports; add two malformed raw-byte regressions and a valid initial BOM control. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.
+- 2026-11-14 (dev, CI pending): Reject Unicode combining grapheme joiner and variation selectors in nested historical JSON keys/values, with 12 escaped/literal negative cases and canonical positive control; frozen 166 gaps / 95 partial unchanged. No main/Pages release.
+- 2026-11-14 (dev, CI pending): Reject private-use Unicode U+E000 and U+F0000 in nested historical audit JSON keys/values (literal/escaped), with assigned NFC Unicode acceptance; frozen 166 gaps / 95 partial unchanged. Exact-head Quality pending; no main/Pages release.
+- 2026-11-14 (dev, CI pending): Reject unassigned Unicode U+0378 in nested audit JSON keys/values, escaped and literal; preserve canonical positive control, noncharacter diagnostics and frozen 166 gaps / 95 partial. Previous exact-head Quality #43592939434 passed; no main/Pages release claimed.
+- 2026-11-14 (dev, CI pending): Correct surrogate-pair positive test expectation to decoded U+1F600 scalar after exact-head Quality #43582928342 failed one of 545 structural tests; retain four negative lone-surrogate checks. Frozen 166 gaps / 95 partial unchanged; no release claimed.
+- 2026-11-14 (dev, CI pending): Repair failed surrogate-pair positive fixture by serializing the actual U+1F600 scalar to JSON; preserve four lone-surrogate negative cases. Exact-head PR Quality #43578315570 failed 545 structural tests (one failure). Frozen 166 gaps / 95 partial unchanged; no release claimed.
+- 2026-11-14 (dev, CI pending): Report exact U+XXXX for lone UTF-16 surrogate values/keys in audit JSON; four negative regression cases and valid escaped surrogate-pair positive control. Frozen 166 gaps / 95 partial unchanged; no release claimed.
+- 2026-11-14 (dev, CI pending): Include exact U+2028/U+2029 in nested audit JSON line-separator errors; strengthen eight escaped/literal key/value regression cases. Frozen 166 gaps / 95 partial unchanged; no release claimed.
+- 2026-11-14 (dev, CI pending): Identify exact U+XXXX code point in nested audit JSON Unicode noncharacter diagnostics; six escaped/literal negative regressions and printable positive control. Frozen 166 gaps / 95 partial unchanged; no release claimed.
+- 2026-11-14 (dev, CI pending): Fix format-control regression diagnostic regex to match literal U+XXXX code points; preserve negative and positive assertions. No release claimed.
+- 2026-11-14 (dev, CI pending): Include U+XXXX in nested audit JSON Unicode format-control diagnostics; add six escaped/literal regression cases and safe positive control. Frozen 166 gaps / 95 partial unchanged; no release claimed.
+- 2026-11-14 (dev, CI pending): Repair NFC CI regression: distinguish nested key/value errors, reject formerly accepted decomposed nested value, retain canonical positive control; value diagnostic now explicitly identifies string value. Quality #43530946098 failed 542 structural tests (2 failures, 1 error). Historical 166 gaps / 95 partial unchanged; no release claimed.
+- 2026-11-14 (dev, CI pending): Reject non-NFC Unicode in nested feature-ledger JSON values as well as keys, including escaped/literal JSON regression and canonical positive control; historical 166 gaps / 95 partial unchanged, no release claimed.
+- 2026-11-13 (dev, CI pending): Repair failing Unicode-space JSON fixtures using actual characters with escaped/literal nested key/value cases; report U+XXXX in validator errors. Isolated 12-case JSON check passed; full CI pending. Historical 166 gaps / 95 partial unchanged; no release claimed.
+- 2026-11-13 (dev, CI pending): Reject visually ambiguous non-ASCII Unicode spaces in nested audit JSON keys/values, preserving ordinary spaces; add focused positive/negative regression. Historical 166 gaps / 95 partial unchanged; no main/Pages release claimed.
+- 2026-11-13 (dev, CI pending): Audit JSON float parsing now reports stable validation errors for decimal exponents beyond the Decimal decoder limit, with negative/positive regression; frozen 166 gaps / 95 partial unchanged, release not claimed.
+- 2026-11-13 (dev, CI pending): Audit JSON import rejects U+2028/U+2029 in nested keys/values (escaped or literal), with focused negative and positive regression. Frozen 166 gaps / 95 partial remain historical; release not claimed.
+- 2026-11-13: Reject Unicode format controls in nested audit JSON metadata keys and values; add positive/negative regression; frozen 166 gaps / 95 partial unchanged; new exact-head CI pending.
+- 2026-11-13: Repair three failing Unicode noncharacter regression fixtures (U+FDD0, U+FFFE, U+10FFFF) without weakening validator assertions; exact-head CI pending; frozen 166 gaps / 95 partial unchanged.
+- 2026-11-13: Correct Unicode noncharacter JSON regression fixtures to decode real noncharacters rather than literal escape strings; exact-head CI pending.
+- 2026-11-13: Reject Unicode noncharacters in nested historical audit JSON strings and keys, with focused negative and canonical positive regression; frozen 166 gaps / 95 partial unchanged; exact-head CI pending.
+- 2026-11-13: Preserve historical JSON-control diagnostic prefix while adding literal U+XXXX code points; fix escaped-regex assertions for exact-head structural CI. Frozen 166 gaps / 95 partial unchanged; new CI pending.
+- 2026-11-12: Repair exact-head CI failure caused by stale escaped-control positive fixture; assert C0/C1 rejection in nested keys/values with explicit U+XXXX diagnostics and preserve printable-string acceptance. Frozen 166 gaps / 95 partial unchanged; new exact-head CI pending.
+- 2026-11-12: Reject decoded C0/C1 control characters in historical audit JSON strings, including nested keys and values; add focused regression while preserving NUL/BOM diagnostics. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending.
+- 2026-11-12: Reject invisible embedded U+FEFF BOM characters in historical audit JSON strings (including nested keys/values), preserving leading UTF-8 BOM compatibility; add positive/negative regression. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending.
+- 2026-11-12: Repair audit-label NFC regression fixture escaping so the negative test uses an actual decomposed Unicode accent and correctly matches literal diagnostic parentheses; validator unchanged, exact-head CI pending.
+- 2026-11-12 — AUDIT-LABEL-NFC-254: Require NFC Unicode normalization for historical audit title/scope/section export labels, preserving printable/trimmed checks; add decomposed-label negative and frozen canonical positive regressions. Historical 166 gaps / 95 partial unchanged; new exact-head CI pending; no main or Pages release.
+- 2026-11-12: Reject non-NFC Unicode object keys in imported historical feature-ledger JSON, including nested keys, before duplicate checks; test decomposed/aliased keys, canonical Unicode and frozen audit acceptance. Historical 166 gaps / 95 partial unchanged; exact-head CI pending.
+- 2026-11-12: Reject non-NFC feature IDs in historical audit exports to prevent canonically equivalent identifiers bypassing duplicate checks; focused negative and canonical-positive regression. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending.
+- 2026-11-12: Corrected historical-ledger edge-label test expectations for the established plural `Feature titles` invisible-character diagnostic (tab/newline), preserving validator protections; exact-head structural/Chromium CI pending. Frozen inventory remains 166 gaps / 95 partial.
+- 2026-11-12 — AUDIT-EXPORT-DIAGNOSTIC-CI-249: Repair six edge-label regression diagnostic expectations for tabs/LF versus ordinary spaces; preserve invisible-control and surrounding-whitespace rejection, canonical inventory and frozen 166 gaps / 95 partial. Exact-head CI pending; no release claimed.
+- 2026-11-12 — AUDIT-EXPORT-EDGE-LABELS-248: Reject surrounding whitespace on exported title/scope/section labels while preserving interior spaces and the canonical historical ledger. Add negative leading/trailing space, tab and newline regression fixtures. Frozen inventory remains 166 gaps / 95 partial. Local checkout unavailable (github.com DNS); exact-head CI pending; no release claimed.
+- 2026-11-11: Correct the newline test fixture to a valid escaped Python string before exact-head CI; no production change.
+- 2026-11-11: Repair literal backslash-n source corruption in audit validator and scope/section regression; restore executable IDs assignment and real Unicode negative fixtures. Frozen 166 gaps / 95 partial unchanged; exact-head Quality pending, no release claim.
+- 2026-11-11: Reject invisible/control characters in historical audit scope and section labels; add 10 negative cases and canonical positive control. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending, no release claim.\n- 2026-11-11: Correct test fixture escape syntax before exact-head CI; exercise actual invisible characters and match diagnostic parentheses literally.
+- 2026-11-11: Reject invisible/control characters in historical audit feature titles, with direct regression and canonical acceptance. Frozen 166 gaps / 95 partial unchanged; exact-head Quality pending, no release claim.
+- 2026-11-11: Reject negative-zero floating JSON tokens in frozen ledger exports (including exponent notation), with nested negative cases and positive-zero controls; maintain 166 gaps / 95 partial. Exact-head QA pending; no release claim.
+- 2026-11-11: Restore readable validator comments and extend invisible-ID regressions to DEL U+007F and zero-width joiner U+200D. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending, no release claim.
+- 2026-11-11: Repair feature-ledger CI classification for ASCII information separators U+001C–U+001F; preserve invisible-control rejection and add regression coverage. Exact-head QA pending.
+## 2026-11-11 — Repair interior-whitespace regression fixtures and diagnostics
+- Use real tab/LF/CR/NBSP fixture characters and correctly escaped regex; validate whitespace before other invisible characters to preserve a stable diagnostic. Keep canonical acceptance and non-whitespace invisible rejection. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending, no Pages release.
+
+## 2026-11-11 — Reject interior whitespace in historical audit feature IDs
+- Reject embedded whitespace that can make external feature-ID references ambiguous, with space/tab/newline/CR/NBSP regressions and frozen ledger acceptance. No app bundle changes; 166 gaps / 95 partial unchanged. Exact-head Quality pending; no release or Pages claim.
+
+## 2026-11-11 — Reject invisible interior feature-ID characters
+- Reject zero-width, bidirectional format, control and word-joiner characters in historical audit IDs; focused regression plus valid canonical control. Frozen 166 gaps / 95 partial unchanged; no application bundle change. Exact-head Quality pending; no merge or Pages claim.
+
+## 2026-11-10 — Repair whitespace-ID CI fixture and improve diagnostics
+- Replace literal backslash-t fixture with real tab, add trailing tab/newline negative cases, and include offending item index in validator error. Frozen 166 gaps / 95 partial unchanged. Exact-head CI pending; no app bundle, main release or Pages claim.
+
+## 2026-11-10 — Reject whitespace-ambiguous historical feature IDs
+- Require canonical feature IDs without surrounding whitespace; add positive and negative regression cases. Historical 166 gaps / 95 partial unchanged; no application bundle changes. Exact-head QA pending; no merge or Pages deployment.
+
+## 2026-11-10 — Quiet historical audit validation for CI
+- Add opt-in `--quiet` to suppress successful validator output without hiding invalid-input diagnostics. Add subprocess regression for quiet default/JSON-summary success and malformed failure. Frozen 166 gaps / 95 partial unchanged; no app bundle or Pages release. Exact-head QA pending.
+
+## 2026-11-10 — Machine-readable validated historical ledger summary
+- Add opt-in `--json-summary` CLI output for automation consumers, retaining existing default text output and failing closed for malformed exports. Add subprocess success/error regression. Frozen 166 gaps / 95 partial unchanged; no application bundle or Pages release. Exact-head CI pending.
+
+## 2026-11-10 — Validate external historical audit exports from CLI
+- Accept optional ledger JSON path while retaining canonical default; report malformed exports without tracebacks. Add subprocess acceptance/rejection regression. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No application bundle or Pages release.
+
+## 2026-11-10 — Reject ambiguous negative-zero JSON integers in frozen audit
+- Reject JSON integer -0 before Python silently converts it to zero; add nested negative cases and valid zero/negative-one/negative-zero-float controls. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No runtime bundle or Pages deployment.
+
+## 2026-11-10 — Normalize excessive JSON integer digit errors
+- Convert Python 3.11+ integer digit-limit failures to a stable audit ValueError; test 5,000-digit rejection and safe integer acceptance. No application bundle change. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending.
+
+## 2026-11-10 — Restore decoded NUL detection and deep Unicode CI regressions
+- Fix iterative historical JSON Unicode validation to inspect actual U+0000 rather than literal backslash-x-zero; repair deep JSON escape fixtures and test nested NUL keys. Exact-head Quality pending; frozen 166 gaps / 95 partial unchanged. No application bundle or Pages deployment.
+
+## 2026-11-10 — Iterative Unicode validation for nested historical JSON
+- Replace recursive NUL and surrogate walks with one iterative post-decode traversal; test 400-deep valid and invalid Unicode inputs. No app bundle change. Frozen 166 gaps / 95 partial unchanged; new exact-head CI pending.
+
+## 2026-11-10 — Correct malformed JSON regression regex
+- Fix line/column regex escaping in the newly added regression; no validator behavior or application bundle change. Exact-head CI pending.
+
+## 2026-11-10 — Actionable malformed historical JSON diagnostics
+- Report malformed JSON as ValueError with line/column context; add malformed fixture regressions and preserve BOM handling. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No application bundle or Pages change.
+
+## 2026-11-10 — Bound historical audit JSON input size
+- Limit untrusted ledger JSON input to 8 MiB before UTF-8 decoding, with oversized-file rejection and valid-small regression. Frozen 166 gaps / 95 partial unchanged; new exact-head CI pending. No application bundle or Pages release.
+
+## 2026-11-09 — Normalize missing historical ledger read errors
+- Convert missing/unreadable JSON audit path errors to actionable ValueError, with missing-path and directory regressions. New exact-head CI pending; no runtime bundle, release or Pages change. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-09 — Restore BOM validator syntax and reject misplaced BOMs
+- Correct invalid Python assignment introduced by UTF-8 BOM support; preserve one JSON parse call. Add double-BOM and whitespace-before-BOM negative regressions. Exact-head CI pending; no application bundle change, main merge or Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-09 — Correct BOM regression malformed-byte fixture
+- Ensure the negative UTF-8 regression appends a real FF byte after BOM; preserve strict error assertion. New exact-head CI pending; frozen audit unchanged.
+
+## 2026-11-09 — Accept optional UTF-8 BOM in historical JSON exports
+- Historical feature-ledger loader accepts UTF-8 BOM at the start of JSON exports while retaining strict malformed UTF-8 rejection; added plain/BOM Unicode and invalid post-BOM regression cases. No runtime JS/index.html changes. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending.
+
+## 2026-11-09 — Report malformed UTF-8 in historical audit input
+- Convert invalid UTF-8 ledger input to actionable ValueError; two malformed-byte regression cases and valid UTF-8 acceptance. Frozen 166 gaps / 95 partial unchanged; exact-head QA pending. No app JS/index.html changes.
+
+## 2026-11-09 — Report deeply nested historical JSON as invalid audit input
+- Converted JSON decoder recursion failures into explicit ValueError and added a 12,000-level nesting regression; no app JavaScript or standalone HTML changed. Exact-head CI and Pages pending; frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-09 — Repair valid-control JSON regression fixture
+- Corrected the escaped newline/tab fixture so the parser receives JSON control escapes rather than double-escaped literal backslashes. Preserved the positive assertions and existing NUL rejection. Exact-head CI pending; no application JS/index.html or Pages change. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-09 — Reject NUL escapes in historical JSON audit data
+- Feature-ledger JSON loader rejects U+0000 in nested values or object keys to prevent truncated audit exports. Added negative and valid-control regression cases; historical 166 gaps / 95 partial unchanged. New exact-head QA pending; no application bundle or Pages change.
+
+## 2026-11-09 — Reject silently rounded fractional JSON audit numbers
+- Historical feature-ledger loader now rejects decimal fractional tokens with discarded significant digits (such as 0.10000000000000001) while accepting equivalent exponent notation, exact-decimal zero and subnormal boundary literals. Added focused positive/negative regressions; frozen 166 gaps / 95 partial unchanged. New exact-head CI pending; no runtime JS/HTML or Pages change.
+
+## 2026-11-09 — Correct zero-mantissa regression fixture selection
+- Included extended zero-mantissa literal in the valid-zero test branch, before CI completion. No validator algorithm or application bundle change; new exact-head QA pending. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-09 — Repair zero-literal CI fixture and exact decimal underflow check
+- Fixed exact-head CI KeyError in valid-zero JSON test by reading the field actually present in each fixture; added signed-zero and extended zero-mantissa regression cases. The validator now distinguishes exact decimal zero using Decimal rather than a digit heuristic. Historical 166 gaps / 95 partial unchanged; new exact-head CI pending. No application JS/index.html or Pages changes.
+
+## 2026-11-09 — Restore underflow-specific audit validation after CI failure
+- Fixed exact-head Quality regression in the historical JSON loader: check nonzero-to-zero underflow before the rounded-to-integer guard, retaining both validations. Added subnormal underflow and valid zero-exponent regression cases. Historical 166 gaps / 95 partial unchanged; new CI pending. No application JS/HTML or Pages changes.
+
+## 2026-11-09 — Correct audit fraction-check Python source formatting
+- Replaced accidental literal newline escapes in the newly added validator guard with actual Python newlines; behavior and regression intent unchanged. Full exact-head QA pending.
+
+## 2026-11-09 — Reject JSON decimal fractions silently rounded to integers
+- Historical audit loader now compares integer-valued binary64 floats with the original decimal token to reject fractional inputs rounded into integers. Added three nested/boundary regressions; frozen 166 gaps / 95 partial unchanged. Exact-head CI pending; no application JS/HTML or Pages changes.
+
+## 2026-11-09 — Reject precision-losing integer-valued JSON floats in frozen audit
+- JSON decimal/exponent forms above the JavaScript safe integer boundary now fail strict feature-ledger loading instead of bypassing parse_int. Added nested negative cases and safe boundary/fractional positive regression. Historical 166 gaps / 95 partial unchanged; new exact-head CI pending. No runtime JS/HTML or Pages change.
+
+## 2026-11-09 — Require integer types for frozen historical counts
+- Historical feature-ledger validation now rejects float or boolean count fields even when Python equality would accept the numeric value. Added four direct regression cases. Frozen 166 gaps / 95 partial unchanged. New exact-head CI pending; no runtime bundle or Pages change.
+
+## 2026-11-09 — Reject precision-losing JSON integers in frozen feature audit
+- Reject integer literals outside JavaScript's safe integer range (including nested values) to preserve audit fidelity in browser/spreadsheet consumers. Added negative and boundary-positive regressions. Frozen 166 gaps / 95 partial unchanged; exact-head CI pending. No runtime bundle or Pages change.
+
+## 2026-11-09 — Correct Unicode regression fixture escaping
+- Ensure JSON test fixtures decode surrogate escapes instead of escaping the backslash itself; validator behavior unchanged. Exact-head CI pending.
+
+## 2026-11-09 — Reject unpaired Unicode surrogate escapes in frozen feature audit
+- Strict historical JSON decoding now rejects lone UTF-16 surrogate escapes in nested keys and values while accepting valid surrogate pairs. Added four focused cases. Frozen 166 gaps / 95 partial unchanged. New exact-head CI pending; no JS/HTML or Pages changes.
+
+## 2026-11-09 — Reject underflowed nonzero JSON floats in historical audit
+- Strict feature-ledger JSON loading rejects nonzero float literals silently rounded to zero (including nested fields), while accepting genuine zero. Added focused regression cases. Frozen 166 gaps/95 partial unchanged; exact-head CI pending. No runtime bundle, merge or Pages change.
+
+## 2026-11-09 — Reject overflowed non-finite JSON floats in historical audit
+- Strict JSON loading now rejects float literals such as 1e999 and -1e999 that decode to infinity, even in nested unused fields. Added three negative regressions. Frozen 166 gaps/95 partial unchanged; new exact-head QA pending, no JS/HTML, merge or Pages deployment.
+
+## 2026-11-09 — Reject nonstandard non-finite JSON constants in historical feature ledger
+- The audit loader now rejects NaN, Infinity and -Infinity (including nested JSON), with three negative temporary-file regressions. Historical 166 gaps/95 partial preserved. New exact-head CI pending; no application JS/HTML, release or Pages change.
+
+## 2026-11-09 — Reject ambiguous duplicate JSON keys in frozen feature ledger
+- Added a duplicate-key-safe JSON loader for the historical inventory, including nested objects, and focused regression coverage. The original audit remains 166 gaps / 95 partial; new exact-head CI pending. No application bundle, release or Pages change.
+
+## 2026-11-08 — Reject malformed historical audit field types
+- Hardened `scripts/validate_feature_ledger.py` to reject non-string ID/kind/status/priority before set/Counter processing and to reject boolean `schemaVersion` values, with descriptive `ValueError` instead of incidental `TypeError`. Added five negative regressions in `tests/test_feature_ledger_validation.py`. Historical inventory remains unchanged (166 gaps / 95 partial). Exact-commit CI pending; no application bundle changes, release or deployment.
+
+## 2026-11-08 — Enforce frozen audit validation even with optimized Python
+- Replaced optimization-removable `assert` checks in the historical feature-ledger validator with explicit, diagnostic validation failures. Added regression coverage for malformed audit records and a `python -O` subprocess to prove that the frozen inventory cannot silently pass when assertions are disabled. Historical 166 gaps / 95 partial unchanged. Exact-head CI pending; no application bundle, release or Pages change.
+
+## 2026-11-08 — Recover cleanly from module removal during standalone verification
+- Standalone build snapshot verification now reports a consistent actionable concurrent-source error when a module is deleted or becomes undecodable between assembly and final check. Added a subprocess regression for deleted module in read-only check mode with unchanged HTML and no temporary files. Previous exact-head push/PR Quality passed; new exact-head full QA pending. No application JavaScript or bundled HTML changes, release or Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-08 — Correct injected builder fixture indentation
+- Corrected the concurrent-index test's guard targeting to preserve Python indentation while selecting the first of two matching destination reads. This preflight follow-up preserves the regression's failure and cleanup checks; no application code changed. Exact-head CI pending.
+
+## 2026-11-08 — Repair concurrent-index regression fixtures
+- Fixed two structural test-only failures reported by exact-head push/PR Quality #42517673686/#42517679751. The publish-path injection now targets its uniquely indented guard rather than also matching the no-op path, and the no-op fixture expects a real newline written by the injected editor. Rollback and temporary cleanup assertions remain strict. No production source or bundle change; new exact-head CI pending.
+
+## 2026-11-08 — Reject stale destination on no-op standalone rebuild
+- The normal no-op builder now checks that `index.html` is still a regular unchanged file after assembling and verifying module snapshots. This prevents false "already up to date" reports when an external editor changes the destination. Added a subprocess regression for an injected concurrent index edit. Existing `--check` snapshot behavior is preserved. Exact-head CI pending; no application runtime changes or production release.
+
+## 2026-11-08 — Preserve externally introduced index symlinks during rebuild
+- The standalone builder now checks for a destination symlink immediately before publishing, preserving an independently replaced path instead of overwriting it. Added a subprocess regression simulating the symlink swap, verifying failure, external-target preservation and temporary-file cleanup. Best-effort guard, not a full interprocess lock. Exact-head CI pending; no application JS or Pages release.
+
+## 2026-11-08 — Verify source snapshots on no-op standalone builds
+- Fixed a normal-build race where an initially unchanged `index.html` skipped module freshness verification and could report success despite a concurrent source edit. Added an injected no-op regression covering failure, preservation of the existing bundle and no staging artifacts. Exact-head CI pending; no runtime JS or Pages release.
+
+## 2026-11-08 — Complete concurrent-module fixture newline repair
+- Corrected the injected literal-newline conversion to use the actual four-space function indentation. This supplements the earlier test-only syntax fix; exact-head CI pending, no production changes or release.
+
+## 2026-11-08 — Repair concurrent-module-edit regression fixture
+- Exact-head CI exposed an indentation error in the subprocess-instrumented test builder, not in production `scripts/build.py`. Corrected the injected loop indentation and added explicit Python compilation of the fixture. Retained the original strict stale-module, index-preservation and cleanup assertions. New exact-head CI pending; no release.
+
+## 2026-11-08 — Detect concurrent source changes in read-only bundle check
+- Reused the standalone builder's source-snapshot verification in `--check`, preventing a false consistency success when a modular source changes during the check. Added an injected concurrent-edit subprocess regression that verifies failure and unchanged `index.html`. Previous exact-head push/PR Quality #42492393106/#42492396772 passed; new commit CI pending. No runtime bundle change or Pages release.
+
+## 2026-11-08 — Detect concurrent module edits before publishing standalone HTML
+- The standalone builder now snapshots modular source files and checks they have not changed before replacing `index.html`. If a source file is edited or replaced by a symlink during assembly, rebuilding aborts without publishing stale JavaScript. Added subprocess rollback/cleanup regression for an intervening source edit. This is a best-effort race guard, not a cross-process lock. Prior exact-head push/PR Quality #42487293944/#42487298107 succeeded; new commit QA pending. No runtime module change, merge or Pages release.
+
+## 2026-11-08 — Preserve concurrent standalone HTML edits during rebuild
+- The atomic standalone builder now checks that `index.html` still matches the snapshot read before module assembly; on an intervening external edit, it aborts and cleans the staged file rather than overwriting newer changes. Added a focused concurrent-edit subprocess regression. This detects ordinary lost-update races but does not implement an interprocess lock. Prior exact-head push/PR Quality #42485007089/#42485010736 passed; new commit CI pending. No runtime module change or production release.
+
+## 2026-11-08 — Atomic standalone HTML rebuild and failure rollback
+- `scripts/build.py` now writes the complete LF-normalized bundle to a same-directory temporary file and atomically replaces `index.html` only after a successful write, preserving original file mode and cleaning abandoned temporary files on failures. Previously it could truncate `index.html` if writing failed. Added focused `tests/test_build_atomic_write.py` for failed replacement rollback and successful rebuild. Isolated prototype passed locally; exact-commit full CI pending. No application runtime change, main promotion or Pages release.
+
+## 2026-11-06 — Project import polling and explicit future-schema reset API
+- Fixed Chromium project migration regression's unsafe wait predicate when graph.dataset is temporarily null; preserved two-row success and added imported-header verification.
+- Added opt-in `MathStudio.toolPrefs.resetUnsupported(true)` API. Unsupported newer schema stays intact on ordinary operations and on failed reset writes; explicit successful reset stores v1. Focused Node regression exercises all transitions; standalone bundle synchronized. Reset UI is not yet implemented.
+- Prior exact-head push Quality #42159635636 failed in project schema browser smoke; PR Quality #42159640300 was cancelled. New exact-head CI pending, no local Chromium execution, PR #189 remains review-gated; no main/Pages deployment. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Repair incomplete v1 tool preferences and unblock structural Quality
+- Corrected a stale structural assertion for the now-extended preference state declaration; the assertion still requires persistence initialization before storage reads. Saved v1 preferences missing recents or pins are marked as needing repair, preserving valid sibling entries until a successful write. Added focused executable Node repair/recovery assertions and synchronized standalone HTML. Exact-head CI pending after previous push #42154342867 and PR #42154352048 failed at this structural assertion. No release; frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Preserve unknown preference schemas and migrate legacy data
+- Saved tool preferences with an unsupported schema version no longer risk silent overwrite by an older client. Session-only recents and pins continue working; unversioned legacy data is readable and migrates to v1 after a successful save. Node and Chromium regressions cover both behaviors; offline standalone module synchronized. Prior dev exact-head push/PR Quality passed (#42147267403/#42147271856), new commit's QA pending. PR #189 still lacks reviews; Pages not redeployed. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Search preferences repair malformed nested IDs
+- Invalid, repeated and over-limit nested saved recent/pinned IDs are now flagged as requiring repair rather than silently treated as fully persisted. Valid sibling IDs remain available in memory; a successful save writes sanitized lists and restores persistence. Focused Node and Chromium regression cases plus synchronized standalone HTML were committed with the living plan.
+- Prior exact-head dev push Quality #42140368695 and PR Quality #42140374316 passed; new head CI and full local Chromium pending. PR #189 still lacks reviews, no merge/Pages release; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Bound restored search preference payloads
+- Preference restore now rejects payloads over 16,384 UTF-16 code units and non-string storage results before JSON parsing, reporting session-only status until a successful rewrite. Added Node and Chromium oversized-payload/recovery regressions; synchronized modular source and standalone HTML. Previous exact-head push #42133233110 and PR #42133237537 passed; new exact-head QA pending, PR #189 review-blocked. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Salvage valid preferences when one stored list is malformed
+- A valid JSON preferences object with a non-array recent/pin field now reports non-persistent status until a successful rewrite, while retaining the other valid list. This avoids falsely claiming damaged stored preferences are fully restored. Node state-transition and Chromium corrupted-list assertions added; standalone HTML synchronized.
+- Previous exact-head dev push Quality #42126789186 and PR Quality #42126793454 passed for f80ff900; new exact-head CI pending, PR #189 review-gated and production Pages unchanged. Frozen historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-06 — Stabilize quota-recovery Chromium regression
+- Fixed a test-only one-shot quota simulation that could be consumed by unrelated startup storage writes. The browser test now arms a failure specifically for the tool-search preferences key immediately before pinning and verifies session-only state before recovery. Production JavaScript and standalone HTML are unchanged. Both previous exact-head Quality runs #42117774224 and #42117785366 failed at this browser assertion; new CI is pending. PR #189 remains review-gated. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Search preferences announce recovered persistence
+- Pin/unpin now announces when a previously session-only preference successfully saves to browser storage; existing failure message remains. Added structural and 390px Chromium quota-recovery regressions and synchronized the standalone HTML. Prior exact-head push/PR Quality green; new CI and review-gated release pending. Historical 166 gaps/95 partial unchanged.
+
+## 2026-11-05 — Reject malformed saved tool IDs
+- Search favourites now discard whitespace-only and control-character IDs from corrupted storage and reject them in the preferences API. Valid IDs, limits and legacy preferences remain supported. Added executable Node negative/boundary cases and Chromium restore assertions; synchronized standalone HTML. Prior dev/PR Quality for 5ced1f4 passed; new exact-head QA and review-gated release pending. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Invalid search-preferences root reports session-only state
+- Fixed a follow-on persistence-state defect: valid JSON with unsupported top-level types (null, array, number or string) now reports session-only until a successful rewrite, instead of incorrectly claiming preferences were saved. Expanded executable Node and Chromium recovery regressions and kept the standalone HTML synchronized. Exact-head CI pending; PR #189 still requires review and passing checks; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Search preferences session-only persistence accuracy
+- When browser storage cannot be read (blocked or corrupt), tool preferences immediately report non-persistent state instead of falsely reporting success. The in-memory recent and pinned lists still work; successful subsequent writes restore persisted status. Pin actions announce session-only behavior to assistive technology through the existing live region.
+- New focused executable Node storage-state transitions and extended Chromium corrupt/blocked-storage assertions; synchronized source and offline standalone HTML. Previous dev Quality #42070115621 passed while PR Quality #42070125639 was cancelled; new exact-head CI, review-gated PR #189 and Pages release remain pending. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Deterministic LF standalone output
+- Builder explicitly writes LF line endings across operating systems; regression checks generated HTML bytes and unchanged rebuild timestamp. Previous exact-head Quality #42051332141 was cancelled, not passing. PR #189 remains review-blocked; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone drift diagnostic lists source paths
+- Read-only --check lists up to three mismatched module paths, total count and first mismatch position; focused regression asserts two source paths. Exact-head CI pending, previous run cancelled. PR #189 review-blocked; Pages unverified. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone drift diagnostics count mismatched modules
+- Read-only `python scripts/build.py --check` now reports the number of embedded modules that differ from modular sources, while retaining first module and line/column details. Added focused two-module drift and no-rewrite regression. Previous exact-head Quality #42023181030 passed; new head CI and local tests pending. PR #189 remains review-gated, Pages unverified; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Consistent standalone check snapshot
+- Read-only build consistency checking now compares against the original index.html snapshot rather than reopening it after modular source processing. Added isolated regression simulating a concurrent index move; local test execution and new exact-head CI pending. Previous Quality #42014883879 passed. PR #189 remains review-gated; no release. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Idempotent standalone rebuild
+- Normal `python scripts/build.py` no longer rewrites already synchronized index.html; preserves modification time and avoids unnecessary rebuild churn. Focused isolated subprocess regression checks unchanged bytes, mtime and successful no-op output. Prior exact-head Quality #41999177480 passed; new-head QA pending. No release; frozen historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone drift diagnostics identify source module
+- `scripts/build.py --check` now names the first mismatched modular source alongside line and column; focused regression verifies the module hint without rewriting output. Previous exact-head Quality #41990683493 passed; new-head checks pending. No release; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone builder reports drift column
+- Read-only `python scripts/build.py --check` now reports the first mismatched line and 1-based column; focused regression checks an embedded module change at line 3, column 18. Previous exact-head Quality #41984214066 passed; new head QA pending. No release; frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone builder identifies drift line
+- Read-only --check now identifies the first mismatched line to help repair stale standalone bundles. Added a focused line-number regression. Previous head Quality #41977921641 passed; new exact-head Quality pending. No release; frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Standalone builder rejects unsupported CLI arguments
+- Reject unknown or extra flags before any index.html read/write; preserve normal build and --check modes. Added focused regression asserting no output mutation on invalid invocation. Previous head Quality #41971023436 green; new exact-head checks pending. No release; historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Read-only standalone bundle consistency check
+- Added `python scripts/build.py --check` to report out-of-sync standalone HTML without rewriting it; normal build behavior retained. Added isolated regression for matching content, drift detection, byte-preserving failure and ordinary repair. New exact-head CI pending; PR #189 review-gated; no Pages release. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Latest exact-head Quality confirmed; checkout unavailable
+- Quality [41945883245](https://github.com/saeedsai/ProMathStudio/actions/runs/41945883245) succeeded for dev `20c89b114d47f3d9fd09c929392b26fae7919325`. PR #189 remains review-gated. Local git checkout failed DNS resolution, preventing safe standalone source/bundle and browser-test edits; no application feature or regression was committed. Main Quality and Pages not verified. Historical 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Exact-head Quality green; release still review-gated
+- Quality [41937533190](https://github.com/saeedsai/ProMathStudio/actions/runs/41937533190) completed successfully for dev 262ba648be1fa99959a4a79a84d6bf5231275f1f, including structural and Chromium checks. PR #189 has no submitted reviews. Local git checkout remains unavailable (GitHub DNS failure), so no application source/test was changed in this checkpoint; main Quality and Pages remain unverified. Ledger/changelog updates require their own exact-head Quality before promotion. Frozen 166 gaps / 95 partial unchanged.
+
+## 2026-11-05 — Browse All Tools GNSS catalog regression
+- 2026-11-05 (CI-PIPE-CATALOG-167; dev QA pending): corrected engineering pipe/digital-logic browser catalog assertions for implemented GNSS least-squares positioning and control frequency response; retained planned spectral-analysis negative assertion. Exact-head Quality/Pages pending; no application source feature in this iteration.
+
+- Exact-head Quality [41921062294](https://github.com/saeedsai/ProMathStudio/actions/runs/41921062294) passed structural and browser steps through 209, then failed at step 210 because a stale browse assertion excluded implemented GNSS. The regression now requires canonical `catalog:gnss.positioning.least.squares` while excluding planned-only `catalog:signals.spectral.analysis`. Browser rerun pending; no application source change or release.
+
+## 2026-11-04 — CI browse disclosure timing regression
+
+- CI [41911514968](https://github.com/saeedsai/ProMathStudio/actions/runs/41911514968) passed structural and browser checks through step 209, then failed at browse-group assertion in `tests/smoke_tool_search_favorites.py:239`. The native `<details>` toggle event populates groups asynchronously. The browser test now waits for populated groups without relaxing any browse navigation, keyboard, storage or route assertions. Exact-head CI and release remain pending; no application source feature added.
+
+## Unreleased — 2026-11-04
+- 2026-11-04 (CI-PINS-GNSS-164; QA pending): corrected the tool-search favourites regression to treat implemented GNSS positioning as available; at full pin capacity it must refuse a new pin, while genuinely planned spectral analysis remains unpinnable. Exact-head Chromium and release remain pending; frozen 166 gaps / 95 partial unchanged.
+- CI search regression: use Playwright forced pointer click to exercise refusal on an aria-disabled planned-only search result; preserve accessibility and workspace invariants. Exact-head browser QA pending.
+
+- 2026-11-04 (CI-SEARCH-VISIBILITY-161; exact-head QA pending): repaired browser regression ordering for mixed planned/available tool-search results. The planned result is now clicked while the popup remains visible, preserving disabled-result status and no-navigation checks; the preceding Enter had legitimately opened an available result and dismissed the popup. Source behavior unchanged; local Chromium unavailable; PR #189 and Pages remain gated. Frozen 166 gaps / 95 partial unchanged.\n- 2026-11-04 (CI-CANCELLED-160; QA pending): exact-head Quality run 41863330816 was cancelled during browser dependency installation after structural checks passed. No Chromium verification, source change, or release this iteration; recorded blocker and next five acceptance gates in the living plan. Frozen 166 gaps / 95 partial unchanged.
+- 2026-11-04 (CI-CATALOG-STATUS-157; exact-head CI pending): the consolidated branch's structural tests passed, but browser Quality failed because an old catalog smoke treated implemented control.frequency.response as planned. Updated its assertion to require an Open action and no planned label, while retaining the genuine planned-tool negative regression. Reconciled history-only main ancestry without changing released code. Full Quality and Pages release are still pending; frozen 166-gap/95-partial inventory unchanged.
+
+- QA (dev): strengthen global tool-search regression for mixed planned/available matches, verifying arrow/Home/End never select disabled planned entries; exact-head Chromium recheck pending ([3f9fbf4](https://github.com/saeedsai/ProMathStudio/commit/3f9fbf4809dbfc12c092c162e641d26512cd8a8b)).
+- Fixed global tool-search browser regression to recognize implemented digital logic and preserve disabled/keyboard refusal coverage for planned signal spectral analysis (CI run 41831603088; dev QA pending).
+- 2026-11-04 (BRANCH-CONSOLIDATION-156; exact-head CI pending): reconciled the existing Claude engineering-feature branch into dev without discarding either history; preserved 11 additional JavaScript modules, source/bundle consistency, toolbar favourites and recent tools, disabled-result keyboard/Home/End improvements, builder security guards, all existing tests and both development ledgers. PR #189 to main remains gated by exact-head structural/browser QA, reviews and Pages confirmation. Historical 166 gaps / 95 partial unchanged.
+- 2026-11-04 (CI-SYMLINK-FIX-155; dev QA pending): repaired malformed literal-newline symlink regression fixture responsible for failed exact-head Quality #41817935010; builder now also rejects modules reached via symlinked `src` directory, with isolated external-file/index byte-preservation regression. Local tests unavailable (GitHub DNS); exact-head CI and release pending. Historical 166 gaps / 95 partial unchanged.
+- 2026-11-04 (BUILD-MODULE-SYMLINK-154; dev QA pending): refuse symlinked JavaScript module sources before standalone bundling; focused subprocess regression asserts symlink, external target and index bytes remain untouched. Exact-head CI and release pending; historical 166-gap/95-partial audit unchanged.
+- 2026-11-04 (BUILD-SYMLINK-153; dev QA pending): reject symlinked standalone index.html before reading or writing it; isolated subprocess regression verifies the symlink and external target remain unchanged. Exact-head Quality pending; no release claimed.
+- 2026-11-04 (UI-SEARCH-HOME-END-152; dev QA pending): Home/End navigates to first/last enabled search result without selecting planned-only tools; focused source/bundle regression. Exact-head CI and release pending.
+- 2026-11-04 (UI-SEARCH-DISABLED-151; dev QA pending): planned-only tool search mouse clicks now announce unavailable status without marking disabled results active; focused source/bundle regression. Exact-head Quality and release pending.
+- 2026-11-04 (UI-SEARCH-KEYBOARD-150; dev QA pending): tool-search ArrowUp/Down skips disabled planned entries, with browser regression for planned-only results; exact-head Quality and release pending.
+- BUILD-INDEX-CONTROL-149 (dev, QA pending): reject unexpected ASCII controls in index.html before rewrite; subprocess regression asserts original bytes preserved.\n## 2026-11-04 — BUILD-MODULE-CRLF-147
+
+- BUILD-MODULE-CONTROL-148 (dev, QA pending): fail fast when JavaScript modules contain nonprinting ASCII control characters other than TAB/LF; subprocess regression checks four controls and unchanged standalone HTML. Exact-head CI and release pending; frozen 166-gap/95-partial baseline unchanged.
+- Preserve raw newlines when reading standalone JavaScript modules; reject CRLF/lone CR module input before HTML rewrite, preventing silent newline normalization. Add focused subprocess regression for diagnostic and unchanged index. Exact-head CI pending; no release claimed.
+
+## 2026-11-04 — CI-CRLF-146
+- Fix standalone builder carriage-return validation by disabling Python universal-newline translation when reading `index.html`. Prevents CRLF/lone-CR HTML from bypassing the fail-fast guard.
+- Add subprocess regression for lone CR and mixed newline files, asserting diagnostic and byte-for-byte preservation. Exact-head CI pending; no release claimed.
+
+- 2026-11-04 (BUILD-INDEX-CRLF-145; dev QA pending): reject carriage returns in standalone index before Python newline normalization can silently rewrite CRLF input; subprocess regression verifies unchanged bytes. Prior PR Quality 41751753649 passed; new head QA and release pending.
+- 2026-11-04 (BUILD-INDEX-BOM-144; dev QA pending): reject leading UTF-8 BOM in standalone index before rewriting; isolated subprocess regression asserts diagnostic and unchanged input. Exact-head CI and release pending.
+- 2026-11-04 (BUILD-INDEX-NUL-143; dev QA pending): standalone builder rejects embedded NUL in index.html before rewriting; isolated subprocess regression verifies diagnostic and byte-preserving failure. Exact-head CI and release pending.
+- 2026-11-03 (parallel batch 150–155; branch QA pending). Fourth round of parallel agents, plus a CI repair:
+  - **CTRL-MARGINS-150:** gain/phase margins, crossover frequencies, closed-loop bandwidth and resonant peak in a new Control Theory Frequency response panel, with crossover markers on the Bode plot. `control.frequency.response` is now available in the catalog.
+  - **GNSS-151:** weighted Gauss–Newton single-epoch positioning with clock bias, DOPs, WGS-84 coordinates and a sky plot. No atmospheric, relativistic or Sagnac corrections. `gnss.positioning.least.squares` is now available.
+  - **FUNC-ANALYSIS-152:** numerical inequality solving over intervals and function domain analysis (zeros, poles, extrema, monotonicity, symmetry), reusing the shared root finder.
+  - **RANDOM-153:** PCG32-seeded samplers, plus plain Monte Carlo and Halton quasi-Monte Carlo integration with a convergence table.
+  - **SEARCH-FAVS-154:** "Find a tool" adds Recent and Pinned tools (Alt+P to pin) and a collapsed "Browse all tools" list grouped by workspace. Preferences are stored per viewer with safe fallbacks.
+  - **DOCS-GUIDE-155:** `docs/USER_GUIDE.md` covers every tool with a worked example taken from its regression test. `tests/test_user_guide.py` fails if a panel or catalog tool is left undocumented.
+  - **CI-NUMPY-FIX:** Quality runs 41734137142/41734143560 failed because `smoke_interpolation_splines.py` imported numpy, which CI does not install. `smoke_matrix_extras.py` had the same problem. Both now use pure-Python or fixed references with unchanged tolerances.
+- 2026-11-03 (parallel batch 142–149; branch QA pending). Eight features from a third round of parallel agents:
+  - **POLY-142 polynomial tools:** Aberth–Ehrlich complex roots with backward errors and multiplicity clustering, plus Horner evaluation, derivative/integral, add/multiply/divide, numerical GCD and build-from-roots.
+  - **NLFIT-143 nonlinear fitting:** Levenberg–Marquardt with standard errors and t intervals, verified against NIST Misra1a, with warnings for parameters that cannot be identified.
+  - **FILTERS-144 digital filters:** convolution and correlation, windowed-sinc FIR, Butterworth IIR (order 1–8, second-order sections), zero-phase filtfilt and frequency response.
+  - **VECCALC-145 vector calculus:** Ridders derivatives of order 1–4, gradient, Hessian, Jacobian, divergence, curl, Laplacian and directional derivatives, with error estimates; kinks are refused.
+  - **MATRIX-EXTRAS-146:** for matrices up to 8×8, Cholesky and LDLᵀ, Jacobi-SVD rank with null-space and column-space bases, determinant, characteristic polynomial, norms and κ₂.
+  - **MULTIVAR-147 multivariate analysis:** covariance and Pearson/Spearman matrices, a scatter matrix, PCA and seeded k-means++ on Data Tables columns.
+  - **FIELDS-148 vector fields:** quiver plots, RK4 streamlines, slope fields with solution curves, heuristic equilibria and reduced-motion-aware particle animation.
+  - **ENG-THERMO-CIRCUITS-149:** `thermal.cycle.analysis` (Otto, Diesel and Brayton with animated P–v/T–s diagrams) and `circuits.network.analysis` (a DC modified-nodal-analysis netlist solver with animated current flow) are now available.
+  - **Tests:** each feature has reference, negative, keyboard and 390/1280 px tests registered in Quality.
+- 2026-11-03 (CI-SPLINE-NUMPY-142; dev QA pending): removed undeclared NumPy dependency from cubic spline browser smoke's independent dense numerical reference; pure-Python partial-pivot solver retains nonuniform spline checks and adds pivot/singular controls. Production spline code unchanged; exact-head CI pending.
+- 2026-11-03 (UI-TOOL-SEARCH-141; branch QA pending): global "Find a tool" search in the workspace bar (`/` or Ctrl/Cmd+K). It indexes every tool panel, workspace task and Engineering catalog tool at runtime, matches a small synonym map, and opens the chosen tool in the right workspace without clearing inputs. Results use an accessible combobox with keyboard navigation and announced counts. Planned tools are marked "Planned". Works at 390px.
+- 2026-11-03 (parallel batch 135–140; branch QA pending). Six features from a second round of parallel agents, integrated onto one branch:
+  - **STATS-TESTS-135:** hypothesis tests with confidence intervals: one-sample, Welch, pooled and paired t-tests; chi-square goodness-of-fit and r×c independence (optional Yates); one-proportion z-test with Wilson interval; exact binomial with Clopper–Pearson; chi-square variance interval. Results include effect sizes and assumptions, and values match scipy within 1e-8.
+  - **GRAPH-OVERLAY-136:** implicit, parametric and polar curves can be overlaid on the main 2D graph (up to 8). Implicit curves are re-traced on zoom and pan, and overlays persist in projects with schema validation before import.
+  - **ENG-SIM-UNITS-137:** Engineering simulation inputs accept units (e.g. `12 ft`, `3.5 kN`, `212 °F`) through the shared units module. Field-specific errors report dimension mismatches.
+  - **BVP-SHOOT-138:** two-point boundary-value problems solved by shooting on the existing RK4/TR-BDF2 solvers, with Dirichlet, Neumann or Robin conditions. Every bracketed solution is reported (for example both Bratu solutions), as are non-unique and no-solution cases.
+  - **UNCERTAINTY-139:** GUM first-order propagation with correlations and contributions, and seeded deterministic Monte Carlo with symmetric/shortest intervals, a histogram and a non-linearity flag.
+  - **SPLINES-140:** natural, clamped, not-a-knot and periodic cubic splines plus Akima and modified Akima, with derivatives and the exact spline integral.
+  - **Tests:** each feature adds reference, negative, keyboard and responsive browser tests, registered in Quality.
 - 2026-11-03 (parallel batch 129–134; branch QA pending). Six new modules were built by parallel agents and integrated onto one branch:
   - **STATS-DIST-129:** Normal, Student t, chi-square, exponential, binomial and Poisson pdf/pmf, CDF, survival and quantile functions, built on in-house log-gamma, incomplete gamma/beta and erf. Also descriptive statistics for Data Tables columns (type-7 quartiles, skewness, Pearson r, covariance). There are no hypothesis tests or confidence intervals.
   - **GRAPH-CURVES-130:** implicit F(x,y)=0 curves via marching squares with refined crossings; pole and jump crossings are rejected and counted. Also parametric and polar curves, equal-aspect axes and Data Tables export.
@@ -209,3 +546,5 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - 2026-10-29 (dev / CI pending): Added bounded continuous-time control analysis in Graphs with polynomial SISO transfer-function inputs, sampled Bode/Nyquist/root locus plots, Routh–Hurwitz table, and unity negative feedback. Structural regression added. Controller tuning, feedforward design and symbolic Laplace integration remain planned; release unverified.
 - 2026-10-29 (dev, CI pending): Added a dedicated complex-number Graph workbench with 2D Argand plots and sampled 3D |f(z)| magnitude surfaces, presets z, z², inverse and exp, finite-input validation, accessible status and responsive canvas. Preserved existing real graph workflows. Structural regression added; deployment not yet confirmed.
 - 2026-10-29 (dev, pending CI): Refreshed the entire interface with an original computational math-first design: stronger input/result hierarchy, teal navigation, palette/sidebar, consistent panels, focus visibility, mobile and reduced-motion refinements; added structural UI regression coverage. Deployment not yet verified.
+
+- 2026-11-04: Corrected stale control-frequency-response status assertion in thermo/circuit browser smoke (implemented tool is available); exact-head CI recheck pending. No application feature or release claimed.

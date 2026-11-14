@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-SURROGATE-PAIR-CI-REPAIR-275
+
+**Execution ledger:** Inspected exact dev a086d11d7781810505b8ee9694d1bf716dd0397c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical inventory, PR #189 (zero submitted reviews), and exact-head PR Quality #43578315570. Quality failed structural tests (545 run, one failure) because the positive surrogate-pair fixture wrote literal escaped backslashes instead of a JSON surrogate pair. Replace it with json.dumps of the real U+1F600 scalar so the decoder receives the escaped pair; preserve the four lone-surrogate negative checks. Isolated local Python JSON round-trip passed; full exact-head Quality and Chromium pending. Standalone index.html unaffected. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes historical-ledger, all structural tests including lone-surrogate and valid-pair cases, embedded Python compile and Chromium smoke.
+2. P0: obtain eligible PR #189 approval and verify required exact-head checks before ordinary protected dev-to-main merge.
+3. P0: after protected merge, verify main Quality, GitHub Pages published SHA and hosted smoke.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html; browser checks for confirmation, cancellation, focus and persistence.
+5. P1: independent numerical references and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-SURROGATE-DIAGNOSTIC-274
 
 **Execution ledger:** Inspected exact dev b9645288206b751babefcb6860da31920bb462b4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical inventory, successful exact-head PR Quality #43564439403 and PR #189 (zero submitted reviews). Improve lone UTF-16 surrogate diagnostics to report exact U+XXXX code points in nested JSON keys/values. Add four focused negative cases and a valid escaped surrogate-pair positive control. Local isolated Python JSON decoding checks passed; new exact-head structural/Chromium CI pending. Standalone index.html unaffected. Frozen historical 166 gaps / 95 partial unchanged.

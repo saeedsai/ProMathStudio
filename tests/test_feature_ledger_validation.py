@@ -106,7 +106,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                         with self.assertRaisesRegex(
                                 ValueError, r"Unpaired Unicode surrogate.*U[+]" + format(codepoint, "04X")):
                             validator.load_ledger(path)
-            path.write_text('{"nested": ["\\\\ud83d\\\\ude00"]}', encoding="utf-8")
+            path.write_text(json.dumps({"nested": ["\U0001f600"]}), encoding="utf-8")
             self.assertEqual(validator.load_ledger(path), {"nested": ["\\U0001f600"]})
 
     @classmethod

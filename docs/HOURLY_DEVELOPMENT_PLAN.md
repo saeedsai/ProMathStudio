@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-SURROGATE-DIAGNOSTIC-274
+
+**Execution ledger:** Inspected exact dev b9645288206b751babefcb6860da31920bb462b4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, historical inventory, successful exact-head PR Quality #43564439403 and PR #189 (zero submitted reviews). Improve lone UTF-16 surrogate diagnostics to report exact U+XXXX code points in nested JSON keys/values. Add four focused negative cases and a valid escaped surrogate-pair positive control. Local isolated Python JSON decoding checks passed; new exact-head structural/Chromium CI pending. Standalone index.html unaffected. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes historical-ledger, structural and Chromium checks including lone-surrogate diagnostics and valid surrogate pair.
+2. P0: obtain eligible approval on PR #189 and verify all required exact-head checks before ordinary protected merge.
+3. P0: verify merged main Quality, GitHub Pages published SHA and hosted smoke after release.
+4. P1: accessible preferences reset synchronized in modular source and standalone index.html; confirmation, cancellation, focus and persistence browser regressions.
+5. P1: independent numerical references and invalid-input regressions for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-LINE-SEPARATOR-DIAGNOSTIC-273
 
 **Execution ledger:** Verified dev 2dd045dc384c18b29dd091630724576bcd99c39c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical inventory and exact-head successful PR Quality #43559165151. PR #189 has zero reviews; main/Pages promotion remains unverified. Improved nested JSON U+2028/U+2029 line-separator diagnostics to include exact code points and strengthened the existing eight escaped/literal key/value regression cases. Eight isolated JSON decoding/diagnostic checks passed; full exact-head CI pending. Standalone bundle unchanged. Frozen historical 166 gaps / 95 partial unchanged.

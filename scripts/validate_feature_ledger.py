@@ -219,8 +219,11 @@ def load_ledger(path):
                         raise ValueError(
                             f"Unicode format character in feature ledger JSON string (U+{ord(char):04X})"
                         )
-                if any(0xD800 <= ord(char) <= 0xDFFF for char in current):
-                    raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
+                for char in current:
+                    if 0xD800 <= ord(char) <= 0xDFFF:
+                        raise ValueError(
+                            f"Unpaired Unicode surrogate in feature ledger JSON (U+{ord(char):04X})"
+                        )
                 # Unicode noncharacters are legal scalar values but unsuitable
                 # for portable human-readable audit identifiers and metadata.
                 for char in current:

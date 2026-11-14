@@ -91,6 +91,24 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                              {"nested": {"safe key": "safe value"}})
 
 
+    def test_nested_json_surrogate_diagnostics_and_valid_pair(self):
+        # Escaped lone UTF-16 halves are invalid in keys and values, while
+        # a valid escaped surrogate pair decodes to a single Unicode scalar.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for codepoint in (0xD800, 0xDFFF):
+                for in_key in (False, True):
+                    with self.subTest(codepoint=hex(codepoint), in_key=in_key):
+                        bad = "bad" + chr(codepoint)
+                        payload = ({"nested": {bad: 1}} if in_key
+                                   else {"nested": [bad]})
+                        path.write_text(json.dumps(payload), encoding="utf-8")
+                        with self.assertRaisesRegex(
+                                ValueError, r"Unpaired Unicode surrogate.*U[+]" + format(codepoint, "04X")):
+                            validator.load_ledger(path)
+            path.write_text('{"nested": ["\\\\ud83d\\\\ude00"]}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), {"nested": ["\\U0001f600"]})
+
     @classmethod
     def setUpClass(cls):
         cls.original = json.loads(LEDGER.read_text(encoding="utf-8"))

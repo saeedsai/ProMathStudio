@@ -200,8 +200,11 @@ def load_ledger(path):
                         raise ValueError(f"Control character in feature ledger JSON string (U+{codepoint:04X})")
                 # Unicode line/paragraph separators can create misleading
                 # rendered audit rows even though JSON allows them in strings.
-                if any(char in "\u2028\u2029" for char in current):
-                    raise ValueError("Unicode line separator in feature ledger JSON string")
+                for char in current:
+                    if char in "\u2028\u2029":
+                        raise ValueError(
+                            f"Unicode line separator in feature ledger JSON string (U+{ord(char):04X})"
+                        )
                 # Non-ASCII spacing can look like an ordinary space in exported
                 # audit metadata but compare differently across consumers.
                 for char in current:

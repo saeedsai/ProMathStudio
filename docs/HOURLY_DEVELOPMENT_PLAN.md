@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-LINE-SEPARATOR-DIAGNOSTIC-273
+
+**Execution ledger:** Verified dev 2dd045dc384c18b29dd091630724576bcd99c39c, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, historical inventory and exact-head successful PR Quality #43559165151. PR #189 has zero reviews; main/Pages promotion remains unverified. Improved nested JSON U+2028/U+2029 line-separator diagnostics to include exact code points and strengthened the existing eight escaped/literal key/value regression cases. Eight isolated JSON decoding/diagnostic checks passed; full exact-head CI pending. Standalone bundle unchanged. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality green for historical-ledger, structural and Chromium checks including eight line-separator diagnostics.
+2. P0: eligible approval on PR #189 and all required exact-head checks verified before ordinary protected merge.
+3. P0: merged main Quality green, GitHub Pages published SHA and hosted smoke verified.
+4. P1: accessible preferences reset synchronized between modular source and standalone index.html; confirm/cancel/focus/persistence browser regressions.
+5. P1: independent numerical reference and invalid-input tests for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-NONCHARACTER-DIAGNOSTIC-272
 
 **Execution ledger:** Inspected exact dev 99dcdb3084e229faf5806ba45fe617cd3e4adaf4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical inventory and successful exact-head Quality #43549423087. PR #189 remains open with zero submitted reviews; no main/Pages release verified. Improve nested audit JSON noncharacter errors with literal U+XXXX code points, add six escaped/literal negative cases for U+FDD0, U+FFFE and U+10FFFF plus printable positive control. Six isolated JSON decode/regex checks passed; full new exact-head Python/structural/Chromium CI pending. Historical 166 gaps / 95 partial remain frozen.

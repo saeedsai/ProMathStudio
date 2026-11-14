@@ -1,3 +1,4 @@
+- 2026-11-14 (dev, CI pending): Include exact U+2028/U+2029 in nested audit JSON line-separator errors; strengthen eight escaped/literal key/value regression cases. Frozen 166 gaps / 95 partial unchanged; no release claimed.
 - 2026-11-14 (dev, CI pending): Identify exact U+XXXX code point in nested audit JSON Unicode noncharacter diagnostics; six escaped/literal negative regressions and printable positive control. Frozen 166 gaps / 95 partial unchanged; no release claimed.
 - 2026-11-14 (dev, CI pending): Fix format-control regression diagnostic regex to match literal U+XXXX code points; preserve negative and positive assertions. No release claimed.
 - 2026-11-14 (dev, CI pending): Include U+XXXX in nested audit JSON Unicode format-control diagnostics; add six escaped/literal regression cases and safe positive control. Frozen 166 gaps / 95 partial unchanged; no release claimed.

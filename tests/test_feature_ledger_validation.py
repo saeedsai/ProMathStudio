@@ -83,7 +83,8 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                                    if key_position else
                                    '{"nested": ["bad' + separator + 'value"]}')
                         path.write_text(payload, encoding="utf-8")
-                        with self.assertRaisesRegex(ValueError, "Unicode line separator"):
+                        expected = "U+2028" if "2028" in repr(separator) or "\u2028" in separator else "U+2029"
+                        with self.assertRaisesRegex(ValueError, r"Unicode line separator.*U[+]" + expected[2:]):
                             validator.load_ledger(path)
             path.write_text('{"nested": {"safe key": "safe value"}}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path),

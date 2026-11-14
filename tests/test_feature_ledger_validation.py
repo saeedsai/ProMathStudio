@@ -425,6 +425,23 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                              {"meta": "visible text", "nested": {"café": 1}})
         self.assertEqual(validator.validate(self.original)["gap"], 166)
 
+    def test_format_control_diagnostic_identifies_codepoint(self):
+        # Include the actual code point for actionable nested audit cleanup.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            for codepoint in (0x200B, 0x202E, 0x2060):
+                for escaped in (True, False):
+                    with self.subTest(codepoint=codepoint, escaped=escaped):
+                        payload = {"nested": ["safe" + chr(codepoint) + "text"]}
+                        path.write_text(json.dumps(payload, ensure_ascii=escaped),
+                                        encoding="utf-8")
+                        with self.assertRaisesRegex(
+                                ValueError, rf"Unicode format character.*U\\+{codepoint:04X}"):
+                            validator.load_ledger(path)
+            path.write_text('{"nested":["safe visible text"]}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path),
+                             {"nested": ["safe visible text"]})
+
     def test_nested_unicode_validation_is_iterative(self):
         # Decoder-accepted nesting must not overflow the post-parse validator.
         with tempfile.TemporaryDirectory() as directory:

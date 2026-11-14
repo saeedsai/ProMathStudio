@@ -211,8 +211,11 @@ def load_ledger(path):
                         )
                 # Format controls (including bidi overrides and zero-width
                 # joiners) can visually spoof arbitrary nested audit metadata.
-                if any(unicodedata.category(char) == "Cf" for char in current):
-                    raise ValueError("Unicode format character in feature ledger JSON string")
+                for char in current:
+                    if unicodedata.category(char) == "Cf":
+                        raise ValueError(
+                            f"Unicode format character in feature ledger JSON string (U+{ord(char):04X})"
+                        )
                 if any(0xD800 <= ord(char) <= 0xDFFF for char in current):
                     raise ValueError("Unpaired Unicode surrogate in feature ledger JSON")
                 # Unicode noncharacters are legal scalar values but unsuitable

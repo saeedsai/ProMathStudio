@@ -1,3 +1,14 @@
+## 2026-11-14 — AUDIT-FORMAT-CODEPOINT-270
+
+**Execution ledger:** Verified dev 1bbd8465b7a2c68befcfa1f468102a134064d0a9, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, successful exact-head Quality #43537736872, and open PR #189 without submitted reviews. Improve nested JSON format-control rejection diagnostics to identify the exact Unicode U+XXXX code point; add six escaped/literal negative regressions for U+200B, U+202E, U+2060 and one valid positive control. This audit-only change does not touch the standalone application. Frozen historical 166 gaps / 95 partial remain unchanged. New exact-head CI pending; no merge or Pages claim.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head historical-ledger, structural and Chromium Quality green, including six format-control diagnostics.
+2. P0: obtain eligible approval on PR #189 and verify all required checks before ordinary protected merge.
+3. P0: verify main Quality, GitHub Pages published SHA and hosted smoke after promotion.
+4. P1: implement accessible preferences reset in synchronized modular source and standalone index.html; test confirmation, cancellation, focus and persistence.
+5. P1: independent reference and invalid-input numerical regressions for repeated roots, nonlinear fits and unstable filters.
+
 ## 2026-11-14 — AUDIT-NFC-CI-REPAIR-269
 
 **Execution ledger:** Inspected exact dev bfd14609c3d7be3a40f2aacfca9aed9125a06342, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md and frozen inventory. Quality #43530946098 failed structural tests (542 tests, two failures and one error): key-position cases incorrectly expected value diagnostics, and an older test accepted a non-NFC nested value. Correct both assertions without weakening validation; clarify the validator's value-specific error message. CI for this commit pending. PR #189 has zero reviews; no merge or Pages claim. Historical inventory remains 166 gaps / 95 partial.

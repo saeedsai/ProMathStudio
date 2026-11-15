@@ -85,6 +85,23 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_bytes(bytes([0xEF, 0xBB, 0xBF]) + b'{"nested": ["valid"]}')
             self.assertEqual(validator.load_ledger(path), {"nested": ["valid"]})
 
+    def test_invalid_utf8_after_bom_uses_original_byte_offset(self):
+        # utf-8-sig reports decode offsets after stripping the three-byte BOM.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for bom in (b"", b"\\xef\\xbb\\xbf"):
+                with self.subTest(bom=bool(bom)):
+                    prefix = bom + '{"title":"café",\\r\\n"items":"'.encode("utf-8")
+                    path.write_bytes(prefix + b"\\xff" + b'"}')
+                    with self.assertRaises(ValueError) as raised:
+                        validator.load_ledger(path)
+                    message = str(raised.exception)
+                    self.assertIn(f"byte offset {len(prefix)}", message)
+                    self.assertIn("offending bytes: ff", message)
+                    self.assertIn("line 2, byte column 10", message)
+            path.write_bytes(b"\\xef\\xbb\\xbf" + b'{"items":[]}')
+            self.assertEqual(validator.load_ledger(path), {"items": []})
+
     def test_invalid_utf8_diagnostics_include_decoder_reason(self):
         # Invalid leading bytes and truncated multibyte sequences need
         # distinct actionable diagnostics while retaining exact byte offsets.

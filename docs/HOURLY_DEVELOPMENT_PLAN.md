@@ -1,3 +1,5 @@
+**Fixture follow-up:** Correct Python literal escaping so the BOM bytes and newline are real input bytes rather than backslash text; exact-head CI pending.
+
 ## 2026-11-15 — AUDIT-JSON-SYNTAX-BYTE-COORDINATES-287
 
 **Execution ledger:** Inspected exact dev 0b5c63c25dbb4ed17bce7582ea04c3c8ba290770, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical inventory, passing exact-head Quality #43674713171 and open PR #189 without submitted reviews. Improve malformed JSON syntax errors with absolute UTF-8 byte offset and byte column while preserving decoded character line/column. Regression covers multibyte text, optional BOM, a second-line syntax error and a valid Unicode control. Standalone bundle unaffected. Local full repository/browser checks unavailable; new exact-head CI pending. No release; frozen 166 gaps / 95 partial unchanged.

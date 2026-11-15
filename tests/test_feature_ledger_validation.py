@@ -37,7 +37,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path)["items"], [])
 
     def test_malformed_json_byte_columns_with_cr_line_endings(self):
-        # JSONDecodeError counts bare CR and CRLF as newlines, not only LF.
+        # Raw byte columns should restart after CR, CRLF and LF, even though\n        # Python's JSONDecodeError does not count bare CR in its line number.
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "malformed.json"
             for separator in (b"\r", b"\r\n", b"\n"):

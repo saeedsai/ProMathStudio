@@ -1,4 +1,4 @@
-**Fixture follow-up:** Correct CR/LF regression literals to encode actual line-ending bytes; exact-head Quality pending.
+**Isolated verification:** Python JSON decoding with CR, CRLF and LF confirms byte column 10 for all three, offsets 27/28/27 respectively; bare CR retains Python's character line 1. Full exact-head Quality pending.\n\n**Fixture follow-up:** Correct CR/LF regression literals to encode actual line-ending bytes; exact-head Quality pending.
 
 ## 2026-11-15 — AUDIT-CR-LINE-ENDINGS-288
 

@@ -1,3 +1,5 @@
+**Fixture follow-up:** Correct CR/LF regression literals to encode actual line-ending bytes; exact-head Quality pending.
+
 ## 2026-11-15 — AUDIT-CR-LINE-ENDINGS-288
 
 **Execution ledger:** Inspected exact dev bc77f053bc75b7ba0ccff963b5ab9940acb22006, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory and successful exact-head push/PR Quality #43702075024/#43702079561. PR #189 has zero reviews. Correct malformed JSON byte-column diagnostics for bare CR and CRLF (previously split only LF); add three line-ending regression cases plus valid JSON control. Standalone bundle unaffected. New exact-head CI pending; no main/Pages release. Frozen 166 gaps / 95 partial unchanged.

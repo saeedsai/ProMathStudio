@@ -1,3 +1,4 @@
+- 2026-11-15 (dev, CI pending): Correct CR/LF regression fixture to use real line-ending bytes, not backslash text.
 - 2026-11-15 (dev, CI pending): Align malformed JSON byte-column diagnostics with CR, CRLF and LF line endings; add focused negative cases and valid control. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.\n- 2026-11-15 (dev, CI pending): Correct malformed JSON coordinate regression fixture to use real UTF-8 BOM and newline bytes; retain positive Unicode control.
 - 2026-11-15 (dev, CI pending): Report UTF-8 byte offset/column for malformed JSON syntax, including multibyte text and initial BOM; preserve character coordinates, add negative and positive regressions. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.
 - 2026-11-15 (dev, CI pending): Correct byte-coordinate regression fixture to write an actual newline and invalid 0xFF byte, preserving line-2/byte-column-14 assertions; no release.

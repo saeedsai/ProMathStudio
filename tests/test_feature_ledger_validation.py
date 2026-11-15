@@ -40,7 +40,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         # JSONDecodeError counts bare CR and CRLF as newlines, not only LF.
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "malformed.json"
-            for separator in (b"\\r", b"\\r\\n", b"\\n"):
+            for separator in (b"\r", b"\r\n", b"\n"):
                 with self.subTest(separator=separator):
                     prefix = '{"title":"café",'.encode("utf-8") + separator + b'"items": '
                     path.write_bytes(prefix + b"}")

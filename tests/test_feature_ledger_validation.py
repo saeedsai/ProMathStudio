@@ -50,6 +50,21 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_text('{"nested": "café"}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path), {"nested": "café"})
 
+    def test_invalid_utf8_reports_multiline_byte_coordinates(self):
+        # Columns count raw bytes even after a valid multibyte character.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            prefix = '{"first": "café",\\n  "second": "'.encode("utf-8")
+            path.write_bytes(prefix + b"\\xff" + b'"}')
+            with self.assertRaises(ValueError) as error:
+                validator.load_ledger(path)
+            message = str(error.exception)
+            self.assertIn(f"byte offset {len(prefix)}", message)
+            self.assertIn("offending bytes: ff", message)
+            self.assertIn("line 2, byte column 14", message)
+            path.write_bytes(b'{"first": "valid"}')
+            self.assertEqual(validator.load_ledger(path), {"first": "valid"})
+
     def test_decimal_exponents_beyond_decoder_limit_fail_cleanly(self):
         # JSON accepts large exponent digit sequences; Decimal can reject
         # them even when float() silently underflows to zero.

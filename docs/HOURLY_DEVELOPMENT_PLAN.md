@@ -1,3 +1,14 @@
+## 2026-11-15 — AUDIT-UTF8-BYTE-COORDINATES-286
+
+**Execution ledger:** Verified dev 1d3c5dfa8b14953ae06467307e57e9b302678fc0, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, passing exact-head Quality #43645896143, and PR #189 with zero submitted reviews. Add byte-based line/column context to malformed UTF-8 audit import diagnostics while retaining byte offset, decoder reason and offending-byte hex; regression covers a multibyte character on the preceding line, malformed byte on line 2 and valid JSON. Full new-head Quality pending; no main/Pages release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Quality including byte-coordinate regression, historical ledger, structural, Python and Chromium checks.
+2. P0: obtain eligible PR #189 review and verify required exact-head checks/protections before merge.
+3. P0: promote only via ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages published SHA and hosted smoke against promoted main.
+5. P1: accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-14 — AUDIT-UTF8-HEX-CI-REPAIR-282
 
 **Execution ledger:** Exact dev 3eae99d45629bbb71f21183132d15d70de88f9a1; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. PR #189 has no submitted reviews. Quality #43640573911 failed 1/550 structural tests: positive Unicode escape decoded to café but fixture expected literal backslash-u. Fix positive expectation, add malformed UTF-8 offending-byte hex diagnostics and focused leading/truncated byte regressions. Isolated fixture checks only; exact-head full Quality pending. No main/Pages release. Frozen 166 gaps / 95 partial unchanged.

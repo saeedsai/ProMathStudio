@@ -36,6 +36,22 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_text('{"title":"café","items":[]}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path)["items"], [])
 
+    def test_malformed_json_byte_columns_with_cr_line_endings(self):
+        # JSONDecodeError counts bare CR and CRLF as newlines, not only LF.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "malformed.json"
+            for separator in (b"\\r", b"\\r\\n", b"\\n"):
+                with self.subTest(separator=separator):
+                    prefix = '{"title":"café",'.encode("utf-8") + separator + b'"items": '
+                    path.write_bytes(prefix + b"}")
+                    with self.assertRaises(ValueError) as raised:
+                        validator.load_ledger(path)
+                    message = str(raised.exception)
+                    self.assertIn(f"byte offset {len(prefix)}", message)
+                    self.assertIn("byte column 10", message)
+            path.write_bytes(b'{"items": []}')
+            self.assertEqual(validator.load_ledger(path), {"items": []})
+
     def test_invalid_utf8_reports_byte_offset_and_accepts_initial_bom(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "export.json"

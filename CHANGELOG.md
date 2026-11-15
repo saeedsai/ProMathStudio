@@ -1,3 +1,4 @@
+- 2026-11-15 (dev, CI pending): Report UTF-8 byte offset/column for malformed JSON syntax, including multibyte text and initial BOM; preserve character coordinates, add negative and positive regressions. Frozen 166 gaps / 95 partial unchanged; no main/Pages release.
 - 2026-11-15 (dev, CI pending): Correct byte-coordinate regression fixture to write an actual newline and invalid 0xFF byte, preserving line-2/byte-column-14 assertions; no release.
 - 2026-11-15 (dev, CI pending): Add byte-based line and column diagnostics for malformed UTF-8 historical JSON imports; regression covers multibyte UTF-8 before a later-line invalid byte and a valid control. Frozen 166 gaps / 95 partial unchanged; no release.
 - 2026-11-14 (dev, CI pending): Repair UTF-8 positive Unicode assertion from failed Quality #43640573911; include offending raw bytes in invalid UTF-8 diagnostics with leading/truncated regressions. Frozen 166 gaps / 95 partial unchanged; no release.

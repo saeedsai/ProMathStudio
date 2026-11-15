@@ -18,6 +18,24 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_malformed_json_reports_utf8_byte_coordinates(self):
+        # A multibyte character before a syntax error changes byte coordinates.
+        # An initial UTF-8 BOM must count toward the absolute byte offset.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "malformed.json"
+            for bom in (b"", b"\\xef\\xbb\\xbf"):
+                with self.subTest(bom=bool(bom)):
+                    prefix = bom + '{"title":"café",\\n"items": '.encode("utf-8")
+                    path.write_bytes(prefix + b"}")
+                    with self.assertRaises(ValueError) as raised:
+                        validator.load_ledger(path)
+                    message = str(raised.exception)
+                    self.assertIn("Malformed feature ledger JSON at line 2, column 10", message)
+                    self.assertIn(f"byte offset {len(prefix)}", message)
+                    self.assertIn("byte column 10", message)
+            path.write_text('{"title":"café","items":[]}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path)["items"], [])
+
     def test_invalid_utf8_reports_byte_offset_and_accepts_initial_bom(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "export.json"

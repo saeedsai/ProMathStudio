@@ -1,3 +1,14 @@
+## 2026-11-15 — AUDIT-JSON-SYNTAX-BYTE-COORDINATES-287
+
+**Execution ledger:** Inspected exact dev 0b5c63c25dbb4ed17bce7582ea04c3c8ba290770, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen historical inventory, passing exact-head Quality #43674713171 and open PR #189 without submitted reviews. Improve malformed JSON syntax errors with absolute UTF-8 byte offset and byte column while preserving decoded character line/column. Regression covers multibyte text, optional BOM, a second-line syntax error and a valid Unicode control. Standalone bundle unaffected. Local full repository/browser checks unavailable; new exact-head CI pending. No release; frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes historical ledger, syntax-byte-coordinate regression, structural/Python and Chromium checks.
+2. P0: obtain eligible PR #189 review and verify required exact-head checks and protections before any merge.
+3. P0: ordinary dev-to-main PR promotion only after all gates, then verify main Quality.
+4. P0: verify Pages published SHA and hosted smoke against promoted main.
+5. P1: accessible preferences reset with synchronized modular/standalone source and confirm/cancel/focus/persistence browser tests.
+
 ## 2026-11-15 — AUDIT-UTF8-BYTE-COORDINATES-286
 
 **Execution ledger:** Verified dev 1d3c5dfa8b14953ae06467307e57e9b302678fc0, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, passing exact-head Quality #43645896143, and PR #189 with zero submitted reviews. Add byte-based line/column context to malformed UTF-8 audit import diagnostics while retaining byte offset, decoder reason and offending-byte hex; regression covers a multibyte character on the preceding line, malformed byte on line 2 and valid JSON. Fixture correction: use actual newline and invalid 0xFF byte, not literal escape characters. Full new-head Quality pending; no main/Pages release. Historical 166 gaps / 95 partial unchanged.

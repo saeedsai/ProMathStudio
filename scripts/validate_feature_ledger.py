@@ -277,7 +277,15 @@ def load_ledger(path):
                           parse_float=finite_float,
                           parse_int=safe_integer)
     except json.JSONDecodeError as exc:
-        raise ValueError(f"Malformed feature ledger JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}") from exc
+        # JSONDecodeError.pos counts decoded characters, not UTF-8 bytes.
+        # Account for multibyte text and an optional consumed UTF-8 BOM.
+        byte_offset = len(payload) - len(exc.doc[exc.pos:].encode("utf-8"))
+        byte_prefix = payload[:byte_offset]
+        byte_column = len(byte_prefix.rsplit(b"\n", 1)[-1]) + 1
+        raise ValueError(
+            f"Malformed feature ledger JSON at line {exc.lineno}, column {exc.colno} "
+            f"(byte offset {byte_offset}, byte column {byte_column}): {exc.msg}"
+        ) from exc
     except UnicodeDecodeError as exc:
         # Report byte-based source coordinates, not character columns: invalid
         # UTF-8 cannot be decoded reliably to count Unicode characters.

@@ -1,6 +1,6 @@
 ## 2026-11-15 — AUDIT-UTF8-BYTE-COORDINATES-286
 
-**Execution ledger:** Verified dev 1d3c5dfa8b14953ae06467307e57e9b302678fc0, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, passing exact-head Quality #43645896143, and PR #189 with zero submitted reviews. Add byte-based line/column context to malformed UTF-8 audit import diagnostics while retaining byte offset, decoder reason and offending-byte hex; regression covers a multibyte character on the preceding line, malformed byte on line 2 and valid JSON. Full new-head Quality pending; no main/Pages release. Historical 166 gaps / 95 partial unchanged.
+**Execution ledger:** Verified dev 1d3c5dfa8b14953ae06467307e57e9b302678fc0, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, passing exact-head Quality #43645896143, and PR #189 with zero submitted reviews. Add byte-based line/column context to malformed UTF-8 audit import diagnostics while retaining byte offset, decoder reason and offending-byte hex; regression covers a multibyte character on the preceding line, malformed byte on line 2 and valid JSON. Fixture correction: use actual newline and invalid 0xFF byte, not literal escape characters. Full new-head Quality pending; no main/Pages release. Historical 166 gaps / 95 partial unchanged.
 
 **NEXT FIVE (priority / acceptance tests):**
 1. P0: verify new exact-head Quality including byte-coordinate regression, historical ledger, structural, Python and Chromium checks.

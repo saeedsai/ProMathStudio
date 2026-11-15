@@ -54,8 +54,8 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         # Columns count raw bytes even after a valid multibyte character.
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "export.json"
-            prefix = '{"first": "café",\\n  "second": "'.encode("utf-8")
-            path.write_bytes(prefix + b"\\xff" + b'"}')
+            prefix = '{"first": "café",\n  "second": "'.encode("utf-8")
+            path.write_bytes(prefix + b"\xff" + b'"}')
             with self.assertRaises(ValueError) as error:
                 validator.load_ledger(path)
             message = str(error.exception)

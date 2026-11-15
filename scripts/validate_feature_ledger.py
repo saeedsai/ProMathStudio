@@ -292,8 +292,9 @@ def load_ledger(path):
         # Report byte-based source coordinates, not character columns: invalid
         # UTF-8 cannot be decoded reliably to count Unicode characters.
         prefix = exc.object[:exc.start]
-        line = prefix.count(b"\n") + 1
-        byte_column = len(prefix.rsplit(b"\n", 1)[-1]) + 1
+        # Treat CR, LF and CRLF as one physical line break each.
+        line = prefix.count(b"\n") + prefix.count(b"\r") - prefix.count(b"\r\n") + 1
+        byte_column = len(prefix[max(prefix.rfind(b"\n"), prefix.rfind(b"\r")) + 1:]) + 1
         raise ValueError(
             f"Feature ledger JSON must be valid UTF-8 at byte offset {exc.start}: {exc.reason}; offending bytes: {exc.object[exc.start:exc.end].hex()}; line {line}, byte column {byte_column}"
         ) from exc

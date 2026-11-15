@@ -102,6 +102,23 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_bytes(b'{"first": "valid"}')
             self.assertEqual(validator.load_ledger(path), {"first": "valid"})
 
+    def test_invalid_utf8_coordinates_for_cr_crlf_and_lf(self):
+        # Physical byte lines should count bare CR and CRLF exactly once.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for separator in (b"\r", b"\r\n", b"\n"):
+                with self.subTest(separator=separator):
+                    prefix = '{"first":"café",'.encode("utf-8") + separator + b'"next": "'
+                    path.write_bytes(prefix + b"\xff" + b'"}')
+                    with self.assertRaises(ValueError) as raised:
+                        validator.load_ledger(path)
+                    message = str(raised.exception)
+                    self.assertIn(f"byte offset {len(prefix)}", message)
+                    self.assertIn("line 2, byte column 10", message)
+                    self.assertIn("offending bytes: ff", message)
+            path.write_bytes(b'{"next": "valid"}')
+            self.assertEqual(validator.load_ledger(path), {"next": "valid"})
+
     def test_decimal_exponents_beyond_decoder_limit_fail_cleanly(self):
         # JSON accepts large exponent digit sequences; Decimal can reject
         # them even when float() silently underflows to zero.

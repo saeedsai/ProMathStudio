@@ -1,3 +1,14 @@
+## 2026-11-15 — AUDIT-INVALID-UTF8-CR-COORDINATES-290
+
+**Execution ledger:** Verified dev 6c3516631c105a82bc7046ecf1998ee9aca8fe4d and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; read AGENTS.md, frozen inventory, exact-head successful PR Quality #43727773583, and PR #189 with zero submitted reviews. Correct invalid UTF-8 diagnostic physical line/byte-column counting for bare CR and CRLF, retaining LF and multibyte behavior. Add focused CR/CRLF/LF negative cases and valid control. Standalone application unchanged. New exact-head CI pending; no release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes ledger validator, invalid UTF-8 CR/CRLF/LF regression, structural/Python and Chromium checks.
+2. P0: obtain eligible PR #189 approval and verify required checks/protections.
+3. P0: ordinary protected dev-to-main PR merge only when approved and green; verify main Quality.
+4. P0: verify Pages publication SHA matches promoted main and hosted smoke passes.
+5. P1: accessible preferences reset with synchronized modular/standalone source and confirm/cancel/focus/persistence browser tests.
+
 ## 2026-11-15 — AUDIT-CR-CI-REPAIR-289
 
 **Execution ledger:** Inspected dev ce441d5df34ec860051eb4ddfa8b750ddb315fd6 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, PR #189 (zero reviews), and failed exact-head PR Quality #43711328544. Root cause: literal backslash-n in Python comment swallowed byte_column assignment, raising UnboundLocalError. Restore real comment line breaks in validator and regression; strengthen CR/CRLF/LF assertions for malformed-JSON diagnostics and character line numbering. Isolated reasoning only; full exact-head Quality, Chromium and release pending. Frozen 166 gaps / 95 partial unchanged.

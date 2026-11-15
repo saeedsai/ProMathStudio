@@ -281,7 +281,9 @@ def load_ledger(path):
         # Account for multibyte text and an optional consumed UTF-8 BOM.
         byte_offset = len(payload) - len(exc.doc[exc.pos:].encode("utf-8"))
         byte_prefix = payload[:byte_offset]
-        # Count byte columns from the latest CR or LF; Python's JSONDecodeError\n        # character-line accounting does not count bare CR as a new line.\n        byte_column = len(byte_prefix[max(byte_prefix.rfind(b"\n"), byte_prefix.rfind(b"\r")) + 1:]) + 1
+        # Count byte columns from the latest CR or LF; Python's JSONDecodeError
+        # character-line accounting does not count bare CR as a new line.
+        byte_column = len(byte_prefix[max(byte_prefix.rfind(b"\n"), byte_prefix.rfind(b"\r")) + 1:]) + 1
         raise ValueError(
             f"Malformed feature ledger JSON at line {exc.lineno}, column {exc.colno} "
             f"(byte offset {byte_offset}, byte column {byte_column}): {exc.msg}"

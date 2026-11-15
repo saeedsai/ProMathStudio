@@ -1,3 +1,14 @@
+## 2026-11-15 — AUDIT-CR-CI-REPAIR-289
+
+**Execution ledger:** Inspected dev ce441d5df34ec860051eb4ddfa8b750ddb315fd6 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen inventory, PR #189 (zero reviews), and failed exact-head PR Quality #43711328544. Root cause: literal backslash-n in Python comment swallowed byte_column assignment, raising UnboundLocalError. Restore real comment line breaks in validator and regression; strengthen CR/CRLF/LF assertions for malformed-JSON diagnostics and character line numbering. Isolated reasoning only; full exact-head Quality, Chromium and release pending. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: corrected exact-head Quality passes ledger validator, CR/CRLF/LF regressions, structural/Python and Chromium checks.
+2. P0: obtain eligible approval for PR #189 and verify exact-head required checks and branch protection.
+3. P0: ordinary dev-to-main PR merge only when approved and green; verify main Quality.
+4. P0: verify Pages publication points to promoted main SHA and hosted smoke tests pass.
+5. P1: accessible preferences reset with synchronized modular and standalone source plus confirm/cancel/focus/persistence browser tests.
+
 **Isolated verification:** Python JSON decoding with CR, CRLF and LF confirms byte column 10 for all three, offsets 27/28/27 respectively; bare CR retains Python's character line 1. Full exact-head Quality pending.\n\n**Fixture follow-up:** Correct CR/LF regression literals to encode actual line-ending bytes; exact-head Quality pending.
 
 ## 2026-11-15 — AUDIT-CR-LINE-ENDINGS-288

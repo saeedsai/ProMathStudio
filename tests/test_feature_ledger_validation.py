@@ -37,7 +37,8 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(validator.load_ledger(path)["items"], [])
 
     def test_malformed_json_byte_columns_with_cr_line_endings(self):
-        # Raw byte columns should restart after CR, CRLF and LF, even though\n        # Python's JSONDecodeError does not count bare CR in its line number.
+        # Raw byte columns should restart after CR, CRLF and LF, even though
+        # Python's JSONDecodeError does not count bare CR in its line number.
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "malformed.json"
             for separator in (b"\r", b"\r\n", b"\n"):
@@ -49,6 +50,8 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                     message = str(raised.exception)
                     self.assertIn(f"byte offset {len(prefix)}", message)
                     self.assertIn("byte column 10", message)
+                    self.assertIn("Malformed feature ledger JSON", message)
+                    self.assertIn("line 1" if separator == b"\r" else "line 2", message)
             path.write_bytes(b'{"items": []}')
             self.assertEqual(validator.load_ledger(path), {"items": []})
 

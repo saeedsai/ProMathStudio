@@ -284,9 +284,11 @@ def load_ledger(path):
         # Count byte columns from the latest CR or LF; Python's JSONDecodeError
         # character-line accounting does not count bare CR as a new line.
         byte_column = len(byte_prefix[max(byte_prefix.rfind(b"\n"), byte_prefix.rfind(b"\r")) + 1:]) + 1
+        # Python counts LF but not bare CR; report the physical source line too.
+        physical_line = byte_prefix.count(b"\n") + byte_prefix.count(b"\r") - byte_prefix.count(b"\r\n") + 1
         raise ValueError(
             f"Malformed feature ledger JSON at line {exc.lineno}, column {exc.colno} "
-            f"(byte offset {byte_offset}, byte column {byte_column}): {exc.msg}"
+            f"(byte offset {byte_offset}, byte column {byte_column}, physical line {physical_line}): {exc.msg}"
         ) from exc
     except UnicodeDecodeError as exc:
         # Report byte-based source coordinates, not character columns: invalid

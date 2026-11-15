@@ -1,3 +1,14 @@
+## 2026-11-15 — AUDIT-MALFORMED-PHYSICAL-LINE-291
+
+**Execution ledger:** Inspected dev 478cf9ee76c8aae0e9bc20a37aaf9f87cf37dbfa, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, AGENTS.md, frozen historical inventory, successful exact-head Quality #43733389731, and PR #189 (zero reviews). Add explicit physical source line to malformed-JSON diagnostics so bare CR, CRLF and LF have consistent human-readable line positions without changing Python JSONDecodeError character-line semantics. Add focused regression and valid JSON control; standalone bundle unaffected. New exact-head Quality pending. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes malformed JSON CR/CRLF/LF physical-line regression, structural/Python and Chromium checks.
+2. P0: obtain eligible review for PR #189 and verify required branch protections/checks.
+3. P0: promote only via ordinary protected dev-to-main PR; verify main Quality.
+4. P0: verify Pages published main SHA and hosted critical-path smoke tests.
+5. P1: accessible preferences reset with synchronized modular/standalone code and confirmation, cancellation, keyboard focus and persistence browser regressions.
+
 ## 2026-11-15 — AUDIT-INVALID-UTF8-CR-COORDINATES-290
 
 **Execution ledger:** Verified dev 6c3516631c105a82bc7046ecf1998ee9aca8fe4d and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; read AGENTS.md, frozen inventory, exact-head successful PR Quality #43727773583, and PR #189 with zero submitted reviews. Correct invalid UTF-8 diagnostic physical line/byte-column counting for bare CR and CRLF, retaining LF and multibyte behavior. Add focused CR/CRLF/LF negative cases and valid control. Standalone application unchanged. New exact-head CI pending; no release. Historical 166 gaps / 95 partial unchanged.

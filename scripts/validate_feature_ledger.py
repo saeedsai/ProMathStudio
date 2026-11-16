@@ -6,6 +6,7 @@ This checks historical audit data integrity, not current implementation status.
 """
 import json
 import math
+import stat
 import unicodedata
 from decimal import Decimal, InvalidOperation
 from collections import Counter
@@ -267,7 +268,12 @@ def load_ledger(path):
     try:
         # UTF-8 BOM is emitted by some spreadsheet exports; accept it only at the start.
         # Cap untrusted audit imports before decoding to avoid unbounded memory use.
-        with Path(path).open("rb") as source:
+        # Reject FIFOs/devices before opening: an untrusted path could block
+        # indefinitely or read from a non-file stream during validation.
+        source_path = Path(path)
+        if not stat.S_ISREG(source_path.stat().st_mode):
+            raise ValueError("Cannot read feature ledger JSON: not a regular file")
+        with source_path.open("rb") as source:
             payload = source.read(8 * 1024 * 1024 + 1)
         if len(payload) > 8 * 1024 * 1024:
             raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")

@@ -1,3 +1,4 @@
+- 2026-11-16 (dev, exact-head CI pending): Reject non-regular audit JSON input paths before opening to avoid blocking on FIFOs or reading devices; add bounded subprocess FIFO regression and regular-file control. Frozen 166 gaps / 95 partial unchanged; no release.
 - 2026-11-16 (dev, exact-head CI pending): Correct audit diagnostic regression to assert raw-control absence and escaped key representation for all key classes.
 - 2026-11-16 (dev, exact-head CI pending): Escape duplicate/non-NFC audit JSON keys in parser diagnostics to prevent terminal-control and newline log injection; add focused negative and valid-key regression. Historical 166 gaps / 95 partial unchanged; no release.
 - 2026-11-15 (dev, exact-head CI pending): Correct invalid UTF-8 raw byte offsets when a leading BOM is stripped by utf-8-sig; add BOM/non-BOM CRLF and multibyte regression with valid control. Frozen 166 gaps / 95 partial unchanged; no release.

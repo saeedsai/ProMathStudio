@@ -2,6 +2,7 @@
 import copy
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -568,6 +569,25 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 validator.load_ledger(missing)
             with self.assertRaisesRegex(ValueError, "Cannot read feature ledger JSON"):
                 validator.load_ledger(Path(directory))
+
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "POSIX FIFO support required")
+    def test_special_file_export_rejected_without_blocking(self):
+        # Opening a FIFO for reading without a writer would hang indefinitely.
+        # The validator must reject it before attempting to open the stream.
+        with tempfile.TemporaryDirectory() as directory:
+            fifo = Path(directory) / "untrusted.json"
+            os.mkfifo(fifo)
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), str(fifo)],
+                capture_output=True, text=True, check=False, timeout=5,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(result.stdout, "")
+            self.assertIn("Cannot read feature ledger JSON: not a regular file", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+            regular = Path(directory) / "regular.json"
+            regular.write_text('{"nested":true}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(regular), {"nested": True})
 
     def test_invalid_utf8_is_reported_as_a_validation_error(self):
         # Strict UTF-8 input should give an actionable audit diagnostic.

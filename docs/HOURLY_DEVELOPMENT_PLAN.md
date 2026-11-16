@@ -1,3 +1,15 @@
+## 2026-11-16 — AUDIT-REGULAR-FILE-294
+
+**Execution ledger:** Verified dev `76b457a4b4528018969e80d20ed249da132575d2`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen historical inventory, successful exact-head Quality #43807889525 and open PR #189 with zero submitted reviews. Harden audit JSON import to reject non-regular paths before opening: FIFOs can block forever awaiting a writer, while device paths are not stable file exports. Add POSIX FIFO subprocess timeout regression, error-message assertions and a regular-file control. Isolated `stat.S_ISREG` reproduction passed; full new-head Quality pending. No application bundle change; frozen 166 gaps / 95 partial unchanged; no release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes FIFO import regression, historical ledger, Python, structural and Chromium suites.
+2. P0: obtain eligible PR #189 approval and verify exact-head checks and protections.
+3. P0: merge only via ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages publication SHA equals promoted main and hosted critical-path smoke tests pass.
+5. P1: implement accessible preferences reset with synchronized modular/standalone source and confirmation, cancellation, keyboard focus and persistence regressions.
+
+
 **Fixture follow-up (2026-11-16):** Correct diagnostic regression to assert no raw ESC/LF and compare the decoded key's Python representation for all three cases, including printable combining Unicode. New exact-head CI pending.
 
 ## 2026-11-16 — AUDIT-KEY-DIAGNOSTIC-293

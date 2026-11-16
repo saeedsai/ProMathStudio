@@ -1254,6 +1254,40 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(malformed.stdout, "")
             self.assertIn("Malformed feature ledger JSON", malformed.stderr)
 
+    def test_cli_existing_status_scopes_summary_is_validated_and_opt_in(self):
+        frozen = json.loads(LEDGER.read_text(encoding="utf-8"))
+        expected = {}
+        for item in frozen["items"]:
+            if item["kind"] == "existing":
+                expected.setdefault(item["scope"], {"bounded_complete": 0, "partial": 0})
+                key = "bounded_complete" if item["status"] == "bounded-complete" else "partial"
+                expected[item["scope"]][key] += 1
+        command = [sys.executable, str(SCRIPT)]
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(frozen), encoding="utf-8")
+            result = subprocess.run(command + ["--json-summary", "--include-existing-status-scopes",
+                                               str(export)], capture_output=True, text=True, timeout=10)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            summary = json.loads(result.stdout)
+            self.assertEqual(summary["existing_status_scopes"], dict(sorted(expected.items())))
+            self.assertEqual(sum(row["bounded_complete"] for row in summary["existing_status_scopes"].values()), 63)
+            self.assertEqual(sum(row["partial"] for row in summary["existing_status_scopes"].values()), 95)
+            self.assertEqual(set(summary), {"existing", "gaps", "existing_status_scopes"})
+            default = subprocess.run(command + ["--json-summary", str(export)],
+                                     capture_output=True, text=True, timeout=10)
+            self.assertEqual(set(json.loads(default.stdout)), {"existing", "gaps"})
+            invalid = subprocess.run(command + ["--include-existing-status-scopes", str(export)],
+                                     capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertIn("--include-existing-status-scopes requires --json-summary", invalid.stderr)
+            export.write_text('{"items": [}', encoding="utf-8")
+            malformed = subprocess.run(command + ["--json-summary", "--include-existing-status-scopes",
+                                                  str(export)], capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(malformed.returncode, 0)
+            self.assertEqual(malformed.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", malformed.stderr)
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

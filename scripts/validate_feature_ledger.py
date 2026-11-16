@@ -352,6 +352,8 @@ def main(argv=None):
                         help="Include gap counts by priority within each audit section with --json-summary")
     parser.add_argument("--include-priority-scopes", action="store_true",
                         help="Include gap counts by priority within each scope with --json-summary")
+    parser.add_argument("--include-existing-status-scopes", action="store_true",
+                        help="Include existing feature status counts by scope with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
@@ -367,6 +369,8 @@ def main(argv=None):
         parser.error("--include-priority-sections requires --json-summary")
     if args.include_priority_scopes and not args.json_summary:
         parser.error("--include-priority-scopes requires --json-summary")
+    if args.include_existing_status_scopes and not args.json_summary:
+        parser.error("--include-existing-status-scopes requires --json-summary")
     try:
         data = load_ledger(args.path)
         counts = validate(data)
@@ -407,6 +411,15 @@ def main(argv=None):
                     by_scope.setdefault(item["scope"], Counter())[item["priority"]] += 1
             summary["gap_priority_scopes"] = {
                 scope: {priority: row[priority] for priority in ("P0", "P1", "P2", "P3")}
+                for scope, row in sorted(by_scope.items())
+            }
+        if args.include_existing_status_scopes:
+            by_scope = {}
+            for item in data["items"]:
+                if item["kind"] == "existing":
+                    by_scope.setdefault(item["scope"], Counter())[item["status"]] += 1
+            summary["existing_status_scopes"] = {
+                scope: {"bounded_complete": row["bounded-complete"], "partial": row["partial"]}
                 for scope, row in sorted(by_scope.items())
             }
         print(json.dumps(summary, sort_keys=True))

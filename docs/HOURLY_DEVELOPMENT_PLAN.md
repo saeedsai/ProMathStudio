@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-EXISTING-STATUS-SCOPE-305
+
+**Execution ledger:** Inspected dev `87280fa30a7d093b6eb175f036ccc5f49a956f9c`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen inventory, PR #189 (open, zero reviews) and successful exact-head PR Quality #43905802802. Implement opt-in `--json-summary --include-existing-status-scopes` for validated existing-feature status by scope, preserving 63 bounded-complete / 95 partial. Add CLI regression for scope counts, totals, backward compatibility, invalid flags and malformed exports. Full local checkout/browser suite unavailable; new exact-head CI pending. No app bundle changes or historical audit reclassification.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes new status-by-scope regression, Python, structural and Chromium checks.
+2. P0: obtain eligible PR #189 approval and verify required exact-head checks and protections.
+3. P0: merge only via ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages publication SHA matches promoted main and hosted critical-path smoke tests pass.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirmation/cancellation/focus/persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-PRIORITY-SCOPE-CROSSTAB-304
 
 **Execution ledger:** Inspected dev `814a2f3ba4583e520cd7aee5dc6849f2e4aac5f9`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen historical inventory and successful exact-head PR Quality #43892649430; PR #189 open without submitted reviews. Add opt-in `--json-summary --include-priority-scopes` to report validated frozen gaps by scope and priority with explicit zero cells. Add CLI regression for exact 166 total, cross-tab, default compatibility, invalid flags and malformed JSON. Local full checkout unavailable; new-head CI pending. No application bundle changes; historical 166 gaps / 95 partial unchanged.

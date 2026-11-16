@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-EXISTING-STATUS-SECTION-306
+
+**Execution ledger:** Inspected dev `5640c2f12c6bf525357a902365ff4614a4b6c105`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen audit and plan. Previous exact-head PR Quality #43912773386 succeeded; PR #189 open with zero submitted reviews; dev is 311 commits ahead of main with no behind commits. Added opt-in validated existing-status-by-section JSON summary with deterministic zero cells and CLI regression for 63 bounded-complete / 95 partial totals, default compatibility, missing summary flag and malformed exports. Full local checkout/browser suite unavailable; new exact-head CI pending. No bundle changes; historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Python, structural and Chromium Quality, repair observed failures.
+2. P0: secure eligible review approval for PR #189 and verify required exact-head checks/protections.
+3. P0: merge via ordinary dev-to-main PR only after gates pass; verify main Quality.
+4. P0: verify Pages publication SHA and hosted critical-path smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser tests.
+
 ## 2026-11-16 — AUDIT-EXISTING-STATUS-SCOPE-305
 
 **Execution ledger:** Inspected dev `87280fa30a7d093b6eb175f036ccc5f49a956f9c`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen inventory, PR #189 (open, zero reviews) and successful exact-head PR Quality #43905802802. Implement opt-in `--json-summary --include-existing-status-scopes` for validated existing-feature status by scope, preserving 63 bounded-complete / 95 partial. Add CLI regression for scope counts, totals, backward compatibility, invalid flags and malformed exports. Full local checkout/browser suite unavailable; new exact-head CI pending. No app bundle changes or historical audit reclassification.

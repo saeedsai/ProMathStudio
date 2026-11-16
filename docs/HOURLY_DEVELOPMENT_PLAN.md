@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-PRIORITY-SUMMARY-300
+
+**Execution ledger:** Verified dev `3a72eaa4ae08902b0ffd1cf296e7ee1239b4cda4`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, exact-head successful push Quality #43856296755 and PR Quality #43856305567. PR #189 open with zero submitted reviews; Pages API inaccessible. Added opt-in `--json-summary --include-priorities` to report validated historical gap priority counts (P0 22 / P1 64 / P2 53 / P3 27), without altering default or status-only JSON contracts. Added CLI regression for default/combined output, invalid flags, malformed exports. Isolated priority aggregation passed; full new-head CI pending. No bundle change; frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes priority-summary CLI regression, frozen ledger, Python, structural and Chromium checks.
+2. P0: obtain eligible PR #189 review approval and verify exact-head protections/checks.
+3. P0: merge only via ordinary protected dev-to-main PR; verify main Quality success.
+4. P0: verify Pages published SHA matches promoted main and hosted critical-path smoke tests pass.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-STATUS-SUMMARY-299
 
 **Execution ledger:** Verified dev `43558b4e7afc62ad10ba389c2101deb8040ee51a`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen inventory and successful exact-head push/PR checks #43846518103/#43846529171. PR #189 remains open without submitted reviews; Pages verification unavailable. Add optional `--json-summary --include-status` to report validated 63 bounded-complete / 95 partial counts without changing existing JSON output. Add CLI regression for exact counts, default compatibility, invalid flag combination and malformed export. Isolated Python status-count check passed; full new-head CI pending. No bundle changes; frozen 166 gaps / 95 partial unchanged.

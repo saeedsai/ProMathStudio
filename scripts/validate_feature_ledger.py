@@ -342,11 +342,15 @@ def main(argv=None):
                         help="Print validated historical counts as machine-readable JSON")
     parser.add_argument("--include-status", action="store_true",
                         help="Include validated existing-feature status counts with --json-summary")
+    parser.add_argument("--include-priorities", action="store_true",
+                        help="Include validated frozen gap priority counts with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
     if args.include_status and not args.json_summary:
         parser.error("--include-status requires --json-summary")
+    if args.include_priorities and not args.json_summary:
+        parser.error("--include-priorities requires --json-summary")
     try:
         data = load_ledger(args.path)
         counts = validate(data)
@@ -359,6 +363,9 @@ def main(argv=None):
         if args.include_status:
             statuses = Counter(item["status"] for item in data["items"] if item["kind"] == "existing")
             summary.update({"bounded_complete": statuses["bounded-complete"], "partial": statuses["partial"]})
+        if args.include_priorities:
+            priorities = Counter(item["priority"] for item in data["items"] if item["kind"] == "gap")
+            summary["gap_priorities"] = {key: priorities[key] for key in ("P0", "P1", "P2", "P3")}
         print(json.dumps(summary, sort_keys=True))
     else:
         print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")

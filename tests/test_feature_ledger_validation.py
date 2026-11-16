@@ -406,6 +406,37 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(corrupt.stdout, "")
             self.assertIn("Malformed feature ledger JSON", corrupt.stderr)
 
+    def test_cli_json_summary_optional_gap_priorities(self):
+        # Priority totals are historical, validated and opt-in only.
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(self.original), encoding="utf-8")
+            base = [sys.executable, str(SCRIPT)]
+            def run(*args):
+                return subprocess.run(base + list(args) + [str(export)],
+                                      capture_output=True, text=True, timeout=10)
+            plain = run("--json-summary")
+            self.assertEqual(plain.returncode, 0, plain.stderr)
+            self.assertEqual(json.loads(plain.stdout), {"existing": 158, "gaps": 166})
+            summary = run("--json-summary", "--include-priorities")
+            self.assertEqual(summary.returncode, 0, summary.stderr)
+            self.assertEqual(json.loads(summary.stdout), {
+                "existing": 158, "gaps": 166,
+                "gap_priorities": {"P0": 22, "P1": 64, "P2": 53, "P3": 27},
+            })
+            combined = run("--json-summary", "--include-status", "--include-priorities")
+            self.assertEqual(combined.returncode, 0, combined.stderr)
+            self.assertEqual(json.loads(combined.stdout)["partial"], 95)
+            self.assertEqual(json.loads(combined.stdout)["gap_priorities"]["P0"], 22)
+            invalid = run("--include-priorities")
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertIn("--include-priorities requires --json-summary", invalid.stderr)
+            export.write_text('{"items": [}', encoding="utf-8")
+            malformed = run("--json-summary", "--include-priorities")
+            self.assertNotEqual(malformed.returncode, 0)
+            self.assertEqual(malformed.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", malformed.stderr)
+
     def test_cli_quiet_is_silent_on_success_but_not_on_error(self):
         with tempfile.TemporaryDirectory() as directory:
             export = Path(directory) / "export.json"

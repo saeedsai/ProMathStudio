@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-KIND-SECTION-307
+
+**Execution ledger:** Inspected dev `e7e99f95db0f98cfbd754f57b70b681cd39c25f6`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen inventory, plan, PR #189 (open, zero reviews), and exact-head PR Quality #43924868849 (success). Added opt-in `--json-summary --include-kind-sections` reporting existing/gap counts by audit section with explicit zero cells and CLI regression for 158/166 totals, default compatibility, invalid flag and malformed input. Full local repository/browser tests unavailable; new-head CI pending. No application bundle changes; historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-head Python, structural and Chromium Quality and fix observed failures.
+2. P0: obtain eligible PR #189 review and verify exact-head checks and protections.
+3. P0: merge only via ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages publication SHA equals promoted main and hosted smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-EXISTING-STATUS-SECTION-306
 
 **Execution ledger:** Inspected dev `5640c2f12c6bf525357a902365ff4614a4b6c105`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen audit and plan. Previous exact-head PR Quality #43912773386 succeeded; PR #189 open with zero submitted reviews; dev is 311 commits ahead of main with no behind commits. Added opt-in validated existing-status-by-section JSON summary with deterministic zero cells and CLI regression for 63 bounded-complete / 95 partial totals, default compatibility, missing summary flag and malformed exports. Full local checkout/browser suite unavailable; new exact-head CI pending. No bundle changes; historical 166 gaps / 95 partial unchanged.

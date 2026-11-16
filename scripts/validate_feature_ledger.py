@@ -356,6 +356,8 @@ def main(argv=None):
                         help="Include existing feature status counts by scope with --json-summary")
     parser.add_argument("--include-existing-status-sections", action="store_true",
                         help="Include existing feature status counts by audit section with --json-summary")
+    parser.add_argument("--include-kind-sections", action="store_true",
+                        help="Include existing/gap counts by audit section with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
@@ -375,6 +377,8 @@ def main(argv=None):
         parser.error("--include-existing-status-scopes requires --json-summary")
     if args.include_existing_status_sections and not args.json_summary:
         parser.error("--include-existing-status-sections requires --json-summary")
+    if args.include_kind_sections and not args.json_summary:
+        parser.error("--include-kind-sections requires --json-summary")
     try:
         data = load_ledger(args.path)
         counts = validate(data)
@@ -433,6 +437,14 @@ def main(argv=None):
                     by_section.setdefault(item["section"], Counter())[item["status"]] += 1
             summary["existing_status_sections"] = {
                 section: {"bounded_complete": row["bounded-complete"], "partial": row["partial"]}
+                for section, row in sorted(by_section.items())
+            }
+        if args.include_kind_sections:
+            by_section = {}
+            for item in data["items"]:
+                by_section.setdefault(item["section"], Counter())[item["kind"]] += 1
+            summary["kind_sections"] = {
+                section: {"existing": row["existing"], "gaps": row["gap"]}
                 for section, row in sorted(by_section.items())
             }
         print(json.dumps(summary, sort_keys=True))

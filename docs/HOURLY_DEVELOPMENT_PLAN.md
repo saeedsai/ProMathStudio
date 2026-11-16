@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-STATUS-SUMMARY-299
+
+**Execution ledger:** Verified dev `43558b4e7afc62ad10ba389c2101deb8040ee51a`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen inventory and successful exact-head push/PR checks #43846518103/#43846529171. PR #189 remains open without submitted reviews; Pages verification unavailable. Add optional `--json-summary --include-status` to report validated 63 bounded-complete / 95 partial counts without changing existing JSON output. Add CLI regression for exact counts, default compatibility, invalid flag combination and malformed export. Isolated Python status-count check passed; full new-head CI pending. No bundle changes; frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes status-summary CLI regression, frozen ledger, Python, structural and Chromium checks.
+2. P0: obtain eligible PR #189 review and verify protections/checks on exact head.
+3. P0: merge only through ordinary protected dev-to-main PR; verify main Quality success.
+4. P0: verify GitHub Pages published SHA equals promoted main and hosted smoke tests pass.
+5. P1: implement accessible preferences reset in synchronized modular/standalone code with confirmation, cancellation, keyboard focus and persistence browser tests.
+
 ## 2026-11-16 — AUDIT-SIZE-BOUNDARY-298
 
 **Execution ledger:** Verified dev `903e90713bd7945d166648dc615f746214195fbd`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, successful exact-head push/PR Quality #43837245478/#43837254391, and open PR #189 with zero submitted reviews. Centralize the audit import 8 MiB bound across opened-descriptor preflight and bounded read. Add exact-8-MiB valid JSON boundary regression plus 8-MiB+1 rejection. Isolated Python JSON boundary reproduction passed; full new-head CI pending. Standalone bundle unaffected; frozen 166 gaps / 95 partial unchanged.

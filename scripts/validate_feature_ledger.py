@@ -340,17 +340,26 @@ def main(argv=None):
                         help="JSON export to validate (default: frozen audit ledger)")
     parser.add_argument("--json-summary", action="store_true",
                         help="Print validated historical counts as machine-readable JSON")
+    parser.add_argument("--include-status", action="store_true",
+                        help="Include validated existing-feature status counts with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
+    if args.include_status and not args.json_summary:
+        parser.error("--include-status requires --json-summary")
     try:
-        counts = validate(load_ledger(args.path))
+        data = load_ledger(args.path)
+        counts = validate(data)
     except ValueError as exc:
         parser.error(str(exc))
     if args.quiet:
         return
     if args.json_summary:
-        print(json.dumps({"existing": counts["existing"], "gaps": counts["gap"]}, sort_keys=True))
+        summary = {"existing": counts["existing"], "gaps": counts["gap"]}
+        if args.include_status:
+            statuses = Counter(item["status"] for item in data["items"] if item["kind"] == "existing")
+            summary.update({"bounded_complete": statuses["bounded-complete"], "partial": statuses["partial"]})
+        print(json.dumps(summary, sort_keys=True))
     else:
         print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
 

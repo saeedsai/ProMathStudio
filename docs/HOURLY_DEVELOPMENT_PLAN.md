@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-SIZE-BOUNDARY-298
+
+**Execution ledger:** Verified dev `903e90713bd7945d166648dc615f746214195fbd`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, successful exact-head push/PR Quality #43837245478/#43837254391, and open PR #189 with zero submitted reviews. Centralize the audit import 8 MiB bound across opened-descriptor preflight and bounded read. Add exact-8-MiB valid JSON boundary regression plus 8-MiB+1 rejection. Isolated Python JSON boundary reproduction passed; full new-head CI pending. Standalone bundle unaffected; frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes inclusive size-boundary regression, frozen audit, Python, structural and Chromium checks.
+2. P0: obtain eligible PR #189 approval and verify exact-head checks/protections.
+3. P0: merge only via ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages publication SHA matches promoted main and hosted critical-path smoke tests.
+5. P1: accessible preferences reset with synchronized modular/standalone implementation and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-FDOPEN-CLEANUP-297
 
 **Execution ledger:** Verified dev `c26938bcf1e7c4cbad72ed7cd901c922ea462157`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, exact-head successful push/PR Quality #43829231889/#43829238011, and open PR #189 with zero reviews. Close a raw descriptor if `os.fdopen` fails before taking ownership, retaining the existing nonblocking FIFO and fstat safeguards. Add mocked wrapping-failure/descriptor-closure regression and valid-file control. Isolated descriptor cleanup reproduction passed; full new-head CI pending. No bundle change or release; historical 166 gaps / 95 partial unchanged.

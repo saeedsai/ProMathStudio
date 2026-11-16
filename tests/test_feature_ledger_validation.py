@@ -580,6 +580,18 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_bytes(b'{"ok":true}')
             self.assertEqual(validator.load_ledger(path), {"ok": True})
 
+    def test_exact_eight_mib_limit_accepts_regular_json(self):
+        # The preflight limit is inclusive; a one-byte increase is rejected.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "boundary.json"
+            path.write_bytes(b'{}' + b' ' * (validator.MAX_LEDGER_BYTES - 2))
+            self.assertEqual(path.stat().st_size, validator.MAX_LEDGER_BYTES)
+            self.assertEqual(validator.load_ledger(path), {})
+            with path.open("ab") as output:
+                output.write(b" ")
+            with self.assertRaisesRegex(ValueError, "exceeds 8 MiB input limit"):
+                validator.load_ledger(path)
+
     def test_oversized_ledger_is_rejected_before_json_decoding(self):
         # Bound memory usage even if an export is mostly whitespace.
         with tempfile.TemporaryDirectory() as directory:

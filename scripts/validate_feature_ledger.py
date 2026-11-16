@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "docs" / "feature-ledger-audit-20261026.json"
+MAX_LEDGER_BYTES = 8 * 1024 * 1024
 
 
 def require(condition, message):
@@ -286,10 +287,10 @@ def load_ledger(path):
                 raise ValueError("Cannot read feature ledger JSON: not a regular file")
             # Sparse and oversized exports need not be read into memory just
             # to discover their size. Keep the bounded read as a race guard.
-            if opened_stat.st_size > 8 * 1024 * 1024:
+            if opened_stat.st_size > MAX_LEDGER_BYTES:
                 raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")
-            payload = source.read(8 * 1024 * 1024 + 1)
-        if len(payload) > 8 * 1024 * 1024:
+            payload = source.read(MAX_LEDGER_BYTES + 1)
+        if len(payload) > MAX_LEDGER_BYTES:
             raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")
         data = json.loads(payload.decode("utf-8-sig"),
                           object_pairs_hook=unique_object,

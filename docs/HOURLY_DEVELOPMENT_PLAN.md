@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-PRIORITY-SCOPE-CROSSTAB-304
+
+**Execution ledger:** Inspected dev `814a2f3ba4583e520cd7aee5dc6849f2e4aac5f9`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen historical inventory and successful exact-head PR Quality #43892649430; PR #189 open without submitted reviews. Add opt-in `--json-summary --include-priority-scopes` to report validated frozen gaps by scope and priority with explicit zero cells. Add CLI regression for exact 166 total, cross-tab, default compatibility, invalid flags and malformed JSON. Local full checkout unavailable; new-head CI pending. No application bundle changes; historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes new priority-scope CLI regression, frozen ledger, Python, structural and Chromium checks.
+2. P0: obtain eligible PR #189 approval and verify required exact-head checks and protections.
+3. P0: merge only via ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages publication SHA matches promoted main and hosted critical-path smoke tests pass.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirmation/cancellation/focus/persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-PRIORITY-SECTION-CROSSTAB-303
 
 **Execution ledger:** Verified dev `b7fb653437f4c02a697338e4bf17c7673d36a27f`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, exact-head PR Quality #43884954650 successful, and open PR #189 with zero submitted reviews. Implement opt-in `--json-summary --include-priority-sections` for validated gap priority counts per audit section, including zero-count priority cells. Add focused CLI regression for 166-item total, exact cross-tab, default backward compatibility, invalid flags and malformed export. Local full checkout unavailable; new exact-head CI pending. No standalone bundle change; historical 166 gaps / 95 partial unchanged.

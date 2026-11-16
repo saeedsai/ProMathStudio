@@ -1221,6 +1221,39 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(malformed.stdout, "")
             self.assertIn("Malformed feature ledger JSON", malformed.stderr)
 
+    def test_cli_priority_scopes_summary_is_validated_and_opt_in(self):
+        frozen = json.loads(LEDGER.read_text(encoding="utf-8"))
+        expected = {}
+        for item in frozen["items"]:
+            if item["kind"] == "gap":
+                expected.setdefault(item["scope"], dict.fromkeys(("P0", "P1", "P2", "P3"), 0))
+                expected[item["scope"]][item["priority"]] += 1
+        command = [sys.executable, str(SCRIPT)]
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(frozen), encoding="utf-8")
+            result = subprocess.run(command + ["--json-summary", "--include-priority-scopes",
+                                               str(export)], capture_output=True, text=True, timeout=10)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            summary = json.loads(result.stdout)
+            self.assertEqual(summary["gap_priority_scopes"], dict(sorted(expected.items())))
+            self.assertEqual(sum(sum(row.values()) for row in summary["gap_priority_scopes"].values()), 166)
+            self.assertEqual(set(summary), {"existing", "gaps", "gap_priority_scopes"})
+            default = subprocess.run(command + ["--json-summary", str(export)],
+                                     capture_output=True, text=True, timeout=10)
+            self.assertEqual(default.returncode, 0, default.stderr)
+            self.assertEqual(set(json.loads(default.stdout)), {"existing", "gaps"})
+            invalid = subprocess.run(command + ["--include-priority-scopes", str(export)],
+                                     capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertIn("--include-priority-scopes requires --json-summary", invalid.stderr)
+            export.write_text('{"items": [}', encoding="utf-8")
+            malformed = subprocess.run(command + ["--json-summary", "--include-priority-scopes",
+                                                  str(export)], capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(malformed.returncode, 0)
+            self.assertEqual(malformed.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", malformed.stderr)
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -550,6 +551,21 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_text("[" * 12000 + "0" + "]" * 12000, encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "nesting exceeds decoder limit"):
                 validator.load_ledger(path)
+
+    def test_fdopen_failure_closes_raw_descriptor(self):
+        # If stream wrapping fails, the original os.open descriptor must not leak.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "valid.json"
+            path.write_bytes(b'{"ok":true}')
+            with mock.patch.object(validator.os, "fdopen", side_effect=OSError("synthetic fdopen failure")):
+                with mock.patch.object(validator.os, "close", wraps=os.close) as close_spy:
+                    with self.assertRaisesRegex(ValueError, "Cannot read feature ledger JSON"):
+                        validator.load_ledger(path)
+                    close_spy.assert_called_once()
+                    descriptor = close_spy.call_args.args[0]
+                    with self.assertRaises(OSError):
+                        os.fstat(descriptor)
+            self.assertEqual(validator.load_ledger(path), {"ok": True})
 
     def test_sparse_oversized_ledger_is_rejected_without_reading(self):
         # A sparse export reports its true size without requiring an 8 MiB read.

@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-FDOPEN-CLEANUP-297
+
+**Execution ledger:** Verified dev `c26938bcf1e7c4cbad72ed7cd901c922ea462157`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, exact-head successful push/PR Quality #43829231889/#43829238011, and open PR #189 with zero reviews. Close a raw descriptor if `os.fdopen` fails before taking ownership, retaining the existing nonblocking FIFO and fstat safeguards. Add mocked wrapping-failure/descriptor-closure regression and valid-file control. Isolated descriptor cleanup reproduction passed; full new-head CI pending. No bundle change or release; historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes descriptor cleanup regression, frozen ledger, structural, Python and Chromium checks.
+2. P0: obtain eligible PR #189 review approval; verify exact-head checks and protections.
+3. P0: merge only via ordinary protected dev-to-main PR; verify main Quality.
+4. P0: verify Pages published main SHA and hosted critical-path smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone source and confirm/cancel/focus/persistence browser tests.
+
 ## 2026-11-16 — AUDIT-SPARSE-PREFLIGHT-296
 
 **Execution ledger:** Verified dev `f836a7526fc9b941b66bfa795e1be85965f34a65`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, successful exact-head push/PR Quality #43821384375/#43821390905, and PR #189 with zero submitted reviews. Add opened-descriptor size preflight for oversized/sparse audit exports while retaining bounded read against growth races. Add sparse 8 MiB+1 regression and valid JSON control. Isolated POSIX fstat sparse-file reproduction passed; full new-head CI pending. No application bundle change or release. Historical 166 gaps / 95 partial unchanged.

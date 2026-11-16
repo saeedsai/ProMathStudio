@@ -273,7 +273,14 @@ def load_ledger(path):
         # path stat() followed by open() can race a replacement with a FIFO.
         source_path = Path(path)
         descriptor = os.open(source_path, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0))
-        with os.fdopen(descriptor, "rb") as source:
+        # fdopen() normally takes ownership, but if wrapping fails the raw
+        # descriptor remains ours and must be closed before propagating.
+        try:
+            source = os.fdopen(descriptor, "rb")
+        except BaseException:
+            os.close(descriptor)
+            raise
+        with source:
             opened_stat = os.fstat(source.fileno())
             if not stat.S_ISREG(opened_stat.st_mode):
                 raise ValueError("Cannot read feature ledger JSON: not a regular file")

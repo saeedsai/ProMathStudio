@@ -324,9 +324,9 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                         validator.load_ledger(path)
                     message = str(error.exception)
                     self.assertIn(diagnostic, message)
-                    self.assertNotIn("\\x1b", message.replace("\\\\x1b", ""))
-                    self.assertNotIn("\\n", message.replace("\\\\n", ""))
-                    self.assertIn("\\\\", message)
+                    self.assertNotIn(chr(27), message)
+                    self.assertNotIn(chr(10), message)
+                    self.assertIn(repr(json.loads(payload, object_pairs_hook=lambda pairs: pairs)[0][0]), message)
             path.write_text('{"safe key":1}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path), {"safe key": 1})
 

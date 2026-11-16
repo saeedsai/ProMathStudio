@@ -1,3 +1,5 @@
+**Fixture follow-up (2026-11-16):** Correct diagnostic regression to assert no raw ESC/LF and compare the decoded key's Python representation for all three cases, including printable combining Unicode. New exact-head CI pending.
+
 ## 2026-11-16 — AUDIT-KEY-DIAGNOSTIC-293
 
 **Execution ledger:** Verified dev `28b439f04455bbceb9101b155fdd62422e99e559`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, passing exact-head PR Quality #43755345609 and PR #189 with zero submitted reviews. Object-pairs hook errors previously interpolated raw duplicate or non-NFC JSON keys before recursive Unicode validation, allowing newline/terminal-control injection into diagnostic text. Escape key representations with `!r`; add focused malicious-key regression plus valid-key control. Isolated Python hook reproduction passed; full new-head CI pending. No bundle change or release. Historical 166 gaps / 95 partial unchanged.

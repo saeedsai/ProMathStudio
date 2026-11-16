@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-SPARSE-PREFLIGHT-296
+
+**Execution ledger:** Verified dev `f836a7526fc9b941b66bfa795e1be85965f34a65`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, successful exact-head push/PR Quality #43821384375/#43821390905, and PR #189 with zero submitted reviews. Add opened-descriptor size preflight for oversized/sparse audit exports while retaining bounded read against growth races. Add sparse 8 MiB+1 regression and valid JSON control. Isolated POSIX fstat sparse-file reproduction passed; full new-head CI pending. No application bundle change or release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes sparse size preflight regression, frozen audit, structural, Python and Chromium suites.
+2. P0: obtain eligible approval for PR #189 and verify exact-head checks and protections.
+3. P0: merge only through ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages published SHA equals promoted main and hosted critical-path smoke tests pass.
+5. P1: accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-FD-RACE-295
 
 **Execution ledger:** Inspected dev `5d3b90d8f177419c1f3fe2485e165b8d8fae8a4f`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen inventory, successful exact-head push/PR Quality #43814324785/#43814330146, and open PR #189 (zero reviews). Close path-stat/open race in audit import by opening nonblocking and checking fstat on the actual descriptor; add FIFO symlink timeout regression and regular JSON control. Isolated POSIX nonblocking FIFO/regular fstat check passed; full new-head CI pending. No application bundle change or release. Historical 166 gaps / 95 partial unchanged.

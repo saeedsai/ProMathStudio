@@ -274,8 +274,13 @@ def load_ledger(path):
         source_path = Path(path)
         descriptor = os.open(source_path, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0))
         with os.fdopen(descriptor, "rb") as source:
-            if not stat.S_ISREG(os.fstat(source.fileno()).st_mode):
+            opened_stat = os.fstat(source.fileno())
+            if not stat.S_ISREG(opened_stat.st_mode):
                 raise ValueError("Cannot read feature ledger JSON: not a regular file")
+            # Sparse and oversized exports need not be read into memory just
+            # to discover their size. Keep the bounded read as a race guard.
+            if opened_stat.st_size > 8 * 1024 * 1024:
+                raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")
             payload = source.read(8 * 1024 * 1024 + 1)
         if len(payload) > 8 * 1024 * 1024:
             raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")

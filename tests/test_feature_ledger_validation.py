@@ -1187,6 +1187,40 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_text(r'{"symbol":"\ud83d\ude80"}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(path)["symbol"], "🚀")
 
+    def test_cli_priority_sections_summary_is_validated_and_opt_in(self):
+        # Cross-tabulate only frozen gaps, including explicit zero-count cells.
+        expected = {}
+        frozen = json.loads(LEDGER.read_text(encoding="utf-8"))
+        for item in frozen["items"]:
+            if item["kind"] == "gap":
+                expected.setdefault(item["section"], dict.fromkeys(("P0", "P1", "P2", "P3"), 0))
+                expected[item["section"]][item["priority"]] += 1
+        command = [sys.executable, str(SCRIPT)]
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(frozen), encoding="utf-8")
+            result = subprocess.run(command + ["--json-summary", "--include-priority-sections",
+                                               str(export)], capture_output=True, text=True, timeout=10)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            summary = json.loads(result.stdout)
+            self.assertEqual(summary["gap_priority_sections"], dict(sorted(expected.items())))
+            self.assertEqual(sum(sum(row.values()) for row in summary["gap_priority_sections"].values()), 166)
+            self.assertEqual(set(summary), {"existing", "gaps", "gap_priority_sections"})
+            default = subprocess.run(command + ["--json-summary", str(export)],
+                                     capture_output=True, text=True, timeout=10)
+            self.assertEqual(default.returncode, 0, default.stderr)
+            self.assertEqual(set(json.loads(default.stdout)), {"existing", "gaps"})
+            invalid = subprocess.run(command + ["--include-priority-sections", str(export)],
+                                     capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertIn("--include-priority-sections requires --json-summary", invalid.stderr)
+            export.write_text('{"items": [}', encoding="utf-8")
+            malformed = subprocess.run(command + ["--json-summary", "--include-priority-sections",
+                                                  str(export)], capture_output=True, text=True, timeout=10)
+            self.assertNotEqual(malformed.returncode, 0)
+            self.assertEqual(malformed.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", malformed.stderr)
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

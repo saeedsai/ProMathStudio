@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-PRIORITY-SECTION-CROSSTAB-303
+
+**Execution ledger:** Verified dev `b7fb653437f4c02a697338e4bf17c7673d36a27f`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, exact-head PR Quality #43884954650 successful, and open PR #189 with zero submitted reviews. Implement opt-in `--json-summary --include-priority-sections` for validated gap priority counts per audit section, including zero-count priority cells. Add focused CLI regression for 166-item total, exact cross-tab, default backward compatibility, invalid flags and malformed export. Local full checkout unavailable; new exact-head CI pending. No standalone bundle change; historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes priority-section CLI regression, frozen ledger, Python, structural and Chromium checks.
+2. P0: obtain eligible PR #189 approval and verify exact-head checks and branch protections.
+3. P0: merge only through ordinary protected dev-to-main PR after all gates pass; verify main Quality.
+4. P0: verify Pages publication SHA equals promoted main and hosted critical-path smoke tests pass.
+5. P1: implement accessible preferences reset with synchronized modular/standalone source and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-SECTION-SUMMARY-302
 
 **Execution ledger:** Inspected dev `573bbda27d0d73679c2c023ce6adb19b9ff85214`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, historical inventory, successful exact-head PR Quality #43872799526 and PR #189 with zero submitted reviews. Added opt-in `--json-summary --include-sections` to group validated frozen gaps by audit section, retaining default JSON compatibility. Added focused CLI regression for computed counts, all summary options together, invalid option usage and malformed export. New exact-head full CI pending; no application bundle change. Historical 166 gaps / 95 partial unchanged.

@@ -348,6 +348,8 @@ def main(argv=None):
                         help="Include validated gap counts grouped by scope with --json-summary")
     parser.add_argument("--include-sections", action="store_true",
                         help="Include validated gap counts grouped by audit section with --json-summary")
+    parser.add_argument("--include-priority-sections", action="store_true",
+                        help="Include gap counts by priority within each audit section with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
@@ -359,6 +361,8 @@ def main(argv=None):
         parser.error("--include-scopes requires --json-summary")
     if args.include_sections and not args.json_summary:
         parser.error("--include-sections requires --json-summary")
+    if args.include_priority_sections and not args.json_summary:
+        parser.error("--include-priority-sections requires --json-summary")
     try:
         data = load_ledger(args.path)
         counts = validate(data)
@@ -380,6 +384,18 @@ def main(argv=None):
         if args.include_sections:
             sections = Counter(item["section"] for item in data["items"] if item["kind"] == "gap")
             summary["gap_sections"] = dict(sorted(sections.items()))
+        if args.include_priority_sections:
+            by_section = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    section = item["section"]
+                    if section not in by_section:
+                        by_section[section] = Counter()
+                    by_section[section][item["priority"]] += 1
+            summary["gap_priority_sections"] = {
+                section: {priority: counts[priority] for priority in ("P0", "P1", "P2", "P3")}
+                for section, counts in sorted(by_section.items())
+            }
         print(json.dumps(summary, sort_keys=True))
     else:
         print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")

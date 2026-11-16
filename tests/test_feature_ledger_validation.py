@@ -483,6 +483,55 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(malformed.stdout, "")
             self.assertIn("Malformed feature ledger JSON", malformed.stderr)
 
+    def test_cli_optional_section_summary_counts_only_frozen_gaps(self):
+        # Section grouping is derived from validated gap records, never the
+        # historical existing-feature records or hard-coded section labels.
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(self.original), encoding="utf-8")
+            command = [sys.executable, str(SCRIPT)]
+            expected = {}
+            for item in self.original["items"]:
+                if item["kind"] == "gap":
+                    expected[item["section"]] = expected.get(item["section"], 0) + 1
+            result = subprocess.run(
+                command + ["--json-summary", "--include-sections", str(export)],
+                capture_output=True, text=True, timeout=10,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout),
+                             {"existing": 158, "gaps": 166,
+                              "gap_sections": dict(sorted(expected.items()))})
+            self.assertEqual(sum(expected.values()), 166)
+            default = subprocess.run(
+                command + ["--json-summary", str(export)],
+                capture_output=True, text=True, timeout=10,
+            )
+            self.assertEqual(json.loads(default.stdout), {"existing": 158, "gaps": 166})
+            combined = subprocess.run(
+                command + ["--json-summary", "--include-status",
+                           "--include-priorities", "--include-scopes",
+                           "--include-sections", str(export)],
+                capture_output=True, text=True, timeout=10,
+            )
+            self.assertEqual(combined.returncode, 0, combined.stderr)
+            self.assertEqual(json.loads(combined.stdout)["gap_sections"],
+                             dict(sorted(expected.items())))
+            invalid = subprocess.run(
+                command + ["--include-sections", str(export)],
+                capture_output=True, text=True, timeout=10,
+            )
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertIn("--include-sections requires --json-summary", invalid.stderr)
+            export.write_text('{"items": [}', encoding="utf-8")
+            malformed = subprocess.run(
+                command + ["--json-summary", "--include-sections", str(export)],
+                capture_output=True, text=True, timeout=10,
+            )
+            self.assertNotEqual(malformed.returncode, 0)
+            self.assertEqual(malformed.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", malformed.stderr)
+
     def test_cli_quiet_is_silent_on_success_but_not_on_error(self):
         with tempfile.TemporaryDirectory() as directory:
             export = Path(directory) / "export.json"

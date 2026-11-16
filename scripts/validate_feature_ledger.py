@@ -346,6 +346,8 @@ def main(argv=None):
                         help="Include validated frozen gap priority counts with --json-summary")
     parser.add_argument("--include-scopes", action="store_true",
                         help="Include validated gap counts grouped by scope with --json-summary")
+    parser.add_argument("--include-sections", action="store_true",
+                        help="Include validated gap counts grouped by audit section with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
@@ -355,6 +357,8 @@ def main(argv=None):
         parser.error("--include-priorities requires --json-summary")
     if args.include_scopes and not args.json_summary:
         parser.error("--include-scopes requires --json-summary")
+    if args.include_sections and not args.json_summary:
+        parser.error("--include-sections requires --json-summary")
     try:
         data = load_ledger(args.path)
         counts = validate(data)
@@ -373,6 +377,9 @@ def main(argv=None):
         if args.include_scopes:
             scopes = Counter(item["scope"] for item in data["items"] if item["kind"] == "gap")
             summary["gap_scopes"] = dict(sorted(scopes.items()))
+        if args.include_sections:
+            sections = Counter(item["section"] for item in data["items"] if item["kind"] == "gap")
+            summary["gap_sections"] = dict(sorted(sections.items()))
         print(json.dumps(summary, sort_keys=True))
     else:
         print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")

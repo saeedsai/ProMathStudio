@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-SECTION-SUMMARY-302
+
+**Execution ledger:** Inspected dev `573bbda27d0d73679c2c023ce6adb19b9ff85214`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, historical inventory, successful exact-head PR Quality #43872799526 and PR #189 with zero submitted reviews. Added opt-in `--json-summary --include-sections` to group validated frozen gaps by audit section, retaining default JSON compatibility. Added focused CLI regression for computed counts, all summary options together, invalid option usage and malformed export. New exact-head full CI pending; no application bundle change. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: new exact-head Quality passes section-summary regression, frozen audit, structural, Python and Chromium checks.
+2. P0: obtain eligible PR #189 approval; verify exact-head checks and protected-branch requirements.
+3. P0: merge only via ordinary protected dev-to-main PR after all gates pass; verify main Quality.
+4. P0: verify Pages published SHA equals promoted main and hosted critical-path smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-SCOPE-SUMMARY-301
 
 **Execution ledger:** Inspected dev `39e9fcefd123aab65b47568cef7b9a640dd1013c`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, historical inventory and exact-head successful PR Quality #43864383935. PR #189 remains open with no submitted reviews; Pages API unavailable. Add optional `--json-summary --include-scopes` to report sorted, validated gap counts by scope without altering default output; add CLI regression for computed scope counts, 166 total, combined options, invalid flags and malformed input. Full new-head CI pending; no standalone bundle change. Frozen 166 gaps / 95 partial unchanged.

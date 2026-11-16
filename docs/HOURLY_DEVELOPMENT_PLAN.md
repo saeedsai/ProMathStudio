@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-FD-RACE-295
+
+**Execution ledger:** Inspected dev `5d3b90d8f177419c1f3fe2485e165b8d8fae8a4f`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen inventory, successful exact-head push/PR Quality #43814324785/#43814330146, and open PR #189 (zero reviews). Close path-stat/open race in audit import by opening nonblocking and checking fstat on the actual descriptor; add FIFO symlink timeout regression and regular JSON control. Isolated POSIX nonblocking FIFO/regular fstat check passed; full new-head CI pending. No application bundle change or release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes new descriptor FIFO/symlink regression, historical ledger, structural, Python and Chromium checks.
+2. P0: obtain eligible PR #189 approval and verify required reviews/protections and exact-head checks.
+3. P0: promote only via ordinary protected dev-to-main PR; verify main Quality green.
+4. P0: verify Pages published SHA matches promoted main and hosted critical-path smoke tests.
+5. P1: accessible preferences reset with synchronized modular/standalone implementation and confirm/cancel/focus/persistence browser tests.
+
 ## 2026-11-16 — AUDIT-REGULAR-FILE-294
 
 **Execution ledger:** Verified dev `76b457a4b4528018969e80d20ed249da132575d2`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen historical inventory, successful exact-head Quality #43807889525 and open PR #189 with zero submitted reviews. Harden audit JSON import to reject non-regular paths before opening: FIFOs can block forever awaiting a writer, while device paths are not stable file exports. Add POSIX FIFO subprocess timeout regression, error-message assertions and a regular-file control. Isolated `stat.S_ISREG` reproduction passed; full new-head Quality pending. No application bundle change; frozen 166 gaps / 95 partial unchanged; no release.

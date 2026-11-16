@@ -589,6 +589,27 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             regular.write_text('{"nested":true}', encoding="utf-8")
             self.assertEqual(validator.load_ledger(regular), {"nested": True})
 
+    @unittest.skipUnless(hasattr(os, "mkfifo") and hasattr(os, "symlink"),
+                         "POSIX FIFO/symlink support required")
+    def test_fifo_symlink_is_rejected_without_blocking(self):
+        # A symlink can resolve to a FIFO between path stat() and open().
+        # Descriptor-level validation must reject it without waiting for a writer.
+        with tempfile.TemporaryDirectory() as directory:
+            fifo = Path(directory) / "fifo.json"
+            link = Path(directory) / "alias.json"
+            os.mkfifo(fifo)
+            os.symlink(fifo, link)
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), str(link)],
+                capture_output=True, text=True, check=False, timeout=5,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("not a regular file", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+            regular = Path(directory) / "regular.json"
+            regular.write_text('{"ok":true}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(regular), {"ok": True})
+
     def test_invalid_utf8_is_reported_as_a_validation_error(self):
         # Strict UTF-8 input should give an actionable audit diagnostic.
         with tempfile.TemporaryDirectory() as directory:

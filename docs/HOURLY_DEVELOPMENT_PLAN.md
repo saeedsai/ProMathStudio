@@ -1,3 +1,14 @@
+## 2026-11-16 — AUDIT-KEY-DIAGNOSTIC-293
+
+**Execution ledger:** Verified dev `28b439f04455bbceb9101b155fdd62422e99e559`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, passing exact-head PR Quality #43755345609 and PR #189 with zero submitted reviews. Object-pairs hook errors previously interpolated raw duplicate or non-NFC JSON keys before recursive Unicode validation, allowing newline/terminal-control injection into diagnostic text. Escape key representations with `!r`; add focused malicious-key regression plus valid-key control. Isolated Python hook reproduction passed; full new-head CI pending. No bundle change or release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: exact-head Quality passes escaped-key diagnostic regression, historical ledger, structural/Python and Chromium suites.
+2. P0: obtain eligible PR #189 approval and verify exact-head checks and protections.
+3. P0: merge through ordinary protected dev-to-main PR only after all gates; verify main Quality.
+4. P0: verify Pages publication SHA equals promoted main and hosted critical-path smoke passes.
+5. P1: accessible preferences reset with synchronized modular/standalone code and confirmation, cancellation, keyboard-focus and persistence browser tests.
+
 ## 2026-11-15 — AUDIT-UTF8-BOM-OFFSET-292
 
 **Execution ledger:** Verified dev 14809ec66505f8692aabddb6d076b0c2aa0e9531, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, root AGENTS.md, frozen inventory, exact-head successful PR Quality #43743976724 and PR #189 (zero submitted reviews). Correct invalid UTF-8 byte offsets after an initial UTF-8 BOM: Python's utf-8-sig decoder strips the BOM before raising UnicodeDecodeError, so raw-file offsets must restore its three bytes. Add BOM/non-BOM negative cases with CRLF and multibyte text and a valid BOM control. Isolated Python reproduction confirms raw byte offset 31, physical line 2, byte column 10; full new-head Quality pending. No release; frozen 166 gaps / 95 partial unchanged.

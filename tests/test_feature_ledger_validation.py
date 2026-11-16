@@ -308,6 +308,28 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             path.write_text(json.dumps({"nested": ["\U0001f600"]}), encoding="utf-8")
             self.assertEqual(validator.load_ledger(path), {"nested": ["\U0001f600"]})
 
+    def test_duplicate_and_non_nfc_key_errors_escape_control_text(self):
+        # Object hooks run before recursive Unicode checks. Never let hostile
+        # audit keys inject terminal escapes or physical lines into CLI errors.
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "export.json"
+            for payload, diagnostic in (
+                ('{"\\u001b[31m":1,"\\u001b[31m":2}', "Duplicate feature ledger JSON key"),
+                ('{"bad\\nkey":1,"bad\\nkey":2}', "Duplicate feature ledger JSON key"),
+                ('{"cafe\\u0301":1}', "Non-NFC feature ledger JSON key"),
+            ):
+                with self.subTest(payload=payload):
+                    path.write_text(payload, encoding="utf-8")
+                    with self.assertRaises(ValueError) as error:
+                        validator.load_ledger(path)
+                    message = str(error.exception)
+                    self.assertIn(diagnostic, message)
+                    self.assertNotIn("\\x1b", message.replace("\\\\x1b", ""))
+                    self.assertNotIn("\\n", message.replace("\\\\n", ""))
+                    self.assertIn("\\\\", message)
+            path.write_text('{"safe key":1}', encoding="utf-8")
+            self.assertEqual(validator.load_ledger(path), {"safe key": 1})
+
     @classmethod
     def setUpClass(cls):
         cls.original = json.loads(LEDGER.read_text(encoding="utf-8"))

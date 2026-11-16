@@ -121,9 +121,9 @@ def load_ledger(path):
             # Decomposed keys can look identical to canonical keys while
             # comparing differently in JSON consumers.
             if not unicodedata.is_normalized("NFC", key):
-                raise ValueError(f"Non-NFC feature ledger JSON key: {key}")
+                raise ValueError(f"Non-NFC feature ledger JSON key: {key!r}")
             if key in result:
-                raise ValueError(f"Duplicate feature ledger JSON key: {key}")
+                raise ValueError(f"Duplicate feature ledger JSON key: {key!r}")
             result[key] = value
         return result
 

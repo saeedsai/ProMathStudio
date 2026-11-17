@@ -1613,6 +1613,39 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(rejected.returncode, 2)
             self.assertEqual(rejected.stdout, "")
 
+    def test_cli_gap_ids_by_scope_is_validated_and_opt_in(self):
+        command = [sys.executable, str(SCRIPT)]
+        frozen = validator.load_ledger(LEDGER)
+        expected = {}
+        for item in frozen["items"]:
+            if item["kind"] == "gap":
+                expected.setdefault(item["scope"], []).append(item["id"])
+        expected = {scope: sorted(ids) for scope, ids in sorted(expected.items())}
+        result = subprocess.run(command + ["--json-summary", "--include-gap-ids-by-scope"],
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        summary = json.loads(result.stdout)
+        self.assertEqual(summary["gap_ids_by_scope"], expected)
+        self.assertEqual(sum(map(len, summary["gap_ids_by_scope"].values())), 166)
+        self.assertEqual(len(set(id for ids in summary["gap_ids_by_scope"].values()
+                                 for id in ids)), 166)
+        self.assertEqual(set(summary), {"existing", "gaps", "gap_ids_by_scope"})
+        default = subprocess.run(command + ["--json-summary"],
+                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(json.loads(default.stdout), {"existing": 158, "gaps": 166})
+        invalid = subprocess.run(command + ["--include-gap-ids-by-scope"],
+                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(invalid.returncode, 2)
+        self.assertIn("requires --json-summary", invalid.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            bad = Path(directory) / "bad.json"
+            bad.write_text("{", encoding="utf-8")
+            rejected = subprocess.run(command + ["--json-summary", "--include-gap-ids-by-scope",
+                                                  str(bad)], capture_output=True, text=True, timeout=10)
+            self.assertEqual(rejected.returncode, 2)
+            self.assertEqual(rejected.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", rejected.stderr)
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

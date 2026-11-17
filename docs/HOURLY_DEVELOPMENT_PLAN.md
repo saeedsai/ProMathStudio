@@ -1,3 +1,14 @@
+## 2026-11-17 — AUDIT-QUIET-JSON-CI-RECOVERY-310
+
+**Execution checkpoint:** Inspected dev `0acab87fe2e7db7d38c3c68acdc34af4fd3d13e2`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen audit, living plan, PR #189 (open, no submitted reviews), and failed exact-head Quality [#43992701386](https://github.com/saeedsai/ProMathStudio/actions/runs/43992701386). Root cause: legacy `test_cli_quiet_is_silent_on_success_but_not_on_error` still expected successful silent output from the newly invalid `--quiet --json-summary` combination. Update this regression to assert quiet-only silent success and JSON-only machine-readable success, retaining separate explicit conflict-error coverage. No validator behavior weakened. Local checkout/browser suite unavailable; exact-new-head Quality pending. Historical 166 gaps / 95 partial remain frozen. No release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-new-head Quality Python/structural/Chromium suite all green, diagnose any further failure.
+2. P0: obtain eligible PR #189 approval and inspect required checks/protections at exact head.
+3. P0: promote via ordinary dev-to-main PR only after every required gate; verify new main Quality.
+4. P0: verify Pages publication SHA matches promoted main and hosted critical-path smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code, confirmation, cancellation, keyboard focus and persistence browser regressions.
+
 ## 2026-11-17 — AUDIT-QUIET-JSON-CONFLICT-309
 
 **Execution ledger:** Inspected dev `a78628d711344ddaaf8add25a40d8e874c90f696`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, historical audit, plan, PR #189 (open, mergeable, zero reviews), and exact-head PR Quality #43984767253 (success). Reject mutually exclusive `--quiet --json-summary` rather than silently discard a requested JSON report. Add focused CLI regression for explicit error, quiet-only and JSON-only controls. Full local checkout/browser suite unavailable; new exact-head CI pending. Frozen 166 gaps / 95 partial features unchanged; no release.

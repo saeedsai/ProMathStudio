@@ -593,13 +593,21 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             export = Path(directory) / "export.json"
             export.write_text(json.dumps(self.original), encoding="utf-8")
-            for extra in ([], ["--json-summary"]):
-                good = subprocess.run(
-                    [sys.executable, str(SCRIPT), "--quiet", *extra, str(export)],
-                    capture_output=True, text=True, check=False, timeout=10,
-                )
-                self.assertEqual(good.returncode, 0, good.stderr)
-                self.assertEqual((good.stdout, good.stderr), ("", ""))
+            # Quiet-only success is silent. JSON output is a distinct mode:
+            # combining --quiet with --json-summary must fail, not disappear.
+            good = subprocess.run(
+                [sys.executable, str(SCRIPT), "--quiet", str(export)],
+                capture_output=True, text=True, check=False, timeout=10,
+            )
+            self.assertEqual(good.returncode, 0, good.stderr)
+            self.assertEqual((good.stdout, good.stderr), ("", ""))
+            json_only = subprocess.run(
+                [sys.executable, str(SCRIPT), "--json-summary", str(export)],
+                capture_output=True, text=True, check=False, timeout=10,
+            )
+            self.assertEqual(json_only.returncode, 0, json_only.stderr)
+            self.assertEqual(json.loads(json_only.stdout)["gaps"], 166)
+            self.assertEqual(json_only.stderr, "")
             export.write_text('{"items": [}', encoding="utf-8")
             bad = subprocess.run(
                 [sys.executable, str(SCRIPT), "--quiet", str(export)],

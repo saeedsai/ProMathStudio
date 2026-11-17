@@ -1,3 +1,12 @@
+## 2026-11-18 — AUDIT-GAP-SECTION-IDS-318: Baseline dev cf7fdfcdcc5bf318a07759b96d3af5aa733398fc, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; exact-head Quality #44131480700 green, PR #189 open without reviews. Add opt-in sorted historical gap IDs grouped by audit section and focused regression (166 unique IDs, compatibility, invalid flag, malformed JSON). Local Python/Chromium not run; new-head CI pending, no release/Pages claim. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head historical-ledger, structural and Chromium Quality; repair failures.
+2. P0: obtain eligible PR #189 review and independently verify protections and required checks.
+3. P0: merge only through ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages publication SHA and hosted critical-path smoke checks.
+5. P1: accessible preferences reset with synchronized modular/standalone code, confirm/cancel, focus and persistence browser regressions.
+
 ## 2026-11-17 — AUDIT-GAP-SCOPE-IDS-317: Verified dev 9a10a7bc57c768350d50865f995860229f8cc849, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head Quality #44110137048 green, PR #189 open without submitted reviews. Added opt-in sorted historical gap IDs grouped by scope, with regression for 166 unique IDs, compatibility, invalid flag and malformed input. Local checkout/DNS unavailable; new-head CI pending, no release. Frozen 166 gaps / 95 partial unchanged.
 
 **NEXT FIVE (priority / acceptance tests):**

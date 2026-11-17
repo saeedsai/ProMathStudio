@@ -350,6 +350,8 @@ def main(argv=None):
                         help="Include sorted historical gap IDs by priority with --json-summary")
     parser.add_argument("--include-gap-ids-by-scope", action="store_true",
                         help="Include sorted historical gap IDs grouped by scope with --json-summary")
+    parser.add_argument("--include-gap-ids-by-section", action="store_true",
+                        help="Include sorted historical gap IDs grouped by audit section with --json-summary")
     parser.add_argument("--include-scopes", action="store_true",
                         help="Include validated gap counts grouped by scope with --json-summary")
     parser.add_argument("--include-sections", action="store_true",
@@ -391,6 +393,8 @@ def main(argv=None):
         parser.error("--include-gap-ids requires --json-summary")
     if args.include_gap_ids_by_scope and not args.json_summary:
         parser.error("--include-gap-ids-by-scope requires --json-summary")
+    if args.include_gap_ids_by_section and not args.json_summary:
+        parser.error("--include-gap-ids-by-section requires --json-summary")
     if args.include_scopes and not args.json_summary:
         parser.error("--include-scopes requires --json-summary")
     if args.include_sections and not args.json_summary:
@@ -446,6 +450,14 @@ def main(argv=None):
                     by_scope.setdefault(item["scope"], []).append(item["id"])
             summary["gap_ids_by_scope"] = {
                 scope: sorted(ids) for scope, ids in sorted(by_scope.items())
+            }
+        if args.include_gap_ids_by_section:
+            by_section = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    by_section.setdefault(item["section"], []).append(item["id"])
+            summary["gap_ids_by_section"] = {
+                section: sorted(ids) for section, ids in sorted(by_section.items())
             }
         if args.include_scopes:
             scopes = Counter(item["scope"] for item in data["items"] if item["kind"] == "gap")

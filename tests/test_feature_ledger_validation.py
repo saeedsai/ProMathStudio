@@ -20,6 +20,35 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_gap_ids_by_section_is_opt_in_sorted_and_validated(self):
+        command = [sys.executable, str(SCRIPT)]
+        baseline = subprocess.run(command + ["--json-summary"], capture_output=True,
+                                  text=True, check=True, timeout=10)
+        detailed = subprocess.run(command + ["--json-summary", "--include-gap-ids-by-section"],
+                                  capture_output=True, text=True, check=True, timeout=10)
+        original, report = json.loads(baseline.stdout), json.loads(detailed.stdout)
+        grouped = report.pop("gap_ids_by_section")
+        self.assertEqual(report, original)
+        self.assertEqual(list(grouped), sorted(grouped))
+        self.assertEqual(sum(map(len, grouped.values())), 166)
+        self.assertTrue(all(ids == sorted(set(ids)) for ids in grouped.values()))
+        expected = {item["id"] for item in validator.load_ledger(LEDGER)["items"]
+                    if item["kind"] == "gap"}
+        self.assertEqual(set().union(*(set(ids) for ids in grouped.values())), expected)
+        invalid = subprocess.run(command + ["--include-gap-ids-by-section"],
+                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(invalid.returncode, 2)
+        self.assertIn("requires --json-summary", invalid.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            bad = Path(directory) / "invalid.json"
+            bad.write_text("{", encoding="utf-8")
+            rejected = subprocess.run(command + [str(bad), "--json-summary",
+                                                  "--include-gap-ids-by-section"],
+                                      capture_output=True, text=True, timeout=10)
+            self.assertEqual(rejected.returncode, 2)
+            self.assertEqual(rejected.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", rejected.stderr)
+
     def test_gap_ids_by_priority_is_opt_in_sorted_and_validated(self):
         baseline = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
                                   capture_output=True, text=True, check=True)

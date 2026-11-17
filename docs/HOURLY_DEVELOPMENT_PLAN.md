@@ -1,3 +1,14 @@
+## 2026-11-17 — AUDIT-KIND-SCOPE-SECTION-313
+
+**Execution checkpoint:** Inspected dev `9345ebbc8f10173e59af13ee813bc34f62a660c8`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, PR #189 (open, zero reviews), and exact-head PR Quality [#44020817654](https://github.com/saeedsai/ProMathStudio/actions/runs/44020817654) (success). Add opt-in existing/gap kind counts by scope and audit section, sorted deterministic output and zero-count cells, with focused CLI regression covering 158/166 totals, backward compatibility, invalid flag and malformed input. Application bundle unchanged; new-head CI pending; no release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-new-head Quality historical ledger, Python structural and Chromium jobs; diagnose failures.
+2. P0: obtain eligible PR #189 approval and inspect exact-head required checks/protections.
+3. P0: merge through ordinary dev-to-main PR only after all gates; verify new main Quality.
+4. P0: verify Pages publication SHA and hosted critical-path smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirmation, cancellation, focus and persistence browser regressions.
+
 ## 2026-11-17 — AUDIT-EXISTING-STATUS-SCOPE-SECTION-312
 
 **Execution checkpoint:** Inspected dev `07dca4c81460d9ea09cbaa9882a8d61b8a4d6f68`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root contract, frozen inventory, PR #189 (zero reviews) and exact-head [Quality #44014588989](https://github.com/saeedsai/ProMathStudio/actions/runs/44014588989) (success). Add opt-in existing-feature status-by-scope-and-section reporting with explicit zero counts, deterministic ordering and focused CLI regression for 63 bounded-complete / 95 partial totals, default compatibility, flag guard and malformed input. No standalone bundle changes; new-head Quality pending. No release.

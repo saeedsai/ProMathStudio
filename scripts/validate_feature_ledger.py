@@ -364,6 +364,8 @@ def main(argv=None):
                         help="Include frozen gap counts by scope and audit section with --json-summary")
     parser.add_argument("--include-existing-status-scope-sections", action="store_true",
                         help="Include existing-feature status by scope and section with --json-summary")
+    parser.add_argument("--include-kind-scope-sections", action="store_true",
+                        help="Include existing/gap counts by scope and audit section with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
@@ -395,6 +397,8 @@ def main(argv=None):
         parser.error("--include-scope-sections requires --json-summary")
     if args.include_existing_status_scope_sections and not args.json_summary:
         parser.error("--include-existing-status-scope-sections requires --json-summary")
+    if args.include_kind_scope_sections and not args.json_summary:
+        parser.error("--include-kind-scope-sections requires --json-summary")
     try:
         data = load_ledger(args.path)
         counts = validate(data)
@@ -491,6 +495,19 @@ def main(argv=None):
                 scope: {
                     section: {"bounded_complete": row["bounded-complete"],
                               "partial": row["partial"]}
+                    for section, row in sorted(sections.items())
+                }
+                for scope, sections in sorted(by_scope_section.items())
+            }
+        if args.include_kind_scope_sections:
+            by_scope_section = {}
+            for item in data["items"]:
+                by_scope_section.setdefault(item["scope"], {}).setdefault(
+                    item["section"], Counter()
+                )[item["kind"]] += 1
+            summary["kind_scope_sections"] = {
+                scope: {
+                    section: {"existing": row["existing"], "gaps": row["gap"]}
                     for section, row in sorted(sections.items())
                 }
                 for scope, sections in sorted(by_scope_section.items())

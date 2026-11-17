@@ -1,3 +1,14 @@
+## 2026-11-17 — AUDIT-QUIET-JSON-CONFLICT-309
+
+**Execution ledger:** Inspected dev `a78628d711344ddaaf8add25a40d8e874c90f696`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, historical audit, plan, PR #189 (open, mergeable, zero reviews), and exact-head PR Quality #43984767253 (success). Reject mutually exclusive `--quiet --json-summary` rather than silently discard a requested JSON report. Add focused CLI regression for explicit error, quiet-only and JSON-only controls. Full local checkout/browser suite unavailable; new exact-head CI pending. Frozen 166 gaps / 95 partial features unchanged; no release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Python, structural and Chromium Quality; fix observed failures.
+2. P0: obtain eligible PR #189 approval and verify exact-head checks/protections.
+3. P0: merge only via ordinary protected dev-to-main PR after all gates; verify main Quality.
+4. P0: verify Pages publication SHA matches promoted main and hosted critical-path smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirmation, cancellation, focus and persistence browser regressions.
+
 ## 2026-11-17 — AUDIT-KIND-SCOPE-308
 
 **Execution ledger:** Inspected dev `364798deaffe6b433fec6e157b474cc996c34876`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, plan, exact-head PR Quality #43933888057 (success), and PR #189 (open, mergeable, zero submitted reviews). Added opt-in `--json-summary --include-kind-scopes` reporting validated existing/gap counts by scope with explicit zero cells and a CLI regression for 158/166 totals, combination with section summary, default compatibility, invalid flag and malformed input. Full local checkout/browser tests unavailable; new-head CI pending. Historical 166 gaps / 95 partial unchanged; no release.

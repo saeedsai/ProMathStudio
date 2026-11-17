@@ -1379,6 +1379,22 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(malformed.stdout, "")
             self.assertIn("Malformed feature ledger JSON", malformed.stderr)
 
+    def test_quiet_and_json_summary_conflict_is_explicit(self):
+        command = [sys.executable, str(SCRIPT)]
+        conflict = subprocess.run(command + ["--quiet", "--json-summary", str(LEDGER)],
+                                  capture_output=True, text=True, timeout=10)
+        self.assertEqual(conflict.returncode, 2)
+        self.assertEqual(conflict.stdout, "")
+        self.assertIn("--quiet cannot be combined with --json-summary", conflict.stderr)
+        quiet = subprocess.run(command + ["--quiet", str(LEDGER)],
+                               capture_output=True, text=True, timeout=10)
+        self.assertEqual(quiet.returncode, 0, quiet.stderr)
+        self.assertEqual(quiet.stdout, "")
+        summary = subprocess.run(command + ["--json-summary", str(LEDGER)],
+                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(summary.returncode, 0, summary.stderr)
+        self.assertEqual(json.loads(summary.stdout), {"existing": 158, "gaps": 166})
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

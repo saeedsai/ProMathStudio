@@ -363,6 +363,10 @@ def main(argv=None):
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
+    # --quiet suppresses success output; combining it with a requested JSON
+    # report would silently discard machine-readable results.
+    if args.quiet and args.json_summary:
+        parser.error("--quiet cannot be combined with --json-summary")
     if args.include_status and not args.json_summary:
         parser.error("--include-status requires --json-summary")
     if args.include_priorities and not args.json_summary:

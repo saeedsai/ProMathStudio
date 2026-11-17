@@ -1,3 +1,12 @@
+## 2026-11-17 — AUDIT-PROVENANCE-315: Verified dev f2e088484ce732fe1f686b07061725ff107f84f5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head Quality #44050992618 green, PR #189 open with zero submitted reviews. Add opt-in validated audit provenance JSON metadata (schema version/source date) and regression for default compatibility, required flag and invalid schema. New-head CI pending; no release. Historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-new-head Quality structural, Python and Chromium jobs all pass; fix any observed failures.
+2. P0: obtain eligible PR #189 review; independently verify required protections and checks.
+3. P0: merge only via ordinary protected dev-to-main PR when all gates pass; verify main Quality.
+4. P0: verify GitHub Pages publication SHA and hosted smoke checks after promotion.
+5. P1: implement accessible preferences reset with synchronized source/index.html and confirmation, cancellation, focus and persistence browser regressions.
+
 ## 2026-11-17 — AUDIT-PRIORITY-SCOPE-SECTION-314
 
 **Execution checkpoint:** Inspected dev `5b9c99ca76633f2bd799d71a2156378388457ccf`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen audit, PR #189 (zero reviews) and successful exact-head Quality #44028359618. Added opt-in validated gap priority counts by scope and section, deterministic P0-P3 zero cells, focused CLI regression for 22/64/53/27, default compatibility, missing flag and malformed input. Standalone bundle unchanged. Local checkout unavailable; new-head CI pending. Frozen 166 gaps / 95 partial unchanged; no release.

@@ -20,6 +20,33 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_cli_audit_metadata_provenance_is_opt_in_and_validated(self):
+        baseline = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
+                                  capture_output=True, text=True, check=True)
+        detailed = subprocess.run([sys.executable, str(SCRIPT), "--json-summary",
+                                   "--include-audit-metadata"],
+                                  capture_output=True, text=True, check=True)
+        original = json.loads(baseline.stdout)
+        report = json.loads(detailed.stdout)
+        self.assertNotIn("audit_metadata", original)
+        self.assertEqual(report.pop("audit_metadata"),
+                         {"schema_version": 1, "source_audit": "2026-10-26"})
+        self.assertEqual(report, original)
+        missing = subprocess.run([sys.executable, str(SCRIPT), "--include-audit-metadata"],
+                                 capture_output=True, text=True)
+        self.assertEqual(missing.returncode, 2)
+        self.assertIn("requires --json-summary", missing.stderr)
+        with tempfile.TemporaryDirectory() as folder:
+            invalid = Path(folder) / "invalid.json"
+            invalid.write_text('{"schemaVersion":2,"sourceAudit":"2026-10-26","items":[]}',
+                               encoding="utf-8")
+            rejected = subprocess.run([sys.executable, str(SCRIPT), str(invalid),
+                                       "--json-summary", "--include-audit-metadata"],
+                                      capture_output=True, text=True)
+            self.assertEqual(rejected.returncode, 2)
+            self.assertEqual(rejected.stdout, "")
+            self.assertIn("schemaVersion", rejected.stderr)
+
     def test_existing_status_scope_sections_cli_and_guards(self):
         default = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
                                  capture_output=True, text=True, check=True)

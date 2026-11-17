@@ -340,6 +340,8 @@ def main(argv=None):
                         help="JSON export to validate (default: frozen audit ledger)")
     parser.add_argument("--json-summary", action="store_true",
                         help="Print validated historical counts as machine-readable JSON")
+    parser.add_argument("--include-audit-metadata", action="store_true",
+                        help="Include validated frozen audit provenance with --json-summary")
     parser.add_argument("--include-status", action="store_true",
                         help="Include validated existing-feature status counts with --json-summary")
     parser.add_argument("--include-priorities", action="store_true",
@@ -375,6 +377,8 @@ def main(argv=None):
     # report would silently discard machine-readable results.
     if args.quiet and args.json_summary:
         parser.error("--quiet cannot be combined with --json-summary")
+    if args.include_audit_metadata and not args.json_summary:
+        parser.error("--include-audit-metadata requires --json-summary")
     if args.include_status and not args.json_summary:
         parser.error("--include-status requires --json-summary")
     if args.include_priorities and not args.json_summary:
@@ -412,6 +416,9 @@ def main(argv=None):
         return
     if args.json_summary:
         summary = {"existing": counts["existing"], "gaps": counts["gap"]}
+        if args.include_audit_metadata:
+            summary["audit_metadata"] = {"schema_version": data["schemaVersion"],
+                                         "source_audit": data["sourceAudit"]}
         if args.include_status:
             statuses = Counter(item["status"] for item in data["items"] if item["kind"] == "existing")
             summary.update({"bounded_complete": statuses["bounded-complete"], "partial": statuses["partial"]})

@@ -589,6 +589,45 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
             self.assertEqual(malformed.stdout, "")
             self.assertIn("Malformed feature ledger JSON", malformed.stderr)
 
+    def test_cli_optional_gap_scope_section_crosstab(self):
+        # Counts come from validated gap records; no frozen totals are rewritten.
+        with tempfile.TemporaryDirectory() as directory:
+            export = Path(directory) / "export.json"
+            export.write_text(json.dumps(self.original), encoding="utf-8")
+            command = [sys.executable, str(SCRIPT)]
+            expected = {}
+            for item in self.original["items"]:
+                if item["kind"] == "gap":
+                    scope = item["scope"]
+                    section = item["section"]
+                    expected.setdefault(scope, {})[section] = expected.setdefault(scope, {}).get(section, 0) + 1
+            result = subprocess.run(
+                command + ["--json-summary", "--include-scope-sections", str(export)],
+                capture_output=True, text=True, check=False, timeout=10,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            summary = json.loads(result.stdout)
+            self.assertEqual(summary["gap_scope_sections"], {
+                scope: dict(sorted(row.items())) for scope, row in sorted(expected.items())
+            })
+            self.assertEqual(sum(sum(row.values()) for row in expected.values()), 166)
+            self.assertEqual((summary["existing"], summary["gaps"]), (158, 166))
+            plain = subprocess.run(command + ["--json-summary", str(export)],
+                                   capture_output=True, text=True, check=False, timeout=10)
+            self.assertEqual(json.loads(plain.stdout), {"existing": 158, "gaps": 166})
+            invalid = subprocess.run(command + ["--include-scope-sections", str(export)],
+                                     capture_output=True, text=True, check=False, timeout=10)
+            self.assertEqual(invalid.returncode, 2)
+            self.assertIn("--include-scope-sections requires --json-summary", invalid.stderr)
+            export.write_text('{"items": [}', encoding="utf-8")
+            malformed = subprocess.run(
+                command + ["--json-summary", "--include-scope-sections", str(export)],
+                capture_output=True, text=True, check=False, timeout=10,
+            )
+            self.assertEqual(malformed.returncode, 2)
+            self.assertEqual(malformed.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", malformed.stderr)
+
     def test_cli_quiet_is_silent_on_success_but_not_on_error(self):
         with tempfile.TemporaryDirectory() as directory:
             export = Path(directory) / "export.json"

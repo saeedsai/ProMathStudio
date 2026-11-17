@@ -1,3 +1,14 @@
+## 2026-11-17 — AUDIT-SCOPE-SECTION-CROSSTAB-311
+
+**Execution checkpoint:** Inspected dev `793dc64eae20536c1cc827794a64a6b9606f0cef`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, historical audit, plan, PR #189 (open, no submitted reviews), and exact-head Quality [#44007157110](https://github.com/saeedsai/ProMathStudio/actions/runs/44007157110) (success, static/browser job green). Add optional validated gap-by-scope-and-section JSON reporting with deterministic sorted keys, a focused CLI regression for 166 total gaps, default compatibility, invalid flag and malformed export. No application bundle changes. Local checkout/browser execution unavailable; new-head CI pending. Historical 166 gaps and 95 partial features unchanged; no release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-new-head Quality (historical ledger, Python structural, Chromium) succeeds; fix any observed regression.
+2. P0: obtain eligible PR #189 review and verify exact-head required checks, branch protections and merge eligibility.
+3. P0: merge only through ordinary dev-to-main PR after all release gates, then verify main Quality.
+4. P0: verify Pages published SHA against promoted main and run hosted critical-path smoke checks.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirm/cancel/focus/persistence browser regressions.
+
 ## 2026-11-17 — AUDIT-QUIET-JSON-CI-RECOVERY-310
 
 **Execution checkpoint:** Inspected dev `0acab87fe2e7db7d38c3c68acdc34af4fd3d13e2`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen audit, living plan, PR #189 (open, no submitted reviews), and failed exact-head Quality [#43992701386](https://github.com/saeedsai/ProMathStudio/actions/runs/43992701386). Root cause: legacy `test_cli_quiet_is_silent_on_success_but_not_on_error` still expected successful silent output from the newly invalid `--quiet --json-summary` combination. Update this regression to assert quiet-only silent success and JSON-only machine-readable success, retaining separate explicit conflict-error coverage. No validator behavior weakened. Local checkout/browser suite unavailable; exact-new-head Quality pending. Historical 166 gaps / 95 partial remain frozen. No release.

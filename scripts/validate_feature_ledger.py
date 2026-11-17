@@ -360,6 +360,8 @@ def main(argv=None):
                         help="Include existing/gap counts by audit section with --json-summary")
     parser.add_argument("--include-kind-scopes", action="store_true",
                         help="Include existing/gap counts by scope with --json-summary")
+    parser.add_argument("--include-scope-sections", action="store_true",
+                        help="Include frozen gap counts by scope and audit section with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
@@ -387,6 +389,8 @@ def main(argv=None):
         parser.error("--include-kind-sections requires --json-summary")
     if args.include_kind_scopes and not args.json_summary:
         parser.error("--include-kind-scopes requires --json-summary")
+    if args.include_scope_sections and not args.json_summary:
+        parser.error("--include-scope-sections requires --json-summary")
     try:
         data = load_ledger(args.path)
         counts = validate(data)
@@ -462,6 +466,15 @@ def main(argv=None):
             summary["kind_scopes"] = {
                 scope: {"existing": row["existing"], "gaps": row["gap"]}
                 for scope, row in sorted(by_scope.items())
+            }
+        if args.include_scope_sections:
+            by_scope_section = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    by_scope_section.setdefault(item["scope"], Counter())[item["section"]] += 1
+            summary["gap_scope_sections"] = {
+                scope: dict(sorted(row.items()))
+                for scope, row in sorted(by_scope_section.items())
             }
         print(json.dumps(summary, sort_keys=True))
     else:

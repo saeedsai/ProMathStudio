@@ -20,6 +20,46 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_existing_status_scope_sections_cli_and_guards(self):
+        default = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
+                                 capture_output=True, text=True, check=True)
+        detailed = subprocess.run([sys.executable, str(SCRIPT), "--json-summary",
+                                   "--include-existing-status-scope-sections"],
+                                  capture_output=True, text=True, check=True)
+        baseline, result = json.loads(default.stdout), json.loads(detailed.stdout)
+        expected = {}
+        for item in validator.load_ledger(LEDGER)["items"]:
+            if item["kind"] != "existing":
+                continue
+            row = expected.setdefault(item["scope"], {}).setdefault(
+                item["section"], {"bounded_complete": 0, "partial": 0})
+            row[item["status"].replace("-", "_")] += 1
+        self.assertEqual(result["existing_status_scope_sections"], {
+            scope: dict(sorted(sections.items()))
+            for scope, sections in sorted(expected.items())
+        })
+        rows = [row for sections in result["existing_status_scope_sections"].values()
+                for row in sections.values()]
+        self.assertEqual(sum(row["bounded_complete"] for row in rows), 63)
+        self.assertEqual(sum(row["partial"] for row in rows), 95)
+        self.assertEqual({k: v for k, v in result.items()
+                          if k != "existing_status_scope_sections"}, baseline)
+        invalid = subprocess.run([sys.executable, str(SCRIPT),
+                                  "--include-existing-status-scope-sections"],
+                                 capture_output=True, text=True)
+        self.assertEqual(invalid.returncode, 2)
+        self.assertIn("requires --json-summary", invalid.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            malformed = Path(directory) / "invalid.json"
+            malformed.write_text("{", encoding="utf-8")
+            rejected = subprocess.run([sys.executable, str(SCRIPT), str(malformed),
+                                       "--json-summary",
+                                       "--include-existing-status-scope-sections"],
+                                      capture_output=True, text=True)
+            self.assertEqual(rejected.returncode, 2)
+            self.assertEqual(rejected.stdout, "")
+
+
     def test_kind_scopes_cli_cross_tab_and_flag_guard(self):
         default = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
                                  capture_output=True, text=True, check=True)

@@ -20,6 +20,37 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_gap_ids_by_priority_is_opt_in_sorted_and_validated(self):
+        baseline = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
+                                  capture_output=True, text=True, check=True)
+        detailed = subprocess.run([sys.executable, str(SCRIPT), "--json-summary",
+                                   "--include-gap-ids", "--include-priorities"],
+                                  capture_output=True, text=True, check=True)
+        original, report = json.loads(baseline.stdout), json.loads(detailed.stdout)
+        grouped = report.pop("gap_ids_by_priority")
+        counts = report.pop("gap_priorities")
+        self.assertEqual(report, original)
+        self.assertEqual(list(grouped), ["P0", "P1", "P2", "P3"])
+        self.assertEqual({key: len(ids) for key, ids in grouped.items()},
+                         {"P0": 22, "P1": 64, "P2": 53, "P3": 27})
+        self.assertEqual(counts, {key: len(ids) for key, ids in grouped.items()})
+        self.assertTrue(all(ids == sorted(set(ids)) for ids in grouped.values()))
+        self.assertEqual(set().union(*(set(ids) for ids in grouped.values())),
+                         {item["id"] for item in validator.load_ledger(LEDGER)["items"]
+                          if item["kind"] == "gap"})
+        invalid = subprocess.run([sys.executable, str(SCRIPT), "--include-gap-ids"],
+                                 capture_output=True, text=True)
+        self.assertEqual(invalid.returncode, 2)
+        self.assertIn("requires --json-summary", invalid.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            bad = Path(directory) / "invalid.json"
+            bad.write_text("{", encoding="utf-8")
+            rejected = subprocess.run([sys.executable, str(SCRIPT), str(bad),
+                                       "--json-summary", "--include-gap-ids"],
+                                      capture_output=True, text=True)
+            self.assertEqual(rejected.returncode, 2)
+            self.assertEqual(rejected.stdout, "")
+
     def test_cli_audit_metadata_provenance_is_opt_in_and_validated(self):
         baseline = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
                                   capture_output=True, text=True, check=True)

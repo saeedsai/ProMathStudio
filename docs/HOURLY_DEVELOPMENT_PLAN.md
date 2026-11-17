@@ -1,3 +1,12 @@
+## 2026-11-17 — AUDIT-GAP-IDS-316: Verified dev 81371cb2e4c693f46c5ae34a5acc517b4708705a, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head Quality #44069735130 green, PR #189 open without reviews. Added opt-in sorted historical gap IDs by priority with regression for 22/64/53/27, uniqueness, coverage, compatibility and error handling. New-head CI pending; no release. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Quality including historical ledger, structural and Chromium tests; fix failures.
+2. P0: obtain eligible PR #189 approval and verify required branch protections and exact-head checks.
+3. P0: merge only via ordinary dev-to-main PR after all gates pass; verify main Quality.
+4. P0: verify Pages publication SHA and hosted critical-path smoke tests after promotion.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code, confirmation, cancellation, focus and persistence browser regressions.
+
 ## 2026-11-17 — AUDIT-PROVENANCE-315: Verified dev f2e088484ce732fe1f686b07061725ff107f84f5, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, exact-head Quality #44050992618 green, PR #189 open with zero submitted reviews. Add opt-in validated audit provenance JSON metadata (schema version/source date) and regression for default compatibility, required flag and invalid schema. New-head CI pending; no release. Historical 166 gaps / 95 partial unchanged.
 
 **NEXT FIVE (priority / acceptance tests):**

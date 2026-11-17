@@ -366,6 +366,8 @@ def main(argv=None):
                         help="Include existing-feature status by scope and section with --json-summary")
     parser.add_argument("--include-kind-scope-sections", action="store_true",
                         help="Include existing/gap counts by scope and audit section with --json-summary")
+    parser.add_argument("--include-priority-scope-sections", action="store_true",
+                        help="Include frozen gap priorities by scope and audit section with --json-summary")
     parser.add_argument("--quiet", action="store_true",
                         help="Validate without success output (errors still go to stderr)")
     args = parser.parse_args(argv)
@@ -399,6 +401,8 @@ def main(argv=None):
         parser.error("--include-existing-status-scope-sections requires --json-summary")
     if args.include_kind_scope_sections and not args.json_summary:
         parser.error("--include-kind-scope-sections requires --json-summary")
+    if args.include_priority_scope_sections and not args.json_summary:
+        parser.error("--include-priority-scope-sections requires --json-summary")
     try:
         data = load_ledger(args.path)
         counts = validate(data)
@@ -508,6 +512,20 @@ def main(argv=None):
             summary["kind_scope_sections"] = {
                 scope: {
                     section: {"existing": row["existing"], "gaps": row["gap"]}
+                    for section, row in sorted(sections.items())
+                }
+                for scope, sections in sorted(by_scope_section.items())
+            }
+        if args.include_priority_scope_sections:
+            by_scope_section = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    by_scope_section.setdefault(item["scope"], {}).setdefault(
+                        item["section"], Counter()
+                    )[item["priority"]] += 1
+            summary["gap_priority_scope_sections"] = {
+                scope: {
+                    section: {priority: row[priority] for priority in ("P0", "P1", "P2", "P3")}
                     for section, row in sorted(sections.items())
                 }
                 for scope, sections in sorted(by_scope_section.items())

@@ -1,3 +1,14 @@
+## 2026-11-17 — AUDIT-PRIORITY-SCOPE-SECTION-314
+
+**Execution checkpoint:** Inspected dev `5b9c99ca76633f2bd799d71a2156378388457ccf`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen audit, PR #189 (zero reviews) and successful exact-head Quality #44028359618. Added opt-in validated gap priority counts by scope and section, deterministic P0-P3 zero cells, focused CLI regression for 22/64/53/27, default compatibility, missing flag and malformed input. Standalone bundle unchanged. Local checkout unavailable; new-head CI pending. Frozen 166 gaps / 95 partial unchanged; no release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-new-head Quality historical ledger, Python structural and Chromium; repair observed failures.
+2. P0: obtain eligible PR #189 review and inspect branch protections and required checks.
+3. P0: merge only through ordinary dev-to-main PR after all gates, then verify main Quality.
+4. P0: verify Pages published SHA and hosted critical-path smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirmation, cancellation, focus and persistence browser regressions.
+
 ## 2026-11-17 — AUDIT-KIND-SCOPE-SECTION-313
 
 **Execution checkpoint:** Inspected dev `9345ebbc8f10173e59af13ee813bc34f62a660c8`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, PR #189 (open, zero reviews), and exact-head PR Quality [#44020817654](https://github.com/saeedsai/ProMathStudio/actions/runs/44020817654) (success). Add opt-in existing/gap kind counts by scope and audit section, sorted deterministic output and zero-count cells, with focused CLI regression covering 158/166 totals, backward compatibility, invalid flag and malformed input. Application bundle unchanged; new-head CI pending; no release. Historical 166 gaps / 95 partial unchanged.

@@ -1522,6 +1522,39 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
         self.assertEqual(summary.returncode, 0, summary.stderr)
         self.assertEqual(json.loads(summary.stdout), {"existing": 158, "gaps": 166})
 
+    def test_cli_priority_scope_sections_and_guards(self):
+        command = [sys.executable, str(SCRIPT)]
+        base = subprocess.run(command + ["--json-summary"], capture_output=True,
+                              text=True, check=True, timeout=10)
+        detail = subprocess.run(command + ["--json-summary", "--include-priority-scope-sections"],
+                                capture_output=True, text=True, check=True, timeout=10)
+        result = json.loads(detail.stdout)
+        expected = {}
+        for item in validator.load_ledger(LEDGER)["items"]:
+            if item["kind"] == "gap":
+                row = expected.setdefault(item["scope"], {}).setdefault(
+                    item["section"], {priority: 0 for priority in ("P0", "P1", "P2", "P3")})
+                row[item["priority"]] += 1
+        self.assertEqual(result["gap_priority_scope_sections"], {
+            scope: dict(sorted(sections.items())) for scope, sections in sorted(expected.items())
+        })
+        totals = {priority: sum(row[priority] for sections in result["gap_priority_scope_sections"].values()
+                                for row in sections.values()) for priority in ("P0", "P1", "P2", "P3")}
+        self.assertEqual(totals, {"P0": 22, "P1": 64, "P2": 53, "P3": 27})
+        self.assertEqual({k: v for k, v in result.items()
+                          if k != "gap_priority_scope_sections"}, json.loads(base.stdout))
+        invalid = subprocess.run(command + ["--include-priority-scope-sections"],
+                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(invalid.returncode, 2)
+        self.assertIn("requires --json-summary", invalid.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            malformed = Path(directory) / "bad.json"
+            malformed.write_text("{", encoding="utf-8")
+            rejected = subprocess.run(command + ["--json-summary", "--include-priority-scope-sections",
+                                                  str(malformed)], capture_output=True, text=True, timeout=10)
+            self.assertEqual(rejected.returncode, 2)
+            self.assertEqual(rejected.stdout, "")
+
     def test_optimized_python_still_rejects_corruption(self):
         # Under -O, the former assert-based validator silently accepted invalid data.
         script = (

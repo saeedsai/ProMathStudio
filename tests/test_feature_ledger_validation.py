@@ -20,6 +20,35 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_kind_scopes_cli_cross_tab_and_flag_guard(self):
+        default = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
+                                 capture_output=True, text=True, check=True)
+        detailed = subprocess.run([sys.executable, str(SCRIPT), "--json-summary",
+                                   "--include-kind-scopes", "--include-kind-sections"],
+                                  capture_output=True, text=True, check=True)
+        baseline, result = json.loads(default.stdout), json.loads(detailed.stdout)
+        expected = {}
+        for item in validator.load_ledger(LEDGER)["items"]:
+            row = expected.setdefault(item["scope"], {"existing": 0, "gaps": 0})
+            row["existing" if item["kind"] == "existing" else "gaps"] += 1
+        self.assertEqual(result["kind_scopes"], dict(sorted(expected.items())))
+        self.assertEqual(sum(row["existing"] for row in result["kind_scopes"].values()), 158)
+        self.assertEqual(sum(row["gaps"] for row in result["kind_scopes"].values()), 166)
+        self.assertEqual({k: v for k, v in result.items()
+                          if k not in ("kind_scopes", "kind_sections")}, baseline)
+        invalid = subprocess.run([sys.executable, str(SCRIPT), "--include-kind-scopes"],
+                                 capture_output=True, text=True)
+        self.assertNotEqual(invalid.returncode, 0)
+        self.assertIn("requires --json-summary", invalid.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            malformed = Path(directory) / "bad.json"
+            malformed.write_text("{", encoding="utf-8")
+            rejected = subprocess.run([sys.executable, str(SCRIPT), str(malformed),
+                                       "--json-summary", "--include-kind-scopes"],
+                                      capture_output=True, text=True)
+            self.assertNotEqual(rejected.returncode, 0)
+            self.assertEqual(rejected.stdout, "")
+
     def test_kind_sections_cli_cross_tab_and_flag_guard(self):
         default = subprocess.run([sys.executable, str(SCRIPT), "--json-summary"],
                                  capture_output=True, text=True, check=True)

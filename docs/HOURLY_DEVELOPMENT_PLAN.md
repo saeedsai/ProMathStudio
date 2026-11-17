@@ -1,3 +1,14 @@
+## 2026-11-17 — AUDIT-KIND-SCOPE-308
+
+**Execution ledger:** Inspected dev `364798deaffe6b433fec6e157b474cc996c34876`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, root AGENTS.md, frozen inventory, plan, exact-head PR Quality #43933888057 (success), and PR #189 (open, mergeable, zero submitted reviews). Added opt-in `--json-summary --include-kind-scopes` reporting validated existing/gap counts by scope with explicit zero cells and a CLI regression for 158/166 totals, combination with section summary, default compatibility, invalid flag and malformed input. Full local checkout/browser tests unavailable; new-head CI pending. Historical 166 gaps / 95 partial unchanged; no release.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Python, structural and Chromium Quality; repair any observed failure.
+2. P0: obtain eligible PR #189 review and verify branch protections and exact-head checks.
+3. P0: merge only through ordinary dev-to-main PR after required checks/reviews; verify main Quality.
+4. P0: verify GitHub Pages publication SHA and hosted critical-path smoke tests.
+5. P1: implement accessible preferences reset with synchronized modular/standalone code and confirmation, cancellation, focus and persistence browser regressions.
+
 ## 2026-11-16 — AUDIT-KIND-SECTION-307
 
 **Execution ledger:** Inspected dev `e7e99f95db0f98cfbd754f57b70b681cd39c25f6`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, AGENTS.md, frozen inventory, plan, PR #189 (open, zero reviews), and exact-head PR Quality #43924868849 (success). Added opt-in `--json-summary --include-kind-sections` reporting existing/gap counts by audit section with explicit zero cells and CLI regression for 158/166 totals, default compatibility, invalid flag and malformed input. Full local repository/browser tests unavailable; new-head CI pending. No application bundle changes; historical 166 gaps / 95 partial unchanged.

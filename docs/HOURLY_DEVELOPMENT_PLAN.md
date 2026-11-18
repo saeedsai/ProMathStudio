@@ -1,3 +1,11 @@
+## 2026-11-18 — TRUSS-SUPPORT-FLAGS-329 (dev; new-head CI pending)
+
+Validate truss support constraints as explicit booleans or lowercase 'true'/'false' strings, with omitted flags defaulting to false. Reject ambiguous numeric, null, array, object and typo flags before stiffness assembly. Focused Node regression checks both fixX/fixY refusal, valid strings, omitted flags and analytical axial-bar displacement. Previous exact-dev-head PR Quality #44365528635 passed for c1f2f3c2fd237f918e6161eb1c6143cb355f12fd; PR #189 still has zero reviews; main/Pages publication unverified. Local checkout blocked by GitHub DNS; new exact-head Quality pending. Frozen inventory 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (acceptance):** (1) verify exact-new-head push and PR Quality including Node/browser suites, fixing failures without weakening tests; (2) obtain eligible PR #189 review and verify all release gates; (3) merge only via ordinary reviewed dev→main PR and verify main exact-head Quality; (4) verify Pages published SHA and hosted desktop/390px smoke; (5) add JSON model round-trip regression and integrate canonical truss navigation only with synchronized modular/standalone assets and browser coverage.
+
+**Execution ledger:** prior dev c1f2f3c2fd237f918e6161eb1c6143cb355f12fd, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, prior exact-head Quality success #44365528635, new-head CI pending; source/test/docs/changelog atomic update, no local Node/browser suite.
+
 ## 2026-11-18 — TRUSS-LEGACY-AREA-328 (dev; CI pending)
 
 Reject finite legacy member areas whose m²→mm² conversion overflows. Preserve valid legacy bar displacement and converted area; focused Node regression added. Prior dev be9a3c4d1d2d8514218f8c99c16211d970fd02e8 exact-head Quality #44331313464 passed; PR #189 still lacks eligible approval. No main/Pages release claimed. Historical 166 gaps / 95 partial frozen.

@@ -128,3 +128,19 @@ test('legacy area SI conversion rejects overflow and preserves valid axial-bar p
  close(converted.members[0].area,1000);
  close(fem.solve(converted).displacements[1].x,1e-5,1e-13);
 });
+
+
+test('support constraints reject ambiguous flags and preserve explicit boolean/string settings',()=>{
+ const base=clone(fem.examples.bar);
+ for(const field of ['fixX','fixY']) for(const bad of [null,0,1,'TRUE','yes',[],{}]){
+   const model=clone(base);model.nodes[0][field]=bad;
+   assert.throws(()=>fem.parseModel(model),/must be true or false/);
+   assert.throws(()=>fem.solve(model),/must be true or false/);
+ }
+ const strings=clone(base);
+ strings.nodes[0].fixX='true';strings.nodes[0].fixY='true';
+ strings.nodes[1].fixY='true';strings.nodes[1].fixX='false';
+ close(fem.solve(strings).displacements[1].x,1e-5,1e-13);
+ const omitted=clone(base);delete omitted.nodes[1].fixX;
+ close(fem.solve(omitted).members[0].force,1000);
+});

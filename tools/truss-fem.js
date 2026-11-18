@@ -34,6 +34,11 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
+  const supportFlag = (value, name) => {
+    if (value === undefined || value === false || value === 'false') return false;
+    if (value === true || value === 'true') return true;
+    throw Error(name + ' must be true or false.');
+  };
   const requiredId = (v, name) => {
     const id = String(v ?? '').trim();
     if (!/^[A-Za-z0-9_-]{1,24}$/.test(id)) throw Error(name + ' needs a unique 1–24 character ID (letters, digits, - or _).');
@@ -53,8 +58,8 @@
       if (ids.has(id)) throw Error('Duplicate node ID: ' + id + '.');
       ids.add(id);
       return {id, x: finite(row.x, id + ' x (m)'), y: finite(row.y, id + ' y (m)'),
-        fixX: row.fixX === true || row.fixX === 'true',
-        fixY: row.fixY === true || row.fixY === 'true',
+        fixX: supportFlag(row.fixX, id + ' fixX'),
+        fixY: supportFlag(row.fixY, id + ' fixY'),
         fx: finiteScaled(row.fx ?? 0, id + ' Fx (kN)', 1000),
         fy: finiteScaled(row.fy ?? 0, id + ' Fy (kN)', 1000)};
     });

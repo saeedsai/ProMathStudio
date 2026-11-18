@@ -20,6 +20,47 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_gap_ids_by_scope_section_is_opt_in_sorted_and_validated(self):
+        command = [sys.executable, str(SCRIPT)]
+        plain = subprocess.run(command + ["--json-summary"], capture_output=True,
+                               text=True, check=True, timeout=10)
+        detailed = subprocess.run(command + ["--json-summary",
+                                            "--include-gap-ids-by-scope-section"],
+                                  capture_output=True, text=True, check=True, timeout=10)
+        baseline, report = json.loads(plain.stdout), json.loads(detailed.stdout)
+        grouped = report.pop("gap_ids_by_scope_section")
+        self.assertEqual(report, baseline)
+        self.assertEqual(list(grouped), sorted(grouped))
+        self.assertTrue(all(list(sections) == sorted(sections)
+                            for sections in grouped.values()))
+        actual = [identifier for sections in grouped.values()
+                  for ids in sections.values() for identifier in ids]
+        self.assertEqual(len(actual), 166)
+        self.assertEqual(len(set(actual)), 166)
+        self.assertTrue(all(ids == sorted(ids) for sections in grouped.values()
+                            for ids in sections.values()))
+        expected = {}
+        for item in validator.load_ledger(LEDGER)["items"]:
+            if item["kind"] == "gap":
+                expected.setdefault(item["scope"], {}).setdefault(
+                    item["section"], []).append(item["id"])
+        self.assertEqual(grouped, {scope: {section: sorted(ids)
+                                          for section, ids in sorted(sections.items())}
+                                   for scope, sections in sorted(expected.items())})
+        invalid = subprocess.run(command + ["--include-gap-ids-by-scope-section"],
+                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(invalid.returncode, 2)
+        self.assertIn("requires --json-summary", invalid.stderr)
+        with tempfile.TemporaryDirectory() as directory:
+            bad = Path(directory) / "invalid.json"
+            bad.write_text("{", encoding="utf-8")
+            rejected = subprocess.run(command + [str(bad), "--json-summary",
+                                                 "--include-gap-ids-by-scope-section"],
+                                      capture_output=True, text=True, timeout=10)
+            self.assertEqual(rejected.returncode, 2)
+            self.assertEqual(rejected.stdout, "")
+            self.assertIn("Malformed feature ledger JSON", rejected.stderr)
+
     def test_gap_ids_by_section_is_opt_in_sorted_and_validated(self):
         command = [sys.executable, str(SCRIPT)]
         baseline = subprocess.run(command + ["--json-summary"], capture_output=True,

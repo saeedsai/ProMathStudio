@@ -1,3 +1,13 @@
+## 2026-11-18 — TRUSS-CI-326: Repair exact-head regression fixture and reject coerced numeric objects
+Observed both push Quality #44308706690 and PR Quality #44308715188 failing on dev 30cca85763e593ddb897f47d179b26b1638745bb: the new malformed-row test supplied an invalid first node `{}`, so parser correctly rejected Node 1 before reaching intended Node 2. Replace that fixture with a valid first node; retain indexed Node 2 assertion. Harden shared finite-number validation against arrays and objects (including coercible objects) and add positive/negative solver regression. This does not change units or standalone bundle. Main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 still lacks reviews. New-head CI pending; no release. Historical inventory frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-new-head push and PR Quality pass including all eight Node truss tests and browser checks; fix failures without weakening tests.
+2. P0: obtain eligible PR #189 review and verify required release checks and protections.
+3. P0: merge only via ordinary reviewed dev-to-main PR; confirm main exact-head Quality success.
+4. P0: verify GitHub Pages deployment SHA and hosted Truss Studio at desktop and 390px mobile viewport.
+5. P1: add independent truss load-case and JSON round-trip analytical tests; integrate canonical Engineering Toolbox navigation only with synchronized src/index.html and browser regression.
+
 ## 2026-11-18 — TRUSS-MODEL-325: Indexed validation for malformed modern truss rows
 Dev-only pure solver fix: reject null, arrays, and primitive entries in modern `nodes`/`members` before accessing row properties. Preserve valid axial-bar displacement and current-model legacy passthrough. Added focused Node regression for five invalid row types in both arrays and direct `parseModel` calls. Prior dev `7aca18035c758a37b0a18d0909668dec7c626b6b`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; previous exact-head PR Quality #44290125690 green. New exact-commit Quality pending; PR #189 has no submitted reviews; Pages not verified. No modular bundle or standalone index.html change required. Historical inventory remains frozen at 166 gaps / 95 partial.
 

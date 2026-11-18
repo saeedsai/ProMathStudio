@@ -86,7 +86,19 @@ test('current truss parser rejects malformed node and member entries with indexe
    const members=clone(fem.examples.bar);members.members[0]=bad;
    assert.throws(()=>fem.solve(members),/Member 1 must be an object/);
  }
- assert.throws(()=>fem.parseModel({nodes:[{},null],members:[{}]}),/Node 2 must be an object/);
+ assert.throws(()=>fem.parseModel({nodes:[fem.examples.bar.nodes[0],null],members:fem.examples.bar.members}),/Node 2 must be an object/);
  assert.throws(()=>fem.parseModel({nodes:fem.examples.bar.nodes,members:[null]}),/Member 1 must be an object/);
  assert.deepEqual(fem.fromLegacy(fem.examples.bar),fem.examples.bar);
+});
+
+
+test('numeric model fields reject arrays and objects rather than coercing them',()=>{
+ for (const bad of [[],[1],{}, {valueOf:()=>1}]) {
+   const node=clone(fem.examples.bar);node.nodes[1].fx=bad;
+   assert.throws(()=>fem.solve(node),/finite number/);
+   const member=clone(fem.examples.bar);member.members[0].area=bad;
+   assert.throws(()=>fem.solve(member),/finite number/);
+ }
+ const good=fem.solve(fem.examples.bar);
+ close(good.displacements[1].x,1e-5,1e-13);
 });

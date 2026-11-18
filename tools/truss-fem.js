@@ -24,7 +24,7 @@
   'use strict';
   const MAX_NODES = 80, MAX_MEMBERS = 240;
   const finite = (v, name) => {
-    if (v === null || v === undefined || v === '' || typeof v === 'boolean') throw Error(name + ' must be a finite number.');
+    if (v === null || v === undefined || v === '' || typeof v === 'boolean' || typeof v === 'object' || typeof v === 'function') throw Error(name + ' must be a finite number.');
     const n = Number(v);
     if (!Number.isFinite(n)) throw Error(name + ' must be a finite number.');
     return n;

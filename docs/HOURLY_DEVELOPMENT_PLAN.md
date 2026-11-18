@@ -1,3 +1,16 @@
+## 2026-11-18 — TRUSS-SI-OVERFLOW-327 (dev; new-head CI pending)
+
+**Implemented on dev, release pending.** Reject finite-but-unrepresentable kN→N force and GPa→Pa modulus scaling at model parse time, before Infinity reaches the FEM matrices. Focused Node regression checks both load axes, member modulus overflow, the analytical single-bar result and numeric-string compatibility. Previous exact-head PR Quality #44318660075 passed at 0be7525f348136ac2e7bb28cbe57196536380c47. Local checkout blocked by github.com DNS; isolated Node suite not run locally, exact-new-head CI pending. PR #189 awaits eligible review; main Quality and Pages publication unverified. Frozen historical inventory: 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. **P0 — Verify exact new-head Quality:** all numerical, structural and browser jobs green for precise SHA; repair any observed failure without reducing assertions.
+2. **P0 — Release approval:** verify PR #189 exact-head checks and eligible reviewer approval; merge only by ordinary authorized dev→main PR.
+3. **P0 — Production validation:** verify resulting main Quality, GitHub Pages publication and hosted truss smoke, including mobile layout.
+4. **P1 — Truss JSON round-trip:** model export/import retains SI and current units, IDs and forces; negative malformed and mixed-unit fixtures.
+5. **P1 — Engineering Toolbox integration:** reuse canonical solver ID with synchronized source/index.html and Chromium desktop/390px navigation regression.
+
+**Execution ledger:** initial dev 0be7525f348136ac2e7bb28cbe57196536380c47; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR Quality #44318660075 success; source/test/docs/changelog bundled into one commit, new exact-head CI pending; no merge/Pages claim.
+
 ## 2026-11-18 — TRUSS-CI-326: Repair exact-head regression fixture and reject coerced numeric objects
 Observed both push Quality #44308706690 and PR Quality #44308715188 failing on dev 30cca85763e593ddb897f47d179b26b1638745bb: the new malformed-row test supplied an invalid first node `{}`, so parser correctly rejected Node 1 before reaching intended Node 2. Replace that fixture with a valid first node; retain indexed Node 2 assertion. Harden shared finite-number validation against arrays and objects (including coercible objects) and add positive/negative solver regression. This does not change units or standalone bundle. Main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 still lacks reviews. New-head CI pending; no release. Historical inventory frozen at 166 gaps / 95 partial.
 

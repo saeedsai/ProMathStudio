@@ -102,3 +102,17 @@ test('numeric model fields reject arrays and objects rather than coercing them',
  const good=fem.solve(fem.examples.bar);
  close(good.displacements[1].x,1e-5,1e-13);
 });
+
+test('rejects SI scaling overflow before assembling loads and stiffness',()=>{
+ const reference=fem.solve(fem.examples.bar);
+ close(reference.displacements[1].x,1e-5,1e-13);
+ for (const field of ['fx','fy']) {
+   const model=clone(fem.examples.bar);model.nodes[1][field]=1e308;
+   assert.throws(()=>fem.parseModel(model),/exceeds the supported SI range/);
+   assert.throws(()=>fem.solve(model),/exceeds the supported SI range/);
+ }
+ const stiff=clone(fem.examples.bar);stiff.members[0].E=1e308;
+ assert.throws(()=>fem.parseModel(stiff),/exceeds the supported SI range/);
+ const valid=clone(fem.examples.bar);valid.nodes[1].fx='1';
+ close(fem.solve(valid).members[0].force,1000);
+});

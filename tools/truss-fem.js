@@ -29,6 +29,11 @@
     if (!Number.isFinite(n)) throw Error(name + ' must be a finite number.');
     return n;
   };
+  const finiteScaled = (v, name, scale) => {
+    const result = finite(v, name) * scale;
+    if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
+    return result;
+  };
   const requiredId = (v, name) => {
     const id = String(v ?? '').trim();
     if (!/^[A-Za-z0-9_-]{1,24}$/.test(id)) throw Error(name + ' needs a unique 1–24 character ID (letters, digits, - or _).');
@@ -50,8 +55,8 @@
       return {id, x: finite(row.x, id + ' x (m)'), y: finite(row.y, id + ' y (m)'),
         fixX: row.fixX === true || row.fixX === 'true',
         fixY: row.fixY === true || row.fixY === 'true',
-        fx: finite(row.fx ?? 0, id + ' Fx (kN)') * 1000,
-        fy: finite(row.fy ?? 0, id + ' Fy (kN)') * 1000};
+        fx: finiteScaled(row.fx ?? 0, id + ' Fx (kN)', 1000),
+        fy: finiteScaled(row.fy ?? 0, id + ' Fy (kN)', 1000)};
     });
     const ix = new Map(nodes.map((n, i) => [n.id, i]));
     const members = model.members.map((row, i) => {
@@ -60,7 +65,7 @@
       const a = ix.get(String(row.a).trim()), b = ix.get(String(row.b).trim());
       if (a === undefined || b === undefined) throw Error('Member ' + id + ': end nodes must exist.');
       if (a === b) throw Error('Member ' + id + ': both ends cannot be the same node.');
-      const E = finite(row.E, id + ' E (GPa)') * 1e9;
+      const E = finiteScaled(row.E, id + ' E (GPa)', 1e9);
       const A = finite(row.area, id + ' area (mm²)') * 1e-6;
       if (E <= 0 || A <= 0) throw Error('Member ' + id + ': E and area must be positive.');
       const dx = nodes[b].x - nodes[a].x, dy = nodes[b].y - nodes[a].y;

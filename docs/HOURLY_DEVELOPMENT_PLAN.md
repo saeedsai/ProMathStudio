@@ -1,3 +1,12 @@
+## 2026-11-18 — TRUSS-STUDIO-322: User-facing 2D structural finite-element truss studio
+Added standalone offline `tools/truss-studio.html` with editable JSON model, pin/roller supports, 2D bar stiffness assembly, pivoted normalized linear solve, joint displacements, support reactions, axial member forces/stresses/strains, SVG undeformed/deformed diagram, CSV export, accessible status, responsive layout and explicit modeling limitations. Browser regression `tests/smoke_truss_studio.py` covers a hand-solvable triangular truss, equilibrium, singular mechanism, validation, CSV and 390px UI. Previous dev 26e8929bb07c4ee98c75779bc541ace5c35fccc4, main 70fc483cb1cec3d2372d37484e4a8ef7942343da. No changes to modular bundle or index.html. Local browser and new exact-head CI pending; PR #189 reviews/protections and Pages not verified. Frozen historical 166 gaps / 95 partial unchanged.
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: run truss browser test and exact-head Quality; verify triangle forces, singular rejection, no browser errors.
+2. P0: obtain PR #189 eligible review and independently verify protections; never bypass.
+3. P0: merge only through ordinary dev-to-main PR after exact-head CI and reviews; verify main Quality.
+4. P0: verify Pages SHA and hosted truss-studio URL, offline function, CSV and mobile viewport.
+5. P1: integrate truss studio into Engineering Toolbox navigation with source/bundle synchronization and browser routing test.
+
 ## 2026-11-18 — AUDIT-SYMLINK-DIAGNOSTIC-321: Repair exact-head PR Quality #44226742388 failure (FIFO symlink expected `not a regular file`, O_NOFOLLOW raised ELOOP). Normalize ELOOP to the existing non-regular-file diagnostic without weakening O_NOFOLLOW or descriptor checks; strengthen symlink-to-regular-file regression to require the same diagnostic. Previous dev eb3deadf79f714a3a23a01fbd1df5a03bc457bb6, main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Local isolated errno/symlink check only; exact-new-head Python/Chromium CI pending. PR #189 review/protections and Pages unverified. Frozen 166 gaps / 95 partial unchanged.
 
 **NEXT FIVE (priority / acceptance tests):**

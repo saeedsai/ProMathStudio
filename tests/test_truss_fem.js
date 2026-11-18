@@ -75,3 +75,18 @@ test('legacy SI model conversion preserves force and displacement, and rejects m
  assert.throws(()=>fem.fromLegacy(bad),/finite number/);
  assert.deepEqual(fem.fromLegacy(fem.examples.bar),fem.examples.bar);
 });
+
+
+test('current truss parser rejects malformed node and member entries with indexed diagnostics',()=>{
+ const reference=fem.solve(fem.examples.bar);
+ close(reference.displacements[1].x,1e-5,1e-13);
+ for (const bad of [null,undefined,[],42,'bad']) {
+   const nodes=clone(fem.examples.bar);nodes.nodes[1]=bad;
+   assert.throws(()=>fem.solve(nodes),/Node 2 must be an object/);
+   const members=clone(fem.examples.bar);members.members[0]=bad;
+   assert.throws(()=>fem.solve(members),/Member 1 must be an object/);
+ }
+ assert.throws(()=>fem.parseModel({nodes:[{},null],members:[{}]}),/Node 2 must be an object/);
+ assert.throws(()=>fem.parseModel({nodes:fem.examples.bar.nodes,members:[null]}),/Member 1 must be an object/);
+ assert.deepEqual(fem.fromLegacy(fem.examples.bar),fem.examples.bar);
+});

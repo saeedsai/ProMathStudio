@@ -1,3 +1,13 @@
+## 2026-11-18 — TRUSS-MODEL-325: Indexed validation for malformed modern truss rows
+Dev-only pure solver fix: reject null, arrays, and primitive entries in modern `nodes`/`members` before accessing row properties. Preserve valid axial-bar displacement and current-model legacy passthrough. Added focused Node regression for five invalid row types in both arrays and direct `parseModel` calls. Prior dev `7aca18035c758a37b0a18d0909668dec7c626b6b`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; previous exact-head PR Quality #44290125690 green. New exact-commit Quality pending; PR #189 has no submitted reviews; Pages not verified. No modular bundle or standalone index.html change required. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify exact-new-head Quality including Node truss and Chromium regressions; repair any observed failure.
+2. P0: obtain eligible PR #189 review and verify branch protections and required checks without bypass.
+3. P0: merge through ordinary dev-to-main PR only after release gates; verify main exact-head Quality.
+4. P0: verify Pages publication SHA and hosted truss studio, numerical example and mobile viewport.
+5. P1: add a verified independent second truss loading example and JSON round-trip numerical regression, then integrate canonical toolbox navigation with synchronized src/index.html and browser tests.
+
 ## 2026-11-18 — TRUSS-LEGACY-324: Reject ambiguous legacy/current truss units and malformed legacy imports
 Dev-only change: require valid node/member object arrays before legacy conversion; reject mixed SI A and modern area member schemas; validate legacy force/material/area numbers before converting N→kN, Pa→GPa and m²→mm². Focused Node regression checks reference single-bar displacement/reaction, conversion, mixed and dual-unit rejection, malformed arrays, nonfinite force and unchanged modern input. Previous dev `2a452444b44cbd9eabcedd6192f7363c29eeb28f`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; prior exact-head PR Quality #44258689876 passed, zero PR #189 reviews. New exact-commit CI pending; local full/browser checks not available in this execution. No root index.html or src/ change; historical 166 gaps / 95 partial unchanged.
 

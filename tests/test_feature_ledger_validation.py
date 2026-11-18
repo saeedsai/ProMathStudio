@@ -32,7 +32,7 @@ class FrozenFeatureLedgerValidationTests(unittest.TestCase):
                 link.symlink_to(target)
             except (OSError, NotImplementedError) as exc:
                 self.skipTest(f"symlinks unavailable: {exc}")
-            with self.assertRaisesRegex(ValueError, "Cannot read feature ledger JSON"):
+            with self.assertRaisesRegex(ValueError, "not a regular file"):
                 validator.load_ledger(link)
             self.assertEqual(validator.validate(validator.load_ledger(target)),
                              {"existing": 158, "gap": 166})

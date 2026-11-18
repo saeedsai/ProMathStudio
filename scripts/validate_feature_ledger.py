@@ -4,6 +4,7 @@
 Usage: python3 scripts/validate_feature_ledger.py
 This checks historical audit data integrity, not current implementation status.
 """
+import errno
 import json
 import math
 import os
@@ -330,6 +331,10 @@ def load_ledger(path):
             f"Feature ledger JSON must be valid UTF-8 at byte offset {byte_offset}: {exc.reason}; offending bytes: {exc.object[exc.start:exc.end].hex()}; line {line}, byte column {byte_column}"
         ) from exc
     except OSError as exc:
+        # O_NOFOLLOW reports ELOOP for symlinked paths before fstat can run.
+        # Preserve the established non-regular-file diagnostic for callers.
+        if exc.errno == errno.ELOOP and hasattr(os, "O_NOFOLLOW"):
+            raise ValueError("Cannot read feature ledger JSON: not a regular file") from exc
         raise ValueError(f"Cannot read feature ledger JSON: {exc.strerror or exc}") from exc
     except RecursionError as exc:
         raise ValueError("Feature ledger JSON nesting exceeds decoder limit") from exc

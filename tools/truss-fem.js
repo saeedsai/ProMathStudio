@@ -179,7 +179,7 @@
     return {nodes: model.nodes.map(n => ({...n, fx: finite(n.fx ?? 0, 'Legacy Fx (N)') / 1000,
       fy: finite(n.fy ?? 0, 'Legacy Fy (N)') / 1000})),
       members: model.members.map(m => ({id: m.id, a: m.a, b: m.b,
-        E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finite(m.A, 'Legacy area (m²)') * 1e6}))};
+        E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finiteScaled(m.A, 'Legacy area (m²)', 1e6)}))};
   }
   return Object.freeze({solve, parseModel, fromLegacy, examples, id:'structural-truss-fem-2d'});
 });

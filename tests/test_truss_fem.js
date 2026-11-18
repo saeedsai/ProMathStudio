@@ -116,3 +116,15 @@ test('rejects SI scaling overflow before assembling loads and stiffness',()=>{
  const valid=clone(fem.examples.bar);valid.nodes[1].fx='1';
  close(fem.solve(valid).members[0].force,1000);
 });
+
+
+test('legacy area SI conversion rejects overflow and preserves valid axial-bar physics',()=>{
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],
+   members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ const overflowing=clone(legacy);overflowing.members[0].A=1e308;
+ assert.throws(()=>fem.fromLegacy(overflowing),/Legacy area.*exceeds the supported SI range/);
+ assert.throws(()=>fem.solve(fem.fromLegacy(overflowing)),/Legacy area.*exceeds the supported SI range/);
+ const converted=fem.fromLegacy(legacy);
+ close(converted.members[0].area,1000);
+ close(fem.solve(converted).displacements[1].x,1e-5,1e-13);
+});

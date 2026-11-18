@@ -1,3 +1,11 @@
+## 2026-11-18 — TRUSS-LEGACY-AREA-328 (dev; CI pending)
+
+Reject finite legacy member areas whose m²→mm² conversion overflows. Preserve valid legacy bar displacement and converted area; focused Node regression added. Prior dev be9a3c4d1d2d8514218f8c99c16211d970fd02e8 exact-head Quality #44331313464 passed; PR #189 still lacks eligible approval. No main/Pages release claimed. Historical 166 gaps / 95 partial frozen.
+
+**NEXT FIVE (acceptance):** (1) exact new-head Quality success for Node and browser jobs; (2) eligible PR #189 approval and release gate verification; (3) authorized dev→main PR merge and main Quality success; (4) Pages deployment and desktop/mobile hosted smoke verified; (5) truss JSON round-trip and synchronized Engineering Toolbox navigation regressions.
+
+**Execution ledger:** base dev be9a3c4d1d2d8514218f8c99c16211d970fd02e8, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; previous exact-head CI success, new CI pending; no local Node/browser run (DNS/checkout unavailable).
+
 ## 2026-11-18 — TRUSS-SI-OVERFLOW-327 (dev; new-head CI pending)
 
 **Implemented on dev, release pending.** Reject finite-but-unrepresentable kN→N force and GPa→Pa modulus scaling at model parse time, before Infinity reaches the FEM matrices. Focused Node regression checks both load axes, member modulus overflow, the analytical single-bar result and numeric-string compatibility. Previous exact-head PR Quality #44318660075 passed at 0be7525f348136ac2e7bb28cbe57196536380c47. Local checkout blocked by github.com DNS; isolated Node suite not run locally, exact-new-head CI pending. PR #189 awaits eligible review; main Quality and Pages publication unverified. Frozen historical inventory: 166 gaps / 95 partial.

@@ -52,3 +52,26 @@ test('rejects mechanisms with nonzero stiffness diagonals (two unbraced collinea
  const model={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:1,y:0,fixY:true},{id:'C',x:1,y:1,fx:1}],members:[{id:'AB',a:'A',b:'B',E:200,area:1000},{id:'BC',a:'B',b:'C',E:200,area:1000}]};
  assert.throws(()=>fem.solve(model),/Unstable|under-constrained|singular/);
 });
+
+test('legacy SI model conversion preserves force and displacement, and rejects mixed units',()=>{
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},
+   {id:'B',x:2,y:0,fixY:true,fx:1000}],
+   members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ const converted=fem.fromLegacy(legacy);
+ close(converted.nodes[1].fx,1);
+ close(converted.members[0].E,200);
+ close(converted.members[0].area,1000);
+ const r=fem.solve(converted);
+ close(r.displacements[1].x,1e-5,1e-13);
+ close(r.reactions[0].rx,-1000);
+ const mixed=clone(legacy);
+ mixed.members.push({id:'BA',a:'B',b:'A',E:200,area:1000});
+ assert.throws(()=>fem.fromLegacy(mixed),/Mixed legacy SI and current/);
+ const both=clone(legacy);both.members[0].area=1000;
+ assert.throws(()=>fem.fromLegacy(both),/Mixed legacy SI and current/);
+ assert.throws(()=>fem.fromLegacy({nodes:null,members:legacy.members}),/Invalid legacy truss model/);
+ assert.throws(()=>fem.fromLegacy({nodes:[null],members:legacy.members}),/Invalid legacy truss model/);
+ const bad=clone(legacy);bad.nodes[1].fx='Infinity';
+ assert.throws(()=>fem.fromLegacy(bad),/finite number/);
+ assert.deepEqual(fem.fromLegacy(fem.examples.bar),fem.examples.bar);
+});

@@ -1,3 +1,13 @@
+## 2026-11-18 — TRUSS-LEGACY-324: Reject ambiguous legacy/current truss units and malformed legacy imports
+Dev-only change: require valid node/member object arrays before legacy conversion; reject mixed SI A and modern area member schemas; validate legacy force/material/area numbers before converting N→kN, Pa→GPa and m²→mm². Focused Node regression checks reference single-bar displacement/reaction, conversion, mixed and dual-unit rejection, malformed arrays, nonfinite force and unchanged modern input. Previous dev `2a452444b44cbd9eabcedd6192f7363c29eeb28f`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; prior exact-head PR Quality #44258689876 passed, zero PR #189 reviews. New exact-commit CI pending; local full/browser checks not available in this execution. No root index.html or src/ change; historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Quality (Node truss numerical regression and browser/structural suites); fix observed failures without weakening checks.
+2. P0: obtain eligible review for PR #189 and verify required release checks/protection; merge only via ordinary authorized PR.
+3. P0: after promotion verify main exact-head Quality, Pages publication SHA, and hosted truss assets/mobile smoke.
+4. P1: integrate structural-truss-fem-2d in Engineering Toolbox navigation with synchronized src/index.html and browser route regression.
+5. P1: add independently checked multiple truss load cases with reference forces, invalid cases and JSON round-trip tests.
+
 ## 2026-11-18 — TRUSS-STUDIO-323: Upgrade newly added basic 2D truss studio into a complete editable engineering UI with tabular joint/member inputs, direct stiffness FEM solver split into reusable pure JS, diagonal-scaled solution, residual and energy checks, tension/compression SVG deformation visualization, amplification, labels, two example models, model JSON import/export, results CSV/SVG, accessible responsive keyboard/mobile layout. Preserve legacy TrussStudio.solve(...) SI-unit API and legacy JSON (N, Pa, m²) imports while new form uses kN, GPa, mm². Source/data and regression tests updated atomically. Previous dev 047d18925452405792f219af2b0c26a8a29a5c3a, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; local node --test tests/test_truss_fem.js (5 passed); CHROMIUM_PATH=/usr/bin/chromium python tests/smoke_truss_fem.py and tests/smoke_truss_studio.py (both passed). Exact-new-head CI, PR #189 approval/protection and Pages release pending. Root index.html and modular bundle unchanged. Historical 166 gaps/95 partials remain frozen.
 
 **NEXT FIVE (priority / acceptance tests):**

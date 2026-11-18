@@ -159,10 +159,20 @@
       members:[{id:'AB',a:'A',b:'B',E:200,area:1000}]}
   };
   function fromLegacy(model) {
-    if (!model || !Array.isArray(model.members)) throw Error('Invalid legacy truss model.');
-    if (!model.members.some(m => m.A !== undefined)) return model;
-    return {nodes: model.nodes.map(n => ({...n, fx: (n.fx ?? 0) / 1000, fy: (n.fy ?? 0) / 1000})),
-      members: model.members.map(m => ({id: m.id, a: m.a, b: m.b, E: m.E / 1e9, area: m.A * 1e6}))};
+    if (!model || !Array.isArray(model.nodes) || !Array.isArray(model.members) ||
+        model.nodes.some(n => !n || typeof n !== 'object' || Array.isArray(n)) ||
+        model.members.some(m => !m || typeof m !== 'object' || Array.isArray(m))) {
+      throw Error('Invalid legacy truss model: nodes and members must contain objects.');
+    }
+    const legacyCount = model.members.filter(m => m.A !== undefined).length;
+    if (!legacyCount) return model;
+    if (legacyCount !== model.members.length || model.members.some(m => m.area !== undefined)) {
+      throw Error('Mixed legacy SI and current truss member units are not supported.');
+    }
+    return {nodes: model.nodes.map(n => ({...n, fx: finite(n.fx ?? 0, 'Legacy Fx (N)') / 1000,
+      fy: finite(n.fy ?? 0, 'Legacy Fy (N)') / 1000})),
+      members: model.members.map(m => ({id: m.id, a: m.a, b: m.b,
+        E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finite(m.A, 'Legacy area (m²)') * 1e6}))};
   }
   return Object.freeze({solve, parseModel, fromLegacy, examples, id:'structural-truss-fem-2d'});
 });

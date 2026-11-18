@@ -1,3 +1,11 @@
+## 2026-11-18 — TRUSS-WHITESPACE-NUMERIC-330 (dev; new-head CI pending)
+
+Reject whitespace-only numeric fields instead of silently converting them to zero via Number(' '). Preserve trimmed finite numeric strings and analytical single-bar results. Add Node regression for load, area and legacy area; no modular application or standalone index.html changes. Prior exact-head push/PR Quality #44375158127/#44375171973 succeeded for 5824a19c0beb4dbfd6e3e0783f44a529031544fd; PR #189 still lacks submitted review; main/Pages not verified. Frozen inventory 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (acceptance):** (1) verify exact-new-head push/PR Quality and repair failures; (2) obtain eligible PR #189 review and verify release gates; (3) merge only through ordinary approved dev-to-main PR and verify main Quality; (4) verify Pages published SHA and hosted desktop/390px smoke; (5) add truss JSON round-trip coverage and synchronized canonical Engineering Toolbox navigation with browser tests.
+
+**Execution ledger:** prior dev 5824a19c0beb4dbfd6e3e0783f44a529031544fd, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; previous push/PR Quality green; atomic source/test/docs/changelog update; local Node/browser not run (checkout/DNS unavailable); new-head CI pending, no release.
+
 ## 2026-11-18 — TRUSS-SUPPORT-FLAGS-329 (dev; new-head CI pending)
 
 Validate truss support constraints as explicit booleans or lowercase 'true'/'false' strings, with omitted flags defaulting to false. Reject ambiguous numeric, null, array, object and typo flags before stiffness assembly. Focused Node regression checks both fixX/fixY refusal, valid strings, omitted flags and analytical axial-bar displacement. Previous exact-dev-head PR Quality #44365528635 passed for c1f2f3c2fd237f918e6161eb1c6143cb355f12fd; PR #189 still has zero reviews; main/Pages publication unverified. Local checkout blocked by GitHub DNS; new exact-head Quality pending. Frozen inventory 166 gaps / 95 partial unchanged.

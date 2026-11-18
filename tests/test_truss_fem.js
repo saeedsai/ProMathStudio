@@ -144,3 +144,18 @@ test('support constraints reject ambiguous flags and preserve explicit boolean/s
  const omitted=clone(base);delete omitted.nodes[1].fixX;
  close(fem.solve(omitted).members[0].force,1000);
 });
+
+
+test('numeric input rejects whitespace-only values while preserving finite numeric strings',()=>{
+ for(const blank of [' ', '\\t', '\\n', '  \\t  ']){
+   const load=clone(fem.examples.bar);load.nodes[1].fx=blank;
+   assert.throws(()=>fem.parseModel(load),/finite number/);
+   assert.throws(()=>fem.solve(load),/finite number/);
+   const area=clone(fem.examples.bar);area.members[0].area=blank;
+   assert.throws(()=>fem.parseModel(area),/finite number/);
+ }
+ const valid=clone(fem.examples.bar);valid.nodes[1].fx=' 1 ';valid.members[0].area=' 1000 ';
+ close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:'   '}]};
+ assert.throws(()=>fem.fromLegacy(legacy),/finite number/);
+});

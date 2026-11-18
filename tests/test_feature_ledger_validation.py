@@ -20,6 +20,23 @@ spec.loader.exec_module(validator)
 
 
 class FrozenFeatureLedgerValidationTests(unittest.TestCase):
+    def test_symlinked_export_is_rejected_without_reading_target(self):
+        # The open-time guard must not follow a symlink to a different export.
+        if not hasattr(os, "O_NOFOLLOW"):
+            self.skipTest("O_NOFOLLOW unavailable on this platform")
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "target.json"
+            link = Path(directory) / "linked.json"
+            target.write_bytes(LEDGER.read_bytes())
+            try:
+                link.symlink_to(target)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"symlinks unavailable: {exc}")
+            with self.assertRaisesRegex(ValueError, "Cannot read feature ledger JSON"):
+                validator.load_ledger(link)
+            self.assertEqual(validator.validate(validator.load_ledger(target)),
+                             {"existing": 158, "gap": 166})
+
     def test_gap_ids_by_scope_section_is_opt_in_sorted_and_validated(self):
         command = [sys.executable, str(SCRIPT)]
         plain = subprocess.run(command + ["--json-summary"], capture_output=True,

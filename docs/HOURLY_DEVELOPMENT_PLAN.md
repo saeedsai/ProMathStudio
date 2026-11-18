@@ -1,3 +1,12 @@
+## 2026-11-18 — AUDIT-SYMLINK-OPEN-320: Previous dev 8f6231ecef7afb5653d8238617e6c5e68e189683, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; exact-head push/PR Quality #44220306832/#44220313073 successful. Harden historical ledger file opening with O_NOFOLLOW where available, rejecting symlinked exports at open time while preserving ordinary regular-file imports and size checks; add focused positive/negative symlink regression. Local Python/Chromium not run; new-head CI pending. PR #189 open with zero submitted reviews; Pages unverified; frozen 166 gaps / 95 partial unchanged.
+**NEXT FIVE (priority / acceptance tests):**
+1. P0: verify new exact-head Python ledger validation, structural and Chromium Quality; fix any observed failure.
+2. P0: obtain eligible PR #189 approval and independently verify release protection and required checks.
+3. P0: merge only via ordinary protected dev-to-main PR after gates pass; verify main Quality.
+4. P0: verify Pages published SHA and hosted critical-path smoke tests after promotion.
+5. P1: implement accessible preferences reset with synchronized modular and standalone code; test confirmation, cancellation, keyboard focus and persistence.
+
+
 ## 2026-11-18 — AUDIT-GAP-SCOPE-SECTION-IDS-319: Verified dev 6fd96119704ec418604bf865b2feda01df448667, main 70fc483cb1cec3d2372d37484e4a8ef7942343da, push/PR Quality #44203585687/#44203592193 green; PR #189 has zero reviews. Add opt-in sorted historical gap IDs grouped by scope and section, with focused CLI regression for all 166 unique IDs, default compatibility, invalid flag and malformed input. Local Python/Chromium not run; new exact-head CI pending. Frozen 166 gaps / 95 partial unchanged; no release.
 
 **NEXT FIVE (priority / acceptance tests):**

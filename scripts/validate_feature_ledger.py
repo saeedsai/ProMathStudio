@@ -273,7 +273,12 @@ def load_ledger(path):
         # Open nonblocking, then inspect the opened descriptor. A separate
         # path stat() followed by open() can race a replacement with a FIFO.
         source_path = Path(path)
-        descriptor = os.open(source_path, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0))
+        # On platforms supporting O_NOFOLLOW, reject symlinked exports at open
+        # time rather than following a potentially replaced path. Keep the
+        # existing fstat check for regular files and the bounded read.
+        descriptor = os.open(source_path, os.O_RDONLY |
+                             getattr(os, "O_NONBLOCK", 0) |
+                             getattr(os, "O_NOFOLLOW", 0))
         # fdopen() normally takes ownership, but if wrapping fails the raw
         # descriptor remains ours and must be closed before propagating.
         try:

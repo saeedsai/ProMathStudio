@@ -147,7 +147,7 @@ test('support constraints reject ambiguous flags and preserve explicit boolean/s
 
 
 test('numeric input rejects whitespace-only values while preserving finite numeric strings',()=>{
- for(const blank of [' ', '\\t', '\\n', '  \\t  ']){
+ for(const blank of [' ', String.fromCharCode(9), String.fromCharCode(10), '  '+String.fromCharCode(9)+'  ']){
    const load=clone(fem.examples.bar);load.nodes[1].fx=blank;
    assert.throws(()=>fem.parseModel(load),/finite number/);
    assert.throws(()=>fem.solve(load),/finite number/);

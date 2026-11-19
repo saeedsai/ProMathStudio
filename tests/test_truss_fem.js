@@ -253,3 +253,12 @@ test('JSON import enforces byte limit for multibyte Unicode rather than UTF-16 l
  assert.throws(()=>fem.importJSON(oversized),/1 MiB import limit/);
  close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });
+
+
+test('truss JSON import accepts UTF-8 BOM from saved files without relaxing validation',()=>{
+ const bar=JSON.stringify(fem.examples.bar);
+ assert.deepEqual(fem.importJSON('\uFEFF'+bar),fem.examples.bar);
+ close(fem.solve(fem.importJSON('\uFEFF'+bar)).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.importJSON('\uFEFF{bad'),/Invalid truss JSON/);
+ assert.throws(()=>fem.importJSON('\uFEFF'.repeat(350000)+bar),/1 MiB import limit/);
+});

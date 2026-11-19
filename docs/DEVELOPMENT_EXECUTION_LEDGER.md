@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-BOM-341 (dev; new exact-head CI pending)
+
+Accept a leading UTF-8 BOM in pasted or file-loaded truss JSON without weakening validation or 1 MiB UTF-8 byte cap. Focused Node regression covers valid BOM model, analytical displacement, malformed BOM JSON, and oversized BOM input. Baseline dev `d57b19c52913b5cb4f18574da07288ed6c8179b9`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; exact-head push Quality #44510297803 and PR Quality #44510305609 both succeeded. PR #189 has zero reviews; no release. Local Node/browser unavailable; new-head CI pending. Frozen historical 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (acceptance):** (1) new exact-head push/PR Quality green including BOM Node regression and browser smoke; (2) eligible approval on PR #189 and verified required protections; (3) authorized ordinary dev-to-main PR merge followed by exact-main Quality green; (4) Pages published commit and desktop/390px hosted smoke verified; (5) wire validated JSON importer into Truss Studio UI with current/legacy units, BOM file handling, negative upload browser regressions and synchronized index.html.
+
 ## 2026-11-19 — TRUSS-JSON-UTF8-340 (dev; exact-new-head CI pending)
 
 Correct the 1 MiB truss JSON import boundary to measure UTF-8 bytes rather than JavaScript UTF-16 code units; multibyte pasted documents previously bypassed the intended byte limit. Added positive Unicode and negative oversized Unicode Node regressions plus analytical bar control. Prior exact-head PR Quality #44501337459 passed at `6eca1052da6545f89d91f186dfc09a78a267e7f6`; PR #189 still has zero submitted reviews. Local Node/Chromium not run in this connector-only environment. New exact-head CI, main Quality and Pages remain pending. Historical 166 gaps / 95 partial frozen.

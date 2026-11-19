@@ -196,7 +196,8 @@
     // Bound UTF-8 bytes (not UTF-16 code units) before parsing oversized imports.
     if (new TextEncoder().encode(text).byteLength > 1024 * 1024) throw Error('Truss JSON document exceeds the 1 MiB import limit.');
     let model;
-    try { model = JSON.parse(text); } catch (_) { throw Error('Invalid truss JSON document.'); }
+    // Accept a single UTF-8 BOM from imported text files; count it toward the byte limit.
+    try { model = JSON.parse(text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text); } catch (_) { throw Error('Invalid truss JSON document.'); }
     parseModel(fromLegacy(model));
     return model;
   }

@@ -193,8 +193,8 @@
   // Validation is performed on a converted copy, not on the returned document.
   function importJSON(text) {
     if (typeof text !== 'string') throw Error('Truss JSON input must be a string.');
-    // Keep oversized pasted/imported files from monopolizing the UI thread.
-    if (text.length > 1024 * 1024) throw Error('Truss JSON document exceeds the 1 MiB import limit.');
+    // Bound UTF-8 bytes (not UTF-16 code units) before parsing oversized imports.
+    if (new TextEncoder().encode(text).byteLength > 1024 * 1024) throw Error('Truss JSON document exceeds the 1 MiB import limit.');
     let model;
     try { model = JSON.parse(text); } catch (_) { throw Error('Invalid truss JSON document.'); }
     parseModel(fromLegacy(model));

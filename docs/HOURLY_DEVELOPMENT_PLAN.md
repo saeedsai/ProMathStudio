@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-UTF8-340 (dev; exact-new-head CI pending)
+
+Correct the 1 MiB truss JSON import boundary to measure UTF-8 bytes rather than JavaScript UTF-16 code units; multibyte pasted documents previously bypassed the intended byte limit. Added positive Unicode and negative oversized Unicode Node regressions plus analytical bar control. Prior exact-head PR Quality #44501337459 passed at `6eca1052da6545f89d91f186dfc09a78a267e7f6`; PR #189 still has zero submitted reviews. Local Node/Chromium not run in this connector-only environment. New exact-head CI, main Quality and Pages remain pending. Historical 166 gaps / 95 partial frozen.
+
+**NEXT FIVE (acceptance):** (1) exact-new-head Quality green including UTF-8 truss Node and Chromium smoke; (2) obtain eligible PR #189 approval and verify protections; (3) ordinary approved dev-to-main PR merge with exact-main Quality green; (4) verify Pages published SHA and desktop/390px hosted smoke; (5) integrate JSON importer in Truss Studio UI with current/legacy unit labeling and synchronized standalone index.html plus negative browser upload tests.
+
 ## 2026-11-19 — TRUSS-JSON-BOUND-339 (dev; exact-head CI pending)
 
 Bound standalone truss JSON input to 1 MiB before JSON.parse to prevent oversized imports monopolizing the browser thread. Added positive valid-model and negative over-limit/malformed regressions; no bundled index.html or modular source change. Baseline dev `9c6dfb0a086cd46875c7b6eff3d975951a4c6673`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; prior exact-head PR Quality #44492914124 succeeded, PR #189 has zero reviews. Local git blocked by DNS; full Node/browser QA and new-head CI pending. Historical 166 gaps/95 partial remain frozen.

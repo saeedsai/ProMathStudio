@@ -242,3 +242,14 @@ test('truss JSON importer bounds input before parsing without rejecting normal m
  assert.throws(()=>fem.importJSON(' '.repeat(1024*1024)+'x'),/1 MiB import limit/);
  assert.throws(()=>fem.importJSON('{bad'),/Invalid truss JSON/);
 });
+
+
+test('JSON import enforces byte limit for multibyte Unicode rather than UTF-16 length',()=>{
+ const valid=JSON.stringify({...fem.examples.bar,note:'é'.repeat(100)});
+ assert.deepEqual(fem.importJSON(valid).nodes,fem.examples.bar.nodes);
+ const oversized=JSON.stringify({...fem.examples.bar,note:'é'.repeat(530000)});
+ assert.ok(oversized.length<1024*1024);
+ assert.ok(new TextEncoder().encode(oversized).byteLength>1024*1024);
+ assert.throws(()=>fem.importJSON(oversized),/1 MiB import limit/);
+ close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+});

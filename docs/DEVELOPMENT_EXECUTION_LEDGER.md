@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-BOUND-339 (dev; exact-head CI pending)
+
+Bound standalone truss JSON input to 1 MiB before JSON.parse to prevent oversized imports monopolizing the browser thread. Added positive valid-model and negative over-limit/malformed regressions; no bundled index.html or modular source change. Baseline dev `9c6dfb0a086cd46875c7b6eff3d975951a4c6673`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; prior exact-head PR Quality #44492914124 succeeded, PR #189 has zero reviews. Local git blocked by DNS; full Node/browser QA and new-head CI pending. Historical 166 gaps/95 partial remain frozen.
+
+**NEXT FIVE (acceptance):** (1) new exact-head Quality green including truss Node and Chromium smoke; (2) eligible PR #189 review and protection verified; (3) authorized ordinary PR merge and exact-main Quality green; (4) verify Pages published SHA and desktop/390px hosted smoke; (5) connect truss JSON importer to Studio UI with legacy-unit label and negative upload tests, preserving bundle consistency.
+
 ## 2026-11-19 — TRUSS-JSON-IMPORT-338 (dev; exact-new-head CI pending)
 
 Added standalone truss FEM `importJSON(text)` with strict JSON decoding, model/unit validation, and lossless preservation of original input IDs, supports, loads and units. Focused Node regression covers current and legacy examples, round-trip identity, analytical displacement, malformed JSON, invalid supports and mixed-unit rejection. No modular app or index.html changes; the truss solver is standalone. Baseline dev `f841a4754a1860a82bdf228b457832f0fcccd999`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Baseline PR Quality #44486898552 succeeded, PR #189 has no submitted reviews. New exact-head CI, main Quality and Pages pending. Historical inventory remains frozen at 166 gaps and 95 partial.

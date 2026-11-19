@@ -233,3 +233,12 @@ test('truss JSON import preserves model data and rejects malformed or mixed unit
  const malformed=clone(fem.examples.bar);malformed.nodes[1].fixY=1;
  assert.throws(()=>fem.importJSON(JSON.stringify(malformed)),/must be true or false/);
 });
+
+
+test('truss JSON importer bounds input before parsing without rejecting normal models',()=>{
+ const valid=JSON.stringify(fem.examples.bar);
+ assert.deepEqual(fem.importJSON(valid),fem.examples.bar);
+ assert.throws(()=>fem.importJSON(' '.repeat(1024*1024+1)),/1 MiB import limit/);
+ assert.throws(()=>fem.importJSON(' '.repeat(1024*1024)+'x'),/1 MiB import limit/);
+ assert.throws(()=>fem.importJSON('{bad'),/Invalid truss JSON/);
+});

@@ -1,3 +1,11 @@
+## 2026-11-19 — TRUSS-STIFFNESS-UNDERFLOW-332 (dev; new-head CI pending)
+
+Reject strictly positive but extremely small E/area combinations whose assembled EA/L underflows to zero, before the matrix is assembled; report an actionable indexed member error instead of a generic singular-system error. Add focused negative underflow and positive analytical-bar Node regression. Prior exact-head PR Quality #44397046757 passed on rerun for 2016a8b663bc3ae59d73c77c91814fb2978dbd6f; PR #189 still has no submitted reviews, and main/Pages publication of dev remains unverified. No standalone index.html change required (pure solver module); frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):** (1) verify exact-new-head push and PR Quality including truss Node and browser checks; (2) obtain eligible PR #189 approval and verify release protections; (3) merge only through authorized dev-to-main PR and verify main Quality; (4) verify Pages deployment SHA and hosted desktop/390px smoke; (5) add truss JSON model round-trip regression for IDs, units, loads and constraints, followed by synchronized Engineering Toolbox navigation/browser integration.
+
+**Execution ledger:** previous dev 2016a8b663bc3ae59d73c77c91814fb2978dbd6f, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; previous exact-head CI success; source/test/plan/changelog atomic commit intended; local checkout unavailable and github.com DNS unresolved, so local Node/browser suites not run; new-head CI pending; no merge or Pages claim.
+
 ## 2026-11-18 — TRUSS-WHITESPACE-FIXTURE-331 (dev; CI pending)
 
 Correct whitespace regression fixtures to use actual tab/newline characters via String.fromCharCode instead of escaped backslash sequences. Preserve the source validation fix in preceding commit. Previous exact-head Quality at 5824a19c was green; 4cf8f127 CI queued before fixture correction. No local Node/browser execution; PR #189 review and Pages remain pending. Frozen 166 gaps / 95 partial unchanged.

@@ -159,3 +159,14 @@ test('numeric input rejects whitespace-only values while preserving finite numer
  const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:'   '}]};
  assert.throws(()=>fem.fromLegacy(legacy),/finite number/);
 });
+
+
+test('truss parser rejects positive properties whose assembled stiffness underflows to zero',()=>{
+ const model=clone(fem.examples.bar);
+ model.members[0].E=1e-300;
+ model.members[0].area=1e-300;
+ assert.throws(()=>fem.parseModel(model),/stiffness underflow/);
+ assert.throws(()=>fem.solve(model),/stiffness underflow/);
+ const reference=fem.solve(fem.examples.bar);
+ close(reference.displacements[1].x,1e-5,1e-13);
+});

@@ -78,6 +78,7 @@
       if (!Number.isFinite(L) || L <= 1e-12) throw Error('Member ' + id + ': zero/invalid length.');
       const EAbyL = E * A / L;
       if (!Number.isFinite(EAbyL)) throw Error('Member ' + id + ': stiffness overflow.');
+      if (!(EAbyL > 0)) throw Error('Member ' + id + ': stiffness underflow; increase E or area.');
       return {id, a, b, E, A, L, c: dx / L, s: dy / L, stiffness: EAbyL};
     });
     if (new Set(members.map(m => m.id)).size !== members.length) throw Error('Member IDs must be unique.');

@@ -33,6 +33,8 @@ jobs:
         run: |
           python scripts/build_toolbox_registry.py
           python scripts/build_toolbox_registry.py --check
+      - name: Audit CI smoke-test registration, missing files and duplicate runs
+        run: python scripts/audit_quality_tests.py
       - name: Structural tests and embedded Python compile check
         run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Install browser test requirements

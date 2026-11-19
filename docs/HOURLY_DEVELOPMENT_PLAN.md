@@ -1,3 +1,12 @@
+## 2026-11-19 — CI-SMOKE-AUDIT-336: Audited Quality workflow after concern that outdated tests caused failures. Verified current exact dev 4d86afc41ab94082d86d6347462aaaa741d76ed9 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da; exact-head PR Quality #44484188871 passed; push Quality #44484180412 was still in progress at initial inspection. Inspected 205 smoke_*.py files: all registered exactly once; no missing/duplicated registrations. 206 direct smoke/Node test commands; Python unittest discovery still covers test_*.py. Prior observed failures were mismatched fixtures/diagnostics subsequently repaired, not proof of obsolete tests. Kept all coverage. Added scripts/audit_quality_tests.py to detect deleted or renamed test files, unregistered new smoke files, duplicate direct test commands and missing unittest discovery, plus seven focused Python unit regressions and an early fail-fast Quality preflight. Local seven test cases passed; full exact-new-head Quality pending. PR #189 has no reviews; main/Pages unchanged/unverified. Historical 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (with acceptance tests):**
+1. Verify exact-new-head push/PR Quality, including early smoke-audit preflight and seven new Python unit tests, as well as all existing Node/Chromium regressions; repair failures without skipping valid tests.
+2. Investigate only concrete slow/flaky/obsolete tests identified by logs and recorded functionality; adapt or remove solely with equivalent coverage and measured performance evidence.
+3. Obtain eligible review on PR #189 and independently verify required checks and branch protection; do not bypass approvals.
+4. Promote solely by ordinary authorized dev-to-main PR after complete gates, then verify exact main Quality.
+5. Verify Pages publication SHA and hosted desktop/390px smoke; resume substantive Engineering Toolbox feature development.
+
 ## 2026-11-19 — TRUSS-NUMERIC-TYPES-335 (dev; exact-new-head CI pending)
 
 Reject bigint and symbol numeric inputs before Number() conversion in current and legacy 2D truss models. This prevents native TypeError for symbols and lossy bigint coercion, while preserving finite numeric strings and analytical axial-bar displacement. Focused Node regression covers load, area, legacy SI area and valid control. Previous exact-head push/PR Quality #44469474017/#44469481239 succeeded for d3a4516ae1bb7283f4eb7cc8654b88ce80fbde23; PR #189 remains unreviewed; main/Pages publication not verified. Frozen 166 gaps / 95 partial unchanged.

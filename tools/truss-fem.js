@@ -227,5 +227,9 @@
     const inputUnits = describeUnits(model);
     return {...solve(fromLegacy(model)), inputUnits};
   }
-  return Object.freeze({solve, solveDocument, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
+  // One-step file-to-solution entry point, preserving import validation and public unit labels.
+  function solveJSON(text) {
+    return solveDocument(importJSON(text));
+  }
+  return Object.freeze({solve, solveDocument, solveJSON, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
 });

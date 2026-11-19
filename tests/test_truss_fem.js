@@ -349,3 +349,20 @@ test('solveDocument accepts current and legacy JSON while returning explicit inp
  const invalid=clone(current);invalid.nodes[1].fixY=1;
  assert.throws(()=>fem.solveDocument(invalid),/must be true or false/);
 });
+
+
+test('solveJSON validates imported Studio and SI documents and retains analytical physics',()=>{
+ const studio=fem.solveJSON(fem.exportJSON(fem.examples.bar));
+ close(studio.displacements[1].x,1e-5,1e-13);
+ close(studio.members[0].force,1000);
+ assert.equal(studio.inputUnits.system,'studio');
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ const si=fem.solveJSON('\uFEFF'+fem.exportJSON(legacy));
+ close(si.displacements[1].x,studio.displacements[1].x,1e-13);
+ close(si.reactions[0].rx,-1000);
+ assert.equal(si.inputUnits.system,'legacy-si');
+ assert.throws(()=>fem.solveJSON('{bad'),/Invalid truss JSON/);
+ assert.throws(()=>fem.solveJSON(' '.repeat(1024*1024+1)),/1 MiB import limit/);
+ const invalid=clone(fem.examples.bar);invalid.nodes[1].fixY=1;
+ assert.throws(()=>fem.solveJSON(JSON.stringify(invalid)),/must be true or false/);
+});

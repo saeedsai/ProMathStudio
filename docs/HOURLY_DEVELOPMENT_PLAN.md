@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-SOLVE-ENTRY-348 (dev; exact-head CI pending)
+
+Added standalone solveJSON(text), composing size-bounded BOM-aware JSON import with unit-aware SI truss solving. Focused Node regression covers analytical axial displacement, reaction, Studio and legacy SI metadata, malformed/oversized JSON and invalid supports. Baseline dev fc872a340b0a5aa27639641696e1f9d3ae95ec34, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; baseline PR Quality #44582553570 succeeded. PR #189 has zero reviews; local browser and Node checks unavailable; exact-new-head CI and Pages pending. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):** (1) exact-head Quality green including solveJSON regression and Chromium smoke; (2) eligible PR #189 review and protections verified; (3) authorized ordinary PR merge and exact-main Quality green; (4) Pages published SHA and desktop/390px smoke verified; (5) synchronize truss JSON browser file workflow with standalone index.html and add invalid-file browser regression.
+
 ## 2026-11-19 — TRUSS-JSON-SOLVE-DOCUMENT-347 (dev; new exact-head CI pending)
 
 Added standalone `solveDocument(model)` to solve imported Studio or legacy SI truss JSON without callers manually converting units. Output physical quantities remain SI and include frozen input-unit metadata. Regression tests check analytical bar displacement, force, reactions, unchanged legacy input, JSON round-trip and mixed/invalid unit rejection. Baseline dev `fd3d1e5a554b0fdf9876c3b4717df51a112ebb24`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; baseline exact-head push Quality #44571816206 and PR Quality #44571826435 both green. PR #189 has zero submitted reviews. Local Node/Chromium not run; new-head CI, main Quality and Pages remain pending. Frozen historical inventory: 166 gaps / 95 partial.

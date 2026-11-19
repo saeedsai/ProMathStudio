@@ -184,3 +184,18 @@ test('member endpoints require string IDs; no array or object coercion',()=>{
  trimmed.members[0].a=' A ';trimmed.members[0].b=' B ';
  close(fem.solve(trimmed).displacements[1].x,1e-5,1e-13);
 });
+
+test('node and member identifiers reject coerced non-string IDs while retaining trimmed string IDs',()=>{
+ const reference=fem.solve(fem.examples.bar);
+ close(reference.displacements[1].x,1e-5,1e-13);
+ for (const collection of ['nodes','members']) for (const bad of [null,undefined,0,1,['A'],['AB'],{},true]) {
+   const model=clone(fem.examples.bar);model[collection][0].id=bad;
+   assert.throws(()=>fem.parseModel(model),/ID must be a string/);
+   assert.throws(()=>fem.solve(model),/ID must be a string/);
+ }
+ const valid=clone(fem.examples.bar);
+ valid.nodes[0].id=' A ';valid.nodes[1].id=' B ';
+ valid.members[0].id=' AB ';
+ close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
+ assert.equal(fem.parseModel(valid).members[0].id,'AB');
+});

@@ -1,3 +1,11 @@
+## 2026-11-19 — TRUSS-IDENTIFIER-TYPES-334 (dev; new-head CI pending)
+
+Reject non-string node/member IDs (including arrays that coerce to valid strings) before uniqueness checks. Preserve trimmed string IDs and analytical bar displacement. Focused Node regression covers null/undefined/number/array/object/boolean IDs and valid whitespace-trimmed controls. Prior exact-head push Quality #44455608715 and PR Quality #44455614729 both succeeded at 7fb5dfcc7da6e3595ddf6e5068a788c20ccd40e9; PR #189 still lacks submitted reviews. No modular source/index.html change; solver is standalone. Historical 166 gaps / 95 partial remain frozen.
+
+**NEXT FIVE (acceptance):** (1) exact-new-head push/PR Quality including Node truss and Chromium smoke green; (2) obtain eligible PR #189 approval and confirm protections; (3) merge only by ordinary reviewed PR and verify main Quality; (4) verify Pages deployment and hosted desktop/390px behavior; (5) truss JSON round-trip preservation of IDs, loads, units and constraints, including malformed and mixed-unit negative fixtures.
+
+**Execution ledger:** prior dev 7fb5dfcc7da6e3595ddf6e5068a788c20ccd40e9; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Local git blocked by DNS/checkout; focused regression committed for GitHub CI, no local Node/browser execution. New-head CI/Pages pending, no release.
+
 ## 2026-11-19 — TRUSS-ENDPOINT-TYPES-333 (dev; exact-head CI pending)
 
 Reject non-string member endpoint IDs before lookup, avoiding accidental acceptance of arrays such as `['A']` via JavaScript string coercion. Preserve whitespace-trimmed string IDs and analytical single-bar behavior. Added focused Node regression for both endpoints, malformed scalar/array/object inputs, and valid controls. Previous exact-head Quality #44448599356 succeeded at 656fdd891480f13a7a66c7349a7f68970f21e770; new-head checks pending. PR #189 remains without submitted reviews; main Quality and Pages for pending dev work unverified. No standalone index.html change (standalone truss solver module). Frozen inventory remains 166 gaps and 95 partial.

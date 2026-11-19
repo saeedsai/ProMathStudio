@@ -40,6 +40,7 @@
     throw Error(name + ' must be true or false.');
   };
   const requiredId = (v, name) => {
+    if (typeof v !== 'string') throw Error(name + ' ID must be a string.');
     const id = String(v ?? '').trim();
     if (!/^[A-Za-z0-9_-]{1,24}$/.test(id)) throw Error(name + ' needs a unique 1–24 character ID (letters, digits, - or _).');
     return id;

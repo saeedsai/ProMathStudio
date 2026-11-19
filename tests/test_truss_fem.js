@@ -199,3 +199,18 @@ test('node and member identifiers reject coerced non-string IDs while retaining 
  close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
  assert.equal(fem.parseModel(valid).members[0].id,'AB');
 });
+
+
+test('numeric fields reject bigint and symbol without leaking native conversion errors',()=>{
+ for(const bad of [1n, Symbol('bad')]) {
+   const load=clone(fem.examples.bar);load.nodes[1].fx=bad;
+   assert.throws(()=>fem.parseModel(load),/finite number/);
+   assert.throws(()=>fem.solve(load),/finite number/);
+   const area=clone(fem.examples.bar);area.members[0].area=bad;
+   assert.throws(()=>fem.parseModel(area),/finite number/);
+   const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:bad}]};
+   assert.throws(()=>fem.fromLegacy(legacy),/finite number/);
+ }
+ const valid=clone(fem.examples.bar);valid.nodes[1].fx=' 1 ';
+ close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
+});

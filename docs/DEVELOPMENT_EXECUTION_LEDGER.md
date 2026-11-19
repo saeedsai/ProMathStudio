@@ -1,3 +1,7 @@
+## 2026-11-19 — TRUSS-NUMERIC-TYPES-335
+
+Baseline dev `d3a4516ae1bb7283f4eb7cc8654b88ce80fbde23`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; exact-head push/PR Quality #44469474017/#44469481239 passed. Reject bigint and symbol numeric fields in truss current/legacy parser with focused negative and analytical positive Node regression. Atomic source/test/plan/ledger/changelog update; local checkout/DNS unavailable, no local Node/Chromium run. New-head Quality pending, PR #189 zero submitted reviews, Pages unverified. Frozen 166 gaps / 95 partial. NEXT FIVE in plan.
+
 ## 2026-11-19 — TRUSS-IDENTIFIER-TYPES-334
 
 Prior dev `7fb5dfcc7da6e3595ddf6e5068a788c20ccd40e9`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; prior exact-head push/PR Quality #44455608715/#44455614729 passed. Strict node/member ID type validation and focused positive/negative Node regression, atomic source/test/plan/ledger/changelog update. Local git DNS unresolved, no checkout; local Node/Chromium not executed. New exact-head CI pending; PR #189 no submitted reviews; main/Pages not released. Frozen 166 gaps / 95 partial. NEXT FIVE in plan.

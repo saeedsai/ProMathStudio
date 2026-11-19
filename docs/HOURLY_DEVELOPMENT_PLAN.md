@@ -1,3 +1,11 @@
+## 2026-11-19 — TRUSS-NUMERIC-TYPES-335 (dev; exact-new-head CI pending)
+
+Reject bigint and symbol numeric inputs before Number() conversion in current and legacy 2D truss models. This prevents native TypeError for symbols and lossy bigint coercion, while preserving finite numeric strings and analytical axial-bar displacement. Focused Node regression covers load, area, legacy SI area and valid control. Previous exact-head push/PR Quality #44469474017/#44469481239 succeeded for d3a4516ae1bb7283f4eb7cc8654b88ce80fbde23; PR #189 remains unreviewed; main/Pages publication not verified. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (acceptance):** (1) exact-new-head push/PR Quality including Node and browser smoke green; (2) obtain eligible PR #189 review and verify release protections; (3) ordinary approved dev-to-main PR merge and exact-main Quality green; (4) verify Pages published SHA and desktop/390px hosted smoke; (5) truss JSON round-trip preserving IDs, units, loads and constraints, including malformed/mixed-unit fixtures.
+
+**Execution ledger:** baseline dev d3a4516ae1bb7283f4eb7cc8654b88ce80fbde23; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; local checkout/DNS unavailable, Node/Chromium not executed locally; new-head CI pending; no release.
+
 ## 2026-11-19 — TRUSS-IDENTIFIER-TYPES-334 (dev; new-head CI pending)
 
 Reject non-string node/member IDs (including arrays that coerce to valid strings) before uniqueness checks. Preserve trimmed string IDs and analytical bar displacement. Focused Node regression covers null/undefined/number/array/object/boolean IDs and valid whitespace-trimmed controls. Prior exact-head push Quality #44455608715 and PR Quality #44455614729 both succeeded at 7fb5dfcc7da6e3595ddf6e5068a788c20ccd40e9; PR #189 still lacks submitted reviews. No modular source/index.html change; solver is standalone. Historical 166 gaps / 95 partial remain frozen.

@@ -204,7 +204,10 @@
   // Export only validated models, retaining original current or legacy public units.
   function exportJSON(model) {
     parseModel(fromLegacy(model));
-    const document = JSON.stringify(model, null, 2);
+    let document;
+    try { document = JSON.stringify(model, null, 2); }
+    catch (_) { throw Error('Truss JSON export could not serialize the model.'); }
+    if (typeof document !== 'string') throw Error('Truss JSON export must produce a document.');
     // Keep exports importable under the same UTF-8 byte budget.
     if (new TextEncoder().encode(document).byteLength > 1024 * 1024) throw Error('Truss JSON document exceeds the 1 MiB export limit.');
     // JSON.stringify invokes toJSON hooks; validate the actual serialized model too.

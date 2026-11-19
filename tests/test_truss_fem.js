@@ -299,3 +299,16 @@ test('JSON export validates serialized toJSON output rather than only original f
  assert.deepEqual(fem.importJSON(fem.exportJSON(valid)),valid);
  close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
 });
+
+
+test('truss JSON export rejects missing or cyclic serialized documents with clear diagnostics',()=>{
+ const missing=clone(fem.examples.bar);
+ missing.toJSON=()=>undefined;
+ assert.throws(()=>fem.exportJSON(missing),/must produce a document/);
+ const cyclic=clone(fem.examples.bar);
+ cyclic.extra=cyclic;
+ assert.throws(()=>fem.exportJSON(cyclic),/could not serialize the model/);
+ const valid=clone(fem.examples.bar);
+ assert.deepEqual(fem.importJSON(fem.exportJSON(valid)),valid);
+ close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
+});

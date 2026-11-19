@@ -214,5 +214,13 @@
     parseModel(fromLegacy(JSON.parse(document)));
     return document;
   }
-  return Object.freeze({solve, parseModel, fromLegacy, importJSON, exportJSON, examples, id:'structural-truss-fem-2d'});
+  // Public unit metadata for JSON file workflows; never infer units from magnitudes.
+  function describeUnits(model) {
+    parseModel(fromLegacy(model));
+    const legacy = model.members.some(m => m.A !== undefined);
+    return Object.freeze(legacy
+      ? {system:'legacy-si',coordinates:'m',forces:'N',modulus:'Pa',area:'m²'}
+      : {system:'studio',coordinates:'m',forces:'kN',modulus:'GPa',area:'mm²'});
+  }
+  return Object.freeze({solve, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
 });

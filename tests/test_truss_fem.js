@@ -312,3 +312,17 @@ test('truss JSON export rejects missing or cyclic serialized documents with clea
  assert.deepEqual(fem.importJSON(fem.exportJSON(valid)),valid);
  close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
 });
+
+
+test('truss JSON unit descriptors distinguish Studio and legacy SI without magnitude guessing',()=>{
+ const studio=clone(fem.examples.bar);
+ assert.deepEqual(fem.describeUnits(studio),{system:'studio',coordinates:'m',forces:'kN',modulus:'GPa',area:'mm²'});
+ assert.ok(Object.isFrozen(fem.describeUnits(studio)));
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ assert.deepEqual(fem.describeUnits(fem.importJSON(fem.exportJSON(legacy))),{system:'legacy-si',coordinates:'m',forces:'N',modulus:'Pa',area:'m²'});
+ close(fem.solve(fem.fromLegacy(legacy)).displacements[1].x,1e-5,1e-13);
+ const mixed=clone(legacy);mixed.members[0].area=1000;
+ assert.throws(()=>fem.describeUnits(mixed),/Mixed legacy SI and current/);
+ const invalid=clone(studio);invalid.nodes[1].fixY=1;
+ assert.throws(()=>fem.describeUnits(invalid),/must be true or false/);
+});

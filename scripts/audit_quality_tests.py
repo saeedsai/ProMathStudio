@@ -13,7 +13,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 DIRECT_RUN = re.compile(r"^\s*run:\s*((?:python(?:3)?|node\s+--test)\s+tests/[\w.-]+\.(?:py|js))\s*$", re.MULTILINE)
 TEST_PATH = re.compile(r"tests/[\w.-]+\.(?:py|js)$")
-DISCOVERY = re.compile(r"^\s*run:\s*python\s+-m\s+unittest\s+discover\s+-s\s+tests\s+-p\s+['\"]?test_\*\.py['\"]?\s*$", re.MULTILINE)
+DISCOVERY = re.compile(r"^\s*run:\s*python\s+-m\s+unittest\s+discover\s+-s\s+tests\s+-p\s+['\"]?test_\*\.py['\"]?(?:\s+(?:-v|--verbose))?\s*$", re.MULTILINE)
 
 
 def audit(root: Path, workflow_text: str) -> dict:

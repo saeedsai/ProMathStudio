@@ -21,7 +21,7 @@ class QualityAuditTests(unittest.TestCase):
   check:
     steps:
       - name: Structural tests
-        run: python -m unittest discover -s tests -p 'test_*.py'
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: A
         run: python tests/smoke_alpha.py
       - name: B
@@ -33,6 +33,12 @@ class QualityAuditTests(unittest.TestCase):
         self.assertEqual(summary['smoke_registered'], 2)
         self.assertEqual(summary['direct_test_commands'], 2)
         self.assertTrue(summary['python_unittest_discovery'])
+
+    def test_nonverbose_discovery_remains_valid(self):
+        self.assertTrue(audit.audit(self.root, self.workflow.replace("'test_*.py' -v", "'test_*.py'"))['python_unittest_discovery'])
+
+    def test_long_verbose_discovery_valid(self):
+        self.assertTrue(audit.audit(self.root, self.workflow.replace(' -v\n', ' --verbose\n'))['python_unittest_discovery'])
 
     def test_missing_referenced_file(self):
         (self.root / 'tests' / 'smoke_beta.py').unlink()

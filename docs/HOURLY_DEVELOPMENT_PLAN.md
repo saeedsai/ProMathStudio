@@ -1,3 +1,11 @@
+## 2026-11-19 — TRUSS-ENDPOINT-TYPES-333 (dev; exact-head CI pending)
+
+Reject non-string member endpoint IDs before lookup, avoiding accidental acceptance of arrays such as `['A']` via JavaScript string coercion. Preserve whitespace-trimmed string IDs and analytical single-bar behavior. Added focused Node regression for both endpoints, malformed scalar/array/object inputs, and valid controls. Previous exact-head Quality #44448599356 succeeded at 656fdd891480f13a7a66c7349a7f68970f21e770; new-head checks pending. PR #189 remains without submitted reviews; main Quality and Pages for pending dev work unverified. No standalone index.html change (standalone truss solver module). Frozen inventory remains 166 gaps and 95 partial.
+
+**NEXT FIVE (acceptance):** (1) verify exact-head push/PR Quality including truss Node and browser tests; (2) obtain eligible PR #189 approval and confirm release protections; (3) merge only by ordinary reviewed PR after all required checks and verify main Quality; (4) verify Pages deployment and hosted desktop/390px behavior; (5) implement truss JSON round-trip test preserving IDs, loads, units and support constraints, then synchronized Engineering Toolbox navigation.
+
+**Execution ledger:** baseline dev 656fdd891480f13a7a66c7349a7f68970f21e770 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Previous exact-head Quality successful; local git DNS unavailable and checkout absent. New source/test/plan/ledger/changelog atomic commit, Node/browser execution and exact-head CI status to be verified. No unauthorized merge or branch cleanup.
+
 ## 2026-11-19 — TRUSS-STIFFNESS-UNDERFLOW-332 (dev; new-head CI pending)
 
 Reject strictly positive but extremely small E/area combinations whose assembled EA/L underflows to zero, before the matrix is assembled; report an actionable indexed member error instead of a generic singular-system error. Add focused negative underflow and positive analytical-bar Node regression. Prior exact-head PR Quality #44397046757 passed on rerun for 2016a8b663bc3ae59d73c77c91814fb2978dbd6f; PR #189 still has no submitted reviews, and main/Pages publication of dev remains unverified. No standalone index.html change required (pure solver module); frozen historical inventory remains 166 gaps / 95 partial.

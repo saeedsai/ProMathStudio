@@ -170,3 +170,17 @@ test('truss parser rejects positive properties whose assembled stiffness underfl
  const reference=fem.solve(fem.examples.bar);
  close(reference.displacements[1].x,1e-5,1e-13);
 });
+
+
+test('member endpoints require string IDs; no array or object coercion',()=>{
+ const reference=fem.solve(fem.examples.bar);
+ close(reference.displacements[1].x,1e-5,1e-13);
+ for(const field of ['a','b']) for(const bad of [null,undefined,0,1,['A'],['B'],{},true]){
+   const model=clone(fem.examples.bar);model.members[0][field]=bad;
+   assert.throws(()=>fem.parseModel(model),/end node IDs must be strings/);
+   assert.throws(()=>fem.solve(model),/end node IDs must be strings/);
+ }
+ const trimmed=clone(fem.examples.bar);
+ trimmed.members[0].a=' A ';trimmed.members[0].b=' B ';
+ close(fem.solve(trimmed).displacements[1].x,1e-5,1e-13);
+});

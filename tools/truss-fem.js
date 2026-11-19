@@ -67,7 +67,8 @@
     const members = model.members.map((row, i) => {
       if (!row || typeof row !== 'object' || Array.isArray(row)) throw Error('Member ' + (i + 1) + ' must be an object.');
       const id = requiredId(row.id, 'Member ' + (i + 1));
-      const a = ix.get(String(row.a).trim()), b = ix.get(String(row.b).trim());
+      if (typeof row.a !== 'string' || typeof row.b !== 'string') throw Error('Member ' + id + ': end node IDs must be strings.');
+      const a = ix.get(row.a.trim()), b = ix.get(row.b.trim());
       if (a === undefined || b === undefined) throw Error('Member ' + id + ': end nodes must exist.');
       if (a === b) throw Error('Member ' + id + ': both ends cannot be the same node.');
       const E = finiteScaled(row.E, id + ' E (GPa)', 1e9);

@@ -222,5 +222,10 @@
       ? {system:'legacy-si',coordinates:'m',forces:'N',modulus:'Pa',area:'m²'}
       : {system:'studio',coordinates:'m',forces:'kN',modulus:'GPa',area:'mm²'});
   }
-  return Object.freeze({solve, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
+  // Solve a validated imported document in either public unit system. Results remain SI.
+  function solveDocument(model) {
+    const inputUnits = describeUnits(model);
+    return {...solve(fromLegacy(model)), inputUnits};
+  }
+  return Object.freeze({solve, solveDocument, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
 });

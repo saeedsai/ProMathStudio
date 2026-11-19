@@ -326,3 +326,26 @@ test('truss JSON unit descriptors distinguish Studio and legacy SI without magni
  const invalid=clone(studio);invalid.nodes[1].fixY=1;
  assert.throws(()=>fem.describeUnits(invalid),/must be true or false/);
 });
+
+
+test('solveDocument accepts current and legacy JSON while returning explicit input units and SI physics',()=>{
+ const current=fem.importJSON(fem.exportJSON(fem.examples.bar));
+ const modern=fem.solveDocument(current);
+ close(modern.displacements[1].x,1e-5,1e-13);
+ close(modern.members[0].force,1000);
+ assert.deepEqual(modern.inputUnits,fem.describeUnits(current));
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],
+  members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ const before=clone(legacy);
+ const result=fem.solveDocument(fem.importJSON(fem.exportJSON(legacy)));
+ close(result.displacements[1].x,modern.displacements[1].x,1e-13);
+ close(result.members[0].force,modern.members[0].force);
+ close(result.reactions[0].rx,-1000);
+ assert.equal(result.inputUnits.system,'legacy-si');
+ assert.ok(Object.isFrozen(result.inputUnits));
+ assert.deepEqual(legacy,before);
+ const mixed=clone(legacy);mixed.members[0].area=1000;
+ assert.throws(()=>fem.solveDocument(mixed),/Mixed legacy SI and current/);
+ const invalid=clone(current);invalid.nodes[1].fixY=1;
+ assert.throws(()=>fem.solveDocument(invalid),/must be true or false/);
+});

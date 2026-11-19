@@ -235,7 +235,10 @@
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
       fixedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX) + Number(n.fixY), 0),
-      loadedNodeCount: normalized.nodes.filter(n => n.fx !== 0 || n.fy !== 0).length};
+      loadedNodeCount: normalized.nodes.filter(n => n.fx !== 0 || n.fy !== 0).length,
+      appliedForce: Object.freeze(normalized.nodes.reduce((sum, n) => ({
+        x: sum.x + n.fx, y: sum.y + n.fy
+      }), {x: 0, y: 0}))};
   }
   function solveJSON(text) {
     return solveDocument(importJSON(text));

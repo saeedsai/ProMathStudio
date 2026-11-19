@@ -412,3 +412,22 @@ test('inspectJSON reports constrained DOFs and loaded nodes without solving',()=
  invalid.nodes[0].fixX=1;
  assert.throws(()=>fem.inspectJSON(JSON.stringify(invalid)),/must be true or false/);
 });
+
+test('inspectJSON computes immutable applied-force resultant in SI',()=>{
+ const studio=JSON.parse(JSON.stringify(fem.examples.bar));
+ studio.nodes[0].fx=-0.25; studio.nodes[0].fy=0.5;
+ studio.nodes[1].fx=1.25; studio.nodes[1].fy=-0.25;
+ const a=fem.inspectJSON(JSON.stringify(studio));
+ close(a.appliedForce.x,1000);close(a.appliedForce.y,250);
+ assert.ok(Object.isFrozen(a.appliedForce));
+ assert.equal(a.loadedNodeCount,2);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true,fx:-250,fy:500},
+ {id:'B',x:2,y:0,fixY:true,fx:1250,fy:-250}],
+ members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ assert.deepEqual(fem.inspectJSON(JSON.stringify(legacy)).appliedForce,a.appliedForce);
+ const unloaded=JSON.parse(JSON.stringify(fem.examples.bar));
+ unloaded.nodes.forEach(n=>{n.fx=0;n.fy=0;});unloaded.nodes[1].fixY=false;
+ assert.deepEqual(fem.inspectJSON(JSON.stringify(unloaded)).appliedForce,{x:0,y:0});
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+ close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+});

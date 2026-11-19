@@ -1,3 +1,9 @@
+## 2026-11-20 — TRUSS-JSON-RESULTANT-352 (dev; new exact-head CI pending)
+
+Add immutable applied-force vector in SI newtons to truss JSON preview without solving. Focused Node regression covers signed multi-node Studio/legacy forces, zero-load unstable preview, malformed JSON, immutable metadata and analytical bar displacement. Baseline dev 126166eef6ab9b7c1836ce13c8878e1e66208e08; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Previous exact-head PR Quality #44624231778 passed; PR #189 has no submitted reviews; new CI and Pages pending. Frozen 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):** (1) exact-head Quality passes new resultant regression and browser smoke; (2) eligible PR #189 approval and branch protection gates; (3) authorized ordinary dev-to-main PR merge with main Quality green; (4) Pages published main SHA and hosted desktop/390px smoke; (5) synchronized browser JSON preview/import/export/solve with invalid-file and keyboard regressions.
+
 ## 2026-11-19 — TRUSS-JSON-PREVIEW-COUNTS-351 (dev; exact-head CI pending)
 
 Extend validated truss JSON preview with `fixedDofCount` and `loadedNodeCount`, counting constrained x/y degrees of freedom and nodes carrying nonzero applied loads after legacy-SI conversion. Preview remains available for unstable/unloaded documents without solving. Added focused Node regression for analytical Studio bar, legacy SI, unloaded unstable preview and invalid support flags. Baseline `dev` 8dea772ec3a14efd85a0e403298f7b79667bcb09, `main` `70fc483cb1cec3d2372d37484e4a8ef7942343da`; prior exact-head PR Quality #44614114148 passed, PR #189 zero reviews. Local checkout absent and GitHub DNS unavailable; full Node/Chromium checks await new exact-head CI. Pages unverified. Historical inventory frozen at 166 gaps / 95 partial.

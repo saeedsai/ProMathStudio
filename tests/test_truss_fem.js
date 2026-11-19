@@ -289,3 +289,13 @@ test('truss JSON export respects importer UTF-8 limit and round-trips valid Unic
  assert.throws(()=>fem.exportJSON(tooLarge),/1 MiB export limit/);
  assert.throws(()=>fem.importJSON(JSON.stringify(tooLarge)),/1 MiB import limit/);
 });
+
+
+test('JSON export validates serialized toJSON output rather than only original fields',()=>{
+ const model=clone(fem.examples.bar);
+ model.nodes[1].toJSON=function(){return {...this,fixY:1,toJSON:undefined};};
+ assert.throws(()=>fem.exportJSON(model),/must be true or false/);
+ const valid=clone(fem.examples.bar);
+ assert.deepEqual(fem.importJSON(fem.exportJSON(valid)),valid);
+ close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
+});

@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-SERIALIZED-344 (dev; new-head CI pending)
+
+Validate the actual JSON.stringify output before export, preventing custom toJSON serialization from emitting an invalid truss despite valid original input. Added negative toJSON regression and positive round-trip/analytical reference. Baseline dev `c495fd41691d7f2d4651b1f9a652db7d50b7ed49`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; baseline exact-head PR Quality #44539689966 succeeded. PR #189 has zero reviews; main/Pages unverified. Historical 166 gaps/95 partial frozen.
+
+**NEXT FIVE (acceptance):** (1) exact new-head Quality passes Node truss tests and browser smoke; (2) eligible PR #189 review and required protections satisfied; (3) ordinary approved dev-to-main PR merge with main Quality passing; (4) verify Pages published SHA and desktop/390px smoke; (5) implement synchronized Truss Studio JSON import/export UI with invalid-file browser regression.
+
 ## 2026-11-19 — TRUSS-JSON-EXPORT-LIMIT-343 (dev; exact-head CI pending)
 
 Ensure exported 2D truss JSON is accepted by the existing 1 MiB UTF-8 importer; reject oversized exports including multibyte metadata. Add focused Node positive round-trip/analytical reference and negative oversized export/import regression. Baseline dev `1d9adb5fdaf1c124a11bcea3af2f13b81fc54478`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Baseline exact-head PR Quality #44528937282 succeeded; PR #189 still has zero submitted reviews. No release; new-head CI, main Quality and Pages pending. Historical 166 gaps/95 partial remain frozen.

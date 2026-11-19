@@ -262,3 +262,19 @@ test('truss JSON import accepts UTF-8 BOM from saved files without relaxing vali
  assert.throws(()=>fem.importJSON('\uFEFF{bad'),/Invalid truss JSON/);
  assert.throws(()=>fem.importJSON('\uFEFF'.repeat(350000)+bar),/1 MiB import limit/);
 });
+
+test('validated truss JSON export round-trips current and legacy models',()=>{
+ for(const example of [fem.examples.bar,fem.examples.triangle]){
+   assert.deepEqual(fem.importJSON(fem.exportJSON(example)),example);
+   close(fem.solve(fem.importJSON(fem.exportJSON(example))).maxDisplacement.magnitude,fem.solve(example).maxDisplacement.magnitude);
+ }
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],
+   members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ assert.deepEqual(fem.importJSON(fem.exportJSON(legacy)),legacy);
+ close(fem.solve(fem.fromLegacy(fem.importJSON(fem.exportJSON(legacy)))).displacements[1].x,1e-5,1e-13);
+ const invalid=clone(fem.examples.bar);invalid.nodes[1].fixY=1;
+ assert.throws(()=>fem.exportJSON(invalid),/must be true or false/);
+ const mixed=clone(legacy);mixed.members[0].area=1000;
+ assert.throws(()=>fem.exportJSON(mixed),/Mixed legacy SI and current/);
+ assert.throws(()=>fem.exportJSON(null),/Invalid legacy truss model/);
+});

@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-EXPORT-342 (dev; new CI pending)
+
+Add validated standalone 2D truss JSON export, preserving original public units and IDs for modern/legacy models. Focused Node regression covers analytical bar, triangle, legacy round-trip, invalid supports and mixed units. Baseline dev `8c68139a7f16673e65b111d6864397055732422c`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Exact-head PR Quality #44520320588 failed during Playwright browser dependency installation due to Ubuntu apt network errors; one failed-job rerun requested. PR #189 zero reviews. Local full QA, new-head CI, main Quality and Pages pending. Frozen historical 166 gaps/95 partial unchanged.
+
+**NEXT FIVE (acceptance):** (1) exact new-head Quality green with Node export and Chromium smoke; (2) eligible PR #189 approval and protections verified; (3) ordinary authorized dev-to-main PR merge and exact-main Quality green; (4) verify Pages published SHA and desktop/390px hosted smoke; (5) connect validated truss JSON import/export to Studio UI with legacy unit labeling, negative browser fixtures and synchronized standalone index.html.
+
 ## 2026-11-19 — TRUSS-JSON-BOM-341 (dev; new exact-head CI pending)
 
 Accept a leading UTF-8 BOM in pasted or file-loaded truss JSON without weakening validation or 1 MiB UTF-8 byte cap. Focused Node regression covers valid BOM model, analytical displacement, malformed BOM JSON, and oversized BOM input. Baseline dev `d57b19c52913b5cb4f18574da07288ed6c8179b9`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; exact-head push Quality #44510297803 and PR Quality #44510305609 both succeeded. PR #189 has zero reviews; no release. Local Node/browser unavailable; new-head CI pending. Frozen historical 166 gaps / 95 partial unchanged.

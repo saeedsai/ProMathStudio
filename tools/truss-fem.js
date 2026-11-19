@@ -201,5 +201,10 @@
     parseModel(fromLegacy(model));
     return model;
   }
-  return Object.freeze({solve, parseModel, fromLegacy, importJSON, examples, id:'structural-truss-fem-2d'});
+  // Export only validated models, retaining original current or legacy public units.
+  function exportJSON(model) {
+    parseModel(fromLegacy(model));
+    return JSON.stringify(model, null, 2);
+  }
+  return Object.freeze({solve, parseModel, fromLegacy, importJSON, exportJSON, examples, id:'structural-truss-fem-2d'});
 });

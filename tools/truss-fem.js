@@ -231,8 +231,11 @@
   // Preview valid truss files without requiring structural stability.
   function inspectJSON(text) {
     const model = importJSON(text);
+    const normalized = parseModel(fromLegacy(model));
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
-      memberCount: model.members.length};
+      memberCount: model.members.length,
+      fixedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX) + Number(n.fixY), 0),
+      loadedNodeCount: normalized.nodes.filter(n => n.fx !== 0 || n.fy !== 0).length};
   }
   function solveJSON(text) {
     return solveDocument(importJSON(text));

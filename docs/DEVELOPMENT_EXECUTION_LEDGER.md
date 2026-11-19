@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-PREVIEW-COUNTS-351 (dev; exact-head CI pending)
+
+Extend validated truss JSON preview with `fixedDofCount` and `loadedNodeCount`, counting constrained x/y degrees of freedom and nodes carrying nonzero applied loads after legacy-SI conversion. Preview remains available for unstable/unloaded documents without solving. Added focused Node regression for analytical Studio bar, legacy SI, unloaded unstable preview and invalid support flags. Baseline `dev` 8dea772ec3a14efd85a0e403298f7b79667bcb09, `main` `70fc483cb1cec3d2372d37484e4a8ef7942343da`; prior exact-head PR Quality #44614114148 passed, PR #189 zero reviews. Local checkout absent and GitHub DNS unavailable; full Node/Chromium checks await new exact-head CI. Pages unverified. Historical inventory frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):** (1) exact-head push/PR Quality passes including new preview-count regression and Chromium smoke; (2) eligible PR #189 approval and protection gates verified; (3) authorized ordinary dev-to-main PR merge and exact-main Quality green; (4) verify Pages published main SHA and hosted desktop/390px smoke; (5) implement browser truss JSON preview/import/export/solve with synchronized standalone index.html and negative accessibility/file tests.
+
 ## 2026-11-19 — TRUSS-JSON-PREVIEW-CI-FIX-350
 
 Exact `dev` baseline `760b8557401790e2fd1f11255898de82b0e1711f`; `main` `70fc483cb1cec3d2372d37484e4a8ef7942343da`. [Quality #44604888254](https://github.com/saeedsai/ProMathStudio/actions/runs/44604888254) failed at truss Node regression because `inspectJSON` was passed literal backslash-u text instead of a BOM. Corrected fixture and added negative escaped-prefix assertion, preserving strict import behavior. Local isolated Node BOM sanity passed; full Node/browser and new exact-head CI pending. PR #189 has zero reviews; no merge/Pages confirmation. Historical 166 gaps/95 partial unchanged. NEXT FIVE in hourly plan.

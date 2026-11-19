@@ -387,3 +387,28 @@ test('inspectJSON previews Studio and legacy models, including unstable structur
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
  assert.throws(()=>fem.inspectJSON(JSON.stringify({...fem.examples.bar,members:[]})),/members/);
 });
+
+
+test('inspectJSON reports constrained DOFs and loaded nodes without solving',()=>{
+ const bar=fem.inspectJSON(fem.exportJSON(fem.examples.bar));
+ assert.equal(bar.fixedDofCount,3);
+ assert.equal(bar.loadedNodeCount,1);
+ assert.equal(bar.nodeCount,2);
+ close(fem.solveDocument(bar.model).displacements[1].x,1e-5,1e-13);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],
+   members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ const si=fem.inspectJSON(JSON.stringify(legacy));
+ assert.equal(si.fixedDofCount,3);
+ assert.equal(si.loadedNodeCount,1);
+ assert.equal(si.inputUnits.system,'legacy-si');
+ const unloaded=JSON.parse(JSON.stringify(fem.examples.bar));
+ unloaded.nodes[1].fx=0;
+ unloaded.nodes[1].fixY=false;
+ const preview=fem.inspectJSON(JSON.stringify(unloaded));
+ assert.equal(preview.fixedDofCount,2);
+ assert.equal(preview.loadedNodeCount,0);
+ assert.throws(()=>fem.solveDocument(preview.model),/Unstable|under-constrained/);
+ const invalid=JSON.parse(JSON.stringify(fem.examples.bar));
+ invalid.nodes[0].fixX=1;
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(invalid)),/must be true or false/);
+});

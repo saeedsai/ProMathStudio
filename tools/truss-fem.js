@@ -189,5 +189,14 @@
       members: model.members.map(m => ({id: m.id, a: m.a, b: m.b,
         E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finiteScaled(m.A, 'Legacy area (m²)', 1e6)}))};
   }
-  return Object.freeze({solve, parseModel, fromLegacy, examples, id:'structural-truss-fem-2d'});
+  // Import JSON as a model, retaining the original public-unit values and IDs.
+  // Validation is performed on a converted copy, not on the returned document.
+  function importJSON(text) {
+    if (typeof text !== 'string') throw Error('Truss JSON input must be a string.');
+    let model;
+    try { model = JSON.parse(text); } catch (_) { throw Error('Invalid truss JSON document.'); }
+    parseModel(fromLegacy(model));
+    return model;
+  }
+  return Object.freeze({solve, parseModel, fromLegacy, importJSON, examples, id:'structural-truss-fem-2d'});
 });

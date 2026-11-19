@@ -214,3 +214,22 @@ test('numeric fields reject bigint and symbol without leaking native conversion 
  const valid=clone(fem.examples.bar);valid.nodes[1].fx=' 1 ';
  close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
 });
+
+test('truss JSON import preserves model data and rejects malformed or mixed units',()=>{
+ for(const example of [fem.examples.bar,fem.examples.triangle]){
+   const text=JSON.stringify(example), imported=fem.importJSON(text);
+   assert.deepEqual(imported,example);
+   assert.deepEqual(JSON.parse(JSON.stringify(imported)),example);
+   close(fem.solve(imported).maxDisplacement.magnitude,fem.solve(example).maxDisplacement.magnitude,1e-12);
+ }
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],
+   members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ assert.deepEqual(fem.importJSON(JSON.stringify(legacy)),legacy);
+ close(fem.solve(fem.fromLegacy(fem.importJSON(JSON.stringify(legacy)))).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.importJSON('{bad'),/Invalid truss JSON/);
+ assert.throws(()=>fem.importJSON(null),/must be a string/);
+ const mixed=clone(legacy);mixed.members[0].area=1000;
+ assert.throws(()=>fem.importJSON(JSON.stringify(mixed)),/Mixed legacy SI and current/);
+ const malformed=clone(fem.examples.bar);malformed.nodes[1].fixY=1;
+ assert.throws(()=>fem.importJSON(JSON.stringify(malformed)),/must be true or false/);
+});

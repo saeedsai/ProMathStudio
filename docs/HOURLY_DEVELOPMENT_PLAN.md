@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-PREVIEW-349 (dev; exact-head CI pending)
+
+Added standalone inspectJSON(text) for non-solving validated import preview with original model, frozen units and node/member counts. Node regression covers Studio/legacy/BOM, axial reference, unstable preview, malformed input and invalid member count. Baseline dev d22874d44d6a7b6f591bed48ea7e57b010a5c142, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; prior exact-head Quality #44594191540 passed; PR #189 zero reviews. Local tests/browser unavailable; new-head CI and Pages pending. Frozen inventory 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):** (1) exact-head Quality green including inspectJSON regression; (2) eligible PR #189 approval and protection verification; (3) ordinary approved PR merge and main Quality green; (4) Pages published SHA and desktop/390px smoke; (5) synchronized browser truss JSON preview/import/export/solve UI and invalid-file browser regression.
+
 ## 2026-11-19 — TRUSS-JSON-SOLVE-ENTRY-348 (dev; exact-head CI pending)
 
 Added standalone solveJSON(text), composing size-bounded BOM-aware JSON import with unit-aware SI truss solving. Focused Node regression covers analytical axial displacement, reaction, Studio and legacy SI metadata, malformed/oversized JSON and invalid supports. Baseline dev fc872a340b0a5aa27639641696e1f9d3ae95ec34, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; baseline PR Quality #44582553570 succeeded. PR #189 has zero reviews; local browser and Node checks unavailable; exact-new-head CI and Pages pending. Frozen historical inventory remains 166 gaps / 95 partial.

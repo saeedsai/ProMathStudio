@@ -228,8 +228,14 @@
     return {...solve(fromLegacy(model)), inputUnits};
   }
   // One-step file-to-solution entry point, preserving import validation and public unit labels.
+  // Preview valid truss files without requiring structural stability.
+  function inspectJSON(text) {
+    const model = importJSON(text);
+    return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
+      memberCount: model.members.length};
+  }
   function solveJSON(text) {
     return solveDocument(importJSON(text));
   }
-  return Object.freeze({solve, solveDocument, solveJSON, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
+  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
 });

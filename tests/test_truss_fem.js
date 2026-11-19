@@ -366,3 +366,23 @@ test('solveJSON validates imported Studio and SI documents and retains analytica
  const invalid=clone(fem.examples.bar);invalid.nodes[1].fixY=1;
  assert.throws(()=>fem.solveJSON(JSON.stringify(invalid)),/must be true or false/);
 });
+
+
+test('inspectJSON previews Studio and legacy models, including unstable structures',()=>{
+ const studio=fem.inspectJSON(fem.exportJSON(fem.examples.bar));
+ assert.equal(studio.nodeCount,2);assert.equal(studio.memberCount,1);
+ assert.equal(studio.inputUnits.system,'studio');
+ assert.ok(Object.isFrozen(studio.inputUnits));
+ assert.deepEqual(studio.model,fem.examples.bar);
+ close(fem.solveDocument(studio.model).displacements[1].x,1e-5,1e-13);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ const preview=fem.inspectJSON('\\uFEFF'+JSON.stringify(legacy));
+ assert.equal(preview.inputUnits.system,'legacy-si');assert.equal(preview.inputUnits.forces,'N');
+ assert.deepEqual(preview.model,legacy);
+ close(fem.solveDocument(preview.model).displacements[1].x,1e-5,1e-13);
+ const unstable=clone(fem.examples.bar);unstable.nodes[1].fixY=false;
+ assert.equal(fem.inspectJSON(JSON.stringify(unstable)).nodeCount,2);
+ assert.throws(()=>fem.solveDocument(unstable),/Unstable|under-constrained/);
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+ assert.throws(()=>fem.inspectJSON(JSON.stringify({...fem.examples.bar,members:[]})),/members/);
+});

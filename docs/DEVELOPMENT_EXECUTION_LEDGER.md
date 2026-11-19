@@ -1,3 +1,7 @@
+## 2026-11-19 — TRUSS-JSON-PREVIEW-CI-FIX-350
+
+Exact `dev` baseline `760b8557401790e2fd1f11255898de82b0e1711f`; `main` `70fc483cb1cec3d2372d37484e4a8ef7942343da`. [Quality #44604888254](https://github.com/saeedsai/ProMathStudio/actions/runs/44604888254) failed at truss Node regression because `inspectJSON` was passed literal backslash-u text instead of a BOM. Corrected fixture and added negative escaped-prefix assertion, preserving strict import behavior. Local isolated Node BOM sanity passed; full Node/browser and new exact-head CI pending. PR #189 has zero reviews; no merge/Pages confirmation. Historical 166 gaps/95 partial unchanged. NEXT FIVE in hourly plan.
+
 ## 2026-11-19 — TRUSS-JSON-PREVIEW-349 (dev; exact-head CI pending)
 
 Added standalone inspectJSON(text) for non-solving validated import preview with original model, frozen units and node/member counts. Node regression covers Studio/legacy/BOM, axial reference, unstable preview, malformed input and invalid member count. Baseline dev d22874d44d6a7b6f591bed48ea7e57b010a5c142, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; prior exact-head Quality #44594191540 passed; PR #189 zero reviews. Local tests/browser unavailable; new-head CI and Pages pending. Frozen inventory 166 gaps / 95 partial.

@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-PREVIEW-CI-FIX-350 (dev; new exact-head CI pending)
+
+Fixed the BOM fixture in the new `inspectJSON` regression: a literal escaped `\\uFEFF` prefix is not a Unicode BOM and must fail JSON parsing; the positive fixture now uses a real U+FEFF escape. Added an explicit negative test for the literal escaped prefix. Exact prior-head [Quality #44604888254](https://github.com/saeedsai/ProMathStudio/actions/runs/44604888254) failed at Node truss test (step 214), after preceding structural/browser steps passed; failure reproduced from logs at test line 379. Local isolated Node BOM syntax sanity passed; full repository Node/Chromium suites require exact-new-head Actions. `main` remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`; PR #189 has no submitted reviews; Pages not verified. Frozen 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (acceptance):** (1) exact-head Quality passes `node --test tests/test_truss_fem.js` and full browser workflow; (2) eligible PR #189 review plus verified branch protections; (3) ordinary approved dev→main PR merge and main Quality green; (4) Pages published main SHA and desktop/390px smoke verified; (5) synchronized browser truss JSON preview/import/export/solve UI, with invalid-file and accessibility regression.
+
 ## 2026-11-19 — TRUSS-JSON-PREVIEW-349 (dev; exact-head CI pending)
 
 Added standalone inspectJSON(text) for non-solving validated import preview with original model, frozen units and node/member counts. Node regression covers Studio/legacy/BOM, axial reference, unstable preview, malformed input and invalid member count. Baseline dev d22874d44d6a7b6f591bed48ea7e57b010a5c142, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; prior exact-head Quality #44594191540 passed; PR #189 zero reviews. Local tests/browser unavailable; new-head CI and Pages pending. Frozen inventory 166 gaps / 95 partial.

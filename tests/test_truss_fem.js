@@ -278,3 +278,14 @@ test('validated truss JSON export round-trips current and legacy models',()=>{
  assert.throws(()=>fem.exportJSON(mixed),/Mixed legacy SI and current/);
  assert.throws(()=>fem.exportJSON(null),/Invalid legacy truss model/);
 });
+
+
+test('truss JSON export respects importer UTF-8 limit and round-trips valid Unicode',()=>{
+ const valid={...clone(fem.examples.bar),note:'é'.repeat(100)};
+ const json=fem.exportJSON(valid);
+ assert.deepEqual(fem.importJSON(json),valid);
+ close(fem.solve(fem.importJSON(json)).displacements[1].x,1e-5,1e-13);
+ const tooLarge={...clone(fem.examples.bar),note:'é'.repeat(530000)};
+ assert.throws(()=>fem.exportJSON(tooLarge),/1 MiB export limit/);
+ assert.throws(()=>fem.importJSON(JSON.stringify(tooLarge)),/1 MiB import limit/);
+});

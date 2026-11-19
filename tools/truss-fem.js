@@ -204,7 +204,10 @@
   // Export only validated models, retaining original current or legacy public units.
   function exportJSON(model) {
     parseModel(fromLegacy(model));
-    return JSON.stringify(model, null, 2);
+    const document = JSON.stringify(model, null, 2);
+    // Keep exports importable under the same UTF-8 byte budget.
+    if (new TextEncoder().encode(document).byteLength > 1024 * 1024) throw Error('Truss JSON document exceeds the 1 MiB export limit.');
+    return document;
   }
   return Object.freeze({solve, parseModel, fromLegacy, importJSON, exportJSON, examples, id:'structural-truss-fem-2d'});
 });

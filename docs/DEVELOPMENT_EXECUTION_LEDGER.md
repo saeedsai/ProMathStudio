@@ -1,3 +1,9 @@
+## 2026-11-19 — TRUSS-JSON-EXPORT-LIMIT-343 (dev; exact-head CI pending)
+
+Ensure exported 2D truss JSON is accepted by the existing 1 MiB UTF-8 importer; reject oversized exports including multibyte metadata. Add focused Node positive round-trip/analytical reference and negative oversized export/import regression. Baseline dev `1d9adb5fdaf1c124a11bcea3af2f13b81fc54478`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Baseline exact-head PR Quality #44528937282 succeeded; PR #189 still has zero submitted reviews. No release; new-head CI, main Quality and Pages pending. Historical 166 gaps/95 partial remain frozen.
+
+**NEXT FIVE (acceptance):** (1) new exact-head push/PR Quality green including truss JSON byte-limit regression and browser checks; (2) eligible PR #189 approval plus protections verified; (3) ordinary authorized dev-to-main PR merge with exact-main Quality green; (4) verify Pages deployed SHA and hosted desktop/390px smoke; (5) wire validated truss JSON import/export into Studio UI with negative browser fixtures and synchronized index.html.
+
 ## 2026-11-19 — TRUSS-JSON-EXPORT-342 (dev; new CI pending)
 
 Add validated standalone 2D truss JSON export, preserving original public units and IDs for modern/legacy models. Focused Node regression covers analytical bar, triangle, legacy round-trip, invalid supports and mixed units. Baseline dev `8c68139a7f16673e65b111d6864397055732422c`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Exact-head PR Quality #44520320588 failed during Playwright browser dependency installation due to Ubuntu apt network errors; one failed-job rerun requested. PR #189 zero reviews. Local full QA, new-head CI, main Quality and Pages pending. Frozen historical 166 gaps/95 partial unchanged.

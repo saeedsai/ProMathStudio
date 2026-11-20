@@ -117,6 +117,28 @@ test('rejects mechanisms with nonzero stiffness diagonals (two unbraced collinea
  assert.throws(()=>fem.solve(model),/Unstable|under-constrained|singular/);
 });
 
+test('scaled pivoting rejects a triangular mechanism with nonzero free-DOF stiffness diagonals',()=>{
+ const model=clone(fem.examples.triangle);
+ model.nodes[1].fixY=false;
+ const parsed=fem.parseModel(model);
+ const diagonal=new Array(parsed.nodes.length*2).fill(0);
+ for(const member of parsed.members){
+  const v=[-member.c,-member.s,member.c,member.s];
+  const dof=[2*member.a,2*member.a+1,2*member.b,2*member.b+1];
+  for(let i=0;i<4;i++) diagonal[dof[i]]+=member.stiffness*v[i]*v[i];
+ }
+ const free=parsed.nodes.flatMap((node,i)=>[
+  ...(node.fixX?[]:[2*i]),...(node.fixY?[]:[2*i+1])
+ ]);
+ assert.equal(free.length,4);
+ assert.ok(free.every(dof=>diagonal[dof]>0),'fixture must not be caught by a zero stiffness diagonal');
+ const preview=fem.inspectJSON(JSON.stringify(model));
+ assert.equal(preview.nodeCount,3);
+ assert.equal(preview.memberCount,3);
+ assert.equal(preview.connectedComponentCount,1);
+ assert.throws(()=>fem.solve(model),/Unstable or under-constrained truss \\(singular stiffness matrix\\)/);
+});
+
 test('legacy SI model conversion preserves force and displacement, and rejects mixed units',()=>{
  const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},
    {id:'B',x:2,y:0,fixY:true,fx:1000}],

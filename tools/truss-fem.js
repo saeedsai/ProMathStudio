@@ -87,18 +87,19 @@
     return {nodes, members};
   }
   function linearSolve(A, rhs) {
-    // Scaled pivoting: reject near-mechanisms instead of dividing by tiny pivots.
+    // Scaled partial pivoting must retain each original row scale. Re-scaling by
+    // the shrinking trailing row can make a tiny singular pivot score as one.
     const n = rhs.length, m = A.map((row, i) => row.concat(rhs[i]));
+    const rowScales = A.map(row => Math.max(...row.map(Math.abs)));
     for (let k = 0; k < n; k++) {
       let piv = k, pivScore = -1;
       for (let i = k; i < n; i++) {
-        const scale = Math.max(...m[i].slice(k, n).map(Math.abs));
-        const score = scale ? Math.abs(m[i][k]) / scale : 0;
+        const score = rowScales[i] ? Math.abs(m[i][k]) / rowScales[i] : 0;
         if (score > pivScore) { pivScore = score; piv = i; }
       }
-      // Compare to original row stiffness scale, which is kept outside elimination.
       if (!(pivScore > 1e-12) || !Number.isFinite(pivScore)) throw Error('Unstable or under-constrained truss (singular stiffness matrix).');
       [m[k], m[piv]] = [m[piv], m[k]];
+      [rowScales[k], rowScales[piv]] = [rowScales[piv], rowScales[k]];
       for (let i = k + 1; i < n; i++) {
         const q = m[i][k] / m[k][k];
         m[i][k] = 0;

@@ -541,3 +541,17 @@ test('inspectJSON framing diagonal is finite, zero for collapsed geometry, and r
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
 });
+
+
+test('inspectJSON totals member centreline lengths in metres and rejects sum overflow',()=>{
+ const bar=fem.inspectJSON(fem.exportJSON(fem.examples.bar));
+ close(bar.totalMemberLength,2);
+ const triangle=fem.inspectJSON(fem.exportJSON(fem.examples.triangle));
+ close(triangle.totalMemberLength,4+2*Math.hypot(2,3));
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ close(fem.inspectJSON(JSON.stringify(legacy)).totalMemberLength,2);
+ const huge={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:1e308,y:0,fixX:true,fixY:true},{id:'C',x:0,y:1,fixX:true,fixY:true},{id:'D',x:1e308,y:1,fixX:true,fixY:true}],members:[{id:'AB',a:'A',b:'B',E:200,area:1000},{id:'CD',a:'C',b:'D',E:200,area:1000}]};
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),/Total member length.*finite number/);
+ close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+});

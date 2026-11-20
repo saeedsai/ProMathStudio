@@ -234,6 +234,8 @@
     const normalized = parseModel(fromLegacy(model));
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
+      // Sum member centreline lengths for material estimates; do not silently overflow.
+      totalMemberLength: finite(normalized.members.reduce((sum, m) => sum + m.L, 0), 'Total member length (m)'),
       // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.
       bounds: Object.freeze((() => {
         const xs = normalized.nodes.map(n => n.x), ys = normalized.nodes.map(n => n.y);

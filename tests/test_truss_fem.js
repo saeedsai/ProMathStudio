@@ -555,3 +555,19 @@ test('inspectJSON totals member centreline lengths in metres and rejects sum ove
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
 });
+
+
+test('inspectJSON totals SI member volume without solving and rejects overflow',()=>{
+ const bar=fem.inspectJSON(fem.exportJSON(fem.examples.bar));
+ close(bar.totalMemberVolume,0.002);
+ const triangle=fem.inspectJSON(fem.exportJSON(fem.examples.triangle));
+ close(triangle.totalMemberVolume,(4+2*Math.hypot(2,3))*0.0012);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ close(fem.inspectJSON(JSON.stringify(legacy)).totalMemberVolume,bar.totalMemberVolume);
+ const unstable=clone(fem.examples.bar);unstable.nodes[1].fixY=false;
+ close(fem.inspectJSON(JSON.stringify(unstable)).totalMemberVolume,0.002);
+ const huge=clone(fem.examples.bar);huge.nodes[1].x=1e100;huge.members[0].area=1e308;
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),/Total member volume.*finite number/);
+ close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+});

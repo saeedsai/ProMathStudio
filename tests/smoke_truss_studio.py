@@ -28,6 +28,7 @@ def main():
         page.keyboard.press('Space')
         preview = page.locator('#preview-summary').inner_text()
         for expected in ('3 joints', '3 members', '1 connected component', '0 isolated joints',
+                         'total member length 11.21 m', 'axial member volume Σ(L·A) 0.01345 m³',
                          'bounds 4 × 3 m', 'applied load', 'ΣFy -20 kN', 'not a stability check'):
             assert expected in preview, (expected, preview)
         assert page.locator('#plot line[data-member-id]').count() == 3
@@ -48,6 +49,18 @@ def main():
         assert '3 joints' in page.locator('#preview-summary').inner_text()
         page.locator('#reset').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
+        # Material metrics use the same SI contract for the simple analytical bar and triangle.
+        page.locator('#example').select_option('bar')
+        page.locator('#load-example').click()
+        bar_preview = page.locator('#preview-summary').inner_text()
+        assert 'total member length 2 m' in bar_preview, bar_preview
+        assert 'axial member volume Σ(L·A) 0.002 m³' in bar_preview, bar_preview
+        page.locator('#example').select_option('triangle')
+        page.locator('#load-example').click()
+        triangle_preview = page.locator('#preview-summary').inner_text()
+        assert 'total member length 11.21 m' in triangle_preview, triangle_preview
+        assert 'axial member volume Σ(L·A) 0.01345 m³' in triangle_preview, triangle_preview
+        assert page.evaluate("() => { const e=document.querySelector('#preview-summary'); return e.scrollWidth <= e.clientWidth + 1; }")
         result = page.evaluate('() => TrussStudio.solve(TrussStudio.example)')
         assert result['residual'] < 1e-9
         forces = {m['id']: m['force'] for m in result['members']}
@@ -80,6 +93,9 @@ def main():
         assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'
         assert page.locator('#members tr').nth(0).locator('input[data-field="E"]').input_value() == '200'
         assert page.locator('#members tr').nth(0).locator('input[data-field="area"]').input_value() == '1000.0000000000001' or abs(float(page.locator('#members tr').nth(0).locator('input[data-field="area"]').input_value())-1000)<1e-9
+        legacy_preview = page.locator('#preview-summary').inner_text()
+        assert 'total member length 11.21 m' in legacy_preview, legacy_preview
+        assert 'axial member volume Σ(L·A) 0.01345 m³' in legacy_preview, legacy_preview
         # Capture Blob downloads without navigating away from the standalone tool.
         page.evaluate('''() => { window.__exports=[]; const orig=URL.createObjectURL.bind(URL);
             URL.createObjectURL = blob => {window.__exports.push({blob});return orig(blob);};

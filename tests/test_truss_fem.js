@@ -715,3 +715,28 @@ test('inspectJSON counts disconnected truss components including isolated nodes 
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
  close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });
+
+
+test('inspectJSON exposes immutable per-member SI material metrics without solving',()=>{
+ const triangle=fem.inspectJSON(fem.exportJSON(fem.examples.triangle));
+ assert.deepEqual(triangle.memberMetrics.map(m=>[m.id,m.startNodeId,m.endNodeId]),
+  [['AB','A','B'],['AC','A','C'],['BC','B','C']]);
+ const lengths=[4,Math.hypot(2,3),Math.hypot(2,3)];
+ triangle.memberMetrics.forEach((m,i)=>{
+  close(m.length,lengths[i]);close(m.area,0.0012);close(m.volume,lengths[i]*0.0012);
+  assert.ok(Object.isFrozen(m));
+ });
+ assert.ok(Object.isFrozen(triangle.memberMetrics));
+ close(triangle.memberMetrics.reduce((sum,m)=>sum+m.length,0),triangle.totalMemberLength);
+ close(triangle.memberMetrics.reduce((sum,m)=>sum+m.volume,0),triangle.totalMemberVolume);
+ const legacy={nodes:fem.examples.triangle.nodes.map(n=>({...n,fx:n.fx*1000,fy:n.fy*1000})),
+  members:fem.examples.triangle.members.map(m=>({id:m.id,a:m.a,b:m.b,E:m.E*1e9,A:m.area*1e-6}))};
+ const imported=fem.inspectJSON(JSON.stringify(legacy));
+ assert.equal(imported.inputUnits.system,'legacy-si');
+ imported.memberMetrics.forEach((m,i)=>{
+  close(m.length,triangle.memberMetrics[i].length);
+  close(m.area,triangle.memberMetrics[i].area);
+  close(m.volume,triangle.memberMetrics[i].volume);
+ });
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+});

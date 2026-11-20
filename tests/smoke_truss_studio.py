@@ -23,6 +23,7 @@ def main():
         assert 'Analysis complete' in page.locator('#status').inner_text()
         # Preview valid geometry without solving, including a model that is structurally unstable.
         assert page.locator('#preview-summary').get_attribute('aria-live') == 'polite'
+        page.locator('#member-material-details > summary').click()
         support_y = page.locator('#nodes tr').nth(1).locator('input[data-field="fixY"]')
         support_y.focus()
         page.keyboard.press('Space')
@@ -31,6 +32,11 @@ def main():
                          'total member length 11.21 m', 'axial member volume Σ(L·A) 0.01345 m³',
                          'bounds 4 × 3 m', 'applied load', 'ΣFy -20 kN', 'not a stability check'):
             assert expected in preview, (expected, preview)
+        member_rows = page.locator('#member-metrics tr')
+        assert member_rows.count() == 3
+        assert [member_rows.nth(0).locator('td').nth(i).inner_text() for i in range(6)] == ['AB','A','B','4','1200','0.0048']
+        assert [member_rows.nth(1).locator('td').nth(i).inner_text() for i in range(6)] == ['AC','A','C','3.606','1200','0.004327']
+        assert [member_rows.nth(2).locator('td').nth(i).inner_text() for i in range(6)] == ['BC','B','C','3.606','1200','0.004327']
         assert page.locator('#plot line[data-member-id]').count() == 3
         assert page.locator('#plot circle[data-node-id]').count() == 3
         assert 'Preview ready' in page.locator('#status').inner_text()
@@ -45,8 +51,10 @@ def main():
         node_b_x.fill('')
         assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
         assert page.locator('#plot line[data-member-id]').count() == 0
+        assert 'Correct model inputs' in page.locator('#member-metrics').inner_text()
         node_b_x.fill('4')
         assert '3 joints' in page.locator('#preview-summary').inner_text()
+        assert page.locator('#member-metrics tr').count() == 3
         page.locator('#reset').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         # Material metrics use the same SI contract for the simple analytical bar and triangle.
@@ -55,12 +63,15 @@ def main():
         bar_preview = page.locator('#preview-summary').inner_text()
         assert 'total member length 2 m' in bar_preview, bar_preview
         assert 'axial member volume Σ(L·A) 0.002 m³' in bar_preview, bar_preview
+        bar_row = page.locator('#member-metrics tr').first.locator('td')
+        assert [bar_row.nth(i).inner_text() for i in range(6)] == ['AB','A','B','2','1000','0.002']
         page.locator('#example').select_option('triangle')
         page.locator('#load-example').click()
         triangle_preview = page.locator('#preview-summary').inner_text()
         assert 'total member length 11.21 m' in triangle_preview, triangle_preview
         assert 'axial member volume Σ(L·A) 0.01345 m³' in triangle_preview, triangle_preview
         assert page.evaluate("() => { const e=document.querySelector('#preview-summary'); return e.scrollWidth <= e.clientWidth + 1; }")
+        assert page.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1")
         result = page.evaluate('() => TrussStudio.solve(TrussStudio.example)')
         assert result['residual'] < 1e-9
         forces = {m['id']: m['force'] for m in result['members']}
@@ -94,8 +105,13 @@ def main():
         assert page.locator('#members tr').nth(0).locator('input[data-field="E"]').input_value() == '200'
         assert page.locator('#members tr').nth(0).locator('input[data-field="area"]').input_value() == '1000.0000000000001' or abs(float(page.locator('#members tr').nth(0).locator('input[data-field="area"]').input_value())-1000)<1e-9
         legacy_preview = page.locator('#preview-summary').inner_text()
-        assert 'total member length 11.21 m' in legacy_preview, legacy_preview
-        assert 'axial member volume Σ(L·A) 0.01345 m³' in legacy_preview, legacy_preview
+        assert 'total member length 4.828 m' in legacy_preview, legacy_preview
+        assert 'axial member volume Σ(L·A) 0.004828 m³' in legacy_preview, legacy_preview
+        assert 'bounds 2 × 1 m' in legacy_preview, legacy_preview
+        legacy_rows = page.locator('#member-metrics tr')
+        assert legacy_rows.count() == 3
+        legacy_first = legacy_rows.first.locator('td')
+        assert [legacy_first.nth(i).inner_text() for i in range(6)] == ['AB','A','B','2','1000','0.002']
         # Capture Blob downloads without navigating away from the standalone tool.
         page.evaluate('''() => { window.__exports=[]; const orig=URL.createObjectURL.bind(URL);
             URL.createObjectURL = blob => {window.__exports.push({blob});return orig(blob);};

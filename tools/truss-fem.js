@@ -235,6 +235,15 @@
     const normalized = parseModel(fromLegacy(model));
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
+      // Per-member quantities stay in SI and are available even when the structure is unstable.
+      memberMetrics: Object.freeze(normalized.members.map(member => Object.freeze({
+        id: member.id,
+        startNodeId: normalized.nodes[member.a].id,
+        endNodeId: normalized.nodes[member.b].id,
+        length: member.L,
+        area: member.A,
+        volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)')
+      }))),
       // Topological components include isolated nodes; this is not a stability certificate.
       connectedComponentCount: (() => {
         const parent = normalized.nodes.map((_, i) => i);

@@ -234,7 +234,7 @@
     const normalized = parseModel(fromLegacy(model));
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
-      // Immutable geometry bounds in metres, available for unstable imported structures.
+      // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.
       bounds: Object.freeze((() => {
         const xs = normalized.nodes.map(n => n.x), ys = normalized.nodes.map(n => n.y);
         const minX = Math.min(...xs), maxX = Math.max(...xs);

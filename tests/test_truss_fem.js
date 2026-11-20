@@ -502,7 +502,9 @@ test('inspectJSON geometry spans reject overflow and support flat shapes',()=>{
  flat.nodes.forEach(n=>{n.y=0;});
  assert.equal(fem.inspectJSON(JSON.stringify(flat)).bounds.height,0);
  const huge=clone(fem.examples.bar);
- huge.nodes[0].x=-1e308;huge.nodes[1].x=1e308;
+ huge.nodes.push({id:'C',x:-1e308,y:0,fixX:true,fixY:true});
+ huge.nodes.push({id:'D',x:1e308,y:0,fixX:true,fixY:true});
+ // Keep member AB valid: the remote fixed nodes alone should overflow the bounds.
  assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),/Truss bounds width.*finite number/);
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);

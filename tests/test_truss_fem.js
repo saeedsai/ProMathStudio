@@ -566,7 +566,9 @@ test('inspectJSON totals SI member volume without solving and rejects overflow',
  close(fem.inspectJSON(JSON.stringify(legacy)).totalMemberVolume,bar.totalMemberVolume);
  const unstable=clone(fem.examples.bar);unstable.nodes[1].fixY=false;
  close(fem.inspectJSON(JSON.stringify(unstable)).totalMemberVolume,0.002);
- const huge=clone(fem.examples.bar);huge.nodes[1].x=1e100;huge.members[0].area=1e308;
+ const huge=clone(fem.examples.bar);huge.nodes[1].x=1e308;huge.members[0].area=1e12;
+ // E*A/L stays finite and positive, but L*A exceeds the finite volume range.
+ assert.ok(Number.isFinite(200e9*(1e12*1e-6)/1e308));
  assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),/Total member volume.*finite number/);
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);

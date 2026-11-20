@@ -237,7 +237,7 @@
       // Sum member centreline lengths for material estimates; do not silently overflow.
       totalMemberLength: finite(normalized.members.reduce((sum, m) => sum + m.L, 0), 'Total member length (m)'),
       // Sum physical axial-bar volumes in m³; reject overflow before UI/material estimates.
-      totalMemberVolume: finite(normalized.members.reduce((sum, m) => sum + m.L * m.A, 0), 'Total member volume (m³)'),
+      totalMemberVolume: finite(normalized.members.reduce((sum, m) => sum + finite(m.L * m.A, 'Total member volume (m³)'), 0), 'Total member volume (m³)'),
       // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.
       bounds: Object.freeze((() => {
         const xs = normalized.nodes.map(n => n.x), ys = normalized.nodes.map(n => n.y);

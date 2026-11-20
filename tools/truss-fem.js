@@ -235,10 +235,14 @@
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
       // Immutable geometry bounds in metres, available for unstable imported structures.
-      bounds: Object.freeze({minX: Math.min(...normalized.nodes.map(n => n.x)),
-        maxX: Math.max(...normalized.nodes.map(n => n.x)),
-        minY: Math.min(...normalized.nodes.map(n => n.y)),
-        maxY: Math.max(...normalized.nodes.map(n => n.y))}),
+      bounds: Object.freeze((() => {
+        const xs = normalized.nodes.map(n => n.x), ys = normalized.nodes.map(n => n.y);
+        const minX = Math.min(...xs), maxX = Math.max(...xs);
+        const minY = Math.min(...ys), maxY = Math.max(...ys);
+        return {minX, maxX, minY, maxY,
+          width: finite(maxX - minX, 'Truss bounds width (m)'),
+          height: finite(maxY - minY, 'Truss bounds height (m)')};
+      })()),
       fixedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX) + Number(n.fixY), 0),
       loadedNodeCount: normalized.nodes.filter(n => n.fx !== 0 || n.fy !== 0).length,
       appliedForce: Object.freeze((() => {

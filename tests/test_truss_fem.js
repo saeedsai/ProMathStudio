@@ -1,5 +1,12 @@
 /* Analytical reference, equilibrium, energy and invalid-mechanism regressions. */
 'use strict';
+
+const assert = require('node:assert/strict');
+const test = require('node:test');
+const fem = require('../tools/truss-fem.js');
+const close = (got,want,rel=1e-9) => assert.ok(Math.abs(got-want)<=rel*Math.max(1,Math.abs(want)),String(got)+' != '+String(want));
+const clone = data => JSON.parse(JSON.stringify(data));
+
 test('truss JSON preview distinguishes loads at restrained DOFs',()=>{
  const bar=clone(fem.examples.bar);
  assert.equal(fem.inspectJSON(JSON.stringify(bar)).restrainedLoadedDofCount,0);
@@ -16,11 +23,13 @@ test('truss JSON preview distinguishes loads at restrained DOFs',()=>{
  close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });
 
-const assert = require('node:assert/strict');
-const test = require('node:test');
-const fem = require('../tools/truss-fem.js');
-const close = (got,want,rel=1e-9) => assert.ok(Math.abs(got-want)<=rel*Math.max(1,Math.abs(want)),String(got)+' != '+String(want));
-const clone = data => JSON.parse(JSON.stringify(data));
+test('truss preview does not count zero-valued restrained loads',()=>{
+ const bar=clone(fem.examples.bar);
+ bar.nodes[0].fx=0;bar.nodes[0].fy=0;
+ const preview=fem.inspectJSON(JSON.stringify(bar));
+ assert.equal(preview.restrainedLoadedDofCount,0);
+ assert.equal(preview.loadedDofCount,1);
+});
 
 test('truss JSON preview counts isolated nodes independently of connected groups',()=>{
  const bar=clone(fem.examples.bar);

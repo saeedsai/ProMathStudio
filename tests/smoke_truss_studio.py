@@ -48,6 +48,7 @@ def main():
         page.locator('#import-model').set_input_files({'name':'legacy.json','mimeType':'application/json',
                                                       'buffer':json.dumps(prior).encode('utf-8')})
         assert 'Analysis complete' in page.locator('#status').inner_text()
+        assert page.locator('#status').get_attribute('aria-busy') == 'false'
         # Normalized user controls now show kN/GPa/mm² rather than SI base units.
         assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'
         assert page.locator('#members tr').nth(0).locator('input[data-field="E"]').input_value() == '200'
@@ -70,8 +71,26 @@ def main():
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         # A malformed import must preserve the currently edited model.
+        # Hold File.text() open to verify the UI announces pending work before validation settles.
+        page.evaluate('''() => {
+            const read = File.prototype.text;
+            let release;
+            const gate = new Promise(resolve => { release = resolve; });
+            window.__releaseInvalidImport = release;
+            File.prototype.text = function() {
+                const pending = read.call(this);
+                return this.name === 'invalid.json' ? gate.then(() => pending) : pending;
+            };
+        }''')
         page.locator('#import-model').set_input_files({'name':'invalid.json','mimeType':'application/json',
                                                       'buffer':b'{bad'})
+        assert page.locator('#status').inner_text() == 'Importing model…'
+        assert page.locator('#status').get_attribute('aria-busy') == 'true'
+        page.evaluate('window.__releaseInvalidImport()')
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status.classList.contains('error') && status.getAttribute('aria-busy') === 'false';
+        }""")
         assert page.locator('#status.error').count() == 1
         assert page.locator('#nodes tr').count() == 3
         assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'

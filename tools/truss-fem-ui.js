@@ -7,8 +7,11 @@
   const SVG = 'http://www.w3.org/2000/svg';
   let latest = null, latestModel = null;
   const fmt = (x, digits=5) => Number(x).toPrecision(digits).replace(/(\.\d*?)0+(e|$)/,'$1$2').replace(/\.(e|$)/,'$1');
-  function status(message, error=false) {
-    $('status').textContent = message; $('status').classList.toggle('error', error);
+  function status(message, error=false, busy=false) {
+    const target = $('status');
+    target.textContent = message;
+    target.classList.toggle('error', error);
+    target.setAttribute('aria-busy', String(busy));
   }
   const el = (tag, text, attrs={}) => {
     const node = document.createElement(tag);
@@ -98,7 +101,7 @@
   $('nodes').addEventListener('input',invalidate);$('members').addEventListener('input',invalidate);$('nodes').addEventListener('change',invalidate);$('members').addEventListener('change',invalidate);
   $('solve').addEventListener('click',analyze);$('scale').addEventListener('change',draw);$('show-labels').addEventListener('change',draw);
   $('export-model').addEventListener('click',()=>{try{download('promath-truss-model.json',fem.exportJSON(readModel()),'application/json;charset=utf-8');status('Validated model JSON exported.');}catch(err){status('Export failed: '+err.message,true);}});
-  $('import-model').addEventListener('change',async event=>{const file=event.target.files?.[0];event.target.value='';if(!file)return;try{if(file.size>1024*1024)throw Error('Model JSON exceeds 1 MiB.');const model=fem.fromLegacy(fem.importJSON(await file.text()));renderModel(model);analyze();}catch(err){status('Import failed: '+err.message,true);}});
+  $('import-model').addEventListener('change',async event=>{const file=event.target.files?.[0];event.target.value='';if(!file)return;status('Importing model…',false,true);try{if(file.size>1024*1024)throw Error('Model JSON exceeds 1 MiB.');const model=fem.fromLegacy(fem.importJSON(await file.text()));renderModel(model);analyze();}catch(err){status('Import failed: '+err.message,true);}});
   $('export-csv').addEventListener('click',csv);
   $('export-svg').addEventListener('click',()=>{if(!latest){status('Analyze before exporting SVG.',true);return;}const svg=$('plot').cloneNode(true);svg.setAttribute('xmlns',SVG);svg.setAttribute('width','1240');svg.setAttribute('height','760');const background=svgNode('rect',{x:0,y:0,width:620,height:380,fill:'#09152a'});svg.insertBefore(background,svg.firstChild);download('promath-truss-deformation.svg',new XMLSerializer().serializeToString(svg),'image/svg+xml;charset=utf-8');});
   renderModel(fem.examples.triangle);analyze();

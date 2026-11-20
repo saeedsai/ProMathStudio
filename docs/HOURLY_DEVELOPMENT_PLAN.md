@@ -1,3 +1,9 @@
+## 2026-11-20 — TRUSS-JSON-MOMENT-353 (dev; exact-head CI pending)
+
+Added signed applied-force moment about the global origin (`appliedMoment`, SI N·m) to non-solving truss JSON preview, alongside the existing force resultant. Regression checks Studio/legacy SI parity, translated coordinates, zero-load unstable preview, malformed input and analytical displacement. Baseline dev `852ae4fa4baf6b436f7fb1326aa9d707f044c8df`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Previous exact-head PR Quality #44634206497 passed. PR #189 open without reviews; Pages verification unavailable. Historical inventory frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):** (1) exact-head push/PR Quality green with new moment regression and Chromium smoke; (2) eligible PR #189 review and protection verification; (3) authorized ordinary PR merge with exact-main Quality green; (4) Pages published SHA and hosted desktop/390px smoke; (5) browser truss JSON preview/import/export/solve, synchronized index.html and invalid-file/keyboard tests.
+
 ## 2026-11-20 — TRUSS-JSON-RESULTANT-352 (dev; new exact-head CI pending)
 
 Add immutable applied-force vector in SI newtons to truss JSON preview without solving. Focused Node regression covers signed multi-node Studio/legacy forces, zero-load unstable preview, malformed JSON, immutable metadata and analytical bar displacement. Baseline dev 126166eef6ab9b7c1836ce13c8878e1e66208e08; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Previous exact-head PR Quality #44624231778 passed; PR #189 has no submitted reviews; new CI and Pages pending. Frozen 166 gaps / 95 partial.

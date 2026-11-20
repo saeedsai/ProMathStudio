@@ -431,3 +431,25 @@ test('inspectJSON computes immutable applied-force resultant in SI',()=>{
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });
+
+
+test('inspectJSON reports signed applied moment about origin in SI N m',()=>{
+ const studio=clone(fem.examples.bar);
+ studio.nodes[0].fx=0;studio.nodes[0].fy=0;
+ studio.nodes[1].fx=1;studio.nodes[1].fy=2;
+ const p=fem.inspectJSON(JSON.stringify(studio));
+ close(p.appliedMoment,4000);
+ close(p.appliedForce.x,1000);close(p.appliedForce.y,2000);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},
+  {id:'B',x:2,y:0,fixY:true,fx:1000,fy:2000}],
+  members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ close(fem.inspectJSON(JSON.stringify(legacy)).appliedMoment,4000);
+ const translated=clone(studio);
+ translated.nodes.forEach(n=>{n.y+=3;});
+ close(fem.inspectJSON(JSON.stringify(translated)).appliedMoment,1000);
+ const zero=clone(fem.examples.bar);zero.nodes.forEach(n=>{n.fx=0;n.fy=0;});
+ zero.nodes[1].fixY=false;
+ close(fem.inspectJSON(JSON.stringify(zero)).appliedMoment,0);
+ close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
+});

@@ -1,3 +1,9 @@
+## 2026-11-20 — TRUSS-JSON-MOMENT-353 (dev; exact-head CI pending)
+
+Added signed applied-force moment about the global origin (`appliedMoment`, SI N·m) to non-solving truss JSON preview, alongside the existing force resultant. Regression checks Studio/legacy SI parity, translated coordinates, zero-load unstable preview, malformed input and analytical displacement. Baseline dev `852ae4fa4baf6b436f7fb1326aa9d707f044c8df`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Previous exact-head PR Quality #44634206497 passed. PR #189 open without reviews; Pages verification unavailable. Historical inventory frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):** (1) exact-head push/PR Quality green with new moment regression and Chromium smoke; (2) eligible PR #189 review and protection verification; (3) authorized ordinary PR merge with exact-main Quality green; (4) Pages published SHA and hosted desktop/390px smoke; (5) browser truss JSON preview/import/export/solve, synchronized index.html and invalid-file/keyboard tests.
+
 ## 2026-11-20 — TRUSS-JSON-RESULTANT-352
 
 Implemented immutable SI applied-load resultant in validated JSON preview with Studio/legacy/unstable/negative/analytical Node regression. Baseline dev 126166eef6ab9b7c1836ce13c8878e1e66208e08, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; prior Quality #44624231778 passed, new CI pending. PR #189 unreviewed; Pages unverified. Frozen 166 gaps / 95 partial. **NEXT FIVE (acceptance):** (1) exact-head Quality passes new resultant regression and browser smoke; (2) eligible PR #189 approval and branch protection gates; (3) authorized ordinary dev-to-main PR merge with main Quality green; (4) Pages published main SHA and hosted desktop/390px smoke; (5) synchronized browser JSON preview/import/export/solve with invalid-file and keyboard regressions.

@@ -235,15 +235,6 @@
     const normalized = parseModel(fromLegacy(model));
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
-      // Per-member quantities stay in SI and are available even when the structure is unstable.
-      memberMetrics: Object.freeze(normalized.members.map(member => Object.freeze({
-        id: member.id,
-        startNodeId: normalized.nodes[member.a].id,
-        endNodeId: normalized.nodes[member.b].id,
-        length: member.L,
-        area: member.A,
-        volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)')
-      }))),
       // Topological components include isolated nodes; this is not a stability certificate.
       connectedComponentCount: (() => {
         const parent = normalized.nodes.map((_, i) => i);
@@ -270,6 +261,15 @@
       totalMemberLength: finite(normalized.members.reduce((sum, m) => sum + m.L, 0), 'Total member length (m)'),
       // Sum physical axial-bar volumes in m³; reject overflow before UI/material estimates.
       totalMemberVolume: finite(normalized.members.reduce((sum, m) => sum + finite(m.L * m.A, 'Total member volume (m³)'), 0), 'Total member volume (m³)'),
+      // Per-member quantities stay in SI and are available even when the structure is unstable.
+      memberMetrics: Object.freeze(normalized.members.map(member => Object.freeze({
+        id: member.id,
+        startNodeId: normalized.nodes[member.a].id,
+        endNodeId: normalized.nodes[member.b].id,
+        length: member.L,
+        area: member.A,
+        volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)')
+      }))),
       // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.
       bounds: Object.freeze((() => {
         const xs = normalized.nodes.map(n => n.x), ys = normalized.nodes.map(n => n.y);

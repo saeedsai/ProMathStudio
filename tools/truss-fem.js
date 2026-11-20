@@ -254,6 +254,8 @@
       // Count free x/y translations independently of structural stability.
       freeDofCount: normalized.nodes.reduce((sum, n) => sum + Number(!n.fixX) + Number(!n.fixY), 0),
       loadedNodeCount: normalized.nodes.filter(n => n.fx !== 0 || n.fy !== 0).length,
+      // Count independently loaded translation components, including loads at supports.
+      loadedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fx !== 0) + Number(n.fy !== 0), 0),
       appliedForce: Object.freeze((() => {
         const total = normalized.nodes.reduce((sum, n) => ({
           x: sum.x + n.fx, y: sum.y + n.fy

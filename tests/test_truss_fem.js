@@ -588,3 +588,22 @@ test('inspectJSON reports free and constrained translational DOFs without solvin
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
 });
+
+
+test('inspectJSON counts independently loaded translational components including restrained loads',()=>{
+ const model=clone(fem.examples.bar);
+ model.nodes[0].fx=-2;model.nodes[0].fy=3;
+ model.nodes[1].fx=0;model.nodes[1].fy=-1;
+ const preview=fem.inspectJSON(JSON.stringify(model));
+ assert.equal(preview.loadedNodeCount,2);
+ assert.equal(preview.loadedDofCount,3);
+ assert.equal(preview.fixedDofCount,3);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true,fx:-2000,fy:3000},{id:'B',x:2,y:0,fixY:true,fy:-1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ assert.equal(fem.inspectJSON(JSON.stringify(legacy)).loadedDofCount,3);
+ const zero=clone(fem.examples.bar);zero.nodes.forEach(n=>{n.fx=0;n.fy=0;});
+ zero.nodes[1].fixY=false;
+ assert.equal(fem.inspectJSON(JSON.stringify(zero)).loadedDofCount,0);
+ assert.throws(()=>fem.solveDocument(zero),/Unstable|under-constrained/);
+ close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+});

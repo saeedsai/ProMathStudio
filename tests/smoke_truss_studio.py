@@ -37,6 +37,14 @@ def main():
         assert page.locator('#plot line').count() >= 6
         # Import a model produced by the old SI-only JSON editor: retain N, Pa, m² semantics.
         prior = page.evaluate('TrussStudio.example')
+        # Force File.text() to return a UTF-8 BOM, as some external editors include one.
+        # The browser UI must use the canonical importer rather than raw JSON.parse.
+        page.evaluate("""() => {
+            const read = File.prototype.text;
+            File.prototype.text = function() {
+                return read.call(this).then(value => String.fromCharCode(0xFEFF) + value);
+            };
+        }""")
         page.locator('#import-model').set_input_files({'name':'legacy.json','mimeType':'application/json',
                                                       'buffer':json.dumps(prior).encode('utf-8')})
         assert 'Analysis complete' in page.locator('#status').inner_text()
@@ -44,18 +52,39 @@ def main():
         assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'
         assert page.locator('#members tr').nth(0).locator('input[data-field="E"]').input_value() == '200'
         assert page.locator('#members tr').nth(0).locator('input[data-field="area"]').input_value() == '1000.0000000000001' or abs(float(page.locator('#members tr').nth(0).locator('input[data-field="area"]').input_value())-1000)<1e-9
-        # Export CSV content in the restricted sandbox without a download navigation.
+        # Capture Blob downloads without navigating away from the standalone tool.
         page.evaluate('''() => { window.__exports=[]; const orig=URL.createObjectURL.bind(URL);
             URL.createObjectURL = blob => {window.__exports.push({blob});return orig(blob);};
             HTMLAnchorElement.prototype.click = function(){window.__exports.at(-1).name=this.download;}; }''')
+        page.locator('#export-model').click()
+        model_export = page.evaluate('''async () => ({name:window.__exports[0].name,body:await window.__exports[0].blob.text()})''')
+        assert model_export['name'].endswith('.json')
+        exported_model = json.loads(model_export['body'])
+        assert abs(float(exported_model['members'][0]['area']) - 1000) < 1e-9
+        # Invalid edits must not produce a JSON file that cannot be imported again.
+        page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').fill('')
+        page.locator('#export-model').click()
+        assert page.locator('#status.error').count() == 1
+        assert len(page.evaluate('window.__exports')) == 1, 'Invalid model must not be exported'
+        page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').fill('0')
+        page.locator('#solve').click()
+        assert 'Analysis complete' in page.locator('#status').inner_text()
+        # A malformed import must preserve the currently edited model.
+        page.locator('#import-model').set_input_files({'name':'invalid.json','mimeType':'application/json',
+                                                      'buffer':b'{bad'})
+        assert page.locator('#status.error').count() == 1
+        assert page.locator('#nodes tr').count() == 3
+        assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'
+        page.locator('#solve').click()
+        assert 'Analysis complete' in page.locator('#status').inner_text()
         page.locator('#export-csv').click()
-        exported = page.evaluate('''async () => ({name:window.__exports[0].name,body:await window.__exports[0].blob.text()})''')
+        exported = page.evaluate('''async () => ({name:window.__exports[1].name,body:await window.__exports[1].blob.text()})''')
         assert exported['name'].endswith('.csv') and 'Axial force (kN)' in exported['body']
         page.locator('#nodes tr').nth(1).locator('input[data-field="fixY"]').uncheck()
         page.locator('#solve').click()
         assert page.locator('#status.error').count() == 1
         page.locator('#export-csv').click()
-        assert len(page.evaluate('window.__exports')) == 1, 'Failed analysis must not export stale results'
+        assert len(page.evaluate('window.__exports')) == 2, 'Failed analysis must not export stale results'
         page.locator('#reset').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2')

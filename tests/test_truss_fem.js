@@ -7,6 +7,26 @@ const fem = require('../tools/truss-fem.js');
 const close = (got,want,rel=1e-9) => assert.ok(Math.abs(got-want)<=rel*Math.max(1,Math.abs(want)),String(got)+' != '+String(want));
 const clone = data => JSON.parse(JSON.stringify(data));
 
+test('truss JSON preview counts independently loaded free DOFs',()=>{
+ const bar=clone(fem.examples.bar);
+ let preview=fem.inspectJSON(JSON.stringify(bar));
+ assert.equal(preview.freeLoadedDofCount,1);
+ assert.equal(preview.freeLoadedDofCount+preview.restrainedLoadedDofCount,preview.loadedDofCount);
+ bar.nodes[0].fx=2;bar.nodes[0].fy=-3;bar.nodes[1].fy=4;
+ preview=fem.inspectJSON(JSON.stringify(bar));
+ assert.equal(preview.freeLoadedDofCount,1);
+ assert.equal(preview.restrainedLoadedDofCount,3);
+ assert.equal(preview.freeLoadedDofCount+preview.restrainedLoadedDofCount,preview.loadedDofCount);
+ bar.nodes[1].fx=0;
+ assert.equal(fem.inspectJSON(JSON.stringify(bar)).freeLoadedDofCount,0);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true,fx:2000,fy:-3000},
+  {id:'B',x:2,y:0,fixY:true,fx:1000,fy:4000}],
+  members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ assert.equal(fem.inspectJSON(JSON.stringify(legacy)).freeLoadedDofCount,1);
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+ close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+});
+
 test('truss JSON preview distinguishes loads at restrained DOFs',()=>{
  const bar=clone(fem.examples.bar);
  assert.equal(fem.inspectJSON(JSON.stringify(bar)).restrainedLoadedDofCount,0);

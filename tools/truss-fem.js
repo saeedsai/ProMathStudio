@@ -280,6 +280,8 @@
       loadedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fx !== 0) + Number(n.fy !== 0), 0),
       // Loads at constrained translations produce reactions, not free displacement forcing.
       restrainedLoadedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX && n.fx !== 0) + Number(n.fixY && n.fy !== 0), 0),
+      // Nonzero applied loads on unconstrained translations, excluding support reactions.
+      freeLoadedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(!n.fixX && n.fx !== 0) + Number(!n.fixY && n.fy !== 0), 0),
       appliedForce: Object.freeze((() => {
         const total = normalized.nodes.reduce((sum, n) => ({
           x: sum.x + n.fx, y: sum.y + n.fy

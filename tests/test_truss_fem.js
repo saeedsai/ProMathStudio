@@ -453,3 +453,15 @@ test('inspectJSON reports signed applied moment about origin in SI N m',()=>{
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
 });
+
+
+test('inspectJSON rejects nonfinite global moment instead of returning invalid preview physics',()=>{
+ const huge=clone(fem.examples.bar);
+ huge.nodes[0].x=1e200;huge.nodes[1].x=1e200+1e190;
+ huge.nodes[1].fy=1e200;
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),/Applied moment.*finite number/);
+ const normal=fem.inspectJSON(fem.exportJSON(fem.examples.bar));
+ close(normal.appliedMoment,0);
+ close(fem.solveDocument(normal.model).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
+});

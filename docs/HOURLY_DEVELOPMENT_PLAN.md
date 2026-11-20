@@ -1,3 +1,9 @@
+## 2026-11-20 — TRUSS-JSON-MOMENT-RANGE-354 (dev; exact-head QA pending)
+
+Reject non-finite SI applied moments during validated truss JSON preview rather than returning Infinity for finite but extreme coordinates/forces. Focused Node regression covers overflow rejection, valid zero moment, analytical axial-bar displacement and malformed JSON. Baseline dev c774f5cae427677382638069760621b19e427239; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Previous exact-head PR Quality #44642722037 succeeded. PR #189 remains unreviewed; no promotion or Pages confirmation. Frozen inventory: 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):** (1) new exact-head push/PR Quality green including overflow Node regression and Chromium smoke; (2) eligible PR #189 review and protection gates verified; (3) ordinary authorized dev→main PR merge followed by exact-main Quality green; (4) Pages published main SHA plus hosted desktop/390px smoke; (5) synchronized browser truss JSON preview/import/export/solve with negative file and keyboard regressions.
+
 ## 2026-11-20 — TRUSS-JSON-MOMENT-353 (dev; exact-head CI pending)
 
 Added signed applied-force moment about the global origin (`appliedMoment`, SI N·m) to non-solving truss JSON preview, alongside the existing force resultant. Regression checks Studio/legacy SI parity, translated coordinates, zero-load unstable preview, malformed input and analytical displacement. Baseline dev `852ae4fa4baf6b436f7fb1326aa9d707f044c8df`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Previous exact-head PR Quality #44634206497 passed. PR #189 open without reviews; Pages verification unavailable. Historical inventory frozen at 166 gaps / 95 partial.

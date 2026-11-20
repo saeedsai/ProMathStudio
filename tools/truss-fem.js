@@ -240,7 +240,7 @@
         x: sum.x + n.fx, y: sum.y + n.fy
       }), {x: 0, y: 0})),
       // Signed z-axis moment about the global origin, in SI N·m.
-      appliedMoment: normalized.nodes.reduce((sum, n) => sum + n.x*n.fy - n.y*n.fx, 0)};
+      appliedMoment: finite(normalized.nodes.reduce((sum, n) => sum + n.x*n.fy - n.y*n.fx, 0), 'Applied moment (N·m)')};
   }
   function solveJSON(text) {
     return solveDocument(importJSON(text));

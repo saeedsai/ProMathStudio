@@ -234,6 +234,19 @@
     const normalized = parseModel(fromLegacy(model));
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
+      // Topological components include isolated nodes; this is not a stability certificate.
+      connectedComponentCount: (() => {
+        const parent = normalized.nodes.map((_, i) => i);
+        const rootOf = i => {
+          while (parent[i] !== i) i = parent[i];
+          return i;
+        };
+        for (const member of normalized.members) {
+          const a = rootOf(member.a), b = rootOf(member.b);
+          if (a !== b) parent[b] = a;
+        }
+        return new Set(parent.map((_, i) => rootOf(i))).size;
+      })(),
       // Sum member centreline lengths for material estimates; do not silently overflow.
       totalMemberLength: finite(normalized.members.reduce((sum, m) => sum + m.L, 0), 'Total member length (m)'),
       // Sum physical axial-bar volumes in m³; reject overflow before UI/material estimates.

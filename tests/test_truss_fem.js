@@ -607,3 +607,25 @@ test('inspectJSON counts independently loaded translational components including
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
 });
+
+test('inspectJSON counts disconnected truss components including isolated nodes without solving',()=>{
+ const model=clone(fem.examples.bar);
+ model.nodes.push({id:'C',x:4,y:0,fixX:true,fixY:true},
+                  {id:'D',x:6,y:0,fixY:true},
+                  {id:'E',x:8,y:2,fixX:true,fixY:true});
+ model.members.push({id:'CD',a:'C',b:'D',E:200,area:1000});
+ const preview=fem.inspectJSON(JSON.stringify(model));
+ assert.equal(preview.nodeCount,5);
+ assert.equal(preview.memberCount,2);
+ assert.equal(preview.connectedComponentCount,3);
+ assert.equal(fem.inspectJSON(JSON.stringify(fem.examples.bar)).connectedComponentCount,1);
+ const legacy={nodes:model.nodes.map(n=>({...n,fx:(n.fx??0)*1000,fy:(n.fy??0)*1000})),
+   members:model.members.map(m=>({id:m.id,a:m.a,b:m.b,E:m.E*1e9,A:m.area*1e-6}))};
+ assert.equal(fem.inspectJSON(JSON.stringify(legacy)).connectedComponentCount,3);
+ const connected=clone(model);
+ connected.members.push({id:'BC',a:'B',b:'C',E:200,area:1000},
+                        {id:'DE',a:'D',b:'E',E:200,area:1000});
+ assert.equal(fem.inspectJSON(JSON.stringify(connected)).connectedComponentCount,1);
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+ close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+});

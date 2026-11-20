@@ -21,6 +21,33 @@ def main():
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.set_content(HTML, wait_until='load')
         assert 'Analysis complete' in page.locator('#status').inner_text()
+        # Preview valid geometry without solving, including a model that is structurally unstable.
+        assert page.locator('#preview-summary').get_attribute('aria-live') == 'polite'
+        support_y = page.locator('#nodes tr').nth(1).locator('input[data-field="fixY"]')
+        support_y.focus()
+        page.keyboard.press('Space')
+        preview = page.locator('#preview-summary').inner_text()
+        for expected in ('3 joints', '3 members', '1 connected component', '0 isolated joints',
+                         'bounds 4 × 3 m', 'applied load', 'ΣFy -20 kN', 'not a stability check'):
+            assert expected in preview, (expected, preview)
+        assert page.locator('#plot line[data-member-id]').count() == 3
+        assert page.locator('#plot circle[data-node-id]').count() == 3
+        assert 'Preview ready' in page.locator('#status').inner_text()
+        assert page.locator('#status.error').count() == 0
+        # The solver rejects this released support, but the non-solving preview remains visible.
+        page.locator('#solve').click()
+        assert page.locator('#status.error').count() == 1
+        assert 'Unstable or under-constrained truss' in page.locator('#status').inner_text()
+        assert page.locator('#plot line[data-member-id]').count() == 3
+        # Invalid geometry removes stale preview; correcting the field restores it.
+        node_b_x = page.locator('#nodes tr').nth(1).locator('input[data-field="x"]')
+        node_b_x.fill('')
+        assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
+        assert page.locator('#plot line[data-member-id]').count() == 0
+        node_b_x.fill('4')
+        assert '3 joints' in page.locator('#preview-summary').inner_text()
+        page.locator('#reset').click()
+        assert 'Analysis complete' in page.locator('#status').inner_text()
         result = page.evaluate('() => TrussStudio.solve(TrussStudio.example)')
         assert result['residual'] < 1e-9
         forces = {m['id']: m['force'] for m in result['members']}
@@ -109,7 +136,7 @@ def main():
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2')
         assert not errors, errors
         browser.close()
-    print('Truss Studio: old SI references, model migration, export, singularity, recovery and mobile PASS')
+    print('Truss Studio: pre-solve geometry preview, unstable-model diagnostics, import/export, recovery and mobile PASS')
 
 
 if __name__ == '__main__':

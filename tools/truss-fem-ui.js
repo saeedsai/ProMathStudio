@@ -47,8 +47,50 @@
     });
   }
   function readModel() {return {nodes:readRows('nodes'),members:readRows('members')};}
-  function invalidate(){latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:4}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';}
+  function invalidate(){latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:4}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
+  function updatePreview() {
+    try {
+      const info=fem.inspectJSON(fem.exportJSON(readModel()));
+      const model=info.model,bounds=info.bounds,scale=500/Math.max(bounds.width,bounds.height,0.1);
+      const point=(x,y)=>[310+(Number(x)-bounds.centerX)*scale,190-(Number(y)-bounds.centerY)*scale];
+      const group=svgNode('g',{}),nodeById=new Map(model.nodes.map(node=>[String(node.id).trim(),node]));
+      const line=(a,b,attrs={})=>group.append(svgNode('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],...attrs}));
+      model.members.forEach(member=>{
+        const a=nodeById.get(String(member.a).trim()),b=nodeById.get(String(member.b).trim());
+        const pa=point(a.x,a.y),pb=point(b.x,b.y);
+        line(pa,pb,{stroke:'#78d7ff','stroke-width':3,'stroke-linecap':'round','data-member-id':member.id});
+        if($('show-labels').value==='all')group.append(svgNode('text',{x:(pa[0]+pb[0])/2+5,y:(pa[1]+pb[1])/2-8},member.id));
+      });
+      model.nodes.forEach(node=>{
+        const pt=point(node.x,node.y);
+        if(node.fixX||node.fixY)group.append(svgNode('rect',{x:pt[0]-9,y:pt[1]-9,width:18,height:18,rx:3,fill:'#30507e',stroke:'#a8c0e2','stroke-width':1}));
+        group.append(svgNode('circle',{cx:pt[0],cy:pt[1],r:4,fill:'#e5f3ff','data-node-id':node.id}));
+        if($('show-labels').value!=='none')group.append(svgNode('text',{x:pt[0]+9,y:pt[1]-11},node.id));
+        const fx=Number(node.fx),fy=Number(node.fy);
+        if(Math.hypot(fx,fy)>1e-12){
+          const length=30,angle=Math.atan2(-fy,fx),start=[pt[0]-length*Math.cos(angle),pt[1]-length*Math.sin(angle)];
+          line(start,pt,{stroke:'#ffe173','stroke-width':2.6});
+          const a1=angle+Math.PI*0.82,a2=angle-Math.PI*0.82;
+          line(pt,[pt[0]+9*Math.cos(a1),pt[1]+9*Math.sin(a1)],{stroke:'#ffe173','stroke-width':2.6});
+          line(pt,[pt[0]+9*Math.cos(a2),pt[1]+9*Math.sin(a2)],{stroke:'#ffe173','stroke-width':2.6});
+        }
+      });
+      group.append(svgNode('text',{x:15,y:362,'font-size':12},'Pre-solve geometry · not to scale'));
+      $('plot').replaceChildren(group);
+      $('plot').setAttribute('aria-label',`Pre-solve truss geometry preview with ${info.nodeCount} joints and ${info.memberCount} members. Supports and applied loads are shown. Topology does not certify stability.`);
+      const unit=info.inputUnits.forces,divisor=unit==='N'?1:1000;
+      const components=info.connectedComponentCount===1?'connected component':'connected components';
+      const isolated=info.isolatedNodeCount===1?'isolated joint':'isolated joints';
+      $('preview-summary').textContent=`Model overview · ${info.nodeCount} joints · ${info.memberCount} members · ${info.connectedComponentCount} ${components} · ${info.isolatedNodeCount} ${isolated} · bounds ${fmt(bounds.width,4)} × ${fmt(bounds.height,4)} m · applied load ΣFx ${fmt(info.appliedForce.x/divisor,4)} ${unit}, ΣFy ${fmt(info.appliedForce.y/divisor,4)} ${unit} (${info.loadedDofCount} loaded DOFs). Topology is not a stability check.`;
+      status('Preview ready · analyze to check structural stability.',false);
+    } catch(error) {
+      $('preview-summary').textContent='Preview unavailable: '+error.message;
+      $('plot').replaceChildren(svgNode('text',{x:310,y:190,'text-anchor':'middle'},'Correct model inputs to preview'));
+      $('plot').setAttribute('aria-label','Truss preview unavailable because model inputs are invalid.');
+      status('Preview unavailable: '+error.message,true);
+    }
+  }
   function draw() {
     if(!latest||!latestModel) return;
     const svg=$('plot'), m=latestModel, d=latest, xy=new Map(m.nodes.map(node=>[String(node.id),[Number(node.x),Number(node.y)]]));
@@ -74,7 +116,7 @@
       const fx=Number(node.fx),fy=Number(node.fy);
       if(Math.hypot(fx,fy)>1e-12){const length=30,angle=Math.atan2(-fy,fx),start=[pt[0]-length*Math.cos(angle),pt[1]-length*Math.sin(angle)];line(start,pt,'#ffe173',2.6);const a1=angle+Math.PI*0.82,a2=angle-Math.PI*0.82;line(pt,[pt[0]+9*Math.cos(a1),pt[1]+9*Math.sin(a1)],'#ffe173',2.6);line(pt,[pt[0]+9*Math.cos(a2),pt[1]+9*Math.sin(a2)],'#ffe173',2.6);}
     });
-    g.append(svgNode('text',{x:15,y:362,fill:'#a5c1dc'},'Deformation ×'+fmt(amp,4)+' · Geometry not to scale'));svg.replaceChildren(g);
+    g.append(svgNode('text',{x:15,y:362,fill:'#a5c1dc'},'Deformation ×'+fmt(amp,4)+' · Geometry not to scale'));svg.replaceChildren(g);svg.setAttribute('aria-label','Solved truss deformation with original geometry, member force colors and applied loads.');
   }
   function addResultRows(target, data, formatter) {
     const rows=data.map(item=>{const tr=el('tr',null);formatter(item).forEach(value=>tr.append(el('td',value)));return tr;});

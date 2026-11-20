@@ -535,7 +535,7 @@ test('inspectJSON framing diagonal is finite, zero for collapsed geometry, and r
  close(fem.inspectJSON(JSON.stringify(slanted)).bounds.diagonal,Math.sqrt(8));
  const huge=clone(fem.examples.bar);
  huge.nodes.push({id:'C',x:-1e308,y:-1e308,fixX:true,fixY:true});
- huge.nodes.push({id:'D',x:1e307,y:1e307,fixX:true,fixY:true});
+ huge.nodes.push({id:'D',x:5e307,y:5e307,fixX:true,fixY:true});
  assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),/Truss bounds diagonal.*finite number/);
  assert.ok(Object.isFrozen(normal));
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);

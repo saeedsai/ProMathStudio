@@ -241,7 +241,9 @@
         const minY = Math.min(...ys), maxY = Math.max(...ys);
         const width = finite(maxX - minX, 'Truss bounds width (m)');
         const height = finite(maxY - minY, 'Truss bounds height (m)');
-        return {minX, maxX, minY, maxY, width, height,
+        // The diagonal supports viewport fit; reject finite spans whose combined extent overflows.
+        const diagonal = finite(Math.hypot(width, height), 'Truss bounds diagonal (m)');
+        return {minX, maxX, minY, maxY, width, height, diagonal,
           centerX: minX + width / 2, centerY: minY + height / 2};
       })()),
       fixedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX) + Number(n.fixY), 0),

@@ -251,6 +251,8 @@
           centerX: minX + width / 2, centerY: minY + height / 2};
       })()),
       fixedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX) + Number(n.fixY), 0),
+      // Count free x/y translations independently of structural stability.
+      freeDofCount: normalized.nodes.reduce((sum, n) => sum + Number(!n.fixX) + Number(!n.fixY), 0),
       loadedNodeCount: normalized.nodes.filter(n => n.fx !== 0 || n.fy !== 0).length,
       appliedForce: Object.freeze((() => {
         const total = normalized.nodes.reduce((sum, n) => ({

@@ -573,3 +573,18 @@ test('inspectJSON totals SI member volume without solving and rejects overflow',
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
 });
+
+
+test('inspectJSON reports free and constrained translational DOFs without solving',()=>{
+ const bar=fem.inspectJSON(fem.exportJSON(fem.examples.bar));
+ assert.equal(bar.fixedDofCount,3);assert.equal(bar.freeDofCount,1);
+ assert.equal(bar.fixedDofCount+bar.freeDofCount,2*bar.nodeCount);
+ const unstable=clone(fem.examples.bar);unstable.nodes[1].fixY=false;
+ const preview=fem.inspectJSON(JSON.stringify(unstable));
+ assert.equal(preview.fixedDofCount,2);assert.equal(preview.freeDofCount,2);
+ assert.throws(()=>fem.solveDocument(unstable),/Unstable|under-constrained/);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ assert.equal(fem.inspectJSON(JSON.stringify(legacy)).freeDofCount,1);
+ close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+});

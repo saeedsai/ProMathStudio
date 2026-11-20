@@ -136,7 +136,7 @@ test('scaled pivoting rejects a triangular mechanism with nonzero free-DOF stiff
  assert.equal(preview.nodeCount,3);
  assert.equal(preview.memberCount,3);
  assert.equal(preview.connectedComponentCount,1);
- assert.throws(()=>fem.solve(model),/Unstable or under-constrained truss \\(singular stiffness matrix\\)/);
+ assert.throws(()=>fem.solve(model),/Unstable or under-constrained truss \(singular stiffness matrix\)/);
 });
 
 test('legacy SI model conversion preserves force and displacement, and rejects mixed units',()=>{

@@ -239,9 +239,10 @@
         const xs = normalized.nodes.map(n => n.x), ys = normalized.nodes.map(n => n.y);
         const minX = Math.min(...xs), maxX = Math.max(...xs);
         const minY = Math.min(...ys), maxY = Math.max(...ys);
-        return {minX, maxX, minY, maxY,
-          width: finite(maxX - minX, 'Truss bounds width (m)'),
-          height: finite(maxY - minY, 'Truss bounds height (m)')};
+        const width = finite(maxX - minX, 'Truss bounds width (m)');
+        const height = finite(maxY - minY, 'Truss bounds height (m)');
+        return {minX, maxX, minY, maxY, width, height,
+          centerX: minX + width / 2, centerY: minY + height / 2};
       })()),
       fixedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX) + Number(n.fixY), 0),
       loadedNodeCount: normalized.nodes.filter(n => n.fx !== 0 || n.fy !== 0).length,

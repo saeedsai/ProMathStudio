@@ -487,7 +487,7 @@ test('inspectJSON returns immutable geometry bounds in metres without solving',(
   model.nodes[0].x=-3; model.nodes[0].y=4;
   model.nodes[1].x=2; model.nodes[1].y=-1;
   const p=fem.inspectJSON(JSON.stringify(model));
-  assert.deepEqual(p.bounds,{minX:-3,maxX:2,minY:-1,maxY:4,width:5,height:5});
+  assert.deepEqual(p.bounds,{minX:-3,maxX:2,minY:-1,maxY:4,width:5,height:5,centerX:-0.5,centerY:1.5});
   assert.ok(Object.isFrozen(p.bounds));
   const legacy={nodes:[{id:'A',x:-3,y:4,fixX:true,fixY:true},{id:'B',x:2,y:-1,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
   assert.deepEqual(fem.inspectJSON(JSON.stringify(legacy)).bounds,p.bounds);
@@ -506,6 +506,23 @@ test('inspectJSON geometry spans reject overflow and support flat shapes',()=>{
  huge.nodes.push({id:'D',x:1e308,y:0,fixX:true,fixY:true});
  // Keep member AB valid: the remote fixed nodes alone should overflow the bounds.
  assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),/Truss bounds width.*finite number/);
+ close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
+});
+
+
+test('inspectJSON framing center is finite for extreme valid coordinates and flat models',()=>{
+ const huge=clone(fem.examples.bar);
+ huge.nodes.push({id:'C',x:-1e308,y:-1e307,fixX:true,fixY:true});
+ huge.nodes.push({id:'D',x:1e307,y:1e307,fixX:true,fixY:true});
+ const b=fem.inspectJSON(JSON.stringify(huge)).bounds;
+ close(b.centerX,-4.5e307);close(b.centerY,0);
+ assert.ok(Number.isFinite(b.centerX) && Number.isFinite(b.centerY));
+ const flat=clone(fem.examples.bar);
+ flat.nodes.forEach(n=>{n.y=7;});
+ const f=fem.inspectJSON(JSON.stringify(flat)).bounds;
+ assert.equal(f.centerY,7);assert.equal(f.height,0);
+ assert.ok(Object.isFrozen(f));
  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
 });

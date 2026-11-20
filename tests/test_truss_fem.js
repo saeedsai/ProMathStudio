@@ -465,3 +465,18 @@ test('inspectJSON rejects nonfinite global moment instead of returning invalid p
  close(fem.solveDocument(normal.model).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
 });
+
+
+test('inspectJSON rejects nonfinite resultant loads without weakening valid force and moment preview',()=>{
+ const huge=clone(fem.examples.bar);
+ huge.nodes[0].fx=1e305;huge.nodes[1].fx=1e305;
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),/Applied force x.*finite number/);
+ const vertical=clone(fem.examples.bar);
+ vertical.nodes[0].fy=1e305;vertical.nodes[1].fy=1e305;
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(vertical)),/Applied force y.*finite number/);
+ const normal=fem.inspectJSON(fem.exportJSON(fem.examples.bar));
+ close(normal.appliedForce.x,1000);close(normal.appliedForce.y,0);
+ close(normal.appliedMoment,0);
+ close(fem.solveDocument(normal.model).displacements[1].x,1e-5,1e-13);
+ assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
+});

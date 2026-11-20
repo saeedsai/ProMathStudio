@@ -1,3 +1,9 @@
+## 2026-11-20 — TRUSS-JSON-FORCE-RANGE-355 (dev; exact-head QA pending)
+
+Reject non-finite SI resultant force components in truss JSON preview when individually finite node loads overflow during summation. Preserve valid signed forces and moment, analytical bar physics, malformed-document rejection. Baseline dev 90a824b8ad3f4acfc5ebbcf65410c5e085255313; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Exact-head push Quality #44650390185 and PR Quality #44650398950 passed for baseline. PR #189 remains open with zero submitted reviews; no merge or Pages confirmation. Local checkout/Chromium unavailable; new exact-head Quality pending. Frozen historical inventory 166 gaps / 95 partial unchanged.
+
+**NEXT FIVE (acceptance):** (1) exact-new-head push/PR Quality green including resultant overflow Node and browser regressions; (2) eligible independent PR #189 review and verified release protections; (3) ordinary authorized dev→main PR merge and exact-main Quality green; (4) Pages publication of main SHA plus hosted desktop/390px smoke; (5) synchronized browser truss JSON preview/import/export/solve UI with invalid-file and keyboard regressions.
+
 ## 2026-11-20 — TRUSS-JSON-MOMENT-RANGE-354 (dev; exact-head QA pending)
 
 Reject non-finite SI applied moments during validated truss JSON preview rather than returning Infinity for finite but extreme coordinates/forces. Focused Node regression covers overflow rejection, valid zero moment, analytical axial-bar displacement and malformed JSON. Baseline dev c774f5cae427677382638069760621b19e427239; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Previous exact-head PR Quality #44642722037 succeeded. PR #189 remains unreviewed; no promotion or Pages confirmation. Frozen inventory: 166 gaps / 95 partial.

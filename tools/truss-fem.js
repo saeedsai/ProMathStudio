@@ -236,9 +236,12 @@
       memberCount: model.members.length,
       fixedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX) + Number(n.fixY), 0),
       loadedNodeCount: normalized.nodes.filter(n => n.fx !== 0 || n.fy !== 0).length,
-      appliedForce: Object.freeze(normalized.nodes.reduce((sum, n) => ({
-        x: sum.x + n.fx, y: sum.y + n.fy
-      }), {x: 0, y: 0})),
+      appliedForce: Object.freeze((() => {
+        const total = normalized.nodes.reduce((sum, n) => ({
+          x: sum.x + n.fx, y: sum.y + n.fy
+        }), {x: 0, y: 0});
+        return {x: finite(total.x, 'Applied force x (N)'), y: finite(total.y, 'Applied force y (N)')};
+      })()),
       // Signed z-axis moment about the global origin, in SI N·m.
       appliedMoment: finite(normalized.nodes.reduce((sum, n) => sum + n.x*n.fy - n.y*n.fx, 0), 'Applied moment (N·m)')};
   }

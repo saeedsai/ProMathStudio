@@ -480,3 +480,18 @@ test('inspectJSON rejects nonfinite resultant loads without weakening valid forc
  close(fem.solveDocument(normal.model).displacements[1].x,1e-5,1e-13);
  assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
 });
+
+
+test('inspectJSON returns immutable geometry bounds in metres without solving',()=>{
+  const model=clone(fem.examples.bar);
+  model.nodes[0].x=-3; model.nodes[0].y=4;
+  model.nodes[1].x=2; model.nodes[1].y=-1;
+  const p=fem.inspectJSON(JSON.stringify(model));
+  assert.deepEqual(p.bounds,{minX:-3,maxX:2,minY:-1,maxY:4});
+  assert.ok(Object.isFrozen(p.bounds));
+  const legacy={nodes:[{id:'A',x:-3,y:4,fixX:true,fixY:true},{id:'B',x:2,y:-1,fx:1000}],members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+  assert.deepEqual(fem.inspectJSON(JSON.stringify(legacy)).bounds,p.bounds);
+  assert.throws(()=>fem.solveDocument(legacy),/Unstable|under-constrained/);
+  close(fem.solveDocument(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+  assert.throws(()=>fem.inspectJSON('{broken'),/Invalid truss JSON/);
+});

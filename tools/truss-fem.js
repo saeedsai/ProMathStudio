@@ -247,6 +247,15 @@
         }
         return new Set(parent.map((_, i) => rootOf(i))).size;
       })(),
+      // Nodes without any incident member remain isolated even when other members form a component.
+      isolatedNodeCount: (() => {
+        const incident = new Set();
+        for (const member of normalized.members) {
+          incident.add(member.a);
+          incident.add(member.b);
+        }
+        return normalized.nodes.length - incident.size;
+      })(),
       // Sum member centreline lengths for material estimates; do not silently overflow.
       totalMemberLength: finite(normalized.members.reduce((sum, m) => sum + m.L, 0), 'Total member length (m)'),
       // Sum physical axial-bar volumes in m³; reject overflow before UI/material estimates.

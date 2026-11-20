@@ -6,6 +6,25 @@ const fem = require('../tools/truss-fem.js');
 const close = (got,want,rel=1e-9) => assert.ok(Math.abs(got-want)<=rel*Math.max(1,Math.abs(want)),String(got)+' != '+String(want));
 const clone = data => JSON.parse(JSON.stringify(data));
 
+test('truss JSON preview counts isolated nodes independently of connected groups',()=>{
+ const bar=clone(fem.examples.bar);
+ assert.equal(fem.inspectJSON(JSON.stringify(bar)).isolatedNodeCount,0);
+ const disconnected=clone(bar);
+ disconnected.nodes.push({id:'C',x:10,y:10},{id:'D',x:11,y:10});
+ assert.equal(fem.inspectJSON(JSON.stringify(disconnected)).isolatedNodeCount,2);
+ assert.equal(fem.inspectJSON(JSON.stringify(disconnected)).connectedComponentCount,3);
+ disconnected.members.push({id:'CD',a:'C',b:'D',E:200,area:1000});
+ assert.equal(fem.inspectJSON(JSON.stringify(disconnected)).isolatedNodeCount,0);
+ assert.equal(fem.inspectJSON(JSON.stringify(disconnected)).connectedComponentCount,2);
+ disconnected.nodes.push({id:'E',x:20,y:20});
+ assert.equal(fem.inspectJSON(JSON.stringify(disconnected)).isolatedNodeCount,1);
+ const legacy={nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:1000},{id:'C',x:5,y:0}],
+   members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001}]};
+ assert.equal(fem.inspectJSON(JSON.stringify(legacy)).isolatedNodeCount,1);
+ assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
+ close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+});
+
 test('single axial bar matches FL/EA, stress F/A, reactions and Clapeyron energy',()=>{
  const r=fem.solve(fem.examples.bar);
  close(r.displacements[1].x,1e-5,1e-13);close(r.members[0].force,1000);close(r.members[0].stress,1e6);

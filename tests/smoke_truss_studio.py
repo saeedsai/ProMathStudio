@@ -113,7 +113,7 @@ def main():
         legacy_rows = page.locator('#member-metrics tr')
         assert legacy_rows.count() == 3
         legacy_first = legacy_rows.first.locator('td')
-        assert [legacy_first.nth(i).inner_text() for i in range(6)] == ['AB','A','B','2','1000','0.002']
+        assert [legacy_first.nth(i).inner_text() for i in range(8)] == ['AB','A','B','2','1000','0.002','200','100']
         # Capture Blob downloads without navigating away from the standalone tool.
         page.evaluate('''() => { window.__exports=[]; const orig=URL.createObjectURL.bind(URL);
             URL.createObjectURL = blob => {window.__exports.push({blob});return orig(blob);};
@@ -138,8 +138,8 @@ def main():
         material_export = page.evaluate('''async () => ({name:window.__exports[1].name,body:await window.__exports[1].blob.text()})''')
         assert material_export['name'] == 'promath-truss-material-schedule.csv'
         material_rows = list(csv.reader(io.StringIO(material_export['body'])))
-        assert material_rows[0] == ['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)']
-        assert material_rows[1] == ['AB','A','B','2','0.001','0.002']
+        assert material_rows[0] == ['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)']
+        assert material_rows[1] == ['AB','A','B','2','0.001','0.002','200','100']
         assert material_export['body'].endswith(chr(13) + chr(10))
         assert 'Validated member material schedule exported.' in page.locator('#status').inner_text()
         page.locator('#solve').click()

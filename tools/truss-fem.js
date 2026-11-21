@@ -268,6 +268,9 @@
         endNodeId: normalized.nodes[member.b].id,
         length: member.L,
         area: member.A,
+        elasticModulus: member.E,
+        // EA/L is axial stiffness in N/m; the existing validated FEM stiffness is reused.
+        axialStiffness: member.stiffness,
         volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)')
       }))),
       // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.
@@ -305,9 +308,9 @@
   function exportMaterialCSV(model) {
     const preview = inspectJSON(exportJSON(model));
     const rows = [
-      ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)'],
+      ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)', 'Elastic modulus (GPa)', 'Axial stiffness EA/L (kN/mm)'],
       ...preview.memberMetrics.map(member => [member.id, member.startNodeId, member.endNodeId,
-        member.length, member.area, member.volume])
+        member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6])
     ];
     const quote = value => '"' + String(value).replace(/"/g, '""') + '"';
     return rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';

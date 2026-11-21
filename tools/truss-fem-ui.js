@@ -138,6 +138,7 @@
   function analyze(){try{const model=readModel();showResult(fem.solve(model),model);}catch(error){invalidate();status(error.message,true);}}
   function download(name,content,mime){const link=el('a',null);const url=URL.createObjectURL(new Blob([content],{type:mime}));link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
   function csv(){if(!latest){status('Run analysis before exporting results.',true);return;}const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain'],...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain]),[],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),[],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];download('promath-truss-results.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+  function materialCsv(){try{download('promath-truss-material-schedule.csv',fem.exportMaterialCSV(readModel()),'text/csv;charset=utf-8');status('Validated member material schedule exported.');}catch(error){status('Material schedule export failed: '+error.message,true);}}
   $('load-example').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
   $('reset').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
   $('add-node').addEventListener('click',()=>{appendRow('nodes',{id:'N'+($('nodes').children.length+1),x:0,y:0,fixX:false,fixY:false,fx:0,fy:0});invalidate();});
@@ -146,7 +147,7 @@
   $('solve').addEventListener('click',analyze);$('scale').addEventListener('change',draw);$('show-labels').addEventListener('change',draw);
   $('export-model').addEventListener('click',()=>{try{download('promath-truss-model.json',fem.exportJSON(readModel()),'application/json;charset=utf-8');status('Validated model JSON exported.');}catch(err){status('Export failed: '+err.message,true);}});
   $('import-model').addEventListener('change',async event=>{const file=event.target.files?.[0];event.target.value='';if(!file)return;status('Importing model…',false,true);try{if(file.size>1024*1024)throw Error('Model JSON exceeds 1 MiB.');const model=fem.fromLegacy(fem.importJSON(await file.text()));renderModel(model);analyze();}catch(err){status('Import failed: '+err.message,true);}});
-  $('export-csv').addEventListener('click',csv);
+  $('export-csv').addEventListener('click',csv);$('export-material-csv').addEventListener('click',materialCsv);
   $('export-svg').addEventListener('click',()=>{if(!latest){status('Analyze before exporting SVG.',true);return;}const svg=$('plot').cloneNode(true);svg.setAttribute('xmlns',SVG);svg.setAttribute('width','1240');svg.setAttribute('height','760');const background=svgNode('rect',{x:0,y:0,width:620,height:380,fill:'#09152a'});svg.insertBefore(background,svg.firstChild);download('promath-truss-deformation.svg',new XMLSerializer().serializeToString(svg),'image/svg+xml;charset=utf-8');});
   renderModel(fem.examples.triangle);analyze();
 })();

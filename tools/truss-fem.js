@@ -301,8 +301,19 @@
       // Signed z-axis moment about the global origin, in SI N·m.
       appliedMoment: finite(normalized.nodes.reduce((sum, n) => sum + n.x*n.fy - n.y*n.fx, 0), 'Applied moment (N·m)')};
   }
+  // Export a validated per-member material schedule in explicit SI units without solving.
+  function exportMaterialCSV(model) {
+    const preview = inspectJSON(exportJSON(model));
+    const rows = [
+      ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)'],
+      ...preview.memberMetrics.map(member => [member.id, member.startNodeId, member.endNodeId,
+        member.length, member.area, member.volume])
+    ];
+    const quote = value => '"' + String(value).replace(/"/g, '""') + '"';
+    return rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';
+  }
   function solveJSON(text) {
     return solveDocument(importJSON(text));
   }
-  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
+  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
 });

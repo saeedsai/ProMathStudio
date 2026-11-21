@@ -740,3 +740,25 @@ test('inspectJSON exposes immutable per-member SI material metrics without solvi
  });
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
 });
+
+test('material schedule CSV exports validated per-member SI quantities without solving',()=>{
+ const barCSV=fem.exportMaterialCSV(fem.examples.bar);
+ const header='"Member ID","Start joint ID","End joint ID","Centreline length (m)","Cross-sectional area (m²)","Axial material volume (m³)"';
+ assert.equal(barCSV,header+'\r\n"AB","A","B","2","0.001","0.002"\r\n');
+ assert.ok(barCSV.endsWith('\r\n'));
+ assert.equal(barCSV.replace(/\r\n/g,'').includes('\n'),false);
+ const triangleCSV=fem.exportMaterialCSV(fem.examples.triangle);
+ const rows=triangleCSV.trimEnd().split('\r\n').map(line=>line.slice(1,-1).split('","'));
+ assert.deepEqual(rows[0],['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)']);
+ assert.equal(rows.length,4);
+ const lengths=[4,Math.hypot(2,3),Math.hypot(2,3)];
+ rows.slice(1).forEach((row,i)=>{close(Number(row[3]),lengths[i]);close(Number(row[4]),0.0012);close(Number(row[5]),lengths[i]*0.0012);});
+ const legacy={nodes:fem.examples.bar.nodes.map(n=>({...n,fx:n.fx*1000,fy:n.fy*1000})),
+  members:fem.examples.bar.members.map(m=>({id:m.id,a:m.a,b:m.b,E:m.E*1e9,A:m.area*1e-6}))};
+ assert.equal(fem.exportMaterialCSV(legacy),barCSV,'legacy SI and Studio models must export identical physical schedules');
+ const unstable=clone(fem.examples.bar);unstable.nodes[1].fixY=false;
+ assert.equal(fem.exportMaterialCSV(unstable),barCSV,'a valid unstable model still has a material schedule');
+ const invalid=clone(fem.examples.bar);invalid.members[0].area=0;
+ assert.throws(()=>fem.exportMaterialCSV(invalid),/area must be positive/);
+ assert.throws(()=>fem.exportMaterialCSV({nodes:[],members:[]}),/Use 2–80 nodes/);
+});

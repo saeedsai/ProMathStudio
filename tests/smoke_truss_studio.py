@@ -1,6 +1,8 @@
 """Backwards-compatible truss studio: original SI reference values, CSV export and UI.
 The upgraded page uses an editable table UI but retains the prior solver interface."""
 from pathlib import Path
+import csv
+import io
 import json
 import os
 from playwright.sync_api import sync_playwright
@@ -126,7 +128,20 @@ def main():
         page.locator('#export-model').click()
         assert page.locator('#status.error').count() == 1
         assert len(page.evaluate('window.__exports')) == 1, 'Invalid model must not be exported'
+        page.locator('#export-material-csv').click()
+        assert len(page.evaluate('window.__exports')) == 1, 'Invalid model must not produce a material schedule'
+        assert 'Material schedule export failed' in page.locator('#status').inner_text()
+        # Restore a valid model but do not solve: material scheduling is a pre-solve workflow.
         page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').fill('0')
+        page.locator('#export-material-csv').focus()
+        page.keyboard.press('Enter')
+        material_export = page.evaluate('''async () => ({name:window.__exports[1].name,body:await window.__exports[1].blob.text()})''')
+        assert material_export['name'] == 'promath-truss-material-schedule.csv'
+        material_rows = list(csv.reader(io.StringIO(material_export['body'])))
+        assert material_rows[0] == ['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)']
+        assert material_rows[1] == ['AB','A','B','2','0.001','0.002']
+        assert material_export['body'].endswith('\\r\\n')
+        assert 'Validated member material schedule exported.' in page.locator('#status').inner_text()
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         # A malformed import must preserve the currently edited model.
@@ -156,19 +171,19 @@ def main():
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         page.locator('#export-csv').click()
-        exported = page.evaluate('''async () => ({name:window.__exports[1].name,body:await window.__exports[1].blob.text()})''')
+        exported = page.evaluate('''async () => ({name:window.__exports[2].name,body:await window.__exports[2].blob.text()})''')
         assert exported['name'].endswith('.csv') and 'Axial force (kN)' in exported['body']
         page.locator('#nodes tr').nth(1).locator('input[data-field="fixY"]').uncheck()
         page.locator('#solve').click()
         assert page.locator('#status.error').count() == 1
         page.locator('#export-csv').click()
-        assert len(page.evaluate('window.__exports')) == 2, 'Failed analysis must not export stale results'
+        assert len(page.evaluate('window.__exports')) == 3, 'Failed analysis must not export stale results'
         page.locator('#reset').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2')
         assert not errors, errors
         browser.close()
-    print('Truss Studio: pre-solve geometry preview, unstable-model diagnostics, import/export, recovery and mobile PASS')
+    print('Truss Studio: pre-solve geometry, validated material schedule CSV, import/export, recovery and mobile PASS')
 
 
 if __name__ == '__main__':

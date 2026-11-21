@@ -746,13 +746,13 @@ test('inspectJSON exposes immutable per-member SI material metrics without solvi
 
 test('material schedule CSV exports validated per-member SI quantities without solving',()=>{
  const barCSV=fem.exportMaterialCSV(fem.examples.bar);
- const header='"Member ID","Start joint ID","End joint ID","Centreline length (m)","Cross-sectional area (m²)","Axial material volume (m³)","Elastic modulus (GPa)","Axial stiffness EA/L (kN/mm)","Density (kg/m³)","Member mass (kg)"';
- assert.equal(barCSV,header+'\r\n"AB","A","B","2","0.001","0.002","200","100","",""\r\n');
+ const header='"Member ID","Start joint ID","End joint ID","Centreline length (m)","Cross-sectional area (m²)","Axial material volume (m³)","Elastic modulus (GPa)","Axial stiffness EA/L (kN/mm)","Density (kg/m³)","Member mass (kg)","Second moment of area I (mm⁴)","Effective length factor K (-)","Euler critical load Pcr (kN)"';
+ assert.equal(barCSV,header+'\r\n"AB","A","B","2","0.001","0.002","200","100","","","","",""\r\n');
  assert.ok(barCSV.endsWith('\r\n'));
  assert.equal(barCSV.replace(/\r\n/g,'').includes('\n'),false);
  const triangleCSV=fem.exportMaterialCSV(fem.examples.triangle);
  const rows=triangleCSV.trimEnd().split('\r\n').map(line=>line.slice(1,-1).split('","'));
- assert.deepEqual(rows[0],['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)','Density (kg/m³)','Member mass (kg)']);
+ assert.deepEqual(rows[0],['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)','Density (kg/m³)','Member mass (kg)','Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']);
  assert.equal(rows.length,4);
  const lengths=[4,Math.hypot(2,3),Math.hypot(2,3)];
  rows.slice(1).forEach((row,i)=>{
@@ -814,4 +814,49 @@ test('material CSV numeric cells avoid binary floating-point tails and retain si
  assert.ok(csv.includes(['"AB"','"A"','"B"','"2"','"0.001"','"0.002"','"200"','"100"','"7850"','"15.7"'].join(',')));
  const precise=clone(fem.examples.bar);precise.nodes[1].x=2/3;
  assert.ok(fem.exportMaterialCSV(precise).includes('"0.6666666666666666"'));
+});
+
+test('optional Euler buckling estimate uses SI units, validates I/K and remains independent of applied load',()=>{
+ const bar=clone(fem.examples.bar);
+ const baseline=fem.inspectJSON(JSON.stringify(bar)).memberMetrics[0];
+ assert.equal(baseline.secondMoment,null);
+ assert.equal(baseline.effectiveLengthFactor,null);
+ assert.equal(baseline.eulerCriticalLoad,null);
+ const pinned=clone(bar);pinned.members[0].I=1e6;pinned.members[0].K=1;
+ const metric=fem.inspectJSON(JSON.stringify(pinned)).memberMetrics[0];
+ const expected=Math.PI*Math.PI*200e9*1e-6/(2*2);
+ close(metric.secondMoment,1e-6);assert.equal(metric.effectiveLengthFactor,1);
+ close(metric.eulerCriticalLoad,expected,1e-12);
+ assert.ok(Object.isFrozen(metric));
+ const fixedEnd=clone(pinned);fixedEnd.members[0].K=2;
+ close(fem.inspectJSON(JSON.stringify(fixedEnd)).memberMetrics[0].eulerCriticalLoad,expected/4,1e-12);
+ const zeroLoad=clone(pinned);zeroLoad.nodes[1].fx=0;
+ const tension=clone(pinned);tension.nodes[1].fx=1;
+ close(fem.inspectJSON(JSON.stringify(zeroLoad)).memberMetrics[0].eulerCriticalLoad,expected,1e-12);
+ close(fem.inspectJSON(JSON.stringify(tension)).memberMetrics[0].eulerCriticalLoad,expected,1e-12);
+ const legacy={nodes:bar.nodes.map(n=>({...n,fx:n.fx*1000,fy:n.fy*1000})),
+  members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001,I:1e-6,K:1}]};
+ const legacyMetric=fem.inspectJSON(JSON.stringify(legacy)).memberMetrics[0];
+ close(legacyMetric.secondMoment,1e-6);close(legacyMetric.eulerCriticalLoad,expected,1e-12);
+ const rows=fem.exportMaterialCSV(pinned).trimEnd().split('\\r\\n').map(line=>line.slice(1,-1).split('\",\"'));
+ assert.deepEqual(rows[0].slice(-3),['Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']);
+ assert.equal(rows[1][10],'1000000');assert.equal(rows[1][11],'1');
+ close(Number(rows[1][12]),expected/1000,1e-12);
+ for(const invalid of [0,-1,NaN,Infinity,-Infinity,'not-a-number',true,Number.MIN_VALUE]){
+  const model=clone(pinned);model.members[0].I=invalid;
+  assert.throws(()=>fem.parseModel(model),invalid===0||invalid===-1||invalid===Number.MIN_VALUE?/I must be positive/:/finite number/);
+ }
+ for(const invalid of [0,-1,NaN,Infinity,-Infinity,'not-a-number',true]){
+  const model=clone(pinned);model.members[0].K=invalid;
+  assert.throws(()=>fem.parseModel(model),invalid===0||invalid===-1?/K must be positive/:/finite number/);
+ }
+ const missingK=clone(pinned);delete missingK.members[0].K;
+ assert.throws(()=>fem.parseModel(missingK),/provide both I .* and K/);
+ const missingI=clone(pinned);delete missingI.members[0].I;
+ assert.throws(()=>fem.parseModel(missingI),/provide both I .* and K/);
+ const overflow=clone(pinned);overflow.members[0].I=Number.MAX_VALUE;
+ assert.throws(()=>fem.parseModel(overflow),/Euler buckling numerator.*finite number/);
+ const shortK=clone(pinned);shortK.members[0].K=Number.MIN_VALUE;
+ assert.throws(()=>fem.parseModel(shortK),/effective buckling length squared underflow/);
+ close(fem.solve(bar).displacements[1].x,1e-5,1e-13);
 });

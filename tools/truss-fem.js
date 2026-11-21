@@ -87,7 +87,27 @@
         (typeof row.density === 'string' && !row.density.trim()) ? null : finite(row.density, id + ' density (kg/m³)');
       if (density !== null && density < 0) throw Error('Member ' + id + ': density must be non-negative.');
       const mass = density === null ? null : finite(finite(L * A, 'Member ' + id + ' material volume (m³)') * density, 'Member ' + id + ' mass (kg)');
-      return {id, a, b, E, A, L, c: dx / L, s: dy / L, stiffness: EAbyL, density, mass};
+      // Optional ideal Euler estimate: I is entered in mm⁴ and K is dimensionless.
+      // Both are required together; this is a member property, not a demand/capacity check.
+      const hasI = row.I !== undefined && row.I !== null && !(typeof row.I === 'string' && !row.I.trim());
+      const hasK = row.K !== undefined && row.K !== null && !(typeof row.K === 'string' && !row.K.trim());
+      if (hasI !== hasK) throw Error('Member ' + id + ': provide both I (mm⁴) and K for the Euler buckling estimate.');
+      let secondMoment = null, effectiveLengthFactor = null, eulerCriticalLoad = null;
+      if (hasI) {
+        secondMoment = finiteScaled(row.I, id + ' I (mm⁴)', 1e-12);
+        effectiveLengthFactor = finite(row.K, id + ' K (dimensionless)');
+        if (!(secondMoment > 0)) throw Error('Member ' + id + ': I must be positive.');
+        if (!(effectiveLengthFactor > 0)) throw Error('Member ' + id + ': K must be positive.');
+        const effectiveLength = finite(effectiveLengthFactor * L, id + ' effective buckling length (m)');
+        if (!(effectiveLength > 0)) throw Error('Member ' + id + ': effective buckling length underflow.');
+        const numerator = finite(Math.PI * Math.PI * E * secondMoment, id + ' Euler buckling numerator');
+        const denominator = finite(effectiveLength * effectiveLength, id + ' effective buckling length squared');
+        if (!(denominator > 0)) throw Error('Member ' + id + ': effective buckling length squared underflow.');
+        eulerCriticalLoad = finite(numerator / denominator, id + ' Euler critical load (N)');
+        if (!(eulerCriticalLoad > 0)) throw Error('Member ' + id + ': Euler critical load underflow; increase I or E, or reduce K·L.');
+      }
+      return {id, a, b, E, A, L, c: dx / L, s: dy / L, stiffness: EAbyL,
+        density, mass, secondMoment, effectiveLengthFactor, eulerCriticalLoad};
     });
     if (new Set(members.map(m => m.id)).size !== members.length) throw Error('Member IDs must be unique.');
     return {nodes, members};
@@ -195,7 +215,9 @@
       fy: finite(n.fy ?? 0, 'Legacy Fy (N)') / 1000})),
       members: model.members.map(m => ({id: m.id, a: m.a, b: m.b,
         E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finiteScaled(m.A, 'Legacy area (m²)', 1e6),
-        ...(m.density === undefined ? {} : {density: m.density})}))};
+        ...(m.density === undefined ? {} : {density: m.density}),
+        ...(m.I === undefined || m.I === null || (typeof m.I === 'string' && !m.I.trim()) ? {} : {I: finiteScaled(m.I, 'Legacy I (m⁴)', 1e12)}),
+        ...(m.K === undefined ? {} : {K: m.K})}))};
   }
   // Import JSON as a model, retaining the original public-unit values and IDs.
   // Validation is performed on a converted copy, not on the returned document.
@@ -280,7 +302,10 @@
         axialStiffness: member.stiffness,
         volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)'),
         density: member.density,
-        mass: member.mass
+        mass: member.mass,
+        secondMoment: member.secondMoment,
+        effectiveLengthFactor: member.effectiveLengthFactor,
+        eulerCriticalLoad: member.eulerCriticalLoad
       }))),
       // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.
       bounds: Object.freeze((() => {
@@ -317,10 +342,13 @@
   function exportMaterialCSV(model) {
     const preview = inspectJSON(exportJSON(model));
     const rows = [
-      ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)', 'Elastic modulus (GPa)', 'Axial stiffness EA/L (kN/mm)', 'Density (kg/m³)', 'Member mass (kg)'],
+      ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)', 'Elastic modulus (GPa)', 'Axial stiffness EA/L (kN/mm)', 'Density (kg/m³)', 'Member mass (kg)', 'Second moment of area I (mm⁴)', 'Effective length factor K (-)', 'Euler critical load Pcr (kN)'],
       ...preview.memberMetrics.map(member => [member.id, member.startNodeId, member.endNodeId,
         member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6,
-        member.density ?? '', member.mass ?? ''])
+        member.density ?? '', member.mass ?? '',
+        member.secondMoment === null ? '' : member.secondMoment * 1e12,
+        member.effectiveLengthFactor ?? '',
+        member.eulerCriticalLoad === null ? '' : member.eulerCriticalLoad / 1000])
     ];
     // Keep CSV numeric cells readable without exposing binary floating-point tails.
     // Sixteen significant digits retain near-double precision for engineering exports.

@@ -218,8 +218,9 @@ def main():
         density_input = page.locator('#members tr').first.locator('input[data-field="density"]')
         assert density_input.input_value() == ''
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.count() == 10
+        assert metric_cells.count() == 13
         assert metric_cells.nth(8).inner_text() == '—' and metric_cells.nth(9).inner_text() == '—'
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['—','—','—']
         density_input.fill('7850')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(8).inner_text() == '7850'
@@ -228,11 +229,43 @@ def main():
         page.locator('#export-material-csv').click()
         density_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
         density_rows = list(csv.reader(io.StringIO(density_export['body'])))
-        assert density_rows[0][-2:] == ['Density (kg/m³)','Member mass (kg)']
-        assert density_rows[1][-2:] == ['7850','15.7']
+        assert density_rows[0][8:10] == ['Density (kg/m³)','Member mass (kg)']
+        assert density_rows[1][8:10] == ['7850','15.7']
         density_input.fill('')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(8).inner_text() == '—' and metric_cells.nth(9).inner_text() == '—'
+        # Euler Pcr is available only when both optional I and K are supplied.
+        i_input = page.locator('#members tr').first.locator('input[data-field="I"]')
+        k_input = page.locator('#members tr').first.locator('input[data-field="K"]')
+        i_input.fill('1000000')
+        assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
+        assert 'provide both I' in page.locator('#status').inner_text()
+        k_input.fill('1')
+        assert 'Preview ready' in page.locator('#status').inner_text()
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.count() == 13
+        assert metric_cells.nth(10).inner_text() == '1000000'
+        assert metric_cells.nth(11).inner_text() == '1'
+        assert metric_cells.nth(12).inner_text() == '493.48'
+        export_index = page.evaluate('window.__exports.length')
+        page.locator('#export-material-csv').click()
+        euler_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
+        euler_rows = list(csv.reader(io.StringIO(euler_export['body'])))
+        assert euler_rows[0][-3:] == ['Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']
+        assert euler_rows[1][-3:] == ['1000000','1','493.4802200544679']
+        k_input.fill('2')
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.nth(12).inner_text() == '123.37'
+        k_input.fill('0')
+        assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
+        assert 'K must be positive' in page.locator('#status').inner_text()
+        k_input.fill('1')
+        i_input.fill('-1')
+        assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
+        assert 'I must be positive' in page.locator('#status').inner_text()
+        i_input.fill('')
+        k_input.fill('')
+        assert 'Preview ready' in page.locator('#status').inner_text()
         # Negative density is rejected and cannot be exported; clearing it restores the preview.
         density_input.fill('-1')
         assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
@@ -242,16 +275,21 @@ def main():
         assert 'density must be non-negative' in page.locator('#status').inner_text()
         density_input.fill('')
         assert 'Preview ready' in page.locator('#status').inner_text()
-        # Legacy SI import keeps density in kg/m³ and computes the same physical member mass.
+        # Legacy SI import keeps density and the Euler estimate physically equivalent.
         legacy_model = page.evaluate('TrussStudio.example')
         for member in legacy_model['members']:
             member['density'] = 7850
-        page.locator('#import-model').set_input_files({'name':'legacy-density.json','mimeType':'application/json',
+            member['I'] = 1e-6
+            member['K'] = 1
+        page.locator('#import-model').set_input_files({'name':'legacy-density-buckling.json','mimeType':'application/json',
                                                        'buffer':json.dumps(legacy_model).encode('utf-8')})
         page.wait_for_function("""() => document.querySelector('#status').textContent.startsWith('Analysis complete')""")
         legacy_cells = page.locator('#member-metrics tr').first.locator('td')
         assert legacy_cells.nth(8).inner_text() == '7850'
         assert legacy_cells.nth(9).inner_text() == '15.7'
+        assert legacy_cells.nth(10).inner_text() == '1000000'
+        assert legacy_cells.nth(11).inner_text() == '1'
+        assert legacy_cells.nth(12).inner_text() == '493.48'
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2')
         assert not errors, errors
         browser.close()

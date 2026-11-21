@@ -34,31 +34,59 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
-  // Solid prismatic section properties in mm units, about the stated centroidal axis.
+  // Solid and concentric hollow prismatic section properties in mm units.
+  // Rectangular results include both centroidal principal axes; circular results are isotropic.
   function sectionProperties(shape, dimensions) {
-    if (shape !== 'rectangle' && shape !== 'solid-circle') throw Error('Section shape must be rectangle or solid-circle.');
+    const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
+    const circular = shape === 'solid-circle' || shape === 'hollow-circle';
+    if (!rectangular && !circular) throw Error('Section shape must be rectangle, hollow-rectangle, solid-circle or hollow-circle.');
     if (!dimensions || typeof dimensions !== 'object' || Array.isArray(dimensions)) throw Error('Section dimensions must be an object.');
-    let area, secondMoment, axis;
-    if (shape === 'rectangle') {
+    let area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis;
+    if (rectangular) {
       const width = finite(dimensions.width, 'Rectangle width b (mm)');
       const depth = finite(dimensions.height, 'Rectangle depth h (mm)');
       if (!(width > 0) || !(depth > 0)) throw Error('Rectangle width and depth must be positive.');
-      area = finite(width * depth, 'Rectangle area (mm²)');
-      secondMoment = finite(width * depth * depth * depth / 12, 'Rectangle second moment I (mm⁴)');
-      if (!(area > 0)) throw Error('Rectangle area underflow; increase its dimensions.');
-      if (!(secondMoment > 0)) throw Error('Rectangle second moment underflow; increase its dimensions.');
+      const hollow = shape === 'hollow-rectangle';
+      const innerWidth = hollow ? finite(dimensions.innerWidth, 'Hollow rectangle inner width bi (mm)') : 0;
+      const innerHeight = hollow ? finite(dimensions.innerHeight, 'Hollow rectangle inner depth hi (mm)') : 0;
+      if (hollow && (!(innerWidth > 0) || !(innerWidth < width) || !(innerHeight > 0) || !(innerHeight < depth))) {
+        throw Error('Hollow rectangle inner width and depth must be positive and smaller than the outer dimensions.');
+      }
+      const outerArea = finite(width * depth, 'Rectangle outer area (mm²)');
+      const innerArea = hollow ? finite(innerWidth * innerHeight, 'Hollow rectangle inner area (mm²)') : 0;
+      if (hollow && !(innerArea > 0)) throw Error('Hollow rectangle inner area underflow; increase the inner dimensions.');
+      area = finite(outerArea - innerArea, 'Rectangle net area (mm²)');
+      const outerIxx = finite(width * depth * depth * depth / 12, 'Rectangle outer Ixx (mm⁴)');
+      const innerIxx = hollow ? finite(innerWidth * innerHeight * innerHeight * innerHeight / 12, 'Hollow rectangle inner Ixx (mm⁴)') : 0;
+      secondMoment = finite(outerIxx - innerIxx, 'Rectangle Ixx (mm⁴)');
+      const outerIyy = finite(depth * width * width * width / 12, 'Rectangle outer Iyy (mm⁴)');
+      const innerIyy = hollow ? finite(innerHeight * innerWidth * innerWidth * innerWidth / 12, 'Hollow rectangle inner Iyy (mm⁴)') : 0;
+      secondMomentPerpendicular = finite(outerIyy - innerIyy, 'Rectangle Iyy (mm⁴)');
       axis = 'centroidal axis parallel to width';
+      perpendicularAxis = 'centroidal axis parallel to depth';
     } else {
-      const diameter = finite(dimensions.diameter, 'Solid-circle diameter d (mm)');
-      if (!(diameter > 0)) throw Error('Solid-circle diameter must be positive.');
-      const square = diameter * diameter;
-      area = finite(Math.PI * square / 4, 'Solid-circle area (mm²)');
-      secondMoment = finite(Math.PI * square * square / 64, 'Solid-circle second moment I (mm⁴)');
-      if (!(area > 0)) throw Error('Solid-circle area underflow; increase its diameter.');
-      if (!(secondMoment > 0)) throw Error('Solid-circle second moment underflow; increase its diameter.');
+      const diameter = finite(dimensions.diameter, 'Circle outer diameter Do (mm)');
+      if (!(diameter > 0)) throw Error('Circle outer diameter must be positive.');
+      const hollow = shape === 'hollow-circle';
+      const innerDiameter = hollow ? finite(dimensions.innerDiameter, 'Hollow circle inner diameter Di (mm)') : 0;
+      if (hollow && (!(innerDiameter > 0) || !(innerDiameter < diameter))) {
+        throw Error('Hollow circle inner diameter must be positive and smaller than the outer diameter.');
+      }
+      const outerSquare = finite(diameter * diameter, 'Circle outer diameter squared (mm²)');
+      const innerSquare = hollow ? finite(innerDiameter * innerDiameter, 'Hollow circle inner diameter squared (mm²)') : 0;
+      if (hollow && !(innerSquare > 0)) throw Error('Hollow circle inner area underflow; increase the inner diameter.');
+      area = finite(Math.PI * (outerSquare - innerSquare) / 4, 'Circle net area (mm²)');
+      const outerFourth = finite(outerSquare * outerSquare, 'Circle outer diameter to fourth power (mm⁴)');
+      const innerFourth = hollow ? finite(innerSquare * innerSquare, 'Hollow circle inner diameter to fourth power (mm⁴)') : 0;
+      secondMoment = finite(Math.PI * (outerFourth - innerFourth) / 64, 'Circle centroidal second moment I (mm⁴)');
+      secondMomentPerpendicular = secondMoment;
       axis = 'centroidal diameter axis';
+      perpendicularAxis = 'centroidal diameter axis';
     }
-    return Object.freeze({shape, area, secondMoment, axis});
+    if (!(area > 0)) throw Error('Section area underflow; increase the dimensions or use a resolvable wall thickness.');
+    if (!(secondMoment > 0)) throw Error('Section second moment underflow (Ixx); increase the dimensions or use a resolvable wall thickness.');
+    if (!(secondMomentPerpendicular > 0)) throw Error('Section second moment underflow (Iyy); increase the dimensions or use a resolvable wall thickness.');
+    return Object.freeze({shape, area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis});
   }
   const supportFlag = (value, name) => {
     if (value === undefined || value === false || value === 'false') return false;

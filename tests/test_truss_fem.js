@@ -893,27 +893,59 @@ test('post-solve Euler comparison reports compression-only utilization and load 
 });
 
 
-test('solid rectangular and circular section helpers return validated area and centroidal I in mm units',()=>{
+test('solid and concentric hollow section helpers return validated area and centroidal principal moments in mm units',()=>{
  const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
  assert.equal(rectangle.area,2400);
  assert.equal(rectangle.secondMoment,720000);
+ assert.equal(rectangle.secondMomentPerpendicular,320000);
  assert.equal(rectangle.axis,'centroidal axis parallel to width');
+ assert.equal(rectangle.perpendicularAxis,'centroidal axis parallel to depth');
  assert.ok(Object.isFrozen(rectangle));
  const circle=fem.sectionProperties('solid-circle',{diameter:40});
  close(circle.area,400*Math.PI,1e-12);
  close(circle.secondMoment,40000*Math.PI,1e-12);
+ assert.equal(circle.secondMomentPerpendicular,circle.secondMoment);
  assert.equal(circle.axis,'centroidal diameter axis');
  assert.ok(Object.isFrozen(circle));
+ const hollowRectangle=fem.sectionProperties('hollow-rectangle',{width:100,height:80,innerWidth:80,innerHeight:60});
+ assert.equal(hollowRectangle.area,3200);
+ close(hollowRectangle.secondMoment,2826666.6666666665,1e-7);
+ close(hollowRectangle.secondMomentPerpendicular,4106666.666666667,1e-7);
+ assert.ok(Object.isFrozen(hollowRectangle));
+ const hollowCircle=fem.sectionProperties('hollow-circle',{diameter:100,innerDiameter:80});
+ close(hollowCircle.area,900*Math.PI,1e-10);
+ close(hollowCircle.secondMoment,922500*Math.PI,1e-7);
+ assert.equal(hollowCircle.secondMomentPerpendicular,hollowCircle.secondMoment);
+ assert.ok(Object.isFrozen(hollowCircle));
  for(const invalid of [0,-1,NaN,Infinity,-Infinity,'not-a-number',true,{}]){
   assert.throws(()=>fem.sectionProperties('rectangle',{width:invalid,height:60}));
   assert.throws(()=>fem.sectionProperties('rectangle',{width:40,height:invalid}));
   assert.throws(()=>fem.sectionProperties('solid-circle',{diameter:invalid}));
+  assert.throws(()=>fem.sectionProperties('hollow-rectangle',{width:100,height:80,innerWidth:invalid,innerHeight:60}));
+  assert.throws(()=>fem.sectionProperties('hollow-circle',{diameter:100,innerDiameter:invalid}));
  }
+ for(const dimensions of [
+  {width:100,height:80,innerWidth:0,innerHeight:60},
+  {width:100,height:80,innerWidth:100,innerHeight:60},
+  {width:100,height:80,innerWidth:80,innerHeight:80},
+  {width:100,height:80,innerWidth:80,innerHeight:90},
+  {width:100,height:80,innerWidth:80,innerHeight:-1}
+ ]) assert.throws(()=>fem.sectionProperties('hollow-rectangle',dimensions));
+ for(const dimensions of [
+  {diameter:100,innerDiameter:0},
+  {diameter:100,innerDiameter:100},
+  {diameter:100,innerDiameter:101},
+  {diameter:100,innerDiameter:-1}
+ ]) assert.throws(()=>fem.sectionProperties('hollow-circle',dimensions));
  assert.throws(()=>fem.sectionProperties('rectangle',{width:1e-200,height:1e-200}),/area underflow/);
  assert.throws(()=>fem.sectionProperties('rectangle',{width:1e308,height:2}),/finite number/);
  assert.throws(()=>fem.sectionProperties('solid-circle',{diameter:1e100}),/finite number/);
  assert.throws(()=>fem.sectionProperties('solid-circle',{diameter:1e-100}),/second moment underflow/);
- assert.throws(()=>fem.sectionProperties('hollow-circle',{diameter:40}),/Section shape/);
+ assert.throws(()=>fem.sectionProperties('hollow-rectangle',{width:1e308,height:2,innerWidth:1,innerHeight:1}),/finite number/);
+ assert.throws(()=>fem.sectionProperties('hollow-rectangle',{width:1e-200,height:1e-200,innerWidth:5e-201,innerHeight:5e-201}),/underflow/);
+ assert.throws(()=>fem.sectionProperties('hollow-circle',{diameter:1e100,innerDiameter:1}),/finite number/);
+ assert.throws(()=>fem.sectionProperties('hollow-circle',{diameter:1e-100,innerDiameter:5e-101}),/underflow/);
+ assert.throws(()=>fem.sectionProperties('hollow-square',{width:100,height:80,innerWidth:80,innerHeight:60}),/Section shape/);
  assert.throws(()=>fem.sectionProperties('rectangle',[]),/dimensions must be an object/);
  close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });

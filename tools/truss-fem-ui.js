@@ -60,10 +60,18 @@
     else if(ids.length) select.value=ids[0];
   }
   function updateSectionShape() {
-    const rectangle=$('section-shape').value==='rectangle';
+    const shape=$('section-shape').value;
+    const rectangle=shape==='rectangle'||shape==='hollow-rectangle';
+    const hollowRectangle=shape==='hollow-rectangle';
+    const circle=shape==='solid-circle'||shape==='hollow-circle';
+    const hollowCircle=shape==='hollow-circle';
     $('section-width-control').hidden=!rectangle;
     $('section-height-control').hidden=!rectangle;
-    $('section-diameter-control').hidden=rectangle;
+    $('section-inner-width-control').hidden=!hollowRectangle;
+    $('section-inner-height-control').hidden=!hollowRectangle;
+    $('section-diameter-control').hidden=!circle;
+    $('section-inner-diameter-control').hidden=!hollowCircle;
+    $('section-axis-control').hidden=!rectangle;
   }
   function applySectionProperties() {
     try {
@@ -71,12 +79,32 @@
       const row=Array.from($('members').querySelectorAll('tr')).find(tr=>tr.querySelector('input[data-field="id"]')?.value.trim()===memberId);
       if(!row) throw Error('Choose an existing member.');
       const shape=$('section-shape').value;
-      const dimensions=shape==='rectangle'?{width:$('section-width').value,height:$('section-height').value}:{diameter:$('section-diameter').value};
+      const rectangle=shape==='rectangle'||shape==='hollow-rectangle';
+      const hollowRectangle=shape==='hollow-rectangle';
+      const hollowCircle=shape==='hollow-circle';
+      let dimensions;
+      if(rectangle) {
+        dimensions={width:$('section-width').value,height:$('section-height').value};
+        if(hollowRectangle) {
+          dimensions.innerWidth=$('section-inner-width').value;
+          dimensions.innerHeight=$('section-inner-height').value;
+        }
+      } else {
+        dimensions={diameter:$('section-diameter').value};
+        if(hollowCircle) dimensions.innerDiameter=$('section-inner-diameter').value;
+      }
       const properties=fem.sectionProperties(shape,dimensions);
+      const axis=rectangle&&$('section-axis').value==='depth'?'depth':'width';
+      const appliedI=rectangle&&axis==='depth'?properties.secondMomentPerpendicular:properties.secondMoment;
+      const axisName=rectangle?(axis==='depth'?'Iyy':'Ixx'):'I';
       row.querySelector('input[data-field="area"]').value=String(properties.area);
-      row.querySelector('input[data-field="I"]').value=String(properties.secondMoment);
+      row.querySelector('input[data-field="I"]').value=String(appliedI);
       invalidate();
-      $('section-result').textContent=(shape==='rectangle'?'Rectangle':'Solid circle')+': area '+fmt(properties.area,5)+' mm²; I '+fmtSectionMoment(properties.secondMoment)+' mm⁴ ('+properties.axis+'), applied to member '+memberId+'.';
+      const shapeName=shape==='rectangle'?'Solid rectangle':shape==='hollow-rectangle'?'Hollow rectangle':shape==='solid-circle'?'Solid circle':'Hollow circle';
+      const moments=rectangle
+        ? '; Ixx '+fmtSectionMoment(properties.secondMoment)+' mm⁴; Iyy '+fmtSectionMoment(properties.secondMomentPerpendicular)+' mm⁴; applied '+axisName+' '+fmtSectionMoment(appliedI)+' mm⁴'
+        : '; I '+fmtSectionMoment(properties.secondMoment)+' mm⁴ about any centroidal diameter';
+      $('section-result').textContent=shapeName+': area '+fmt(properties.area,5)+' mm²'+moments+', applied to member '+memberId+'.';
     } catch(error) {
       $('section-result').textContent='Not applied: '+error.message;
     }

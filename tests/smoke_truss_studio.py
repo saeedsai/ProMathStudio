@@ -70,7 +70,44 @@ def main():
         assert abs(float(ac_area.input_value()) - 400 * math.pi) < 1e-9
         assert abs(float(ac_i.input_value()) - 40000 * math.pi) < 1e-8
         assert page.locator('#members tr').nth(2).locator('input[data-field="area"]').input_value() == '1200'
-        # Invalid geometry must not partially overwrite the last valid member properties.
+        # A centered hollow rectangle reports both centroidal principal moments and applies the selected axis.
+        page.locator('#section-member').select_option('AB')
+        page.locator('#section-shape').select_option('hollow-rectangle')
+        assert page.locator('#section-inner-width-control').is_visible()
+        assert page.locator('#section-inner-height-control').is_visible()
+        assert page.locator('#section-axis-control').is_visible()
+        page.locator('#section-width').fill('100')
+        page.locator('#section-height').fill('80')
+        page.locator('#section-inner-width').fill('80')
+        page.locator('#section-inner-height').fill('60')
+        page.locator('#section-axis').select_option('depth')
+        page.locator('#section-properties-apply').click()
+        assert abs(float(ab_area.input_value()) - 3200) < 1e-9
+        assert abs(float(ab_i.input_value()) - 4106666.666666667) < 1e-7
+        assert 'Ixx' in page.locator('#section-result').inner_text()
+        assert 'Iyy' in page.locator('#section-result').inner_text()
+        assert 'applied Iyy' in page.locator('#section-result').inner_text()
+        # A hollow circular tube has equal centroidal I in both directions.
+        page.locator('#section-member').select_option('AC')
+        page.locator('#section-shape').select_option('hollow-circle')
+        assert page.locator('#section-diameter-control').is_visible()
+        assert page.locator('#section-inner-diameter-control').is_visible()
+        assert page.locator('#section-axis-control').is_hidden()
+        page.locator('#section-diameter').fill('100')
+        page.locator('#section-inner-diameter').fill('80')
+        page.locator('#section-properties-apply').click()
+        assert abs(float(ac_area.input_value()) - 900 * math.pi) < 1e-8
+        assert abs(float(ac_i.input_value()) - 922500 * math.pi) < 1e-7
+        assert page.locator('#members tr').nth(2).locator('input[data-field="area"]').input_value() == '1200'
+        # Invalid wall thickness must not partially overwrite the last valid hollow rectangle.
+        page.locator('#section-member').select_option('AB')
+        page.locator('#section-shape').select_option('hollow-rectangle')
+        page.locator('#section-inner-width').fill('100')
+        page.locator('#section-properties-apply').click()
+        assert 'Not applied' in page.locator('#section-result').inner_text()
+        assert abs(float(ab_area.input_value()) - 3200) < 1e-9
+        assert abs(float(ab_i.input_value()) - 4106666.666666667) < 1e-7
+        # Restore the original model values before solver and export regressions below.
         page.locator('#section-member').select_option('AB')
         page.locator('#section-shape').select_option('rectangle')
         page.locator('#section-width').fill('-1')

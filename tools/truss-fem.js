@@ -34,9 +34,8 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
-  // Solid and concentric hollow prismatic section properties in mm units.
-  // Rectangular results include both centroidal principal axes; circular results are isotropic.
   // Solid, concentric hollow, open-channel and I-section properties in mm units.
+  // Returns centroidal Ixx/Iyy, section moduli and radii of gyration for both axes.
   // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
   function sectionProperties(shape, dimensions) {
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
@@ -45,6 +44,7 @@
     if (!rectangular && !circular && !composite) throw Error('Section shape must be rectangle, hollow-rectangle, solid-circle, hollow-circle, channel or i-section.');
     if (!dimensions || typeof dimensions !== 'object' || Array.isArray(dimensions)) throw Error('Section dimensions must be an object.');
     let area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis, centroid = null;
+    let boundsWidth, boundsHeight, centroidX, centroidY;
     if (composite) {
       const width = finite(dimensions.width, 'Section outer width B (mm)');
       const depth = finite(dimensions.height, 'Section outer depth H (mm)');
@@ -54,6 +54,8 @@
           !(flangeThickness > 0) || !(2 * flangeThickness < depth)) {
         throw Error('Section B, H, tw and tf must be positive, with tw < B and 2·tf < H.');
       }
+      boundsWidth = width;
+      boundsHeight = depth;
       // Channel web is on the left and both flanges extend right.
       // The I-section web is centered between equal-width top and bottom flanges.
       const pieces = shape === 'channel'
@@ -76,8 +78,8 @@
       });
       area = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area,0), 'Composite section area (mm²)');
       if (!(area > 0)) throw Error('Composite section area underflow; increase dimensions.');
-      const centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'Composite section centroid x (mm)');
-      const centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'Composite section centroid y (mm)');
+      centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'Composite section centroid x (mm)');
+      centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'Composite section centroid y (mm)');
       secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
         const local = finite(piece.width*piece.height*piece.height*piece.height/12, 'Composite rectangle local Ixx (mm⁴)');
         const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'Composite rectangle Ixx offset (mm⁴)');
@@ -95,6 +97,10 @@
       const width = finite(dimensions.width, 'Rectangle width b (mm)');
       const depth = finite(dimensions.height, 'Rectangle depth h (mm)');
       if (!(width > 0) || !(depth > 0)) throw Error('Rectangle width and depth must be positive.');
+      boundsWidth = width;
+      boundsHeight = depth;
+      centroidX = width/2;
+      centroidY = depth/2;
       const hollow = shape === 'hollow-rectangle';
       const innerWidth = hollow ? finite(dimensions.innerWidth, 'Hollow rectangle inner width bi (mm)') : 0;
       const innerHeight = hollow ? finite(dimensions.innerHeight, 'Hollow rectangle inner depth hi (mm)') : 0;
@@ -116,6 +122,10 @@
     } else {
       const diameter = finite(dimensions.diameter, 'Circle outer diameter Do (mm)');
       if (!(diameter > 0)) throw Error('Circle outer diameter must be positive.');
+      boundsWidth = diameter;
+      boundsHeight = diameter;
+      centroidX = diameter/2;
+      centroidY = diameter/2;
       const hollow = shape === 'hollow-circle';
       const innerDiameter = hollow ? finite(dimensions.innerDiameter, 'Hollow circle inner diameter Di (mm)') : 0;
       if (hollow && (!(innerDiameter > 0) || !(innerDiameter < diameter))) {
@@ -135,7 +145,18 @@
     if (!(area > 0)) throw Error('Section area underflow; increase the dimensions or use a resolvable wall thickness.');
     if (!(secondMoment > 0)) throw Error('Section second moment underflow (Ixx); increase the dimensions or use a resolvable wall thickness.');
     if (!(secondMomentPerpendicular > 0)) throw Error('Section second moment underflow (Iyy); increase the dimensions or use a resolvable wall thickness.');
+    const extremeFiberDistanceAboutX = finite(Math.max(centroidY, boundsHeight-centroidY), 'Extreme-fibre distance about X (mm)');
+    const extremeFiberDistanceAboutY = finite(Math.max(centroidX, boundsWidth-centroidX), 'Extreme-fibre distance about Y (mm)');
+    if (!(extremeFiberDistanceAboutX > 0) || !(extremeFiberDistanceAboutY > 0)) throw Error('Section extreme-fibre distance underflow.');
+    const sectionModulusX = finite(secondMoment/extremeFiberDistanceAboutX, 'Section modulus Sx (mm³)');
+    const sectionModulusY = finite(secondMomentPerpendicular/extremeFiberDistanceAboutY, 'Section modulus Sy (mm³)');
+    const radiusOfGyrationX = finite(Math.sqrt(secondMoment/area), 'Radius of gyration rx (mm)');
+    const radiusOfGyrationY = finite(Math.sqrt(secondMomentPerpendicular/area), 'Radius of gyration ry (mm)');
+    if (!(sectionModulusX > 0) || !(sectionModulusY > 0)) throw Error('Section modulus underflow; increase the section dimensions or wall thickness.');
+    if (!(radiusOfGyrationX > 0) || !(radiusOfGyrationY > 0)) throw Error('Radius of gyration underflow; increase the section dimensions.');
     return Object.freeze({shape, area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis,
+      sectionModulusX, sectionModulusY, radiusOfGyrationX, radiusOfGyrationY,
+      extremeFiberDistanceAboutX, extremeFiberDistanceAboutY,
       ...(centroid ? {centroid:Object.freeze(centroid)} : {})});
   }
   const supportFlag = (value, name) => {

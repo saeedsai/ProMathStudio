@@ -115,7 +115,8 @@
       const moments=rectangle
         ? '; Ixx '+fmtSectionMoment(properties.secondMoment)+' mm⁴; Iyy '+fmtSectionMoment(properties.secondMomentPerpendicular)+' mm⁴; applied '+axisName+' '+fmtSectionMoment(appliedI)+' mm⁴'+centroidText
         : '; I '+fmtSectionMoment(properties.secondMoment)+' mm⁴ about any centroidal diameter';
-      $('section-result').textContent=shapeName+': area '+fmt(properties.area,5)+' mm²'+moments+', applied to member '+memberId+'.';
+      const sectionMetrics='; Sx '+fmt(properties.sectionModulusX,5)+' mm³; Sy '+fmt(properties.sectionModulusY,5)+' mm³; rx '+fmt(properties.radiusOfGyrationX,5)+' mm; ry '+fmt(properties.radiusOfGyrationY,5)+' mm; cX '+fmt(properties.extremeFiberDistanceAboutX,5)+' mm; cY '+fmt(properties.extremeFiberDistanceAboutY,5)+' mm';
+      $('section-result').textContent=shapeName+': area '+fmt(properties.area,5)+' mm²'+moments+sectionMetrics+', applied to member '+memberId+'.';
     } catch(error) {
       $('section-result').textContent='Not applied: '+error.message;
     }

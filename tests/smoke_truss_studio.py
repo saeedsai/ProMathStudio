@@ -55,6 +55,9 @@ def main():
         ab_i = page.locator('#members tr').nth(0).locator('input[data-field="I"]')
         assert ab_area.input_value() == '2400'
         assert ab_i.input_value() == '720000'
+        section_text = page.locator('#section-result').inner_text()
+        for expected in ('Sx 24000 mm³', 'Sy 16000 mm³', 'rx 17.321 mm', 'ry 11.547 mm', 'cX 30 mm', 'cY 20 mm'):
+            assert expected in section_text, (expected, section_text)
         assert page.locator('#member-metrics tr').nth(0).locator('td').nth(4).inner_text() == '2400'
         assert page.locator('#member-metrics tr').nth(0).locator('td').nth(10).inner_text() == '720000'
         assert 'Preview ready' in page.locator('#status').inner_text()
@@ -69,6 +72,9 @@ def main():
         ac_i = page.locator('#members tr').nth(1).locator('input[data-field="I"]')
         assert abs(float(ac_area.input_value()) - 400 * math.pi) < 1e-9
         assert abs(float(ac_i.input_value()) - 40000 * math.pi) < 1e-8
+        section_text = page.locator('#section-result').inner_text()
+        for expected in ('Sx 6283.2 mm³', 'Sy 6283.2 mm³', 'rx 10 mm', 'ry 10 mm'):
+            assert expected in section_text, (expected, section_text)
         assert page.locator('#members tr').nth(2).locator('input[data-field="area"]').input_value() == '1200'
         # A centered hollow rectangle reports both centroidal principal moments and applies the selected axis.
         page.locator('#section-member').select_option('AB')
@@ -86,7 +92,10 @@ def main():
         assert abs(float(ab_i.input_value()) - 4106666.666666667) < 1e-7
         assert 'Ixx' in page.locator('#section-result').inner_text()
         assert 'Iyy' in page.locator('#section-result').inner_text()
-        assert 'applied Iyy' in page.locator('#section-result').inner_text()
+        section_text = page.locator('#section-result').inner_text()
+        assert 'applied Iyy' in section_text
+        for expected in ('Sx 70667 mm³', 'Sy 82133 mm³', 'rx 29.721 mm', 'ry 35.824 mm', 'cX 40 mm', 'cY 50 mm'):
+            assert expected in section_text, (expected, section_text)
         # A hollow circular tube has equal centroidal I in both directions.
         page.locator('#section-member').select_option('AC')
         page.locator('#section-shape').select_option('hollow-circle')
@@ -98,6 +107,9 @@ def main():
         page.locator('#section-properties-apply').click()
         assert abs(float(ac_area.input_value()) - 900 * math.pi) < 1e-8
         assert abs(float(ac_i.input_value()) - 922500 * math.pi) < 1e-7
+        section_text = page.locator('#section-result').inner_text()
+        for expected in ('Sx 57962 mm³', 'Sy 57962 mm³', 'rx 32.016 mm', 'ry 32.016 mm'):
+            assert expected in section_text, (expected, section_text)
         assert page.locator('#members tr').nth(2).locator('input[data-field="area"]').input_value() == '1200'
         # Invalid wall thickness must not partially overwrite the last valid hollow rectangle.
         page.locator('#section-member').select_option('AB')
@@ -127,7 +139,10 @@ def main():
         page.locator('#section-properties-apply').click()
         assert abs(float(ab_area.input_value()) - 2240) < 1e-9
         assert abs(float(ab_i.input_value()) - 2300586.6666666665) < 1e-7
-        assert 'centroid x 50 mm' in page.locator('#section-result').inner_text()
+        section_text = page.locator('#section-result').inner_text()
+        assert 'centroid x 50 mm' in section_text
+        for expected in ('Sx 57515 mm³', 'Sy 26773 mm³', 'rx 32.048 mm', 'ry 24.446 mm', 'cX 40 mm', 'cY 50 mm'):
+            assert expected in section_text, (expected, section_text)
         # An open channel has an offset centroid; applying Iyy targets only the selected member.
         page.locator('#section-member').select_option('AC')
         page.locator('#section-shape').select_option('channel')
@@ -139,7 +154,10 @@ def main():
         page.locator('#section-properties-apply').click()
         assert abs(float(ac_area.input_value()) - 2240) < 1e-9
         assert abs(float(ac_i.input_value()) - 2264380.9523809524) < 1e-7
-        assert 'centroid x 37.143 mm' in page.locator('#section-result').inner_text()
+        section_text = page.locator('#section-result').inner_text()
+        assert 'centroid x 37.143 mm' in section_text
+        for expected in ('Sx 57515 mm³', 'Sy 36024 mm³', 'rx 32.048 mm', 'ry 31.794 mm', 'cX 40 mm', 'cY 62.857 mm'):
+            assert expected in section_text, (expected, section_text)
         assert page.locator('#members tr').nth(2).locator('input[data-field="area"]').input_value() == '1200'
         # Invalid flange thickness must roll back without partially changing the channel member.
         page.locator('#section-flange-thickness').fill('40')

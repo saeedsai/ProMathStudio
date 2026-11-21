@@ -898,6 +898,12 @@ test('solid and concentric hollow section helpers return validated area and cent
  assert.equal(rectangle.area,2400);
  assert.equal(rectangle.secondMoment,720000);
  assert.equal(rectangle.secondMomentPerpendicular,320000);
+ assert.equal(rectangle.sectionModulusX,24000);
+ assert.equal(rectangle.sectionModulusY,16000);
+ assert.equal(rectangle.extremeFiberDistanceAboutX,30);
+ assert.equal(rectangle.extremeFiberDistanceAboutY,20);
+ close(rectangle.radiusOfGyrationX,Math.sqrt(300),1e-12);
+ close(rectangle.radiusOfGyrationY,Math.sqrt(400/3),1e-12);
  assert.equal(rectangle.axis,'centroidal axis parallel to width');
  assert.equal(rectangle.perpendicularAxis,'centroidal axis parallel to depth');
  assert.ok(Object.isFrozen(rectangle));
@@ -905,17 +911,35 @@ test('solid and concentric hollow section helpers return validated area and cent
  close(circle.area,400*Math.PI,1e-12);
  close(circle.secondMoment,40000*Math.PI,1e-12);
  assert.equal(circle.secondMomentPerpendicular,circle.secondMoment);
+ close(circle.sectionModulusX,2000*Math.PI,1e-10);
+ close(circle.sectionModulusY,2000*Math.PI,1e-10);
+ assert.equal(circle.radiusOfGyrationX,10);
+ assert.equal(circle.radiusOfGyrationY,10);
+ assert.equal(circle.extremeFiberDistanceAboutX,20);
+ assert.equal(circle.extremeFiberDistanceAboutY,20);
  assert.equal(circle.axis,'centroidal diameter axis');
  assert.ok(Object.isFrozen(circle));
  const hollowRectangle=fem.sectionProperties('hollow-rectangle',{width:100,height:80,innerWidth:80,innerHeight:60});
  assert.equal(hollowRectangle.area,3200);
  close(hollowRectangle.secondMoment,2826666.6666666665,1e-7);
  close(hollowRectangle.secondMomentPerpendicular,4106666.666666667,1e-7);
+ close(hollowRectangle.sectionModulusX,70666.66666666666,1e-8);
+ close(hollowRectangle.sectionModulusY,82133.33333333333,1e-8);
+ close(hollowRectangle.radiusOfGyrationX,29.720924166878344,1e-12);
+ close(hollowRectangle.radiusOfGyrationY,35.823642100341125,1e-12);
+ assert.equal(hollowRectangle.extremeFiberDistanceAboutX,40);
+ assert.equal(hollowRectangle.extremeFiberDistanceAboutY,50);
  assert.ok(Object.isFrozen(hollowRectangle));
  const hollowCircle=fem.sectionProperties('hollow-circle',{diameter:100,innerDiameter:80});
  close(hollowCircle.area,900*Math.PI,1e-10);
  close(hollowCircle.secondMoment,922500*Math.PI,1e-7);
  assert.equal(hollowCircle.secondMomentPerpendicular,hollowCircle.secondMoment);
+ close(hollowCircle.sectionModulusX,18450*Math.PI,1e-8);
+ close(hollowCircle.sectionModulusY,18450*Math.PI,1e-8);
+ close(hollowCircle.radiusOfGyrationX,Math.sqrt(1025),1e-12);
+ close(hollowCircle.radiusOfGyrationY,Math.sqrt(1025),1e-12);
+ assert.equal(hollowCircle.extremeFiberDistanceAboutX,50);
+ assert.equal(hollowCircle.extremeFiberDistanceAboutY,50);
  assert.ok(Object.isFrozen(hollowCircle));
  for(const invalid of [0,-1,NaN,Infinity,-Infinity,'not-a-number',true,{}]){
   assert.throws(()=>fem.sectionProperties('rectangle',{width:invalid,height:60}));
@@ -957,12 +981,29 @@ test('open channel and I sections use composite rectangles and the parallel-axis
  close(channel.centroid.y,40,1e-12);
  close(channel.secondMoment,2300586.6666666665,1e-7);
  close(channel.secondMomentPerpendicular,2264380.9523809524,1e-7);
+ close(channel.sectionModulusX,57514.666666666664,1e-8);
+ close(channel.sectionModulusY,36024.242424242424,1e-8);
+ close(channel.radiusOfGyrationX,32.04758366940664,1e-12);
+ close(channel.radiusOfGyrationY,31.794407585949713,1e-12);
+ assert.equal(channel.extremeFiberDistanceAboutX,40);
+ close(channel.extremeFiberDistanceAboutY,62.857142857142854,1e-12);
  const iSection=fem.sectionProperties('i-section',{width:100,height:80,webThickness:10,flangeThickness:8});
  close(iSection.area,2240,1e-12);
  close(iSection.centroid.x,50,1e-12);
  close(iSection.centroid.y,40,1e-12);
  close(iSection.secondMoment,2300586.6666666665,1e-7);
  close(iSection.secondMomentPerpendicular,1338666.6666666665,1e-7);
+ close(iSection.sectionModulusX,57514.666666666664,1e-8);
+ close(iSection.sectionModulusY,26773.33333333333,1e-8);
+ close(iSection.radiusOfGyrationX,32.04758366940664,1e-12);
+ close(iSection.radiusOfGyrationY,24.44624812970382,1e-12);
+ assert.equal(iSection.extremeFiberDistanceAboutX,40);
+ assert.equal(iSection.extremeFiberDistanceAboutY,50);
+ for(const properties of [rectangle,circle,hollowRectangle,hollowCircle,channel,iSection]){
+  for(const key of ['sectionModulusX','sectionModulusY','radiusOfGyrationX','radiusOfGyrationY','extremeFiberDistanceAboutX','extremeFiberDistanceAboutY']){
+   assert.ok(Number.isFinite(properties[key])&&properties[key]>0,properties.shape+' '+key+' must be finite and positive');
+  }
+ }
  assert.ok(Object.isFrozen(channel));assert.ok(Object.isFrozen(channel.centroid));
  assert.ok(Object.isFrozen(iSection));assert.ok(Object.isFrozen(iSection.centroid));
  for(const invalid of [

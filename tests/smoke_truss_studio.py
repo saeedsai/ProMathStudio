@@ -90,6 +90,32 @@ def main():
         assert page.locator('#plot line').count() >= 6
         # Import a model produced by the old SI-only JSON editor: retain N, Pa, m² semantics.
         prior = page.evaluate('TrussStudio.example')
+        # Two overlapping imports must be ordered by selection, not by File.text() completion.
+        triangle_json = page.evaluate("() => ProMathTrussFEM.exportJSON(ProMathTrussFEM.examples.triangle)")
+        page.evaluate("""() => {
+            const read = File.prototype.text;
+            window.__importReads = [];
+            File.prototype.text = function() {
+                const name = this.name;
+                const delay = name === 'slow-invalid.json' ? 120 : 0;
+                return new Promise(resolve => setTimeout(resolve, delay))
+                    .then(() => read.call(this))
+                    .then(value => { window.__importReads.push(name); return value; });
+            };
+        }""")
+        page.locator('#import-model').set_input_files({'name':'slow-invalid.json','mimeType':'application/json',
+                                                       'buffer':b'{bad'})
+        page.locator('#import-model').set_input_files({'name':'fast-valid.json','mimeType':'application/json',
+                                                       'buffer':triangle_json.encode('utf-8')})
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return window.__importReads?.length === 2 &&
+                   status?.textContent.startsWith('Analysis complete') &&
+                   status.getAttribute('aria-busy') === 'false';
+        }""")
+        assert page.evaluate('window.__importReads') == ['fast-valid.json','slow-invalid.json']
+        assert 'total member length 11.21 m' in page.locator('#preview-summary').inner_text()
+        assert page.locator('#member-metrics tr').count() == 3
         # Force File.text() to return a UTF-8 BOM, as some external editors include one.
         # The browser UI must use the canonical importer rather than raw JSON.parse.
         page.evaluate("""() => {
@@ -100,6 +126,11 @@ def main():
         }""")
         page.locator('#import-model').set_input_files({'name':'legacy.json','mimeType':'application/json',
                                                       'buffer':json.dumps(prior).encode('utf-8')})
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status?.textContent.includes('Analysis complete') &&
+                   status.getAttribute('aria-busy') === 'false';
+        }""")
         assert 'Analysis complete' in page.locator('#status').inner_text()
         assert page.locator('#status').get_attribute('aria-busy') == 'false'
         # Normalized user controls now show kN/GPa/mm² rather than SI base units.

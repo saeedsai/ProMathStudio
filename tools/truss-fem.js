@@ -113,17 +113,19 @@
         (typeof row.density === 'string' && !row.density.trim()) ? null : finite(row.density, id + ' density (kg/m³)');
       if (density !== null && density < 0) throw Error('Member ' + id + ': density must be non-negative.');
       const mass = density === null ? null : finite(finite(L * A, 'Member ' + id + ' material volume (m³)') * density, 'Member ' + id + ' mass (kg)');
-      // Optional ideal Euler estimate: I is entered in mm⁴ and K is dimensionless.
-      // Both are required together; this is a member property, not a demand/capacity check.
+      // I and K are independent member properties; the Euler estimate is available only when both are supplied.
       const hasI = row.I !== undefined && row.I !== null && !(typeof row.I === 'string' && !row.I.trim());
       const hasK = row.K !== undefined && row.K !== null && !(typeof row.K === 'string' && !row.K.trim());
-      if (hasI !== hasK) throw Error('Member ' + id + ': provide both I (mm⁴) and K for the Euler buckling estimate.');
       let secondMoment = null, effectiveLengthFactor = null, eulerCriticalLoad = null;
       if (hasI) {
         secondMoment = finiteScaled(row.I, id + ' I (mm⁴)', 1e-12);
-        effectiveLengthFactor = finite(row.K, id + ' K (dimensionless)');
         if (!(secondMoment > 0)) throw Error('Member ' + id + ': I must be positive.');
+      }
+      if (hasK) {
+        effectiveLengthFactor = finite(row.K, id + ' K (dimensionless)');
         if (!(effectiveLengthFactor > 0)) throw Error('Member ' + id + ': K must be positive.');
+      }
+      if (hasI && hasK) {
         const effectiveLength = finite(effectiveLengthFactor * L, id + ' effective buckling length (m)');
         if (!(effectiveLength > 0)) throw Error('Member ' + id + ': effective buckling length underflow.');
         const numerator = finite(Math.PI * Math.PI * E * secondMoment, id + ' Euler buckling numerator');

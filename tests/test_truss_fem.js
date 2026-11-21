@@ -850,10 +850,12 @@ test('optional Euler buckling estimate uses SI units, validates I/K and remains 
   const model=clone(pinned);model.members[0].K=invalid;
   assert.throws(()=>fem.parseModel(model),invalid===0||invalid===-1?/K must be positive/:/finite number/);
  }
- const missingK=clone(pinned);delete missingK.members[0].K;
- assert.throws(()=>fem.parseModel(missingK),/provide both I .* and K/);
- const missingI=clone(pinned);delete missingI.members[0].I;
- assert.throws(()=>fem.parseModel(missingI),/provide both I .* and K/);
+ const onlyI=clone(pinned);delete onlyI.members[0].K;
+ const onlyIMetric=fem.inspectJSON(JSON.stringify(onlyI)).memberMetrics[0];
+ close(onlyIMetric.secondMoment,1e-6);assert.equal(onlyIMetric.effectiveLengthFactor,null);assert.equal(onlyIMetric.eulerCriticalLoad,null);
+ const onlyK=clone(pinned);delete onlyK.members[0].I;
+ const onlyKMetric=fem.inspectJSON(JSON.stringify(onlyK)).memberMetrics[0];
+ assert.equal(onlyKMetric.secondMoment,null);assert.equal(onlyKMetric.effectiveLengthFactor,1);assert.equal(onlyKMetric.eulerCriticalLoad,null);
  const overflow=clone(pinned);overflow.members[0].I=Number.MAX_VALUE;
  assert.throws(()=>fem.parseModel(overflow),/Euler buckling numerator.*finite number/);
  const shortK=clone(pinned);shortK.members[0].K=Number.MIN_VALUE;

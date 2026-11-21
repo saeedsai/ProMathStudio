@@ -57,6 +57,8 @@ def main():
         assert ab_i.input_value() == '720000'
         assert page.locator('#member-metrics tr').nth(0).locator('td').nth(4).inner_text() == '2400'
         assert page.locator('#member-metrics tr').nth(0).locator('td').nth(10).inner_text() == '720000'
+        assert 'Preview ready' in page.locator('#status').inner_text()
+        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(12).inner_text() == '—'
         # A solid circle uses its centroidal diameter axis and does not change another member.
         page.locator('#section-member').select_option('AC')
         page.locator('#section-shape').select_option('solid-circle')

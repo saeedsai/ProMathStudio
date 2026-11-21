@@ -270,6 +270,50 @@ def main():
         page.locator('#section-height').fill('80')
         page.locator('#section-web-thickness').fill('10')
         page.locator('#section-flange-thickness').fill('8')
+        # Open-channel preview uses the canonical offset centroid and web-left/flanges-right geometry.
+        assert page.locator('#section-sketch-control').is_visible()
+        channel_outline = page.locator('#section-sketch path[data-section-outline="channel"]')
+        assert channel_outline.count() == 1
+        assert channel_outline.get_attribute('data-channel-opening') == 'right'
+        assert channel_outline.get_attribute('data-web-thickness-mm') == '10'
+        assert channel_outline.get_attribute('data-flange-thickness-mm') == '8'
+        channel_path = channel_outline.get_attribute('d')
+        assert channel_path.startswith('M 86 24 H 276 V 39.2 H 105 V 160.8 H 276'), channel_path
+        assert page.locator('#section-sketch circle[data-centroid]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="horizontal"]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="vertical"]').count() == 1
+        assert page.locator('#section-sketch line[data-dimension="tw"]').count() == 1
+        assert page.locator('#section-sketch line[data-dimension="tf"]').count() == 1
+        for expected in ('B=100 mm', 'H=80 mm', 'tw=10 mm', 'tf=8 mm', 'Ixx', 'Iyy'):
+            assert expected in page.locator('#section-sketch').text_content(), expected
+        channel_caption = page.locator('#section-sketch-caption').inner_text()
+        assert 'centroid x 37.143 mm, y 40 mm' in channel_caption, channel_caption
+        assert 'web on left, flanges extend right' in channel_caption
+        assert page.locator('#section-sketch').get_attribute('aria-label') == channel_caption
+        page.locator('#section-web-thickness').fill('12')
+        assert 'tw=12 mm' in page.locator('#section-sketch-caption').inner_text()
+        assert channel_outline.get_attribute('data-web-thickness-mm') == '12'
+        page.locator('#section-web-thickness').fill('10')
+        page.locator('#section-flange-thickness').fill('10')
+        assert 'tf=10 mm' in page.locator('#section-sketch-caption').inner_text()
+        assert channel_outline.get_attribute('data-flange-thickness-mm') == '10'
+        page.locator('#section-flange-thickness').fill('8')
+        page.locator('#section-web-thickness').fill('100')
+        assert page.locator('#section-sketch path[data-section-outline="channel"]').count() == 0
+        invalid_channel = page.locator('#section-sketch-caption').inner_text()
+        assert invalid_channel.startswith('Preview unavailable: channel web thickness tw')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_channel
+        page.locator('#section-web-thickness').fill('10')
+        assert page.locator('#section-sketch path[data-section-outline="channel"]').count() == 1
+        page.locator('#section-flange-thickness').fill('40')
+        assert page.locator('#section-sketch path[data-section-outline="channel"]').count() == 0
+        invalid_channel = page.locator('#section-sketch-caption').inner_text()
+        assert invalid_channel.startswith('Preview unavailable: channel web thickness tw')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_channel
+        page.locator('#section-flange-thickness').fill('8')
+        assert page.locator('#section-sketch path[data-section-outline="channel"]').count() == 1
+        channel_sketch_width = page.locator('#section-sketch').evaluate('(svg) => svg.getBoundingClientRect().width')
+        assert channel_sketch_width <= 390, channel_sketch_width
         page.locator('#section-axis').select_option('depth')
         page.locator('#section-properties-apply').click()
         assert abs(float(ac_area.input_value()) - 2240) < 1e-9

@@ -61,11 +61,12 @@
   }
   function updateSectionSketch() {
     const control=$('section-sketch-control'),svg=$('section-sketch'),caption=$('section-sketch-caption'),shape=$('section-shape').value;
-    const angle=shape==='l-angle',hollowRectangle=shape==='hollow-rectangle',rectangle=shape==='rectangle'||hollowRectangle,circle=shape==='solid-circle'||shape==='hollow-circle',hollowCircle=shape==='hollow-circle';
-    if(!control||(!angle&&!rectangle&&!circle)) return;
+    const channel=shape==='channel',angle=shape==='l-angle',hollowRectangle=shape==='hollow-rectangle',rectangle=shape==='rectangle'||hollowRectangle,circle=shape==='solid-circle'||shape==='hollow-circle',hollowCircle=shape==='hollow-circle';
+    if(!control||(!channel&&!angle&&!rectangle&&!circle)) return;
     svg.replaceChildren();
-    const titleText=angle?'L-angle cross-section preview':hollowRectangle?'Hollow rectangle cross-section preview':hollowCircle?'Hollow circle cross-section preview':circle?'Solid circle cross-section preview':'Solid rectangle cross-section preview';
-    const description=angle?'Dimensioned L-angle outline with centroid and major principal axis.'
+    const titleText=channel?'Open channel cross-section preview':angle?'L-angle cross-section preview':hollowRectangle?'Hollow rectangle cross-section preview':hollowCircle?'Hollow circle cross-section preview':circle?'Solid circle cross-section preview':'Solid rectangle cross-section preview';
+    const description=channel?'Dimensioned open-channel outline with the web on the left, flanges extending right, B/H/tw/tf dimensions, offset centroid and perpendicular centroidal axes.'
+      :angle?'Dimensioned L-angle outline with centroid and major principal axis.'
       :hollowRectangle?'Dimensioned hollow-rectangle outline with a centered void, B/H/bi/hi dimensions, centroid and perpendicular centroidal axes.'
       :hollowCircle?'Dimensioned concentric hollow-circle outline with outer and inner diameters, centroid and perpendicular centroidal axes.'
       :circle?'Dimensioned solid circle outline with diameter, centroid and perpendicular centroidal diameter axes.'
@@ -74,6 +75,7 @@
     const width=Number($('section-width').value),height=Number($('section-height').value),diameter=Number($('section-diameter').value);
     const innerDiameter=Number($('section-inner-diameter').value);
     const innerWidth=Number($('section-inner-width').value),innerHeight=Number($('section-inner-height').value);
+    const webThickness=channel?Number($('section-web-thickness').value):null,flangeThickness=channel?Number($('section-flange-thickness').value):null;
     const thickness=angle?Number($('section-angle-thickness').value):null;
     const unavailable=message=>{
       svg.append(svgNode('text',{x:180,y:126,'text-anchor':'middle','font-size':12,fill:'currentColor'},message));
@@ -88,13 +90,16 @@
     if(hollowRectangle&&(!Number.isFinite(innerWidth)||!Number.isFinite(innerHeight)||!(innerWidth>0)||!(innerHeight>0)||!(innerWidth<width)||!(innerHeight<height))){
       unavailable('Preview unavailable: inner width bi and inner depth hi must be positive and smaller than B and H.');return;
     }
+    if(channel&&(!Number.isFinite(webThickness)||!(webThickness>0)||!(webThickness<width)||!Number.isFinite(flangeThickness)||!(flangeThickness>0)||!(2*flangeThickness<height))){
+      unavailable('Preview unavailable: channel web thickness tw and flange thickness tf must be positive, with tw < B and 2·tf < H.');return;
+    }
     if(!circle&&(!Number.isFinite(width)||!Number.isFinite(height)||!(width>0)||!(height>0)||
        (angle&&(!Number.isFinite(thickness)||!(thickness>0)||!(thickness<Math.min(width,height)))))){
       unavailable(angle?'Preview unavailable: enter positive B, H and t with t smaller than B and H.'
         :'Preview unavailable: enter positive finite B and H dimensions.');return;
     }
     let properties;
-    try{properties=fem.sectionProperties(shape,circle?{diameter,...(hollowCircle?{innerDiameter}:{})}:angle?{width,height,thickness}:{width,height,...(hollowRectangle?{innerWidth,innerHeight}:{})});}
+    try{properties=fem.sectionProperties(shape,circle?{diameter,...(hollowCircle?{innerDiameter}:{})}:channel?{width,height,webThickness,flangeThickness}:angle?{width,height,thickness}:{width,height,...(hollowRectangle?{innerWidth,innerHeight}:{})});}
     catch(error){unavailable('Preview unavailable: '+error.message);return;}
     const scale=circle?Math.min(190/diameter,155/diameter):Math.min(190/width,155/height);
     const x=86,y=24,w=circle?diameter*scale:width*scale,h=circle?w:height*scale;
@@ -107,6 +112,15 @@
       svg.append(svgNode('line',{x1:cx,y1:cy-axisHalf,x2:cx,y2:cy+axisHalf,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
       svg.append(svgNode('text',{x:cx+radius*0.48,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600'},'Ixx'));
       svg.append(svgNode('text',{x:cx+6,y:cy-radius*0.5,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
+    }else if(channel){
+      const tw=webThickness*scale,tf=flangeThickness*scale;
+      const path='M '+x+' '+y+' H '+(x+w)+' V '+(y+tf)+' H '+(x+tw)+' V '+(y+h-tf)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z';
+      svg.append(svgNode('path',{d:path,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'channel','data-channel-opening':'right','data-web-thickness-mm':webThickness,'data-flange-thickness-mm':flangeThickness}));
+      const padX=Math.min(8,w*0.15),padY=Math.min(8,h*0.15);
+      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
+      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
+      svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600'},'Ixx'));
+      svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
     }else if(angle){
       const t=thickness*scale,theta=properties.principalAxisAngleDegrees*Math.PI/180,axisLength=Math.max(18,Math.min(78,Math.hypot(w,h)*0.45));
       const x1=cx-axisLength*Math.cos(theta),y1=cy+axisLength*Math.sin(theta),x2=cx+axisLength*Math.cos(theta),y2=cy-axisLength*Math.sin(theta);
@@ -142,6 +156,14 @@
       svg.append(svgNode('text',{x:x+w/2,y:dimensionY+15,'text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'B'},'B='+fmt(width,4)+' mm'));
       svg.append(svgNode('line',{x1:dimensionX,y1:y,x2:dimensionX,y2:y+h,stroke:'currentColor','stroke-width':1,'data-dimension':'H'}));
       svg.append(svgNode('text',{x:dimensionX-7,y:y+h/2,transform:'rotate(-90 '+(dimensionX-7)+' '+(y+h/2)+')','text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'H'},'H='+fmt(height,4)+' mm'));
+      if(channel){
+        const tw=webThickness*scale,tf=flangeThickness*scale;
+        const twY=y+h-tf-Math.min(8,tf*0.4),tfX=x+tw+Math.min(20,(w-tw)*0.25);
+        svg.append(svgNode('line',{x1:x,y1:twY,x2:x+tw,y2:twY,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'tw'}));
+        svg.append(svgNode('text',{x:x+tw+5,y:twY-4,fill:'currentColor','font-size':10,'data-dimension-label':'tw'},'tw='+fmt(webThickness,4)+' mm'));
+        svg.append(svgNode('line',{x1:tfX,y1:y,x2:tfX,y2:y+tf,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'tf'}));
+        svg.append(svgNode('text',{x:tfX+5,y:y+tf+11,fill:'currentColor','font-size':10,'data-dimension-label':'tf'},'tf='+fmt(flangeThickness,4)+' mm'));
+      }
       if(hollowRectangle){
         const innerW=innerWidth*scale,innerH=innerHeight*scale;
         const innerX=x+(w-innerW)/2,innerY=y+(h-innerH)/2;
@@ -152,7 +174,9 @@
         svg.append(svgNode('text',{x:cx+44,y:dimensionY+32,'text-anchor':'middle',fill:'currentColor','font-size':10,'data-dimension-label':'hi'},'hi='+fmt(innerHeight,4)+' mm'));
       }
     }
-    const summary=circle
+    const summary=channel
+      ?'Open channel B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, tw='+fmt(webThickness,4)+' mm, tf='+fmt(flangeThickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes; web on left, flanges extend right.'
+      :circle
       ?(hollowCircle
         ?'Hollow circle Do='+fmt(diameter,4)+' mm, Di='+fmt(innerDiameter,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal and vertical centroidal diameter axes Ixx and Iyy.'
         :'Solid circle D='+fmt(diameter,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal and vertical centroidal diameter axes Ixx and Iyy.')
@@ -167,7 +191,7 @@
     const shape=$('section-shape').value;
     const composite=shape==='channel'||shape==='i-section';
     const angle=shape==='l-angle';
-    const sketch=shape==='rectangle'||shape==='hollow-rectangle'||angle||shape==='solid-circle'||shape==='hollow-circle';
+    const sketch=shape==='rectangle'||shape==='hollow-rectangle'||angle||shape==='solid-circle'||shape==='hollow-circle'||shape==='channel';
     const rectangle=shape==='rectangle'||shape==='hollow-rectangle'||composite||angle;
     const hollowRectangle=shape==='hollow-rectangle';
     const circle=shape==='solid-circle'||shape==='hollow-circle';
@@ -340,7 +364,7 @@
   function csv(){if(!latest){status('Run analysis before exporting results.',true);return;}const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment'],...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain,m.eulerUtilization===null?'':m.eulerUtilization*100,m.eulerLoadRatio===null?'':m.eulerLoadRatio,m.eulerAssessment]),[],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),[],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];download('promath-truss-results.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}
   function materialCsv(){try{download('promath-truss-material-schedule.csv',fem.exportMaterialCSV(readModel()),'text/csv;charset=utf-8');status('Validated member material schedule exported.');}catch(error){status('Material schedule export failed: '+error.message,true);}}
   $('section-shape').addEventListener('change',updateSectionShape);
-  ['section-width','section-height','section-inner-width','section-inner-height','section-angle-thickness','section-diameter','section-inner-diameter'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));
+  ['section-width','section-height','section-inner-width','section-inner-height','section-web-thickness','section-flange-thickness','section-angle-thickness','section-diameter','section-inner-diameter'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));
   $('section-properties-apply').addEventListener('click',applySectionProperties);
   $('members').addEventListener('change',()=>{syncSectionMembers();invalidate();});
   $('load-example').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});

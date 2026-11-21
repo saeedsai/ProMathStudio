@@ -811,7 +811,7 @@ test('optional member density produces SI mass estimates and rejects invalid or 
 test('material CSV numeric cells avoid binary floating-point tails and retain sixteen significant digits',()=>{
  const dense=clone(fem.examples.bar);dense.members[0].density=7850;
  const csv=fem.exportMaterialCSV(dense);
- assert.ok(csv.includes('"AB","A","B","2","0.001","0.002","200","100","7850","15.7"\\r\\n'));
+ assert.ok(csv.includes(['"AB"','"A"','"B"','"2"','"0.001"','"0.002"','"200"','"100"','"7850"','"15.7"'].join(',')));
  const precise=clone(fem.examples.bar);precise.nodes[1].x=2/3;
  assert.ok(fem.exportMaterialCSV(precise).includes('"0.6666666666666666"'));
 });

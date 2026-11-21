@@ -1,3 +1,4 @@
+- 2026-11-21 — TRUSS-MATERIAL-CSV-REGRESSION-ASSERTION-FIX-386: Corrected an over-escaped literal in the new Node CSV regression to assert quoted cells directly; the existing contract regression still verifies CRLF. Production CSV formatting unchanged.
 - 2026-11-21 — TRUSS-MATERIAL-CSV-NUMERIC-FORMATTING-CI-REPAIR-385: Fixed the exact-head Truss Studio browser failure by serializing finite CSV numeric cells to 16 significant digits, removing binary floating-point tails without materially reducing engineering precision. Added Node regression for the 15.7 kg analytical bar mass and a 16-digit 2/3 m length. Existing Chromium CSV assertion retained.
 # Changelog
 

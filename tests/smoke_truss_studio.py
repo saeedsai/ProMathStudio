@@ -123,6 +123,9 @@ def main():
         inner_outline = page.locator('#section-sketch path[data-section-outline="hollow-rectangle-inner"]')
         assert inner_outline.get_attribute('data-inner-width-mm') == '80'
         assert inner_outline.get_attribute('data-inner-height-mm') == '60'
+        assert inner_outline.get_attribute('fill') == 'rgba(127,127,127,.05)'
+        assert page.locator('#section-sketch line[data-dimension="bi"]').count() == 1
+        assert page.locator('#section-sketch line[data-dimension="hi"]').count() == 1
         page.locator('#section-inner-width').fill('70')
         assert 'bi=70 mm' in page.locator('#section-sketch-caption').inner_text()
         page.locator('#section-inner-width').fill('80')

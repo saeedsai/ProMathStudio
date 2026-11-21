@@ -118,7 +118,7 @@
       const innerW=hollowRectangle?innerWidth*scale:0,innerH=hollowRectangle?innerHeight*scale:0;
       const innerX=x+(w-innerW)/2,innerY=y+(h-innerH)/2;
       svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':hollowRectangle?'hollow-rectangle-outer':'rectangle'}));
-      if(hollowRectangle) svg.append(svgNode('path',{d:'M '+innerX+' '+innerY+' H '+(innerX+innerW)+' V '+(innerY+innerH)+' H '+innerX+' Z',fill:'none',stroke:'#355578','stroke-width':2,'data-section-outline':'hollow-rectangle-inner','data-inner-width-mm':innerWidth,'data-inner-height-mm':innerHeight}));
+      if(hollowRectangle) svg.append(svgNode('path',{d:'M '+innerX+' '+innerY+' H '+(innerX+innerW)+' V '+(innerY+innerH)+' H '+innerX+' Z',fill:'rgba(127,127,127,.05)',stroke:'#355578','stroke-width':2,'data-section-outline':'hollow-rectangle-inner','data-inner-width-mm':innerWidth,'data-inner-height-mm':innerHeight}));
       const padX=Math.min(8,w*0.15),padY=Math.min(8,h*0.15);
       svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
       svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
@@ -143,6 +143,8 @@
       svg.append(svgNode('line',{x1:dimensionX,y1:y,x2:dimensionX,y2:y+h,stroke:'currentColor','stroke-width':1,'data-dimension':'H'}));
       svg.append(svgNode('text',{x:dimensionX-7,y:y+h/2,transform:'rotate(-90 '+(dimensionX-7)+' '+(y+h/2)+')','text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'H'},'H='+fmt(height,4)+' mm'));
       if(hollowRectangle){
+        const innerW=innerWidth*scale,innerH=innerHeight*scale;
+        const innerX=x+(w-innerW)/2,innerY=y+(h-innerH)/2;
         const biY=cy+Math.min(7,innerH*0.12),hiX=cx+Math.min(7,innerW*0.12);
         svg.append(svgNode('line',{x1:innerX,y1:biY,x2:innerX+innerW,y2:biY,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'bi'}));
         svg.append(svgNode('line',{x1:hiX,y1:innerY,x2:hiX,y2:innerY+innerH,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'hi'}));

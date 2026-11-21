@@ -127,6 +127,32 @@ def main():
         assert 'Not applied' in page.locator('#section-result').inner_text()
         assert abs(float(ab_area.input_value()) - 3200) < 1e-9
         assert abs(float(ab_i.input_value()) - 4106666.666666667) < 1e-7
+        # A solid rectangle preview shows its outline, centroid and both centroidal axes.
+        page.locator('#section-width').fill('100')
+        page.locator('#section-height').fill('80')
+        assert page.locator('#section-sketch-control').is_visible()
+        assert page.locator('#section-sketch path[data-section-outline="rectangle"]').count() == 1
+        assert page.locator('#section-sketch circle[data-centroid]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="horizontal"]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="vertical"]').count() == 1
+        for expected in ('B=100 mm', 'H=80 mm', 'Ixx', 'Iyy'):
+            assert expected in page.locator('#section-sketch').text_content(), expected
+        rectangle_caption = page.locator('#section-sketch-caption').inner_text()
+        assert 'centroid x 50 mm, y 40 mm' in rectangle_caption, rectangle_caption
+        assert page.locator('#section-sketch').get_attribute('aria-label') == rectangle_caption
+        # Dimension edits are live, and invalid geometry removes the previous outline.
+        page.locator('#section-width').fill('120')
+        assert 'B=120 mm' in page.locator('#section-sketch-caption').inner_text()
+        assert 'centroid x 60 mm' in page.locator('#section-sketch-caption').inner_text()
+        page.locator('#section-height').fill('0')
+        assert page.locator('#section-sketch path[data-section-outline="rectangle"]').count() == 0
+        rectangle_invalid = page.locator('#section-sketch-caption').inner_text()
+        assert rectangle_invalid.startswith('Preview unavailable: enter positive finite B and H')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == rectangle_invalid
+        page.locator('#section-height').fill('80')
+        assert page.locator('#section-sketch path[data-section-outline="rectangle"]').count() == 1
+        assert 'B=120 mm' in page.locator('#section-sketch-caption').inner_text()
+        page.locator('#section-width').fill('100')
         # An I-section uses three non-overlapping rectangles and reports its centroid.
         page.locator('#section-shape').select_option('i-section')
         assert page.locator('#section-web-thickness-control').is_visible()

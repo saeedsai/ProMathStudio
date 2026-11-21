@@ -134,5 +134,7 @@ document.addEventListener('click',event=>{
  }
 },true);
 new MutationObserver(()=>{const next=mode();if(next!==activeMode)selectMode(next);}).observe(document.querySelector('.workspace-bar'),{attributes:true,attributeFilter:['class'],subtree:true});
-window.MathStudio.workspaceTasks={select:selectTask,current:()=>activeMode};
+// Read-only task metadata for discovery UIs; selectors stay owned by this module.
+const list=()=>Object.entries(tasks).map(([m,entries])=>entries.map(([key,label,description,selector])=>Object.freeze({mode:m,key,label,description,selector:selector||null}))).flat();
+window.MathStudio.workspaceTasks={select:selectTask,current:()=>activeMode,list};
 })();

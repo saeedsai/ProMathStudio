@@ -4,44 +4,600 @@
 Usage: python3 scripts/validate_feature_ledger.py
 This checks historical audit data integrity, not current implementation status.
 """
+import errno
 import json
+import math
+import os
+import stat
+import unicodedata
+from decimal import Decimal, InvalidOperation
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "docs" / "feature-ledger-audit-20261026.json"
+MAX_LEDGER_BYTES = 8 * 1024 * 1024
+
+
+def require(condition, message):
+    """Enforce audit invariants even when Python is invoked with -O."""
+    if not condition:
+        raise ValueError(message)
 
 
 def validate(data):
-    assert data["schemaVersion"] == 1
-    assert data["sourceAudit"] == "2026-10-26"
-    items = data["items"]
-    assert len(items) == 324, "Expected 158 existing and 166 gaps from frozen audit"
-    ids = [x["id"] for x in items]
-    assert len(ids) == len(set(ids)), "Duplicate feature IDs"
-    counts = Counter(x["kind"] for x in items)
-    assert counts == {"existing": 158, "gap": 166}, counts
-    assert data["counts"] == {"existing": 158, "gaps": 166}
-    assert Counter(x["status"] for x in items if x["kind"] == "existing") == {
-        "bounded-complete": 63, "partial": 95
-    }
-    assert Counter(x["priority"] for x in items if x["kind"] == "gap") == {
-        "P0": 22, "P1": 64, "P2": 53, "P3": 27
-    }
+    require(isinstance(data, dict), "Feature ledger must be a JSON object")
+    require(type(data.get("schemaVersion")) is int and data["schemaVersion"] == 1, "Expected feature ledger schemaVersion 1")
+    require(data.get("sourceAudit") == "2026-10-26", "Unexpected source audit date")
+    items = data.get("items")
+    require(isinstance(items, list), "Feature ledger items must be an array")
+    require(len(items) == 324, "Expected 158 existing and 166 gaps from frozen audit")
+    require(all(isinstance(item, dict) for item in items), "Every feature ledger item must be an object")
+    # Validate hash keys before Counter/set: malformed JSON can contain arrays or
+    # objects here, which must raise a useful audit error rather than TypeError.
+    for index, item in enumerate(items):
+        for key in ("id", "kind", "status"):
+            require(isinstance(item.get(key), str),
+                    f"Feature ledger item {index} has invalid {key}")
+        if "priority" in item:
+            require(isinstance(item["priority"], str),
+                    f"Feature ledger item {index} has invalid priority")
+    # Reject invisible ID differences that make cross-file references ambiguous.
+    for index, item in enumerate(items):
+        require(bool(item["id"]) and item["id"] == item["id"].strip(),
+                f"Feature IDs must not have surrounding whitespace (item {index})")
+    # Check whitespace first so tabs/newlines have a consistent diagnostic;
+    # ASCII information separators (U+001C..U+001F) are control characters
+    # despite Python isspace() classifying them as whitespace.
+    # non-whitespace format/control characters remain separately rejected.
+    for index, item in enumerate(items):
+        require(not any(char.isspace() and char not in "\x1c\x1d\x1e\x1f" for char in item["id"]),
+                f"Feature IDs must not contain interior whitespace (item {index})")
+    for index, item in enumerate(items):
+        require(item["id"].isprintable(),
+                f"Feature IDs must not contain invisible characters (item {index})")
+    # Titles appear in the UI and exports: reject hidden controls rather than
+    # allowing visually identical labels with different machine values.
+    for index, item in enumerate(items):
+        title = item.get("title")
+        if isinstance(title, str):
+            require(title.isprintable(),
+                    f"Feature titles must not contain invisible characters (item {index})")
+    # Scope and section are exported audit labels too; hidden format and
+    # control characters can misrepresent their meaning downstream.
+    for index, item in enumerate(items):
+        for field in ("scope", "section"):
+            value = item.get(field)
+            if isinstance(value, str):
+                require(value.isprintable(),
+                        f"Feature {field} must not contain invisible characters (item {index})")
+    # Exported labels should not have invisible-looking edge spacing:
+    # preserve legitimate interior spaces in descriptive text.
+    for index, item in enumerate(items):
+        for field in ("title", "scope", "section"):
+            value = item.get(field)
+            if isinstance(value, str):
+                require(value == value.strip(),
+                        f"Feature {field} must not have surrounding whitespace (item {index})")
+    # Exported descriptive labels should use one canonical spelling; otherwise
+    # visually identical labels can compare differently across consumers.
+    for index, item in enumerate(items):
+        for field in ("title", "scope", "section"):
+            value = item.get(field)
+            if isinstance(value, str):
+                require(unicodedata.is_normalized("NFC", value),
+                        f"Feature {field} must use NFC Unicode normalization (item {index})")
+    # Canonically equivalent Unicode IDs must not evade exact-string duplicate checks.
+    for index, item in enumerate(items):
+        require(unicodedata.is_normalized("NFC", item["id"]),
+                f"Feature IDs must use NFC Unicode normalization (item {index})")
+    ids = [item["id"] for item in items]
+    require(len(ids) == len(set(ids)), "Duplicate feature IDs")
+    counts = Counter(item["kind"] for item in items)
+    require(counts == {"existing": 158, "gap": 166}, f"Unexpected feature kinds/counts: {counts}")
+    require(isinstance(data.get("counts"), dict) and
+            all(type(data["counts"].get(key)) is int for key in ("existing", "gaps")),
+            "Frozen feature counts must be integer values")
+    require(data.get("counts") == {"existing": 158, "gaps": 166}, "Frozen feature counts mismatch")
+    statuses = Counter(item.get("status") for item in items if item["kind"] == "existing")
+    require(statuses == {"bounded-complete": 63, "partial": 95}, f"Frozen feature statuses mismatch: {statuses}")
+    priorities = Counter(item.get("priority") for item in items if item["kind"] == "gap")
+    require(priorities == {"P0": 22, "P1": 64, "P2": 53, "P3": 27},
+            f"Frozen gap priorities mismatch: {priorities}")
     for item in items:
-        assert all(item.get(k) for k in ("id", "title", "scope", "section", "source"))
-        assert item["source"] == "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md"
+        require(all(isinstance(item.get(k), str) and item[k].strip()
+                    for k in ("id", "title", "scope", "section", "source")),
+                f"Missing/invalid required feature field: {item.get('id')!r}")
+        require(item["source"] == "docs/FEATURE_INVENTORY_AND_MATLAB_GAP_ANALYSIS_2026-10-26.md",
+                f"Unexpected audit source for {item['id']}")
         if item["kind"] == "gap":
-            assert item["status"] == "planned"
+            require(item.get("status") == "planned", f"Gap must remain historically planned: {item['id']}")
         else:
-            assert "priority" not in item
+            require("priority" not in item, f"Existing feature must not have gap priority: {item['id']}")
     return counts
 
 
-def main():
-    data = json.loads(LEDGER.read_text(encoding="utf-8"))
-    counts = validate(data)
-    print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
+def load_ledger(path):
+    """Reject ambiguous duplicate JSON keys instead of silently using the last value."""
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            # Decomposed keys can look identical to canonical keys while
+            # comparing differently in JSON consumers.
+            if not unicodedata.is_normalized("NFC", key):
+                raise ValueError(f"Non-NFC feature ledger JSON key: {key!r}")
+            if key in result:
+                raise ValueError(f"Duplicate feature ledger JSON key: {key!r}")
+            result[key] = value
+        return result
+
+    def reject_nonfinite(token):
+        raise ValueError(f"Non-finite feature ledger JSON constant: {token}")
+
+    def finite_float(token):
+        value = float(token)
+        try:
+            exact = Decimal(token)
+        except InvalidOperation as exc:
+            raise ValueError("Feature ledger JSON decimal exponent exceeds decoder limit") from exc
+        # Preserve signed zero: binary64 distinguishes -0.0 from +0.0,
+        # but normalized exports and comparisons often discard that sign.
+        if value == 0.0 and token.lstrip().startswith("-") and exact.is_zero():
+            raise ValueError(f"Negative-zero feature ledger JSON float is ambiguous: {token}")
+        if not math.isfinite(value):
+            raise ValueError(f"Non-finite feature ledger JSON number: {token}")
+        # JSON decimal/exponent notation can bypass parse_int and silently
+        # round large integer-valued numbers in JavaScript consumers.
+        if value.is_integer() and abs(value) > 9007199254740991:
+            raise ValueError(f"Unsafe feature ledger JSON floating integer: {token}")
+        # Preserve the more specific underflow diagnostic before the general
+        # rounded-fraction check: tiny nonzero tokens also round to integer 0.
+        # Decimal distinguishes exact zero from nonzero subnormal literals
+        # without inspecting exponent digits or losing mantissa precision.
+        if value == 0.0 and not exact.is_zero():
+            raise ValueError(f"Underflowed feature ledger JSON number: {token}")
+        # A decimal fraction can round to an integer in binary64 even when
+        # the integer is inside the safe range (e.g. 1.0000000000000001).
+        if value.is_integer() and exact != Decimal(int(value)):
+            raise ValueError(f"Rounded feature ledger JSON fraction to integer: {token}")
+        # Also reject non-integer decimal tokens with more significant digits
+        # than binary64 retains, rather than silently changing audit values.
+        # str(value) is Python's shortest round-tripping decimal representation;
+        # compare numeric Decimal values so equivalent exponent notation works.
+        if not value.is_integer() and exact != Decimal(str(value)):
+            raise ValueError(f"Rounded feature ledger JSON fractional precision: {token}")
+        return value
+
+    def safe_integer(token):
+        # JSON -0 silently loses its sign when decoded as Python int 0.
+        # Preserve the audit's exact numeric representation instead.
+        if token == "-0":
+            raise ValueError("Negative-zero feature ledger JSON integer is ambiguous")
+        # JSON integers beyond IEEE-754's exact integer range lose precision
+        # when the audit is consumed by JavaScript or spreadsheet tooling.
+        try:
+            value = int(token)
+        except ValueError as exc:
+            # Python 3.11+ bounds decimal integer conversion; expose a stable
+            # audit diagnostic instead of leaking the interpreter limit error.
+            raise ValueError("Feature ledger JSON integer exceeds decoder digit limit") from exc
+        if abs(value) > 9007199254740991:
+            raise ValueError(f"Unsafe feature ledger JSON integer: {token}")
+        return value
+
+    def reject_invalid_unicode(value):
+        # Walk iteratively: valid JSON can be nested deeply enough to exhaust
+        # Python recursion while checking decoded strings.
+        pending = [value]
+        while pending:
+            current = pending.pop()
+            if isinstance(current, str):
+                if not unicodedata.is_normalized("NFC", current):
+                    raise ValueError("Non-NFC feature ledger JSON string value")
+                if "\x00" in current:
+                    raise ValueError("NUL character in feature ledger JSON")
+                if "\ufeff" in current:
+                    raise ValueError("Embedded BOM character in feature ledger JSON string")
+                for char in current:
+                    codepoint = ord(char)
+                    if codepoint < 32 or 0x7f <= codepoint <= 0x9f:
+                        raise ValueError(f"Control character in feature ledger JSON string (U+{codepoint:04X})")
+                # Unicode line/paragraph separators can create misleading
+                # rendered audit rows even though JSON allows them in strings.
+                for char in current:
+                    if char in "\u2028\u2029":
+                        raise ValueError(
+                            f"Unicode line separator in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                # Non-ASCII spacing can look like an ordinary space in exported
+                # audit metadata but compare differently across consumers.
+                for char in current:
+                    if unicodedata.category(char) == "Zs" and char != " ":
+                        raise ValueError(
+                            f"Nonstandard Unicode space in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                # Format controls (including bidi overrides and zero-width
+                # joiners) can visually spoof arbitrary nested audit metadata.
+                for char in current:
+                    if unicodedata.category(char) == "Cf":
+                        raise ValueError(
+                            f"Unicode format character in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                for char in current:
+                    if 0xD800 <= ord(char) <= 0xDFFF:
+                        raise ValueError(
+                            f"Unpaired Unicode surrogate in feature ledger JSON (U+{ord(char):04X})"
+                        )
+                # Unassigned code points have no stable published character
+                # meaning and should not enter portable historical audit exports.
+                for char in current:
+                    if unicodedata.category(char) == "Cn" and not (
+                        0xFDD0 <= ord(char) <= 0xFDEF or
+                        (ord(char) & 0xFFFE) == 0xFFFE
+                    ):
+                        raise ValueError(
+                            f"Unassigned Unicode code point in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                # Variation selectors and the combining grapheme joiner can
+                # change or hide rendered audit labels without changing NFC.
+                for char in current:
+                    codepoint = ord(char)
+                    if codepoint == 0x034F or 0xFE00 <= codepoint <= 0xFE0F or 0xE0100 <= codepoint <= 0xE01EF:
+                        raise ValueError(
+                            f"Unicode rendering modifier in feature ledger JSON string (U+{codepoint:04X})"
+                        )
+                # Private-use code points have no interoperable published
+                # meaning in portable historical audit identifiers/metadata.
+                for char in current:
+                    if unicodedata.category(char) == "Co":
+                        raise ValueError(
+                            f"Private-use Unicode code point in feature ledger JSON string (U+{ord(char):04X})"
+                        )
+                # Unicode noncharacters are legal scalar values but unsuitable
+                # for portable human-readable audit identifiers and metadata.
+                for char in current:
+                    codepoint = ord(char)
+                    if 0xFDD0 <= codepoint <= 0xFDEF or (codepoint & 0xFFFE) == 0xFFFE:
+                        raise ValueError(
+                            f"Unicode noncharacter in feature ledger JSON string (U+{codepoint:04X})"
+                        )
+            elif isinstance(current, list):
+                pending.extend(current)
+            elif isinstance(current, dict):
+                for key, item in current.items():
+                    pending.append(key)
+                    pending.append(item)
+
+    try:
+        # UTF-8 BOM is emitted by some spreadsheet exports; accept it only at the start.
+        # Cap untrusted audit imports before decoding to avoid unbounded memory use.
+        # Open nonblocking, then inspect the opened descriptor. A separate
+        # path stat() followed by open() can race a replacement with a FIFO.
+        source_path = Path(path)
+        # On platforms supporting O_NOFOLLOW, reject symlinked exports at open
+        # time rather than following a potentially replaced path. Keep the
+        # existing fstat check for regular files and the bounded read.
+        descriptor = os.open(source_path, os.O_RDONLY |
+                             getattr(os, "O_NONBLOCK", 0) |
+                             getattr(os, "O_NOFOLLOW", 0))
+        # fdopen() normally takes ownership, but if wrapping fails the raw
+        # descriptor remains ours and must be closed before propagating.
+        try:
+            source = os.fdopen(descriptor, "rb")
+        except BaseException:
+            os.close(descriptor)
+            raise
+        with source:
+            opened_stat = os.fstat(source.fileno())
+            if not stat.S_ISREG(opened_stat.st_mode):
+                raise ValueError("Cannot read feature ledger JSON: not a regular file")
+            # Sparse and oversized exports need not be read into memory just
+            # to discover their size. Keep the bounded read as a race guard.
+            if opened_stat.st_size > MAX_LEDGER_BYTES:
+                raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")
+            payload = source.read(MAX_LEDGER_BYTES + 1)
+        if len(payload) > MAX_LEDGER_BYTES:
+            raise ValueError("Feature ledger JSON exceeds 8 MiB input limit")
+        data = json.loads(payload.decode("utf-8-sig"),
+                          object_pairs_hook=unique_object,
+                          parse_constant=reject_nonfinite,
+                          parse_float=finite_float,
+                          parse_int=safe_integer)
+    except json.JSONDecodeError as exc:
+        # JSONDecodeError.pos counts decoded characters, not UTF-8 bytes.
+        # Account for multibyte text and an optional consumed UTF-8 BOM.
+        byte_offset = len(payload) - len(exc.doc[exc.pos:].encode("utf-8"))
+        byte_prefix = payload[:byte_offset]
+        # Count byte columns from the latest CR or LF; Python's JSONDecodeError
+        # character-line accounting does not count bare CR as a new line.
+        byte_column = len(byte_prefix[max(byte_prefix.rfind(b"\n"), byte_prefix.rfind(b"\r")) + 1:]) + 1
+        # Python counts LF but not bare CR; report the physical source line too.
+        physical_line = byte_prefix.count(b"\n") + byte_prefix.count(b"\r") - byte_prefix.count(b"\r\n") + 1
+        raise ValueError(
+            f"Malformed feature ledger JSON at line {exc.lineno}, column {exc.colno} "
+            f"(byte offset {byte_offset}, byte column {byte_column}, physical line {physical_line}): {exc.msg}"
+        ) from exc
+    except UnicodeDecodeError as exc:
+        # Report byte-based source coordinates, not character columns: invalid
+        # UTF-8 cannot be decoded reliably to count Unicode characters.
+        # utf-8-sig strips the BOM before reporting a decoding offset.
+        # Derive coordinates from the original file bytes instead.
+        byte_offset = exc.start + (3 if payload.startswith(b"\xef\xbb\xbf") else 0)
+        prefix = payload[:byte_offset]
+        # Treat CR, LF and CRLF as one physical line break each.
+        line = prefix.count(b"\n") + prefix.count(b"\r") - prefix.count(b"\r\n") + 1
+        byte_column = len(prefix[max(prefix.rfind(b"\n"), prefix.rfind(b"\r")) + 1:]) + 1
+        raise ValueError(
+            f"Feature ledger JSON must be valid UTF-8 at byte offset {byte_offset}: {exc.reason}; offending bytes: {exc.object[exc.start:exc.end].hex()}; line {line}, byte column {byte_column}"
+        ) from exc
+    except OSError as exc:
+        # O_NOFOLLOW reports ELOOP for symlinked paths before fstat can run.
+        # Preserve the established non-regular-file diagnostic for callers.
+        if exc.errno == errno.ELOOP and hasattr(os, "O_NOFOLLOW"):
+            raise ValueError("Cannot read feature ledger JSON: not a regular file") from exc
+        raise ValueError(f"Cannot read feature ledger JSON: {exc.strerror or exc}") from exc
+    except RecursionError as exc:
+        raise ValueError("Feature ledger JSON nesting exceeds decoder limit") from exc
+    reject_invalid_unicode(data)
+    return data
+
+
+def main(argv=None):
+    # Validate external exports without modifying the canonical audit.
+    import argparse
+    parser = argparse.ArgumentParser(description="Validate a historical feature-ledger JSON export")
+    parser.add_argument("path", nargs="?", type=Path, default=LEDGER,
+                        help="JSON export to validate (default: frozen audit ledger)")
+    parser.add_argument("--json-summary", action="store_true",
+                        help="Print validated historical counts as machine-readable JSON")
+    parser.add_argument("--include-audit-metadata", action="store_true",
+                        help="Include validated frozen audit provenance with --json-summary")
+    parser.add_argument("--include-status", action="store_true",
+                        help="Include validated existing-feature status counts with --json-summary")
+    parser.add_argument("--include-priorities", action="store_true",
+                        help="Include validated frozen gap priority counts with --json-summary")
+    parser.add_argument("--include-gap-ids", action="store_true",
+                        help="Include sorted historical gap IDs by priority with --json-summary")
+    parser.add_argument("--include-gap-ids-by-scope", action="store_true",
+                        help="Include sorted historical gap IDs grouped by scope with --json-summary")
+    parser.add_argument("--include-gap-ids-by-section", action="store_true",
+                        help="Include sorted historical gap IDs grouped by audit section with --json-summary")
+    parser.add_argument("--include-gap-ids-by-scope-section", action="store_true",
+                        help="Include sorted historical gap IDs grouped by scope and section with --json-summary")
+    parser.add_argument("--include-scopes", action="store_true",
+                        help="Include validated gap counts grouped by scope with --json-summary")
+    parser.add_argument("--include-sections", action="store_true",
+                        help="Include validated gap counts grouped by audit section with --json-summary")
+    parser.add_argument("--include-priority-sections", action="store_true",
+                        help="Include gap counts by priority within each audit section with --json-summary")
+    parser.add_argument("--include-priority-scopes", action="store_true",
+                        help="Include gap counts by priority within each scope with --json-summary")
+    parser.add_argument("--include-existing-status-scopes", action="store_true",
+                        help="Include existing feature status counts by scope with --json-summary")
+    parser.add_argument("--include-existing-status-sections", action="store_true",
+                        help="Include existing feature status counts by audit section with --json-summary")
+    parser.add_argument("--include-kind-sections", action="store_true",
+                        help="Include existing/gap counts by audit section with --json-summary")
+    parser.add_argument("--include-kind-scopes", action="store_true",
+                        help="Include existing/gap counts by scope with --json-summary")
+    parser.add_argument("--include-scope-sections", action="store_true",
+                        help="Include frozen gap counts by scope and audit section with --json-summary")
+    parser.add_argument("--include-existing-status-scope-sections", action="store_true",
+                        help="Include existing-feature status by scope and section with --json-summary")
+    parser.add_argument("--include-kind-scope-sections", action="store_true",
+                        help="Include existing/gap counts by scope and audit section with --json-summary")
+    parser.add_argument("--include-priority-scope-sections", action="store_true",
+                        help="Include frozen gap priorities by scope and audit section with --json-summary")
+    parser.add_argument("--quiet", action="store_true",
+                        help="Validate without success output (errors still go to stderr)")
+    args = parser.parse_args(argv)
+    # --quiet suppresses success output; combining it with a requested JSON
+    # report would silently discard machine-readable results.
+    if args.quiet and args.json_summary:
+        parser.error("--quiet cannot be combined with --json-summary")
+    if args.include_audit_metadata and not args.json_summary:
+        parser.error("--include-audit-metadata requires --json-summary")
+    if args.include_status and not args.json_summary:
+        parser.error("--include-status requires --json-summary")
+    if args.include_priorities and not args.json_summary:
+        parser.error("--include-priorities requires --json-summary")
+    if args.include_gap_ids and not args.json_summary:
+        parser.error("--include-gap-ids requires --json-summary")
+    if args.include_gap_ids_by_scope and not args.json_summary:
+        parser.error("--include-gap-ids-by-scope requires --json-summary")
+    if args.include_gap_ids_by_section and not args.json_summary:
+        parser.error("--include-gap-ids-by-section requires --json-summary")
+    if args.include_gap_ids_by_scope_section and not args.json_summary:
+        parser.error("--include-gap-ids-by-scope-section requires --json-summary")
+    if args.include_scopes and not args.json_summary:
+        parser.error("--include-scopes requires --json-summary")
+    if args.include_sections and not args.json_summary:
+        parser.error("--include-sections requires --json-summary")
+    if args.include_priority_sections and not args.json_summary:
+        parser.error("--include-priority-sections requires --json-summary")
+    if args.include_priority_scopes and not args.json_summary:
+        parser.error("--include-priority-scopes requires --json-summary")
+    if args.include_existing_status_scopes and not args.json_summary:
+        parser.error("--include-existing-status-scopes requires --json-summary")
+    if args.include_existing_status_sections and not args.json_summary:
+        parser.error("--include-existing-status-sections requires --json-summary")
+    if args.include_kind_sections and not args.json_summary:
+        parser.error("--include-kind-sections requires --json-summary")
+    if args.include_kind_scopes and not args.json_summary:
+        parser.error("--include-kind-scopes requires --json-summary")
+    if args.include_scope_sections and not args.json_summary:
+        parser.error("--include-scope-sections requires --json-summary")
+    if args.include_existing_status_scope_sections and not args.json_summary:
+        parser.error("--include-existing-status-scope-sections requires --json-summary")
+    if args.include_kind_scope_sections and not args.json_summary:
+        parser.error("--include-kind-scope-sections requires --json-summary")
+    if args.include_priority_scope_sections and not args.json_summary:
+        parser.error("--include-priority-scope-sections requires --json-summary")
+    try:
+        data = load_ledger(args.path)
+        counts = validate(data)
+    except ValueError as exc:
+        parser.error(str(exc))
+    if args.quiet:
+        return
+    if args.json_summary:
+        summary = {"existing": counts["existing"], "gaps": counts["gap"]}
+        if args.include_audit_metadata:
+            summary["audit_metadata"] = {"schema_version": data["schemaVersion"],
+                                         "source_audit": data["sourceAudit"]}
+        if args.include_status:
+            statuses = Counter(item["status"] for item in data["items"] if item["kind"] == "existing")
+            summary.update({"bounded_complete": statuses["bounded-complete"], "partial": statuses["partial"]})
+        if args.include_priorities:
+            priorities = Counter(item["priority"] for item in data["items"] if item["kind"] == "gap")
+            summary["gap_priorities"] = {key: priorities[key] for key in ("P0", "P1", "P2", "P3")}
+        if args.include_gap_ids:
+            summary["gap_ids_by_priority"] = {
+                priority: sorted(item["id"] for item in data["items"]
+                                 if item["kind"] == "gap" and item["priority"] == priority)
+                for priority in ("P0", "P1", "P2", "P3")
+            }
+        if args.include_gap_ids_by_scope:
+            by_scope = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    by_scope.setdefault(item["scope"], []).append(item["id"])
+            summary["gap_ids_by_scope"] = {
+                scope: sorted(ids) for scope, ids in sorted(by_scope.items())
+            }
+        if args.include_gap_ids_by_section:
+            by_section = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    by_section.setdefault(item["section"], []).append(item["id"])
+            summary["gap_ids_by_section"] = {
+                section: sorted(ids) for section, ids in sorted(by_section.items())
+            }
+        if args.include_gap_ids_by_scope_section:
+            grouped = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    grouped.setdefault(item["scope"], {}).setdefault(
+                        item["section"], []).append(item["id"])
+            summary["gap_ids_by_scope_section"] = {
+                scope: {section: sorted(ids) for section, ids in sorted(sections.items())}
+                for scope, sections in sorted(grouped.items())
+            }
+        if args.include_scopes:
+            scopes = Counter(item["scope"] for item in data["items"] if item["kind"] == "gap")
+            summary["gap_scopes"] = dict(sorted(scopes.items()))
+        if args.include_sections:
+            sections = Counter(item["section"] for item in data["items"] if item["kind"] == "gap")
+            summary["gap_sections"] = dict(sorted(sections.items()))
+        if args.include_priority_sections:
+            by_section = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    section = item["section"]
+                    if section not in by_section:
+                        by_section[section] = Counter()
+                    by_section[section][item["priority"]] += 1
+            summary["gap_priority_sections"] = {
+                section: {priority: counts[priority] for priority in ("P0", "P1", "P2", "P3")}
+                for section, counts in sorted(by_section.items())
+            }
+        if args.include_priority_scopes:
+            by_scope = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    by_scope.setdefault(item["scope"], Counter())[item["priority"]] += 1
+            summary["gap_priority_scopes"] = {
+                scope: {priority: row[priority] for priority in ("P0", "P1", "P2", "P3")}
+                for scope, row in sorted(by_scope.items())
+            }
+        if args.include_existing_status_scopes:
+            by_scope = {}
+            for item in data["items"]:
+                if item["kind"] == "existing":
+                    by_scope.setdefault(item["scope"], Counter())[item["status"]] += 1
+            summary["existing_status_scopes"] = {
+                scope: {"bounded_complete": row["bounded-complete"], "partial": row["partial"]}
+                for scope, row in sorted(by_scope.items())
+            }
+        if args.include_existing_status_sections:
+            by_section = {}
+            for item in data["items"]:
+                if item["kind"] == "existing":
+                    by_section.setdefault(item["section"], Counter())[item["status"]] += 1
+            summary["existing_status_sections"] = {
+                section: {"bounded_complete": row["bounded-complete"], "partial": row["partial"]}
+                for section, row in sorted(by_section.items())
+            }
+        if args.include_kind_sections:
+            by_section = {}
+            for item in data["items"]:
+                by_section.setdefault(item["section"], Counter())[item["kind"]] += 1
+            summary["kind_sections"] = {
+                section: {"existing": row["existing"], "gaps": row["gap"]}
+                for section, row in sorted(by_section.items())
+            }
+        if args.include_kind_scopes:
+            by_scope = {}
+            for item in data["items"]:
+                by_scope.setdefault(item["scope"], Counter())[item["kind"]] += 1
+            summary["kind_scopes"] = {
+                scope: {"existing": row["existing"], "gaps": row["gap"]}
+                for scope, row in sorted(by_scope.items())
+            }
+        if args.include_scope_sections:
+            by_scope_section = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    by_scope_section.setdefault(item["scope"], Counter())[item["section"]] += 1
+            summary["gap_scope_sections"] = {
+                scope: dict(sorted(row.items()))
+                for scope, row in sorted(by_scope_section.items())
+            }
+        if args.include_existing_status_scope_sections:
+            by_scope_section = {}
+            for item in data["items"]:
+                if item["kind"] == "existing":
+                    by_scope_section.setdefault(item["scope"], {}).setdefault(
+                        item["section"], Counter()
+                    )[item["status"]] += 1
+            summary["existing_status_scope_sections"] = {
+                scope: {
+                    section: {"bounded_complete": row["bounded-complete"],
+                              "partial": row["partial"]}
+                    for section, row in sorted(sections.items())
+                }
+                for scope, sections in sorted(by_scope_section.items())
+            }
+        if args.include_kind_scope_sections:
+            by_scope_section = {}
+            for item in data["items"]:
+                by_scope_section.setdefault(item["scope"], {}).setdefault(
+                    item["section"], Counter()
+                )[item["kind"]] += 1
+            summary["kind_scope_sections"] = {
+                scope: {
+                    section: {"existing": row["existing"], "gaps": row["gap"]}
+                    for section, row in sorted(sections.items())
+                }
+                for scope, sections in sorted(by_scope_section.items())
+            }
+        if args.include_priority_scope_sections:
+            by_scope_section = {}
+            for item in data["items"]:
+                if item["kind"] == "gap":
+                    by_scope_section.setdefault(item["scope"], {}).setdefault(
+                        item["section"], Counter()
+                    )[item["priority"]] += 1
+            summary["gap_priority_scope_sections"] = {
+                scope: {
+                    section: {priority: row[priority] for priority in ("P0", "P1", "P2", "P3")}
+                    for section, row in sorted(sections.items())
+                }
+                for scope, sections in sorted(by_scope_section.items())
+            }
+        print(json.dumps(summary, sort_keys=True))
+    else:
+        print(f"Feature ledger validated: {counts['existing']} existing, {counts['gap']} gaps")
 
 
 if __name__ == "__main__":

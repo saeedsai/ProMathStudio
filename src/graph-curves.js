@@ -197,8 +197,119 @@ function tableOf(result){
  return {headers:['theta','r','x','y'],rows:result.points.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>[p.theta,p.r,p.x,p.y])};
 }
 
-const api={implicit,parametric,polar,draw,table:tableOf,limits:{maxGrid:MAX_GRID,maxSamples:MAX_SAMPLES}};
+/* ---------- Main 2D graph overlays ----------
+   Definitions (not computed points) are the persisted source of truth. Parametric and polar
+   samples are independent of the view; implicit contours are re-traced on the main graph's
+   visible window whenever its bounds change, so zoom and pan stay exact. */
+const MAX_OVERLAYS=8,OVERLAY_KEYS={implicit:['type','expression','grid'],parametric:['type','x','y','t0','t1','samples'],polar:['type','r','theta0','theta1','samples']};
+const OVERLAY_COLORS=['#c2410c','#7c3aed','#0f766e','#be185d','#1d4ed8','#a16207','#15803d','#9f1239'];
+function normalizeOverlay(def){
+ if(!def||typeof def!=='object'||Array.isArray(def))fail('Overlay curve definition must be an object.');
+ const keys=OVERLAY_KEYS[def.type];
+ if(!keys)fail('Overlay curve type must be implicit, parametric or polar.');
+ const extra=Object.keys(def).filter(k=>!keys.includes(k));
+ if(extra.length)fail('Overlay curve has unsupported field '+extra[0].slice(0,40)+'.');
+ const text=(v,label)=>{if(typeof v!=='string')fail(label+' must be text.');return cleanExpr(v,label);};
+ if(def.type==='implicit'){
+  const expression=text(def.expression,'Implicit equation');implicitFunction(expression);
+  return {type:'implicit',expression,grid:intIn(def.grid,MIN_GRID,MAX_GRID,'Grid cells per axis')};
+ }
+ const num=(v,label)=>{if(typeof v!=='number')fail(label+' must be a number.');return v;};
+ if(def.type==='parametric'){
+  const [t0,t1]=window2(num(def.t0,'t start'),num(def.t1,'t end'),'t');
+  return {type:'parametric',x:text(def.x,'x(t)'),y:text(def.y,'y(t)'),t0,t1,samples:sampleCount(num(def.samples,'Samples'))};
+ }
+ const [theta0,theta1]=window2(num(def.theta0,'θ start'),num(def.theta1,'θ end'),'θ');
+ return {type:'polar',r:text(def.r,'r(θ)'),theta0,theta1,samples:sampleCount(num(def.samples,'Samples'))};
+}
+const g4=v=>String(Number(v.toPrecision(4)));
+const overlayLabel=d=>d.type==='implicit'?'Implicit: '+d.expression+(d.expression.includes('=')?'':' = 0'):
+ d.type==='parametric'?'Parametric: ('+d.x+', '+d.y+'), t ∈ ['+g4(d.t0)+', '+g4(d.t1)+']':'Polar: r = '+d.r+', θ ∈ ['+g4(d.theta0)+', '+g4(d.theta1)+']';
+/* Each overlay: {def, color, fixed (view-independent result), cache:{key, lines}}. */
+let overlays=[],lastRender={window:null,overlays:[]};
+function linesOf(result){
+ if(result.type==='implicit')return result.segments.map(s=>[[s[0],s[1]],[s[2],s[3]]]);
+ return result.polylines.map(line=>line.map(p=>[p.x,p.y]));
+}
+function computeFixed(def){
+ if(def.type==='parametric')return parametric(def.x,def.y,{t0:def.t0,t1:def.t1,samples:def.samples});
+ if(def.type==='polar')return polar(def.r,{theta0:def.theta0,theta1:def.theta1,samples:def.samples});
+ return null;
+}
+function buildEntry(def,index){
+ const d=normalizeOverlay(def),fixed=computeFixed(d);
+ return {def:d,color:OVERLAY_COLORS[index%OVERLAY_COLORS.length],fixed,lines:fixed?linesOf(fixed):null,cacheKey:'',error:''};
+}
+function overlayLines(entry,range){
+ if(!entry.fixed){
+  const key=[range.xmin,range.xmax,range.ymin,range.ymax,entry.def.grid].join('|');
+  if(entry.cacheKey!==key){
+   entry.cacheKey=key;
+   try{entry.lines=linesOf(implicit(entry.def.expression,{xmin:range.xmin,xmax:range.xmax,ymin:range.ymin,ymax:range.ymax,grid:entry.def.grid}));entry.error='';}
+   catch(err){entry.lines=[];entry.error=err.message;}
+  }
+ }
+ return entry.lines||[];
+}
+/* Draw into the main graph canvas using its own view transform. Breaks never get joined:
+   each polyline starts with moveTo, and a step that leaves the visible window with a jump
+   larger than 80% of the canvas (an asymptote such as t -> 1/t) is broken too. */
+function drawOverlays(ctx,props){
+ if(!props||props.mode!=='2d'){return;}
+ const {range,w,h}=props,{xmin,xmax,ymin,ymax}=range;
+ const sx=x=>(x-xmin)/(xmax-xmin)*w,sy=y=>h-(y-ymin)/(ymax-ymin)*h;
+ const inside=(x,y)=>x>=xmin&&x<=xmax&&y>=ymin&&y<=ymax,limit=.8*Math.max(w,h);
+ const rendered=[];
+ for(const entry of overlays){
+  const lines=overlayLines(entry,range);let visible=0;
+  ctx.save();ctx.strokeStyle=entry.color;ctx.lineWidth=2.6;ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash([]);ctx.beginPath();
+  for(const line of lines){
+   let prev=null;
+   for(const [x,y] of line){
+    const X=sx(x),Y=sy(y);
+    if(!Number.isFinite(X)||!Number.isFinite(Y)||Math.abs(X)>1e7||Math.abs(Y)>1e7){prev=null;continue;}
+    const inView=inside(x,y);if(inView)visible++;
+    if(!prev||(Math.hypot(X-prev.X,Y-prev.Y)>limit&&!(inView&&prev.inView)))ctx.moveTo(X,Y);else ctx.lineTo(X,Y);
+    prev={X,Y,inView};
+   }
+   if(line.length===1&&prev)ctx.lineTo(prev.X+.01,prev.Y);
+  }
+  ctx.stroke();ctx.restore();
+  rendered.push({type:entry.def.type,label:overlayLabel(entry.def),color:entry.color,polylines:lines,visiblePoints:visible,error:entry.error});
+ }
+ lastRender={window:{xmin,xmax,ymin,ymax},overlays:rendered};
+}
+const redrawMain=()=>{document.getElementById('graph-plot')?.click();};
+const overlayApi={
+ add(def){
+  if(overlays.length>=MAX_OVERLAYS)fail('A graph can show up to '+MAX_OVERLAYS+' curve overlays. Clear overlays first.');
+  const entry=buildEntry(def,overlays.length),key=JSON.stringify(entry.def);
+  if(overlays.some(o=>JSON.stringify(o.def)===key))fail('This curve is already overlaid on the main graph.');
+  overlays=overlays.concat([entry]);redrawMain();return {...entry.def};
+ },
+ clear(redraw=true){overlays=[];lastRender={window:lastRender.window,overlays:[]};if(redraw)redrawMain();},
+ count:()=>overlays.length,
+ hasOverlays:mode=>overlays.length>0&&(mode===undefined||mode==='2d'),
+ draw:drawOverlays,
+ legend:()=>overlays.map(o=>({name:overlayLabel(o.def),color:o.color})),
+ info:()=>overlays.length?overlays.length+' curve overlay'+(overlays.length===1?'':'s'):'',
+ exportState:()=>overlays.map(o=>({...o.def})),
+ /* Atomic: every definition is validated and sampled before the current list is replaced. */
+ restoreState(list){
+  if(list===null||list===undefined){overlays=[];overlayApi.onChange?.();return;}
+  if(!Array.isArray(list)||list.length>MAX_OVERLAYS)fail('Overlay curves must be a list of at most '+MAX_OVERLAYS+'.');
+  const next=list.map((def,i)=>buildEntry(def,i));
+  const keys=next.map(e=>JSON.stringify(e.def));if(new Set(keys).size!==keys.length)fail('Duplicate overlay curves.');
+  overlays=next;overlayApi.onChange?.();
+ },
+ rendered:()=>JSON.parse(JSON.stringify(lastRender)),
+ normalize:normalizeOverlay,
+ limits:{maxOverlays:MAX_OVERLAYS}
+};
+
+const api={implicit,parametric,polar,draw,table:tableOf,limits:{maxGrid:MAX_GRID,maxSamples:MAX_SAMPLES},overlays:overlayApi};
 M.graphCurves=api;
+M.graphOverlays=overlayApi;
 
 /* ---------- UI (static markup only; user text never reaches innerHTML) ---------- */
 const panel=document.getElementById('graph-panel');
@@ -240,7 +351,8 @@ root.innerHTML='<summary>Implicit, parametric &amp; polar curves · F(x,y)=0, (x
 '<label for="curves-samples" data-curves="parametric polar" hidden>Samples (2–20,000)<input id="curves-samples" type="number" min="2" max="20000" step="1" value="721"></label>'+
 '<label for="curves-equal" class="curves-check"><input id="curves-equal" type="checkbox" checked> Equal aspect (1:1)</label>'+
 '</div>'+
-'<div class="curves-actions"><button id="curves-plot" type="button" class="primary">Plot curve</button><button id="curves-save" type="button" class="secondary" disabled>Save points to Data Tables</button></div>'+
+'<div class="curves-actions"><button id="curves-plot" type="button" class="primary">Plot curve</button><button id="curves-save" type="button" class="secondary" disabled>Save points to Data Tables</button><button id="curves-overlay" type="button" class="secondary" aria-describedby="curves-overlay-status">Overlay on main 2D graph</button><button id="curves-overlay-clear" type="button" class="secondary" aria-describedby="curves-overlay-status" disabled>Clear overlays</button></div>'+
+'<p id="curves-overlay-status" class="small-note" role="status" aria-live="polite">No curve overlays on the main 2D graph. Implicit overlays are re-traced on the main graph\'s visible window; parametric and polar overlays use their parameter range.</p>'+
 '<p id="curves-status" role="status" aria-live="polite">Ready. Choose a curve type and press Plot curve.</p>'+
 '<canvas id="curves-canvas" width="900" height="600" role="img" aria-label="Implicit, parametric or polar curve plot (not yet plotted)"></canvas>';
 const anchor=document.getElementById('complex-graph-workbench');
@@ -295,6 +407,26 @@ $('curves-save').addEventListener('click',()=>{
   setStatus('Saved '+t.rows.length+' points to Data Tables as '+name+'.',false);
  }catch(err){setStatus('Error: '+err.message,true);}
 });
+/* Overlay the current definition on the main 2D graph (validated before anything changes). */
+const overlayStatus=$('curves-overlay-status');
+const setOverlayStatus=(text,error)=>{overlayStatus.textContent=text;overlayStatus.classList.toggle('curves-error',!!error);$('curves-overlay-clear').disabled=!overlayApi.count();};
+function currentDefinition(){
+ const type=$('curves-type').value,n=id=>finite($(id).value,id==='curves-samples'?'Samples':id==='curves-grid-n'?'Grid cells per axis':'Parameter bound');
+ if(type==='implicit')return {type,expression:$('curves-expr').value,grid:n('curves-grid-n')};
+ if(type==='parametric')return {type,x:$('curves-xt').value,y:$('curves-yt').value,t0:n('curves-p0'),t1:n('curves-p1'),samples:n('curves-samples')};
+ return {type,r:$('curves-r').value,theta0:n('curves-p0'),theta1:n('curves-p1'),samples:n('curves-samples')};
+}
+function overlay(){
+ try{
+  const def=overlayApi.add(currentDefinition());
+  const mode=M.advanced?.currentGraphMode?.();
+  setOverlayStatus('Overlaid '+overlayLabel(def)+' on the main graph ('+overlayApi.count()+' of '+MAX_OVERLAYS+').'+(mode==='3d'?' Switch the main graph to 2D to see overlays.':''),false);
+ }catch(err){setOverlayStatus('Overlay error: '+err.message,true);}
+}
+$('curves-overlay').addEventListener('click',overlay);
+$('curves-overlay-clear').addEventListener('click',()=>{overlayApi.clear();setOverlayStatus('Cleared all curve overlays from the main 2D graph.',false);});
+overlayApi.onChange=()=>{if(overlayApi.count())setOverlayStatus(overlayApi.count()+' curve overlay'+(overlayApi.count()===1?'':'s')+' on the main 2D graph.',false);else setOverlayStatus('No curve overlays on the main 2D graph.',false);};
 syncType();
 api.plot=plot;
+api.overlay=overlay;
 })();

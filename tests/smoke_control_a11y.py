@@ -16,7 +16,7 @@ AUDIT = """() => {
   const ids = [...root.querySelectorAll('[id]')].map(e => e.id);
   const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
   const summaries = [...root.querySelectorAll('summary')].map(s => s.textContent.trim());
-  const status = ['ct-status', 'ct-eq-status', 'ct-eq-stability-status', 'ct-eq-transient-status']
+  const status = ['ct-status', 'ct-eq-status', 'ct-eq-stability-status', 'ct-eq-transient-status', 'ct-margins-status']
     .map(id => { const e = document.getElementById(id); return [id, !!e && (e.getAttribute('role') === 'status' || !!e.getAttribute('aria-live'))]; });
   return {count: controls.length, unnamed, dupes, summaries, status};
 }"""
@@ -32,16 +32,16 @@ def main():
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.set_content((ROOT / 'index.html').read_text(encoding='utf-8'), wait_until='load')
         page.locator('[data-workspace="graph"]').click()
-        page.evaluate("() => { for (const id of ['control-theory-toolbox', 'ct-equilibrium', 'ct-eq-transient']) document.getElementById(id).open = true; }")
+        page.evaluate("() => { for (const id of ['control-theory-toolbox', 'ct-frequency', 'ct-equilibrium', 'ct-eq-transient']) document.getElementById(id).open = true; }")
         audit = page.evaluate(AUDIT)
         assert audit['count'] >= 15, audit
         assert audit['unnamed'] == [], 'controls without an accessible name: %s' % audit['unnamed']
         assert audit['dupes'] == [], 'duplicate ids: %s' % audit['dupes']
-        assert len(audit['summaries']) == 3 and all(audit['summaries']), audit['summaries']
+        assert len(audit['summaries']) == 4 and all(audit['summaries']), audit['summaries']
         assert all(ok for _, ok in audit['status']), 'status regions must be live: %s' % audit['status']
 
         # Disclosures: keyboard toggling with Enter and Space on each summary.
-        for panel in ['ct-eq-transient', 'ct-equilibrium', 'control-theory-toolbox']:
+        for panel in ['ct-eq-transient', 'ct-equilibrium', 'ct-frequency', 'control-theory-toolbox']:
             summary = page.locator('#%s > summary' % panel)
             summary.focus()
             assert page.evaluate("document.activeElement === document.querySelector('#%s > summary')" % panel)

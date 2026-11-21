@@ -4,6 +4,10 @@
 
 The application runs from a single, readable `index.html`. A web server and build process are **not required** to use the core app. Full SymPy support uses Pyodide in a Web Worker and downloads Python/SymPy on its first use.
 
+## Structural engineering — 2D Truss Studio
+
+[Open the upgraded 2D Truss Studio](tools/truss-studio.html) — linear-elastic finite-element truss solver, editable joint/member tables, restraints and load inputs, deformed SVG geometry, tension/compression results, reactions and displacements, model JSON and result CSV/SVG export. Legacy SI JSON models and the former TrussStudio solver API remain supported. This is a **dev candidate** until CI, pull request approval and main Pages publication are verified. See [structural truss guide](docs/STRUCTURAL_TRUSS_FEM.md).
+
 ## Start here
 
 - **Use locally:** download `index.html` and open it in a modern browser.
@@ -46,6 +50,7 @@ The current implementation has limits: it is not an arbitrary Python interpreter
 ## Documentation
 
 - [User guide](docs/USER_GUIDE.md) · [Syntax and examples](docs/SYNTAX_REFERENCE.md)
+- [User guide: every tool by workspace, with a worked example, export path and keyboard shortcuts](docs/USER_GUIDE.md#getting-started)
 - [Features and limitations](docs/FEATURES_AND_LIMITATIONS.md) · [Symbolic engines](docs/SYMBOLIC_ENGINE.md)
 - [2D / 3D graphing](docs/GRAPHING.md) · [Workspaces and project format](docs/PROJECT_FORMAT.md)
 - [Word, LaTeX and other exports](docs/EXPORTS.md) · [Architecture](docs/ARCHITECTURE.md)

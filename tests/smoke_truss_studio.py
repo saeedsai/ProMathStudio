@@ -67,6 +67,27 @@ def main():
         page.locator('#section-shape').select_option('solid-circle')
         assert page.locator('#section-diameter-control').is_visible()
         page.locator('#section-diameter').fill('40')
+        # Solid-circle preview reuses the canonical centroid and shows both perpendicular diameter axes.
+        assert page.locator('#section-sketch-control').is_visible()
+        assert page.locator('#section-sketch circle[data-section-outline="solid-circle"]').count() == 1
+        assert page.locator('#section-sketch circle[data-centroid]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="horizontal"]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="vertical"]').count() == 1
+        for expected in ('D=40 mm', 'Ixx', 'Iyy'):
+            assert expected in page.locator('#section-sketch').text_content(), expected
+        circle_caption = page.locator('#section-sketch-caption').inner_text()
+        assert 'centroid x 20 mm, y 20 mm' in circle_caption, circle_caption
+        assert page.locator('#section-sketch').get_attribute('aria-label') == circle_caption
+        page.locator('#section-diameter').fill('60')
+        assert 'D=60 mm' in page.locator('#section-sketch-caption').inner_text()
+        assert 'centroid x 30 mm, y 30 mm' in page.locator('#section-sketch-caption').inner_text()
+        page.locator('#section-diameter').fill('0')
+        assert page.locator('#section-sketch circle[data-section-outline="solid-circle"]').count() == 0
+        circle_invalid = page.locator('#section-sketch-caption').inner_text()
+        assert circle_invalid.startswith('Preview unavailable: enter a positive finite outer diameter D')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == circle_invalid
+        page.locator('#section-diameter').fill('40')
+        assert page.locator('#section-sketch circle[data-section-outline="solid-circle"]').count() == 1
         page.locator('#section-properties-apply').click()
         ac_area = page.locator('#members tr').nth(1).locator('input[data-field="area"]')
         ac_i = page.locator('#members tr').nth(1).locator('input[data-field="I"]')

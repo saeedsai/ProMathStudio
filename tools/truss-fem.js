@@ -175,6 +175,7 @@
       boundsHeight = diameter;
       centroidX = diameter/2;
       centroidY = diameter/2;
+      centroid = {x:centroidX,y:centroidY};
       const hollow = shape === 'hollow-circle';
       const innerDiameter = hollow ? finite(dimensions.innerDiameter, 'Hollow circle inner diameter Di (mm)') : 0;
       if (hollow && (!(innerDiameter > 0) || !(innerDiameter < diameter))) {

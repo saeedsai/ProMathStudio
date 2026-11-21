@@ -910,6 +910,8 @@ test('solid and concentric hollow section helpers return validated area and cent
  assert.equal(rectangle.perpendicularAxis,'centroidal axis parallel to depth');
  assert.ok(Object.isFrozen(rectangle));
  const circle=fem.sectionProperties('solid-circle',{diameter:40});
+ assert.deepEqual(circle.centroid,{x:20,y:20});
+ assert.ok(Object.isFrozen(circle.centroid));
  close(circle.area,400*Math.PI,1e-12);
  close(circle.secondMoment,40000*Math.PI,1e-12);
  assert.equal(circle.secondMomentPerpendicular,circle.secondMoment);
@@ -935,6 +937,8 @@ test('solid and concentric hollow section helpers return validated area and cent
  assert.equal(hollowRectangle.extremeFiberDistanceAboutY,50);
  assert.ok(Object.isFrozen(hollowRectangle));
  const hollowCircle=fem.sectionProperties('hollow-circle',{diameter:100,innerDiameter:80});
+ assert.deepEqual(hollowCircle.centroid,{x:50,y:50});
+ assert.ok(Object.isFrozen(hollowCircle.centroid));
  close(hollowCircle.area,900*Math.PI,1e-10);
  close(hollowCircle.secondMoment,922500*Math.PI,1e-7);
  assert.equal(hollowCircle.secondMomentPerpendicular,hollowCircle.secondMoment);

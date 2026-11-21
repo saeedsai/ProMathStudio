@@ -61,72 +61,81 @@
   }
   function updateSectionSketch() {
     const control=$('section-sketch-control'),svg=$('section-sketch'),caption=$('section-sketch-caption'),shape=$('section-shape').value;
-    const angle=shape==='l-angle',rectangle=shape==='rectangle';
-    if(!control||(!angle&&!rectangle)) return;
+    const angle=shape==='l-angle',rectangle=shape==='rectangle',circle=shape==='solid-circle';
+    if(!control||(!angle&&!rectangle&&!circle)) return;
     svg.replaceChildren();
-    const title=svgNode('title',{id:'section-sketch-title'},angle?'L-angle cross-section preview':'Solid rectangle cross-section preview');
-    const desc=svgNode('desc',{id:'section-sketch-desc'},angle
-      ? 'Dimensioned L-angle outline with centroid and major principal axis.'
-      : 'Dimensioned solid rectangle outline with centroid and horizontal and vertical centroidal axes.');
-    svg.append(title,desc);
-    const width=Number($('section-width').value),height=Number($('section-height').value);
+    const titleText=angle?'L-angle cross-section preview':circle?'Solid circle cross-section preview':'Solid rectangle cross-section preview';
+    const description=angle?'Dimensioned L-angle outline with centroid and major principal axis.'
+      :circle?'Dimensioned solid circle outline with diameter, centroid and perpendicular centroidal diameter axes.'
+      :'Dimensioned solid rectangle outline with centroid and horizontal and vertical centroidal axes.';
+    svg.append(svgNode('title',{id:'section-sketch-title'},titleText),svgNode('desc',{id:'section-sketch-desc'},description));
+    const width=Number($('section-width').value),height=Number($('section-height').value),diameter=Number($('section-diameter').value);
     const thickness=angle?Number($('section-angle-thickness').value):null;
     const unavailable=message=>{
       svg.append(svgNode('text',{x:180,y:126,'text-anchor':'middle','font-size':12,fill:'currentColor'},message));
-      caption.textContent=message;
-      svg.setAttribute('aria-label',message);
+      caption.textContent=message;svg.setAttribute('aria-label',message);
     };
-    if(!Number.isFinite(width)||!Number.isFinite(height)||!(width>0)||!(height>0)||
-       (angle&&(!Number.isFinite(thickness)||!(thickness>0)||!(thickness<Math.min(width,height))))) {
-      unavailable(angle
-        ? 'Preview unavailable: enter positive B, H and t with t smaller than B and H.'
-        : 'Preview unavailable: enter positive finite B and H dimensions.');
-      return;
+    if(circle&&(!Number.isFinite(diameter)||!(diameter>0))){
+      unavailable('Preview unavailable: enter a positive finite outer diameter D.');return;
+    }
+    if(!circle&&(!Number.isFinite(width)||!Number.isFinite(height)||!(width>0)||!(height>0)||
+       (angle&&(!Number.isFinite(thickness)||!(thickness>0)||!(thickness<Math.min(width,height)))))){
+      unavailable(angle?'Preview unavailable: enter positive B, H and t with t smaller than B and H.'
+        :'Preview unavailable: enter positive finite B and H dimensions.');return;
     }
     let properties;
-    try {properties=fem.sectionProperties(shape,angle?{width,height,thickness}:{width,height});}
-    catch(error) {unavailable('Preview unavailable: '+error.message);return;}
-    const scale=Math.min(190/width,155/height),x=86,y=24,w=width*scale,h=height*scale;
+    try{properties=fem.sectionProperties(shape,circle?{diameter}:angle?{width,height,thickness}:{width,height});}
+    catch(error){unavailable('Preview unavailable: '+error.message);return;}
+    const scale=circle?Math.min(190/diameter,155/diameter):Math.min(190/width,155/height);
+    const x=86,y=24,w=circle?diameter*scale:width*scale,h=circle?w:height*scale;
     const cx=x+properties.centroid.x*scale,cy=y+h-properties.centroid.y*scale;
-    if(angle) {
-      const t=thickness*scale;
-      const theta=properties.principalAxisAngleDegrees*Math.PI/180,axisLength=Math.max(18,Math.min(78,Math.hypot(w,h)*0.45));
-      const x1=cx-axisLength*Math.cos(theta),y1=cy+axisLength*Math.sin(theta);
-      const x2=cx+axisLength*Math.cos(theta),y2=cy-axisLength*Math.sin(theta);
-      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+t)+' V '+(y+h-t)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',
-        fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'l-angle'}));
+    if(circle){
+      const radius=w/2,axisHalf=radius*0.78;
+      svg.append(svgNode('circle',{cx,cy,r:radius,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'solid-circle'}));
+      svg.append(svgNode('line',{x1:cx-axisHalf,y1:cy,x2:cx+axisHalf,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
+      svg.append(svgNode('line',{x1:cx,y1:cy-axisHalf,x2:cx,y2:cy+axisHalf,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
+      svg.append(svgNode('text',{x:cx+radius*0.48,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600'},'Ixx'));
+      svg.append(svgNode('text',{x:cx+6,y:cy-radius*0.5,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
+    }else if(angle){
+      const t=thickness*scale,theta=properties.principalAxisAngleDegrees*Math.PI/180,axisLength=Math.max(18,Math.min(78,Math.hypot(w,h)*0.45));
+      const x1=cx-axisLength*Math.cos(theta),y1=cy+axisLength*Math.sin(theta),x2=cx+axisLength*Math.cos(theta),y2=cy-axisLength*Math.sin(theta);
+      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+t)+' V '+(y+h-t)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'l-angle'}));
       svg.append(svgNode('line',{x1,y1,x2,y2,stroke:'#c47b19','stroke-width':2.2,'stroke-dasharray':'6 4','data-principal-axis':'major'}));
       svg.append(svgNode('text',{x:x2+5,y:y2-5,fill:'#c47b19','font-size':11,'font-weight':'600'},'I₁'));
       svg.append(svgNode('text',{x:x+w-62,y:y+h-t/2+4,fill:'#20364f','font-size':10,'font-weight':'600'},'t='+fmt(thickness,4)+' mm'));
-    } else {
-      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',
-        fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'rectangle'}));
+    }else{
+      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'rectangle'}));
       const padX=Math.min(8,w*0.15),padY=Math.min(8,h*0.15);
-      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,
-        'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
-      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,
-        'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
+      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
+      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
       svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600'},'Ixx'));
       svg.append(svgNode('text',{x:cx+5,y:y+12,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
     }
     svg.append(svgNode('circle',{cx,cy,r:4,fill:'#b42318',stroke:'#fff','stroke-width':1.4,'data-centroid':'true'}));
     svg.append(svgNode('text',{x:cx+7,y:cy-7,fill:'#b42318','font-size':11,'font-weight':'600'},'C'));
-    const dimensionY=y+h+18,dimensionX=x-20;
-    svg.append(svgNode('line',{x1:x,y1:dimensionY,x2:x+w,y2:dimensionY,stroke:'currentColor','stroke-width':1,'data-dimension':'B'}));
-    svg.append(svgNode('text',{x:x+w/2,y:dimensionY+15,'text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'B'},'B='+fmt(width,4)+' mm'));
-    svg.append(svgNode('line',{x1:dimensionX,y1:y,x2:dimensionX,y2:y+h,stroke:'currentColor','stroke-width':1,'data-dimension':'H'}));
-    svg.append(svgNode('text',{x:dimensionX-7,y:y+h/2,transform:'rotate(-90 '+(dimensionX-7)+' '+(y+h/2)+')','text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'H'},'H='+fmt(height,4)+' mm'));
-    const summary=angle
-      ? 'L-angle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, t='+fmt(thickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; major principal axis '+fmt(properties.principalAxisAngleDegrees,5)+'° counter-clockwise from +x.'
-      : 'Solid rectangle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes.';
-    caption.textContent=summary;
-    svg.setAttribute('aria-label',summary);
+    if(circle){
+      const dimensionY=y+h+18;
+      svg.append(svgNode('line',{x1:x,y1:dimensionY,x2:x+w,y2:dimensionY,stroke:'currentColor','stroke-width':1,'data-dimension':'D'}));
+      svg.append(svgNode('text',{x:cx,y:dimensionY+15,'text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'D'},'D='+fmt(diameter,4)+' mm'));
+    }else{
+      const dimensionY=y+h+18,dimensionX=x-20;
+      svg.append(svgNode('line',{x1:x,y1:dimensionY,x2:x+w,y2:dimensionY,stroke:'currentColor','stroke-width':1,'data-dimension':'B'}));
+      svg.append(svgNode('text',{x:x+w/2,y:dimensionY+15,'text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'B'},'B='+fmt(width,4)+' mm'));
+      svg.append(svgNode('line',{x1:dimensionX,y1:y,x2:dimensionX,y2:y+h,stroke:'currentColor','stroke-width':1,'data-dimension':'H'}));
+      svg.append(svgNode('text',{x:dimensionX-7,y:y+h/2,transform:'rotate(-90 '+(dimensionX-7)+' '+(y+h/2)+')','text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'H'},'H='+fmt(height,4)+' mm'));
+    }
+    const summary=circle
+      ?'Solid circle D='+fmt(diameter,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal and vertical centroidal diameter axes Ixx and Iyy.'
+      :angle
+        ?'L-angle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, t='+fmt(thickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; major principal axis '+fmt(properties.principalAxisAngleDegrees,5)+'° counter-clockwise from +x.'
+        :'Solid rectangle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes.';
+    caption.textContent=summary;svg.setAttribute('aria-label',summary);
   }
   function updateSectionShape() {
     const shape=$('section-shape').value;
     const composite=shape==='channel'||shape==='i-section';
     const angle=shape==='l-angle';
-    const sketch=shape==='rectangle'||angle;
+    const sketch=shape==='rectangle'||angle||shape==='solid-circle';
     const rectangle=shape==='rectangle'||shape==='hollow-rectangle'||composite||angle;
     const hollowRectangle=shape==='hollow-rectangle';
     const circle=shape==='solid-circle'||shape==='hollow-circle';
@@ -299,7 +308,7 @@
   function csv(){if(!latest){status('Run analysis before exporting results.',true);return;}const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment'],...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain,m.eulerUtilization===null?'':m.eulerUtilization*100,m.eulerLoadRatio===null?'':m.eulerLoadRatio,m.eulerAssessment]),[],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),[],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];download('promath-truss-results.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}
   function materialCsv(){try{download('promath-truss-material-schedule.csv',fem.exportMaterialCSV(readModel()),'text/csv;charset=utf-8');status('Validated member material schedule exported.');}catch(error){status('Material schedule export failed: '+error.message,true);}}
   $('section-shape').addEventListener('change',updateSectionShape);
-  ['section-width','section-height','section-angle-thickness'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));
+  ['section-width','section-height','section-angle-thickness','section-diameter'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));
   $('section-properties-apply').addEventListener('click',applySectionProperties);
   $('members').addEventListener('change',()=>{syncSectionMembers();invalidate();});
   $('load-example').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});

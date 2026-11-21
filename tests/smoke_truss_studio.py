@@ -254,6 +254,13 @@ def main():
         assert metric_cells.nth(10).inner_text() == '1000000'
         assert metric_cells.nth(11).inner_text() == '1'
         assert metric_cells.nth(12).inner_text() == '493.48'
+        # Display precision follows the inverse-square effective-length relationship.
+        k_input.fill('2')
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.nth(12).inner_text() == '123.37'
+        k_input.fill('1')
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.nth(12).inner_text() == '493.48'
         export_index = page.evaluate('window.__exports.length')
         page.locator('#export-material-csv').click()
         euler_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)

@@ -838,7 +838,7 @@ test('optional Euler buckling estimate uses SI units, validates I/K and remains 
   members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001,I:1e-6,K:1}]};
  const legacyMetric=fem.inspectJSON(JSON.stringify(legacy)).memberMetrics[0];
  close(legacyMetric.secondMoment,1e-6);close(legacyMetric.eulerCriticalLoad,expected,1e-12);
- const rows=fem.exportMaterialCSV(pinned).trimEnd().split('\\r\\n').map(line=>line.slice(1,-1).split('\",\"'));
+ const rows=fem.exportMaterialCSV(pinned).trimEnd().split(String.fromCharCode(13)+String.fromCharCode(10)).map(line=>line.slice(1,-1).split('\",\"'));
  assert.deepEqual(rows[0].slice(-3),['Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']);
  assert.equal(rows[1][10],'1000000');assert.equal(rows[1][11],'1');
  close(Number(rows[1][12]),expected/1000,1e-12);

@@ -1,6 +1,6 @@
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
-**Status:** locally tested on dev; CI, review and main Pages deployment unverified. Upgrade of the existing standalone `tools/truss-studio.html`, not a duplicate tool or an embedded main workspace control.
+**Status:** implemented on dev; exact-head Quality pending; local checkout unavailable; review and main Pages deployment unverified. Upgrade of the existing standalone `tools/truss-studio.html`, not a duplicate tool or an embedded main workspace control.
 
 ## How to use
 

@@ -252,7 +252,7 @@ def main():
         euler_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
         euler_rows = list(csv.reader(io.StringIO(euler_export['body'])))
         assert euler_rows[0][-3:] == ['Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']
-        assert euler_rows[1][-3:] == ['1000000','1','493.4802200544679']
+        assert euler_rows[1][-3:] == ['1000000','1','493.4802200544678']
         k_input.fill('2')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(12).inner_text() == '123.37'

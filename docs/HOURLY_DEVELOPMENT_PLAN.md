@@ -1,3 +1,14 @@
+## 2026-11-21 — TRUSS-EULER-CSV-PRECISION-FIX-389 (browser regression correction; exact-head QA pending)
+
+Follow-up to `77c5370c98d0b5c472e103aebb1aeea6ffb7a4e3`. An isolated Node 22 calculation using the production operation order confirmed that `Number((Pcr/1000).toPrecision(16))` serializes the pinned 2 m bar reference as `493.4802200544678` kN (the unrounded binary value is 493.48022005446785 kN). Corrected the Chromium CSV expected string from the adjacent decimal; the analytical Node regression remains tolerance-based and the UI still displays 493.48 kN. No production source, solver equation or validation changed. The prior candidate exact-head runs are superseded; new push/PR Quality is pending.
+
+**NEXT FIVE (acceptance):**
+1. Verify exact-head push and PR Quality for Euler; require Node FEM, Truss Studio Chromium, all structural/browser steps and every Quality step green.
+2. Obtain eligible independent approval for PR #189 and inspect its final diff; no self-approval.
+3. Verify enforceable main protection and required Quality checks; keep release blocked while branches report unprotected, rulesets empty or administration reads unavailable.
+4. Only after exact-head CI, eligible approval and verified protections, merge PR #189 through the ordinary PR process; verify main SHA, main Quality, Pages deployment and hosted desktop/390px behavior.
+5. Add a post-solve compression-only Euler comparison; report utilization/FOS only for compressive force and explicitly handle tension/zero demand without division. Test hand-calculated force, K/I sensitivity, missing inputs, numerical bounds, CSV and responsive results.
+
 ## 2026-11-21 — TRUSS-EULER-CSV-TEST-ESCAPE-FIX-388 (test correction on dev; exact-head QA pending)
 
 Static review of `cf24d8c807983c13846e0aded42288cdfd593d04` caught an over-escaped CRLF separator in the new Node Euler CSV regression: it would split on literal backslash characters rather than the actual CSV record terminator. Replaced the separator with `String.fromCharCode(13) + String.fromCharCode(10)`; the existing exact-CRLF CSV contract remains intact. No product behavior or acceptance scope changed. The Euler feature commit is superseded by this corrected test head; full local Node/Chromium suites remain unavailable because the checkout is not mounted. New exact-head push and PR Quality must complete.

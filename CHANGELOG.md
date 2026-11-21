@@ -1,3 +1,4 @@
+- 2026-11-21 — TRUSS-EULER-CSV-PRECISION-FIX-389: Corrected the browser CSV regression's 16-significant-digit Euler reference to match the production JavaScript numeric formatter; production behavior unchanged.
 - 2026-11-21 — TRUSS-EULER-CSV-TEST-ESCAPE-FIX-388: Corrected the new Node Euler CSV regression to split on actual CRLF characters; production behavior unchanged.
 - 2026-11-21 — TRUSS-EULER-CRITICAL-LOAD-387: Added optional I/K-driven ideal Euler critical-load estimates (Pcr = π²EI/(KL)²) to the non-solving Truss Studio material preview and CSV, with current/legacy SI conversion, guarded validation, analytical and responsive regressions. No buckling utilization or code-compliant design check is claimed.
 - 2026-11-21 — TRUSS-MATERIAL-CSV-REGRESSION-ASSERTION-FIX-386: Corrected an over-escaped literal in the new Node CSV regression to assert quoted cells directly; the existing contract regression still verifies CRLF. Production CSV formatting unchanged.

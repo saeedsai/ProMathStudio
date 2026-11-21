@@ -81,7 +81,13 @@
       const EAbyL = E * A / L;
       if (!Number.isFinite(EAbyL)) throw Error('Member ' + id + ': stiffness overflow.');
       if (!(EAbyL > 0)) throw Error('Member ' + id + ': stiffness underflow; increase E or area.');
-      return {id, a, b, E, A, L, c: dx / L, s: dy / L, stiffness: EAbyL};
+      // Density is an optional SI quantity shared by Studio and legacy imports.
+      // Blank/null means unknown; zero is valid, while negative/non-finite values are not.
+      const density = row.density === undefined || row.density === null ||
+        (typeof row.density === 'string' && !row.density.trim()) ? null : finite(row.density, id + ' density (kg/m³)');
+      if (density !== null && density < 0) throw Error('Member ' + id + ': density must be non-negative.');
+      const mass = density === null ? null : finite(finite(L * A, 'Member ' + id + ' material volume (m³)') * density, 'Member ' + id + ' mass (kg)');
+      return {id, a, b, E, A, L, c: dx / L, s: dy / L, stiffness: EAbyL, density, mass};
     });
     if (new Set(members.map(m => m.id)).size !== members.length) throw Error('Member IDs must be unique.');
     return {nodes, members};
@@ -188,7 +194,8 @@
     return {nodes: model.nodes.map(n => ({...n, fx: finite(n.fx ?? 0, 'Legacy Fx (N)') / 1000,
       fy: finite(n.fy ?? 0, 'Legacy Fy (N)') / 1000})),
       members: model.members.map(m => ({id: m.id, a: m.a, b: m.b,
-        E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finiteScaled(m.A, 'Legacy area (m²)', 1e6)}))};
+        E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finiteScaled(m.A, 'Legacy area (m²)', 1e6),
+        ...(m.density === undefined ? {} : {density: m.density})}))};
   }
   // Import JSON as a model, retaining the original public-unit values and IDs.
   // Validation is performed on a converted copy, not on the returned document.
@@ -271,7 +278,9 @@
         elasticModulus: member.E,
         // EA/L is axial stiffness in N/m; the existing validated FEM stiffness is reused.
         axialStiffness: member.stiffness,
-        volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)')
+        volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)'),
+        density: member.density,
+        mass: member.mass
       }))),
       // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.
       bounds: Object.freeze((() => {
@@ -308,9 +317,10 @@
   function exportMaterialCSV(model) {
     const preview = inspectJSON(exportJSON(model));
     const rows = [
-      ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)', 'Elastic modulus (GPa)', 'Axial stiffness EA/L (kN/mm)'],
+      ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)', 'Elastic modulus (GPa)', 'Axial stiffness EA/L (kN/mm)', 'Density (kg/m³)', 'Member mass (kg)'],
       ...preview.memberMetrics.map(member => [member.id, member.startNodeId, member.endNodeId,
-        member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6])
+        member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6,
+        member.density ?? '', member.mass ?? ''])
     ];
     const quote = value => '"' + String(value).replace(/"/g, '""') + '"';
     return rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';

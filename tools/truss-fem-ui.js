@@ -30,7 +30,7 @@
   }
   function appendRow(kind, row) {
     const tbody = $(kind), tr = el('tr',null);
-    const fields = kind === 'nodes' ? ['id','x','y','fixX','fixY','fx','fy'] : ['id','a','b','E','area'];
+    const fields = kind === 'nodes' ? ['id','x','y','fixX','fixY','fx','fy'] : ['id','a','b','E','area','density'];
     fields.forEach(key=>tr.append(rowInput(row,key,['fixX','fixY'].includes(key)?'checkbox':(['id','a','b'].includes(key)?'text':'number'))));
     const td=el('td',null), btn=el('button','×',{'type':'button','class':'remove','aria-label':'Remove '+kind.slice(0,-1)+' '+(row.id||'row')});
     btn.addEventListener('click',()=>{tr.remove(); invalidate();});td.append(btn);tr.append(td);tbody.append(tr);
@@ -81,7 +81,7 @@
       group.append(svgNode('text',{x:15,y:362,'font-size':12},'Pre-solve geometry · not to scale'));
       $('plot').replaceChildren(group);
       $('plot').setAttribute('aria-label',`Pre-solve truss geometry preview with ${info.nodeCount} joints and ${info.memberCount} members. Supports and applied loads are shown. Topology does not certify stability.`);
-      addResultRows('member-metrics',info.memberMetrics,m=>[m.id,m.startNodeId,m.endNodeId,fmt(m.length,4),fmt(m.area*1e6,4),fmt(m.volume,4),fmt(m.elasticModulus/1e9,4),fmt(m.axialStiffness/1e6,4)]);
+      addResultRows('member-metrics',info.memberMetrics,m=>[m.id,m.startNodeId,m.endNodeId,fmt(m.length,4),fmt(m.area*1e6,4),fmt(m.volume,4),fmt(m.elasticModulus/1e9,4),fmt(m.axialStiffness/1e6,4),m.density===null?'—':fmt(m.density,4),m.mass===null?'—':fmt(m.mass,4)]);
       const unit=info.inputUnits.forces,divisor=unit==='N'?1:1000;
       const components=info.connectedComponentCount===1?'connected component':'connected components';
       const isolated=info.isolatedNodeCount===1?'isolated joint':'isolated joints';
@@ -89,7 +89,7 @@
       status('Preview ready · analyze to check structural stability.',false);
     } catch(error) {
       $('preview-summary').textContent='Preview unavailable: '+error.message;
-      const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:8,class:'empty'}));$('member-metrics').replaceChildren(empty);
+      const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:10,class:'empty'}));$('member-metrics').replaceChildren(empty);
       $('plot').replaceChildren(svgNode('text',{x:310,y:190,'text-anchor':'middle'},'Correct model inputs to preview'));
       $('plot').setAttribute('aria-label','Truss preview unavailable because model inputs are invalid.');
       status('Preview unavailable: '+error.message,true);
@@ -144,7 +144,7 @@
   $('load-example').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
   $('reset').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
   $('add-node').addEventListener('click',()=>{appendRow('nodes',{id:'N'+($('nodes').children.length+1),x:0,y:0,fixX:false,fixY:false,fx:0,fy:0});invalidate();});
-  $('add-member').addEventListener('click',()=>{const nodes=readRows('nodes');appendRow('members',{id:'M'+($('members').children.length+1),a:nodes[0]?.id||'',b:nodes[1]?.id||'',E:210,area:1000});invalidate();});
+  $('add-member').addEventListener('click',()=>{const nodes=readRows('nodes');appendRow('members',{id:'M'+($('members').children.length+1),a:nodes[0]?.id||'',b:nodes[1]?.id||'',E:210,area:1000,density:''});invalidate();});
   $('nodes').addEventListener('input',invalidate);$('members').addEventListener('input',invalidate);$('nodes').addEventListener('change',invalidate);$('members').addEventListener('change',invalidate);
   $('solve').addEventListener('click',analyze);$('scale').addEventListener('change',draw);$('show-labels').addEventListener('change',draw);
   $('export-model').addEventListener('click',()=>{try{download('promath-truss-model.json',fem.exportJSON(readModel()),'application/json;charset=utf-8');status('Validated model JSON exported.');}catch(err){status('Export failed: '+err.message,true);}});

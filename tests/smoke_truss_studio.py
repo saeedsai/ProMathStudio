@@ -169,8 +169,8 @@ def main():
         material_export = page.evaluate('''async () => ({name:window.__exports[1].name,body:await window.__exports[1].blob.text()})''')
         assert material_export['name'] == 'promath-truss-material-schedule.csv'
         material_rows = list(csv.reader(io.StringIO(material_export['body'])))
-        assert material_rows[0] == ['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)']
-        assert material_rows[1] == ['AB','A','B','2','0.001','0.002','200','100']
+        assert material_rows[0] == ['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)','Density (kg/m³)','Member mass (kg)']
+        assert material_rows[1] == ['AB','A','B','2','0.001','0.002','200','100','','']
         assert material_export['body'].endswith(chr(13) + chr(10))
         assert 'Validated member material schedule exported.' in page.locator('#status').inner_text()
         page.locator('#solve').click()
@@ -211,6 +211,47 @@ def main():
         assert len(page.evaluate('window.__exports')) == 3, 'Failed analysis must not export stale results'
         page.locator('#reset').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2')
+        # Optional density stays unknown until supplied; mass is volume × density in SI.
+        page.locator('#example').select_option('bar')
+        page.locator('#load-example').click()
+        density_input = page.locator('#members tr').first.locator('input[data-field="density"]')
+        assert density_input.input_value() == ''
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.count() == 10
+        assert metric_cells.nth(8).inner_text() == '—' and metric_cells.nth(9).inner_text() == '—'
+        density_input.fill('7850')
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.nth(8).inner_text() == '7850'
+        assert metric_cells.nth(9).inner_text() == '15.7'
+        export_index = page.evaluate('window.__exports.length')
+        page.locator('#export-material-csv').click()
+        density_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
+        density_rows = list(csv.reader(io.StringIO(density_export['body'])))
+        assert density_rows[0][-2:] == ['Density (kg/m³)','Member mass (kg)']
+        assert density_rows[1][-2:] == ['7850','15.7']
+        density_input.fill('')
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.nth(8).inner_text() == '—' and metric_cells.nth(9).inner_text() == '—'
+        # Negative density is rejected and cannot be exported; clearing it restores the preview.
+        density_input.fill('-1')
+        assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
+        downloads_before_invalid = page.evaluate('window.__exports.length')
+        page.locator('#export-material-csv').click()
+        assert page.evaluate('window.__exports.length') == downloads_before_invalid
+        assert 'density must be non-negative' in page.locator('#status').inner_text()
+        density_input.fill('')
+        assert 'Preview ready' in page.locator('#status').inner_text()
+        # Legacy SI import keeps density in kg/m³ and computes the same physical member mass.
+        legacy_model = page.evaluate('TrussStudio.example')
+        for member in legacy_model['members']:
+            member['density'] = 7850
+        page.locator('#import-model').set_input_files({'name':'legacy-density.json','mimeType':'application/json',
+                                                       'buffer':json.dumps(legacy_model).encode('utf-8')})
+        page.wait_for_function("""() => document.querySelector('#status').textContent.startsWith('Analysis complete')""")
+        legacy_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert legacy_cells.nth(8).inner_text() == '7850'
+        assert legacy_cells.nth(9).inner_text() == '15.7'
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2')
         assert not errors, errors
         browser.close()

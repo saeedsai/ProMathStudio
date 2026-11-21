@@ -746,18 +746,19 @@ test('inspectJSON exposes immutable per-member SI material metrics without solvi
 
 test('material schedule CSV exports validated per-member SI quantities without solving',()=>{
  const barCSV=fem.exportMaterialCSV(fem.examples.bar);
- const header='"Member ID","Start joint ID","End joint ID","Centreline length (m)","Cross-sectional area (m²)","Axial material volume (m³)","Elastic modulus (GPa)","Axial stiffness EA/L (kN/mm)"';
- assert.equal(barCSV,header+'\r\n"AB","A","B","2","0.001","0.002","200","100"\r\n');
+ const header='"Member ID","Start joint ID","End joint ID","Centreline length (m)","Cross-sectional area (m²)","Axial material volume (m³)","Elastic modulus (GPa)","Axial stiffness EA/L (kN/mm)","Density (kg/m³)","Member mass (kg)"';
+ assert.equal(barCSV,header+'\r\n"AB","A","B","2","0.001","0.002","200","100","",""\r\n');
  assert.ok(barCSV.endsWith('\r\n'));
  assert.equal(barCSV.replace(/\r\n/g,'').includes('\n'),false);
  const triangleCSV=fem.exportMaterialCSV(fem.examples.triangle);
  const rows=triangleCSV.trimEnd().split('\r\n').map(line=>line.slice(1,-1).split('","'));
- assert.deepEqual(rows[0],['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)']);
+ assert.deepEqual(rows[0],['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)','Density (kg/m³)','Member mass (kg)']);
  assert.equal(rows.length,4);
  const lengths=[4,Math.hypot(2,3),Math.hypot(2,3)];
  rows.slice(1).forEach((row,i)=>{
   close(Number(row[3]),lengths[i]);close(Number(row[4]),0.0012);close(Number(row[5]),lengths[i]*0.0012);
   close(Number(row[6]),210);close(Number(row[7]),210e9*0.0012/lengths[i]/1e6);
+  assert.equal(row[8],'');assert.equal(row[9],'');
  });
  const legacy={nodes:fem.examples.bar.nodes.map(n=>({...n,fx:n.fx*1000,fy:n.fy*1000})),
   members:fem.examples.bar.members.map(m=>({id:m.id,a:m.a,b:m.b,E:m.E*1e9,A:m.area*1e-6}))};
@@ -767,4 +768,42 @@ test('material schedule CSV exports validated per-member SI quantities without s
  const invalid=clone(fem.examples.bar);invalid.members[0].area=0;
  assert.throws(()=>fem.exportMaterialCSV(invalid),/area must be positive/);
  assert.throws(()=>fem.exportMaterialCSV({nodes:[],members:[]}),/Use 2–80 nodes/);
+});
+
+test('optional member density produces SI mass estimates and rejects invalid or overflowing values',()=>{
+ const bar=clone(fem.examples.bar);
+ const unspecified=fem.inspectJSON(JSON.stringify(bar)).memberMetrics[0];
+ assert.equal(unspecified.density,null);assert.equal(unspecified.mass,null);
+ for(const blank of [undefined,null,'','   ']){
+  const model=clone(bar);
+  if(blank===undefined) delete model.members[0].density; else model.members[0].density=blank;
+  const metric=fem.inspectJSON(JSON.stringify(model)).memberMetrics[0];
+  assert.equal(metric.density,null);assert.equal(metric.mass,null);
+ }
+ const zero=clone(bar);zero.members[0].density=0;
+ assert.equal(fem.inspectJSON(JSON.stringify(zero)).memberMetrics[0].mass,0);
+ const dense=clone(bar);dense.members[0].density=7850;
+ const preview=fem.inspectJSON(JSON.stringify(dense)),metric=preview.memberMetrics[0];
+ close(metric.volume,0.002);close(metric.mass,15.7);assert.equal(metric.density,7850);
+ assert.ok(Object.isFrozen(metric));assert.ok(Object.isFrozen(preview.memberMetrics));
+ const triangle=clone(fem.examples.triangle);triangle.members.forEach(m=>m.density=7850);
+ const trianglePreview=fem.inspectJSON(JSON.stringify(triangle));
+ trianglePreview.memberMetrics.forEach(m=>close(m.mass,m.volume*7850));
+ const legacy={nodes:bar.nodes.map(n=>({...n,fx:n.fx*1000,fy:n.fy*1000})),
+  members:bar.members.map(m=>({id:m.id,a:m.a,b:m.b,E:m.E*1e9,A:m.area*1e-6,density:7850}))};
+ const legacyMetric=fem.inspectJSON(JSON.stringify(legacy)).memberMetrics[0];
+ close(legacyMetric.density,7850);close(legacyMetric.mass,metric.mass);
+ const csvRows=fem.exportMaterialCSV(dense).trimEnd().split('\r\n').map(line=>line.slice(1,-1).split('\",\"'));
+ assert.equal(csvRows[1][8],'7850');assert.equal(csvRows[1][9],'15.7');
+ const blankRows=fem.exportMaterialCSV(bar).trimEnd().split('\r\n').map(line=>line.slice(1,-1).split('\",\"'));
+ assert.equal(blankRows[1][8],'');assert.equal(blankRows[1][9],'');
+ const unstable=clone(dense);unstable.nodes[1].fixY=false;
+ close(fem.inspectJSON(JSON.stringify(unstable)).memberMetrics[0].mass,15.7);
+ for(const invalid of [-1,NaN,Infinity,-Infinity,'not-a-number',true,{}]){
+  const model=clone(bar);model.members[0].density=invalid;
+  assert.throws(()=>fem.parseModel(model),invalid===-1?/density must be non-negative/:/finite number/);
+ }
+ const overflow=clone(bar);overflow.nodes[1].x=2000;overflow.members[0].density=Number.MAX_VALUE;
+ assert.throws(()=>fem.parseModel(overflow),/mass.*finite number/);
+ close(fem.solve(bar).displacements[1].x,1e-5,1e-13);
 });

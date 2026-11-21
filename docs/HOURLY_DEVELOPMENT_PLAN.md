@@ -1,3 +1,16 @@
+## 2026-11-21 — TRUSS-SECTION-MOMENT-DISPLAY-CI-FIX-393 (source correction; exact-head QA pending)
+
+Both exact-head Quality runs [push #44874164539](https://github.com/saeedsai/ProMathStudio/actions/runs/44874164539) and [PR #44874168789](https://github.com/saeedsai/ProMathStudio/actions/runs/44874168789) failed at browser step 212, `tests/smoke_truss_studio.py:247`. The test expected the editable second moment I=1,000,000 mm⁴ to display as `1000000`, while the generic four-significant-digit formatter rendered `1e+6`. This was a presentation mismatch, not a numerical or Euler-calculation defect. Added a dedicated section-moment formatter: safe whole-number mm⁴ values render as full decimal integers; fractional values retain the existing compact four-significant-digit format. Extended the Chromium regression with 1,250,000.5 mm⁴ → `1.25e+6` and a reset to 1,000,000 → `1000000`. No solver equation, material CSV serialization, validation, or test gate changed.
+
+Pre-change dev `c0ae9bcb7c21ec22852e2bcabc2aeff8c8a3db3c`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. The exact-head Node/Chromium suite is pending on the corrected commit. The local workspace has no repository checkout, so full local Node/Chromium suites were not run; isolated JavaScript formatting and source-contract checks passed. PR #189 remains open with zero reviews. Both branches report unprotected; repository rulesets are empty and classic protection read returns HTTP 403. Pages workflow is manual-dispatch only; last verified deployment remains [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) on 2026-11-03/main `70fc483c`. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE (acceptance):**
+1. Verify exact-head push and PR Quality for this correction; require the Truss FEM Node suite, Truss Studio Chromium step 212, all other browser/structural tests and every workflow step green.
+2. Obtain eligible independent approval for PR #189 and inspect its final diff; do not self-approve.
+3. Verify enforceable main protection and required Quality checks; keep release blocked while protections are absent or unreadable.
+4. Only after all gates pass, merge PR #189 through the ordinary PR process; verify resulting main SHA, main Quality, Pages deployment and hosted desktop/390px behavior.
+5. Add a rectangular/solid-circular section-property helper that populates I (mm⁴): rectangle bh³/12 and solid circle πd⁴/64; test dimensions in mm, positive/finite/overflow validation, analytical references, invalid-input recovery, keyboard operation and 390px behavior.
+
 ## 2026-11-21 — TRUSS-LEGACY-API-SHAPE-392 (compatibility correction; exact-head QA pending)
 
 Follow-up to the compression-only Euler comparison. The first implementation had added new screening fields to the legacy `TrussStudio.solve` member objects. The standalone UI uses the canonical `ProMathTrussFEM.solve` API, so those extra fields were unnecessary and contradicted the documented legacy output-shape compatibility. Restored the original legacy member keys (`id`, `force`, `stress`, `strain`) and added a Node regression that checks the exact key set and finite values. The new compression-only fields remain available on the canonical FEM result. No numerical behavior or safety validation changed.

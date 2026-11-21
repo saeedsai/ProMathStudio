@@ -9,6 +9,8 @@
   // Latest file selection wins even when an earlier File.text() resolves later.
   let importRequest = 0;
   const fmt = (x, digits=5) => Number(x).toPrecision(digits).replace(/(\.\d*?)0+(e|$)/,'$1$2').replace(/\.(e|$)/,'$1');
+  // Keep whole-number section properties readable; retain compact precision for fractional values.
+  const fmtSectionMoment = value => Number.isSafeInteger(value) ? String(value) : fmt(value,4);
   function status(message, error=false, busy=false) {
     const target = $('status');
     target.textContent = message;
@@ -81,7 +83,7 @@
       group.append(svgNode('text',{x:15,y:362,'font-size':12},'Pre-solve geometry · not to scale'));
       $('plot').replaceChildren(group);
       $('plot').setAttribute('aria-label',`Pre-solve truss geometry preview with ${info.nodeCount} joints and ${info.memberCount} members. Supports and applied loads are shown. Topology does not certify stability.`);
-      addResultRows('member-metrics',info.memberMetrics,m=>[m.id,m.startNodeId,m.endNodeId,fmt(m.length,4),fmt(m.area*1e6,4),fmt(m.volume,4),fmt(m.elasticModulus/1e9,4),fmt(m.axialStiffness/1e6,4),m.density===null?'—':fmt(m.density,4),m.mass===null?'—':fmt(m.mass,4),m.secondMoment===null?'—':fmt(m.secondMoment*1e12,4),m.effectiveLengthFactor===null?'—':fmt(m.effectiveLengthFactor,4),m.eulerCriticalLoad===null?'—':fmt(m.eulerCriticalLoad/1000,4)]);
+      addResultRows('member-metrics',info.memberMetrics,m=>[m.id,m.startNodeId,m.endNodeId,fmt(m.length,4),fmt(m.area*1e6,4),fmt(m.volume,4),fmt(m.elasticModulus/1e9,4),fmt(m.axialStiffness/1e6,4),m.density===null?'—':fmt(m.density,4),m.mass===null?'—':fmt(m.mass,4),m.secondMoment===null?'—':fmtSectionMoment(m.secondMoment*1e12),m.effectiveLengthFactor===null?'—':fmt(m.effectiveLengthFactor,4),m.eulerCriticalLoad===null?'—':fmt(m.eulerCriticalLoad/1000,4)]);
       const unit=info.inputUnits.forces,divisor=unit==='N'?1:1000;
       const components=info.connectedComponentCount===1?'connected component':'connected components';
       const isolated=info.isolatedNodeCount===1?'isolated joint':'isolated joints';

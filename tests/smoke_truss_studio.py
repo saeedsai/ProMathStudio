@@ -245,6 +245,13 @@ def main():
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.count() == 13
         assert metric_cells.nth(10).inner_text() == '1000000'
+        # Whole-number section properties stay readable; fractional values retain compact precision.
+        i_input.fill('1250000.5')
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.nth(10).inner_text() == '1.25e+6'
+        i_input.fill('1000000')
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert metric_cells.nth(10).inner_text() == '1000000'
         assert metric_cells.nth(11).inner_text() == '1'
         assert metric_cells.nth(12).inner_text() == '493.48'
         export_index = page.evaluate('window.__exports.length')

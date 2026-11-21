@@ -41,11 +41,59 @@
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
     const circular = shape === 'solid-circle' || shape === 'hollow-circle';
     const composite = shape === 'channel' || shape === 'i-section';
-    if (!rectangular && !circular && !composite) throw Error('Section shape must be rectangle, hollow-rectangle, solid-circle, hollow-circle, channel or i-section.');
+    const angle = shape === 'l-angle';
+    if (!rectangular && !circular && !composite && !angle) throw Error('Section shape must be rectangle, hollow-rectangle, solid-circle, hollow-circle, channel, i-section or l-angle.');
     if (!dimensions || typeof dimensions !== 'object' || Array.isArray(dimensions)) throw Error('Section dimensions must be an object.');
     let area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis, centroid = null;
+    let productOfInertia = null, principalMomentMajor = null, principalMomentMinor = null, principalAxisAngleDegrees = null;
     let boundsWidth, boundsHeight, centroidX, centroidY;
-    if (composite) {
+    if (angle) {
+      const width = finite(dimensions.width, 'L-angle outer width B (mm)');
+      const depth = finite(dimensions.height, 'L-angle outer depth H (mm)');
+      const thickness = finite(dimensions.thickness, 'L-angle leg thickness t (mm)');
+      if (!(width > 0) || !(depth > 0) || !(thickness > 0) || !(thickness < width) || !(thickness < depth)) {
+        throw Error('L-angle B, H and t must be positive, with t < min(B,H).');
+      }
+      boundsWidth = width; boundsHeight = depth;
+      const pieces = [
+        {x:0,y:0,width:thickness,height:depth},
+        {x:thickness,y:0,width:width-thickness,height:thickness}
+      ];
+      const pieceMetrics = pieces.map((piece,index) => {
+        const pieceArea = finite(piece.width*piece.height, 'L-angle rectangle '+(index+1)+' area (mm²)');
+        if (!(pieceArea > 0)) throw Error('L-angle rectangle area underflow; increase dimensions.');
+        return {...piece,area:pieceArea,
+          cx:finite(piece.x+piece.width/2, 'L-angle rectangle centroid x (mm)'),
+          cy:finite(piece.y+piece.height/2, 'L-angle rectangle centroid y (mm)')};
+      });
+      area = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area,0), 'L-angle area (mm²)');
+      if (!(area > 0)) throw Error('L-angle area underflow; increase dimensions.');
+      centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'L-angle centroid x (mm)');
+      centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'L-angle centroid y (mm)');
+      secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
+        const local = finite(piece.width*piece.height*piece.height*piece.height/12, 'L-angle local Ixx (mm⁴)');
+        const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'L-angle Ixx offset (mm⁴)');
+        return sum+local+offset;
+      },0), 'L-angle Ixx (mm⁴)');
+      secondMomentPerpendicular = finite(pieceMetrics.reduce((sum,piece)=>{
+        const local = finite(piece.height*piece.width*piece.width*piece.width/12, 'L-angle local Iyy (mm⁴)');
+        const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'L-angle Iyy offset (mm⁴)');
+        return sum+local+offset;
+      },0), 'L-angle Iyy (mm⁴)');
+      productOfInertia = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*(piece.cx-centroidX)*(piece.cy-centroidY),0),
+        'L-angle product of inertia Ixy (mm⁴)');
+      if (productOfInertia === 0) throw Error('L-angle product of inertia underflow; increase dimensions.');
+      const meanMoment = finite((secondMoment+secondMomentPerpendicular)/2, 'L-angle mean principal moment (mm⁴)');
+      const principalRadius = finite(Math.hypot((secondMoment-secondMomentPerpendicular)/2,productOfInertia), 'L-angle principal moment radius (mm⁴)');
+      principalMomentMajor = finite(meanMoment+principalRadius, 'L-angle major principal moment I1 (mm⁴)');
+      principalMomentMinor = finite(meanMoment-principalRadius, 'L-angle minor principal moment I2 (mm⁴)');
+      if (!(principalMomentMajor > 0) || !(principalMomentMinor > 0)) throw Error('L-angle principal second moment underflow; increase dimensions.');
+      principalAxisAngleDegrees = finite(0.5*Math.atan2(-2*productOfInertia,secondMoment-secondMomentPerpendicular)*180/Math.PI,
+        'L-angle principal-axis angle (degrees)');
+      centroid = {x:centroidX,y:centroidY};
+      axis = 'centroidal horizontal axis (Ixx)';
+      perpendicularAxis = 'centroidal vertical axis (Iyy)';
+    } else if (composite) {
       const width = finite(dimensions.width, 'Section outer width B (mm)');
       const depth = finite(dimensions.height, 'Section outer depth H (mm)');
       const webThickness = finite(dimensions.webThickness, 'Section web thickness tw (mm)');
@@ -157,7 +205,8 @@
     return Object.freeze({shape, area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis,
       sectionModulusX, sectionModulusY, radiusOfGyrationX, radiusOfGyrationY,
       extremeFiberDistanceAboutX, extremeFiberDistanceAboutY,
-      ...(centroid ? {centroid:Object.freeze(centroid)} : {})});
+      ...(centroid ? {centroid:Object.freeze(centroid)} : {}),
+      ...(angle ? {productOfInertia,principalMomentMajor,principalMomentMinor,principalAxisAngleDegrees} : {})});
   }
   const supportFlag = (value, name) => {
     if (value === undefined || value === false || value === 'false') return false;

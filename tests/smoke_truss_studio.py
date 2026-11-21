@@ -165,6 +165,33 @@ def main():
         assert 'Not applied' in page.locator('#section-result').inner_text()
         assert abs(float(ac_area.input_value()) - 2240) < 1e-9
         assert abs(float(ac_i.input_value()) - 2264380.9523809524) < 1e-7
+        # L-angle uses two non-overlapping rectangles; verify principal axes and member isolation.
+        page.locator('#section-member').select_option('AB')
+        page.locator('#section-shape').select_option('l-angle')
+        assert page.locator('#section-angle-thickness-control').is_visible()
+        assert page.locator('#section-web-thickness-control').is_hidden()
+        assert page.locator('#section-flange-thickness-control').is_hidden()
+        assert page.locator('#section-axis option[value="principal-major"]').is_visible()
+        page.locator('#section-width').fill('100')
+        page.locator('#section-height').fill('80')
+        page.locator('#section-angle-thickness').fill('10')
+        page.locator('#section-axis').select_option('principal-major')
+        page.locator('#section-properties-apply').click()
+        assert abs(float(ab_area.input_value())-1700) < 1e-9
+        assert abs(float(ab_i.input_value())-2136969.904902401) < 1e-7
+        section_text = page.locator('#section-result').inner_text()
+        for expected in ('centroid x 31.471 mm, y 21.471 mm','Ixy','principal I1','principal I2',
+                         'I1 axis 57.953° counter-clockwise from +x'):
+            assert expected in section_text, (expected, section_text)
+        assert abs(float(ac_area.input_value())-2240) < 1e-9
+        page.locator('#section-axis').select_option('principal-minor')
+        page.locator('#section-properties-apply').click()
+        assert abs(float(ab_i.input_value())-489010.48725446186) < 1e-7
+        page.locator('#section-angle-thickness').fill('80')
+        page.locator('#section-properties-apply').click()
+        assert 'Not applied' in page.locator('#section-result').inner_text()
+        assert abs(float(ab_area.input_value())-1700) < 1e-9
+        assert abs(float(ab_i.input_value())-489010.48725446186) < 1e-7
         # Restore the example values before solver and export regressions below.
         ab_area.fill('1200')
         ab_i.fill('')

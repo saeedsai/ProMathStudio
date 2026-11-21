@@ -941,6 +941,11 @@ test('solid and concentric hollow section helpers return validated area and cent
  assert.equal(hollowCircle.extremeFiberDistanceAboutX,50);
  assert.equal(hollowCircle.extremeFiberDistanceAboutY,50);
  assert.ok(Object.isFrozen(hollowCircle));
+ for(const properties of [rectangle,circle,hollowRectangle,hollowCircle]){
+  for(const key of ['sectionModulusX','sectionModulusY','radiusOfGyrationX','radiusOfGyrationY','extremeFiberDistanceAboutX','extremeFiberDistanceAboutY']){
+   assert.ok(Number.isFinite(properties[key])&&properties[key]>0,properties.shape+' '+key+' must be finite and positive');
+  }
+ }
  for(const invalid of [0,-1,NaN,Infinity,-Infinity,'not-a-number',true,{}]){
   assert.throws(()=>fem.sectionProperties('rectangle',{width:invalid,height:60}));
   assert.throws(()=>fem.sectionProperties('rectangle',{width:40,height:invalid}));
@@ -999,7 +1004,7 @@ test('open channel and I sections use composite rectangles and the parallel-axis
  close(iSection.radiusOfGyrationY,24.44624812970382,1e-12);
  assert.equal(iSection.extremeFiberDistanceAboutX,40);
  assert.equal(iSection.extremeFiberDistanceAboutY,50);
- for(const properties of [rectangle,circle,hollowRectangle,hollowCircle,channel,iSection]){
+ for(const properties of [channel,iSection]){
   for(const key of ['sectionModulusX','sectionModulusY','radiusOfGyrationX','radiusOfGyrationY','extremeFiberDistanceAboutX','extremeFiberDistanceAboutY']){
    assert.ok(Number.isFinite(properties[key])&&properties[key]>0,properties.shape+' '+key+' must be finite and positive');
   }
@@ -1029,6 +1034,34 @@ test('open channel and I sections use composite rectangles and the parallel-axis
  close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });
 
+
+test('L-angle section returns centroidal and principal properties with validated dimensions',()=>{
+ const angle=fem.sectionProperties('l-angle',{width:100,height:80,thickness:10});
+ close(angle.area,1700,1e-12);
+ close(angle.centroid.x,31.470588235294116,1e-12);
+ close(angle.centroid.y,21.470588235294116,1e-12);
+ close(angle.secondMoment,952990.1960784313,1e-7);
+ close(angle.secondMomentPerpendicular,1672990.1960784313,1e-7);
+ close(angle.productOfInertia,-741176.4705882354,1e-7);
+ close(angle.principalMomentMajor,2136969.904902401,1e-7);
+ close(angle.principalMomentMinor,489010.48725446186,1e-7);
+ close(angle.principalAxisAngleDegrees,57.953253999757194,1e-10);
+ close(angle.principalMomentMajor+angle.principalMomentMinor,angle.secondMoment+angle.secondMomentPerpendicular,1e-7);
+ const theta=angle.principalAxisAngleDegrees*Math.PI/180;
+ close(angle.productOfInertia*Math.cos(2*theta)+(angle.secondMoment-angle.secondMomentPerpendicular)*Math.sin(2*theta)/2,0,1e-7);
+ for(const key of ['sectionModulusX','sectionModulusY','radiusOfGyrationX','radiusOfGyrationY','extremeFiberDistanceAboutX','extremeFiberDistanceAboutY'])
+  assert.ok(Number.isFinite(angle[key])&&angle[key]>0,'L-angle '+key+' must be finite and positive');
+ assert.ok(Object.isFrozen(angle));assert.ok(Object.isFrozen(angle.centroid));
+ for(const invalid of [
+  {width:0,height:80,thickness:10},{width:100,height:0,thickness:10},{width:100,height:80,thickness:0},
+  {width:100,height:80,thickness:100},{width:100,height:80,thickness:80},{width:100,height:80,thickness:-1}
+ ]) assert.throws(()=>fem.sectionProperties('l-angle',invalid));
+ for(const invalid of [NaN,Infinity,-Infinity,'bad',true,{}])
+  assert.throws(()=>fem.sectionProperties('l-angle',{width:100,height:80,thickness:invalid}));
+ assert.throws(()=>fem.sectionProperties('l-angle',{width:1e308,height:80,thickness:10}),/finite number/);
+ assert.throws(()=>fem.sectionProperties('l-angle',{width:1e-200,height:1e-200,thickness:5e-201}),/underflow/);
+ assert.throws(()=>fem.sectionProperties('l-angle',[]),/dimensions must be an object/);
+});
 
 test('legacy TrussStudio.solve retains its original member result shape',()=>{
  const result=globalThis.TrussStudio.solve(globalThis.TrussStudio.example);

@@ -62,7 +62,8 @@
   function updateSectionShape() {
     const shape=$('section-shape').value;
     const composite=shape==='channel'||shape==='i-section';
-    const rectangle=shape==='rectangle'||shape==='hollow-rectangle'||composite;
+    const angle=shape==='l-angle';
+    const rectangle=shape==='rectangle'||shape==='hollow-rectangle'||composite||angle;
     const hollowRectangle=shape==='hollow-rectangle';
     const circle=shape==='solid-circle'||shape==='hollow-circle';
     const hollowCircle=shape==='hollow-circle';
@@ -74,7 +75,11 @@
     $('section-inner-diameter-control').hidden=!hollowCircle;
     $('section-web-thickness-control').hidden=!composite;
     $('section-flange-thickness-control').hidden=!composite;
+    $('section-angle-thickness-control').hidden=!angle;
     $('section-axis-control').hidden=!rectangle;
+    $('section-axis').querySelectorAll('[data-angle-axis]').forEach(option=>option.hidden=!angle);
+    if(angle) $('section-axis').value='principal-major';
+    else if($('section-axis').value.startsWith('principal-')) $('section-axis').value='width';
   }
   function applySectionProperties() {
     try {
@@ -83,7 +88,8 @@
       if(!row) throw Error('Choose an existing member.');
       const shape=$('section-shape').value;
       const composite=shape==='channel'||shape==='i-section';
-      const rectangle=shape==='rectangle'||shape==='hollow-rectangle'||composite;
+      const angle=shape==='l-angle';
+      const rectangle=shape==='rectangle'||shape==='hollow-rectangle'||composite||angle;
       const hollowRectangle=shape==='hollow-rectangle';
       const hollowCircle=shape==='hollow-circle';
       let dimensions;
@@ -97,26 +103,33 @@
           dimensions.webThickness=$('section-web-thickness').value;
           dimensions.flangeThickness=$('section-flange-thickness').value;
         }
+        if(angle) dimensions.thickness=$('section-angle-thickness').value;
       } else {
         dimensions={diameter:$('section-diameter').value};
         if(hollowCircle) dimensions.innerDiameter=$('section-inner-diameter').value;
       }
       const properties=fem.sectionProperties(shape,dimensions);
-      const axis=rectangle&&$('section-axis').value==='depth'?'depth':'width';
-      const appliedI=rectangle&&axis==='depth'?properties.secondMomentPerpendicular:properties.secondMoment;
-      const axisName=rectangle?(axis==='depth'?'Iyy':'Ixx'):'I';
+      const axis=$('section-axis').value;
+      let appliedI=properties.secondMoment, axisName='Ixx';
+      if(angle&&axis==='principal-major') {appliedI=properties.principalMomentMajor;axisName='I1 (major principal)';}
+      else if(angle&&axis==='principal-minor') {appliedI=properties.principalMomentMinor;axisName='I2 (minor principal)';}
+      else if(rectangle&&axis==='depth') {appliedI=properties.secondMomentPerpendicular;axisName='Iyy';}
+      else if(!rectangle) axisName='I';
       row.querySelector('input[data-field="area"]').value=String(properties.area);
       row.querySelector('input[data-field="I"]').value=String(appliedI);
       invalidate();
-      const shapeName=shape==='rectangle'?'Solid rectangle':shape==='hollow-rectangle'?'Hollow rectangle':shape==='solid-circle'?'Solid circle':shape==='hollow-circle'?'Hollow circle':shape==='channel'?'Open channel (web left)':'I-section';
+      const shapeName=shape==='rectangle'?'Solid rectangle':shape==='hollow-rectangle'?'Hollow rectangle':shape==='solid-circle'?'Solid circle':shape==='hollow-circle'?'Hollow circle':shape==='channel'?'Open channel (web left)':shape==='i-section'?'I-section':'L-angle (web left, bottom leg right)';
       const centroidText=properties.centroid
         ? '; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm'
         : '';
       const moments=rectangle
         ? '; Ixx '+fmtSectionMoment(properties.secondMoment)+' mm⁴; Iyy '+fmtSectionMoment(properties.secondMomentPerpendicular)+' mm⁴; applied '+axisName+' '+fmtSectionMoment(appliedI)+' mm⁴'+centroidText
         : '; I '+fmtSectionMoment(properties.secondMoment)+' mm⁴ about any centroidal diameter';
+      const principalMetrics=angle
+        ? '; Ixy '+fmtSectionMoment(properties.productOfInertia)+' mm⁴; principal I1 '+fmtSectionMoment(properties.principalMomentMajor)+' mm⁴; principal I2 '+fmtSectionMoment(properties.principalMomentMinor)+' mm⁴; I1 axis '+fmt(properties.principalAxisAngleDegrees,5)+'° counter-clockwise from +x'
+        : '';
       const sectionMetrics='; Sx '+fmt(properties.sectionModulusX,5)+' mm³; Sy '+fmt(properties.sectionModulusY,5)+' mm³; rx '+fmt(properties.radiusOfGyrationX,5)+' mm; ry '+fmt(properties.radiusOfGyrationY,5)+' mm; cX '+fmt(properties.extremeFiberDistanceAboutX,5)+' mm; cY '+fmt(properties.extremeFiberDistanceAboutY,5)+' mm';
-      $('section-result').textContent=shapeName+': area '+fmt(properties.area,5)+' mm²'+moments+sectionMetrics+', applied to member '+memberId+'.';
+      $('section-result').textContent=shapeName+': area '+fmt(properties.area,5)+' mm²'+moments+principalMetrics+sectionMetrics+', applied to member '+memberId+'.';
     } catch(error) {
       $('section-result').textContent='Not applied: '+error.message;
     }

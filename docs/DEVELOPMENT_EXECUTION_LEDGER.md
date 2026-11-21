@@ -1,3 +1,14 @@
+## 2026-11-21 — TRUSS-LEGACY-API-SHAPE-392 (compatibility correction; exact-head QA pending)
+
+Follow-up to the compression-only Euler comparison. The first implementation had added new screening fields to the legacy `TrussStudio.solve` member objects. The standalone UI uses the canonical `ProMathTrussFEM.solve` API, so those extra fields were unnecessary and contradicted the documented legacy output-shape compatibility. Restored the original legacy member keys (`id`, `force`, `stress`, `strain`) and added a Node regression that checks the exact key set and finite values. The new compression-only fields remain available on the canonical FEM result. No numerical behavior or safety validation changed.
+
+**NEXT FIVE (acceptance):**
+1. Verify exact-head push and PR Quality for the current final commit, including the 13-column material CSV, compression-only Euler Node/Chromium cases, results CSV CRLF and legacy API shape; require all workflow steps green.
+2. Obtain eligible independent approval for PR #189 and inspect the final diff; do not self-approve.
+3. Verify enforceable main protection and required Quality checks; keep release blocked while protections are absent or unreadable.
+4. Only after all gates pass, merge PR #189 through the ordinary PR process; verify resulting main SHA, main Quality, Pages deployment and hosted desktop/390px behavior.
+5. Add a small-section property helper for rectangular and solid circular sections to populate I (mm⁴), with dimensional-unit validation, analytical references (bh³/12 and πd⁴/64), invalid/overflow recovery and keyboard/mobile browser tests.
+
 ## 2026-11-21 — TRUSS-RESULTS-CSV-CRLF-FIX-391 (follow-up source/test correction; exact-head QA pending)
 
 Follow-up to `8f06e87a97b6fa9b82dbb2b869236f7e9418f3d2`. Static review found that the new results CSV line separator had been double-escaped, which would emit literal backslash-r/backslash-n text rather than CRLF. Corrected the standalone UI exporter to emit actual CRLF and extended the Chromium regression to assert the results CSV terminator. The material-schedule exporter was already correct and remains unchanged. No numerical calculation or assertion was weakened. New exact-head push/PR Quality must run on the corrected head; local checkout remains unavailable.

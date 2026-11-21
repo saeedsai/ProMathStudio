@@ -15,9 +15,7 @@
         const result=api.solve(api.fromLegacy(model));
         return {nodes:result.nodes.map((n,i)=>({...model.nodes[i],ux:result.displacements[i].x,uy:result.displacements[i].y,
           rx:result.reactions.find(r=>r.id===n.id)?.rx??0,ry:result.reactions.find(r=>r.id===n.id)?.ry??0})),
-          members:result.members.map(m=>({id:m.id,force:m.force,stress:m.stress,strain:m.strain,type:m.type,
-            compressionDemand:m.compressionDemand,eulerCriticalLoad:m.eulerCriticalLoad,
-            eulerUtilization:m.eulerUtilization,eulerLoadRatio:m.eulerLoadRatio,eulerAssessment:m.eulerAssessment})),
+          members:result.members.map(m=>({id:m.id,force:m.force,stress:m.stress,strain:m.strain})),
           residual:result.residual,maxDisplacement:result.maxDisplacement.magnitude};
       }
     };

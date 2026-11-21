@@ -889,3 +889,10 @@ test('post-solve Euler comparison reports compression-only utilization and load 
  assert.equal(unassessed.eulerAssessment,'Not assessed (I/K missing)');
  close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });
+
+
+test('legacy TrussStudio.solve retains its original member result shape',()=>{
+ const result=globalThis.TrussStudio.solve(globalThis.TrussStudio.example);
+ assert.deepEqual(Object.keys(result.members[0]).sort(),['force','id','strain','stress']);
+ assert.ok(result.members.every(m=>Number.isFinite(m.force)&&Number.isFinite(m.stress)&&Number.isFinite(m.strain)));
+});

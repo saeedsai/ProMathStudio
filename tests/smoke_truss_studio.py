@@ -279,12 +279,23 @@ def main():
         i_input = page.locator('#members tr').first.locator('input[data-field="I"]')
         k_input = page.locator('#members tr').first.locator('input[data-field="K"]')
         i_input.fill('1000000')
-        assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
-        assert 'provide both I' in page.locator('#status').inner_text()
-        k_input.fill('1')
-        assert 'Preview ready' in page.locator('#status').inner_text()
+        assert 'Model overview' in page.locator('#preview-summary').inner_text()
+        assert 'Euler estimate requires both I and K' in page.locator('#status').inner_text()
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.count() == 13
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['1000000','—','—']
+        # K-only is also a valid partial member property; the preview stays available without Pcr.
+        i_input.fill('')
+        k_input.fill('1')
+        assert 'Model overview' in page.locator('#preview-summary').inner_text()
+        assert 'Euler estimate requires both I and K' in page.locator('#status').inner_text()
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['—','1','—']
+        # Supplying the missing I restores the Euler estimate without invalidating the preview.
+        i_input.fill('1000000')
+        assert 'Preview ready' in page.locator('#status').inner_text()
+        assert 'Euler estimate requires both I and K' not in page.locator('#status').inner_text()
+        metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(10).inner_text() == '1000000'
         # Whole-number section properties stay readable; fractional values retain compact precision.
         i_input.fill('1250000.5')

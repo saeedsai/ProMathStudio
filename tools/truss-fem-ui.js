@@ -118,7 +118,11 @@
       const components=info.connectedComponentCount===1?'connected component':'connected components';
       const isolated=info.isolatedNodeCount===1?'isolated joint':'isolated joints';
       $('preview-summary').textContent=`Model overview · ${info.nodeCount} joints · ${info.memberCount} members · ${info.connectedComponentCount} ${components} · ${info.isolatedNodeCount} ${isolated} · total member length ${fmt(info.totalMemberLength,4)} m · axial member volume Σ(L·A) ${fmt(info.totalMemberVolume,4)} m³ · bounds ${fmt(bounds.width,4)} × ${fmt(bounds.height,4)} m · applied load ΣFx ${fmt(info.appliedForce.x/divisor,4)} ${unit}, ΣFy ${fmt(info.appliedForce.y/divisor,4)} ${unit} (${info.loadedDofCount} loaded DOFs). Topology is not a stability check.`;
-      status('Preview ready · analyze to check structural stability.',false);
+      const hasIncompleteEulerInputs=info.memberMetrics.some(metric =>
+        (metric.secondMoment===null)!==(metric.effectiveLengthFactor===null));
+      status(hasIncompleteEulerInputs
+        ? 'Preview ready · Euler estimate requires both I and K.'
+        : 'Preview ready · analyze to check structural stability.',false);
     } catch(error) {
       $('preview-summary').textContent='Preview unavailable: '+error.message;
       const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:13,class:'empty'}));$('member-metrics').replaceChildren(empty);

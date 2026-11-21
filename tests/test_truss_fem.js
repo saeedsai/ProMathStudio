@@ -950,6 +950,45 @@ test('solid and concentric hollow section helpers return validated area and cent
  close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });
 
+test('open channel and I sections use composite rectangles and the parallel-axis theorem',()=>{
+ const channel=fem.sectionProperties('channel',{width:100,height:80,webThickness:10,flangeThickness:8});
+ close(channel.area,2240,1e-12);
+ close(channel.centroid.x,37.142857142857146,1e-12);
+ close(channel.centroid.y,40,1e-12);
+ close(channel.secondMoment,2300586.6666666665,1e-7);
+ close(channel.secondMomentPerpendicular,2264380.9523809524,1e-7);
+ const iSection=fem.sectionProperties('i-section',{width:100,height:80,webThickness:10,flangeThickness:8});
+ close(iSection.area,2240,1e-12);
+ close(iSection.centroid.x,50,1e-12);
+ close(iSection.centroid.y,40,1e-12);
+ close(iSection.secondMoment,2300586.6666666665,1e-7);
+ close(iSection.secondMomentPerpendicular,1338666.6666666665,1e-7);
+ assert.ok(Object.isFrozen(channel));assert.ok(Object.isFrozen(channel.centroid));
+ assert.ok(Object.isFrozen(iSection));assert.ok(Object.isFrozen(iSection.centroid));
+ for(const invalid of [
+  {width:0,height:80,webThickness:10,flangeThickness:8},
+  {width:100,height:0,webThickness:10,flangeThickness:8},
+  {width:100,height:80,webThickness:0,flangeThickness:8},
+  {width:100,height:80,webThickness:100,flangeThickness:8},
+  {width:100,height:80,webThickness:10,flangeThickness:0},
+  {width:100,height:80,webThickness:10,flangeThickness:40},
+  {width:100,height:80,webThickness:10,flangeThickness:41},
+  {width:100,height:80,webThickness:-1,flangeThickness:8}
+ ]) {
+  assert.throws(()=>fem.sectionProperties('channel',invalid));
+  assert.throws(()=>fem.sectionProperties('i-section',invalid));
+ }
+ for(const invalid of [NaN,Infinity,-Infinity,'bad',true,{}]) {
+  assert.throws(()=>fem.sectionProperties('channel',{width:100,height:80,webThickness:invalid,flangeThickness:8}));
+  assert.throws(()=>fem.sectionProperties('i-section',{width:100,height:80,webThickness:10,flangeThickness:invalid}));
+ }
+ assert.throws(()=>fem.sectionProperties('channel',{width:1e308,height:2,webThickness:1,flangeThickness:0.1}),/finite number/);
+ assert.throws(()=>fem.sectionProperties('i-section',{width:1e-200,height:1e-200,webThickness:5e-201,flangeThickness:1e-201}),/underflow/);
+ assert.throws(()=>fem.sectionProperties('channel',[]),/dimensions must be an object/);
+ close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+});
+
+
 test('legacy TrussStudio.solve retains its original member result shape',()=>{
  const result=globalThis.TrussStudio.solve(globalThis.TrussStudio.example);
  assert.deepEqual(Object.keys(result.members[0]).sort(),['force','id','strain','stress']);

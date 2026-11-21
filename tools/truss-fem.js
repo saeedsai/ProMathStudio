@@ -36,13 +36,62 @@
   };
   // Solid and concentric hollow prismatic section properties in mm units.
   // Rectangular results include both centroidal principal axes; circular results are isotropic.
+  // Solid, concentric hollow, open-channel and I-section properties in mm units.
+  // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
   function sectionProperties(shape, dimensions) {
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
     const circular = shape === 'solid-circle' || shape === 'hollow-circle';
-    if (!rectangular && !circular) throw Error('Section shape must be rectangle, hollow-rectangle, solid-circle or hollow-circle.');
+    const composite = shape === 'channel' || shape === 'i-section';
+    if (!rectangular && !circular && !composite) throw Error('Section shape must be rectangle, hollow-rectangle, solid-circle, hollow-circle, channel or i-section.');
     if (!dimensions || typeof dimensions !== 'object' || Array.isArray(dimensions)) throw Error('Section dimensions must be an object.');
-    let area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis;
-    if (rectangular) {
+    let area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis, centroid = null;
+    if (composite) {
+      const width = finite(dimensions.width, 'Section outer width B (mm)');
+      const depth = finite(dimensions.height, 'Section outer depth H (mm)');
+      const webThickness = finite(dimensions.webThickness, 'Section web thickness tw (mm)');
+      const flangeThickness = finite(dimensions.flangeThickness, 'Section flange thickness tf (mm)');
+      if (!(width > 0) || !(depth > 0) || !(webThickness > 0) || !(webThickness < width) ||
+          !(flangeThickness > 0) || !(2 * flangeThickness < depth)) {
+        throw Error('Section B, H, tw and tf must be positive, with tw < B and 2·tf < H.');
+      }
+      // Channel web is on the left and both flanges extend right.
+      // The I-section web is centered between equal-width top and bottom flanges.
+      const pieces = shape === 'channel'
+        ? [
+            {x:0,y:0,width:webThickness,height:depth},
+            {x:webThickness,y:0,width:width-webThickness,height:flangeThickness},
+            {x:webThickness,y:depth-flangeThickness,width:width-webThickness,height:flangeThickness}
+          ]
+        : [
+            {x:0,y:0,width,height:flangeThickness},
+            {x:(width-webThickness)/2,y:flangeThickness,width:webThickness,height:depth-2*flangeThickness},
+            {x:0,y:depth-flangeThickness,width,height:flangeThickness}
+          ];
+      const pieceMetrics = pieces.map((piece,index) => {
+        const pieceArea = finite(piece.width * piece.height, 'Composite section rectangle '+(index+1)+' area (mm²)');
+        if (!(pieceArea > 0)) throw Error('Composite section area underflow; increase dimensions.');
+        return {...piece,area:pieceArea,
+          cx:finite(piece.x + piece.width/2, 'Composite section rectangle centroid x (mm)'),
+          cy:finite(piece.y + piece.height/2, 'Composite section rectangle centroid y (mm)')};
+      });
+      area = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area,0), 'Composite section area (mm²)');
+      if (!(area > 0)) throw Error('Composite section area underflow; increase dimensions.');
+      const centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'Composite section centroid x (mm)');
+      const centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'Composite section centroid y (mm)');
+      secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
+        const local = finite(piece.width*piece.height*piece.height*piece.height/12, 'Composite rectangle local Ixx (mm⁴)');
+        const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'Composite rectangle Ixx offset (mm⁴)');
+        return sum+local+offset;
+      },0), 'Composite section Ixx (mm⁴)');
+      secondMomentPerpendicular = finite(pieceMetrics.reduce((sum,piece)=>{
+        const local = finite(piece.height*piece.width*piece.width*piece.width/12, 'Composite rectangle local Iyy (mm⁴)');
+        const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'Composite rectangle Iyy offset (mm⁴)');
+        return sum+local+offset;
+      },0), 'Composite section Iyy (mm⁴)');
+      centroid = {x:centroidX,y:centroidY};
+      axis = 'centroidal horizontal axis (Ixx)';
+      perpendicularAxis = 'centroidal vertical axis (Iyy)';
+    } else if (rectangular) {
       const width = finite(dimensions.width, 'Rectangle width b (mm)');
       const depth = finite(dimensions.height, 'Rectangle depth h (mm)');
       if (!(width > 0) || !(depth > 0)) throw Error('Rectangle width and depth must be positive.');
@@ -86,7 +135,8 @@
     if (!(area > 0)) throw Error('Section area underflow; increase the dimensions or use a resolvable wall thickness.');
     if (!(secondMoment > 0)) throw Error('Section second moment underflow (Ixx); increase the dimensions or use a resolvable wall thickness.');
     if (!(secondMomentPerpendicular > 0)) throw Error('Section second moment underflow (Iyy); increase the dimensions or use a resolvable wall thickness.');
-    return Object.freeze({shape, area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis});
+    return Object.freeze({shape, area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis,
+      ...(centroid ? {centroid:Object.freeze(centroid)} : {})});
   }
   const supportFlag = (value, name) => {
     if (value === undefined || value === false || value === 'false') return false;

@@ -61,7 +61,8 @@
   }
   function updateSectionShape() {
     const shape=$('section-shape').value;
-    const rectangle=shape==='rectangle'||shape==='hollow-rectangle';
+    const composite=shape==='channel'||shape==='i-section';
+    const rectangle=shape==='rectangle'||shape==='hollow-rectangle'||composite;
     const hollowRectangle=shape==='hollow-rectangle';
     const circle=shape==='solid-circle'||shape==='hollow-circle';
     const hollowCircle=shape==='hollow-circle';
@@ -71,6 +72,8 @@
     $('section-inner-height-control').hidden=!hollowRectangle;
     $('section-diameter-control').hidden=!circle;
     $('section-inner-diameter-control').hidden=!hollowCircle;
+    $('section-web-thickness-control').hidden=!composite;
+    $('section-flange-thickness-control').hidden=!composite;
     $('section-axis-control').hidden=!rectangle;
   }
   function applySectionProperties() {
@@ -79,7 +82,8 @@
       const row=Array.from($('members').querySelectorAll('tr')).find(tr=>tr.querySelector('input[data-field="id"]')?.value.trim()===memberId);
       if(!row) throw Error('Choose an existing member.');
       const shape=$('section-shape').value;
-      const rectangle=shape==='rectangle'||shape==='hollow-rectangle';
+      const composite=shape==='channel'||shape==='i-section';
+      const rectangle=shape==='rectangle'||shape==='hollow-rectangle'||composite;
       const hollowRectangle=shape==='hollow-rectangle';
       const hollowCircle=shape==='hollow-circle';
       let dimensions;
@@ -88,6 +92,10 @@
         if(hollowRectangle) {
           dimensions.innerWidth=$('section-inner-width').value;
           dimensions.innerHeight=$('section-inner-height').value;
+        }
+        if(composite) {
+          dimensions.webThickness=$('section-web-thickness').value;
+          dimensions.flangeThickness=$('section-flange-thickness').value;
         }
       } else {
         dimensions={diameter:$('section-diameter').value};
@@ -100,9 +108,12 @@
       row.querySelector('input[data-field="area"]').value=String(properties.area);
       row.querySelector('input[data-field="I"]').value=String(appliedI);
       invalidate();
-      const shapeName=shape==='rectangle'?'Solid rectangle':shape==='hollow-rectangle'?'Hollow rectangle':shape==='solid-circle'?'Solid circle':'Hollow circle';
+      const shapeName=shape==='rectangle'?'Solid rectangle':shape==='hollow-rectangle'?'Hollow rectangle':shape==='solid-circle'?'Solid circle':shape==='hollow-circle'?'Hollow circle':shape==='channel'?'Open channel (web left)':'I-section';
+      const centroidText=properties.centroid
+        ? '; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm'
+        : '';
       const moments=rectangle
-        ? '; Ixx '+fmtSectionMoment(properties.secondMoment)+' mm⁴; Iyy '+fmtSectionMoment(properties.secondMomentPerpendicular)+' mm⁴; applied '+axisName+' '+fmtSectionMoment(appliedI)+' mm⁴'
+        ? '; Ixx '+fmtSectionMoment(properties.secondMoment)+' mm⁴; Iyy '+fmtSectionMoment(properties.secondMomentPerpendicular)+' mm⁴; applied '+axisName+' '+fmtSectionMoment(appliedI)+' mm⁴'+centroidText
         : '; I '+fmtSectionMoment(properties.secondMoment)+' mm⁴ about any centroidal diameter';
       $('section-result').textContent=shapeName+': area '+fmt(properties.area,5)+' mm²'+moments+', applied to member '+memberId+'.';
     } catch(error) {

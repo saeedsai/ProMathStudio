@@ -107,14 +107,46 @@ def main():
         assert 'Not applied' in page.locator('#section-result').inner_text()
         assert abs(float(ab_area.input_value()) - 3200) < 1e-9
         assert abs(float(ab_i.input_value()) - 4106666.666666667) < 1e-7
-        # Restore the original model values before solver and export regressions below.
+        # Invalid solid geometry must preserve the last successfully applied hollow section.
         page.locator('#section-member').select_option('AB')
         page.locator('#section-shape').select_option('rectangle')
         page.locator('#section-width').fill('-1')
         page.locator('#section-properties-apply').click()
         assert 'Not applied' in page.locator('#section-result').inner_text()
-        assert ab_area.input_value() == '2400'
-        assert ab_i.input_value() == '720000'
+        assert abs(float(ab_area.input_value()) - 3200) < 1e-9
+        assert abs(float(ab_i.input_value()) - 4106666.666666667) < 1e-7
+        # An I-section uses three non-overlapping rectangles and reports its centroid.
+        page.locator('#section-shape').select_option('i-section')
+        assert page.locator('#section-web-thickness-control').is_visible()
+        assert page.locator('#section-flange-thickness-control').is_visible()
+        page.locator('#section-width').fill('100')
+        page.locator('#section-height').fill('80')
+        page.locator('#section-web-thickness').fill('10')
+        page.locator('#section-flange-thickness').fill('8')
+        page.locator('#section-axis').select_option('width')
+        page.locator('#section-properties-apply').click()
+        assert abs(float(ab_area.input_value()) - 2240) < 1e-9
+        assert abs(float(ab_i.input_value()) - 2300586.6666666665) < 1e-7
+        assert 'centroid x 50 mm' in page.locator('#section-result').inner_text()
+        # An open channel has an offset centroid; applying Iyy targets only the selected member.
+        page.locator('#section-member').select_option('AC')
+        page.locator('#section-shape').select_option('channel')
+        page.locator('#section-width').fill('100')
+        page.locator('#section-height').fill('80')
+        page.locator('#section-web-thickness').fill('10')
+        page.locator('#section-flange-thickness').fill('8')
+        page.locator('#section-axis').select_option('depth')
+        page.locator('#section-properties-apply').click()
+        assert abs(float(ac_area.input_value()) - 2240) < 1e-9
+        assert abs(float(ac_i.input_value()) - 2264380.9523809524) < 1e-7
+        assert 'centroid x 37.143 mm' in page.locator('#section-result').inner_text()
+        assert page.locator('#members tr').nth(2).locator('input[data-field="area"]').input_value() == '1200'
+        # Invalid flange thickness must roll back without partially changing the channel member.
+        page.locator('#section-flange-thickness').fill('40')
+        page.locator('#section-properties-apply').click()
+        assert 'Not applied' in page.locator('#section-result').inner_text()
+        assert abs(float(ac_area.input_value()) - 2240) < 1e-9
+        assert abs(float(ac_i.input_value()) - 2264380.9523809524) < 1e-7
         # Restore the example values before solver and export regressions below.
         ab_area.fill('1200')
         ab_i.fill('')

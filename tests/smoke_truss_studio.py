@@ -197,7 +197,9 @@ def main():
         assert abs(float(ab_i.input_value())-489010.48725446186) < 1e-7
         page.locator('#section-angle-thickness').fill('80')
         assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 0
-        assert 'Preview unavailable' in page.locator('#section-sketch-caption').inner_text()
+        invalid_caption = page.locator('#section-sketch-caption').inner_text()
+        assert invalid_caption.startswith('Preview unavailable: enter positive B, H and t')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_caption
         page.locator('#section-properties-apply').click()
         assert 'Not applied' in page.locator('#section-result').inner_text()
         assert abs(float(ab_area.input_value())-1700) < 1e-9

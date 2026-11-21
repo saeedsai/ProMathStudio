@@ -73,7 +73,7 @@
       svg.setAttribute('aria-label',message);
     };
     if(!Number.isFinite(width)||!Number.isFinite(height)||!Number.isFinite(thickness)||!(width>0)||!(height>0)||!(thickness>0)||!(thickness<Math.min(width,height))) {
-      unavailable('Enter positive B, H and t with t smaller than B and H.');
+      unavailable('Preview unavailable: enter positive B, H and t with t smaller than B and H.');
       return;
     }
     let properties;

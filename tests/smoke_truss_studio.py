@@ -140,7 +140,7 @@ def main():
         material_rows = list(csv.reader(io.StringIO(material_export['body'])))
         assert material_rows[0] == ['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)']
         assert material_rows[1] == ['AB','A','B','2','0.001','0.002']
-        assert material_export['body'].endswith('\\r\\n')
+        assert material_export['body'].endswith(chr(13) + chr(10))
         assert 'Validated member material schedule exported.' in page.locator('#status').inner_text()
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()

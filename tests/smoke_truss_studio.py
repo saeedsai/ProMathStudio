@@ -125,6 +125,39 @@ def main():
         assert page.locator('#section-axis-control').is_hidden()
         page.locator('#section-diameter').fill('100')
         page.locator('#section-inner-diameter').fill('80')
+        # Hollow-circle preview uses canonical properties, concentric inner/outer outlines and both diameter axes.
+        assert page.locator('#section-sketch-control').is_visible()
+        assert page.locator('#section-sketch circle[data-section-outline="hollow-circle-outer"]').count() == 1
+        assert page.locator('#section-sketch circle[data-section-outline="hollow-circle-inner"]').count() == 1
+        assert page.locator('#section-sketch circle[data-centroid]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="horizontal"]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="vertical"]').count() == 1
+        for expected in ('Do=100 mm', 'Di=80 mm', 'Ixx', 'Iyy'):
+            assert expected in page.locator('#section-sketch').text_content(), expected
+        hollow_circle_caption = page.locator('#section-sketch-caption').inner_text()
+        assert 'centroid x 50 mm, y 50 mm' in hollow_circle_caption, hollow_circle_caption
+        assert page.locator('#section-sketch').get_attribute('aria-label') == hollow_circle_caption
+        outer_radius = float(page.locator('#section-sketch circle[data-section-outline="hollow-circle-outer"]').get_attribute('r'))
+        inner_radius = float(page.locator('#section-sketch circle[data-section-outline="hollow-circle-inner"]').get_attribute('r'))
+        assert abs(inner_radius / outer_radius - 0.8) < 1e-9
+        page.locator('#section-inner-diameter').fill('60')
+        assert 'Di=60 mm' in page.locator('#section-sketch-caption').inner_text()
+        inner_radius = float(page.locator('#section-sketch circle[data-section-outline="hollow-circle-inner"]').get_attribute('r'))
+        assert abs(inner_radius / outer_radius - 0.6) < 1e-9
+        # Equal/zero inner diameters and overflowing outer dimensions must clear stale geometry.
+        page.locator('#section-inner-diameter').fill('100')
+        assert page.locator('#section-sketch circle[data-section-outline^="hollow-circle-"]').count() == 0
+        invalid_hole = page.locator('#section-sketch-caption').inner_text()
+        assert invalid_hole.startswith('Preview unavailable: inner diameter Di must be positive and smaller than outer diameter Do')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_hole
+        page.locator('#section-inner-diameter').fill('0')
+        assert page.locator('#section-sketch circle[data-section-outline^="hollow-circle-"]').count() == 0
+        page.locator('#section-inner-diameter').fill('80')
+        page.locator('#section-diameter').fill('1e308')
+        assert page.locator('#section-sketch circle[data-section-outline^="hollow-circle-"]').count() == 0
+        assert page.locator('#section-sketch-caption').inner_text().startswith('Preview unavailable:')
+        page.locator('#section-diameter').fill('100')
+        assert page.locator('#section-sketch circle[data-section-outline^="hollow-circle-"]').count() == 2
         page.locator('#section-properties-apply').click()
         assert abs(float(ac_area.input_value()) - 900 * math.pi) < 1e-8
         assert abs(float(ac_i.input_value()) - 922500 * math.pi) < 1e-7

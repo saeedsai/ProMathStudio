@@ -322,7 +322,13 @@
         member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6,
         member.density ?? '', member.mass ?? ''])
     ];
-    const quote = value => '"' + String(value).replace(/"/g, '""') + '"';
+    // Keep CSV numeric cells readable without exposing binary floating-point tails.
+    // Sixteen significant digits retain near-double precision for engineering exports.
+    const quote = value => {
+      const text = typeof value === 'number' && Number.isFinite(value)
+        ? String(Number(value.toPrecision(16))) : String(value);
+      return '"' + text.replace(/"/g, '""') + '"';
+    };
     return rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';
   }
   function solveJSON(text) {

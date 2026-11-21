@@ -171,11 +171,19 @@ def main():
         assert page.locator('#section-angle-thickness-control').is_visible()
         assert page.locator('#section-web-thickness-control').is_hidden()
         assert page.locator('#section-flange-thickness-control').is_hidden()
-        assert page.locator('#section-axis option[value="principal-major"]').is_visible()
+        major_axis_option = page.locator('#section-axis option[value="principal-major"]')
+        assert not major_axis_option.evaluate('(option) => option.hidden')
         page.locator('#section-width').fill('100')
         page.locator('#section-height').fill('80')
         page.locator('#section-angle-thickness').fill('10')
+        assert page.locator('#section-sketch-control').is_visible()
+        assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 1
+        assert page.locator('#section-sketch circle[data-centroid]').count() == 1
+        assert page.locator('#section-sketch line[data-principal-axis]').count() == 1
+        for expected in ('B=100 mm', 'H=80 mm', 't=10 mm', '57.953°'):
+            assert expected in page.locator('#section-sketch-caption').inner_text()
         page.locator('#section-axis').select_option('principal-major')
+        assert page.locator('#section-axis').input_value() == 'principal-major'
         page.locator('#section-properties-apply').click()
         assert abs(float(ab_area.input_value())-1700) < 1e-9
         assert abs(float(ab_i.input_value())-2136969.904902401) < 1e-7
@@ -188,6 +196,8 @@ def main():
         page.locator('#section-properties-apply').click()
         assert abs(float(ab_i.input_value())-489010.48725446186) < 1e-7
         page.locator('#section-angle-thickness').fill('80')
+        assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 0
+        assert 'Preview unavailable' in page.locator('#section-sketch-caption').inner_text()
         page.locator('#section-properties-apply').click()
         assert 'Not applied' in page.locator('#section-result').inner_text()
         assert abs(float(ab_area.input_value())-1700) < 1e-9

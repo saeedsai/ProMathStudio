@@ -15,7 +15,9 @@
         const result=api.solve(api.fromLegacy(model));
         return {nodes:result.nodes.map((n,i)=>({...model.nodes[i],ux:result.displacements[i].x,uy:result.displacements[i].y,
           rx:result.reactions.find(r=>r.id===n.id)?.rx??0,ry:result.reactions.find(r=>r.id===n.id)?.ry??0})),
-          members:result.members.map(m=>({id:m.id,force:m.force,stress:m.stress,strain:m.strain})),
+          members:result.members.map(m=>({id:m.id,force:m.force,stress:m.stress,strain:m.strain,type:m.type,
+            compressionDemand:m.compressionDemand,eulerCriticalLoad:m.eulerCriticalLoad,
+            eulerUtilization:m.eulerUtilization,eulerLoadRatio:m.eulerLoadRatio,eulerAssessment:m.eulerAssessment})),
           residual:result.residual,maxDisplacement:result.maxDisplacement.magnitude};
       }
     };
@@ -173,8 +175,18 @@
     const results = members.map(m => {
       const extension = m.c*(u[2*m.b]-u[2*m.a]) + m.s*(u[2*m.b+1]-u[2*m.a+1]);
       const force = m.stiffness * extension;
+      const compressionDemand = force < -1e-8 ? -force : 0;
+      // Only compression has an Euler demand. Tension and zero force deliberately avoid division.
+      const eulerUtilization = m.eulerCriticalLoad !== null && compressionDemand > 0
+        ? finite(compressionDemand / m.eulerCriticalLoad, 'Member ' + m.id + ' Euler utilization') : null;
+      const eulerLoadRatio = m.eulerCriticalLoad !== null && compressionDemand > 0
+        ? finite(m.eulerCriticalLoad / compressionDemand, 'Member ' + m.id + ' Euler load ratio') : null;
+      const eulerAssessment = m.eulerCriticalLoad === null ? 'Not assessed (I/K missing)' :
+        compressionDemand > 0 ? (eulerUtilization >= 1 ? 'At/above ideal Euler load' : 'Below ideal Euler load') :
+        force > 1e-8 ? 'Tension — not applicable' : 'No compression demand';
       return {id: m.id, a: nodes[m.a].id, b: nodes[m.b].id, length: m.L, extension, force, stress: force/m.A,
-        strain: extension/m.L, type: force > 1e-8 ? 'Tension' : force < -1e-8 ? 'Compression' : 'Zero'};
+        strain: extension/m.L, type: force > 1e-8 ? 'Tension' : force < -1e-8 ? 'Compression' : 'Zero',
+        compressionDemand,eulerCriticalLoad:m.eulerCriticalLoad,eulerUtilization,eulerLoadRatio,eulerAssessment};
     });
     const reactions = nodes.map((node, i) => ({id: node.id, rx: node.fixX ? r[2*i] : 0, ry: node.fixY ? r[2*i+1] : 0}))
       .filter(q => nodes.find(n => n.id === q.id).fixX || nodes.find(n => n.id === q.id).fixY);
@@ -188,7 +200,7 @@
     const maxStress = results.reduce((a,b)=>Math.abs(b.stress)>Math.abs(a.stress)?b:a,results[0]);
     return {id:'structural-truss-fem-2d',nodes,members:results,displacements,reactions,maxDisplacement,maxStress,
       residual,energyError,elasticEnergy,forceBalance:{x:forceSum[0]+reactionSum[0],y:forceSum[1]+reactionSum[1]},
-      assumptions:'2D pin-connected truss; linear elastic axial bars; small deformation; static loads; supported DOFs fixed at zero. No member buckling, plasticity, geometric nonlinearity, thermal effects, safety factors or design-code certification.'};
+      assumptions:'2D pin-connected truss; linear elastic axial bars; small deformation; static loads; supported DOFs fixed at zero. Optional post-solve Euler comparison is an ideal elastic compression-only screen when I/K are supplied; no geometric buckling, imperfections, yielding, code resistance factors or design-code certification.'};
   }
   const examples = {
     triangle: {nodes:[

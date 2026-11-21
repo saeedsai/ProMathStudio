@@ -169,8 +169,8 @@ def main():
         material_export = page.evaluate('''async () => ({name:window.__exports[1].name,body:await window.__exports[1].blob.text()})''')
         assert material_export['name'] == 'promath-truss-material-schedule.csv'
         material_rows = list(csv.reader(io.StringIO(material_export['body'])))
-        assert material_rows[0] == ['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)','Density (kg/m³)','Member mass (kg)']
-        assert material_rows[1] == ['AB','A','B','2','0.001','0.002','200','100','','']
+        assert material_rows[0] == ['Member ID','Start joint ID','End joint ID','Centreline length (m)','Cross-sectional area (m²)','Axial material volume (m³)','Elastic modulus (GPa)','Axial stiffness EA/L (kN/mm)','Density (kg/m³)','Member mass (kg)','Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']
+        assert material_rows[1] == ['AB','A','B','2','0.001','0.002','200','100','','','','','']
         assert material_export['body'].endswith(chr(13) + chr(10))
         assert 'Validated member material schedule exported.' in page.locator('#status').inner_text()
         page.locator('#solve').click()
@@ -253,6 +253,36 @@ def main():
         euler_rows = list(csv.reader(io.StringIO(euler_export['body'])))
         assert euler_rows[0][-3:] == ['Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']
         assert euler_rows[1][-3:] == ['1000000','1','493.4802200544678']
+        # Post-solve Euler screening is compression-only: tension and zero demand never divide.
+        page.locator('#solve').click()
+        result_cells = page.locator('#member-results tr').first.locator('td')
+        assert result_cells.count() == 7
+        assert result_cells.nth(4).inner_text() == '—' and result_cells.nth(5).inner_text() == '—'
+        assert result_cells.nth(6).inner_text() == 'Tension — not applicable'
+        page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').fill('0')
+        page.locator('#solve').click()
+        result_cells = page.locator('#member-results tr').first.locator('td')
+        assert result_cells.nth(4).inner_text() == '—' and result_cells.nth(5).inner_text() == '—'
+        assert result_cells.nth(6).inner_text() == 'No compression demand'
+        page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').fill('-1')
+        page.locator('#solve').click()
+        result_cells = page.locator('#member-results tr').first.locator('td')
+        assert 0 < float(result_cells.nth(4).inner_text().rstrip('%')) < 1
+        assert abs(float(result_cells.nth(5).inner_text()) - 493.4802200544678) < 0.1
+        assert result_cells.nth(6).inner_text() == 'Below ideal Euler load'
+        export_index = page.evaluate('window.__exports.length')
+        page.locator('#export-csv').click()
+        result_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
+        result_rows = list(csv.reader(io.StringIO(result_export['body'])))
+        assert result_rows[0][:7] == ['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment']
+        assert result_rows[1][4] and result_rows[1][5] and result_rows[1][6] == 'Below ideal Euler load'
+        page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').fill('-600')
+        page.locator('#solve').click()
+        result_cells = page.locator('#member-results tr').first.locator('td')
+        assert float(result_cells.nth(4).inner_text().rstrip('%')) > 100
+        assert result_cells.nth(6).inner_text() == 'At/above ideal Euler load'
+        page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').fill('1')
+        page.locator('#solve').click()
         k_input.fill('2')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(12).inner_text() == '123.37'

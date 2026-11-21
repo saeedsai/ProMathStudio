@@ -49,7 +49,7 @@
     });
   }
   function readModel() {return {nodes:readRows('nodes'),members:readRows('members')};}
-  function invalidate(){latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:4}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
+  function invalidate(){latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function updatePreview() {
     try {
@@ -131,7 +131,9 @@
     $('disp-card').textContent=fmt(result.maxDisplacement.magnitude*1000)+' mm · '+result.maxDisplacement.id;
     $('stress-card').textContent=fmt(Math.abs(result.maxStress.stress)/1e6)+' MPa · '+result.maxStress.id;
     $('res-card').textContent=result.residual.toExponential(2);
-    addResultRows('member-results',result.members,m=>[m.id,fmt(m.force/1000),fmt(m.stress/1e6),m.type]);
+    addResultRows('member-results',result.members,m=>[m.id,fmt(m.force/1000),fmt(m.stress/1e6),m.type,
+      m.eulerUtilization===null?'—':fmt(m.eulerUtilization*100)+'%',
+      m.eulerLoadRatio===null?'—':fmt(m.eulerLoadRatio),m.eulerAssessment]);
     addResultRows('joint-results',result.displacements,n=>[n.id,fmt(n.x*1000),fmt(n.y*1000),fmt(n.magnitude*1000)]);
     addResultRows('reactions',result.reactions,r=>[r.id,fmt(r.rx/1000),fmt(r.ry/1000)]);
     $('verification').textContent='Force balance: ΣFx = '+fmt(result.forceBalance.x)+' N, ΣFy = '+fmt(result.forceBalance.y)+' N. Max free DOF residual / load scale = '+result.residual.toExponential(3)+'. Elastic strain energy = '+fmt(result.elasticEnergy)+' J. Normalized energy identity error = '+result.energyError.toExponential(3)+'.';
@@ -139,7 +141,7 @@
   }
   function analyze(){try{const model=readModel();showResult(fem.solve(model),model);}catch(error){invalidate();status(error.message,true);}}
   function download(name,content,mime){const link=el('a',null);const url=URL.createObjectURL(new Blob([content],{type:mime}));link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
-  function csv(){if(!latest){status('Run analysis before exporting results.',true);return;}const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain'],...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain]),[],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),[],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];download('promath-truss-results.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+  function csv(){if(!latest){status('Run analysis before exporting results.',true);return;}const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment'],...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain,m.eulerUtilization===null?'':m.eulerUtilization*100,m.eulerLoadRatio===null?'':m.eulerLoadRatio,m.eulerAssessment]),[],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),[],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];download('promath-truss-results.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\\r\\n'),'text/csv;charset=utf-8');}
   function materialCsv(){try{download('promath-truss-material-schedule.csv',fem.exportMaterialCSV(readModel()),'text/csv;charset=utf-8');status('Validated member material schedule exported.');}catch(error){status('Material schedule export failed: '+error.message,true);}}
   $('load-example').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
   $('reset').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});

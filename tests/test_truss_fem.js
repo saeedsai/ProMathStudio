@@ -860,3 +860,32 @@ test('optional Euler buckling estimate uses SI units, validates I/K and remains 
  assert.throws(()=>fem.parseModel(shortK),/effective buckling length squared underflow/);
  close(fem.solve(bar).displacements[1].x,1e-5,1e-13);
 });
+
+
+test('post-solve Euler comparison reports compression-only utilization and load ratio',()=>{
+ const bar=clone(fem.examples.bar);bar.members[0].I=1e6;bar.members[0].K=1;
+ const pcr=Math.PI*Math.PI*200e9*1e-6/(2*2);
+ const tension=fem.solve(bar).members[0];
+ assert.equal(tension.type,'Tension');assert.equal(tension.compressionDemand,0);
+ assert.equal(tension.eulerUtilization,null);assert.equal(tension.eulerLoadRatio,null);
+ assert.equal(tension.eulerAssessment,'Tension — not applicable');
+ const zero=clone(bar);zero.nodes[1].fx=0;
+ const unloaded=fem.solve(zero).members[0];
+ assert.equal(unloaded.type,'Zero');assert.equal(unloaded.compressionDemand,0);
+ assert.equal(unloaded.eulerUtilization,null);assert.equal(unloaded.eulerLoadRatio,null);
+ assert.equal(unloaded.eulerAssessment,'No compression demand');
+ const compression=clone(bar);compression.nodes[1].fx=-1;
+ const below=fem.solve(compression).members[0];
+ close(below.force,-1000);close(below.compressionDemand,1000);
+ close(below.eulerUtilization,1000/pcr,1e-12);close(below.eulerLoadRatio,pcr/1000,1e-12);
+ assert.equal(below.eulerAssessment,'Below ideal Euler load');
+ const above=clone(compression);above.nodes[1].fx=-600;
+ const exceeded=fem.solve(above).members[0];
+ assert.ok(exceeded.eulerUtilization>1);assert.ok(exceeded.eulerLoadRatio<1);
+ assert.equal(exceeded.eulerAssessment,'At/above ideal Euler load');
+ const noProperties=clone(compression);delete noProperties.members[0].I;delete noProperties.members[0].K;
+ const unassessed=fem.solve(noProperties).members[0];
+ assert.equal(unassessed.eulerUtilization,null);assert.equal(unassessed.eulerLoadRatio,null);
+ assert.equal(unassessed.eulerAssessment,'Not assessed (I/K missing)');
+ close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+});

@@ -1,3 +1,9 @@
+## 2026-11-21 — Truss Studio hollow-rectangle preview
+
+- Added a live accessible SVG for concentric hollow rectangles using canonical FEM section properties: outer/inner outlines, B/H/bi/hi dimensions, centroid and centroidal Ixx/Iyy axes.
+- Added immediate inner-dimension updates and invalid wall-thickness clearing/recovery with synchronized visible and accessible status.
+- Added a focused 390px Chromium regression for dimensions, centroid, live edits, invalid geometry and accessibility. No FEM solver formulas changed.
+
 - 2026-11-21 — TRUSS-HOLLOW-CIRCLE-SVG-PREVIEW-414: Added a live accessible concentric hollow-circle preview using canonical section properties, with outer/inner outlines, Do/Di dimensions, centroid, Ixx/Iyy axes, live updates, invalid/overflow clearing and recovery. Added 390px browser regressions for geometry, centroid, labels, resizing, invalid wall thickness, accessible-name parity and recovery. Existing Node tests retain analytical hollow-circle and underflow/overflow coverage; exact-head Quality pending.
 - 2026-11-21 — TRUSS-SOLID-CIRCLE-SVG-PREVIEW-413: Added frozen canonical centroids for solid/concentric hollow circles and a live accessible solid-circle SVG preview with D dimension, centroid, perpendicular Ixx/Iyy axes, live edits and invalid-state recovery. Added analytical Node centroid/immutability regressions and 390px browser coverage for outline, axes, labels, live update, invalid clearing, accessibility and recovery. Exact-head Quality pending.
 - 2026-11-21 — TRUSS-RECTANGLE-CENTROID-CI-FIX-412: Fixed the canonical section-properties contract to return immutable centroid coordinates for solid and concentric hollow rectangles; added analytical Node regressions. Repairs exact-head Truss Studio browser step 212 where the rectangle SVG dereferenced a missing centroid before drawing; existing browser coverage remains intact. Exact-head QA pending.

@@ -108,6 +108,43 @@ def main():
         page.locator('#section-inner-width').fill('80')
         page.locator('#section-inner-height').fill('60')
         page.locator('#section-axis').select_option('depth')
+        # Hollow-rectangle preview uses the canonical centered void and exposes all four dimensions.
+        assert page.locator('#section-sketch-control').is_visible()
+        assert page.locator('#section-sketch path[data-section-outline="hollow-rectangle-outer"]').count() == 1
+        assert page.locator('#section-sketch path[data-section-outline="hollow-rectangle-inner"]').count() == 1
+        assert page.locator('#section-sketch circle[data-centroid]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="horizontal"]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="vertical"]').count() == 1
+        for expected in ('B=100 mm', 'H=80 mm', 'bi=80 mm', 'hi=60 mm', 'Ixx', 'Iyy'):
+            assert expected in page.locator('#section-sketch').text_content(), expected
+        hollow_rectangle_caption = page.locator('#section-sketch-caption').inner_text()
+        assert 'centroid x 50 mm, y 40 mm' in hollow_rectangle_caption, hollow_rectangle_caption
+        assert page.locator('#section-sketch').get_attribute('aria-label') == hollow_rectangle_caption
+        inner_outline = page.locator('#section-sketch path[data-section-outline="hollow-rectangle-inner"]')
+        assert inner_outline.get_attribute('data-inner-width-mm') == '80'
+        assert inner_outline.get_attribute('data-inner-height-mm') == '60'
+        page.locator('#section-inner-width').fill('70')
+        assert 'bi=70 mm' in page.locator('#section-sketch-caption').inner_text()
+        page.locator('#section-inner-width').fill('80')
+        page.locator('#section-inner-height').fill('50')
+        assert 'hi=50 mm' in page.locator('#section-sketch-caption').inner_text()
+        page.locator('#section-inner-height').fill('60')
+        page.locator('#section-inner-width').fill('100')
+        assert page.locator('#section-sketch path[data-section-outline^="hollow-rectangle-"]').count() == 0
+        invalid_hollow_rectangle = page.locator('#section-sketch-caption').inner_text()
+        assert invalid_hollow_rectangle.startswith('Preview unavailable: inner width bi and inner depth hi')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_hollow_rectangle
+        page.locator('#section-inner-width').fill('80')
+        assert page.locator('#section-sketch path[data-section-outline^="hollow-rectangle-"]').count() == 2
+        page.locator('#section-inner-height').fill('80')
+        assert page.locator('#section-sketch path[data-section-outline^="hollow-rectangle-"]').count() == 0
+        invalid_hollow_rectangle = page.locator('#section-sketch-caption').inner_text()
+        assert invalid_hollow_rectangle.startswith('Preview unavailable: inner width bi and inner depth hi')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_hollow_rectangle
+        page.locator('#section-inner-height').fill('60')
+        assert page.locator('#section-sketch path[data-section-outline^="hollow-rectangle-"]').count() == 2
+        sketch_width = page.locator('#section-sketch').evaluate('(svg) => svg.getBoundingClientRect().width')
+        assert sketch_width <= 390, sketch_width
         page.locator('#section-properties-apply').click()
         assert abs(float(ab_area.input_value()) - 3200) < 1e-9
         assert abs(float(ab_i.input_value()) - 4106666.666666667) < 1e-7

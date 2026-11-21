@@ -291,6 +291,9 @@ def main():
         assert result_rows[0][:7] == ['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment']
         assert result_rows[1][4] and result_rows[1][5] and result_rows[1][6] == 'Below ideal Euler load'
         assert result_export['body'].endswith(chr(13) + chr(10))
+        assert result_export['body'].count(chr(13) + chr(10)) == len(result_rows)
+        result_without_crlf = result_export['body'].replace(chr(13) + chr(10), '')
+        assert chr(13) not in result_without_crlf and chr(10) not in result_without_crlf
         page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').fill('-600')
         page.locator('#solve').click()
         result_cells = page.locator('#member-results tr').first.locator('td')

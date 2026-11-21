@@ -663,3 +663,4 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - 2026-10-29 (dev, pending CI): Refreshed the entire interface with an original computational math-first design: stronger input/result hierarchy, teal navigation, palette/sidebar, consistent panels, focus visibility, mobile and reduced-motion refinements; added structural UI regression coverage. Deployment not yet verified.
 
 - 2026-11-04: Corrected stale control-frequency-response status assertion in thermo/circuit browser smoke (implemented tool is available); exact-head CI recheck pending. No application feature or release claimed.
+- 2026-11-21 (dev, exact-head QA pending): Fixed Truss Studio results CSV export to terminate the final record with CRLF, matching the existing material-schedule CSV contract. Strengthened Chromium coverage to assert one CRLF per parsed record and reject bare CR/LF. No numeric, quoting or FEM behavior changed.

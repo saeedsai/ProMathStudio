@@ -895,6 +895,8 @@ test('post-solve Euler comparison reports compression-only utilization and load 
 
 test('solid and concentric hollow section helpers return validated area and centroidal principal moments in mm units',()=>{
  const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
+ assert.deepEqual(rectangle.centroid,{x:20,y:30});
+ assert.ok(Object.isFrozen(rectangle.centroid));
  assert.equal(rectangle.area,2400);
  assert.equal(rectangle.secondMoment,720000);
  assert.equal(rectangle.secondMomentPerpendicular,320000);
@@ -920,6 +922,8 @@ test('solid and concentric hollow section helpers return validated area and cent
  assert.equal(circle.axis,'centroidal diameter axis');
  assert.ok(Object.isFrozen(circle));
  const hollowRectangle=fem.sectionProperties('hollow-rectangle',{width:100,height:80,innerWidth:80,innerHeight:60});
+ assert.deepEqual(hollowRectangle.centroid,{x:50,y:40});
+ assert.ok(Object.isFrozen(hollowRectangle.centroid));
  assert.equal(hollowRectangle.area,3200);
  close(hollowRectangle.secondMoment,2826666.6666666665,1e-7);
  close(hollowRectangle.secondMomentPerpendicular,4106666.666666667,1e-7);

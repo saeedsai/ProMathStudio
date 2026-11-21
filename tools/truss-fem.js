@@ -149,6 +149,7 @@
       boundsHeight = depth;
       centroidX = width/2;
       centroidY = depth/2;
+      centroid = {x:centroidX,y:centroidY};
       const hollow = shape === 'hollow-rectangle';
       const innerWidth = hollow ? finite(dimensions.innerWidth, 'Hollow rectangle inner width bi (mm)') : 0;
       const innerHeight = hollow ? finite(dimensions.innerHeight, 'Hollow rectangle inner depth hi (mm)') : 0;

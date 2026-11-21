@@ -35,12 +35,13 @@
     const fields = kind === 'nodes' ? ['id','x','y','fixX','fixY','fx','fy'] : ['id','a','b','E','area','density','I','K'];
     fields.forEach(key=>tr.append(rowInput(row,key,['fixX','fixY'].includes(key)?'checkbox':(['id','a','b'].includes(key)?'text':'number'))));
     const td=el('td',null), btn=el('button','×',{'type':'button','class':'remove','aria-label':'Remove '+kind.slice(0,-1)+' '+(row.id||'row')});
-    btn.addEventListener('click',()=>{tr.remove(); invalidate();});td.append(btn);tr.append(td);tbody.append(tr);
+    btn.addEventListener('click',()=>{tr.remove(); if(kind==='members')syncSectionMembers(); invalidate();});td.append(btn);tr.append(td);tbody.append(tr);
   }
   function renderModel(model) {
     $('nodes').replaceChildren();$('members').replaceChildren();
     model.nodes.forEach(node=>appendRow('nodes',node));
     model.members.forEach(m=>appendRow('members',m));
+    syncSectionMembers();
     invalidate();
   }
   function readRows(kind) {
@@ -51,6 +52,35 @@
     });
   }
   function readModel() {return {nodes:readRows('nodes'),members:readRows('members')};}
+  function syncSectionMembers() {
+    const select=$('section-member'), previous=select.value;
+    const ids=readRows('members').map(member=>String(member.id??'').trim()).filter(Boolean);
+    select.replaceChildren(...ids.map(id=>el('option',id,{value:id})));
+    if(ids.includes(previous)) select.value=previous;
+    else if(ids.length) select.value=ids[0];
+  }
+  function updateSectionShape() {
+    const rectangle=$('section-shape').value==='rectangle';
+    $('section-width-control').hidden=!rectangle;
+    $('section-height-control').hidden=!rectangle;
+    $('section-diameter-control').hidden=rectangle;
+  }
+  function applySectionProperties() {
+    try {
+      const memberId=$('section-member').value;
+      const row=Array.from($('members').querySelectorAll('tr')).find(tr=>tr.querySelector('input[data-field="id"]')?.value.trim()===memberId);
+      if(!row) throw Error('Choose an existing member.');
+      const shape=$('section-shape').value;
+      const dimensions=shape==='rectangle'?{width:$('section-width').value,height:$('section-height').value}:{diameter:$('section-diameter').value};
+      const properties=fem.sectionProperties(shape,dimensions);
+      row.querySelector('input[data-field="area"]').value=String(properties.area);
+      row.querySelector('input[data-field="I"]').value=String(properties.secondMoment);
+      invalidate();
+      $('section-result').textContent=(shape==='rectangle'?'Rectangle':'Solid circle')+': area '+fmt(properties.area,5)+' mm²; I '+fmtSectionMoment(properties.secondMoment)+' mm⁴ ('+properties.axis+'), applied to member '+memberId+'.';
+    } catch(error) {
+      $('section-result').textContent='Not applied: '+error.message;
+    }
+  }
   function invalidate(){latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function updatePreview() {
@@ -145,10 +175,13 @@
   function download(name,content,mime){const link=el('a',null);const url=URL.createObjectURL(new Blob([content],{type:mime}));link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
   function csv(){if(!latest){status('Run analysis before exporting results.',true);return;}const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment'],...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain,m.eulerUtilization===null?'':m.eulerUtilization*100,m.eulerLoadRatio===null?'':m.eulerLoadRatio,m.eulerAssessment]),[],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),[],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];download('promath-truss-results.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}
   function materialCsv(){try{download('promath-truss-material-schedule.csv',fem.exportMaterialCSV(readModel()),'text/csv;charset=utf-8');status('Validated member material schedule exported.');}catch(error){status('Material schedule export failed: '+error.message,true);}}
+  $('section-shape').addEventListener('change',updateSectionShape);
+  $('section-properties-apply').addEventListener('click',applySectionProperties);
+  $('members').addEventListener('change',()=>{syncSectionMembers();invalidate();});
   $('load-example').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
   $('reset').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
   $('add-node').addEventListener('click',()=>{appendRow('nodes',{id:'N'+($('nodes').children.length+1),x:0,y:0,fixX:false,fixY:false,fx:0,fy:0});invalidate();});
-  $('add-member').addEventListener('click',()=>{const nodes=readRows('nodes');appendRow('members',{id:'M'+($('members').children.length+1),a:nodes[0]?.id||'',b:nodes[1]?.id||'',E:210,area:1000,density:'',I:'',K:''});invalidate();});
+  $('add-member').addEventListener('click',()=>{const nodes=readRows('nodes');appendRow('members',{id:'M'+($('members').children.length+1),a:nodes[0]?.id||'',b:nodes[1]?.id||'',E:210,area:1000,density:'',I:'',K:''});syncSectionMembers();invalidate();});
   $('nodes').addEventListener('input',invalidate);$('members').addEventListener('input',invalidate);$('nodes').addEventListener('change',invalidate);$('members').addEventListener('change',invalidate);
   $('solve').addEventListener('click',analyze);$('scale').addEventListener('change',draw);$('show-labels').addEventListener('change',draw);
   $('export-model').addEventListener('click',()=>{try{download('promath-truss-model.json',fem.exportJSON(readModel()),'application/json;charset=utf-8');status('Validated model JSON exported.');}catch(err){status('Export failed: '+err.message,true);}});
@@ -170,5 +203,6 @@
   });
   $('export-csv').addEventListener('click',csv);$('export-material-csv').addEventListener('click',materialCsv);
   $('export-svg').addEventListener('click',()=>{if(!latest){status('Analyze before exporting SVG.',true);return;}const svg=$('plot').cloneNode(true);svg.setAttribute('xmlns',SVG);svg.setAttribute('width','1240');svg.setAttribute('height','760');const background=svgNode('rect',{x:0,y:0,width:620,height:380,fill:'#09152a'});svg.insertBefore(background,svg.firstChild);download('promath-truss-deformation.svg',new XMLSerializer().serializeToString(svg),'image/svg+xml;charset=utf-8');});
+  updateSectionShape();
   renderModel(fem.examples.triangle);analyze();
 })();

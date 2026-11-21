@@ -34,6 +34,32 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
+  // Solid prismatic section properties in mm units, about the stated centroidal axis.
+  function sectionProperties(shape, dimensions) {
+    if (shape !== 'rectangle' && shape !== 'solid-circle') throw Error('Section shape must be rectangle or solid-circle.');
+    if (!dimensions || typeof dimensions !== 'object' || Array.isArray(dimensions)) throw Error('Section dimensions must be an object.');
+    let area, secondMoment, axis;
+    if (shape === 'rectangle') {
+      const width = finite(dimensions.width, 'Rectangle width b (mm)');
+      const depth = finite(dimensions.height, 'Rectangle depth h (mm)');
+      if (!(width > 0) || !(depth > 0)) throw Error('Rectangle width and depth must be positive.');
+      area = finite(width * depth, 'Rectangle area (mm²)');
+      secondMoment = finite(width * depth * depth * depth / 12, 'Rectangle second moment I (mm⁴)');
+      if (!(area > 0)) throw Error('Rectangle area underflow; increase its dimensions.');
+      if (!(secondMoment > 0)) throw Error('Rectangle second moment underflow; increase its dimensions.');
+      axis = 'centroidal axis parallel to width';
+    } else {
+      const diameter = finite(dimensions.diameter, 'Solid-circle diameter d (mm)');
+      if (!(diameter > 0)) throw Error('Solid-circle diameter must be positive.');
+      const square = diameter * diameter;
+      area = finite(Math.PI * square / 4, 'Solid-circle area (mm²)');
+      secondMoment = finite(Math.PI * square * square / 64, 'Solid-circle second moment I (mm⁴)');
+      if (!(area > 0)) throw Error('Solid-circle area underflow; increase its diameter.');
+      if (!(secondMoment > 0)) throw Error('Solid-circle second moment underflow; increase its diameter.');
+      axis = 'centroidal diameter axis';
+    }
+    return Object.freeze({shape, area, secondMoment, axis});
+  }
   const supportFlag = (value, name) => {
     if (value === undefined || value === false || value === 'false') return false;
     if (value === true || value === 'true') return true;
@@ -372,5 +398,5 @@
   function solveJSON(text) {
     return solveDocument(importJSON(text));
   }
-  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
+  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
 });

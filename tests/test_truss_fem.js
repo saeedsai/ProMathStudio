@@ -891,6 +891,31 @@ test('post-solve Euler comparison reports compression-only utilization and load 
 });
 
 
+test('solid rectangular and circular section helpers return validated area and centroidal I in mm units',()=>{
+ const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
+ assert.equal(rectangle.area,2400);
+ assert.equal(rectangle.secondMoment,720000);
+ assert.equal(rectangle.axis,'centroidal axis parallel to width');
+ assert.ok(Object.isFrozen(rectangle));
+ const circle=fem.sectionProperties('solid-circle',{diameter:40});
+ close(circle.area,400*Math.PI,1e-12);
+ close(circle.secondMoment,40000*Math.PI,1e-12);
+ assert.equal(circle.axis,'centroidal diameter axis');
+ assert.ok(Object.isFrozen(circle));
+ for(const invalid of [0,-1,NaN,Infinity,-Infinity,'not-a-number',true,{}]){
+  assert.throws(()=>fem.sectionProperties('rectangle',{width:invalid,height:60}));
+  assert.throws(()=>fem.sectionProperties('rectangle',{width:40,height:invalid}));
+  assert.throws(()=>fem.sectionProperties('solid-circle',{diameter:invalid}));
+ }
+ assert.throws(()=>fem.sectionProperties('rectangle',{width:1e-200,height:1e-200}),/area underflow/);
+ assert.throws(()=>fem.sectionProperties('rectangle',{width:1e308,height:2}),/finite number/);
+ assert.throws(()=>fem.sectionProperties('solid-circle',{diameter:1e100}),/finite number/);
+ assert.throws(()=>fem.sectionProperties('solid-circle',{diameter:1e-100}),/second moment underflow/);
+ assert.throws(()=>fem.sectionProperties('hollow-circle',{diameter:40}),/Section shape/);
+ assert.throws(()=>fem.sectionProperties('rectangle',[]),/dimensions must be an object/);
+ close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
+});
+
 test('legacy TrussStudio.solve retains its original member result shape',()=>{
  const result=globalThis.TrussStudio.solve(globalThis.TrussStudio.example);
  assert.deepEqual(Object.keys(result.members[0]).sort(),['force','id','strain','stress']);

@@ -4,6 +4,7 @@ from pathlib import Path
 import csv
 import io
 import json
+import math
 import os
 from playwright.sync_api import sync_playwright
 
@@ -43,6 +44,44 @@ def main():
         assert page.locator('#plot circle[data-node-id]').count() == 3
         assert 'Preview ready' in page.locator('#status').inner_text()
         assert page.locator('#status.error').count() == 0
+        # Section helpers calculate solid-section area and centroidal I for the selected member only.
+        assert page.locator('#section-member option').count() == 3
+        page.locator('#section-member').select_option('AB')
+        page.locator('#section-shape').select_option('rectangle')
+        page.locator('#section-width').fill('40')
+        page.locator('#section-height').fill('60')
+        page.locator('#section-properties-apply').click()
+        ab_area = page.locator('#members tr').nth(0).locator('input[data-field="area"]')
+        ab_i = page.locator('#members tr').nth(0).locator('input[data-field="I"]')
+        assert ab_area.input_value() == '2400'
+        assert ab_i.input_value() == '720000'
+        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(4).inner_text() == '2400'
+        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(10).inner_text() == '720000'
+        # A solid circle uses its centroidal diameter axis and does not change another member.
+        page.locator('#section-member').select_option('AC')
+        page.locator('#section-shape').select_option('solid-circle')
+        assert page.locator('#section-diameter-control').is_visible()
+        page.locator('#section-diameter').fill('40')
+        page.locator('#section-properties-apply').click()
+        ac_area = page.locator('#members tr').nth(1).locator('input[data-field="area"]')
+        ac_i = page.locator('#members tr').nth(1).locator('input[data-field="I"]')
+        assert abs(float(ac_area.input_value()) - 400 * math.pi) < 1e-9
+        assert abs(float(ac_i.input_value()) - 40000 * math.pi) < 1e-8
+        assert page.locator('#members tr').nth(2).locator('input[data-field="area"]').input_value() == '1200'
+        # Invalid geometry must not partially overwrite the last valid member properties.
+        page.locator('#section-member').select_option('AB')
+        page.locator('#section-shape').select_option('rectangle')
+        page.locator('#section-width').fill('-1')
+        page.locator('#section-properties-apply').click()
+        assert 'Not applied' in page.locator('#section-result').inner_text()
+        assert ab_area.input_value() == '2400'
+        assert ab_i.input_value() == '720000'
+        # Restore the example values before solver and export regressions below.
+        ab_area.fill('1200')
+        ab_i.fill('')
+        ac_area.fill('1200')
+        ac_i.fill('')
+        assert page.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1")
         # The solver rejects this released support, but the non-solving preview remains visible.
         page.locator('#solve').click()
         assert page.locator('#status.error').count() == 1

@@ -46,6 +46,7 @@ def main():
             page.locator('#nodes tr').nth(1).locator('input[data-field="fixY"]').check()
             page.get_by_role('button', name='Analyze truss').click()
             assert 'Analysis complete' in page.locator('#status').inner_text()
+            assert '[object' not in page.locator('#status').inner_text()
             page.locator('#scale').fill('500')
             page.locator('#scale').press('Tab')
             assert '500' in page.locator('#plot').text_content()

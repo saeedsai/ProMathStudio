@@ -79,3 +79,5 @@ Both results and material-schedule downloads are UTF-8 CSV with a leading UTF-8 
 ### Import unit provenance feedback
 
 After a valid JSON import, the status message identifies whether the file used legacy SI units (N, Pa, m² and m⁴) that were converted to the Studio editor units (kN, GPa, mm² and mm⁴), or whether Studio units were retained. This message is appended only after a successful solve; a structurally unstable model or rejected import keeps its error visible. The Chromium regression uses the actual file input to import a legacy bar with density, I and K, verifies the converted editor values and 0.01 mm reference displacement, exports the edited model as current Studio JSON, reimports it, and verifies the optional properties survive. A mixed-unit file must be rejected without changing the previously loaded model or solved result.
+
+The optional import notice is a string-only argument to the analysis helper. The Analyze button's DOM event object is never treated as notice text; the browser regression asserts that ordinary manual analysis does not display an event-object string.

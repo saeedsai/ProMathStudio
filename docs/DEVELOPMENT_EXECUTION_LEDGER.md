@@ -1,3 +1,7 @@
+## 2026-11-22 — TRUSS-JSON-ANALYZE-EVENT-GUARD
+
+Follow-up to the unit-provenance UI notice: the Analyze button registers `analyze` as a DOM event listener, so the browser supplies a MouseEvent argument. Hardened the optional notice parameter to append text only when it is a non-empty string; ordinary Analyze clicks therefore retain the plain analysis-complete status rather than rendering an event object. Added a Chromium assertion that the status never contains `[object`. The actual legacy/current JSON import notices and their file-input round-trip assertions remain unchanged. This follow-up is committed to dev; exact-head CI is required.
+
 ## 2026-11-22 — TRUSS-JSON-UI-UNIT-ROUNDTRIP
 
 - Starting dev: `d5628d2880477b379a1b8a296a28d53a53a14c7c`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (431 ahead / 0 behind).

@@ -339,6 +339,34 @@ def main():
             assert 'Analysis complete' in page.locator('#status').inner_text()
             assert '0.015 mm' in page.locator('#disp-card').inner_text()
 
+            # File metadata and the actual bytes returned by the browser must agree.
+            # The truncated payload is still valid JSON (only trailing whitespace is omitted),
+            # so a parser-only check would silently accept it and replace the active model.
+            mismatched_payload = (json.dumps(slow_model) + '          ').encode('utf-8')
+            page.evaluate("""() => {
+                const original = File.prototype.arrayBuffer;
+                File.prototype.arrayBuffer = function() {
+                    if (this.name !== 'mismatched-size.json') return original.call(this);
+                    const file = this;
+                    return original.call(file).then(bytes => {
+                        File.prototype.arrayBuffer = original;
+                        return bytes.slice(0, bytes.byteLength - 10);
+                    });
+                };
+            }""")
+            page.locator('#import-model').set_input_files({
+                'name': 'mismatched-size.json', 'mimeType': 'application/json',
+                'buffer': mismatched_payload
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
+                'Model JSON file size does not match the bytes read.')""")
+            assert 'Import failed:' in page.locator('#status').inner_text()
+            assert [page.locator('#nodes tr').nth(i).locator('input[data-field="id"]').input_value()
+                    for i in range(2)] == ['A', 'B']
+            assert page.locator('#nodes tr').nth(1).locator('input[data-field="x"]').input_value() == '3'
+            assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
+            assert '0.015 mm' in page.locator('#disp-card').inner_text()
+
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
             assert not errors, errors

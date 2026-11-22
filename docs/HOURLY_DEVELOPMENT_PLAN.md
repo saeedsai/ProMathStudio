@@ -1,3 +1,22 @@
+## 2026-11-22 — TRUSS-IMPORT-BYTE-LENGTH-INTEGRITY (implemented on dev; exact-head Quality pending)
+
+Started from dev `64f4cddad043a540a04f45276ec5230817bca9cb` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 feature inventory, Truss FEM source/tests/contract, PR #189, branch refs, reviews, exact-head Quality and Pages evidence. Both Push Quality [#45063703824](https://github.com/saeedsai/ProMathStudio/actions/runs/45063703824) and PR Quality [#45063886041](https://github.com/saeedsai/ProMathStudio/actions/runs/45063886041) passed all 218 job steps on the starting dev head, including Truss browser step 215, analytical FEM step 214 and Truss Studio step 212. No existing exact-head CI failure remained.
+
+Closed a file-import integrity gap in `tools/truss-fem-ui.js`: after checking the returned `ArrayBuffer` is present and within 1 MiB, the importer now requires its `byteLength` to equal the selected immutable `File.size`. Previously a shorter read that still formed valid JSON could be accepted, even though the bytes did not match the selected file metadata. The mismatch now fails before UTF-8 decoding/JSON parsing and the existing active model/results remain untouched. Existing declared-size and actual-byte upper bounds, fatal UTF-8 decoding, BOM handling, request-token ordering, cancellation, unit conversion and FEM calculations are unchanged.
+
+Added a mandatory Chromium regression to `tests/smoke_truss_fem.py`. It supplies a file whose declared bytes contain valid JSON followed by ten spaces, then intercepts that file's actual `File.arrayBuffer()` result to return only the valid JSON prefix. The returned prefix is parseable, so the test specifically proves the byte-count mismatch is rejected rather than relying on JSON syntax failure. It verifies the import error, original A/B/AB model, edited 3 m member geometry and previously solved 0.015 mm result are preserved.
+
+Updated the Structural Truss contract, living plan, execution ledger and changelog in the same source/test/docs commit. The companion Truss page loads adjacent standalone JavaScript assets; no `index.html` synchronization is required. Frozen historical inventory remains **166 gaps / 95 partial**. No branch was created and no release is claimed.
+
+The local workspace has no repository checkout, so the full Chromium/Node repository suites cannot be executed locally. The focused regression is committed and must pass on the new exact head in both Push and PR Quality. The previous exact-head run's 218/218 result applies only to the parent SHA.
+
+**NEXT FIVE (status and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Both Push and PR workflows must pass all 218 steps on the new dev SHA; specifically verify the mismatched-size valid-JSON regression, existing delayed-import cancellation, all 59 FEM Node tests, Truss JSON/CSV/SVG exports and 390px browser checks.
+2. **P1 — Latest-file selection and stale failure ordering.** Delay two actual file reads, complete the newer selection first, then resolve and separately reject the older read; the newest model, status, busy state and solved result must remain unchanged.
+3. **P1 — Remaining JSON boundary audit.** Cover null/blank/zero density, independent I-only/K-only, malformed UTF-8, BOM, exact/over-1-MiB payloads and rollback after invalid/failed reads; preserve IDs and physical quantities.
+4. **P1 — Truss member-isolation/export audit.** Prove applying section properties modifies only the selected member and preserves other members/E/density/K; verify CSV quoting/units/BOM/CRLF and SVG XML/accessibility/semantic geometry with no console errors.
+5. **Release governance and promotion.** Obtain an eligible independent PR #189 review and authorized verification of enforceable main protection/required checks. Only after exact-head CI and all release gates pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted assets.
+
 ## 2026-11-22 — TRUSS-IMPORT-CANCELLATION-STATUS-CI-FIX (implemented on dev; exact-head Quality pending)
 
 Started from dev `5b9f30645d8fa5c45ffae8898f9e390b57b9ccfd` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (445 commits ahead, zero behind). Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, unified implementation plan, engineering architecture/catalog, Truss FEM contract/source/browser test, current refs, PR #189/reviews, branch listing, rulesets and latest Actions/Pages evidence.

@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss JSON file-byte integrity (dev; exact-head QA pending)
+
+- The browser importer now requires the actual `ArrayBuffer.byteLength` to match the selected `File.size`, in addition to the existing 1 MiB bounds. A truncated or unexpectedly expanded read is rejected before decoding/parsing.
+- Added a Chromium regression where the returned bytes are a valid JSON prefix but shorter than the file's declared size; the previous model, 3 m edit and 0.015 mm solved result must remain unchanged.
+- Updated the Structural Truss contract, living plan and execution ledger. Source, browser test and docs are committed atomically on dev; exact-head Push/PR Quality must certify the new regression. Not released.
+
 ## 2026-11-22 — Truss import-cancellation status persistence (dev; exact-head QA pending)
 
 - Diagnosed both exact-head failures at mandatory Truss browser step 215: Push [#45058847230](https://github.com/saeedsai/ProMathStudio/actions/runs/45058847230) and PR [#45058851780](https://github.com/saeedsai/ProMathStudio/actions/runs/45058851780). Both fail because preview refresh overwrites the pending-import cancellation status after a model edit; 59/59 FEM Node tests pass in both runs.

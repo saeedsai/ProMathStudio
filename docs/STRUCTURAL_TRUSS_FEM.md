@@ -97,3 +97,8 @@ Both results and material-schedule downloads are UTF-8 CSV with exactly one lead
 After a valid JSON import, the status message identifies whether the file used legacy SI units (N, Pa, m² and m⁴) that were converted to the Studio editor units (kN, GPa, mm² and mm⁴), or whether Studio units were retained. This message is appended only after a successful solve; a structurally unstable model or rejected import keeps its error visible. The Chromium regression uses the actual file input to import a legacy bar with density, I and K, verifies the converted editor values and 0.01 mm reference displacement, exports the edited model as current Studio JSON, reimports it, and verifies the optional properties survive. A mixed-unit file must be rejected without changing the previously loaded model or solved result.
 
 The optional import notice is a string-only argument to the analysis helper. The Analyze button's DOM event object is never treated as notice text; the browser regression asserts that ordinary manual analysis does not display an event-object string.
+
+
+## Browser file-import byte integrity
+
+The editor validates the declared `File.size` before reading and the returned `ArrayBuffer.byteLength` after reading. Both are bounded by the 1 MiB limit, and the byte count must exactly match the immutable file-size metadata before UTF-8 decoding or JSON parsing. This rejects truncated or unexpectedly expanded reads even when the returned prefix is itself valid JSON. The Chromium regression simulates a shorter valid JSON payload by removing only trailing whitespace from the bytes returned by `File.arrayBuffer()`; the import must fail without replacing the active model or its last solved result.

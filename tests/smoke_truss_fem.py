@@ -58,7 +58,7 @@ def main():
             page.get_by_role('button', name='Export results CSV').click()
             page.get_by_role('button', name='Export material schedule CSV').click()
             page.get_by_role('button', name='Export SVG').click()
-            exported=page.evaluate("""async () => await Promise.all(window.__exports.map(async e => ({name:e.name,text:await e.blob.text(),prefix:Array.from(new Uint8Array(await e.blob.slice(0,3).arrayBuffer()))})))""")
+            exported=page.evaluate("""async () => await Promise.all(window.__exports.map(async e => ({name:e.name,type:e.blob.type,text:await e.blob.text(),prefix:Array.from(new Uint8Array(await e.blob.slice(0,3).arrayBuffer()))})))""")
             assert exported[0]['name'] == 'promath-truss-results.csv'
             assert exported[1]['name'] == 'promath-truss-material-schedule.csv'
             assert exported[2]['name'] == 'promath-truss-deformation.svg'
@@ -100,6 +100,7 @@ def main():
                     width: root.getAttribute('width'),
                     height: root.getAttribute('height'),
                     viewBox: root.getAttribute('viewBox'),
+                    preserveAspectRatio: root.getAttribute('preserveAspectRatio'),
                     role: root.getAttribute('role'),
                     labels,
                     labelsResolve: labels.length === 2 && labels.every(id => ids.has(id)),
@@ -111,11 +112,13 @@ def main():
                     background: root.querySelector(':scope > rect')?.getAttribute('fill') || '',
                     solvedLines: root.querySelectorAll('line').length
                 };
-            }""", exported[1]['text'])
+            }""", exported[2]['text'])
             assert not svg_metadata['parseError'], svg_metadata
             assert svg_metadata['namespace'] == 'http://www.w3.org/2000/svg'
             assert (svg_metadata['width'], svg_metadata['height']) == ('1240', '760')
             assert svg_metadata['viewBox'] == '0 0 620 380'
+            assert svg_metadata['preserveAspectRatio'] == 'xMidYMid meet'
+            assert exported[2]['type'] == 'image/svg+xml;charset=utf-8'
             assert svg_metadata['role'] == 'img'
             assert svg_metadata['labels'] == ['truss-export-title', 'truss-export-description']
             assert svg_metadata['labelsResolve']

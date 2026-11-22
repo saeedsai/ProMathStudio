@@ -1,6 +1,6 @@
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
-**Status:** solid, concentric hollow, open-channel, I-section and L-angle helpers report area, centroidal Ixx/Iyy, Sx/Sy and rx/ry on dev. Live previews cover all seven supported section shapes with canonical geometry metadata, accessible dimension/axis labels and perpendicular L-angle principal axes. The seven-shape metadata/accessibility and strict UTF-8 import candidates passed exact-head Push and PR Quality on 2026-11-22. The current import byte-boundary hardening is on dev and awaiting its own exact-head CI; no Truss Studio changes in this sequence are released. PR review and main Pages promotion remain pending. Upgrade of the existing standalone `tools/truss-studio.html`, not a duplicate tool or an embedded main workspace control.
+**Status:** solid, concentric hollow, open-channel, I-section and L-angle helpers report area, centroidal Ixx/Iyy, Sx/Sy and rx/ry on dev. Live previews cover all seven supported section shapes with canonical geometry metadata and accessible dimension/axis labels. Current dev candidate repairs an exact-head Truss browser regression that parsed the material CSV instead of the SVG; the standalone SVG now also declares a deterministic aspect-ratio policy. Fresh Push/PR Quality is pending. No Truss Studio changes in this sequence are released; PR review and main Pages promotion remain pending.
 
 ## How to use
 
@@ -54,6 +54,10 @@ The non-solving material preview can report the ideal elastic critical load `Pcr
 
 Previous TrussStudio API still exposes `TrussStudio.solve(model)` and `TrussStudio.example` with SI N/Pa/m² units and legacy output shape. The UI now accepts kN/GPa/mm². JSON import recognizes legacy member field `A` (m²) and converts load forces in N, E in Pa, and A in m² to the new form; exported JSON uses explicit new-form keys and units. The browser rejects invalid/non-safe or over-limit `File.size` values before reading, then rechecks the actual `ArrayBuffer.byteLength` against the same 1 MiB budget before decoding. It decodes UTF-8 with fatal error handling, preserving a leading BOM for the canonical importer to strip; malformed UTF-8 is rejected before any model controls are replaced. This second check prevents inconsistent file-size metadata from bypassing the byte budget. Existing `index.html` distribution and source/bundle hashes are unchanged, but the companion page requires its relative JS assets, including for offline use.
 
+
+### Standalone SVG export sizing
+
+The exported 1240×760 SVG explicitly sets `preserveAspectRatio="xMidYMid meet"` with the existing `viewBox="0 0 620 380"`. SVG viewers therefore fit the diagram proportionally inside the output viewport rather than stretching its geometry. The Chromium regression checks the serialized SVG root attribute together with its MIME type, namespace, title/description, accessible-name references, background and solved lines.
 
 ### Standalone SVG export accessibility
 

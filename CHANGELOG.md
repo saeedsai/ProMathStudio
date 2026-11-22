@@ -1,3 +1,8 @@
+## 2026-11-22 — Truss SVG export CI repair and deterministic aspect ratio
+- Fixed the Chromium regression to parse the actual SVG download (third Blob), not the material-schedule CSV; added an explicit SVG MIME assertion.
+- Exported standalone SVG now declares `preserveAspectRatio="xMidYMid meet"`; browser regression verifies the 620×380 viewBox remains proportionally fitted in the 1240×760 output.
+- Retained all XML, accessibility, geometry, CSV and FEM assertions. Previous exact-head Push/PR workflows exposed the test-index defect; corrected candidate requires fresh full Quality. Dev-only, not released.
+
 ## 2026-11-22 — Truss CSV BOM regression hardening
 - Assert the UTF-8 BOM from actual Blob prefix bytes instead of assuming Blob.text() preserves U+FEFF; parse decoded CSV after optional BOM stripping.
 - No application behavior change; exact-head Quality pending.

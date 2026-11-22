@@ -1,3 +1,15 @@
+## 2026-11-22 — TRUSS-SVG-EXPORT-CI-REPAIR
+
+- Starting dev: `55060c4cf5e7d8c1b8c6684145397bfe1563ebb4`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da`.
+- Inspected root AGENTS, living plan, frozen inventory, unified/engineering contracts, Truss source/tests, exact refs, PR #189/reviews, latest Actions and main Pages evidence.
+- Exact-head Push Quality #45015484120 and PR Quality #45015489538 both failed on the same Truss browser regression at step 215. Both logs show the 59 Node FEM tests passed. The failure was `DOMParser` receiving `exported[1]` (material CSV) instead of `exported[2]` (SVG), producing an HTML parser-error document.
+- Corrected the browser regression to parse the actual third Blob and assert its SVG MIME type. Added explicit `preserveAspectRatio="xMidYMid meet"` to the standalone SVG export and a regression assertion for the attribute. Retained all existing SVG XML/accessibility/geometry checks and all CSV/FEM assertions.
+- Local full browser/Node execution unavailable because there is no checkout; new exact-head GitHub Actions are required. No test assertions were removed or relaxed.
+- Six files updated atomically: Truss UI source, Truss browser regression, structural FEM contract, hourly plan, execution ledger and changelog. Standalone companion page; no `index.html` bundle synchronization required.
+- Main unchanged. PR #189 remains open with zero submitted reviews. Branches remain unprotected; rulesets empty; main-protection read HTTP 403. Latest main Quality #41730966059 and Pages #41730962844 remain successful on main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Historical baseline remains 166 gaps / 95 partial. No merge or bypass.
+
+**NEXT FIVE:** (1) both exact-head workflows green including Truss browser step 215, 59 FEM Node tests and 390px responsive; (2) verify SVG XML/MIME/viewBox/aspect/title/description/ARIA/geometry plus CSV BOM/CRLF/units/quoting; (3) current/legacy JSON physical round-trip and atomic malformed/oversized rollback; (4) seven-shape invalid-state/accessibility and 390px/desktop audit; (5) eligible independent PR #189 review and authorized main protection verification, then ordinary PR merge and exact-main Quality/Pages/hosted verification only after all gates.
+
 ## 2026-11-22 — TRUSS-CSV-BLOB-TEXT-DECODING
 
 - Starting dev: `01f193803cdca1756087ae65a79f27132ae5ba3b`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da`.

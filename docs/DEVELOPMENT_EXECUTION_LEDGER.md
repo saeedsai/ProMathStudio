@@ -1,3 +1,11 @@
+## 2026-11-22 — TRUSS-L-ANGLE-AXIS-CENTROID-METADATA-CI-FIX-420
+
+Started dev 515a59591d165e0bb868d1ddc1641af4acd58b05; main remained 70fc483cb1cec3d2372d37484e4a8ef7942343da (419 ahead / 0 behind). Inspected AGENTS.md, living plan, frozen inventory, Truss FEM contract, PR #189, reviews, branches, exact-head Quality and Pages evidence.
+
+Diagnosed both exact-head Quality failures: Push #44970050988 and PR #44970054143 failed only at Truss Studio browser step 212. Python Playwright returned dictionaries from page.evaluate, while the new L-angle regression incorrectly used attribute access (endpoints.x1, centroid.x), producing AttributeError. Corrected those assertions to dictionary-key access. Added canonical millimetre centroid metadata to each principal-axis SVG line and regression checks for both axes against independent x/y references, while retaining midpoint/orthogonality/label/invalid-recovery assertions. Updated Truss FEM docs, plan and changelog.
+
+Committed as one atomic six-file dev commit; exact SHA and exact-head workflow states are recorded in this entry after the guarded ref update. Local checkout unavailable because github.com DNS resolution failed; local Playwright not run. New exact-head Push/PR Quality is pending. PR #189 remains open with no independent reviews; branch protection cannot be verified (rulesets empty, classic endpoint HTTP 403). Main and production Pages unchanged. Frozen baseline remains 166 gaps / 95 partial. No merge, force push, bypass or unsafe branch deletion.
+
 ## 2026-11-22 — TRUSS-L-ANGLE-DUAL-PRINCIPAL-AXES-419
 
 Started from dev `d27d8d56d4c77c187f06ee3110552fa3a84e3294` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (418 ahead / 0 behind). Verified the previous I-section exact-head Push Quality #44964690622 and PR Quality #44964698174 both succeeded; steps 7, 9, 212, 214 and 215 passed in both. Re-read AGENTS.md, plan, frozen inventory, unified/engineering architecture, Structural Engineering catalog, Truss FEM guide, PR #189, refs, reviews and Pages evidence.

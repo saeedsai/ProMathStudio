@@ -1,3 +1,10 @@
+## 2026-11-22 — Truss Studio L-angle principal-axis CI repair and centroid metadata
+
+- Fixed the observed exact-head browser regression: Playwright-evaluated SVG endpoint/centroid objects are Python dictionaries, so assertions now use keyed access rather than attribute access.
+- Added canonical FEM centroid coordinates in millimetres to both principal-axis SVG lines (data-centroid-x-mm, data-centroid-y-mm) for machine-readable geometry.
+- Strengthened the Chromium regression to verify both axis midpoints and both axes' canonical centroid metadata against the asymmetric L-angle reference. Existing mathematical, orthogonality and invalid-recovery assertions remain.
+- Updated the Truss FEM contract, hourly plan and execution ledger. Exact-head Quality pending; not released.
+
 ## 2026-11-22 — Truss Studio L-angle dual principal-axis preview
 
 - Extended the live L-angle SVG to draw both perpendicular principal axes through the canonical centroid: major I1 at the FEM helper angle and minor I2 at +90°.

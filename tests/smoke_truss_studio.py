@@ -397,8 +397,10 @@ def main():
             '(node) => ({x:Number(node.getAttribute("cx")),y:Number(node.getAttribute("cy"))})')
         for axis in (major_principal_axis, minor_principal_axis):
             endpoints = axis.evaluate('(node) => ({x1:Number(node.getAttribute("x1")),y1:Number(node.getAttribute("y1")),x2:Number(node.getAttribute("x2")),y2:Number(node.getAttribute("y2"))})')
-            assert abs((endpoints.x1 + endpoints.x2) / 2 - centroid.x) < 1e-6
-            assert abs((endpoints.y1 + endpoints.y2) / 2 - centroid.y) < 1e-6
+            assert abs((endpoints['x1'] + endpoints['x2']) / 2 - centroid['x']) < 1e-6
+            assert abs((endpoints['y1'] + endpoints['y2']) / 2 - centroid['y']) < 1e-6
+            assert abs(float(axis.get_attribute('data-centroid-x-mm')) - 31.470588235294116) < 1e-9
+            assert abs(float(axis.get_attribute('data-centroid-y-mm')) - 21.470588235294116) < 1e-9
         assert page.locator('#section-sketch text[data-principal-axis-label="major"]').inner_text() == 'I₁'
         assert page.locator('#section-sketch text[data-principal-axis-label="minor"]').inner_text() == 'I₂'
         for expected in ('B=100 mm', 'H=80 mm', 't=10 mm',

@@ -1,3 +1,7 @@
+## 2026-11-22 — Correct CSV helper regression capture scope
+
+Post-commit readback caught the new terminal-byte/empty-Blob fields attached to the existing results/material/SVG aggregate capture rather than the dedicated helper fixture. Restored the aggregate capture unchanged and moved the assertions into the direct helper test. No production export behavior or existing result assertions changed. Exact-head CI must verify the corrected test.
+
 ## 2026-11-22 — Truss CSV terminal-record hardening and CI regression repair
 
 Diagnosed both exact-head Quality failures at the direct Truss CSV serializer browser assertion: the test compared decoded Blob text against over-escaped BOM/CRLF strings even though Blob.text() consumes the leading UTF-8 BOM. Corrected the decoded-text assertion while retaining raw-byte checks for exactly one BOM. The production CSV helper now ensures non-empty normalized CSV ends in CRLF, while empty CSV remains BOM-only. Added browser checks for mixed newline input without a terminal separator, final CRLF bytes and empty content. Full exact-head Push/PR Quality remains pending.

@@ -148,8 +148,7 @@ def main():
                     if(bytes[i]===239&&bytes[i+1]===187&&bytes[i+2]===191) bomCount++;
                 }
                 return {name:e.name,type:e.blob.type,text:await e.blob.text(),
-                        prefix:Array.from(bytes.slice(0,3)),tail:Array.from(bytes.slice(-2)),
-                        emptyBytes:Array.from(new Uint8Array(await window.__exports[1].blob.arrayBuffer())),bomCount};
+                        prefix:Array.from(bytes.slice(0,3)),bomCount};
             }))""")
             assert exported[0]['name'] == 'promath-truss-results.csv'
             assert exported[1]['name'] == 'promath-truss-material-schedule.csv'
@@ -275,7 +274,8 @@ def main():
                     if(bytes[i]===239&&bytes[i+1]===187&&bytes[i+2]===191) bomCount++;
                 }
                 return {name:item.name,type:item.blob.type,text:await item.blob.text(),
-                        prefix:Array.from(bytes.slice(0,3)),bomCount};
+                        prefix:Array.from(bytes.slice(0,3)),tail:Array.from(bytes.slice(-2)),
+                        emptyBytes:Array.from(new Uint8Array(await window.__exports[1].blob.arrayBuffer())),bomCount};
             }""")
             assert normalized_csv['name'] == 'serializer-normalization.csv'
             assert normalized_csv['type'] == 'text/csv;charset=utf-8'

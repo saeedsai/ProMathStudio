@@ -1,3 +1,8 @@
+## 2026-11-22 — Truss Studio UTF-8 import byte-boundary hardening
+- Centralized the standalone UI's 1 MiB byte budget and validate both File.size before reading and actual ArrayBuffer.byteLength after reading.
+- Added exact 1 MiB multibyte acceptance, +1-byte rejection, pre-read ASCII/multibyte rejection, and underreported-size fallback regressions; rejected imports preserve the current model.
+- Added Node and Chromium regression coverage plus compatibility documentation. Exact-head Quality pending; dev-only, not released.
+
 ## 2026-11-22 — Truss Studio strict UTF-8 model import
 - Read bounded model files as bytes and decode with fatal UTF-8 validation; malformed byte sequences are rejected instead of silently replacing bytes inside node/member identifiers.
 - Preserve a leading UTF-8 BOM for the canonical importer to strip; keep the 1 MiB file-size guard and stale-import request ordering.

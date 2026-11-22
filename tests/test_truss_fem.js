@@ -330,6 +330,19 @@ test('truss JSON importer bounds input before parsing without rejecting normal m
 });
 
 
+test('truss JSON importer accepts an exact 1 MiB UTF-8 document',()=>{
+ const limit=1024*1024;
+ const prefix=JSON.stringify({...fem.examples.bar,note:'é'.repeat(100)});
+ const padding=limit-new TextEncoder().encode(prefix).byteLength;
+ assert.ok(padding>=0);
+ const exact=prefix+' '.repeat(padding);
+ assert.equal(new TextEncoder().encode(exact).byteLength,limit);
+ assert.ok(exact.length<limit);
+ assert.deepEqual(fem.importJSON(exact).nodes,fem.examples.bar.nodes);
+ assert.throws(()=>fem.importJSON(exact+' '),/1 MiB import limit/);
+});
+
+
 test('JSON import enforces byte limit for multibyte Unicode rather than UTF-16 length',()=>{
  const valid=JSON.stringify({...fem.examples.bar,note:'é'.repeat(100)});
  assert.deepEqual(fem.importJSON(valid).nodes,fem.examples.bar.nodes);

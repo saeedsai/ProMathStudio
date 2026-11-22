@@ -738,6 +738,90 @@ def main():
         assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'
         assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
         page.evaluate('''() => { File.prototype.arrayBuffer = Blob.prototype.arrayBuffer; }''')
+        # The 1 MiB boundary is measured in UTF-8 bytes, including multibyte text.
+        byte_limit = 1024 * 1024
+        exact_text = json.dumps({**prior, 'note': 'é' * 100}, ensure_ascii=False)
+        exact_text += ' ' * (byte_limit - len(exact_text.encode('utf-8')))
+        exact_payload = exact_text.encode('utf-8')
+        assert len(exact_payload) == byte_limit and len(exact_text) < byte_limit
+        page.locator('#import-model').set_input_files({'name':'exact-1mib.json','mimeType':'application/json',
+                                                       'buffer':exact_payload})
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status?.textContent.startsWith('Analysis complete') &&
+                   status.getAttribute('aria-busy') === 'false';
+        }""")
+        assert page.locator('#nodes tr').count() == 3
+        assert page.locator('#members tr').count() == 3
+        assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
+
+        # Files above the limit must be rejected before arrayBuffer allocates/reads them.
+        page.evaluate('''() => {
+            const read = Blob.prototype.arrayBuffer;
+            window.__sizeGuardReads = 0;
+            File.prototype.arrayBuffer = function() {
+                window.__sizeGuardReads++;
+                return read.call(this);
+            };
+        }''')
+        triangle_bytes = triangle_json.encode('utf-8')
+        oversized_ascii = triangle_bytes + b' ' * (byte_limit + 1 - len(triangle_bytes))
+        assert len(oversized_ascii) == byte_limit + 1
+        page.locator('#import-model').set_input_files({'name':'oversized-ascii.json','mimeType':'application/json',
+                                                       'buffer':oversized_ascii})
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status.classList.contains('error') && status.getAttribute('aria-busy') === 'false';
+        }""")
+        assert 'exceeds 1 MiB' in page.locator('#status').inner_text()
+        assert page.evaluate('window.__sizeGuardReads') == 0
+        assert page.locator('#nodes tr').count() == 3
+        assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
+
+        multibyte_text = json.dumps({**prior, 'note': 'é' * 530000}, ensure_ascii=False)
+        multibyte_payload = multibyte_text.encode('utf-8')
+        assert len(multibyte_text) < byte_limit
+        assert len(multibyte_payload) > byte_limit
+        page.locator('#import-model').set_input_files({'name':'oversized-multibyte.json','mimeType':'application/json',
+                                                       'buffer':multibyte_payload})
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status.classList.contains('error') && status.getAttribute('aria-busy') === 'false';
+        }""")
+        assert 'exceeds 1 MiB' in page.locator('#status').inner_text()
+        assert page.evaluate('window.__sizeGuardReads') == 0
+        assert page.locator('#nodes tr').count() == 3
+        assert page.locator('#members tr').count() == 3
+
+        # Even inconsistent File.size metadata cannot bypass the actual byte-length guard.
+        page.evaluate('''() => {
+            const originalSize = Object.getOwnPropertyDescriptor(File.prototype, 'size');
+            Object.defineProperty(File.prototype, 'size', {configurable:true, get:() => 1});
+            window.__restoreFileSize = () => {
+                if (originalSize) Object.defineProperty(File.prototype, 'size', originalSize);
+                else delete File.prototype.size;
+            };
+            const read = Blob.prototype.arrayBuffer;
+            window.__actualByteGuardReads = 0;
+            File.prototype.arrayBuffer = function() {
+                window.__actualByteGuardReads++;
+                return read.call(this);
+            };
+        }''')
+        page.locator('#import-model').set_input_files({'name':'underreported-size.json','mimeType':'application/json',
+                                                       'buffer':oversized_ascii})
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status.classList.contains('error') && status.getAttribute('aria-busy') === 'false';
+        }""")
+        assert 'exceeds 1 MiB' in page.locator('#status').inner_text()
+        assert page.evaluate('window.__actualByteGuardReads') == 1
+        assert page.locator('#nodes tr').count() == 3
+        assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
+        page.evaluate('''() => {
+            File.prototype.arrayBuffer = Blob.prototype.arrayBuffer;
+            window.__restoreFileSize();
+        }''')
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         page.locator('#export-csv').click()

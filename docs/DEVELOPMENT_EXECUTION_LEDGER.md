@@ -1,3 +1,16 @@
+## 2026-11-22 — TRUSS-IMPORT-UTF8-BYTE-BOUNDARY
+
+- Starting dev: `fcfb1f6e7dc6189a37a04a2f4ab607503130f380`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (426 ahead / 0 behind). Existing PR #189 points dev→main.
+- Previous exact-head Push Quality [#45002086394](https://github.com/saeedsai/ProMathStudio/actions/runs/45002086394) and PR Quality [#45002089717](https://github.com/saeedsai/ProMathStudio/actions/runs/45002089717) both succeeded with all 218 steps.
+- Source: named the 1 MiB UI byte budget, reject invalid/unsafe/oversized File.size before read, and recheck actual ArrayBuffer.byteLength before UTF-8 decoding so underreported metadata cannot bypass the limit.
+- Node regression: exactly 1 MiB valid UTF-8 with multibyte text accepted; +1 byte rejected.
+- Chromium regression: exact 1 MiB multibyte payload accepted; >1 MiB ASCII and multibyte payloads rejected before arrayBuffer; underreported File.size rejected against actual bytes after one read. All rejection paths preserve the existing three-member model and ID AB.
+- Pre-commit checks: V8 syntax compilation of complete UI and canonical FEM sources; actual canonical importJSON exact-boundary, +1-byte and multibyte over-limit checks passed. Local full Node/Playwright unavailable because no checkout; exact-head GitHub CI pending.
+- Updated standalone Truss contract, plan, ledger and changelog in the same atomic source/test commit. No main index.html bundle synchronization required.
+- Release: PR #189 open, no submitted reviews; main protection read HTTP 403 and rulesets empty. Main Quality #41730966059 and Pages #41730962844 remain successful on `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Historical inventory remains 166 gaps / 95 partial. No merge or bypass.
+
+**NEXT FIVE:** (1) both exact-head workflows green including exact-size, pre-read rejection, actual-byte fallback, rollback, UTF-8/BOM/race, analytical FEM and 390px; (2) current/legacy JSON round-trip plus CSV units/quoting/CRLF and SVG export/accessibility; (3) seven-shape invalid-state, keyboard/accessibility and desktop/mobile audit; (4) eligible independent PR #189 review and authorized main-protection/required-check verification; (5) only after all gates, ordinary PR merge and exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-22 — TRUSS-STRICT-UTF8-MODEL-IMPORT
 
 - Starting dev: `f0d6d7802babfa135148d5ef78d3ed73fdbdb47f`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (425 ahead / 0 behind). PR #189 head/base match these exact refs.

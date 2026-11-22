@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss Studio UTF-8 CSV downloads
+
+- Added a shared CSV download helper that prepends a UTF-8 BOM to both results and material-schedule exports, improving spreadsheet detection of Unicode engineering unit symbols.
+- Preserved existing quoted fields, doubled quote escaping, CRLF records, final CRLF and CSV MIME type; SVG downloads are unchanged.
+- Added Chromium coverage of actual Blob prefix bytes and Python CSV parsing for result/material headers, units and field counts. Implemented on dev; exact-head Quality pending, not released.
+
 ## 2026-11-22 — Truss Studio UTF-8 import byte-boundary hardening
 - Centralized the standalone UI's 1 MiB byte budget and validate both File.size before reading and actual ArrayBuffer.byteLength after reading.
 - Added exact 1 MiB multibyte acceptance, +1-byte rejection, pre-read ASCII/multibyte rejection, and underreported-size fallback regressions; rejected imports preserve the current model.

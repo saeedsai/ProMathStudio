@@ -1,3 +1,20 @@
+## 2026-11-22 — TRUSS-CSV-UTF8-BOM
+
+- Starting dev: `5f7c1dc7402627274d9d0effa088384934445cf9`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (428 ahead / 0 behind); PR #189 remains the existing dev→main promotion PR.
+- Previous exact-head Push Quality [#45010500117](https://github.com/saeedsai/ProMathStudio/actions/runs/45010500117) and PR Quality [#45010503310](https://github.com/saeedsai/ProMathStudio/actions/runs/45010503310) both completed successfully with all 218 steps.
+- Source: both result and material-schedule CSV downloads now use one helper that prepends UTF-8 BOM while preserving MIME type and existing CSV content/CRLF serialization. SVG downloads continue through the generic non-CSV path.
+- Chromium regression: clicks both CSV export buttons; checks actual Blob prefix bytes EF BB BF, BOM character, CRLF-only terminators and final CRLF; Python csv.reader verifies result/material headers, engineering units, section rows and field counts. Existing SVG export regression remains.
+- Static source/test anchor checks passed. Local Playwright/Node unavailable because the execution workspace has no checkout; new exact-head Push and PR workflows must execute the committed browser regression.
+- Updated the Truss FEM compatibility contract, living plan, ledger and changelog in the same atomic source/test commit. No index.html bundle synchronization required for the standalone companion page.
+- Release: PR #189 open with zero independent reviews; all three branches report unprotected, rulesets query empty and main protection read HTTP 403. Latest main Quality #41730966059 and Pages #41730962844 remain successful on `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Historical inventory remains 166 gaps / 95 partial. No merge or bypass.
+
+**NEXT FIVE (acceptance):**
+1. Verify both exact-head Push and PR Quality for this CSV candidate; require every structural, Node, Truss browser, FEM analytical and 390px responsive check to pass.
+2. Complete Truss JSON compatibility: current-format and legacy SI imports must round-trip to equivalent physical node/member quantities, preserve optional density/I/K fields, and roll back atomically on malformed/oversized input.
+3. Finish the seven-shape invalid-state/accessibility audit: zero, negative, NaN and overflow dimensions clear stale previews and recover; keyboard/screen-reader labels remain correct at 390px and desktop.
+4. Obtain an eligible independent review of PR #189 and authorized verification of enforceable main protection and required checks; do not self-approve or bypass unavailable administration.
+5. Only after every gate is satisfied, merge through the ordinary dev-to-main PR; verify exact-main Quality, GitHub Pages deployment and hosted asset/download behavior.
+
 ## 2026-11-22 — TRUSS-SVG-EXPORT-ACCESSIBILITY
 
 - Starting dev: `7df19ce2ee8799730ae65202507e3729480d3f15`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (427 ahead / 0 behind); existing PR #189 is dev→main.

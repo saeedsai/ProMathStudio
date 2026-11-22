@@ -59,6 +59,10 @@ Previous TrussStudio API still exposes `TrussStudio.solve(model)` and `TrussStud
 
 The solved deformation export preserves the plot's `viewBox` and SVG namespace, adds explicit 1240×760 output dimensions, and includes direct-child `<title>` and `<desc>` elements. The root uses `role="img"` and `aria-labelledby` references to both IDs; the description explains the dotted original members and tension/compression deformation coloring. The exported Blob is parsed as XML in Chromium regression tests, which verify the namespace, dimensions, viewBox, accessible-name references, title/description order, background and solved geometry.
 
+### CSV download encoding and units
+
+Both results and material-schedule downloads are UTF-8 CSV with a leading UTF-8 BOM so spreadsheet applications such as Excel can identify the Unicode unit symbols reliably. Every field is quoted with embedded quotes doubled, records use CRLF terminators, and the final record also ends in CRLF. The results export labels force/stress/displacement/reaction units in kN, MPa and mm; the material schedule reports SI geometry/material quantities with explicit units (m, m², m³, GPa, kN/mm, kg/m³, mm⁴ and kN). The Chromium regression checks the actual downloaded Blob's EF BB BF prefix, CRLF-only records, parsed column counts and exact unit headers.
+
 ## References and tests
 
 - Single 2 m bar: E=200 GPa, area=1000 mm², +1 kN, displacement 0.01 mm, axial stress 1 MPa, reaction -1 kN. With I=1,000,000 mm⁴ and K=1, the ideal Euler Pcr reference is approximately 493.480220 kN.

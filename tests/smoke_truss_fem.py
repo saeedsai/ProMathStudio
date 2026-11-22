@@ -1,5 +1,7 @@
 """Standalone 2D truss lab: in-browser references, negative cases, SVG visualization,
 keyboard and mobile layout, import recovery, CSV/SVG output and console integrity."""
+import csv
+import io
 from pathlib import Path
 import os
 from playwright.sync_api import sync_playwright
@@ -54,10 +56,38 @@ def main():
                 HTMLAnchorElement.prototype.click = function() { window.__exports.at(-1).name=this.download; };
             }""")
             page.get_by_role('button', name='Export results CSV').click()
+            page.get_by_role('button', name='Export material schedule CSV').click()
             page.get_by_role('button', name='Export SVG').click()
-            exported=page.evaluate("""async () => await Promise.all(window.__exports.map(async e => ({name:e.name,text:await e.blob.text()})))""")
-            assert exported[0]['name'].endswith('.csv') and 'Axial force (kN)' in exported[0]['text']
-            assert exported[1]['name'] == 'promath-truss-deformation.svg'
+            exported=page.evaluate("""async () => await Promise.all(window.__exports.map(async e => ({name:e.name,text:await e.blob.text(),prefix:Array.from(new Uint8Array(await e.blob.slice(0,3).arrayBuffer()))})))""")
+            assert exported[0]['name'] == 'promath-truss-results.csv'
+            assert exported[1]['name'] == 'promath-truss-material-schedule.csv'
+            assert exported[2]['name'] == 'promath-truss-deformation.svg'
+            for item in exported[:2]:
+                assert item['prefix'] == [239, 187, 191], item['prefix']
+                assert item['text'].startswith('\ufeff')
+                content = item['text'][1:]
+                assert content.endswith('\r\n')
+                without_crlf = content.replace('\r\n', '')
+                assert '\r' not in without_crlf and '\n' not in without_crlf
+            result_csv = exported[0]['text'][1:]
+            result_rows = list(csv.reader(io.StringIO(result_csv, newline='')))
+            assert result_rows[0] == ['Member', 'Axial force (kN)', 'Stress (MPa)', 'Strain',
+                                      'Euler utilization (%)', 'Euler load ratio Pcr/Pcomp (-)', 'Euler assessment']
+            assert ['Joint', 'Ux (mm)', 'Uy (mm)'] in result_rows
+            assert ['Support', 'Rx (kN)', 'Ry (kN)'] in result_rows
+            assert sum(1 for row in result_rows if not row) == 2
+            assert all(len(row) in (3, 7) for row in result_rows if row)
+            assert sum(1 for row in result_rows if row and len(row) == 7) == 4
+            material_csv = exported[1]['text'][1:]
+            material_rows = list(csv.reader(io.StringIO(material_csv, newline='')))
+            assert material_rows[0] == [
+                'Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)',
+                'Cross-sectional area (m²)', 'Axial material volume (m³)', 'Elastic modulus (GPa)',
+                'Axial stiffness EA/L (kN/mm)', 'Density (kg/m³)', 'Member mass (kg)',
+                'Second moment of area I (mm⁴)', 'Effective length factor K (-)', 'Euler critical load Pcr (kN)'
+            ]
+            assert len(material_rows) == 4
+            assert all(len(row) == 13 for row in material_rows)
             svg_metadata = page.evaluate("""text => {
                 const document = new DOMParser().parseFromString(text, 'image/svg+xml');
                 const root = document.documentElement;

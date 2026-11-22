@@ -837,7 +837,7 @@ Starting dev `b3c24d0ccc269d88be042f3c7b7438f362c565b5`; main `70fc483cb1cec3d23
 
 ## 2026-11-22 — TRUSS-JSON-EDIT-CANCELLATION
 
-Starting dev f0f38adcd201e810ab0fa6f56197d280dba0e7a5; main 70fc483cb1cec3d2372d37484e4a8ef7942343da (442 ahead / 0 behind). Re-read root AGENTS, living plan, frozen inventory, Truss source/tests/contract, PR #189/reviews, branch/ruleset state and latest main Actions/Pages evidence. Previous exact-head Push Quality #45052437168 and PR Quality #45052440817 both passed all 218 steps, including Truss Studio, FEM Node and Truss browser suites.
+Starting dev f0f38adcd201e810ab0fa6f56197d280dba0e7a5; main 70fc483cb1cec3d2372d37484e4a8ef7942343da (442 ahead / 0 behind). Re-read root AGENTS, living plan, frozen inventory, Truss source/tests/contract, PR #189/reviews, branch/ruleset state and latest main Actions/Pages evidence. Previous exact-head Push Quality #45052437168 and PR Quality #45052440817 both passed all 218 steps, including Truss Studio, FEM Node and Truss browser suites. New exact-head Push #45058592621 and PR #45058597071 are now running on 57075990cc303ee0d0d5e822f929113fbcec0929; both show 6/217 steps successful and structural tests active, with no failure reported yet.
 
 Found a race not covered by the existing latest-file-selection token: if the user edits the active model while a selected file's arrayBuffer() is still pending, that late import could overwrite the edit. Added explicit pending-import state and cancellation from model invalidation/manual analysis. Cancellation increments the request token, clears pending state and reports a non-error status; the late result/error is ignored. A successful import clears its pending state before rendering its own model.
 

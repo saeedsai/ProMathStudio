@@ -2,6 +2,7 @@
 keyboard and mobile layout, import recovery, CSV/SVG output and console integrity."""
 import csv
 import io
+import json
 from pathlib import Path
 import os
 from playwright.sync_api import sync_playwright
@@ -48,13 +49,88 @@ def main():
             page.locator('#scale').fill('500')
             page.locator('#scale').press('Tab')
             assert '500' in page.locator('#plot').text_content()
-            # About:blank contexts cannot trigger downloads in sandboxed browsers;
-            # verify generated Blob bytes + filenames via the same click handlers.
+            # Capture the actual generated download Blobs for a UI-level JSON round-trip.
             page.evaluate("""() => { window.__exports=[];
                 const create=URL.createObjectURL.bind(URL);
                 URL.createObjectURL = blob => {window.__exports.push({blob});return create(blob);};
                 HTMLAnchorElement.prototype.click = function() { window.__exports.at(-1).name=this.download; };
             }""")
+            legacy_model = {
+                'nodes': [
+                    {'id': 'A', 'x': 0, 'y': 0, 'fixX': True, 'fixY': True, 'fx': 0, 'fy': 0},
+                    {'id': 'B', 'x': 2, 'y': 0, 'fixX': False, 'fixY': True, 'fx': 1000, 'fy': 0}
+                ],
+                'members': [
+                    {'id': 'AB', 'a': 'A', 'b': 'B', 'E': 200e9, 'A': 0.001,
+                     'density': 7850, 'I': 1e-6, 'K': 1}
+                ]
+            }
+            page.locator('#import-model').set_input_files({
+                'name': 'legacy-truss.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(legacy_model).encode('utf-8')
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
+                'Legacy SI input converted to Studio units.')""")
+            assert page.locator('#nodes tr').count() == 2
+            assert page.locator('#members tr').count() == 1
+            assert page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').input_value() == '1'
+            legacy_row = page.locator('#members tr').first
+            assert legacy_row.locator('input[data-field="E"]').input_value() == '200'
+            assert legacy_row.locator('input[data-field="area"]').input_value() == '1000'
+            assert legacy_row.locator('input[data-field="density"]').input_value() == '7850'
+            assert legacy_row.locator('input[data-field="I"]').input_value() == '1000000'
+            assert legacy_row.locator('input[data-field="K"]').input_value() == '1'
+            assert '0.01 mm' in page.locator('#disp-card').inner_text()
+
+            page.get_by_role('button', name='Export JSON').click()
+            current_export = page.evaluate("""async () => {
+                const item=window.__exports.at(-1);
+                return {name:item.name,type:item.blob.type,text:await item.blob.text()};
+            }""")
+            assert current_export['name'] == 'promath-truss-model.json'
+            assert current_export['type'] == 'application/json;charset=utf-8'
+            studio_model = json.loads(current_export['text'])
+            assert float(studio_model['nodes'][1]['fx']) == 1
+            assert float(studio_model['members'][0]['E']) == 200
+            assert float(studio_model['members'][0]['area']) == 1000
+            assert float(studio_model['members'][0]['density']) == 7850
+            assert float(studio_model['members'][0]['I']) == 1000000
+            assert float(studio_model['members'][0]['K']) == 1
+
+            page.locator('#import-model').set_input_files({
+                'name': 'studio-roundtrip.json', 'mimeType': 'application/json',
+                'buffer': current_export['text'].encode('utf-8')
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
+                'Studio units retained from file.')""")
+            assert page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').input_value() == '1'
+            studio_row = page.locator('#members tr').first
+            assert studio_row.locator('input[data-field="E"]').input_value() == '200'
+            assert studio_row.locator('input[data-field="area"]').input_value() == '1000'
+            assert studio_row.locator('input[data-field="density"]').input_value() == '7850'
+            assert studio_row.locator('input[data-field="I"]').input_value() == '1000000'
+            assert studio_row.locator('input[data-field="K"]').input_value() == '1'
+            displacement_before_rejection = page.locator('#disp-card').inner_text()
+
+            mixed_model = json.loads(json.dumps(legacy_model))
+            mixed_model['members'][0]['area'] = 1000
+            page.locator('#import-model').set_input_files({
+                'name': 'mixed-units.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(mixed_model).encode('utf-8')
+            })
+            page.wait_for_function("""() => document.querySelector('#status').classList.contains('error')""")
+            assert 'Mixed legacy SI and current' in page.locator('#status').inner_text()
+            assert page.locator('#nodes tr').count() == 2
+            assert page.locator('#members tr').count() == 1
+            assert page.locator('#members tr').first.locator('input[data-field="E"]').input_value() == '200'
+            assert page.locator('#members tr').first.locator('input[data-field="area"]').input_value() == '1000'
+            assert page.locator('#members tr').first.locator('input[data-field="density"]').input_value() == '7850'
+            assert page.locator('#members tr').first.locator('input[data-field="I"]').input_value() == '1000000'
+            assert page.locator('#members tr').first.locator('input[data-field="K"]').input_value() == '1'
+            assert page.locator('#disp-card').inner_text() == displacement_before_rejection
+            page.evaluate("window.__exports=[]")
+            # Reset captured downloads before the CSV and SVG export assertions.
+            page.evaluate('window.__exports=[]')
             page.get_by_role('button', name='Export results CSV').click()
             page.get_by_role('button', name='Export material schedule CSV').click()
             page.get_by_role('button', name='Export SVG').click()

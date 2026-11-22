@@ -1,3 +1,8 @@
+## 2026-11-22 — Truss Studio JSON import unit provenance and UI round-trip
+- Successful imports now report whether legacy SI values were converted to Studio editor units or Studio units were retained; failed analysis continues to display its error.
+- Added a Chromium file-input regression for legacy N/Pa/m²/m⁴ conversion, density/I/K preservation, the 0.01 mm bar reference, current JSON export/re-import and mixed-unit rollback without changing the prior model.
+- Dev-only; exact-head Push/PR Quality pending. No FEM equations or main application bundle changed.
+
 ## 2026-11-22 — Truss SVG export CI repair and deterministic aspect ratio
 - Fixed the Chromium regression to parse the actual SVG download (third Blob), not the material-schedule CSV; added an explicit SVG MIME assertion.
 - Exported standalone SVG now declares `preserveAspectRatio="xMidYMid meet"`; browser regression verifies the 620×380 viewBox remains proportionally fitted in the 1240×760 output.

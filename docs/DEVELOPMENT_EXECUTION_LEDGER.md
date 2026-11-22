@@ -1,3 +1,15 @@
+## 2026-11-22 — TRUSS-JSON-UI-UNIT-ROUNDTRIP
+
+- Starting dev: `d5628d2880477b379a1b8a296a28d53a53a14c7c`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (431 ahead / 0 behind).
+- Previous exact-head Push Quality [#45020208748](https://github.com/saeedsai/ProMathStudio/actions/runs/45020208748) and PR Quality [#45020215205](https://github.com/saeedsai/ProMathStudio/actions/runs/45020215205) both succeeded on the same dev SHA, 218/218 steps each, no failed/cancelled steps.
+- Source: successful Truss JSON imports now identify whether legacy SI units were converted to Studio editor units or Studio units were retained. The notice is appended only after successful analysis; errors remain visible.
+- Chromium regression: import actual legacy JSON through the file input; verify 1000 N → 1 kN, 200e9 Pa → 200 GPa, 0.001 m² → 1000 mm², density 7850, 1e-6 m⁴ → 1,000,000 mm⁴ and K=1; verify 0.01 mm bar displacement; export current JSON and reimport it; verify optional density/I/K survive; reject mixed legacy/current units without changing the loaded model or result.
+- Existing CSV BOM/CRLF, SVG XML/accessibility, UTF-8/BOM/size/race, FEM and 390px tests remain. Local Playwright/Node execution unavailable because no checkout; exact-head GitHub Actions are required.
+- Updated standalone Truss compatibility contract, living plan, ledger and changelog in the same atomic source/test commit. No main index.html synchronization required.
+- Release: PR #189 open, zero submitted reviews; all branches report unprotected, rulesets empty and main protection read HTTP 403. Main Quality #41730966059 and Pages #41730962844 remain successful on main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Frozen historical inventory remains 166 gaps / 95 partial. No merge, bypass or unsafe branch deletion.
+
+**NEXT FIVE:** (1) exact-head Push/PR Quality green including real-file JSON unit round-trip, mixed-unit rollback, 59 FEM Node tests and 390px; (2) seven-shape invalid-state/accessibility and 390px/desktop audit; (3) JSON optional density/I/K, blank/zero and Unicode/BOM boundary cases; (4) eligible independent PR #189 review and authorized main-protection verification; (5) only after all gates, ordinary PR merge and exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-22 — TRUSS-SVG-EXPORT-CI-REPAIR
 
 - Starting dev: `55060c4cf5e7d8c1b8c6684145397bfe1563ebb4`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da`.

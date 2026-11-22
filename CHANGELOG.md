@@ -1,3 +1,7 @@
+## 2026-11-22 — Truss SVG semantic geometry metadata
+
+Repaired the exact-head Truss browser regression by replacing a stale six-line expectation for the imported one-member model with an exact semantic assertion: one original member, one deformed member, one load-vector shaft and two arrowhead segments. The exported SVG now carries stable geometry-role, member/node, force-state and load-component metadata. Existing visual geometry, FEM calculations and CSV/SVG accessibility assertions remain unchanged. Full Push/PR Quality is pending on the new dev head.
+
 ## 2026-11-22 — TRUSS-CSV-SERIALIZER-DIRECT-REGRESSION
 
 Added a direct Chromium regression for the production CSV serializer's new normalization behavior. The browser harness exposes the otherwise private helper only in its injected test copy (the shipped UI remains scoped), feeds a fixture containing a pre-existing UTF-8 BOM plus LF, lone CR and CRLF separators, and captures the actual generated Blob. Acceptance requires exactly one EF BB BF sequence, preserved CSV MIME type and canonical CRLF output. This complements the actual results/material-schedule exports and their current-model/SI assertions. The previous material-schedule correction is explicit: 1000 mm² in the editor exports as 0.001 m² in the SI schedule. The isolated V8 helper fixture already passed; the fresh exact-head browser workflows must execute this committed test.

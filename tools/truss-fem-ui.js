@@ -356,12 +356,14 @@
     const xs=all.map(a=>a[0]),ys=all.map(a=>a[1]);const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
     const spread=Math.max(maxX-minX,maxY-minY,0.1),size=300/spread,centerX=(minX+maxX)/2,centerY=(minY+maxY)/2;
     const p=(x,y)=>[310+(x-centerX)*size,190-(y-centerY)*size];
-    const g=svgNode('g',{}),line=(a,b,color,width=2,dash='')=>g.append(svgNode('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:color,'stroke-width':width,'stroke-linecap':'round',...(dash?{'stroke-dasharray':dash}:{})}));
-    m.members.forEach(member=>{const a=p(...xy.get(String(member.a))),b=p(...xy.get(String(member.b)));line(a,b,'#7083a4',2,'5 6');});
+    const g=svgNode('g',{}),line=(a,b,color,width=2,dash='',metadata={})=>g.append(svgNode('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:color,'stroke-width':width,'stroke-linecap':'round',...(dash?{'stroke-dasharray':dash}:{}),...metadata}));
+    m.members.forEach(member=>{const a=p(...xy.get(String(member.a))),b=p(...xy.get(String(member.b)));line(a,b,'#7083a4',2,'5 6',{'data-geometry-role':'original-member','data-member-id':member.id});});
     d.members.forEach(member=>{
       const a0=xy.get(member.a),b0=xy.get(member.b),ua=us.get(member.a),ub=us.get(member.b);
       const a=p(a0[0]+amp*ua[0],a0[1]+amp*ua[1]),b=p(b0[0]+amp*ub[0],b0[1]+amp*ub[1]);
-      const color=member.force>1e-8?'#46e5b4':member.force< -1e-8?'#ffb36e':'#b5c7e2';line(a,b,color,4);
+      const forceState=member.force>1e-8?'tension':member.force< -1e-8?'compression':'neutral';
+      const color=forceState==='tension'?'#46e5b4':forceState==='compression'?'#ffb36e':'#b5c7e2';
+      line(a,b,color,4,'',{'data-geometry-role':'deformed-member','data-member-id':member.id,'data-force-state':forceState,'data-axial-force-n':member.force});
       if($('show-labels').value==='all')g.append(svgNode('text',{x:(a[0]+b[0])/2+5,y:(a[1]+b[1])/2-8,'font-size':12},member.id));
     });
     m.nodes.forEach(node=>{
@@ -370,7 +372,7 @@
       g.append(svgNode('circle',{cx:pt[0],cy:pt[1],r:4,fill:'#e5f3ff'}));
       if($('show-labels').value!=='none')g.append(svgNode('text',{x:pt[0]+9,y:pt[1]-11},node.id));
       const fx=Number(node.fx),fy=Number(node.fy);
-      if(Math.hypot(fx,fy)>1e-12){const length=30,angle=Math.atan2(-fy,fx),start=[pt[0]-length*Math.cos(angle),pt[1]-length*Math.sin(angle)];line(start,pt,'#ffe173',2.6);const a1=angle+Math.PI*0.82,a2=angle-Math.PI*0.82;line(pt,[pt[0]+9*Math.cos(a1),pt[1]+9*Math.sin(a1)],'#ffe173',2.6);line(pt,[pt[0]+9*Math.cos(a2),pt[1]+9*Math.sin(a2)],'#ffe173',2.6);}
+      if(Math.hypot(fx,fy)>1e-12){const length=30,angle=Math.atan2(-fy,fx),start=[pt[0]-length*Math.cos(angle),pt[1]-length*Math.sin(angle)];line(start,pt,'#ffe173',2.6,'',{'data-geometry-role':'applied-load','data-node-id':node.id,'data-force-x-kN':fx,'data-force-y-kN':fy});const a1=angle+Math.PI*0.82,a2=angle-Math.PI*0.82;line(pt,[pt[0]+9*Math.cos(a1),pt[1]+9*Math.sin(a1)],'#ffe173',2.6,'',{'data-geometry-role':'load-arrowhead','data-node-id':node.id,'data-arrowhead-index':1});line(pt,[pt[0]+9*Math.cos(a2),pt[1]+9*Math.sin(a2)],'#ffe173',2.6,'',{'data-geometry-role':'load-arrowhead','data-node-id':node.id,'data-arrowhead-index':2});}
     });
     g.append(svgNode('text',{x:15,y:362,fill:'#a5c1dc'},'Deformation ×'+fmt(amp,4)+' · Geometry not to scale'));svg.replaceChildren(g);svg.setAttribute('aria-label','Solved truss deformation with original geometry, member force colors and applied loads.');
   }

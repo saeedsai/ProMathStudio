@@ -20,6 +20,17 @@ Every valid section preview exposes one outer outline with the same canonical mi
 
 This is presentation metadata, not a second calculation API. The FEM helper remains the sole source of area and centroid values. The Chromium regression checks all seven shapes at a 390px viewport against independent reference values and verifies the outline, centroid marker, axis metadata, title/description/caption and accessible axis labels.
 
+## Exported deformation SVG geometry metadata
+
+The solved SVG export preserves semantic attributes on every geometry line so downstream viewers and tooling do not need to infer meaning from color or coordinates:
+
+- `data-geometry-role="original-member"` identifies the dotted undeformed member and includes its `data-member-id`.
+- `data-geometry-role="deformed-member"` identifies the solved member and includes its member ID, `data-force-state` (`tension`, `compression` or `neutral`) and axial force in newtons.
+- `data-geometry-role="applied-load"` identifies the load-vector shaft and includes the node ID and applied Fx/Fy in kN.
+- `data-geometry-role="load-arrowhead"` identifies each arrowhead segment and includes its node ID and stable segment index.
+
+The browser regression parses the actual exported SVG after importing a one-member AB bar with a load at B. It requires exactly one original member, one deformed member, one load shaft, two arrowhead segments and no unclassified line elements, while retaining the existing XML, MIME, viewBox, aspect-ratio, title, description, ARIA and background checks. These attributes are descriptive metadata only; they do not change FEM calculations or visual geometry.
+
 ## Numerical contract
 
 The FEM solver models 2D pin-connected, axial-only, linear-elastic, small-displacement trusses with static loads. Each bar stiffness is `EA/L * [-c,-s,c,s]^T [-c,-s,c,s]`; global K is assembled, fixed zero-displacement DOFs eliminated, free system diagonal-scaled and solved with pivoting. Member axial extension is projected relative endpoint displacement; positive axial stress is tension. Reactions are `K*u-F`. Force balance, free-DOF residual, and twice strain energy = external work are checked. The solver itself does not model geometric buckling, post-buckling, yielding, thermal loads or connection behavior.

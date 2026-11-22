@@ -216,7 +216,17 @@ def main():
                     description: description?.textContent || '',
                     firstChildren: [...root.children].slice(0, 3).map(node => node.localName),
                     background: root.querySelector(':scope > rect')?.getAttribute('fill') || '',
-                    solvedLines: root.querySelectorAll('line').length
+                    solvedLines: root.querySelectorAll('line').length,
+                    geometry: [...root.querySelectorAll('line[data-geometry-role]')].map(line => ({
+                        role: line.getAttribute('data-geometry-role'),
+                        memberId: line.getAttribute('data-member-id'),
+                        nodeId: line.getAttribute('data-node-id'),
+                        forceState: line.getAttribute('data-force-state'),
+                        loadFxKn: line.getAttribute('data-force-x-kN'),
+                        loadFyKn: line.getAttribute('data-force-y-kN'),
+                        arrowheadIndex: line.getAttribute('data-arrowhead-index')
+                    })),
+                    unclassifiedLines: root.querySelectorAll('line:not([data-geometry-role])').length
                 };
             }""", exported[2]['text'])
             assert not svg_metadata['parseError'], svg_metadata
@@ -235,7 +245,20 @@ def main():
             assert 'tension or compression' in svg_metadata['description']
             assert svg_metadata['firstChildren'] == ['title', 'desc', 'rect']
             assert svg_metadata['background'] == '#09152a'
-            assert svg_metadata['solvedLines'] >= 6
+            assert svg_metadata['solvedLines'] == 5, svg_metadata
+            assert svg_metadata['unclassifiedLines'] == 0, svg_metadata
+            assert svg_metadata['geometry'] == [
+                {'role':'original-member','memberId':'AB','nodeId':None,'forceState':None,
+                 'loadFxKn':None,'loadFyKn':None,'arrowheadIndex':None},
+                {'role':'deformed-member','memberId':'AB','nodeId':None,'forceState':'tension',
+                 'loadFxKn':None,'loadFyKn':None,'arrowheadIndex':None},
+                {'role':'applied-load','memberId':None,'nodeId':'B','forceState':None,
+                 'loadFxKn':'1','loadFyKn':'0','arrowheadIndex':None},
+                {'role':'load-arrowhead','memberId':None,'nodeId':'B','forceState':None,
+                 'loadFxKn':None,'loadFyKn':None,'arrowheadIndex':'1'},
+                {'role':'load-arrowhead','memberId':None,'nodeId':'B','forceState':None,
+                 'loadFxKn':None,'loadFyKn':None,'arrowheadIndex':'2'}
+            ], svg_metadata
             # Exercise the actual private CSV helper with an existing BOM and mixed newline styles.
             page.evaluate("""() => {
                 window.__exports=[];

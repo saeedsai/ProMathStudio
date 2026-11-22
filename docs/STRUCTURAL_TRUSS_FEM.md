@@ -65,7 +65,7 @@ The solved deformation export preserves the plot's `viewBox` and SVG namespace, 
 
 ### CSV download encoding and units
 
-Both results and material-schedule downloads are UTF-8 CSV with a leading UTF-8 BOM so spreadsheet applications such as Excel can identify the Unicode unit symbols reliably. Every field is quoted with embedded quotes doubled, records use CRLF terminators, and the final record also ends in CRLF. The results export labels force/stress/displacement/reaction units in kN, MPa and mm; the material schedule reports SI geometry/material quantities with explicit units (m, m², m³, GPa, kN/mm, kg/m³, mm⁴ and kN). The Chromium regression checks the actual downloaded Blob's EF BB BF prefix, CRLF-only records, parsed column counts and exact unit headers.
+Both results and material-schedule downloads are UTF-8 CSV with exactly one leading UTF-8 BOM so spreadsheet applications such as Excel can identify Unicode unit symbols reliably. The shared download serializer removes any pre-existing leading BOM and canonicalizes CRLF, lone CR and lone LF record separators to CRLF before adding the single BOM. Every field is quoted with embedded quotes doubled, and the final record also ends in CRLF. The results export labels force/stress/displacement/reaction units in kN, MPa and mm; the material schedule reports SI geometry/material quantities with explicit units (m, m², m³, GPa, kN/mm, kg/m³, mm⁴ and kN). The Chromium regression counts BOM sequences in the raw downloaded Blob bytes, checks CRLF-only records, parses the CSV columns and verifies that exports reflect the currently imported model.
 
 ## References and tests
 

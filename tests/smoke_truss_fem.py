@@ -135,12 +135,21 @@ def main():
             page.get_by_role('button', name='Export results CSV').click()
             page.get_by_role('button', name='Export material schedule CSV').click()
             page.get_by_role('button', name='Export SVG').click()
-            exported=page.evaluate("""async () => await Promise.all(window.__exports.map(async e => ({name:e.name,type:e.blob.type,text:await e.blob.text(),prefix:Array.from(new Uint8Array(await e.blob.slice(0,3).arrayBuffer()))})))""")
+            exported=page.evaluate("""async () => await Promise.all(window.__exports.map(async e => {
+                const bytes = new Uint8Array(await e.blob.arrayBuffer());
+                let bomCount=0;
+                for(let i=0;i<=bytes.length-3;i++) {
+                    if(bytes[i]===239&&bytes[i+1]===187&&bytes[i+2]===191) bomCount++;
+                }
+                return {name:e.name,type:e.blob.type,text:await e.blob.text(),
+                        prefix:Array.from(bytes.slice(0,3)),bomCount};
+            }))""")
             assert exported[0]['name'] == 'promath-truss-results.csv'
             assert exported[1]['name'] == 'promath-truss-material-schedule.csv'
             assert exported[2]['name'] == 'promath-truss-deformation.svg'
             for item in exported[:2]:
                 assert item['prefix'] == [239, 187, 191], item['prefix']
+                assert item['bomCount'] == 1, item['bomCount']
                 content = item['text'].lstrip('\ufeff')
                 assert content.endswith('\r\n')
                 without_crlf = content.replace('\r\n', '')
@@ -153,7 +162,11 @@ def main():
             assert ['Support', 'Rx (kN)', 'Ry (kN)'] in result_rows
             assert sum(1 for row in result_rows if not row) == 2
             assert all(len(row) in (3, 7) for row in result_rows if row)
-            assert sum(1 for row in result_rows if row and len(row) == 7) == 4
+            member_rows = [row for row in result_rows if row and len(row) == 7]
+            assert len(member_rows) == 2, member_rows  # header plus the imported AB member
+            assert member_rows[1][0] == 'AB'
+            assert abs(float(member_rows[1][1]) - 1.0) < 1e-12
+            assert abs(float(member_rows[1][2]) - 1.0) < 1e-12
             material_csv = exported[1]['text'].lstrip('\ufeff')
             material_rows = list(csv.reader(io.StringIO(material_csv, newline='')))
             assert material_rows[0] == [
@@ -162,8 +175,15 @@ def main():
                 'Axial stiffness EA/L (kN/mm)', 'Density (kg/m³)', 'Member mass (kg)',
                 'Second moment of area I (mm⁴)', 'Effective length factor K (-)', 'Euler critical load Pcr (kN)'
             ]
-            assert len(material_rows) == 4
+            assert len(material_rows) == 2  # header plus the imported AB member
             assert all(len(row) == 13 for row in material_rows)
+            assert material_rows[1][:3] == ['AB', 'A', 'B']
+            assert float(material_rows[1][3]) == 2.0
+            assert float(material_rows[1][4]) == 1000.0
+            assert float(material_rows[1][6]) == 200.0
+            assert float(material_rows[1][8]) == 7850.0
+            assert float(material_rows[1][10]) == 1000000.0
+            assert float(material_rows[1][11]) == 1.0
             svg_metadata = page.evaluate("""text => {
                 const document = new DOMParser().parseFromString(text, 'image/svg+xml');
                 const root = document.documentElement;

@@ -437,8 +437,10 @@
     parseModel(fromLegacy(model));
     const legacy = model.members.some(m => m.A !== undefined);
     return Object.freeze(legacy
-      ? {system:'legacy-si',coordinates:'m',forces:'N',modulus:'Pa',area:'m²'}
-      : {system:'studio',coordinates:'m',forces:'kN',modulus:'GPa',area:'mm²'});
+      ? {system:'legacy-si',coordinates:'m',forces:'N',modulus:'Pa',area:'m²',
+        density:'kg/m³',secondMoment:'m⁴',effectiveLengthFactor:'dimensionless'}
+      : {system:'studio',coordinates:'m',forces:'kN',modulus:'GPa',area:'mm²',
+        density:'kg/m³',secondMoment:'mm⁴',effectiveLengthFactor:'dimensionless'});
   }
   // Solve a validated imported document in either public unit system. Results remain SI.
   function solveDocument(model) {

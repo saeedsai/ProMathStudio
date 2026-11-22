@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss JSON optional-property unit provenance (dev)
+
+- Extended the immutable Truss JSON unit descriptor with density (kg/m³), second moment I (legacy m⁴ / Studio mm⁴) and dimensionless effective-length factor K.
+- Successful JSON imports now show these optional-property file units in the status message for both legacy SI and Studio formats.
+- Added Node descriptor assertions for both formats and Chromium assertions against real legacy/current JSON file imports. FEM calculations, saved-model schema and IDs are unchanged. Exact-head Quality pending; not released.
+
 ## 2026-11-22 — Truss seven-shape invalid-preview accessibility (dev; exact-head QA pending)
 
 Updated the section-preview invalid path so the SVG `<desc>` referenced by `aria-labelledby` reports the same unavailable message as the live caption and root `aria-label`. Added mandatory Chromium coverage for all seven section shapes across zero, negative, NaN/empty-number and arithmetic-overflow inputs, asserting stale outline/centroid/axis/dimension metadata is removed and valid recovery restores geometry and accessible description. No FEM equations or saved-model schema changed. Exact-head Push/PR Quality pending.

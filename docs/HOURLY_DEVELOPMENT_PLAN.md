@@ -1,3 +1,20 @@
+## 2026-11-22 — TRUSS-JSON-OPTIONAL-UNIT-PROVENANCE (implemented on dev; exact-head Quality pending)
+
+Started from exact dev `7b26c222cc1e75b0712c14396af7d879b9729f4c` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (441 commits ahead, zero behind). Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, the unified implementation plan, engineering architecture/catalog, Structural Engineering catalog and Truss FEM source/tests. Both previous exact-head Quality workflows passed all 218 steps: Push [#45047746392](https://github.com/saeedsai/ProMathStudio/actions/runs/45047746392) and PR [#45047751869](https://github.com/saeedsai/ProMathStudio/actions/runs/45047751869).
+
+Completed the queued Truss JSON optional-property unit-provenance slice. The canonical `describeUnits` contract now reports density (kg/m³), second moment I (m⁴ for legacy SI or mm⁴ for Studio) and effective-length factor K (dimensionless), alongside coordinates, force, modulus and area units. These values describe the input file and are not inferred from numeric magnitudes. The browser import status now reports the optional-property file units for both legacy and Studio JSON. Existing conversion, blank/zero density, independent I/K validation, IDs and FEM physics are unchanged.
+
+Updated the Node descriptor regression for both formats with zero/positive density and I/K present, and extended the real Chromium file-import round-trip to assert the displayed legacy and Studio optional-property units. Updated the structural contract, changelog and execution ledger. The standalone Truss page loads its adjacent JavaScript files; `index.html` synchronization is not applicable. No frozen inventory counts changed: **166 gaps / 95 partial**.
+
+The local workspace still has no checkout (`/mnt/data/ProMathStudio` absent; bounded `git rev-parse` failed), so repository Node/Playwright commands cannot be run locally. Exact-head GitHub Quality must execute the new Node and Chromium assertions before certification. No merge or deployment is claimed.
+
+**NEXT FIVE (status and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Both Push and PR workflows green; run the expanded unit-descriptor Node test, the real legacy/current JSON browser round-trip, all 59 FEM Node tests, Truss CSV/SVG checks and 390px browser coverage.
+2. **P1 — Truss JSON boundary completion.** Exercise blank/null/zero density, I-only and K-only models, malformed UTF-8/BOM, exact/over 1 MiB payloads, duplicate/unknown keys and out-of-order asynchronous file selection; valid imports preserve IDs and failed imports preserve the existing model/result.
+3. **P1 — Truss export/member-isolation audit.** Verify CSV units/quoting/single BOM/CRLF, SVG XML/accessibility/semantic geometry, selected-member-only section application and no console/runtime errors.
+4. **Release governance.** Obtain an eligible independent PR #189 review and authorized verification of enforceable main protection and required checks; do not self-approve or bypass unavailable administration.
+5. **Authorized production promotion.** Only after exact-head CI, independent review and protection gates pass, merge through the ordinary dev-to-main PR; verify exact-main Quality, GitHub Pages and hosted assets/downloads.
+
 ## 2026-11-22 — TRUSS-SEVEN-SHAPE-INVALID-PREVIEW-ACCESSIBILITY (implemented on dev; exact-head Quality pending)
 
 Started from exact dev `b3c24d0ccc269d88be042f3c7b7438f362c565b5` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (440 commits ahead, zero behind). Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 feature inventory, Structural Truss FEM contract, source/browser tests, PR #189, branch refs, reviews and current CI/Pages evidence. The previous exact-head candidate passed both full Quality workflows: Push [#45041424278](https://github.com/saeedsai/ProMathStudio/actions/runs/45041424278) and PR [#45041429805](https://github.com/saeedsai/ProMathStudio/actions/runs/45041429805), each with all 218 steps successful and no failed/non-success steps.

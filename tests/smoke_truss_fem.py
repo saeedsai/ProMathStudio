@@ -78,6 +78,7 @@ def main():
             })
             page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
                 'Legacy SI input converted to Studio units.')""")
+            assert 'Optional property units in file: density kg/m³, I m⁴, K dimensionless.' in page.locator('#status').inner_text()
             assert page.locator('#nodes tr').count() == 2
             assert page.locator('#members tr').count() == 1
             assert page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').input_value() == '1'
@@ -110,6 +111,7 @@ def main():
             })
             page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
                 'Studio units retained from file.')""")
+            assert 'Optional property units in file: density kg/m³, I mm⁴, K dimensionless.' in page.locator('#status').inner_text()
             assert page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').input_value() == '1'
             studio_row = page.locator('#members tr').first
             assert studio_row.locator('input[data-field="E"]').input_value() == '200'

@@ -441,9 +441,12 @@
       const inputUnits=fem.describeUnits(imported);
       const model=fem.fromLegacy(imported);
       renderModel(model);
-      analyze(inputUnits.system==='legacy-si'
+      const unitNotice=inputUnits.system==='legacy-si'
         ? 'Legacy SI input converted to Studio units.'
-        : 'Studio units retained from file.');
+        : 'Studio units retained from file.';
+      const optionalUnitsNotice='Optional property units in file: density '+inputUnits.density+
+        ', I '+inputUnits.secondMoment+', K '+inputUnits.effectiveLengthFactor+'.';
+      analyze(unitNotice+' '+optionalUnitsNotice);
     } catch(err) {
       if(request!==importRequest)return;
       status('Import failed: '+err.message,true);

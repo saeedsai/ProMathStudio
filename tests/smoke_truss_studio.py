@@ -613,9 +613,9 @@ def main():
         # Two overlapping imports must be ordered by selection, not by File.text() completion.
         triangle_json = page.evaluate("() => ProMathTrussFEM.exportJSON(ProMathTrussFEM.examples.triangle)")
         page.evaluate("""() => {
-            const read = File.prototype.text;
+            const read = Blob.prototype.arrayBuffer;
             window.__importReads = [];
-            File.prototype.text = function() {
+            File.prototype.arrayBuffer = function() {
                 const name = this.name;
                 const delay = name === 'slow-invalid.json' ? 120 : 0;
                 return new Promise(resolve => setTimeout(resolve, delay))
@@ -636,12 +636,17 @@ def main():
         assert page.evaluate('window.__importReads') == ['fast-valid.json','slow-invalid.json']
         assert 'total member length 11.21 m' in page.locator('#preview-summary').inner_text()
         assert page.locator('#member-metrics tr').count() == 3
-        # Force File.text() to return a UTF-8 BOM, as some external editors include one.
-        # The browser UI must use the canonical importer rather than raw JSON.parse.
+        # Prepend actual UTF-8 BOM bytes; the canonical importer strips the decoded BOM.
         page.evaluate("""() => {
-            const read = File.prototype.text;
-            File.prototype.text = function() {
-                return read.call(this).then(value => String.fromCharCode(0xFEFF) + value);
+            const read = Blob.prototype.arrayBuffer;
+            File.prototype.arrayBuffer = function() {
+                return read.call(this).then(value => {
+                    const source = new Uint8Array(value);
+                    const prefixed = new Uint8Array(source.length + 3);
+                    prefixed.set([0xEF, 0xBB, 0xBF]);
+                    prefixed.set(source, 3);
+                    return prefixed.buffer;
+                });
             };
         }""")
         page.locator('#import-model').set_input_files({'name':'legacy.json','mimeType':'application/json',
@@ -696,13 +701,13 @@ def main():
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         # A malformed import must preserve the currently edited model.
-        # Hold File.text() open to verify the UI announces pending work before validation settles.
+        # Hold the byte read open to verify pending status before validation settles.
         page.evaluate('''() => {
-            const read = File.prototype.text;
+            const read = Blob.prototype.arrayBuffer;
             let release;
             const gate = new Promise(resolve => { release = resolve; });
             window.__releaseInvalidImport = release;
-            File.prototype.text = function() {
+            File.prototype.arrayBuffer = function() {
                 const pending = read.call(this);
                 return this.name === 'invalid.json' ? gate.then(() => pending) : pending;
             };
@@ -719,6 +724,20 @@ def main():
         assert page.locator('#status.error').count() == 1
         assert page.locator('#nodes tr').count() == 3
         assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'
+        # File.text() replaces malformed UTF-8; reject bytes that would silently corrupt IDs.
+        invalid_utf8 = json.dumps(prior).encode('utf-8').replace(b'"AB"', b'"A\xff"', 1)
+        assert b'\xff' in invalid_utf8
+        page.locator('#import-model').set_input_files({'name':'invalid-utf8.json','mimeType':'application/json',
+                                                      'buffer':invalid_utf8})
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status.classList.contains('error') && status.getAttribute('aria-busy') === 'false';
+        }""")
+        assert 'valid UTF-8' in page.locator('#status').inner_text()
+        assert page.locator('#nodes tr').count() == 3
+        assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'
+        assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
+        page.evaluate('''() => { File.prototype.arrayBuffer = Blob.prototype.arrayBuffer; }''')
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         page.locator('#export-csv').click()

@@ -1,3 +1,15 @@
+## 2026-11-22 — TRUSS-STRICT-UTF8-MODEL-IMPORT
+
+- Starting dev: `f0d6d7802babfa135148d5ef78d3ed73fdbdb47f`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (425 ahead / 0 behind). PR #189 head/base match these exact refs.
+- Previous exact-head Push Quality [#44996339693](https://github.com/saeedsai/ProMathStudio/actions/runs/44996339693) and PR Quality [#44996343753](https://github.com/saeedsai/ProMathStudio/actions/runs/44996343753) both succeeded with all 218 steps and no failed steps.
+- Implemented strict UTF-8 browser import: read bounded file bytes through `Blob.arrayBuffer()`; decode using fatal UTF-8 with BOM preservation; reject malformed bytes before replacing model controls. Existing 1 MiB guard and latest-selection-wins request checks remain.
+- Regression: race test now delays byte reads; BOM test prepends actual EF BB BF bytes; invalid byte 0xFF inside an otherwise valid legacy member ID must be rejected with a clear error while preserving the original model and “AB” identifier.
+- Independent byte-level validation confirmed strict decoding rejects the malformed sequence and permissive replacement would silently change “AB” to “A�”. Full UI JavaScript V8 syntax compilation and source/test anchor checks passed. Local Playwright/Node unavailable because no checkout; new exact-head CI pending.
+- Updated Truss FEM compatibility contract, hourly plan, execution ledger and changelog in this atomic source/test commit. No FEM equations, solver, saved model schema or index.html bundle changes.
+- Release: PR #189 remains open with zero independent reviews; branches unprotected, rulesets empty, main protection read HTTP 403. Main Quality #41730966059 and Pages #41730962844 remain successful on `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Historical baseline remains 166 gaps / 95 partial. No merge or bypass.
+
+**NEXT FIVE:** (1) both exact-head workflows green with invalid UTF-8, BOM, race, analytical FEM and 390px regressions; (2) exact/over 1 MiB and multibyte UTF-8 size-boundary tests with rollback; (3) current/legacy JSON round-trip plus CSV units/quoting/CRLF and SVG export checks; (4) seven-shape invalid-state, keyboard/accessibility and desktop/mobile audit; (5) independent PR #189 review and verified main protection, then ordinary PR merge and exact-main Quality/Pages/hosted verification only after every gate.
+
 ## 2026-11-22 — TRUSS-SEVEN-SHAPE-CANONICAL-PREVIEW-METADATA
 
 ## 2026-11-22 — Truss Studio dimension-label accessibility
@@ -6,7 +18,7 @@
 - Previous exact-head Push Quality [#44992701174](https://github.com/saeedsai/ProMathStudio/actions/runs/44992701174) and PR Quality [#44992704217](https://github.com/saeedsai/ProMathStudio/actions/runs/44992704217) both succeeded on `6a61ffdbeadcc2130b14ffb38b5c35996750fb05`.
 - Implemented: centralized SVG dimension annotations for all seven cross-section shapes; every visible B/H/D/Do/Di/bi/hi/tw/tf/t label has `role="text"` and an accessible name repeating its exact formatted mm value. L-angle t joins the stable dimension-label contract.
 - Regression: shared Chromium helper verifies the complete expected label set, no duplicates/missing labels, SVG text role, units and visible/accessibility value parity for all seven shapes.
-- Checks: complete UI V8 syntax compilation, helper behavior with an SVG-node stub, source anchors and seven expected label sets passed. Local Playwright/Python AST unavailable because no checkout. New exact-head CI pending.
+- Checks: complete UI V8 syntax compilation, helper behavior with an SVG-node stub, source anchors and seven expected label sets passed. Local Playwright/Python AST unavailable because no checkout. Exact-head Push Quality #44996339693 and PR Quality #44996343753 subsequently passed all 218 steps each.
 - Release: PR #189 open, no independent reviews; main protection unverified (HTTP 403), rulesets empty. Main Quality #41730966059 and Pages #41730962844 remain successful on main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Historical inventory remains 166 gaps / 95 partial.
 - Exact new commit SHA is the containing Git commit for this entry.
 

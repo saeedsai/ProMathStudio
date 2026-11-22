@@ -411,8 +411,16 @@
     status('Importing model…',false,true);
     try {
       if(file.size>1024*1024)throw Error('Model JSON exceeds 1 MiB.');
-      const text=await file.text();
+      const bytes=await file.arrayBuffer();
       // A newer selection supersedes a slower earlier read; stale data/errors must not win.
+      if(request!==importRequest)return;
+      let text;
+      try {
+        // File.text() replaces malformed UTF-8, which can silently corrupt imported IDs.
+        text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
+      } catch (_) {
+        throw Error('Model JSON must be valid UTF-8.');
+      }
       if(request!==importRequest)return;
       const model=fem.fromLegacy(fem.importJSON(text));
       renderModel(model);analyze();

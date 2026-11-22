@@ -1,3 +1,8 @@
+## 2026-11-22 — Truss Studio strict UTF-8 model import
+- Read bounded model files as bytes and decode with fatal UTF-8 validation; malformed byte sequences are rejected instead of silently replacing bytes inside node/member identifiers.
+- Preserve a leading UTF-8 BOM for the canonical importer to strip; keep the 1 MiB file-size guard and stale-import request ordering.
+- Updated Chromium regressions for byte-read race ordering, real BOM bytes, invalid UTF-8 rejection and model rollback. Exact-head Quality pending; dev-only, not released.
+
 ## 2026-11-22 — Truss Studio seven-shape canonical preview metadata
 - 2026-11-22 — TRUSS-SEVEN-SHAPE-DIMENSION-LABEL-ACCESSIBILITY: centralized all SVG section-dimension labels across seven previews with explicit text roles and value-bearing accessible names; added exact expected-label/value-parity Chromium assertions for every shape. FEM calculations unchanged; exact-head Quality pending.
 

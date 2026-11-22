@@ -134,7 +134,7 @@
       svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
     }else if(angle){
       const t=thickness*scale,theta=properties.principalAxisAngleDegrees*Math.PI/180,axisLength=Math.max(18,Math.min(78,Math.hypot(w,h)*0.45));
-      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+t)+' V '+(y+h-t)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'l-angle'}));
+      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+t)+' V '+(y+h-t)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'l-angle','data-section-width-mm':width,'data-section-height-mm':height,'data-section-thickness-mm':thickness,'data-section-area-mm2':properties.area,'data-section-centroid-x-mm':properties.centroid.x,'data-section-centroid-y-mm':properties.centroid.y}));
       [
         {name:'major',label:'I₁',angle:theta,color:'#c47b19'},
         {name:'minor',label:'I₂',angle:theta+Math.PI/2,color:'#2b7a65'}

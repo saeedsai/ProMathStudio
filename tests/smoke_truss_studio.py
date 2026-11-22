@@ -413,6 +413,56 @@ def main():
         for expected in ('B=100 mm', 'H=80 mm', 't=10 mm',
                          'major principal axis 57.953°', 'minor principal axis 147.953°'):
             assert expected in page.locator('#section-sketch-caption').inner_text()
+        # Second asymmetric reference: canonical outline, centroid and principal axes.
+        page.locator('#section-width').fill('120')
+        page.locator('#section-height').fill('70')
+        page.locator('#section-angle-thickness').fill('12')
+        asymmetric_outline = page.locator('#section-sketch path[data-section-outline="l-angle"]')
+        assert asymmetric_outline.count() == 1
+        for attribute, expected in (
+            ('data-section-width-mm', 120), ('data-section-height-mm', 70),
+            ('data-section-thickness-mm', 12), ('data-section-area-mm2', 2136),
+            ('data-section-centroid-x-mm', 42.40449438202247),
+            ('data-section-centroid-y-mm', 17.40449438202247)
+        ):
+            assert abs(float(asymmetric_outline.get_attribute(attribute)) - expected) < 1e-9
+        asymmetric_major = page.locator('#section-sketch line[data-principal-axis="major"]')
+        asymmetric_minor = page.locator('#section-sketch line[data-principal-axis="minor"]')
+        assert asymmetric_major.count() == asymmetric_minor.count() == 1
+        assert abs(float(asymmetric_major.get_attribute('data-axis-angle-deg')) - 71.2856436104474) < 1e-9
+        assert abs(float(asymmetric_minor.get_attribute('data-axis-angle-deg')) - 161.2856436104474) < 1e-9
+        assert abs(float(asymmetric_minor.get_attribute('data-axis-angle-deg')) - float(asymmetric_major.get_attribute('data-axis-angle-deg')) - 90) < 1e-9
+        for axis in (asymmetric_major, asymmetric_minor):
+            assert abs(float(axis.get_attribute('data-centroid-x-mm')) - 42.40449438202247) < 1e-9
+            assert abs(float(axis.get_attribute('data-centroid-y-mm')) - 17.40449438202247) < 1e-9
+        for expected in ('B=120 mm', 'H=70 mm', 't=12 mm', 'major principal axis 71.286°', 'minor principal axis 161.286°'):
+            assert expected in page.locator('#section-sketch-caption').inner_text()
+        assert page.locator('#section-sketch').get_attribute('aria-label') == page.locator('#section-sketch-caption').inner_text()
+
+        # A 69.9 mm leg is valid for H=70 mm; exactly 70 mm is invalid.
+        page.locator('#section-angle-thickness').fill('69.9')
+        near_limit_outline = page.locator('#section-sketch path[data-section-outline="l-angle"]')
+        assert near_limit_outline.count() == 1
+        assert abs(float(near_limit_outline.get_attribute('data-section-area-mm2')) - 8394.99) < 1e-8
+        assert abs(float(near_limit_outline.get_attribute('data-section-centroid-x-mm')) - 59.97914238134888) < 1e-9
+        assert abs(float(near_limit_outline.get_attribute('data-section-centroid-y-mm')) - 34.97914238134888) < 1e-9
+        near_major = page.locator('#section-sketch line[data-principal-axis="major"]')
+        near_minor = page.locator('#section-sketch line[data-principal-axis="minor"]')
+        assert near_major.count() == near_minor.count() == 1
+        assert abs(float(near_major.get_attribute('data-axis-angle-deg')) - 89.94723327653608) < 1e-8
+        assert abs(float(near_minor.get_attribute('data-axis-angle-deg')) - 179.94723327653608) < 1e-8
+        assert abs(float(near_minor.get_attribute('data-axis-angle-deg')) - float(near_major.get_attribute('data-axis-angle-deg')) - 90) < 1e-9
+        assert page.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1")
+        page.locator('#section-angle-thickness').fill('70')
+        assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 0
+        assert page.locator('#section-sketch line[data-principal-axis]').count() == 0
+        assert page.locator('#section-sketch-caption').inner_text().startswith('Preview unavailable: enter positive B, H and t')
+
+        page.locator('#section-width').fill('100')
+        page.locator('#section-height').fill('80')
+        page.locator('#section-angle-thickness').fill('10')
+        assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 1
+        assert page.locator('#section-sketch line[data-principal-axis]').count() == 2
         page.locator('#section-axis').select_option('principal-major')
         assert page.locator('#section-axis').input_value() == 'principal-major'
         page.locator('#section-properties-apply').click()

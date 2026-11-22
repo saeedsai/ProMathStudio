@@ -1071,6 +1071,28 @@ test('L-angle section returns centroidal and principal properties with validated
  assert.throws(()=>fem.sectionProperties('l-angle',[]),/dimensions must be an object/);
 });
 
+
+test('L-angle asymmetric and near-limit valid references preserve principal invariants',()=>{
+ const references=[
+  {dimensions:{width:120,height:70,thickness:12},expected:{area:2136,cx:42.40449438202247,cy:17.40449438202247,ixx:787178.5168539326,iyy:3104578.5168539323,ixy:-886813.4831460675,i1:3404996.004888964,i2:486761.02881890116,angle:71.2856436104474}},
+  {dimensions:{width:120,height:70,thickness:69.9},expected:{area:8394.99,cx:59.97914238134888,cy:34.97914238134888,ixx:3423876.6161414036,iyy:10072828.691141404,ixy:-6123.379683596653,i1:10072834.330488255,i2:3423870.976794552,angle:89.94723327653608}}
+ ];
+ for(const {dimensions,expected} of references){
+  const section=fem.sectionProperties('l-angle',dimensions);
+  close(section.area,expected.area,1e-8); close(section.centroid.x,expected.cx,1e-9); close(section.centroid.y,expected.cy,1e-9);
+  close(section.secondMoment,expected.ixx,1e-6); close(section.secondMomentPerpendicular,expected.iyy,1e-6);
+  close(section.productOfInertia,expected.ixy,1e-6); close(section.principalMomentMajor,expected.i1,1e-6);
+  close(section.principalMomentMinor,expected.i2,1e-6); close(section.principalAxisAngleDegrees,expected.angle,1e-9);
+  close(section.principalMomentMajor+section.principalMomentMinor,section.secondMoment+section.secondMomentPerpendicular,1e-6);
+  const theta=section.principalAxisAngleDegrees*Math.PI/180;
+  close(section.productOfInertia*Math.cos(2*theta)+(section.secondMoment-section.secondMomentPerpendicular)*Math.sin(2*theta)/2,0,1e-6);
+  const determinantScale=Math.max(1,Math.abs(section.secondMoment*section.secondMomentPerpendicular));
+  assert.ok(Math.abs(section.principalMomentMajor*section.principalMomentMinor-(section.secondMoment*section.secondMomentPerpendicular-section.productOfInertia**2))<=1e-12*determinantScale);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+ assert.throws(()=>fem.sectionProperties('l-angle',{width:120,height:70,thickness:70}),/t < min\(B,H\)/);
+});
+
 test('legacy TrussStudio.solve retains its original member result shape',()=>{
  const result=globalThis.TrussStudio.solve(globalThis.TrussStudio.example);
  assert.deepEqual(Object.keys(result.members[0]).sort(),['force','id','strain','stress']);

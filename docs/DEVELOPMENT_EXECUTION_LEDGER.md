@@ -1,3 +1,11 @@
+## 2026-11-22 — TRUSS-L-ANGLE-SECOND-REFERENCE-AND-OUTLINE-METADATA
+
+Started from exact dev `e78d958247283e0681c98993ed9e0c1922b5173a`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (422 ahead / 0 behind). Verified previous Push Quality #44983302410 and PR Quality #44983306201 both green; all 218 steps passed, including Truss browser 212, FEM Node 214 and responsive 215.
+
+Added canonical L-angle outline metadata for B/H/t, area and centroid, then extended analytical Node and 390px Chromium regressions with independent 120×70×12 mm asymmetric and 120×70×69.9 mm near-limit references. Exact 70 mm thickness is rejected. Independent Python composite-rectangle calculations passed. V8 source and Node-test syntax compilation passed; local checkout is absent, so local Node/Playwright are unavailable. New exact-head Push/PR Quality remains pending. Updated the structural FEM contract, living plan and changelog in the same atomic commit. Main unchanged; PR #189 has no independent reviews; protection read 403 and rulesets empty; latest verified Pages remains 2026-11-03/main 70fc483c. Frozen inventory remains 166 gaps / 95 partial. No merge, bypass or branch deletion.
+
+**NEXT FIVE:** (1) exact-head Push/PR Quality green including steps 7/9/212/214/215; (2) seven-shape metadata/accessibility/invalid-recovery/390px consistency audit; (3) JSON/legacy-SI import/export and rollback compatibility; (4) CSV units/quoting/CRLF, SVG export, member isolation and zero console errors; (5) eligible PR #189 review and verified main protection, then ordinary PR merge and exact-main Quality/Pages/hosted verification only after every gate.
+
 ## 2026-11-22 — TRUSS-L-ANGLE-AXIS-CAPTION-PRECISION-CI-FIX-422
 
 Started from dev `be9e7e3d9b331047f6d56324157ecb31112b0980`; main remained `70fc483cb1cec3d2372d37484e4a8ef7942343da` (421 ahead / 0 behind). Inspected AGENTS.md, living plan, frozen inventory, Truss FEM docs, PR #189/reviews, branch refs and exact-head Push/PR Quality. Both #44978711329 and #44978715661 failed at step 212, line 413: the test expected `minor principal axis 147.953°`, while the existing five-significant-digit caption formatter rendered `147.95°`. This is a display/test precision mismatch, not a FEM result error; steps 7 and 9 passed and steps 213–215 were skipped.

@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss Studio L-angle second reference and canonical outline metadata
+
+- Added machine-readable L-angle SVG outline metadata for B/H/t, area and canonical centroid.
+- Added independent analytical references for an asymmetric 120×70×12 mm section and a near-limit valid 120×70×69.9 mm section; the exact 70 mm boundary remains rejected.
+- Extended Chromium coverage for both principal-axis angles/centroid, accessible caption parity, metadata, invalid clearing/recovery and 390px no-overflow. Exact-head Quality pending; dev-only, not released.
+
 ## 2026-11-22 — Truss Studio L-angle principal-axis caption precision and regression
 
 - Fixed the observed exact-head browser failure by formatting both L-angle principal-axis caption angles to a consistent three decimal places (57.953° / 147.953°); the prior five-significant-digit formatter displayed the minor angle as 147.95°.

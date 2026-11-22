@@ -75,6 +75,36 @@ def assert_section_preview_metadata(page, selector, width_mm, height_mm, area_mm
     assert page.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1")
 
 
+def assert_invalid_section_preview(page, label):
+    svg = page.locator('#section-sketch')
+    caption = page.locator('#section-sketch-caption').inner_text()
+    assert caption.startswith('Preview unavailable:'), (label, caption)
+    assert svg.get_attribute('aria-label') == caption, (label, caption)
+    assert svg.locator('desc').text_content() == caption, (label, svg.locator('desc').text_content(), caption)
+    stale = svg.locator('[data-section-outline], [data-centroid], [data-centroid-axis], [data-principal-axis], [data-dimension-label]')
+    assert stale.count() == 0, (label, stale.count())
+    assert svg.locator('text').count() == 1, label
+
+
+def assert_recovered_section_preview(page, label):
+    svg = page.locator('#section-sketch')
+    caption = page.locator('#section-sketch-caption').inner_text()
+    assert svg.locator('[data-section-outline]').count() >= 1, label
+    assert svg.locator('circle[data-centroid]').count() == 1, label
+    assert svg.locator('line[data-centroid-axis], line[data-principal-axis]').count() == 2, label
+    assert caption and not caption.startswith('Preview unavailable:'), (label, caption)
+    assert svg.get_attribute('aria-label') == caption, (label, caption)
+    assert 'Preview unavailable:' not in svg.locator('desc').text_content(), label
+    assert page.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1")
+
+
+def set_nan_number_input(page, field_id):
+    is_nan = page.locator('#' + field_id).evaluate(
+        "(input) => { input.value='NaN'; input.dispatchEvent(new Event('input',{bubbles:true})); return input.type==='number' && input.value==='' && Number.isNaN(input.valueAsNumber); }"
+    )
+    assert is_nan, field_id
+
+
 def main():
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True, executable_path=os.getenv('CHROMIUM_PATH') or None, args=['--no-sandbox'])
@@ -557,6 +587,47 @@ def main():
         assert 'Not applied' in page.locator('#section-result').inner_text()
         assert abs(float(ab_area.input_value())-1700) < 1e-9
         assert abs(float(ab_i.input_value())-489010.48725446186) < 1e-7
+        # Systematically verify every supported section shape clears stale SVG metadata
+        # for zero, negative, NaN/empty-number and arithmetic-overflow inputs, then recovers.
+        invalid_shape_cases = [
+            ('rectangle', {'section-width': '40', 'section-height': '60'},
+             'section-width', '40', 'section-width', '40'),
+            ('solid-circle', {'section-diameter': '40'},
+             'section-diameter', '40', 'section-diameter', '40'),
+            ('hollow-rectangle', {'section-width': '100', 'section-height': '80',
+                                  'section-inner-width': '80', 'section-inner-height': '60'},
+             'section-inner-width', '80', 'section-width', '100'),
+            ('hollow-circle', {'section-diameter': '100', 'section-inner-diameter': '80'},
+             'section-inner-diameter', '80', 'section-diameter', '100'),
+            ('channel', {'section-width': '100', 'section-height': '80',
+                         'section-web-thickness': '10', 'section-flange-thickness': '8'},
+             'section-web-thickness', '10', 'section-width', '100'),
+            ('i-section', {'section-width': '100', 'section-height': '80',
+                           'section-web-thickness': '10', 'section-flange-thickness': '8'},
+             'section-web-thickness', '10', 'section-width', '100'),
+            ('l-angle', {'section-width': '100', 'section-height': '80',
+                         'section-angle-thickness': '10'},
+             'section-angle-thickness', '10', 'section-width', '100'),
+        ]
+        for shape, valid_values, invalid_field, invalid_recovery, overflow_field, overflow_recovery in invalid_shape_cases:
+            page.locator('#section-shape').select_option(shape)
+            for field_id, value in valid_values.items():
+                page.locator('#' + field_id).fill(value)
+            assert_recovered_section_preview(page, shape + ' initial valid geometry')
+            for invalid_value in ('0', '-1'):
+                page.locator('#' + invalid_field).fill(invalid_value)
+                assert_invalid_section_preview(page, shape + ' invalid ' + invalid_value)
+                page.locator('#' + invalid_field).fill(invalid_recovery)
+                assert_recovered_section_preview(page, shape + ' recovery ' + invalid_value)
+            set_nan_number_input(page, invalid_field)
+            assert_invalid_section_preview(page, shape + ' NaN number-control state')
+            page.locator('#' + invalid_field).fill(invalid_recovery)
+            assert_recovered_section_preview(page, shape + ' NaN recovery')
+            page.locator('#' + overflow_field).fill('1e308')
+            assert_invalid_section_preview(page, shape + ' arithmetic overflow')
+            page.locator('#' + overflow_field).fill(overflow_recovery)
+            assert_recovered_section_preview(page, shape + ' overflow recovery')
+
         # Restore the example values before solver and export regressions below.
         ab_area.fill('1200')
         ab_i.fill('')

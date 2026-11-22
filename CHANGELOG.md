@@ -1,3 +1,7 @@
+## 2026-11-22 — Truss seven-shape invalid-preview accessibility (dev; exact-head QA pending)
+
+Updated the section-preview invalid path so the SVG `<desc>` referenced by `aria-labelledby` reports the same unavailable message as the live caption and root `aria-label`. Added mandatory Chromium coverage for all seven section shapes across zero, negative, NaN/empty-number and arithmetic-overflow inputs, asserting stale outline/centroid/axis/dimension metadata is removed and valid recovery restores geometry and accessible description. No FEM equations or saved-model schema changed. Exact-head Push/PR Quality pending.
+
 ## 2026-11-22 — Correct CSV helper regression capture scope
 
 Post-commit readback caught the new terminal-byte/empty-Blob fields attached to the existing results/material/SVG aggregate capture rather than the dedicated helper fixture. Restored the aggregate capture unchanged and moved the assertions into the direct helper test. No production export behavior or existing result assertions changed. Exact-head CI must verify the corrected test.

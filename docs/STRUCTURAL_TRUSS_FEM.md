@@ -1,6 +1,6 @@
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
-**Status:** solid, concentric hollow, open-channel, I-section and L-angle helpers report area, centroidal Ixx/Iyy, Sx/Sy and rx/ry on dev. Live previews cover all seven supported section shapes with canonical geometry metadata and accessible dimension/axis labels. Current dev candidate repairs an exact-head Truss browser regression that parsed the material CSV instead of the SVG; the standalone SVG now also declares a deterministic aspect-ratio policy. Fresh Push/PR Quality is pending. No Truss Studio changes in this sequence are released; PR review and main Pages promotion remain pending.
+**Status:** solid, concentric hollow, open-channel, I-section and L-angle helpers report area, centroidal Ixx/Iyy, Sx/Sy and rx/ry on dev. Live previews cover all seven supported section shapes with canonical geometry metadata and accessible dimension/axis labels. Current dev candidate synchronizes the referenced SVG description with the live unavailable message whenever invalid dimensions clear the preview; systematic zero, negative, NaN/empty-number and arithmetic-overflow recovery checks cover all seven shapes. Exact-head Push/PR Quality is pending. No Truss Studio changes in this sequence are released; PR review and main Pages promotion remain pending.
 
 ## How to use
 
@@ -17,6 +17,7 @@ Every valid section preview exposes one outer outline with the same canonical mi
 - Circular outlines additionally expose `data-section-diameter-mm` and, for a hollow circle, `data-section-inner-diameter-mm`. Hollow rectangles expose inner width/height on the outer and inner outlines. Channels and I-sections retain web/flange thickness metadata; L-angles retain leg thickness.
 - Every dimension annotation (B, H, D/Do/Di, bi/hi, tw/tf and L-angle t) has a stable `data-dimension-label`, SVG text role and an accessible name that includes its formatted millimetre value. The browser regression checks the complete expected dimension-label set and exact visible/accessibility value parity for all seven shapes.
 - Horizontal/vertical `Ixx`/`Iyy` labels have explicit accessible names and text roles. The SVG title, description and visible caption remain synchronized through the root `aria-label`.
+- When any required dimension is invalid or a computed property overflows/underflows, the preview removes all stale outlines, centroid/axis markers and dimension metadata. Because `aria-labelledby` references the SVG title and description, the `<desc>` is updated to the same unavailable message as the live caption and root `aria-label`; correcting the input restores the shape-specific description and canonical geometry. The browser regression exercises zero, negative, NaN/empty-number and arithmetic-overflow states plus recovery for all seven shapes.
 
 This is presentation metadata, not a second calculation API. The FEM helper remains the sole source of area and centroid values. The Chromium regression checks all seven shapes at a 390px viewport against independent reference values and verifies the outline, centroid marker, axis metadata, title/description/caption and accessible axis labels.
 

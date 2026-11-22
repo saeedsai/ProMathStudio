@@ -80,6 +80,10 @@
     const webThickness=composite?Number($('section-web-thickness').value):null,flangeThickness=composite?Number($('section-flange-thickness').value):null;
     const thickness=angle?Number($('section-angle-thickness').value):null;
     const unavailable=message=>{
+      // aria-labelledby references this description, so keep the SVG's accessible
+      // description in sync with the live caption whenever geometry is unavailable.
+      const descriptionNode=svg.querySelector('#section-sketch-desc');
+      if(descriptionNode) descriptionNode.textContent=message;
       svg.append(svgNode('text',{x:180,y:126,'text-anchor':'middle','font-size':12,fill:'currentColor'},message));
       caption.textContent=message;svg.setAttribute('aria-label',message);
     };

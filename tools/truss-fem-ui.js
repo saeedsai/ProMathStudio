@@ -146,7 +146,7 @@
         svg.append(svgNode('line',{x1,y1,x2,y2,stroke:axis.color,'stroke-width':2.2,'stroke-dasharray':'6 4','data-principal-axis':axis.name,'data-axis-angle-deg':axis.angle*180/Math.PI,'data-centroid-x-mm':properties.centroid.x,'data-centroid-y-mm':properties.centroid.y}));
         svg.append(svgNode('text',{x:x2+5,y:y2-5,fill:axis.color,'font-size':11,'font-weight':'600','data-principal-axis-label':axis.name,role:'text','aria-label':axis.name==='major'?'Major principal axis I1':'Minor principal axis I2','data-axis-angle-deg':axis.angle*180/Math.PI},axis.label));
       });
-      svg.append(svgNode('text',{x:x+w-62,y:y+h-t/2+4,fill:'#20364f','font-size':10,'font-weight':'600'},'t='+fmt(thickness,4)+' mm'));
+      svg.append(dimensionLabel('t',thickness,{x:x+w-62,y:y+h-t/2+4,fill:'#20364f','font-size':10,'font-weight':'600'}));
     }else{
       const innerW=hollowRectangle?innerWidth*scale:0,innerH=hollowRectangle?innerHeight*scale:0;
       const innerX=x+(w-innerW)/2,innerY=y+(h-innerH)/2;
@@ -163,33 +163,33 @@
     if(circle){
       const dimensionY=y+h+18,outerLabel=hollowCircle?'Do':'D';
       svg.append(svgNode('line',{x1:x,y1:dimensionY,x2:x+w,y2:dimensionY,stroke:'currentColor','stroke-width':1,'data-dimension':outerLabel}));
-      svg.append(svgNode('text',{x:cx,y:dimensionY+14,'text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':outerLabel},outerLabel+'='+fmt(diameter,4)+' mm'));
+      svg.append(dimensionLabel(outerLabel,diameter,{x:cx,y:dimensionY+14,'text-anchor':'middle',fill:'currentColor','font-size':11}));
       if(hollowCircle){
         const innerX1=x+(diameter-innerDiameter)*scale/2,innerX2=x+(diameter+innerDiameter)*scale/2,innerY=dimensionY+22;
         svg.append(svgNode('line',{x1:innerX1,y1:innerY,x2:innerX2,y2:innerY,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'Di'}));
-        svg.append(svgNode('text',{x:(innerX1+innerX2)/2,y:innerY+14,'text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'Di'},'Di='+fmt(innerDiameter,4)+' mm'));
+        svg.append(dimensionLabel('Di',innerDiameter,{x:(innerX1+innerX2)/2,y:innerY+14,'text-anchor':'middle',fill:'currentColor','font-size':11}));
       }
     }else{
       const dimensionY=y+h+18,dimensionX=x-20;
       svg.append(svgNode('line',{x1:x,y1:dimensionY,x2:x+w,y2:dimensionY,stroke:'currentColor','stroke-width':1,'data-dimension':'B'}));
-      svg.append(svgNode('text',{x:x+w/2,y:dimensionY+15,'text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'B'},'B='+fmt(width,4)+' mm'));
+      svg.append(dimensionLabel('B',width,{x:x+w/2,y:dimensionY+15,'text-anchor':'middle',fill:'currentColor','font-size':11}));
       svg.append(svgNode('line',{x1:dimensionX,y1:y,x2:dimensionX,y2:y+h,stroke:'currentColor','stroke-width':1,'data-dimension':'H'}));
-      svg.append(svgNode('text',{x:dimensionX-7,y:y+h/2,transform:'rotate(-90 '+(dimensionX-7)+' '+(y+h/2)+')','text-anchor':'middle',fill:'currentColor','font-size':11,'data-dimension-label':'H'},'H='+fmt(height,4)+' mm'));
+      svg.append(dimensionLabel('H',height,{x:dimensionX-7,y:y+h/2,transform:'rotate(-90 '+(dimensionX-7)+' '+(y+h/2)+')','text-anchor':'middle',fill:'currentColor','font-size':11}));
       if(composite){
         const tw=webThickness*scale,tf=flangeThickness*scale;
         if(channel){
           const twY=y+h-tf-Math.min(8,tf*0.4),tfX=x+tw+Math.min(20,(w-tw)*0.25);
           svg.append(svgNode('line',{x1:x,y1:twY,x2:x+tw,y2:twY,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'tw'}));
-          svg.append(svgNode('text',{x:x+tw+5,y:twY-4,fill:'currentColor','font-size':10,'data-dimension-label':'tw'},'tw='+fmt(webThickness,4)+' mm'));
+          svg.append(dimensionLabel('tw',webThickness,{x:x+tw+5,y:twY-4,fill:'currentColor','font-size':10}));
           svg.append(svgNode('line',{x1:tfX,y1:y,x2:tfX,y2:y+tf,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'tf'}));
-          svg.append(svgNode('text',{x:tfX+5,y:y+tf+11,fill:'currentColor','font-size':10,'data-dimension-label':'tf'},'tf='+fmt(flangeThickness,4)+' mm'));
+          svg.append(dimensionLabel('tf',flangeThickness,{x:tfX+5,y:y+tf+11,fill:'currentColor','font-size':10}));
         }else{
           const webLeft=x+(width-webThickness)*scale/2,webRight=webLeft+tw;
           const twY=cy+Math.min(12,tf*0.55),tfX=x+w-Math.min(16,w*0.12);
           svg.append(svgNode('line',{x1:webLeft,y1:twY,x2:webRight,y2:twY,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'tw'}));
-          svg.append(svgNode('text',{x:webRight+5,y:twY-4,fill:'currentColor','font-size':10,'data-dimension-label':'tw'},'tw='+fmt(webThickness,4)+' mm'));
+          svg.append(dimensionLabel('tw',webThickness,{x:webRight+5,y:twY-4,fill:'currentColor','font-size':10}));
           svg.append(svgNode('line',{x1:tfX,y1:y,x2:tfX,y2:y+tf,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'tf'}));
-          svg.append(svgNode('text',{x:tfX+5,y:y+tf+11,fill:'currentColor','font-size':10,'data-dimension-label':'tf'},'tf='+fmt(flangeThickness,4)+' mm'));
+          svg.append(dimensionLabel('tf',flangeThickness,{x:tfX+5,y:y+tf+11,fill:'currentColor','font-size':10}));
         }
       }
       if(hollowRectangle){
@@ -198,8 +198,8 @@
         const biY=cy+Math.min(7,innerH*0.12),hiX=cx+Math.min(7,innerW*0.12);
         svg.append(svgNode('line',{x1:innerX,y1:biY,x2:innerX+innerW,y2:biY,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'bi'}));
         svg.append(svgNode('line',{x1:hiX,y1:innerY,x2:hiX,y2:innerY+innerH,stroke:'currentColor','stroke-width':1,'stroke-dasharray':'3 2','data-dimension':'hi'}));
-        svg.append(svgNode('text',{x:cx-40,y:dimensionY+32,'text-anchor':'middle',fill:'currentColor','font-size':10,'data-dimension-label':'bi'},'bi='+fmt(innerWidth,4)+' mm'));
-        svg.append(svgNode('text',{x:cx+44,y:dimensionY+32,'text-anchor':'middle',fill:'currentColor','font-size':10,'data-dimension-label':'hi'},'hi='+fmt(innerHeight,4)+' mm'));
+        svg.append(dimensionLabel('bi',innerWidth,{x:cx-40,y:dimensionY+32,'text-anchor':'middle',fill:'currentColor','font-size':10}));
+        svg.append(dimensionLabel('hi',innerHeight,{x:cx+44,y:dimensionY+32,'text-anchor':'middle',fill:'currentColor','font-size':10}));
       }
     }
     const summary=channel
@@ -297,6 +297,7 @@
   }
   function invalidate(){latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
+  function dimensionLabel(name,value,attrs){const formatted=fmt(value,4);return svgNode('text',{...attrs,'data-dimension-label':name,role:'text','aria-label':'Section dimension '+name+': '+formatted+' millimetres'},name+'='+formatted+' mm');}
   function updatePreview() {
     try {
       const info=fem.inspectJSON(fem.exportJSON(readModel()));

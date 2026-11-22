@@ -18,7 +18,8 @@ HTML = HTML.replace('</body>', '<script>' + (ROOT / 'tools' / 'truss-fem.js').re
 
 
 def assert_section_preview_metadata(page, selector, width_mm, height_mm, area_mm2,
-                                    centroid_x_mm, centroid_y_mm, centroidal_axes=True):
+                                    centroid_x_mm, centroid_y_mm, centroidal_axes=True,
+                                    dimension_labels=('B', 'H')):
     svg = page.locator('#section-sketch')
     outline = svg.locator(selector)
     assert outline.count() == 1, selector
@@ -51,6 +52,17 @@ def assert_section_preview_metadata(page, selector, width_mm, height_mm, area_mm
     assert svg.locator('desc').text_content()
     caption = page.locator('#section-sketch-caption').inner_text()
     assert caption and svg.get_attribute('aria-label') == caption
+    dimensions = svg.locator('text[data-dimension-label]').evaluate_all(
+        "(nodes) => nodes.map(node => ({name:node.getAttribute('data-dimension-label'), text:node.textContent, accessible:node.getAttribute('aria-label'), role:node.getAttribute('role')}))"
+    )
+    assert len(dimensions) == len(dimension_labels), (selector, dimensions, dimension_labels)
+    assert {item['name'] for item in dimensions} == set(dimension_labels), (selector, dimensions, dimension_labels)
+    for item in dimensions:
+        assert item['role'] == 'text', (selector, item)
+        assert item['text'].startswith(item['name'] + '='), (selector, item)
+        value_text = item['text'].split('=', 1)[1]
+        assert value_text.endswith(' mm'), (selector, item)
+        assert item['accessible'] == f"Section dimension {item['name']}: {value_text[:-3]} millimetres", (selector, item)
     if centroidal_axes:
         for visible, accessible in (
             ('Ixx', 'Horizontal centroidal axis Ixx'),
@@ -97,7 +109,7 @@ def main():
         page.locator('#section-shape').select_option('rectangle')
         page.locator('#section-width').fill('40')
         page.locator('#section-height').fill('60')
-        assert_section_preview_metadata(page, 'path[data-section-outline="rectangle"]', 40, 60, 2400, 20, 30)
+        assert_section_preview_metadata(page, 'path[data-section-outline="rectangle"]', 40, 60, 2400, 20, 30, dimension_labels=('B', 'H'))
         page.locator('#section-properties-apply').click()
         ab_area = page.locator('#members tr').nth(0).locator('input[data-field="area"]')
         ab_i = page.locator('#members tr').nth(0).locator('input[data-field="I"]')
@@ -115,7 +127,7 @@ def main():
         page.locator('#section-shape').select_option('solid-circle')
         assert page.locator('#section-diameter-control').is_visible()
         page.locator('#section-diameter').fill('40')
-        assert_section_preview_metadata(page, 'circle[data-section-outline="solid-circle"]', 40, 40, 400 * math.pi, 20, 20)
+        assert_section_preview_metadata(page, 'circle[data-section-outline="solid-circle"]', 40, 40, 400 * math.pi, 20, 20, dimension_labels=('D',))
         # Solid-circle preview reuses the canonical centroid and shows both perpendicular diameter axes.
         assert page.locator('#section-sketch-control').is_visible()
         assert page.locator('#section-sketch circle[data-section-outline="solid-circle"]').count() == 1
@@ -156,7 +168,7 @@ def main():
         page.locator('#section-height').fill('80')
         page.locator('#section-inner-width').fill('80')
         page.locator('#section-inner-height').fill('60')
-        assert_section_preview_metadata(page, 'path[data-section-outline="hollow-rectangle-outer"]', 100, 80, 3200, 50, 40)
+        assert_section_preview_metadata(page, 'path[data-section-outline="hollow-rectangle-outer"]', 100, 80, 3200, 50, 40, dimension_labels=('B', 'H', 'bi', 'hi'))
         page.locator('#section-axis').select_option('depth')
         # Hollow-rectangle preview uses the canonical centered void and exposes all four dimensions.
         assert page.locator('#section-sketch-control').is_visible()
@@ -215,7 +227,7 @@ def main():
         assert page.locator('#section-axis-control').is_hidden()
         page.locator('#section-diameter').fill('100')
         page.locator('#section-inner-diameter').fill('80')
-        assert_section_preview_metadata(page, 'circle[data-section-outline="hollow-circle-outer"]', 100, 100, 900 * math.pi, 50, 50)
+        assert_section_preview_metadata(page, 'circle[data-section-outline="hollow-circle-outer"]', 100, 100, 900 * math.pi, 50, 50, dimension_labels=('Do', 'Di'))
         # Hollow-circle preview uses canonical properties, concentric inner/outer outlines and both diameter axes.
         assert page.locator('#section-sketch-control').is_visible()
         assert page.locator('#section-sketch circle[data-section-outline="hollow-circle-outer"]').count() == 1
@@ -306,7 +318,7 @@ def main():
         page.locator('#section-height').fill('80')
         page.locator('#section-web-thickness').fill('10')
         page.locator('#section-flange-thickness').fill('8')
-        assert_section_preview_metadata(page, 'path[data-section-outline="i-section"]', 100, 80, 2240, 50, 40)
+        assert_section_preview_metadata(page, 'path[data-section-outline="i-section"]', 100, 80, 2240, 50, 40, dimension_labels=('B', 'H', 'tw', 'tf'))
         # I-section preview must show a centered web and equal full-width flanges.
         assert page.locator('#section-sketch-control').is_visible()
         i_outline = page.locator('#section-sketch path[data-section-outline="i-section"]')
@@ -365,7 +377,7 @@ def main():
         page.locator('#section-height').fill('80')
         page.locator('#section-web-thickness').fill('10')
         page.locator('#section-flange-thickness').fill('8')
-        assert_section_preview_metadata(page, 'path[data-section-outline="channel"]', 100, 80, 2240, 37.142857142857146, 40)
+        assert_section_preview_metadata(page, 'path[data-section-outline="channel"]', 100, 80, 2240, 37.142857142857146, 40, dimension_labels=('B', 'H', 'tw', 'tf'))
         # Open-channel preview uses the canonical offset centroid and web-left/flanges-right geometry.
         assert page.locator('#section-sketch-control').is_visible()
         channel_outline = page.locator('#section-sketch path[data-section-outline="channel"]')
@@ -436,7 +448,7 @@ def main():
         page.locator('#section-width').fill('100')
         page.locator('#section-height').fill('80')
         page.locator('#section-angle-thickness').fill('10')
-        assert_section_preview_metadata(page, 'path[data-section-outline="l-angle"]', 100, 80, 1700, 31.470588235294116, 21.470588235294116, centroidal_axes=False)
+        assert_section_preview_metadata(page, 'path[data-section-outline="l-angle"]', 100, 80, 1700, 31.470588235294116, 21.470588235294116, centroidal_axes=False, dimension_labels=('B', 'H', 't'))
         assert page.locator('#section-sketch-control').is_visible()
         assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 1
         assert page.locator('#section-sketch circle[data-centroid]').count() == 1

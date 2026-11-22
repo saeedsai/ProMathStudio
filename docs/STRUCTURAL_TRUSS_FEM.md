@@ -15,6 +15,7 @@ Every valid section preview exposes one outer outline with the same canonical mi
 - `data-section-area-mm2`, `data-section-centroid-x-mm` and `data-section-centroid-y-mm` come directly from the canonical `sectionProperties` result.
 - The centroid marker exposes `data-centroid-x-mm` and `data-centroid-y-mm`; each centroidal axis (or each L-angle principal axis) exposes the same coordinates.
 - Circular outlines additionally expose `data-section-diameter-mm` and, for a hollow circle, `data-section-inner-diameter-mm`. Hollow rectangles expose inner width/height on the outer and inner outlines. Channels and I-sections retain web/flange thickness metadata; L-angles retain leg thickness.
+- Every dimension annotation (B, H, D/Do/Di, bi/hi, tw/tf and L-angle t) has a stable `data-dimension-label`, SVG text role and an accessible name that includes its formatted millimetre value. The browser regression checks the complete expected dimension-label set and exact visible/accessibility value parity for all seven shapes.
 - Horizontal/vertical `Ixx`/`Iyy` labels have explicit accessible names and text roles. The SVG title, description and visible caption remain synchronized through the root `aria-label`.
 
 This is presentation metadata, not a second calculation API. The FEM helper remains the sole source of area and centroid values. The Chromium regression checks all seven shapes at a 390px viewport against independent reference values and verifies the outline, centroid marker, axis metadata, title/description/caption and accessible axis labels.

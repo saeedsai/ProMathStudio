@@ -1,4 +1,5 @@
 ## 2026-11-22 — Truss Studio seven-shape canonical preview metadata
+- 2026-11-22 — TRUSS-SEVEN-SHAPE-DIMENSION-LABEL-ACCESSIBILITY: centralized all SVG section-dimension labels across seven previews with explicit text roles and value-bearing accessible names; added exact expected-label/value-parity Chromium assertions for every shape. FEM calculations unchanged; exact-head Quality pending.
 
 - Standardized bounding width/height, area and centroid metadata across all seven supported section outlines; added circle diameters and hollow-section inner dimensions.
 - Added canonical centroid coordinates to the centroid marker and centroidal/principal axis lines.

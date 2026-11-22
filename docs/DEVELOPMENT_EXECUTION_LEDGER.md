@@ -1,5 +1,16 @@
 ## 2026-11-22 — TRUSS-SEVEN-SHAPE-CANONICAL-PREVIEW-METADATA
 
+## 2026-11-22 — Truss Studio dimension-label accessibility
+
+- Starting dev: `6a61ffdbeadcc2130b14ffb38b5c35996750fb05`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (424 ahead / 0 behind).
+- Previous exact-head Push Quality [#44992701174](https://github.com/saeedsai/ProMathStudio/actions/runs/44992701174) and PR Quality [#44992704217](https://github.com/saeedsai/ProMathStudio/actions/runs/44992704217) both succeeded on `6a61ffdbeadcc2130b14ffb38b5c35996750fb05`.
+- Implemented: centralized SVG dimension annotations for all seven cross-section shapes; every visible B/H/D/Do/Di/bi/hi/tw/tf/t label has `role="text"` and an accessible name repeating its exact formatted mm value. L-angle t joins the stable dimension-label contract.
+- Regression: shared Chromium helper verifies the complete expected label set, no duplicates/missing labels, SVG text role, units and visible/accessibility value parity for all seven shapes.
+- Checks: complete UI V8 syntax compilation, helper behavior with an SVG-node stub, source anchors and seven expected label sets passed. Local Playwright/Python AST unavailable because no checkout. New exact-head CI pending.
+- Release: PR #189 open, no independent reviews; main protection unverified (HTTP 403), rulesets empty. Main Quality #41730966059 and Pages #41730962844 remain successful on main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Historical inventory remains 166 gaps / 95 partial.
+- Exact new commit SHA is the containing Git commit for this entry.
+
+
 Started from exact dev `3c76b0b7ba35859596c1fb61088841580e7bfb6d`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (423 ahead / 0 behind). Verified the previous L-angle asymmetric/near-limit increment: Push Quality #44987725356 and PR Quality #44987729415 both succeeded on `3c76b0b7ba35859596c1fb61088841580e7bfb6d`; both jobs completed 218 steps with no failures.
 
 Standardized canonical SVG metadata across all seven supported cross-sections: bounding width/height, area and centroid on every outer outline; diameter/inner-diameter and hollow-rectangle void dimensions where applicable; centroid millimetre coordinates on the marker and both centroidal/principal axes. Added accessible names/text roles to horizontal Ixx and vertical Iyy labels. Added a shared Chromium regression helper invoked for all seven shapes, checking independent area/centroid references, outline/marker/axis parity, SVG title/description/caption synchronization, accessible labels and no horizontal overflow at 390px. No FEM formula or solver changes.

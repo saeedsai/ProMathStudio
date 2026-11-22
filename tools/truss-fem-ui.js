@@ -141,7 +141,7 @@
         const x1=cx-axisLength*Math.cos(axis.angle),y1=cy+axisLength*Math.sin(axis.angle);
         const x2=cx+axisLength*Math.cos(axis.angle),y2=cy-axisLength*Math.sin(axis.angle);
         svg.append(svgNode('line',{x1,y1,x2,y2,stroke:axis.color,'stroke-width':2.2,'stroke-dasharray':'6 4','data-principal-axis':axis.name,'data-axis-angle-deg':axis.angle*180/Math.PI,'data-centroid-x-mm':properties.centroid.x,'data-centroid-y-mm':properties.centroid.y}));
-        svg.append(svgNode('text',{x:x2+5,y:y2-5,fill:axis.color,'font-size':11,'font-weight':'600','data-principal-axis-label':axis.name},axis.label));
+        svg.append(svgNode('text',{x:x2+5,y:y2-5,fill:axis.color,'font-size':11,'font-weight':'600','data-principal-axis-label':axis.name,role:'text','aria-label':axis.name==='major'?'Major principal axis I1':'Minor principal axis I2'},axis.label));
       });
       svg.append(svgNode('text',{x:x+w-62,y:y+h-t/2+4,fill:'#20364f','font-size':10,'font-weight':'600'},'t='+fmt(thickness,4)+' mm'));
     }else{

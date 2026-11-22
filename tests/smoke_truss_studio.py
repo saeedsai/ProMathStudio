@@ -401,8 +401,13 @@ def main():
             assert abs((endpoints['y1'] + endpoints['y2']) / 2 - centroid['y']) < 1e-6
             assert abs(float(axis.get_attribute('data-centroid-x-mm')) - 31.470588235294116) < 1e-9
             assert abs(float(axis.get_attribute('data-centroid-y-mm')) - 21.470588235294116) < 1e-9
-        assert page.locator('#section-sketch text[data-principal-axis-label="major"]').inner_text() == 'I₁'
-        assert page.locator('#section-sketch text[data-principal-axis-label="minor"]').inner_text() == 'I₂'
+        major_axis_label = page.locator('#section-sketch text[data-principal-axis-label="major"]')
+        minor_axis_label = page.locator('#section-sketch text[data-principal-axis-label="minor"]')
+        # SVG <text> is not an HTMLElement: use text_content(), and verify each accessible name.
+        assert major_axis_label.text_content() == 'I₁'
+        assert minor_axis_label.text_content() == 'I₂'
+        assert major_axis_label.get_attribute('aria-label') == 'Major principal axis I1'
+        assert minor_axis_label.get_attribute('aria-label') == 'Minor principal axis I2'
         for expected in ('B=100 mm', 'H=80 mm', 't=10 mm',
                          'major principal axis 57.953°', 'minor principal axis 147.953°'):
             assert expected in page.locator('#section-sketch-caption').inner_text()

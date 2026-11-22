@@ -1,6 +1,6 @@
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
-**Status:** solid, concentric hollow, open-channel, I-section and L-angle helpers report area, centroidal Ixx/Iyy, Sx/Sy and rx/ry on dev. Live accessible previews cover all seven supported section shapes; the I-section preview passed exact-head Quality, and the L-angle dual-principal-axis enhancement is in QA on dev. No preview changes in this sequence are released. PR review and main Pages deployment remain unverified. Upgrade of the existing standalone `tools/truss-studio.html`, not a duplicate tool or an embedded main workspace control.
+**Status:** solid, concentric hollow, open-channel, I-section and L-angle helpers report area, centroidal Ixx/Iyy, Sx/Sy and rx/ry on dev. Live previews cover all seven supported section shapes. The L-angle dual-principal-axis regression is being corrected after exact-head browser CI exposed Playwright `inner_text()` misuse on SVG `<text>` nodes; the next candidate uses `text_content()` and explicit accessible names for I1/I2. No preview changes in this sequence are released. PR review and main Pages deployment remain unverified. Upgrade of the existing standalone `tools/truss-studio.html`, not a duplicate tool or an embedded main workspace control.
 
 ## How to use
 

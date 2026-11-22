@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss Studio L-angle SVG label accessibility and CI correction
+
+- Fixed the exact-head Chromium regression by reading SVG I1/I2 `<text>` content with Playwright `text_content()` instead of HTMLElement-only `inner_text()`.
+- Added explicit accessible names and text roles to the major/minor principal-axis SVG labels; added assertions for the visible I₁/I₂ glyphs and their accessible names.
+- Preserved the independent centroid, orthogonality, invalid clearing and recovery checks. No FEM formulas or test requirements were weakened. Exact-head Quality pending; not released.
+
 ## 2026-11-22 — Truss Studio L-angle principal-axis CI repair and centroid metadata
 
 - Fixed the observed exact-head browser regression: Playwright-evaluated SVG endpoint/centroid objects are Python dictionaries, so assertions now use keyed access rather than attribute access.

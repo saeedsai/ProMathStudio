@@ -1,3 +1,11 @@
+## 2026-11-22 — TRUSS-L-ANGLE-SVG-LABEL-ACCESSIBILITY-CI-FIX-421
+
+Started from dev `cb1a2af44e586809184914feea9aa791f9260d6c`; main remained `70fc483cb1cec3d2372d37484e4a8ef7942343da` (420 ahead / 0 behind). Inspected root contract, living plan, frozen inventory, Truss FEM docs, PR #189/reviews and exact-head CI. Both Push Quality #44974501641 and PR Quality #44974507169 failed at step 212, line 404: Playwright `inner_text()` raised “Node is not an HTMLElement” for SVG `<text>` I1/I2 labels. Earlier Python dictionary-key assertions passed. Corrected SVG label assertions to `text_content()` and added explicit accessible names/role to the source SVG labels; browser regression now checks both visible glyphs and accessible names while preserving orthogonality, centroid, invalid-state and recovery assertions. No mathematical calculation or test acceptance was relaxed.
+
+Prepared one six-file atomic dev commit covering source, focused browser test, Truss FEM contract, living plan, execution ledger and changelog. Local Git/Playwright/Node execution is unavailable due the recurring github.com DNS failure; connected GitHub integration is used for bounded repository access. New exact-head Push/PR Quality is required before this fix is certified. PR #189 remains open with no independent reviews; branch protection remains unverifiable/disabled in the branch API; main and Pages are unchanged. Historical inventory remains frozen at 166 gaps / 95 partial. No merge, force push, bypass or unsafe branch cleanup.
+
+**NEXT FIVE:** (1) both new exact-head workflows green through steps 212, 214 and 215; (2) second asymmetric and near-limit L-angle analytical/browser references; (3) seven-shape SVG accessibility/dimension/centroid/invalid-recovery/390px audit; (4) JSON/legacy-SI/CSV/SVG/member-isolation compatibility audit; (5) independent PR #189 review and authorized branch-protection verification, then ordinary PR merge and exact-main Quality/Pages/hosted verification only after every gate.
+
 ## 2026-11-22 — TRUSS-L-ANGLE-AXIS-CENTROID-METADATA-CI-FIX-420
 
 Started dev 515a59591d165e0bb868d1ddc1641af4acd58b05; main remained 70fc483cb1cec3d2372d37484e4a8ef7942343da (419 ahead / 0 behind). Inspected AGENTS.md, living plan, frozen inventory, Truss FEM contract, PR #189, reviews, branches, exact-head Quality and Pages evidence.

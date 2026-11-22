@@ -1,3 +1,11 @@
+## 2026-11-22 — Truss Studio seven-shape canonical preview metadata
+
+- Standardized bounding width/height, area and centroid metadata across all seven supported section outlines; added circle diameters and hollow-section inner dimensions.
+- Added canonical centroid coordinates to the centroid marker and centroidal/principal axis lines.
+- Added explicit accessible names and text roles to Ixx/Iyy axis labels.
+- Added a Chromium regression for all seven shapes covering independent area/centroid references, metadata parity, SVG title/description/caption synchronization, accessible labels and 390px no-overflow.
+- Dev-only; exact-head Push/PR Quality pending. No FEM formulas changed and no release claimed.
+
 ## 2026-11-22 — Truss Studio L-angle second reference and canonical outline metadata
 
 - Added machine-readable L-angle SVG outline metadata for B/H/t, area and canonical centroid.

@@ -1,3 +1,13 @@
+## 2026-11-22 — TRUSS-SEVEN-SHAPE-CANONICAL-PREVIEW-METADATA
+
+Started from exact dev `3c76b0b7ba35859596c1fb61088841580e7bfb6d`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (423 ahead / 0 behind). Verified the previous L-angle asymmetric/near-limit increment: Push Quality #44987725356 and PR Quality #44987729415 both succeeded on `3c76b0b7ba35859596c1fb61088841580e7bfb6d`; both jobs completed 218 steps with no failures.
+
+Standardized canonical SVG metadata across all seven supported cross-sections: bounding width/height, area and centroid on every outer outline; diameter/inner-diameter and hollow-rectangle void dimensions where applicable; centroid millimetre coordinates on the marker and both centroidal/principal axes. Added accessible names/text roles to horizontal Ixx and vertical Iyy labels. Added a shared Chromium regression helper invoked for all seven shapes, checking independent area/centroid references, outline/marker/axis parity, SVG title/description/caption synchronization, accessible labels and no horizontal overflow at 390px. No FEM formula or solver changes.
+
+Updated Truss FEM documentation, living plan and changelog in the same atomic commit. Local checkout is absent, so local Node/Playwright execution is unavailable; V8 syntax checks and actual canonical FEM reference calculations are run in the connected runtime. New exact-head Push/PR Quality remains pending. Main unchanged; PR #189 has no independent review; both dev/main report unprotected; ruleset/protection verification remains a release blocker. Latest verified main Quality and Pages are still November 3, 2026 on `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Frozen inventory remains **166 gaps / 95 partial**. No merge, bypass or branch deletion.
+
+**NEXT FIVE:** (1) exact-head Push/PR Quality green with all 218 steps and new seven-shape regression; (2) dimension-label/centroid-axis accessibility plus invalid/overflow clearing and recovery at 390px/desktop; (3) current JSON and legacy-SI import, malformed/oversized rollback and file-read race; (4) CSV units/quoting/CRLF, SVG export, member isolation and zero console errors; (5) independent PR #189 review and authorized main-protection verification, then ordinary PR merge and exact-main Quality/Pages/hosted verification only after all gates.
+
 ## 2026-11-22 — TRUSS-L-ANGLE-SECOND-REFERENCE-AND-OUTLINE-METADATA
 
 Started from exact dev `e78d958247283e0681c98993ed9e0c1922b5173a`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (422 ahead / 0 behind). Verified previous Push Quality #44983302410 and PR Quality #44983306201 both green; all 218 steps passed, including Truss browser 212, FEM Node 214 and responsive 215.

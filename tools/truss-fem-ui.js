@@ -106,35 +106,37 @@
     const scale=circle?Math.min(190/diameter,155/diameter):Math.min(190/width,155/height);
     const x=86,y=24,w=circle?diameter*scale:width*scale,h=circle?w:height*scale;
     const cx=x+properties.centroid.x*scale,cy=y+h-properties.centroid.y*scale;
+    const outlineMetadata={'data-section-width-mm':circle?diameter:width,'data-section-height-mm':circle?diameter:height,'data-section-area-mm2':properties.area,'data-section-centroid-x-mm':properties.centroid.x,'data-section-centroid-y-mm':properties.centroid.y};
+    const centroidMetadata={'data-centroid-x-mm':properties.centroid.x,'data-centroid-y-mm':properties.centroid.y};
     if(circle){
       const radius=w/2,innerRadius=hollowCircle?innerDiameter*scale/2:0,axisHalf=radius*(hollowCircle?0.92:0.78);
-      svg.append(svgNode('circle',{cx,cy,r:radius,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':hollowCircle?'hollow-circle-outer':'solid-circle'}));
+      svg.append(svgNode('circle',{cx,cy,r:radius,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':hollowCircle?'hollow-circle-outer':'solid-circle',...outlineMetadata,'data-section-diameter-mm':diameter,...(hollowCircle?{'data-section-inner-diameter-mm':innerDiameter}:{})}));
       if(hollowCircle) svg.append(svgNode('circle',{cx,cy,r:innerRadius,fill:'rgba(127,127,127,.05)',stroke:'#355578','stroke-width':2,'data-section-outline':'hollow-circle-inner'}));
-      svg.append(svgNode('line',{x1:cx-axisHalf,y1:cy,x2:cx+axisHalf,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
-      svg.append(svgNode('line',{x1:cx,y1:cy-axisHalf,x2:cx,y2:cy+axisHalf,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
-      svg.append(svgNode('text',{x:cx+radius*0.48,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600'},'Ixx'));
-      svg.append(svgNode('text',{x:cx+6,y:cy-radius*0.5,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
+      svg.append(svgNode('line',{x1:cx-axisHalf,y1:cy,x2:cx+axisHalf,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal',...centroidMetadata}));
+      svg.append(svgNode('line',{x1:cx,y1:cy-axisHalf,x2:cx,y2:cy+axisHalf,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical',...centroidMetadata}));
+      svg.append(svgNode('text',{x:cx+radius*0.48,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600',role:'text','aria-label':'Horizontal centroidal axis Ixx'},'Ixx'));
+      svg.append(svgNode('text',{x:cx+6,y:cy-radius*0.5,fill:'#2b7a65','font-size':10,'font-weight':'600',role:'text','aria-label':'Vertical centroidal axis Iyy'},'Iyy'));
     }else if(channel){
       const tw=webThickness*scale,tf=flangeThickness*scale;
       const path='M '+x+' '+y+' H '+(x+w)+' V '+(y+tf)+' H '+(x+tw)+' V '+(y+h-tf)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z';
-      svg.append(svgNode('path',{d:path,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'channel','data-channel-opening':'right','data-web-thickness-mm':webThickness,'data-flange-thickness-mm':flangeThickness}));
+      svg.append(svgNode('path',{d:path,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'channel',...outlineMetadata,'data-channel-opening':'right','data-web-thickness-mm':webThickness,'data-flange-thickness-mm':flangeThickness}));
       const padX=Math.min(8,w*0.15),padY=Math.min(8,h*0.15);
-      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
-      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
-      svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600'},'Ixx'));
-      svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
+      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal',...centroidMetadata}));
+      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical',...centroidMetadata}));
+      svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600',role:'text','aria-label':'Horizontal centroidal axis Ixx'},'Ixx'));
+      svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600',role:'text','aria-label':'Vertical centroidal axis Iyy'},'Iyy'));
     }else if(iSection){
       const tw=webThickness*scale,tf=flangeThickness*scale,webLeft=(w-tw)/2,webRight=webLeft+tw;
       const path='M '+x+' '+y+' H '+(x+w)+' V '+(y+tf)+' H '+(x+webRight)+' V '+(y+h-tf)+' H '+(x+w)+' V '+(y+h)+' H '+x+' V '+(y+h-tf)+' H '+(x+webLeft)+' V '+(y+tf)+' H '+x+' Z';
-      svg.append(svgNode('path',{d:path,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'i-section','data-web-thickness-mm':webThickness,'data-flange-thickness-mm':flangeThickness}));
+      svg.append(svgNode('path',{d:path,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'i-section',...outlineMetadata,'data-web-thickness-mm':webThickness,'data-flange-thickness-mm':flangeThickness}));
       const padX=Math.min(8,w*0.15),padY=Math.min(8,h*0.15);
-      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
-      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
-      svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600'},'Ixx'));
-      svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
+      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal',...centroidMetadata}));
+      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical',...centroidMetadata}));
+      svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600',role:'text','aria-label':'Horizontal centroidal axis Ixx'},'Ixx'));
+      svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600',role:'text','aria-label':'Vertical centroidal axis Iyy'},'Iyy'));
     }else if(angle){
       const t=thickness*scale,theta=properties.principalAxisAngleDegrees*Math.PI/180,axisLength=Math.max(18,Math.min(78,Math.hypot(w,h)*0.45));
-      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+t)+' V '+(y+h-t)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'l-angle','data-section-width-mm':width,'data-section-height-mm':height,'data-section-thickness-mm':thickness,'data-section-area-mm2':properties.area,'data-section-centroid-x-mm':properties.centroid.x,'data-section-centroid-y-mm':properties.centroid.y}));
+      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+t)+' V '+(y+h-t)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'l-angle',...outlineMetadata,'data-section-thickness-mm':thickness}));
       [
         {name:'major',label:'I₁',angle:theta,color:'#c47b19'},
         {name:'minor',label:'I₂',angle:theta+Math.PI/2,color:'#2b7a65'}
@@ -148,15 +150,15 @@
     }else{
       const innerW=hollowRectangle?innerWidth*scale:0,innerH=hollowRectangle?innerHeight*scale:0;
       const innerX=x+(w-innerW)/2,innerY=y+(h-innerH)/2;
-      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':hollowRectangle?'hollow-rectangle-outer':'rectangle'}));
+      svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':hollowRectangle?'hollow-rectangle-outer':'rectangle',...outlineMetadata,...(hollowRectangle?{'data-section-inner-width-mm':innerWidth,'data-section-inner-height-mm':innerHeight}:{})}));
       if(hollowRectangle) svg.append(svgNode('path',{d:'M '+innerX+' '+innerY+' H '+(innerX+innerW)+' V '+(innerY+innerH)+' H '+innerX+' Z',fill:'rgba(127,127,127,.05)',stroke:'#355578','stroke-width':2,'data-section-outline':'hollow-rectangle-inner','data-inner-width-mm':innerWidth,'data-inner-height-mm':innerHeight}));
       const padX=Math.min(8,w*0.15),padY=Math.min(8,h*0.15);
-      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal'}));
-      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical'}));
-      svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600'},'Ixx'));
-      svg.append(svgNode('text',{x:cx+5,y:y+12,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
+      svg.append(svgNode('line',{x1:x+padX,y1:cy,x2:x+w-padX,y2:cy,stroke:'#c47b19','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'horizontal',...centroidMetadata}));
+      svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical',...centroidMetadata}));
+      svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600',role:'text','aria-label':'Horizontal centroidal axis Ixx'},'Ixx'));
+      svg.append(svgNode('text',{x:cx+5,y:y+12,fill:'#2b7a65','font-size':10,'font-weight':'600',role:'text','aria-label':'Vertical centroidal axis Iyy'},'Iyy'));
     }
-    svg.append(svgNode('circle',{cx,cy,r:4,fill:'#b42318',stroke:'#fff','stroke-width':1.4,'data-centroid':'true'}));
+    svg.append(svgNode('circle',{cx,cy,r:4,fill:'#b42318',stroke:'#fff','stroke-width':1.4,'data-centroid':'true','data-centroid-x-mm':properties.centroid.x,'data-centroid-y-mm':properties.centroid.y}));
     svg.append(svgNode('text',{x:cx+7,y:cy-7,fill:'#b42318','font-size':11,'font-weight':'600'},'C'));
     if(circle){
       const dimensionY=y+h+18,outerLabel=hollowCircle?'Do':'D';

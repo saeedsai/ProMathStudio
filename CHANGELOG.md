@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss Studio L-angle principal-axis caption precision and regression
+
+- Fixed the observed exact-head browser failure by formatting both L-angle principal-axis caption angles to a consistent three decimal places (57.953° / 147.953°); the prior five-significant-digit formatter displayed the minor angle as 147.95°.
+- Added machine-readable `data-axis-angle-deg` metadata to both SVG principal-axis labels and Chromium assertions that label angles match their corresponding axis lines.
+- Preserved FEM mathematics, accessible names, centroid/orthogonality checks and invalid-input recovery. Exact-head Quality pending; not released.
+
 ## 2026-11-22 — Truss Studio L-angle SVG label accessibility and CI correction
 
 - Fixed the exact-head Chromium regression by reading SVG I1/I2 `<text>` content with Playwright `text_content()` instead of HTMLElement-only `inner_text()`.

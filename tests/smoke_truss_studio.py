@@ -408,6 +408,8 @@ def main():
         assert minor_axis_label.text_content() == 'I₂'
         assert major_axis_label.get_attribute('aria-label') == 'Major principal axis I1'
         assert minor_axis_label.get_attribute('aria-label') == 'Minor principal axis I2'
+        assert abs(float(major_axis_label.get_attribute('data-axis-angle-deg')) - major_angle) < 1e-9
+        assert abs(float(minor_axis_label.get_attribute('data-axis-angle-deg')) - minor_angle) < 1e-9
         for expected in ('B=100 mm', 'H=80 mm', 't=10 mm',
                          'major principal axis 57.953°', 'minor principal axis 147.953°'):
             assert expected in page.locator('#section-sketch-caption').inner_text()

@@ -13,8 +13,14 @@ HTML = (ROOT / 'tools' / 'truss-studio.html').read_text(encoding='utf-8')
 # disallowed in some restricted CI/container browsers. Deployment keeps relative files.
 HTML = HTML.replace('<script defer src="truss-fem.js"></script>', '')
 HTML = HTML.replace('<script defer src="truss-fem-ui.js"></script>', '')
-HTML = HTML.replace('</body>', '<script>' + (ROOT / 'tools' / 'truss-fem.js').read_text(encoding='utf-8') + '</script>'
-                    + '<script>' + (ROOT / 'tools' / 'truss-fem-ui.js').read_text(encoding='utf-8') + '</script></body>')
+FEM_JS = (ROOT / 'tools' / 'truss-fem.js').read_text(encoding='utf-8')
+UI_JS = (ROOT / 'tools' / 'truss-fem-ui.js').read_text(encoding='utf-8')
+# Expose the private CSV helper only in this injected test copy; production keeps it scoped.
+UI_JS = UI_JS.replace('  updateSectionShape();',
+                      '  window.__testDownloadCsv = downloadCsv;\n  updateSectionShape();', 1)
+assert 'window.__testDownloadCsv = downloadCsv;' in UI_JS
+HTML = HTML.replace('</body>', '<script>' + FEM_JS + '</script>'
+                    + '<script>' + UI_JS + '</script></body>')
 
 
 def main():
@@ -230,6 +236,27 @@ def main():
             assert svg_metadata['firstChildren'] == ['title', 'desc', 'rect']
             assert svg_metadata['background'] == '#09152a'
             assert svg_metadata['solvedLines'] >= 6
+            # Exercise the actual private CSV helper with an existing BOM and mixed newline styles.
+            page.evaluate("""() => {
+                window.__exports=[];
+                window.__testDownloadCsv('serializer-normalization.csv',
+                    '\\uFEFFh1,h2\\n1,2\\r3,4\\r\\n','text/csv;charset=utf-8');
+            }""")
+            normalized_csv = page.evaluate("""async () => {
+                const item=window.__exports[0];
+                const bytes=new Uint8Array(await item.blob.arrayBuffer());
+                let bomCount=0;
+                for(let i=0;i<=bytes.length-3;i++) {
+                    if(bytes[i]===239&&bytes[i+1]===187&&bytes[i+2]===191) bomCount++;
+                }
+                return {name:item.name,type:item.blob.type,text:await item.blob.text(),
+                        prefix:Array.from(bytes.slice(0,3)),bomCount};
+            }""")
+            assert normalized_csv['name'] == 'serializer-normalization.csv'
+            assert normalized_csv['type'] == 'text/csv;charset=utf-8'
+            assert normalized_csv['prefix'] == [239, 187, 191]
+            assert normalized_csv['bomCount'] == 1
+            assert normalized_csv['text'].lstrip('\\ufeff') == 'h1,h2\\r\\n1,2\\r\\n3,4\\r\\n'
             page.locator('#example').select_option('bar')
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#member-results tr').count() == 1

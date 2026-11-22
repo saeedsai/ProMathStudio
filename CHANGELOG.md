@@ -1,3 +1,7 @@
+## 2026-11-22 — TRUSS-CSV-SERIALIZER-DIRECT-REGRESSION
+
+Added a direct Chromium regression for the production CSV serializer's new normalization behavior. The browser harness exposes the otherwise private helper only in its injected test copy (the shipped UI remains scoped), feeds a fixture containing a pre-existing UTF-8 BOM plus LF, lone CR and CRLF separators, and captures the actual generated Blob. Acceptance requires exactly one EF BB BF sequence, preserved CSV MIME type and canonical CRLF output. This complements the actual results/material-schedule exports and their current-model/SI assertions. The previous material-schedule correction is explicit: 1000 mm² in the editor exports as 0.001 m² in the SI schedule. The isolated V8 helper fixture already passed; the fresh exact-head browser workflows must execute this committed test.
+
 ## 2026-11-22 — TRUSS-MATERIAL-CSV-SI-AREA-ASSERTION
 
 A final source-level review of `exportMaterialCSV` confirmed that the material schedule intentionally exports physical area in SI m², while the editor field is mm². Corrected the new browser assertion accordingly: the imported editor value remains 1000 mm², and the material CSV must contain 0.001 m². Added independent checks for 0.002 m³ member volume, 100 kN/mm EA/L and 15.7 kg mass, preserving the existing density/I/K assertions. This prevents a unit-system mismatch in the regression itself; the canonical FEM and export implementation are unchanged. The corrected exact-head Push and PR Quality must execute the browser check.

@@ -54,6 +54,11 @@ The non-solving material preview can report the ideal elastic critical load `Pcr
 
 Previous TrussStudio API still exposes `TrussStudio.solve(model)` and `TrussStudio.example` with SI N/Pa/m² units and legacy output shape. The UI now accepts kN/GPa/mm². JSON import recognizes legacy member field `A` (m²) and converts load forces in N, E in Pa, and A in m² to the new form; exported JSON uses explicit new-form keys and units. The browser rejects invalid/non-safe or over-limit `File.size` values before reading, then rechecks the actual `ArrayBuffer.byteLength` against the same 1 MiB budget before decoding. It decodes UTF-8 with fatal error handling, preserving a leading BOM for the canonical importer to strip; malformed UTF-8 is rejected before any model controls are replaced. This second check prevents inconsistent file-size metadata from bypassing the byte budget. Existing `index.html` distribution and source/bundle hashes are unchanged, but the companion page requires its relative JS assets, including for offline use.
 
+
+### Standalone SVG export accessibility
+
+The solved deformation export preserves the plot's `viewBox` and SVG namespace, adds explicit 1240×760 output dimensions, and includes direct-child `<title>` and `<desc>` elements. The root uses `role="img"` and `aria-labelledby` references to both IDs; the description explains the dotted original members and tension/compression deformation coloring. The exported Blob is parsed as XML in Chromium regression tests, which verify the namespace, dimensions, viewBox, accessible-name references, title/description order, background and solved geometry.
+
 ## References and tests
 
 - Single 2 m bar: E=200 GPa, area=1000 mm², +1 kN, displacement 0.01 mm, axial stress 1 MPa, reaction -1 kN. With I=1,000,000 mm⁴ and K=1, the ideal Euler Pcr reference is approximately 493.480220 kN.

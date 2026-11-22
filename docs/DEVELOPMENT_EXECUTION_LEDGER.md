@@ -1,3 +1,15 @@
+## 2026-11-22 — TRUSS-SVG-EXPORT-ACCESSIBILITY
+
+- Starting dev: `7df19ce2ee8799730ae65202507e3729480d3f15`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (427 ahead / 0 behind); existing PR #189 is dev→main.
+- Previous exact-head Push Quality [#45005661735](https://github.com/saeedsai/ProMathStudio/actions/runs/45005661735) and PR Quality [#45005666376](https://github.com/saeedsai/ProMathStudio/actions/runs/45005666376) both succeeded with all 218 steps, including the Truss browser, FEM analytical and responsive checks.
+- Source: standalone SVG export now emits a direct-child title and description, sets role=img and aria-labelledby, and preserves the existing viewBox, 1240×760 dimensions, background and solved geometry.
+- Chromium regression: parses the actual SVG Blob with DOMParser; checks XML validity, SVG namespace, dimensions/viewBox, root role, resolvable accessible-name IDs, exact title/description, title/desc/background order, background fill and solved lines.
+- Pre-commit checks: complete UI JavaScript V8 syntax compilation; source/test patch anchors and serialized-Blob assertion verified. Local Playwright unavailable because no checkout; exact-head browser CI pending.
+- Updated standalone Truss contract, living plan, this ledger and changelog in the same atomic source/test commit. No index.html bundle synchronization is required for the standalone companion page.
+- Release: PR #189 open, zero independent reviews; all branch refs report unprotected and enforceable main protection remains unverified. Main Quality #41730966059 and Pages #41730962844 remain successful on `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Historical inventory remains 166 gaps / 95 partial. No merge or bypass.
+
+**NEXT FIVE:** (1) both exact-head workflows green, including SVG XML/accessibility, CSV CRLF, import byte/UTF-8/BOM/race, seven-shape, FEM and 390px checks; (2) current/legacy JSON physical round-trip plus result/material CSV units, quoting and CRLF; (3) seven-shape invalid-state, keyboard/accessibility and desktop/mobile audit; (4) eligible independent PR #189 review and authorized main-protection/required-check verification; (5) only after all gates, ordinary PR merge and exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-22 — TRUSS-IMPORT-UTF8-BYTE-BOUNDARY
 
 - Starting dev: `fcfb1f6e7dc6189a37a04a2f4ab607503130f380`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (426 ahead / 0 behind). Existing PR #189 points dev→main.

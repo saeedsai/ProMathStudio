@@ -57,7 +57,47 @@ def main():
             page.get_by_role('button', name='Export SVG').click()
             exported=page.evaluate("""async () => await Promise.all(window.__exports.map(async e => ({name:e.name,text:await e.blob.text()})))""")
             assert exported[0]['name'].endswith('.csv') and 'Axial force (kN)' in exported[0]['text']
-            assert exported[1]['name'].endswith('.svg') and '<svg' in exported[1]['text']
+            assert exported[1]['name'] == 'promath-truss-deformation.svg'
+            svg_metadata = page.evaluate("""text => {
+                const document = new DOMParser().parseFromString(text, 'image/svg+xml');
+                const root = document.documentElement;
+                const title = root.querySelector(':scope > title');
+                const description = root.querySelector(':scope > desc');
+                const labels = (root.getAttribute('aria-labelledby') || '').split(/\\s+/).filter(Boolean);
+                const ids = new Set([...root.querySelectorAll('[id]')].map(node => node.id));
+                return {
+                    parseError: Boolean(document.querySelector('parsererror')),
+                    namespace: root.namespaceURI,
+                    width: root.getAttribute('width'),
+                    height: root.getAttribute('height'),
+                    viewBox: root.getAttribute('viewBox'),
+                    role: root.getAttribute('role'),
+                    labels,
+                    labelsResolve: labels.length === 2 && labels.every(id => ids.has(id)),
+                    titleId: title?.id || '',
+                    title: title?.textContent || '',
+                    descriptionId: description?.id || '',
+                    description: description?.textContent || '',
+                    firstChildren: [...root.children].slice(0, 3).map(node => node.localName),
+                    background: root.querySelector(':scope > rect')?.getAttribute('fill') || '',
+                    solvedLines: root.querySelectorAll('line').length
+                };
+            }""", exported[1]['text'])
+            assert not svg_metadata['parseError'], svg_metadata
+            assert svg_metadata['namespace'] == 'http://www.w3.org/2000/svg'
+            assert (svg_metadata['width'], svg_metadata['height']) == ('1240', '760')
+            assert svg_metadata['viewBox'] == '0 0 620 380'
+            assert svg_metadata['role'] == 'img'
+            assert svg_metadata['labels'] == ['truss-export-title', 'truss-export-description']
+            assert svg_metadata['labelsResolve']
+            assert svg_metadata['titleId'] == 'truss-export-title'
+            assert svg_metadata['title'] == 'ProMathStudio truss deformation analysis'
+            assert svg_metadata['descriptionId'] == 'truss-export-description'
+            assert 'original truss members' in svg_metadata['description']
+            assert 'tension or compression' in svg_metadata['description']
+            assert svg_metadata['firstChildren'] == ['title', 'desc', 'rect']
+            assert svg_metadata['background'] == '#09152a'
+            assert svg_metadata['solvedLines'] >= 6
             page.locator('#example').select_option('bar')
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#member-results tr').count() == 1

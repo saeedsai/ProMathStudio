@@ -8,6 +8,7 @@
   let latest = null, latestModel = null;
   // Latest file selection wins even when an earlier byte read resolves later.
   let importRequest = 0;
+  let importPending = false;
   const MAX_IMPORT_BYTES = 1024 * 1024;
   const fmt = (x, digits=5) => Number(x).toPrecision(digits).replace(/(\.\d*?)0+(e|$)/,'$1$2').replace(/\.(e|$)/,'$1');
   const fmtAngle = x => Number(x).toFixed(3);
@@ -300,7 +301,8 @@
       $('section-result').textContent='Not applied: '+error.message;
     }
   }
-  function invalidate(){latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
+  function cancelPendingImport(){if(!importPending)return;importRequest++;importPending=false;status('Pending import cancelled because the model was edited.');}
+  function invalidate(){cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function dimensionLabel(name,value,attrs){const formatted=fmt(value,4);return svgNode('text',{...attrs,'data-dimension-label':name,role:'text','aria-label':'Section dimension '+name+': '+formatted+' millimetres'},name+'='+formatted+' mm');}
   function updatePreview() {
@@ -397,7 +399,7 @@
     $('verification').textContent='Force balance: ΣFx = '+fmt(result.forceBalance.x)+' N, ΣFy = '+fmt(result.forceBalance.y)+' N. Max free DOF residual / load scale = '+result.residual.toExponential(3)+'. Elastic strain energy = '+fmt(result.elasticEnergy)+' J. Normalized energy identity error = '+result.energyError.toExponential(3)+'.';
     draw();status('Analysis complete · '+result.nodes.length+' joints, '+result.members.length+' members.');
   }
-  function analyze(successNotice=''){try{const model=readModel();showResult(fem.solve(model),model);if(typeof successNotice==='string'&&successNotice)status($('status').textContent+' · '+successNotice);}catch(error){invalidate();status(error.message,true);}}
+  function analyze(successNotice=''){cancelPendingImport();try{const model=readModel();showResult(fem.solve(model),model);if(typeof successNotice==='string'&&successNotice)status($('status').textContent+' · '+successNotice);}catch(error){invalidate();status(error.message,true);}}
   function download(name,content,mime){const link=el('a',null);const url=URL.createObjectURL(new Blob([content],{type:mime}));link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
   function downloadCsv(name,content,mime){
     // Canonicalize records to CRLF, terminate non-empty CSV with CRLF, and emit one leading UTF-8 BOM.
@@ -421,6 +423,7 @@
   $('import-model').addEventListener('change',async event=>{
     const file=event.target.files?.[0];event.target.value='';if(!file)return;
     const request=++importRequest;
+    importPending=true;
     status('Importing model…',false,true);
     try {
       if(!Number.isSafeInteger(file.size)||file.size<0||file.size>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
@@ -440,6 +443,7 @@
       const imported=fem.importJSON(text);
       const inputUnits=fem.describeUnits(imported);
       const model=fem.fromLegacy(imported);
+      importPending=false;
       renderModel(model);
       const unitNotice=inputUnits.system==='legacy-si'
         ? 'Legacy SI input converted to Studio units.'
@@ -449,6 +453,7 @@
       analyze(unitNotice+' '+optionalUnitsNotice);
     } catch(err) {
       if(request!==importRequest)return;
+      importPending=false;
       status('Import failed: '+err.message,true);
     }
   });

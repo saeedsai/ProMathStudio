@@ -1,3 +1,10 @@
+## 2026-11-22 — Truss pending JSON import cancellation on model edits (dev)
+
+- A pending asynchronous file read is now cancelled when the user edits the active truss model or explicitly analyzes it; a late import can no longer overwrite those changes.
+- Cancellation increments the import request token, clears the busy state and reports a non-error status. Successful imports clear pending state before rendering their own model.
+- Added a real Chromium regression that delays File.arrayBuffer(), changes the active bar length from 2 m to 3 m, releases the pending read, verifies the edited A/B/AB model remains, and checks the 0.015 mm analytical displacement.
+- Updated the Structural Truss compatibility contract, living plan and execution ledger. Exact-head Quality pending; not released.
+
 ## 2026-11-22 — Truss JSON optional-property unit provenance (dev)
 
 - Extended the immutable Truss JSON unit descriptor with density (kg/m³), second moment I (legacy m⁴ / Studio mm⁴) and dimensionless effective-length factor K.

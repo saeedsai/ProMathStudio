@@ -290,6 +290,52 @@ def main():
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#member-results tr').count() == 1
             assert abs(page.evaluate('ProMathTrussFEM.solve(ProMathTrussFEM.examples.bar).displacements[1].x') - 1e-5) < 1e-12
+            # A pending file import must not overwrite edits made to the active model.
+            slow_model = {
+                'nodes': [
+                    {'id': 'S', 'x': 0, 'y': 0, 'fixX': True, 'fixY': True, 'fx': 0, 'fy': 0},
+                    {'id': 'T', 'x': 4, 'y': 0, 'fixX': False, 'fixY': True, 'fx': 1, 'fy': 0}
+                ],
+                'members': [{'id': 'ST', 'a': 'S', 'b': 'T', 'E': 200, 'area': 1000}]
+            }
+            page.evaluate("""() => {
+                const original = File.prototype.arrayBuffer;
+                window.__slowImportSettled = false;
+                window.__releaseSlowImport = null;
+                File.prototype.arrayBuffer = function() {
+                    if (this.name !== 'delayed-import.json') return original.call(this);
+                    const file = this;
+                    return new Promise((resolve, reject) => {
+                        window.__releaseSlowImport = () => {
+                            File.prototype.arrayBuffer = original;
+                            return original.call(file).then(bytes => {
+                                window.__slowImportSettled = true;
+                                resolve(bytes);
+                            }, reject);
+                        };
+                    });
+                };
+            }""")
+            page.locator('#import-model').set_input_files({
+                'name': 'delayed-import.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(slow_model).encode('utf-8')
+            })
+            page.wait_for_function("window.__releaseSlowImport !== null")
+            page.locator('#nodes tr').nth(1).locator('input[data-field="x"]').fill('3')
+            assert 'Pending import cancelled because the model was edited.' in page.locator('#status').inner_text()
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+            page.evaluate('window.__releaseSlowImport()')
+            page.wait_for_function('window.__slowImportSettled === true')
+            page.wait_for_timeout(20)
+            assert [page.locator('#nodes tr').nth(i).locator('input[data-field="id"]').input_value()
+                    for i in range(2)] == ['A', 'B']
+            assert page.locator('#nodes tr').nth(1).locator('input[data-field="x"]').input_value() == '3'
+            assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
+            assert 'Pending import cancelled because the model was edited.' in page.locator('#status').inner_text()
+            page.get_by_role('button', name='Analyze truss').click()
+            assert 'Analysis complete' in page.locator('#status').inner_text()
+            assert '0.015 mm' in page.locator('#disp-card').inner_text()
+
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
             assert not errors, errors

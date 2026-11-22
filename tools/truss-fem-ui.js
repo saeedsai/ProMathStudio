@@ -428,17 +428,19 @@
   $('export-model').addEventListener('click',()=>{try{download('promath-truss-model.json',fem.exportJSON(readModel()),'application/json;charset=utf-8');status('Validated model JSON exported.');}catch(err){status('Export failed: '+err.message,true);}});
   $('import-model').addEventListener('change',async event=>{
     const file=event.target.files?.[0];event.target.value='';if(!file)return;
+    // Snapshot immutable File metadata before crossing the asynchronous read boundary.
+    const declaredSize=file.size;
     const request=++importRequest;
     importPending=true;
     status('Importing model…',false,true);
     try {
-      if(!Number.isSafeInteger(file.size)||file.size<0||file.size>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
+      if(!Number.isSafeInteger(declaredSize)||declaredSize<0||declaredSize>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
       const bytes=await file.arrayBuffer();
       // A newer selection supersedes a slower earlier read; stale data/errors must not win.
       if(request!==importRequest)return;
       // Enforce the same budget against the actual payload, not only File.size metadata.
       if(!Number.isSafeInteger(bytes?.byteLength)||bytes.byteLength>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
-      if(bytes.byteLength!==file.size)throw Error(`Model JSON file size does not match the bytes read (expected ${file.size} bytes, received ${bytes.byteLength}).`);
+      if(bytes.byteLength!==declaredSize)throw Error(`Model JSON file size does not match the bytes read (expected ${declaredSize} bytes, received ${bytes.byteLength}).`);
       let text;
       try {
         // File.text() replaces malformed UTF-8, which can silently corrupt imported IDs.

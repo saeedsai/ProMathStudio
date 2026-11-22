@@ -343,23 +343,43 @@ def main():
             # The truncated payload is still valid JSON (only trailing whitespace is omitted),
             # so a parser-only check would silently accept it and replace the active model.
             mismatched_payload = (json.dumps(slow_model) + '          ').encode('utf-8')
-            page.evaluate("""() => {
-                const original = File.prototype.arrayBuffer;
-                File.prototype.arrayBuffer = function() {
-                    if (this.name !== 'mismatched-size.json') return original.call(this);
-                    const file = this;
-                    return original.call(file).then(bytes => {
-                        File.prototype.arrayBuffer = original;
-                        return bytes.slice(0, bytes.byteLength - 10);
-                    });
-                };
+            # Use a real File with immutable, correct size metadata. Override only this
+            # instance's read method so the test deterministically simulates a short read
+            # without changing File.prototype state left by earlier import-race coverage.
+            page.evaluate("""payload => {
+                const input = document.querySelector('#import-model');
+                const file = new File([payload], 'mismatched-size.json', {type:'application/json'});
+                const nativeRead = Blob.prototype.arrayBuffer;
+                window.__mismatchRead = null;
+                Object.defineProperty(file, 'arrayBuffer', {
+                    configurable: true,
+                    value: function() {
+                        return nativeRead.call(this).then(bytes => {
+                            window.__mismatchRead = {
+                                name: this.name,
+                                declared: this.size,
+                                returned: bytes.byteLength - 10
+                            };
+                            return bytes.slice(0, bytes.byteLength - 10);
+                        });
+                    }
+                });
+                const transfer = new DataTransfer();
+                transfer.items.add(file);
+                input.files = transfer.files;
+                input.dispatchEvent(new Event('change', {bubbles:true}));
+            }""", mismatched_payload.decode('utf-8'))
+            page.wait_for_function("""() => {
+                const status = document.querySelector('#status');
+                return window.__mismatchRead !== null &&
+                       status?.textContent.includes('Model JSON file size does not match the bytes read.');
             }""")
-            page.locator('#import-model').set_input_files({
-                'name': 'mismatched-size.json', 'mimeType': 'application/json',
-                'buffer': mismatched_payload
-            })
-            page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
-                'Model JSON file size does not match the bytes read.')""")
+            mismatch_read = page.evaluate('window.__mismatchRead')
+            assert mismatch_read == {
+                'name': 'mismatched-size.json',
+                'declared': len(mismatched_payload),
+                'returned': len(mismatched_payload) - 10
+            }, mismatch_read
             mismatch_status = page.locator('#status').inner_text()
             assert 'Import failed:' in mismatch_status
             assert (f'(expected {len(mismatched_payload)} bytes, received '

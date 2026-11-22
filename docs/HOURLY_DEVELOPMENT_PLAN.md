@@ -1,3 +1,22 @@
+## 2026-11-22 — TRUSS-IMPORT-MISMATCH-FIXTURE-ISOLATION (implemented on dev; exact-head Quality pending)
+
+Started from dev `9f4267bc7b2f9e440d104f9abe4e3c86b7c6af44` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, Structural Truss contract/source/tests, PR #189/reviews, branch refs/rulesets and latest Quality/Pages evidence.
+
+Prioritized the exact-head failure. Push Quality [#45075912260](https://github.com/saeedsai/ProMathStudio/actions/runs/45075912260) and PR Quality [#45075916799](https://github.com/saeedsai/ProMathStudio/actions/runs/45075916799) both failed at mandatory Truss browser step 215, `tests/smoke_truss_fem.py:361`, after a 30-second Playwright wait for the byte-mismatch status. Both logs confirm the analytical FEM Node suite passed **59/59**; the failure is in the browser mismatch fixture, not the solver. The previous test installed a second global `File.prototype.arrayBuffer` override after the delayed-import cancellation test. That override did not produce the expected status in CI. Replaced it with an own `arrayBuffer()` method on a real per-test File instance, installed using DataTransfer. The File retains correct immutable `size`, while its actual Blob read is deterministically shortened by ten bytes. The browser test records and asserts the filename, declared byte count and returned byte count before checking the import error and preservation of the edited A/B/AB model and 0.015 mm solved result.
+
+Also snapshot `file.size` before the asynchronous read in `tools/truss-fem-ui.js`; both the preflight size limit and post-read equality check now use the same declared-size value. This prevents re-reading file metadata across the async boundary and makes the integrity invariant explicit. No FEM equations, JSON schema, limits, UTF-8/BOM behavior or existing assertions were weakened.
+
+Updated the Structural Truss contract, living plan, execution ledger and changelog. The standalone Truss page loads adjacent JavaScript assets; no `index.html` synchronization is required. Frozen historical inventory remains **166 gaps / 95 partial**. No release or Pages promotion is claimed.
+
+Local repository checkout is absent, so full local Playwright/Node suites cannot run. Source/test/document replacement anchors and changed-file readback are checked through GitHub; final exact-head Push and PR Quality must execute the browser regression and all 218 steps.
+
+**NEXT FIVE (status and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Push and PR workflows both green on the final SHA across all 218 steps. Truss step 215 must observe a real File whose declared size matches its original bytes, a per-instance read exactly ten bytes shorter, the expected/received diagnostic, unchanged model/result, and no browser console errors; retain 59/59 FEM Node tests, Truss Studio step 212, exports and 390px coverage.
+2. **P1 — Latest-file selection and stale failure ordering.** Delay two actual reads, complete the newer valid selection first, then resolve and separately reject the older read; newest model, status, busy state and solved result must remain unchanged.
+3. **P1 — Remaining JSON boundaries.** Test null/blank/zero density, independent I-only/K-only, malformed UTF-8, actual BOM bytes, exact/over-1-MiB payloads, declared/actual mismatch and failed-read rollback; preserve IDs and physical quantities.
+4. **P1 — Member isolation and export audit.** Applying section properties changes only the selected member and preserves other members/E/density/K; verify CSV quoting/units/single BOM/CRLF and SVG XML/accessibility/semantic geometry.
+5. **Release governance and promotion.** Obtain an eligible independent PR #189 review and authorized verification of enforceable main protection/required checks. Only after exact-head CI and all release gates pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted assets/downloads.
+
 ## 2026-11-22 — TRUSS-IMPORT-BOM-FIXTURE-AND-BYTE-DIAGNOSTICS (implemented on dev; exact-head Quality pending)
 
 Started from exact refs dev `c21e281ab1409d30f24f90310eda98ef4ac8554c` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, engineering architecture, Structural Truss contract, importer/source tests, PR #189/reviews, branch refs, latest Actions, rulesets and main Pages evidence.

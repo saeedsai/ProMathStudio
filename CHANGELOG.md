@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss JSON byte-mismatch regression isolation (dev; exact-head QA pending)
+
+- Diagnosed Push Quality [#45075912260](https://github.com/saeedsai/ProMathStudio/actions/runs/45075912260) and PR Quality [#45075916799](https://github.com/saeedsai/ProMathStudio/actions/runs/45075916799): both passed the 59-test FEM Node suite but timed out at Truss browser step 215 waiting for the mismatch status.
+- Replaced the second shared `File.prototype.arrayBuffer` patch with an instance-only override on a real File, installed through DataTransfer. The browser now asserts correct immutable File.size, a read ten bytes shorter, exact diagnostics and model/result preservation.
+- Snapshot declared file size before the asynchronous read and use it consistently for the 1 MiB preflight and post-read equality check. No solver/schema/limit behavior changed; final-head Push/PR Quality pending; not released.
+
 ## 2026-11-22 — Truss import BOM fixture and byte-count diagnostics (dev; exact-head QA pending)
 
 - Diagnosed both exact-head failures [Push #45069666650](https://github.com/saeedsai/ProMathStudio/actions/runs/45069666650) and [PR #45069672010](https://github.com/saeedsai/ProMathStudio/actions/runs/45069672010): the BOM test added three bytes to `File.arrayBuffer()` without changing immutable `File.size`, so the correct byte-integrity guard rejected an impossible synthetic file.

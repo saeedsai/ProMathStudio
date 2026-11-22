@@ -1,3 +1,7 @@
+## 2026-11-22 — Truss CSV BOM regression hardening
+- Assert the UTF-8 BOM from actual Blob prefix bytes instead of assuming Blob.text() preserves U+FEFF; parse decoded CSV after optional BOM stripping.
+- No application behavior change; exact-head Quality pending.
+
 ## 2026-11-22 — Truss Studio UTF-8 CSV downloads
 
 - Added a shared CSV download helper that prepends a UTF-8 BOM to both results and material-schedule exports, improving spreadsheet detection of Unicode engineering unit symbols.

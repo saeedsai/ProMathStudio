@@ -1,3 +1,12 @@
+## 2026-11-22 — TRUSS-CSV-BLOB-TEXT-DECODING
+
+- Starting dev: `01f193803cdca1756087ae65a79f27132ae5ba3b`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da`.
+- Corrected the browser regression to assert UTF-8 BOM using actual Blob prefix bytes EF BB BF. The test no longer assumes Blob.text() returns U+FEFF; it strips an optional decoded BOM before CSV parsing.
+- Bounded local Node check: Blob.text() returned decoded content without the leading BOM, confirming the need to distinguish raw download bytes from decoded text.
+- No application source behavior changed; this is a focused regression-hardening follow-up to the preceding atomic CSV export source/test commit.
+- Previous candidate Push Quality #45015265031 and PR Quality #45015269404 were in progress with no failures at last inspection; this follow-up requires new exact-head runs.
+- Main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`; PR #189 has zero independent reviews, branch protection is unverified, and historical inventory remains 166 gaps / 95 partial. No merge or bypass.
+
 ## 2026-11-22 — TRUSS-CSV-UTF8-BOM
 
 - Starting dev: `5f7c1dc7402627274d9d0effa088384934445cf9`; main: `70fc483cb1cec3d2372d37484e4a8ef7942343da` (428 ahead / 0 behind); PR #189 remains the existing dev→main promotion PR.

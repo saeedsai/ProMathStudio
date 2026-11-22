@@ -64,12 +64,11 @@ def main():
             assert exported[2]['name'] == 'promath-truss-deformation.svg'
             for item in exported[:2]:
                 assert item['prefix'] == [239, 187, 191], item['prefix']
-                assert item['text'].startswith('\ufeff')
-                content = item['text'][1:]
+                content = item['text'].lstrip('\ufeff')
                 assert content.endswith('\r\n')
                 without_crlf = content.replace('\r\n', '')
                 assert '\r' not in without_crlf and '\n' not in without_crlf
-            result_csv = exported[0]['text'][1:]
+            result_csv = exported[0]['text'].lstrip('\ufeff')
             result_rows = list(csv.reader(io.StringIO(result_csv, newline='')))
             assert result_rows[0] == ['Member', 'Axial force (kN)', 'Stress (MPa)', 'Strain',
                                       'Euler utilization (%)', 'Euler load ratio Pcr/Pcomp (-)', 'Euler assessment']
@@ -78,7 +77,7 @@ def main():
             assert sum(1 for row in result_rows if not row) == 2
             assert all(len(row) in (3, 7) for row in result_rows if row)
             assert sum(1 for row in result_rows if row and len(row) == 7) == 4
-            material_csv = exported[1]['text'][1:]
+            material_csv = exported[1]['text'].lstrip('\ufeff')
             material_rows = list(csv.reader(io.StringIO(material_csv, newline='')))
             assert material_rows[0] == [
                 'Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)',

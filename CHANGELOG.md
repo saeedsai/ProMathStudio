@@ -1,3 +1,7 @@
+## 2026-11-22 — Truss CSV terminal-record hardening and CI regression repair
+
+Diagnosed both exact-head Quality failures at the direct Truss CSV serializer browser assertion: the test compared decoded Blob text against over-escaped BOM/CRLF strings even though Blob.text() consumes the leading UTF-8 BOM. Corrected the decoded-text assertion while retaining raw-byte checks for exactly one BOM. The production CSV helper now ensures non-empty normalized CSV ends in CRLF, while empty CSV remains BOM-only. Added browser checks for mixed newline input without a terminal separator, final CRLF bytes and empty content. Full exact-head Push/PR Quality remains pending.
+
 ## 2026-11-22 — Truss SVG semantic geometry metadata
 
 Repaired the exact-head Truss browser regression by replacing a stale six-line expectation for the imported one-member model with an exact semantic assertion: one original member, one deformed member, one load-vector shaft and two arrowhead segments. The exported SVG now carries stable geometry-role, member/node, force-state and load-component metadata. Existing visual geometry, FEM calculations and CSV/SVG accessibility assertions remain unchanged. Full Push/PR Quality is pending on the new dev head.

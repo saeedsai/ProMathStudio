@@ -148,7 +148,8 @@ def main():
                     if(bytes[i]===239&&bytes[i+1]===187&&bytes[i+2]===191) bomCount++;
                 }
                 return {name:e.name,type:e.blob.type,text:await e.blob.text(),
-                        prefix:Array.from(bytes.slice(0,3)),bomCount};
+                        prefix:Array.from(bytes.slice(0,3)),tail:Array.from(bytes.slice(-2)),
+                        emptyBytes:Array.from(new Uint8Array(await window.__exports[1].blob.arrayBuffer())),bomCount};
             }))""")
             assert exported[0]['name'] == 'promath-truss-results.csv'
             assert exported[1]['name'] == 'promath-truss-material-schedule.csv'
@@ -263,7 +264,8 @@ def main():
             page.evaluate("""() => {
                 window.__exports=[];
                 window.__testDownloadCsv('serializer-normalization.csv',
-                    '\\uFEFFh1,h2\\n1,2\\r3,4\\r\\n','text/csv;charset=utf-8');
+                    '\\uFEFFh1,h2\\n1,2\\r3,4','text/csv;charset=utf-8');
+                window.__testDownloadCsv('empty.csv','','text/csv;charset=utf-8');
             }""")
             normalized_csv = page.evaluate("""async () => {
                 const item=window.__exports[0];
@@ -279,7 +281,9 @@ def main():
             assert normalized_csv['type'] == 'text/csv;charset=utf-8'
             assert normalized_csv['prefix'] == [239, 187, 191]
             assert normalized_csv['bomCount'] == 1
-            assert normalized_csv['text'].lstrip('\\ufeff') == 'h1,h2\\r\\n1,2\\r\\n3,4\\r\\n'
+            assert normalized_csv['tail'] == [13, 10], normalized_csv['tail']
+            assert normalized_csv['emptyBytes'] == [239, 187, 191], normalized_csv['emptyBytes']
+            assert normalized_csv['text'] == 'h1,h2\r\n1,2\r\n3,4\r\n'
             page.locator('#example').select_option('bar')
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#member-results tr').count() == 1

@@ -386,8 +386,23 @@ def main():
         assert page.locator('#section-sketch-control').is_visible()
         assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 1
         assert page.locator('#section-sketch circle[data-centroid]').count() == 1
-        assert page.locator('#section-sketch line[data-principal-axis]').count() == 1
-        for expected in ('B=100 mm', 'H=80 mm', 't=10 mm', '57.953°'):
+        major_principal_axis = page.locator('#section-sketch line[data-principal-axis="major"]')
+        minor_principal_axis = page.locator('#section-sketch line[data-principal-axis="minor"]')
+        assert major_principal_axis.count() == 1
+        assert minor_principal_axis.count() == 1
+        major_angle = float(major_principal_axis.get_attribute('data-axis-angle-deg'))
+        minor_angle = float(minor_principal_axis.get_attribute('data-axis-angle-deg'))
+        assert abs(minor_angle - major_angle - 90) < 1e-9
+        centroid = page.locator('#section-sketch circle[data-centroid]').evaluate(
+            '(node) => ({x:Number(node.getAttribute("cx")),y:Number(node.getAttribute("cy"))})')
+        for axis in (major_principal_axis, minor_principal_axis):
+            endpoints = axis.evaluate('(node) => ({x1:Number(node.getAttribute("x1")),y1:Number(node.getAttribute("y1")),x2:Number(node.getAttribute("x2")),y2:Number(node.getAttribute("y2"))})')
+            assert abs((endpoints.x1 + endpoints.x2) / 2 - centroid.x) < 1e-6
+            assert abs((endpoints.y1 + endpoints.y2) / 2 - centroid.y) < 1e-6
+        assert page.locator('#section-sketch text[data-principal-axis-label="major"]').inner_text() == 'I₁'
+        assert page.locator('#section-sketch text[data-principal-axis-label="minor"]').inner_text() == 'I₂'
+        for expected in ('B=100 mm', 'H=80 mm', 't=10 mm',
+                         'major principal axis 57.953°', 'minor principal axis 147.953°'):
             assert expected in page.locator('#section-sketch-caption').inner_text()
         page.locator('#section-axis').select_option('principal-major')
         assert page.locator('#section-axis').input_value() == 'principal-major'
@@ -407,6 +422,12 @@ def main():
         invalid_caption = page.locator('#section-sketch-caption').inner_text()
         assert invalid_caption.startswith('Preview unavailable: enter positive B, H and t')
         assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_caption
+        assert page.locator('#section-sketch line[data-principal-axis]').count() == 0
+        page.locator('#section-angle-thickness').fill('10')
+        assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 1
+        assert page.locator('#section-sketch line[data-principal-axis]').count() == 2
+        page.locator('#section-angle-thickness').fill('80')
+        assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 0
         page.locator('#section-properties-apply').click()
         assert 'Not applied' in page.locator('#section-result').inner_text()
         assert abs(float(ab_area.input_value())-1700) < 1e-9

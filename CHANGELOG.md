@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss Studio L-angle dual principal-axis preview
+
+- Extended the live L-angle SVG to draw both perpendicular principal axes through the canonical centroid: major I1 at the FEM helper angle and minor I2 at +90°.
+- Added distinct axis metadata/labels and synchronized SVG description/accessibility caption.
+- Added Chromium regression for orthogonality, centroid intersection, I1/I2 labels, invalid clearing and valid-input recovery. Exact-head Quality pending; not released.
+
 ## 2026-11-22 — Truss Studio I-section preview
 
 - Added a live accessible symmetric I-section SVG using canonical FEM properties: two full-width equal flanges, centered web, B/H/tw/tf dimensions, centroid and perpendicular Ixx/Iyy axes.

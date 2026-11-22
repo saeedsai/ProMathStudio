@@ -66,7 +66,7 @@
     svg.replaceChildren();
     const titleText=composite?(channel?'Open channel cross-section preview':'I-section cross-section preview'):angle?'L-angle cross-section preview':hollowRectangle?'Hollow rectangle cross-section preview':hollowCircle?'Hollow circle cross-section preview':circle?'Solid circle cross-section preview':'Solid rectangle cross-section preview';
     const description=composite?(channel?'Dimensioned open-channel outline with the web on the left, flanges extending right, B/H/tw/tf dimensions, offset centroid and perpendicular centroidal axes.':'Dimensioned symmetric I-section outline with a centered web, equal flanges, B/H/tw/tf dimensions, centroid and perpendicular centroidal axes.')
-      :angle?'Dimensioned L-angle outline with centroid and major principal axis.'
+      :angle?'Dimensioned L-angle outline with centroid and perpendicular major (I₁) and minor (I₂) principal axes.'
       :hollowRectangle?'Dimensioned hollow-rectangle outline with a centered void, B/H/bi/hi dimensions, centroid and perpendicular centroidal axes.'
       :hollowCircle?'Dimensioned concentric hollow-circle outline with outer and inner diameters, centroid and perpendicular centroidal axes.'
       :circle?'Dimensioned solid circle outline with diameter, centroid and perpendicular centroidal diameter axes.'
@@ -133,10 +133,16 @@
       svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600'},'Iyy'));
     }else if(angle){
       const t=thickness*scale,theta=properties.principalAxisAngleDegrees*Math.PI/180,axisLength=Math.max(18,Math.min(78,Math.hypot(w,h)*0.45));
-      const x1=cx-axisLength*Math.cos(theta),y1=cy+axisLength*Math.sin(theta),x2=cx+axisLength*Math.cos(theta),y2=cy-axisLength*Math.sin(theta);
       svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+t)+' V '+(y+h-t)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'l-angle'}));
-      svg.append(svgNode('line',{x1,y1,x2,y2,stroke:'#c47b19','stroke-width':2.2,'stroke-dasharray':'6 4','data-principal-axis':'major'}));
-      svg.append(svgNode('text',{x:x2+5,y:y2-5,fill:'#c47b19','font-size':11,'font-weight':'600'},'I₁'));
+      [
+        {name:'major',label:'I₁',angle:theta,color:'#c47b19'},
+        {name:'minor',label:'I₂',angle:theta+Math.PI/2,color:'#2b7a65'}
+      ].forEach(axis=>{
+        const x1=cx-axisLength*Math.cos(axis.angle),y1=cy+axisLength*Math.sin(axis.angle);
+        const x2=cx+axisLength*Math.cos(axis.angle),y2=cy-axisLength*Math.sin(axis.angle);
+        svg.append(svgNode('line',{x1,y1,x2,y2,stroke:axis.color,'stroke-width':2.2,'stroke-dasharray':'6 4','data-principal-axis':axis.name,'data-axis-angle-deg':axis.angle*180/Math.PI}));
+        svg.append(svgNode('text',{x:x2+5,y:y2-5,fill:axis.color,'font-size':11,'font-weight':'600','data-principal-axis-label':axis.name},axis.label));
+      });
       svg.append(svgNode('text',{x:x+w-62,y:y+h-t/2+4,fill:'#20364f','font-size':10,'font-weight':'600'},'t='+fmt(thickness,4)+' mm'));
     }else{
       const innerW=hollowRectangle?innerWidth*scale:0,innerH=hollowRectangle?innerHeight*scale:0;
@@ -202,7 +208,7 @@
         ?'Hollow circle Do='+fmt(diameter,4)+' mm, Di='+fmt(innerDiameter,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal and vertical centroidal diameter axes Ixx and Iyy.'
         :'Solid circle D='+fmt(diameter,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal and vertical centroidal diameter axes Ixx and Iyy.')
       :angle
-        ?'L-angle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, t='+fmt(thickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; major principal axis '+fmt(properties.principalAxisAngleDegrees,5)+'° counter-clockwise from +x.'
+        ?'L-angle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, t='+fmt(thickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; major principal axis '+fmt(properties.principalAxisAngleDegrees,5)+'° counter-clockwise from +x; minor principal axis '+fmt(properties.principalAxisAngleDegrees+90,5)+'° counter-clockwise from +x.'
         :hollowRectangle
           ?'Hollow rectangle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, bi='+fmt(innerWidth,4)+' mm, hi='+fmt(innerHeight,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes.'
           :'Solid rectangle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes.';

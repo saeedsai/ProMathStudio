@@ -179,7 +179,10 @@ def main():
             assert all(len(row) == 13 for row in material_rows)
             assert material_rows[1][:3] == ['AB', 'A', 'B']
             assert float(material_rows[1][3]) == 2.0
-            assert float(material_rows[1][4]) == 1000.0
+            assert abs(float(material_rows[1][4]) - 0.001) < 1e-15  # schedule is SI m², not editor mm²
+            assert abs(float(material_rows[1][5]) - 0.002) < 1e-15  # 2 m × 0.001 m²
+            assert abs(float(material_rows[1][7]) - 100.0) < 1e-12  # EA/L in kN/mm
+            assert abs(float(material_rows[1][9]) - 15.7) < 1e-12  # SI density × volume
             assert float(material_rows[1][6]) == 200.0
             assert float(material_rows[1][8]) == 7850.0
             assert float(material_rows[1][10]) == 1000000.0

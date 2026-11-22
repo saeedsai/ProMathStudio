@@ -1,3 +1,10 @@
+## 2026-11-22 — Truss import-cancellation status persistence (dev; exact-head QA pending)
+
+- Diagnosed both exact-head failures at mandatory Truss browser step 215: Push [#45058847230](https://github.com/saeedsai/ProMathStudio/actions/runs/45058847230) and PR [#45058851780](https://github.com/saeedsai/ProMathStudio/actions/runs/45058851780). Both fail because preview refresh overwrites the pending-import cancellation status after a model edit; 59/59 FEM Node tests pass in both runs.
+- Updated the status helper so preview-only ready/unavailable updates preserve the cancellation notice until an explicit action replaces it. Import tokens, cancellation and solver behavior are unchanged.
+- Strengthened the delayed-file Chromium regression with a second explicit `change` event to prove the notice survives repeated input/change invalidations, then verifies the stale read cannot replace the edited model and the 3 m analytical displacement remains 0.015 mm.
+- Updated the Structural Truss contract, living plan and execution ledger. Source/test/docs are committed atomically on dev; exact-head Push/PR Quality must rerun. Not released.
+
 ## 2026-11-22 — Truss pending JSON import cancellation on model edits (dev)
 - Exact-head Push Quality #45058592621 and PR Quality #45058597071 started on commit 57075990cc303ee0d0d5e822f929113fbcec0929; each has 217 steps, with 6 successful and structural tests active at the latest inspection. Full browser/FEM certification remains pending.
 - Initial exact-head Quality runs for the implementation-only commit were cancelled when the required living-plan/ledger checkpoint advanced dev; full Quality for the final checkpoint remains pending.

@@ -9,12 +9,18 @@
   // Latest file selection wins even when an earlier byte read resolves later.
   let importRequest = 0;
   let importPending = false;
+  let importCancelledNotice = false;
+  const IMPORT_CANCELLED_STATUS = 'Pending import cancelled because the model was edited.';
   const MAX_IMPORT_BYTES = 1024 * 1024;
   const fmt = (x, digits=5) => Number(x).toPrecision(digits).replace(/(\.\d*?)0+(e|$)/,'$1$2').replace(/\.(e|$)/,'$1');
   const fmtAngle = x => Number(x).toFixed(3);
   // Keep whole-number section properties readable; retain compact precision for fractional values.
   const fmtSectionMoment = value => Number.isSafeInteger(value) ? String(value) : fmt(value,4);
   function status(message, error=false, busy=false) {
+    if(message===IMPORT_CANCELLED_STATUS) importCancelledNotice=true;
+    else if(importCancelledNotice && typeof message==='string' && message.startsWith('Preview ready')) message=IMPORT_CANCELLED_STATUS;
+    else if(importCancelledNotice && typeof message==='string' && message.startsWith('Preview unavailable:')) message+=' · '+IMPORT_CANCELLED_STATUS;
+    else importCancelledNotice=false;
     const target = $('status');
     target.textContent = message;
     target.classList.toggle('error', error);
@@ -301,7 +307,7 @@
       $('section-result').textContent='Not applied: '+error.message;
     }
   }
-  function cancelPendingImport(){if(!importPending)return;importRequest++;importPending=false;status('Pending import cancelled because the model was edited.');}
+  function cancelPendingImport(){if(!importPending)return;importRequest++;importPending=false;status(IMPORT_CANCELLED_STATUS);}
   function invalidate(){cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function dimensionLabel(name,value,attrs){const formatted=fmt(value,4);return svgNode('text',{...attrs,'data-dimension-label':name,role:'text','aria-label':'Section dimension '+name+': '+formatted+' millimetres'},name+'='+formatted+' mm');}

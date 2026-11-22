@@ -1,4 +1,25 @@
-## 2026-11-22 — TRUSS-JSON-EDIT-CANCELLATION (implemented on dev; exact-head Quality pending)
+## 2026-11-22 — TRUSS-IMPORT-CANCELLATION-STATUS-CI-FIX (implemented on dev; exact-head Quality pending)
+
+Started from dev `5b9f30645d8fa5c45ffae8898f9e390b57b9ccfd` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (445 commits ahead, zero behind). Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, unified implementation plan, engineering architecture/catalog, Truss FEM contract/source/browser test, current refs, PR #189/reviews, branch listing, rulesets and latest Actions/Pages evidence.
+
+Prioritized an actual exact-head CI failure before new feature work. Both Push Quality [#45058847230](https://github.com/saeedsai/ProMathStudio/actions/runs/45058847230) and PR Quality [#45058851780](https://github.com/saeedsai/ProMathStudio/actions/runs/45058851780) failed on the same mandatory Truss browser step 215 at `tests/smoke_truss_fem.py:325`. Both logs show all 59/59 canonical FEM Node tests passed; the failure is the missing visible cancellation status. The cancellation token/model protection is reached, but `invalidate()` then calls `updatePreview()`, which writes “Preview ready…” over the cancellation notice. Playwright `fill()` emits both input and change, so a second preview refresh can overwrite it again. This is a real UI state/status defect exposed by the new race regression, not a solver failure.
+
+Fixed status precedence in `tools/truss-fem-ui.js`: the cancellation notice is now retained across preview-only “Preview ready” refreshes; an unavailable preview can append the cancellation notice to its validation message. A subsequent explicit action (new import, analysis or another status-bearing operation) replaces the stale notice. Busy state remains false after cancellation. The import request token and late-read rejection behavior are unchanged.
+
+Strengthened the real Chromium regression in `tests/smoke_truss_fem.py` by dispatching a second explicit change event after editing the 2 m bar to 3 m, then requiring the cancellation notice and cleared `aria-busy` to survive both preview refreshes. It still releases the delayed `File.arrayBuffer()`, verifies the original A/B/AB model and 3 m edit remain, then analyzes and checks the 0.015 mm analytical displacement. No test assertions were removed or weakened.
+
+Updated the Structural Truss contract, this plan, execution ledger and changelog in the same atomic source/test commit. The standalone Truss page loads adjacent JavaScript assets; no `index.html` synchronization is required. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+The local execution workspace has no repository checkout, so full local Playwright/Node execution is unavailable. The two exact-head GitHub logs provide the failing browser assertion and independently confirm 59/59 FEM Node tests passed on the parent candidate. Source/test anchors were checked before commit; the new exact-head Push and PR Quality must rerun the complete 217-step suite. Main is unchanged; no merge or Pages deployment is claimed.
+
+**NEXT FIVE (status and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Both Push and PR workflows must pass all 217 steps on the new dev SHA; step 215 must pass delayed import cancellation through input+change refreshes, stale-read release, model preservation and 0.015 mm analysis; retain all 59 FEM Node tests, CSV/SVG/JSON, Truss Studio accessibility and 390px checks.
+2. **P1 — Latest-file selection and stale failure ordering.** Delay two file reads and resolve them out of order; newest selection must win. Reject an older read after a newer selection/cancellation; it must not alter model, status or busy state.
+3. **P1 — JSON boundary/rollback completion.** Cover null/blank/zero density, independent I-only/K-only, malformed UTF-8, BOM, exact/over-1-MiB byte boundaries, mismatched declared size and failed-read rollback; preserve IDs and physical quantities.
+4. **P1 — Truss member-isolation/export audit.** Applying section properties changes only the selected member; preserve other members/E/density/K. Verify CSV quoting/units/single BOM/CRLF and SVG XML/accessibility/semantic geometry with no browser console errors.
+5. **Release governance and promotion.** Obtain an eligible independent PR #189 review and authorized verification of enforceable main protection/required checks; only after exact-head CI and all gates pass, merge via the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted assets.
+
+## 2026-11-22 — TRUSS-JSON-EDIT-CANCELLATION (implementation on dev; exact-head Quality failed; status fix recorded above)
 
 Started from exact dev f0f38adcd201e810ab0fa6f56197d280dba0e7a5 and main 70fc483cb1cec3d2372d37484e4a8ef7942343da (442 commits ahead, zero behind). Re-read root AGENTS.md, this plan, the frozen 2026-10-26 inventory, the Truss FEM contract/source/tests, current refs, PR #189/reviews, branch/ruleset evidence and latest Actions/Pages history. The previous exact-head candidate is fully green: Push Quality #45052437168 and PR Quality #45052440817, each with all 218 steps successful, including Truss Studio, 59-test FEM Node and Truss browser export/mobile regressions. No existing failing exact-head CI remained.
 

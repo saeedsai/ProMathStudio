@@ -321,7 +321,10 @@ def main():
                 'buffer': json.dumps(slow_model).encode('utf-8')
             })
             page.wait_for_function("window.__releaseSlowImport !== null")
-            page.locator('#nodes tr').nth(1).locator('input[data-field="x"]').fill('3')
+            edited_length = page.locator('#nodes tr').nth(1).locator('input[data-field="x"]')
+            edited_length.fill('3')
+            # Repeated input/change invalidations must not erase the cancellation notice.
+            edited_length.dispatch_event('change')
             assert 'Pending import cancelled because the model was edited.' in page.locator('#status').inner_text()
             assert page.locator('#status').get_attribute('aria-busy') == 'false'
             page.evaluate('window.__releaseSlowImport()')

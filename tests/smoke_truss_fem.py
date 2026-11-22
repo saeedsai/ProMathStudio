@@ -360,7 +360,10 @@ def main():
             })
             page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
                 'Model JSON file size does not match the bytes read.')""")
-            assert 'Import failed:' in page.locator('#status').inner_text()
+            mismatch_status = page.locator('#status').inner_text()
+            assert 'Import failed:' in mismatch_status
+            assert (f'(expected {len(mismatched_payload)} bytes, received '
+                    f'{len(mismatched_payload) - 10} bytes)') in mismatch_status
             assert [page.locator('#nodes tr').nth(i).locator('input[data-field="id"]').input_value()
                     for i in range(2)] == ['A', 'B']
             assert page.locator('#nodes tr').nth(1).locator('input[data-field="x"]').input_value() == '3'

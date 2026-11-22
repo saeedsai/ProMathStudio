@@ -1,3 +1,9 @@
+## 2026-11-22 — Truss import BOM fixture and byte-count diagnostics (dev; exact-head QA pending)
+
+- Diagnosed both exact-head failures [Push #45069666650](https://github.com/saeedsai/ProMathStudio/actions/runs/45069666650) and [PR #45069672010](https://github.com/saeedsai/ProMathStudio/actions/runs/45069672010): the BOM test added three bytes to `File.arrayBuffer()` without changing immutable `File.size`, so the correct byte-integrity guard rejected an impossible synthetic file.
+- The Chromium BOM regression now uploads a real BOM-prefixed byte buffer; `File.size` and the actual read agree. Import mismatch errors report expected/received byte counts, with an exact-count browser assertion for a truncated but valid JSON prefix.
+- Updated the Structural Truss contract, living plan and execution ledger. No FEM math or import limits changed; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-22 — Truss JSON file-byte integrity (dev; exact-head QA pending)
 
 - The browser importer now requires the actual `ArrayBuffer.byteLength` to match the selected `File.size`, in addition to the existing 1 MiB bounds. A truncated or unexpectedly expanded read is rejected before decoding/parsing.

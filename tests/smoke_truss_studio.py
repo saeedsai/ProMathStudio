@@ -707,21 +707,10 @@ def main():
         assert page.evaluate('window.__importReads') == ['fast-valid.json','slow-invalid.json']
         assert 'total member length 11.21 m' in page.locator('#preview-summary').inner_text()
         assert page.locator('#member-metrics tr').count() == 3
-        # Prepend actual UTF-8 BOM bytes; the canonical importer strips the decoded BOM.
-        page.evaluate("""() => {
-            const read = Blob.prototype.arrayBuffer;
-            File.prototype.arrayBuffer = function() {
-                return read.call(this).then(value => {
-                    const source = new Uint8Array(value);
-                    const prefixed = new Uint8Array(source.length + 3);
-                    prefixed.set([0xEF, 0xBB, 0xBF]);
-                    prefixed.set(source, 3);
-                    return prefixed.buffer;
-                });
-            };
-        }""")
+        # The BOM belongs to the actual File bytes, so File.size matches arrayBuffer().byteLength.
+        legacy_bytes = b'\xef\xbb\xbf' + json.dumps(prior).encode('utf-8')
         page.locator('#import-model').set_input_files({'name':'legacy.json','mimeType':'application/json',
-                                                      'buffer':json.dumps(prior).encode('utf-8')})
+                                                      'buffer':legacy_bytes})
         page.wait_for_function("""() => {
             const status = document.querySelector('#status');
             return status?.textContent.includes('Analysis complete') &&

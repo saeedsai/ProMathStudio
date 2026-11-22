@@ -1,3 +1,8 @@
+## 2026-11-22 — Truss Studio I-section preview
+
+- Added a live accessible symmetric I-section SVG using canonical FEM properties: two full-width equal flanges, centered web, B/H/tw/tf dimensions, centroid and perpendicular Ixx/Iyy axes.
+- Added immediate web/flange thickness updates and invalid tw >= B / 2·tf >= H clearing with accessible guidance and valid-input recovery.
+- Added a focused 390px Chromium regression for outline geometry, dimensions, centroid, axes, accessibility, live edits and invalid recovery. FEM solver formulas and the main standalone bundle are unchanged; exact-head Quality pending.
 ## 2026-11-21 — Truss Studio open-channel preview
 
 - Added a live accessible open-channel SVG using canonical FEM section properties: web-left/flanges-right geometry, B/H/tw/tf dimensions, offset centroid and perpendicular Ixx/Iyy centroidal axes.

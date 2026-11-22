@@ -255,6 +255,49 @@ def main():
         page.locator('#section-height').fill('80')
         page.locator('#section-web-thickness').fill('10')
         page.locator('#section-flange-thickness').fill('8')
+        # I-section preview must show a centered web and equal full-width flanges.
+        assert page.locator('#section-sketch-control').is_visible()
+        i_outline = page.locator('#section-sketch path[data-section-outline="i-section"]')
+        assert i_outline.count() == 1
+        assert i_outline.get_attribute('data-web-thickness-mm') == '10'
+        assert i_outline.get_attribute('data-flange-thickness-mm') == '8'
+        i_path = i_outline.get_attribute('d')
+        assert i_path.startswith('M 86 24 H 276 V 39.2 H 190.5 V 160.8 H 276 V 176 H 86 V 160.8 H 171.5 V 39.2 H 86 Z'), i_path
+        assert page.locator('#section-sketch circle[data-centroid]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="horizontal"]').count() == 1
+        assert page.locator('#section-sketch line[data-centroid-axis="vertical"]').count() == 1
+        assert page.locator('#section-sketch line[data-dimension="tw"]').count() == 1
+        assert page.locator('#section-sketch line[data-dimension="tf"]').count() == 1
+        for expected in ('B=100 mm', 'H=80 mm', 'tw=10 mm', 'tf=8 mm', 'Ixx', 'Iyy'):
+            assert expected in page.locator('#section-sketch').text_content(), expected
+        i_caption = page.locator('#section-sketch-caption').inner_text()
+        assert 'centroid x 50 mm, y 40 mm' in i_caption, i_caption
+        assert 'centered web and equal-width flanges' in i_caption
+        assert page.locator('#section-sketch').get_attribute('aria-label') == i_caption
+        page.locator('#section-web-thickness').fill('12')
+        assert i_outline.get_attribute('data-web-thickness-mm') == '12'
+        assert 'tw=12 mm' in page.locator('#section-sketch-caption').inner_text()
+        page.locator('#section-web-thickness').fill('10')
+        page.locator('#section-flange-thickness').fill('10')
+        assert i_outline.get_attribute('data-flange-thickness-mm') == '10'
+        assert 'tf=10 mm' in page.locator('#section-sketch-caption').inner_text()
+        page.locator('#section-flange-thickness').fill('8')
+        page.locator('#section-web-thickness').fill('100')
+        assert page.locator('#section-sketch path[data-section-outline="i-section"]').count() == 0
+        invalid_i = page.locator('#section-sketch-caption').inner_text()
+        assert invalid_i.startswith('Preview unavailable: I-section web thickness tw')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_i
+        page.locator('#section-web-thickness').fill('10')
+        assert i_outline.count() == 1
+        page.locator('#section-flange-thickness').fill('40')
+        assert page.locator('#section-sketch path[data-section-outline="i-section"]').count() == 0
+        invalid_i = page.locator('#section-sketch-caption').inner_text()
+        assert invalid_i.startswith('Preview unavailable: I-section web thickness tw')
+        assert page.locator('#section-sketch').get_attribute('aria-label') == invalid_i
+        page.locator('#section-flange-thickness').fill('8')
+        assert i_outline.count() == 1
+        i_sketch_width = page.locator('#section-sketch').evaluate('(svg) => svg.getBoundingClientRect().width')
+        assert i_sketch_width <= 390, i_sketch_width
         page.locator('#section-axis').select_option('width')
         page.locator('#section-properties-apply').click()
         assert abs(float(ab_area.input_value()) - 2240) < 1e-9

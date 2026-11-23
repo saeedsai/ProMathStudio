@@ -332,6 +332,15 @@ def main():
             page.locator('#section-axis').select_option('width')
             page.locator('#section-width').fill('40')
             page.locator('#section-height').fill('60')
+            section_before_invalid_axis = section_member_snapshot()
+            invalid_axis_value = page.locator('#section-axis').evaluate(
+                "(select) => { select.value = 'unsupported-axis'; return select.value; }")
+            assert invalid_axis_value == ''
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text() == (
+                'Not applied: Choose a valid section axis.')
+            assert section_member_snapshot() == section_before_invalid_axis
+            page.locator('#section-axis').select_option('width')
             section_before = section_member_snapshot()
             page.locator('#section-properties-apply').click()
             section_after = section_member_snapshot()

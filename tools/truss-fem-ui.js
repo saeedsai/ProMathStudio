@@ -288,6 +288,10 @@
       }
       const properties=fem.sectionProperties(shape,dimensions);
       const axis=$('section-axis').value;
+      const validAxes=angle
+        ? ['width','depth','principal-major','principal-minor']
+        : rectangle ? ['width','depth'] : null;
+      if(validAxes&&!validAxes.includes(axis)) throw Error('Choose a valid section axis.');
       let appliedI=properties.secondMoment, axisName='Ixx';
       if(angle&&axis==='principal-major') {appliedI=properties.principalMomentMajor;axisName='I1 (major principal)';}
       else if(angle&&axis==='principal-minor') {appliedI=properties.principalMomentMinor;axisName='I2 (minor principal)';}

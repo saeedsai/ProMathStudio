@@ -1,3 +1,24 @@
+## 2026-11-23 — TRUSS-SECTION-AXIS-SELECTION-GUARD (implemented on dev; exact-head QA pending)
+
+Started from verified refs: dev `3ca78fbc2ced1d48003bb9a550ee2b3d753c06f8`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen October 26 inventory, unified master implementation plan, engineering architecture/toolbox catalogs, Structural Truss contract/source/tests, PR #189/reviews, exact-head Actions and Pages evidence.
+
+**P0 baseline:** The previous exact-head Push Quality [#45172145000](https://github.com/saeedsai/ProMathStudio/actions/runs/45172145000) and PR Quality [#45172155851](https://github.com/saeedsai/ProMathStudio/actions/runs/45172155851) both passed all **218/218 steps**, with zero failed or skipped steps, on `3ca78fbc2ced1d48003bb9a550ee2b3d753c06f8`. There was no outstanding failing exact-head CI at the start of this iteration.
+
+**P1 correctness guard:** `applySectionProperties()` previously fell back to Ixx when the selector held an unsupported/empty value. It now validates the selected axis before any member write: rectangles, channels and I-sections accept width/depth; L-angles accept width/depth plus principal-major/principal-minor; circles do not use the selector. Invalid state reports `Not applied: Choose a valid section axis.` and leaves both area and I unchanged.
+
+**Regression:** The mandatory Truss FEM Chromium test snapshots all member inputs, sets the axis selector to an unsupported value, verifies the browser's empty select value, asserts the exact diagnostic and complete snapshot equality, then restores width and continues the existing selected-member, invalid-geometry, overflow and missing-field tests. No solver equations or existing assertions were changed.
+
+Updated the Structural Truss contract, living plan, execution ledger and changelog atomically with source/test. Truss Studio loads adjacent JavaScript assets; no standalone `index.html` bundle synchronization applies. The frozen October 26 baseline remains **166 gaps / 95 partial**.
+
+Full local Node/Playwright execution remains unavailable because this workspace has no checkout; exact-head GitHub Push and PR Quality must certify the new test. No release/deployment is claimed.
+
+**NEXT FIVE (status and acceptance tests):**
+1. **P0 — Exact-head Quality.** Both Push and PR workflows green on this commit, all 218 required steps with zero failures/skips; step 215 must pass invalid-axis rejection/rollback plus existing selected-member, duplicate-ID, overflow and missing-field tests at 1280px/390px; retain FEM Node 214 and spreadsheet 78–80.
+2. **P1 — Malformed UTF-8 import rollback.** Upload an actual File containing invalid UTF-8 bytes, assert the explicit UTF-8 diagnostic, `aria-busy=false`, and unchanged node/member inputs plus last solved result; then import a valid file to prove recovery.
+3. **P1 — Spreadsheet formula-reference edge audit.** Add mixed absolute/relative anchors, quoted sheet names, reversed ranges, multiple escaped quotes and row/column boundaries; verify logical-cell identity, transactional refusal of unsafe sort/delete and standalone `index.html` parity.
+4. **P1 — Truss import compatibility completion.** Exercise actual BOM bytes, exact/over-1-MiB file boundary, long as well as short reads and latest-request success/rejection; every failed/stale read preserves the active model, solved metrics and busy/status state.
+5. **P0 — Release governance.** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required-check configuration. Only after exact-head checks and review pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted critical paths.
+
 ## 2026-11-23 — TRUSS-SECTION-TARGET-IDENTITY-AND-CI-RECOVERY (implemented on dev; exact-head QA pending)
 
 Started from verified dev `4640ec7ea1732a6d079a4534068168e90e85a9fd` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, the living plan, frozen October 26 inventory, unified master plan, engineering architecture/toolbox contracts, Structural Truss contract/source/tests, current refs, PR #189/reviews, exact-head Actions, rulesets and Pages evidence.

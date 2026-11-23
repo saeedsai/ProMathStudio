@@ -1,3 +1,9 @@
+## 2026-11-23 — Reject unsupported Truss section-axis selections
+
+- Validate the selected section axis before writing area or second moment: rectangular/composite profiles accept width/depth, L-angles additionally accept principal-major/principal-minor, and circles do not use the selector.
+- Added a Chromium regression that injects an unsupported selector value, checks the exact diagnostic and complete member-state rollback, then restores Ixx and continues existing FEM tests.
+- Previous parent Push/PR Quality passed 218/218 steps; exact-head Quality for this change is pending. Not released.
+
 ## 2026-11-23 — Reject ambiguous Truss section-helper targets and repair browser fixture
 
 - Exact-head Push Quality #45162019117 and PR Quality #45162337628 both failed at Truss FEM browser step 215 because the test attempted to select a control inside the intentionally collapsed `details#member-material-details`. Opened the disclosure in the browser regression and asserted the helper is visible before interaction; no production visibility behavior or assertions were weakened.

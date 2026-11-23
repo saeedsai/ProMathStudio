@@ -134,3 +134,8 @@ When legacy SI JSON is converted by §fromLegacy§, optional member properties d
 The section-property helper is inside the native `<details id="member-material-details">` disclosure. It is intentionally collapsed on initial load; a user opens “Per-member material breakdown” to access the material schedule and helper. Browser regressions must activate that summary and assert `#section-helper` is visible before interacting with its controls.
 
 Applying section properties requires the selected member ID to match exactly one current member row. No match reports that an existing member must be chosen; duplicate matches report an ambiguous ID and leave all member fields untouched. This prevents a pre-analysis edit that introduces duplicate IDs from silently applying section properties to whichever duplicate happens to appear first. The Chromium regression creates a duplicate ID, checks the exact diagnostic and full model snapshot, restores the unique ID, then verifies normal selected-member application and rollback cases.
+
+
+## Section-axis selection validation
+
+The section helper applies a centroidal or principal second moment only when the selected axis is valid for the current shape. Solid/hollow rectangles, channels and I-sections accept the width-parallel Ixx or depth-parallel Iyy axis. L-angles accept those two centroidal axes plus the major I1 and minor I2 principal axes. Circular sections do not use the axis selector. An invalid or stale selector value is rejected before either the selected member's area or I field is written; the browser regression injects an unsupported value and verifies the full member snapshot is unchanged before restoring Ixx and continuing the normal application test.

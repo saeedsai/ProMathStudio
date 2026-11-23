@@ -1,3 +1,15 @@
+## 2026-11-23 — Truss section-axis validation guard
+
+- Starting exact refs: dev `3ca78fbc2ced1d48003bb9a550ee2b3d753c06f8`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`.
+- Previous exact-head Push Quality [#45172145000](https://github.com/saeedsai/ProMathStudio/actions/runs/45172145000) and PR Quality [#45172155851](https://github.com/saeedsai/ProMathStudio/actions/runs/45172155851) both passed 218/218 steps with zero failed/skipped steps.
+- Production change: reject unsupported/empty section-axis values before mutating a member. Rectangular/composite shapes accept width/depth; L-angle accepts width/depth and principal major/minor; circles do not use the selector.
+- Chromium regression: force an unsupported selector value, assert the exact rejection message and complete member-input rollback, then restore Ixx and continue existing FEM browser coverage.
+- Changed atomically: `tools/truss-fem-ui.js`, `tests/smoke_truss_fem.py`, Structural Truss contract, hourly plan, execution ledger and changelog. No standalone bundle synchronization is applicable.
+- Local checkout is absent, so local Node/Playwright suites were not run. New exact-head Push/PR Quality is pending. No release/deployment claim.
+- PR #189 remains open with no independent reviews. Both main and dev report unprotected; rulesets are empty and main protection read is HTTP 403. Main Quality and Pages remain successful on main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). Historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) both exact-head Quality workflows green, all 218 steps and invalid-axis browser rollback; (2) actual malformed UTF-8 File-input rollback with valid-import recovery; (3) spreadsheet formula-reference mixed/absolute, quoted-sheet, reversed-range, escaped-string and boundary audit with standalone bundle parity; (4) Truss BOM/1-MiB/long-read/latest-request import compatibility tests; (5) eligible independent PR #189 review plus enforceable main protection, then ordinary PR promotion and exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-23 — Truss section-target identity and exact-head CI recovery
 
 - Starting refs: dev `4640ec7ea1732a6d079a4534068168e90e85a9fd`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`.

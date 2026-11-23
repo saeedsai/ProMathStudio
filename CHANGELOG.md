@@ -1,3 +1,9 @@
+## 2026-11-23 — Thin-walled hollow-rectangle section stability (dev; exact-head QA pending)
+
+- Replaced cancellation-prone outer-minus-inner area and inertia subtraction with algebraically equivalent dimensionless gap factors for hollow rectangles.
+- Added high-precision Node references for net area, Ixx/Iyy, section moduli and radii of gyration; added Chromium desktop/390px coverage proving one-member application preserves E, density, K and all other members.
+- Existing finite/positive guards and solid-rectangle behavior remain unchanged. Requires exact-head Push/PR Quality; not released.
+
 ## 2026-11-23 — Truss import race settlement and Analyze cancellation (dev; exact-head QA pending)
 
 - Analyze now explicitly reports when it cancels a pending JSON import and confirms that the current displayed model was analyzed; cancellation context is retained on solve failure.

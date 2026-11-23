@@ -220,13 +220,26 @@
       const outerArea = finite(width * depth, 'Rectangle outer area (mm²)');
       const innerArea = hollow ? finite(innerWidth * innerHeight, 'Hollow rectangle inner area (mm²)') : 0;
       if (hollow && !(innerArea > 0)) throw Error('Hollow rectangle inner area underflow; increase the inner dimensions.');
-      area = finite(outerArea - innerArea, 'Rectangle net area (mm²)');
+      // Factor the outer-minus-inner expressions into dimensionless wall gaps.
+      // Direct subtraction loses significant digits when a valid hollow section has very thin walls.
+      const widthRatio = hollow ? innerWidth / width : 0;
+      const heightRatio = hollow ? innerHeight / depth : 0;
+      const widthGap = hollow ? (width - innerWidth) / width : 1;
+      const heightGap = hollow ? (depth - innerHeight) / depth : 1;
+      const netAreaFactor = hollow ? widthGap + widthRatio * heightGap : 1;
+      area = finite(outerArea * netAreaFactor, 'Rectangle net area (mm²)');
       const outerIxx = finite(width * depth * depth * depth / 12, 'Rectangle outer Ixx (mm⁴)');
-      const innerIxx = hollow ? finite(innerWidth * innerHeight * innerHeight * innerHeight / 12, 'Hollow rectangle inner Ixx (mm⁴)') : 0;
-      secondMoment = finite(outerIxx - innerIxx, 'Rectangle Ixx (mm⁴)');
+      if (hollow) finite(innerWidth * innerHeight * innerHeight * innerHeight / 12, 'Hollow rectangle inner Ixx (mm⁴)');
+      const ixxFactor = hollow
+        ? widthGap + widthRatio * heightGap * (1 + heightRatio + heightRatio * heightRatio)
+        : 1;
+      secondMoment = finite(outerIxx * ixxFactor, 'Rectangle Ixx (mm⁴)');
       const outerIyy = finite(depth * width * width * width / 12, 'Rectangle outer Iyy (mm⁴)');
-      const innerIyy = hollow ? finite(innerHeight * innerWidth * innerWidth * innerWidth / 12, 'Hollow rectangle inner Iyy (mm⁴)') : 0;
-      secondMomentPerpendicular = finite(outerIyy - innerIyy, 'Rectangle Iyy (mm⁴)');
+      if (hollow) finite(innerHeight * innerWidth * innerWidth * innerWidth / 12, 'Hollow rectangle inner Iyy (mm⁴)');
+      const iyyFactor = hollow
+        ? heightGap + heightRatio * widthGap * (1 + widthRatio + widthRatio * widthRatio)
+        : 1;
+      secondMomentPerpendicular = finite(outerIyy * iyyFactor, 'Rectangle Iyy (mm⁴)');
       axis = 'centroidal axis parallel to width';
       perpendicularAxis = 'centroidal axis parallel to depth';
     } else {

@@ -1276,3 +1276,29 @@ test('L-angle principal minor remains resolvable for an extreme aspect-ratio sec
   section.secondMoment+section.secondMomentPerpendicular,1e-12);
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
+
+test('thin-walled hollow rectangle retains net properties without subtractive cancellation',()=>{
+ const dimensions={width:1e6,height:1e6,innerWidth:999999.9999999,innerHeight:999999.9999999};
+ const original={...dimensions};
+ const section=fem.sectionProperties('hollow-rectangle',dimensions);
+ // 80-digit Decimal references evaluated from the exact binary64 input dimensions.
+ const expectedArea=0.20000152289866402;
+ const expectedMoment=33333587149.774002;
+ const closeRelative=(actual,expected,label)=>{
+  assert.ok(Number.isFinite(actual)&&Math.abs(actual-expected)<=expected*1e-12,
+   label+' '+actual+' must match '+expected);
+ };
+ closeRelative(section.area,expectedArea,'net area');
+ closeRelative(section.secondMoment,expectedMoment,'Ixx');
+ closeRelative(section.secondMomentPerpendicular,expectedMoment,'Iyy');
+ closeRelative(section.sectionModulusX,expectedMoment/500000,'Sx');
+ closeRelative(section.sectionModulusY,expectedMoment/500000,'Sy');
+ closeRelative(section.radiusOfGyrationX,Math.sqrt(expectedMoment/expectedArea),'rx');
+ closeRelative(section.radiusOfGyrationY,Math.sqrt(expectedMoment/expectedArea),'ry');
+ assert.ok(section.area>0&&section.secondMoment>0&&section.secondMomentPerpendicular>0);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ assert.throws(()=>fem.sectionProperties('hollow-rectangle',{
+  width:1e6,height:1e6,innerWidth:1e6,innerHeight:999999
+ }),/inner width and depth must be positive and smaller/);
+});

@@ -366,6 +366,34 @@ def main():
             assert page.locator('#section-result').inner_text().startswith('Not applied:')
             assert section_member_snapshot() == section_before_invalid
 
+            # A very thin but representable hollow rectangle must retain its small net area
+            # and positive bending inertias instead of subtracting nearly equal outer/inner values.
+            page.locator('#section-shape').select_option('hollow-rectangle')
+            page.locator('#section-width').fill('1000000')
+            page.locator('#section-height').fill('1000000')
+            page.locator('#section-inner-width').fill('999999.9999999')
+            page.locator('#section-inner-height').fill('999999.9999999')
+            page.locator('#section-axis').select_option('width')
+            section_before_thin_wall = section_member_snapshot()
+            page.locator('#section-properties-apply').click()
+            section_after_thin_wall = section_member_snapshot()
+            expected_thin_wall_area = 0.20000152289866402
+            expected_thin_wall_moment = 33333587149.774002
+            assert abs(float(section_after_thin_wall[1]['area']) - expected_thin_wall_area) <= expected_thin_wall_area * 1e-12
+            assert abs(float(section_after_thin_wall[1]['I']) - expected_thin_wall_moment) <= expected_thin_wall_moment * 1e-12
+            for field, value in section_before_thin_wall[1].items():
+                if field not in ('area', 'I'):
+                    assert section_after_thin_wall[1][field] == value, (field, section_before_thin_wall, section_after_thin_wall)
+            assert section_after_thin_wall[0] == section_before_thin_wall[0]
+            assert section_after_thin_wall[2] == section_before_thin_wall[2]
+            assert 'Hollow rectangle' in page.locator('#section-result').inner_text()
+            assert 'applied Ixx' in page.locator('#section-result').inner_text()
+
+            # Restore the ordinary rectangle setup for the missing-destination-field test.
+            page.locator('#section-shape').select_option('rectangle')
+            page.locator('#section-width').fill('40')
+            page.locator('#section-height').fill('60')
+
             # If either destination field is absent, preflight prevents a partial write.
             page.locator('#section-width').fill('40')
             page.locator('#section-height').fill('60')

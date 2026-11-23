@@ -1,4 +1,31 @@
-## 2026-11-23 — TRUSS-IMPORT-RACE-SETTLEMENT-AND-ANALYZE-CANCELLATION (implemented on dev; exact-head QA pending)
+## 2026-11-23 — TRUSS-HOLLOW-RECTANGLE-THIN-WALL-STABILITY (implemented on dev; exact-head QA pending)
+
+Starting refs: dev `c5df9b79fb69af16164547539add12455e4a2603`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root AGENTS.md, the living plan, frozen October 26 inventory, unified/engineering architecture and structural catalog, Truss FEM source/tests/contract, PR #189/reviews, branch refs and current Actions/Pages evidence.
+
+**P0 CI baseline:** The exact starting dev head passed Push Quality [#45245243102](https://github.com/saeedsai/ProMathStudio/actions/runs/45245243102) and PR Quality [#45245258027](https://github.com/saeedsai/ProMathStudio/actions/runs/45245258027), each with **218/218 steps successful, zero failures and zero skipped steps**. Spreadsheet 78–80, Truss Studio, FEM analytical and FEM browser/mobile checks all passed. No failing exact-head CI blocker remained at the start.
+
+**P1 numerical correctness defect:** Hollow-rectangle section properties used direct subtraction of nearly equal outer and inner areas/inertias. A valid thin-walled case (outer 1,000,000 × 1,000,000 mm; inner 999,999.9999999 × 999,999.9999999 mm) lost approximately 2.52e-4 relative area and 4.21e-4 relative Ixx/Iyy from cancellation.
+
+**Source correction:** Re-expressed net area and centroidal Ixx/Iyy using dimensionless width/depth ratios and positive wall-gap factors. This is algebraically equivalent to outer-minus-inner, but avoids subtracting nearly equal large floating-point quantities. Existing finite/positive checks and the solid-rectangle path remain intact.
+
+**Regressions:** Added a direct Node high-precision reference test for area, Ixx/Iyy, section moduli and radii of gyration, plus invalid inner/outer equality. Extended the real Chromium section-helper regression at 1280px and 390px: apply the thin-wall result to one selected member, verify area and I, and prove E/density/K and all other members remain unchanged.
+
+Updated the FEM kernel, Node regression, Chromium regression, Structural Truss contract, this plan, execution ledger and changelog atomically. Truss Studio uses adjacent JS assets; no root index.html synchronization applies.
+
+**Validation limits:** One bounded local Git attempt confirmed no checkout and GitHub DNS failure (`Could not resolve host: github.com`); no repeated retry. Independent 80-digit Decimal calculations from the exact binary64 inputs confirm the expected area and inertias and show the factored formula agrees within about 2e-16 relative error. Full local Node/Chromium execution is unavailable; the new exact-head Push/PR Quality runs must certify the tests. Candidate is **Implemented on dev / In QA**, not released.
+
+PR #189 remains open from dev to main with zero independent review submissions. Both branches report `protected: false`; required checks are not enforced by branch protection. PR #189 currently has 472 commits and 98 changed files before this commit. No merge, direct main update, force push or governance bypass was attempted. Latest main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remain successful on main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03); no newer main deployment was found.
+
+The October 26 historical baseline remains frozen at **166 gaps / 95 partial**; no historical count or status was reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Both Push and PR workflows must pass on the new dev SHA with all 218 steps successful and zero failures/skips. Verify the new thin-wall FEM Node and browser cases, Truss Studio, FEM 214/215, spreadsheet 78–80 and desktop/390px checks.
+2. **P0 — Release governance and ordinary promotion.** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required-check configuration. Only after exact-head CI and review gates pass, merge via the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted critical paths.
+3. **P1 — Hollow-circle thin-wall stability.** Replace cancellation-prone \(D^2-D_i^2\) and \(D^4-D_i^4\) with factored differences; add high-precision area/inertia references, invalid-boundary cases and desktop/390px helper application.
+4. **P1 — Spreadsheet formula-reference edge audit.** Cover mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity and atomic refusal of noncontiguous range sorts, plus source/standalone parity.
+5. **P1 — Source-backed Engineering Toolbox expansion.** Select one approved unfinished canonical tool; reuse shared solver/units/plot services, add a stable tool ID and reference/negative/browser-mobile tests, and retain truthful planned/implemented labels without placeholder actions.
+
+## 2026-11-23 — TRUSS-IMPORT-RACE-SETTLEMENT-AND-ANALYZE-CANCELLATION (implemented on dev; exact-head Quality verified)
 
 Starting refs: dev `fefbd52bb49fe17b16714fe657dd4fe0c4f73e52`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, Structural Truss source/tests/contract, PR #189/reviews, current refs, exact-head Actions and main Quality/Pages evidence.
 

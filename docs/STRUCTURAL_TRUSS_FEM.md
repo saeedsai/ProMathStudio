@@ -162,3 +162,19 @@ validateImportByteLength(declaredSize, actualByteLength) distinguishes invalid r
 The L-angle inertia tensor is diagonalized after scaling Ixx, Iyy and Ixy by their largest magnitude. The major principal moment is calculated from the normalized mean and radius; the minor moment is calculated as det(I)/I1 rather than subtracting two nearly equal large values. This preserves a representable minor moment for slender but valid sections and avoids avoidable overflow in the unscaled mean, radius and doubled product of inertia. A non-positive normalized determinant or an unrepresentable final moment is still rejected; the implementation does not clamp a negative or zero result into a plausible value.
 
 The direct Node regression includes B=1,000,000 mm, H=1 mm and t=0.001 mm. Its minor principal moment is approximately 4.161659185863228e-4 mm⁴ (independent high-precision composite-rectangle reference); the former mean-minus-radius calculation rounded this positive value to zero and rejected the section.
+
+## Thin-walled hollow-rectangle numerical stability
+
+For outer width/depth \(b,h\) and centered inner width/depth \(b_i,h_i\), compute the hollow section by factoring the outer-minus-inner expressions. Define \(r_b=b_i/b\), \(r_h=h_i/h\), \(g_b=(b-b_i)/b\) and \(g_h=(h-h_i)/h\). Then
+
+\[
+A=bh(g_b+r_b g_h),\quad
+I_{xx}=\frac{bh^3}{12}\left[g_b+r_b g_h(1+r_h+r_h^2)\right],
+\]
+\[
+I_{yy}=\frac{hb^3}{12}\left[g_h+r_h g_b(1+r_b+r_b^2)\right].
+\]
+
+These are algebraically equivalent to subtracting the inner rectangle from the outer rectangle, but avoid catastrophic cancellation when valid walls are very thin. Existing finite/positive geometry checks remain in force; no invalid dimensions are clamped.
+
+The direct Node and Chromium desktop/390px regressions use \(b=h=1{,}000{,}000\) mm and \(b_i=h_i=999{,}999.9999999\) mm. Independent 80-digit Decimal references evaluated from the exact binary64 inputs are \(A=0.20000152289866402\) mm² and \(I_{xx}=I_{yy}=33333587149.774002\) mm⁴. The prior subtractive calculation lost about \(2.52\times10^{-4}\) relative area and \(4.21\times10^{-4}\) relative inertia. The browser test also verifies only the selected member's area/I fields change; E, density, K and every other member remain unchanged.

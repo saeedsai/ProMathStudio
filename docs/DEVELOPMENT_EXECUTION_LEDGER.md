@@ -1,3 +1,14 @@
+## 2026-11-23 — TRUSS-HOLLOW-RECTANGLE-THIN-WALL-STABILITY
+
+- Starting exact refs: dev `c5df9b79fb69af16164547539add12455e4a2603`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. The starting dev Push Quality [#45245243102](https://github.com/saeedsai/ProMathStudio/actions/runs/45245243102) and PR Quality [#45245258027](https://github.com/saeedsai/ProMathStudio/actions/runs/45245258027) both passed 218/218 steps, zero failures/skips; spreadsheet, Truss Studio and FEM analytical/browser checks passed.
+- Numerical issue: hollow-rectangle net area/Ixx/Iyy used outer-minus-inner subtraction and lost significant precision for a valid thin-wall geometry.
+- Source: `tools/truss-fem.js` now uses dimensionless width/depth ratios and positive gap factors for area and both centroidal inertias. The solid-rectangle path, geometry guards and units are unchanged.
+- Regression: `tests/test_truss_fem.js` adds exact-binary64-input Decimal references for area, Ixx/Iyy, Sx/Sy and rx/ry plus invalid geometry. `tests/smoke_truss_fem.py` applies the thin-wall result to one selected member at 1280px/390px and verifies other members and E/density/K remain unchanged.
+- Updated Structural Truss contract, hourly plan, ledger and changelog in the same dev commit. Truss Studio uses adjacent JS assets; standalone root index.html sync is not applicable.
+- Validation: independent 80-digit Decimal calculation confirms the reference values and factored-form relative error below 2e-16; old direct subtraction lost about 2.52e-4 relative area and 4.21e-4 relative inertia. Full local Node/Chromium unavailable: no checkout and one bounded Git attempt failed with GitHub DNS resolution. Exact-head Actions pending.
+- PR #189 remains open, mergeable, with zero independent reviews; dev/main both report unprotected. Main Quality #41730966059 and Pages #41730962844 remain successful on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03). No merge or protection bypass. Historical baseline remains 166 gaps / 95 partial.
+- **NEXT FIVE:** (1) new exact-head Push+PR all 218 steps green, including FEM Node/browser thin-wall regression at desktop/390px; (2) eligible independent PR #189 review and authorized enforceable main protection, then ordinary PR promotion and exact-main Quality/Pages/hosted verification; (3) hollow-circle thin-wall cancellation-safe formulas and high-precision browser references; (4) spreadsheet formula-reference edge audit with source/standalone parity and transactional sort/delete tests; (5) one approved source-backed Engineering Toolbox tool using canonical solver IDs, numerical references and responsive keyboard tests.
+
 ## 2026-11-23 — TRUSS-IMPORT-RACE-SETTLEMENT-AND-ANALYZE-CANCELLATION
 
 - Starting exact refs: dev `fefbd52bb49fe17b16714fe657dd4fe0c4f73e52`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; PR #189 remained open with zero independent reviews.

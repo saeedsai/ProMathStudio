@@ -1,3 +1,10 @@
+## 2026-11-23 — Spreadsheet string-literal safety and Truss CI fixture correction
+
+- Fixed the Truss browser preflight fixture by assigning legacy density, I and K before asserting normalized values.
+- Added a shared Data Tables formula-string shield so row/column insert/delete and stable sorting preserve double-quoted text, including doubled-quote escapes, while still rewriting actual references.
+- Extended spreadsheet structural and sort browser regressions for literal preservation and updated the Data Tables contract.
+- Synchronized `src/data-tables.js` with the standalone `index.html` bundle. Exact-head Quality is pending; not released.
+
 ## 2026-11-23 — Truss legacy import regression and immutable compatibility reference
 
 - Recursively froze the private canonical legacy SI example while preserving fresh editable copies from `TrussStudio.example`.

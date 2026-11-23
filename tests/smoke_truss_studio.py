@@ -1060,6 +1060,10 @@ def main():
         assert 'Preview ready' in page.locator('#status').inner_text()
         # Legacy SI import keeps density and the Euler estimate physically equivalent.
         legacy_model = page.evaluate('''() => JSON.parse(JSON.stringify(TrussStudio.example))''')
+        for member in legacy_model['members']:
+            member['density'] = 7850
+            member['I'] = 1e-6
+            member['K'] = 1
         legacy_preflight = page.evaluate("""model => {
             const json = JSON.stringify(model);
             const imported = ProMathTrussFEM.importJSON(json);
@@ -1080,10 +1084,6 @@ def main():
         assert math.isclose(legacy_preflight['mass'],15.7,rel_tol=1e-12)
         assert math.isclose(legacy_preflight['eulerCriticalLoad'],493480.22005446785,rel_tol=1e-12)
         assert legacy_preflight['residual'] < 1e-12
-        for member in legacy_model['members']:
-            member['density'] = 7850
-            member['I'] = 1e-6
-            member['K'] = 1
         page.locator('#import-model').set_input_files({'name':'legacy-density-buckling.json','mimeType':'application/json',
                                                        'buffer':json.dumps(legacy_model).encode('utf-8')})
         page.wait_for_function("""() => {

@@ -4313,6 +4313,27 @@ self.onmessage=async ({data})=>{
   // Protect complete aggregate ranges before scalar reference rewriting.
   // Deleting inside a range shrinks its surviving rectangle; an empty range is #REF!.
   const structuralRangePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
+  // Formula string literals are data, not cell addresses. Preserve doubled-quote escapes
+  // and leave an unterminated literal untouched rather than rewriting its contents.
+  function protectFormulaStringLiterals(raw){
+    const text=String(raw),literals=[];
+    let masked='',i=0;
+    while(i<text.length){
+      if(text[i]!=='"'){masked+=text[i++];continue;}
+      const literalStart=i++;
+      while(i<text.length){
+        if(text[i]==='"'){
+          if(text[i+1]==='"'){i+=2;continue;}
+          i++;break;
+        }
+        i++;
+      }
+      const token='\uE100'+literals.length+'\uE101';
+      literals.push(text.slice(literalStart,i));
+      masked+=token;
+    }
+    return {text:masked,restore:value=>value.replace(/\uE100(\d+)\uE101/g,(_,index)=>literals[Number(index)])};
+  }
   function shiftReferences(edited,axis,index,delta){
     const coord=ref=>{const m=/^(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)$/.exec(ref);
       return axis==='row'?Number(m[4])-1:colIndex(m[2]);};
@@ -4320,8 +4341,8 @@ self.onmessage=async ({data})=>{
       :ref.replace(/^(\$?)[A-Za-z]{1,3}(?=\$?[1-9]\d*$)/,(_,anchor)=>anchor+colLetter(pos));
     for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
       const raw=String(row[c]);if(!raw.startsWith('='))continue;
-      const ranges=[];
-      let next=raw.replace(structuralRangePattern,(match,prefix,left,right,offset,whole)=>{
+      const protectedFormula=protectFormulaStringLiterals(raw),ranges=[];
+      let next=protectedFormula.text.replace(structuralRangePattern,(match,prefix,left,right,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
         const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
         let mapped=match;
@@ -4332,7 +4353,6 @@ self.onmessage=async ({data})=>{
             mapped=upper<lower?'#REF!':(prefix||'')+
               at(left,a<=b?lower:upper)+':'+at(right,a<=b?upper:lower);}
         }
-        // Also protect foreign-sheet ranges: their second endpoint inherits the prefix.
         const token='\uE000'+ranges.length+'\uE001';ranges.push(mapped);return token;
       });
       next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
@@ -4346,10 +4366,10 @@ self.onmessage=async ({data})=>{
         if(moved===position)return match;
         return (prefix||'')+colAnchor+(axis==='column'?colLetter(moved):letters)+rowAnchor+(axis==='row'?moved+1:digits);
       });
-      row[c]=next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]);
+      row[c]=protectedFormula.restore(next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]));
     }
   }
-  // Stable full-row sort preserves referenced cell identity in all sheets.
+  // Stable full-row sort preserves referenced cell identities in all sheets.
   // Unsafe noncontiguous ranges abort before any workbook mutation.
   function sortRows(column,direction='asc'){
     const t=active();
@@ -4366,8 +4386,8 @@ self.onmessage=async ({data})=>{
     const rowOf=ref=>Number(/[1-9]\d*$/.exec(ref)[0])-1;
     const rewrite=(raw,sheet)=>{
       if(!String(raw).startsWith('='))return raw;
-      const ranges=[];
-      let next=String(raw).replace(rangePattern,(match,prefix,left,right,offset,whole)=>{
+      const protectedFormula=protectFormulaStringLiterals(raw),ranges=[];
+      let next=protectedFormula.text.replace(rangePattern,(match,prefix,left,right,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
         const target=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
         let mapped=match;
@@ -4381,7 +4401,6 @@ self.onmessage=async ({data})=>{
           mapped=(prefix||'')+left.replace(/[1-9]\d*$/,String((forward?lower:upper)+1))+':'+
             right.replace(/[1-9]\d*$/,String((forward?upper:lower)+1));
         }
-        // Always shield both endpoints from the scalar reference rewrite.
         const token='\uE000'+ranges.length+'\uE001';ranges.push(mapped);return token;
       });
       next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
@@ -4391,7 +4410,7 @@ self.onmessage=async ({data})=>{
         const old=Number(digits)-1;if(old>=newRow.length)return match;
         return (prefix||'')+colAnchor+letters+rowAnchor+(newRow[old]+1);
       });
-      return next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]);
+      return protectedFormula.restore(next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]));
     };
     const rewritten=tables.map(sheet=>sheet.rows.map(row=>row.map(cell=>rewrite(cell,sheet))));
     for(let i=0;i<tables.length;i++)tables[i].rows=tables[i].id===t.id?order.map(entry=>rewritten[i][entry.i]):rewritten[i];

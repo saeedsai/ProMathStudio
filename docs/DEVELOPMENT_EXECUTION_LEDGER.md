@@ -1,3 +1,13 @@
+## 2026-11-23 — Execution checkpoint: spreadsheet literal shielding and Truss CI fixture ordering
+
+Starting dev `4509b5efc2eb8a1e174f4720d4815e9ce5d09cc1`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Exact-head Push #45122582862 and PR #45122585874 both failed at Truss Studio step 212 because the browser preflight asserted density/I/K before assigning them to the legacy model. Moved the fixture assignments before preflight.
+
+Audited Data Tables structural edits and stable sorting. Both previously rewrote A1-like tokens inside double-quoted formula strings. Added a shared quoted-literal shield preserving doubled-quote escapes and unterminated strings; insert/delete and sort now rewrite only actual cell references. Extended row/column structural and sort browser tests, retaining range, cross-sheet, anchor and rollback checks. Updated `docs/DATA_TABLES.md`, the living plan and changelog. `src/data-tables.js` and the `mathstudio-data-tables` script in standalone `index.html` are synchronized in this commit.
+
+Local checkout is absent; bounded Git failed because `github.com` cannot resolve. No local Playwright or full Node suite is claimed. V8 source compilation, bundle parity, patch-anchor checks and pure literal-shield reference cases are verified before commit. Full certification remains pending exact-head Actions. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+NEXT FIVE: (1) exact-head Push/PR Quality green, including Truss steps 212/214/215 and spreadsheet steps 78–80; (2) Truss JSON boundary tests for blank/zero density, I-only/K-only, malformed UTF-8, BOM, byte limits and rollback; (3) selected-member A/I isolation and CSV/SVG exports; (4) spreadsheet mixed anchors, quoted sheet names, reversed ranges, escaped quotes and bounds; (5) independent PR #189 review, verified main protection, ordinary PR merge, exact-main Quality and Pages.
+
 ## 2026-11-23 — Execution checkpoint: legacy optional-property import and browser File API restoration
 
 Started from the live GitHub refs: dev `508d2a64a3c8affccd5e4075c229f6996eed35a7`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, current Truss source/tests/contracts, PR #189/reviews, exact-head Actions and Pages evidence.

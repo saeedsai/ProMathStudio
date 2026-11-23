@@ -1,3 +1,15 @@
+## 2026-11-23 — Execution checkpoint: Truss blur-change event no longer cancels a newly selected import
+
+Starting dev `820f25be6bc2ef86277d3b277c474eabf5f17785`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Push Quality [#45129781937](https://github.com/saeedsai/ProMathStudio/actions/runs/45129781937) and PR Quality [#45129788545](https://github.com/saeedsai/ProMathStudio/actions/runs/45129788545) both failed at browser step 212, line 1094, with the exact status `Pending import cancelled because the model was edited.` The prior structural suite and browser steps through 211 passed; steps 213–215 were skipped.
+
+The node/member tables had both `input` and `change` invalidation listeners. Text/number edits already invalidate on `input`, while a delayed blur `change` can arrive after a new file is selected and cancel the pending import despite no new edit. Removed change-only invalidation, made bubbling input authoritative for table mutations, and moved member-ID selector synchronization to the member input handler. Explicit Analyze and genuine input edits still cancel pending reads.
+
+Added Chromium coverage that holds a legacy SI File read, dispatches a delayed `change` event after selection and verifies the import completes with density/I/K, mass and Euler references; a second held read is cancelled by a real density input edit, and its late bytes cannot replace the edited 8000 kg/m³ value. Updated `docs/STRUCTURAL_TRUSS_FEM.md`, the living plan and changelog. No `index.html` synchronization is required because the standalone Truss Studio loads adjacent JavaScript assets.
+
+V8 JavaScript syntax and source/test patch anchors are checked before commit. Local checkout is absent and bounded Git DNS is unavailable; no local full Node/Chromium run is claimed. New exact-head Push/PR Quality must execute the browser regression, spreadsheet steps 78–80, and FEM steps 214/215. Historical baseline remains frozen at **166 gaps / 95 partial**.
+
+NEXT FIVE: (1) both exact-head Quality green, including step 212 delayed-change and real-edit cancellation, steps 214/215, spreadsheet 78–80, mobile and zero console errors; (2) Truss JSON boundaries for null/blank/zero density, I-only/K-only, malformed UTF-8, BOM, byte limits and rollback; (3) selected-member A/I isolation plus CSV/SVG export verification; (4) spreadsheet mixed anchors, quoted sheet names, reversed ranges, escaped literals, bounds and atomic sort rejection; (5) independent PR #189 review, verified main protection, ordinary PR merge, exact-main Quality and Pages.
+
 ## 2026-11-23 — Execution checkpoint: spreadsheet literal shielding and Truss CI fixture ordering
 
 Starting dev `4509b5efc2eb8a1e174f4720d4815e9ce5d09cc1`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Exact-head Push #45122582862 and PR #45122585874 both failed at Truss Studio step 212 because the browser preflight asserted density/I/K before assigning them to the legacy model. Moved the fixture assignments before preflight.

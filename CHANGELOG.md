@@ -1,3 +1,10 @@
+## 2026-11-23 — Prevent stale blur events from cancelling a newly selected Truss import
+
+- Made bubbling `input` events the authoritative model-edit signal for Truss node/member controls; member-ID selector synchronization now occurs on member-ID input.
+- Removed duplicate change-driven invalidation so a delayed blur `change` from an already edited field cannot cancel a newer pending file import.
+- Added Chromium regressions proving delayed change events do not cancel a valid legacy SI import, while a genuine density input edit still cancels a pending read and survives late bytes.
+- Exact-head Push/PR Quality is pending; not released.
+
 ## 2026-11-23 — Spreadsheet string-literal safety and Truss CI fixture correction
 
 - Fixed the Truss browser preflight fixture by assigning legacy density, I and K before asserting normalized values.

@@ -1084,12 +1084,43 @@ def main():
         assert math.isclose(legacy_preflight['mass'],15.7,rel_tol=1e-12)
         assert math.isclose(legacy_preflight['eulerCriticalLoad'],493480.22005446785,rel_tol=1e-12)
         assert legacy_preflight['residual'] < 1e-12
-        page.locator('#import-model').set_input_files({'name':'legacy-density-buckling.json','mimeType':'application/json',
-                                                       'buffer':json.dumps(legacy_model).encode('utf-8')})
+        legacy_json = json.dumps(legacy_model)
+        # A blur-style change event can be delivered after file selection when the previous
+        # text field loses focus. It must not be mistaken for a new model edit.
+        page.evaluate("""json => {
+            const nativeRead = Blob.prototype.arrayBuffer;
+            let release;
+            const gate = new Promise(resolve => { release = resolve; });
+            const pending = window.__legacyBlurImport = {started:false,settled:false,release:null};
+            const file = new File([json], 'legacy-density-buckling.json', {type:'application/json'});
+            Object.defineProperty(file, 'arrayBuffer', {
+                configurable:true,
+                value:function() {
+                    pending.started = true;
+                    return gate.then(() => nativeRead.call(this)).then(bytes => {
+                        pending.settled = true;
+                        return bytes;
+                    });
+                }
+            });
+            pending.release = release;
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            const input = document.querySelector('#import-model');
+            input.files = transfer.files;
+            input.dispatchEvent(new Event('change', {bubbles:true}));
+        }""", legacy_json)
+        page.wait_for_function("window.__legacyBlurImport?.started && typeof window.__legacyBlurImport.release === 'function'")
+        page.locator('#members tr').first.locator('input[data-field="density"]').dispatch_event('change')
+        assert page.locator('#status').inner_text() == 'Importing model…'
+        assert page.locator('#status').get_attribute('aria-busy') == 'true'
+        page.evaluate('window.__legacyBlurImport.release()')
         page.wait_for_function("""() => {
             const status = document.querySelector('#status');
-            return status?.getAttribute('aria-busy') === 'false';
+            return status?.textContent.startsWith('Analysis complete') &&
+                   status.getAttribute('aria-busy') === 'false';
         }""")
+        page.wait_for_function('window.__legacyBlurImport.settled === true')
         legacy_import_status = page.locator('#status').inner_text()
         assert legacy_import_status.startswith('Analysis complete'), legacy_import_status
         legacy_cells = page.locator('#member-metrics tr').first.locator('td')
@@ -1098,6 +1129,42 @@ def main():
         assert legacy_cells.nth(10).inner_text() == '1000000'
         assert legacy_cells.nth(11).inner_text() == '1'
         assert legacy_cells.nth(12).inner_text() == '493.48'
+        # A genuine value edit still cancels a pending read; its late bytes cannot replace the edit.
+        page.evaluate("""json => {
+            const nativeRead = Blob.prototype.arrayBuffer;
+            let release;
+            const gate = new Promise(resolve => { release = resolve; });
+            const pending = window.__editCancelImport = {started:false,settled:false,release:null};
+            const file = new File([json], 'cancel-on-input.json', {type:'application/json'});
+            Object.defineProperty(file, 'arrayBuffer', {
+                configurable:true,
+                value:function() {
+                    pending.started = true;
+                    return gate.then(() => nativeRead.call(this)).then(bytes => {
+                        pending.settled = true;
+                        return bytes;
+                    });
+                }
+            });
+            pending.release = release;
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            const input = document.querySelector('#import-model');
+            input.files = transfer.files;
+            input.dispatchEvent(new Event('change', {bubbles:true}));
+        }""", legacy_json)
+        page.wait_for_function("window.__editCancelImport?.started && typeof window.__editCancelImport.release === 'function'")
+        density_after_import = page.locator('#members tr').first.locator('input[data-field="density"]')
+        density_after_import.fill('8000')
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status?.textContent.includes('Pending import cancelled because the model was edited.') &&
+                   status.getAttribute('aria-busy') === 'false';
+        }""")
+        page.evaluate('window.__editCancelImport.release()')
+        page.wait_for_function('window.__editCancelImport.settled === true')
+        assert density_after_import.input_value() == '8000'
+        assert 'Pending import cancelled because the model was edited.' in page.locator('#status').inner_text()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2')
         assert not errors, errors
         browser.close()

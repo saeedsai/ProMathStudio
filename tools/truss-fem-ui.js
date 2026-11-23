@@ -423,12 +423,17 @@
   $('section-shape').addEventListener('change',updateSectionShape);
   ['section-width','section-height','section-inner-width','section-inner-height','section-web-thickness','section-flange-thickness','section-angle-thickness','section-diameter','section-inner-diameter'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));
   $('section-properties-apply').addEventListener('click',applySectionProperties);
-  $('members').addEventListener('change',()=>{syncSectionMembers();invalidate();});
   $('load-example').addEventListener('click',()=>{renderModel(fem.getExample($('example').value));analyze();});
   $('reset').addEventListener('click',()=>{renderModel(fem.getExample($('example').value));analyze();});
   $('add-node').addEventListener('click',()=>{appendRow('nodes',{id:'N'+($('nodes').children.length+1),x:0,y:0,fixX:false,fixY:false,fx:0,fy:0});invalidate();});
   $('add-member').addEventListener('click',()=>{const nodes=readRows('nodes');appendRow('members',{id:'M'+($('members').children.length+1),a:nodes[0]?.id||'',b:nodes[1]?.id||'',E:210,area:1000,density:'',I:'',K:''});syncSectionMembers();invalidate();});
-  $('nodes').addEventListener('input',invalidate);$('members').addEventListener('input',invalidate);$('nodes').addEventListener('change',invalidate);$('members').addEventListener('change',invalidate);
+  // Input is the authoritative edit signal. A delayed blur-only change event from a field
+  // edited before file selection must not cancel the newer asynchronous import.
+  $('nodes').addEventListener('input',invalidate);
+  $('members').addEventListener('input',event=>{
+    if(event.target?.dataset?.field==='id')syncSectionMembers();
+    invalidate();
+  });
   $('solve').addEventListener('click',analyze);$('scale').addEventListener('change',draw);$('show-labels').addEventListener('change',draw);
   $('export-model').addEventListener('click',()=>{try{download('promath-truss-model.json',fem.exportJSON(readModel()),'application/json;charset=utf-8');status('Validated model JSON exported.');}catch(err){status('Export failed: '+err.message,true);}});
   $('import-model').addEventListener('change',async event=>{

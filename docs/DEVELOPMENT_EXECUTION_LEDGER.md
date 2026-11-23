@@ -1,3 +1,16 @@
+## 2026-11-23 — TRUSS-IMPORT-OVERREAD-DIAGNOSTICS
+
+- Starting exact refs: dev d1c25300184851af0c52c9619571c2878af5c458, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 head/base matched these refs and had no independent review submissions.
+- Starting exact-head CI: Push #45202567594 and PR #45202584053 each passed **218/218 steps**, zero failures/skips; Truss 212, FEM 214/215 and spreadsheet 78–80 passed.
+- Source change: short and longer-than-declared actual byte reads now produce direction-specific diagnostics with exact expected/received byte counts. Validation remains before decoding/parsing.
+- Node regression: asserts both short- and long-read diagnostics.
+- Chromium regression: retains a short-read File case and adds a real under-1-MiB File whose read returns one extra trailing JSON whitespace byte. Assert exact metadata/diagnostic, unchanged full model and solved-result snapshot, and aria-busy=false; both viewport sizes remain mandatory.
+- Updated Structural Truss contract, living plan, ledger and changelog in the same atomic source/test commit. No root index bundle synchronization applies to the adjacent-asset Truss page.
+- Local checkout absent; full local Node/Playwright not run. Exact-head GitHub Actions must validate the new regression.
+- Main remains 70fc483cb1cec3d2372d37484e4a8ef7942343da; latest main Quality #41730966059 and Pages #41730962844 remain successful. PR #189 is open/unreviewed; rulesets empty and branch-protection read 403. No release/deployment claim. Historical baseline remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) exact-head Push/PR Quality green on new SHA, all 218 checks including long/short read browser tests and spreadsheet/Truss/FEM; (2) latest-request success/rejection/edit-cancellation concurrency matrix; (3) spreadsheet formula absolute/relative, quoted-sheet, reversed-range, escape and boundary regressions with index bundle parity; (4) seven-shape section-helper numerical/axis references and rollback; (5) independent PR #189 review plus enforceable main protection, ordinary PR promotion, exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-23 — TRUSS-BOM-BROWSER-FIXTURE-CORRECTION
 
 A post-commit GitHub readback caught an escaping defect in the new Python browser fixture: its byte literal contained doubled backslashes and therefore encoded the characters “\\xef” instead of the actual EF BB BF bytes. Replaced it with the unambiguous bytes tuple `bytes((0xEF, 0xBB, 0xBF))`. The test still constructs a real 1 MiB File, checks the BOM prefix and both byte lengths, and verifies exact-limit success plus pre-read rejection at 1 MiB+1. The preceding candidate's full Quality result is not used to certify this corrected fixture; fresh exact-head Push/PR Quality is required.

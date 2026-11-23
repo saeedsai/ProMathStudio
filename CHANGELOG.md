@@ -1,3 +1,9 @@
+## 2026-11-23 — Truss short/long read diagnostics
+
+- Distinguish shorter-than-declared and longer-than-declared Truss file reads while retaining exact expected/received byte counts.
+- Add Node assertions for both directions and a Chromium real-File over-read regression using one extra JSON whitespace byte; verify the active model/results remain unchanged and busy state clears.
+- Preserve the short-read, malformed UTF-8, BOM and 1 MiB boundary regressions. Fresh exact-head Quality is required; not released.
+
 ## 2026-11-23 — TRUSS-BOM-BROWSER-FIXTURE-CORRECTION
 
 A post-commit GitHub readback caught an escaping defect in the new Python browser fixture: its byte literal contained doubled backslashes and therefore encoded the characters “\\xef” instead of the actual EF BB BF bytes. Replaced it with the unambiguous bytes tuple `bytes((0xEF, 0xBB, 0xBF))`. The test still constructs a real 1 MiB File, checks the BOM prefix and both byte lengths, and verifies exact-limit success plus pre-read rejection at 1 MiB+1. The preceding candidate's full Quality result is not used to certify this corrected fixture; fresh exact-head Push/PR Quality is required.

@@ -1,3 +1,28 @@
+## 2026-11-23 — TRUSS-IMPORT-OVERREAD-DIAGNOSTICS (implemented on dev; exact-head QA pending)
+
+Starting refs: dev d1c25300184851af0c52c9619571c2878af5c458, main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read root AGENTS.md, this plan, the frozen October 26 inventory, Structural Truss source/tests/contract, PR #189, review submissions, exact refs, Actions and main Quality/Pages evidence.
+
+**P0 CI baseline:** The exact starting head passed [Push Quality #45202567594](https://github.com/saeedsai/ProMathStudio/actions/runs/45202567594) and [PR Quality #45202584053](https://github.com/saeedsai/ProMathStudio/actions/runs/45202584053), each with **218/218 steps successful**, zero failures and zero skipped steps. Spreadsheet checks 78–80 and Truss/FEM 212/214/215 all completed successfully. No failing exact-head CI blocker remained before this change.
+
+**P1 import diagnostics:** The shared FEM byte validator now distinguishes a short read from a longer-than-declared read while retaining the exact expected/received byte counts. The error explicitly says whether fewer or more bytes than declared were returned. This is diagnostic only; the same strict rejection happens before UTF-8 decoding and JSON parsing.
+
+**Regression:** The Node validator test asserts both direction-specific diagnostics. The Chromium test retains the existing short-read File regression and adds a real under-1-MiB File whose instance arrayBuffer() returns the declared bytes plus one legal JSON whitespace byte. The browser asserts declared/actual lengths, the exact longer-read diagnostic, complete node/member and solved-result snapshot preservation, and aria-busy=false. Both short- and long-read browser cases run at 1280px and 390px. The added byte would be accepted by JSON.parse, so this specifically proves the byte-integrity check runs first.
+
+Updated the FEM kernel, direct Node regression, Truss Chromium regression, Structural Truss contract, living plan, execution ledger and changelog in one atomic commit. Truss Studio loads adjacent JavaScript assets; no root index.html bundle synchronization applies.
+
+**Validation limits:** The local workspace has no Git checkout and its previous GitHub DNS path has failed; no repeated network retry was made. Full local Node/Playwright execution is unavailable. Exact-head GitHub Push and PR Quality are required to execute the committed tests. The candidate remains **Implemented on dev / In QA**, not released.
+
+PR #189 remains open from dev to main with no independent review submissions. Starting head was d1c25300184851af0c52c9619571c2878af5c458; main is 70fc483cb1cec3d2372d37484e4a8ef7942343da. Repository rulesets are empty and the branch-protection read returns HTTP 403 to the connected integration; no merge or protection bypass is permitted. The inherited claude/sharp-babbage-pqhvgr branch is preserved because its unique history is not proven contained in main. Main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) passed 193/193 steps and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) passed build 5/5, deploy 3/3 and report 3/3 on main 70fc483cb1cec3d2372d37484e4a8ef7942343da. No newer main deployment was found. No production release is claimed.
+
+The October 26 historical inventory remains frozen at **166 gaps / 95 partial**; no historical count or status was reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality for this candidate.** Both Push and PR workflows must pass on the new dev SHA with all 218 required steps, zero failures/skips; verify the new long-read browser regression and retained short-read, malformed UTF-8, BOM/exact-1-MiB, over-limit, Truss 212 and FEM 214/215 cases at desktop and 390px; retain spreadsheet 78–80.
+2. **P1 — Latest-request concurrency matrix.** Exercise older success after newer success, older rejection after newer success, newer rejected import while older success remains pending, and cancellation by genuine model edit; only the current request may update model/status/busy state.
+3. **P1 — Spreadsheet formula-reference edge audit.** Cover mixed absolute/relative anchors, quoted sheet names, reversed ranges, multiple escaped quotes and row/column boundaries; verify logical-cell identity, transactional refusal of unsafe sort/delete and standalone index.html parity.
+4. **P1 — Section-helper shape/axis reference coverage.** Exercise all seven shapes through the visible helper; compare independent area/Ixx/Iyy references, L-angle principal I1/I2 ordering and selected-axis application; reject invalid/overflow dimensions without any member mutation.
+5. **P0 — Release governance and promotion.** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required-check configuration. Only after exact-head CI and reviews pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted critical paths.
+
 ## 2026-11-23 — TRUSS-BOM-BROWSER-FIXTURE-CORRECTION
 
 A post-commit GitHub readback caught an escaping defect in the new Python browser fixture: its byte literal contained doubled backslashes and therefore encoded the characters “\\xef” instead of the actual EF BB BF bytes. Replaced it with the unambiguous bytes tuple `bytes((0xEF, 0xBB, 0xBF))`. The test still constructs a real 1 MiB File, checks the BOM prefix and both byte lengths, and verifies exact-limit success plus pre-read rejection at 1 MiB+1. The preceding candidate's full Quality result is not used to certify this corrected fixture; fresh exact-head Push/PR Quality is required.

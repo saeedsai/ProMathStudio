@@ -484,8 +484,8 @@ def main():
                 'Import failed: Model JSON file size does not match the bytes read. ('
             ), mismatch_status
             assert mismatch_status.endswith(
-                f'(expected {len(mismatched_payload)} bytes, received '
-                f'{len(mismatched_payload) - 10} bytes).'
+                f'(read returned fewer bytes than declared; expected {len(mismatched_payload)} bytes, '
+                f'received {len(mismatched_payload) - 10} bytes).'
             ), mismatch_status
             assert [page.locator('#nodes tr').nth(i).locator('input[data-field="id"]').input_value()
                     for i in range(2)] == ['A', 'B']
@@ -605,6 +605,60 @@ def main():
             assert page.evaluate('window.__oversizeReadStarted') is False
             page.evaluate('window.__restoreOversizeRead()')
             assert import_state_snapshot() == before_over_limit
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+
+            # A longer-than-declared read is also rejected before JSON parsing. The extra
+            # byte is legal JSON whitespace, so parser-only validation would accept it.
+            long_read_payload = json.dumps(slow_model, separators=(',', ':')).encode('utf-8')
+            assert 0 < len(long_read_payload) < 1024 * 1024
+            before_long_read = import_state_snapshot()
+            page.evaluate("""payload => {
+                const input = document.querySelector('#import-model');
+                const file = new File([payload], 'long-read.json', {type:'application/json'});
+                const nativeRead = Blob.prototype.arrayBuffer;
+                window.__longRead = null;
+                Object.defineProperty(file, 'arrayBuffer', {
+                    configurable: true,
+                    value: function() {
+                        return nativeRead.call(this).then(bytes => {
+                            const source = new Uint8Array(bytes);
+                            const extended = new Uint8Array(source.byteLength + 1);
+                            extended.set(source);
+                            extended[source.byteLength] = 0x20;
+                            window.__longRead = {
+                                name: this.name,
+                                declared: this.size,
+                                returned: extended.byteLength
+                            };
+                            return extended.buffer;
+                        });
+                    }
+                });
+                const transfer = new DataTransfer();
+                transfer.items.add(file);
+                input.files = transfer.files;
+                input.dispatchEvent(new Event('change', {bubbles:true}));
+            }""", long_read_payload)
+            page.wait_for_function("""() => {
+                const status = document.querySelector('#status');
+                return window.__longRead !== null &&
+                       status?.textContent.includes('read returned more bytes than declared');
+            }""")
+            long_read = page.evaluate('window.__longRead')
+            assert long_read == {
+                'name': 'long-read.json',
+                'declared': len(long_read_payload),
+                'returned': len(long_read_payload) + 1
+            }, long_read
+            long_read_status = page.locator('#status').inner_text()
+            assert long_read_status.startswith(
+                'Import failed: Model JSON file size does not match the bytes read. ('
+            ), long_read_status
+            assert long_read_status.endswith(
+                f'(read returned more bytes than declared; expected {len(long_read_payload)} bytes, '
+                f'received {len(long_read_payload) + 1} bytes).'
+            ), long_read_status
+            assert import_state_snapshot() == before_long_read
             assert page.locator('#status').get_attribute('aria-busy') == 'false'
 
             # A newer file selection must win even when an older read resolves or rejects later.

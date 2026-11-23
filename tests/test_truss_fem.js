@@ -384,8 +384,8 @@ test('shared file-import byte validator enforces safe 1 MiB and exact byte-count
   assert.throws(()=>fem.validateImportByteLength(5,actual),/Model JSON read returned an invalid byte length/);
  }
  assert.throws(()=>fem.validateImportByteLength(5,limit+1),/Model JSON exceeds 1 MiB/);
- assert.throws(()=>fem.validateImportByteLength(17,16),/expected 17 bytes, received 16 bytes/);
- assert.throws(()=>fem.validateImportByteLength(17,18),/expected 17 bytes, received 18 bytes/);
+ assert.throws(()=>fem.validateImportByteLength(17,16),/read returned fewer bytes than declared; expected 17 bytes, received 16 bytes/);
+ assert.throws(()=>fem.validateImportByteLength(17,18),/read returned more bytes than declared; expected 17 bytes, received 18 bytes/);
  assert.equal(fem.validateImportByteLength(17,17),17);
 });
 

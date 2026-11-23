@@ -60,7 +60,8 @@
       }
       if (actualByteLength > MAX_IMPORT_BYTES) throw Error('Model JSON exceeds 1 MiB.');
       if (actualByteLength !== declaredSize) {
-        throw Error(`Model JSON file size does not match the bytes read. (expected ${declaredSize} bytes, received ${actualByteLength} bytes).`);
+        const direction = actualByteLength < declaredSize ? 'fewer' : 'more';
+        throw Error(`Model JSON file size does not match the bytes read. (read returned ${direction} bytes than declared; expected ${declaredSize} bytes, received ${actualByteLength} bytes).`);
       }
     }
     return declaredSize;

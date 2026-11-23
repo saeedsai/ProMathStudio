@@ -45,6 +45,16 @@ def main():
               return [r.reactions[0].ry,r.reactions[1].ry,r.maxDisplacement.magnitude,r.residual,r.energyError]; }''')
             assert abs(results[0] - 10000) < 1e-6 and abs(results[1] - 10000) < 1e-6
             assert results[2] > 0 and results[3] < 1e-10 and results[4] < 1e-10
+            # The section helper is intentionally collapsed with the material breakdown.
+            # Exercise the real disclosure before interacting with its controls at both widths.
+            details = page.locator('#member-material-details')
+            assert not details.evaluate('(node) => node.open'), 'member details should start collapsed'
+            summary = details.locator('summary')
+            assert summary.inner_text().strip() == 'Member materials and section properties'
+            summary.click()
+            assert details.evaluate('(node) => node.open'), 'summary activation should expand member details'
+            page.locator('#section-helper').wait_for(state='visible')
+            page.locator('#section-member').wait_for(state='visible')
             # A very thin concentric annulus must retain high-precision section properties
             # through the actual helper preview and selected-member application at both widths.
             page.locator('#section-member').select_option('AB')

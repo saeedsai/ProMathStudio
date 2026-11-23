@@ -1,3 +1,10 @@
+## 2026-11-23 — Truss section-helper disclosure discoverability and CI recovery
+
+- Renamed the collapsed member-details disclosure to “Member materials and section properties” so the nested section helper is discoverable; it remains intentionally collapsed by default.
+- Fixed the FEM browser regression to open the native disclosure before selecting its hidden member control, and assert closed→open visibility at 1280px and 390px before exercising hollow-circle preview/application and member-preservation references.
+- Root cause of exact-head Push/PR Quality failure: step 215 attempted to select `#section-member` while its parent details disclosure was closed. The preceding Node suite passed 68/68 in both failed runs. No test assertion was weakened.
+- Fresh exact-head Push/PR Quality required; not released.
+
 ## 2026-11-23 — Thin-walled hollow-rectangle section stability (dev; exact-head QA pending)
 
 - Replaced cancellation-prone outer-minus-inner area and inertia subtraction with algebraically equivalent dimensionless gap factors for hollow rectangles.

@@ -1,3 +1,16 @@
+## 2026-11-23 — TRUSS-SECTION-HELPER-DISCLOSURE-CI-RECOVERY
+
+- Starting refs: dev `acd12a7f5b5e0a1779b93c93b10d930ad38b305d`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Inspected AGENTS.md, living plan, frozen inventory, engineering/structural catalogs, source/tests, PR/reviews, branches, Actions and Pages.
+- Exact-head Push Quality [#45266216919](https://github.com/saeedsai/ProMathStudio/actions/runs/45266216919) and PR Quality [#45266227993](https://github.com/saeedsai/ProMathStudio/actions/runs/45266227993) both failed at browser step 215. The immediately preceding Truss FEM Node suite passed 68/68 in both. Playwright timed out on `#section-member` because the control is inside intentionally collapsed `details#member-material-details`.
+- Fixed the user-facing discoverability label in `tools/truss-studio.html`: “Per-member material breakdown” → “Member materials and section properties”; disclosure remains collapsed by default.
+- Added a real browser workflow regression in `tests/smoke_truss_fem.py` at 1280px/390px: assert initially closed, click summary, assert open and helper/selector visible, then run the existing hollow-circle numerical/member-preservation regression. No assertion weakened.
+- Updated Structural Truss contract, plan, ledger and changelog in the same atomic commit. Adjacent-asset Truss Studio does not require root index.html synchronization.
+- Local browser suite unavailable because no checkout. Full exact-head Push/PR Quality is pending. Candidate is implemented on dev, not released.
+- PR #189 remains open/mergeable with zero independent reviews. dev/main report unprotected; rulesets empty; branch-protection read HTTP 403. No merge or bypass. Main Quality #41730966059 and Pages #41730962844 remain successful on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03).
+- Frozen October 26 baseline remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) exact-head Push and PR Quality green, especially Truss FEM 215 at desktop/mobile with disclosure closed→open and hollow-circle application references; (2) independent PR #189 review and authorized enforceable main protections, then ordinary promotion and exact-main Quality/Pages verification; (3) seven-shape section-helper numerical/browser matrix with rollback and E/density/K preservation; (4) spreadsheet mixed/absolute references, quoted sheets, reversed ranges, escaped literals and boundaries with standalone bundle parity; (5) one approved source-backed Engineering Toolbox tool with canonical ID, reference/negative/responsive tests and truthful status.
+
 ## 2026-11-23 — TRUSS-HOLLOW-RECTANGLE-THIN-WALL-STABILITY
 
 - Starting exact refs: dev `c5df9b79fb69af16164547539add12455e4a2603`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. The starting dev Push Quality [#45245243102](https://github.com/saeedsai/ProMathStudio/actions/runs/45245243102) and PR Quality [#45245258027](https://github.com/saeedsai/ProMathStudio/actions/runs/45245258027) both passed 218/218 steps, zero failures/skips; spreadsheet, Truss Studio and FEM analytical/browser checks passed.

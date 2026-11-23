@@ -1,3 +1,30 @@
+## 2026-11-23 — TRUSS-SECTION-HELPER-DISCLOSURE-CI-RECOVERY (implemented on dev; exact-head QA pending)
+
+Starting refs: dev `acd12a7f5b5e0a1779b93c93b10d930ad38b305d`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, unified/engineering architecture and structural catalog, Truss Studio/FEM source and tests, PR #189/reviews, branch refs, Actions and Pages.
+
+**P0 exact-head CI failure:** Push Quality [#45266216919](https://github.com/saeedsai/ProMathStudio/actions/runs/45266216919) and PR Quality [#45266227993](https://github.com/saeedsai/ProMathStudio/actions/runs/45266227993) both targeted `acd12a7f5b5e0a1779b93c93b10d930ad38b305d` and failed at browser step 215, `tests/smoke_truss_fem.py:50`. The Node suite immediately before the browser test passed **68/68** in both runs. Playwright timed out selecting `#section-member` because it was not visible. The selector is intentionally nested inside the initially collapsed `details#member-material-details`; the browser fixture interacted without opening the disclosure. The source contract already required browser tests to open the summary. This is a test-workflow omission, not a reason to expose the panel by default.
+
+**User-facing source adjustment:** Renamed the disclosure summary in `tools/truss-studio.html` from “Per-member material breakdown” to “Member materials and section properties”, making the nested section helper discoverable without changing its intentional collapsed-by-default behavior.
+
+**Focused browser regression:** At both 1280px and 390px, assert the details element starts closed, verify the new summary label, activate the native summary as a user would, assert the details opens, and wait for both the section helper and target-member selector to become visible. Then continue the existing thin-wall hollow-circle preview/application test and independent area/inertia comparisons, including E/density/K and non-selected-member preservation. No assertions were weakened and no production visibility behavior was changed.
+
+**Changed atomically:** Truss Studio HTML, FEM Chromium smoke, Structural Truss contract, living plan, execution ledger and changelog. The separate Truss Studio page loads adjacent JavaScript files; root `index.html` synchronization is not applicable.
+
+**Validation:** Inspected both exact-head job logs. The FEM Node suite passed 68/68 in each failed run; the browser failure was specifically the hidden select. Full local browser execution is unavailable because this execution workspace has no repository checkout. Fresh exact-head Push and PR Quality must verify the disclosure interaction and the remaining desktop/mobile FEM suite. Candidate is **Implemented on dev / In QA**, not released.
+
+PR #189 remains the sole open PR, from dev to main, mergeable and at 475 commits / 98 changed files before this commit; its head matched dev and base matched main. It has **zero independent reviews**. Branch listing reports dev/main unprotected, repository rulesets are empty, and the branch-protection read returns HTTP 403 to this integration. No merge, direct main update, force push or governance bypass was attempted. The inherited `claude/sharp-babbage-pqhvgr` branch remains preserved because it contains history not proven contained in main.
+
+Latest main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remain successful on main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03); no newer main deployment was found. No production release is claimed.
+
+The October 26 historical baseline remains frozen at **166 gaps / 95 partial**; no historical count or completion status was reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality recovery.** Push and PR Quality must both target the new dev SHA and complete successfully with zero failed/skipped required steps. Specifically verify Truss FEM browser step 215 at 1280px/390px: disclosure initially closed, summary opens it, helper and member selector visible, thin-wall circle reference values correct, non-target member/E/density/K unchanged; retain all other FEM, Truss and spreadsheet suites.
+2. **P0 — Release governance and ordinary promotion.** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required checks. Only after exact-head CI and review gates pass, merge through the ordinary dev-to-main PR; verify exact-main Quality, Pages and hosted critical paths.
+3. **P1 — Seven-shape section-helper numerical/browser matrix.** Independently verify solid/hollow rectangle, solid/hollow circle, channel, I-section and L-angle references; selected-axis application changes only the intended member; invalid/overflow dimensions and missing fields roll back atomically; E/density/K and 390px keyboard/accessibility behavior remain correct.
+4. **P1 — Spreadsheet formula-reference edge audit.** Test mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity, transactional rejection of unsafe noncontiguous sorts/deletes and source/standalone bundle parity.
+5. **P1 — Source-backed Engineering Toolbox expansion.** Select one approved unfinished canonical tool; reuse shared solver/units/plot infrastructure, assign a stable tool ID, add independent numerical references, negative tests and responsive keyboard/browser coverage, and keep planned/implemented status truthful without placeholder actions.
+
 ## 2026-11-23 — TRUSS-HOLLOW-CIRCLE-THIN-WALL-STABILITY (implemented on dev; exact-head QA pending)
 
 Starting refs: dev `307301bd9fc81e77c09a0faa7e2e0e85eb075b6a`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, Unified Master Implementation Plan, Engineering Architecture/Toolbox catalogs, Structural Truss source/tests/contract, PR #189/reviews, branch refs, Actions and Pages evidence.

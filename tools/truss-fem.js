@@ -388,6 +388,19 @@
         {id:'B',x:2,y:0,fixX:false,fixY:true,fx:1,fy:0}],
       members:[{id:'AB',a:'A',b:'B',E:200,area:1000}]}
   };
+  // Keep canonical reference examples immutable; callers receive independent editable copies.
+  function freezeExampleTree(value) {
+    if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+    Object.values(value).forEach(freezeExampleTree);
+    return Object.freeze(value);
+  }
+  freezeExampleTree(examples);
+  function getExample(name) {
+    if (typeof name !== 'string' || !Object.prototype.hasOwnProperty.call(examples, name)) {
+      throw Error('Unknown truss example. Choose triangle or bar.');
+    }
+    return JSON.parse(JSON.stringify(examples[name]));
+  }
   function fromLegacy(model) {
     if (!model || !Array.isArray(model.nodes) || !Array.isArray(model.members) ||
         model.nodes.some(n => !n || typeof n !== 'object' || Array.isArray(n)) ||
@@ -552,5 +565,5 @@
   function solveJSON(text) {
     return solveDocument(importJSON(text));
   }
-  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, examples, id:'structural-truss-fem-2d'});
+  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
 });

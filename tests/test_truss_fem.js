@@ -7,6 +7,29 @@ const fem = require('../tools/truss-fem.js');
 const close = (got,want,rel=1e-9) => assert.ok(Math.abs(got-want)<=rel*Math.max(1,Math.abs(want)),String(got)+' != '+String(want));
 const clone = data => JSON.parse(JSON.stringify(data));
 
+test('built-in truss examples are immutable and getExample returns independent editable copies',()=>{
+ const template=fem.examples.triangle;
+ const copy=fem.getExample('triangle');
+ assert.deepEqual(copy,template);
+ assert.notEqual(copy,template);
+ assert.notEqual(copy.nodes,template.nodes);
+ assert.notEqual(copy.nodes[0],template.nodes[0]);
+ assert.ok(Object.isFrozen(fem.examples));
+ assert.ok(Object.isFrozen(template));
+ assert.ok(Object.isFrozen(template.nodes));
+ assert.ok(Object.isFrozen(template.nodes[0]));
+ copy.nodes[0].x=99;
+ copy.members[0].area=1;
+ assert.equal(template.nodes[0].x,0);
+ assert.equal(template.members[0].area,1200);
+ const bar=fem.getExample('bar');
+ assert.deepEqual(bar,fem.examples.bar);
+ assert.notEqual(bar.members,fem.examples.bar.members);
+ assert.throws(()=>fem.getExample('unknown'),/Unknown truss example/);
+ assert.throws(()=>fem.getExample('toString'),/Unknown truss example/);
+});
+
+
 test('truss JSON preview counts independently loaded free DOFs',()=>{
  const bar=clone(fem.examples.bar);
  let preview=fem.inspectJSON(JSON.stringify(bar));

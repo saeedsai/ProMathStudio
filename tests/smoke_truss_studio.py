@@ -690,7 +690,7 @@ def main():
         assert page.locator('#plot line').count() >= 6
         # Import a model produced by the old SI-only JSON editor: retain N, Pa, m² semantics.
         prior = page.evaluate('TrussStudio.example')
-        triangle_bytes = json.dumps(prior).encode('utf-8')
+        triangle_bytes = json.dumps(page.evaluate("ProMathTrussFEM.getExample('triangle')")).encode('utf-8')
         # A newer selection must finish before an older invalid File read is released.
         page.evaluate("""() => {
             const file = new File(['{bad'], 'slow-invalid.json', {type:'application/json'});

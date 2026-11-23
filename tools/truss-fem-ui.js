@@ -424,8 +424,8 @@
   ['section-width','section-height','section-inner-width','section-inner-height','section-web-thickness','section-flange-thickness','section-angle-thickness','section-diameter','section-inner-diameter'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));
   $('section-properties-apply').addEventListener('click',applySectionProperties);
   $('members').addEventListener('change',()=>{syncSectionMembers();invalidate();});
-  $('load-example').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
-  $('reset').addEventListener('click',()=>{renderModel(fem.examples[$('example').value]);analyze();});
+  $('load-example').addEventListener('click',()=>{renderModel(fem.getExample($('example').value));analyze();});
+  $('reset').addEventListener('click',()=>{renderModel(fem.getExample($('example').value));analyze();});
   $('add-node').addEventListener('click',()=>{appendRow('nodes',{id:'N'+($('nodes').children.length+1),x:0,y:0,fixX:false,fixY:false,fx:0,fy:0});invalidate();});
   $('add-member').addEventListener('click',()=>{const nodes=readRows('nodes');appendRow('members',{id:'M'+($('members').children.length+1),a:nodes[0]?.id||'',b:nodes[1]?.id||'',E:210,area:1000,density:'',I:'',K:''});syncSectionMembers();invalidate();});
   $('nodes').addEventListener('input',invalidate);$('members').addEventListener('input',invalidate);$('nodes').addEventListener('change',invalidate);$('members').addEventListener('change',invalidate);
@@ -474,5 +474,5 @@
   $('export-csv').addEventListener('click',csv);$('export-material-csv').addEventListener('click',materialCsv);
   $('export-svg').addEventListener('click',()=>{if(!latest){status('Analyze before exporting SVG.',true);return;}const svg=$('plot').cloneNode(true);svg.setAttribute('xmlns',SVG);svg.setAttribute('width','1240');svg.setAttribute('height','760');svg.setAttribute('preserveAspectRatio','xMidYMid meet');svg.setAttribute('role','img');svg.setAttribute('aria-labelledby','truss-export-title truss-export-description');svg.removeAttribute('aria-label');const title=svgNode('title',{id:'truss-export-title'},'ProMathStudio truss deformation analysis');const description=svgNode('desc',{id:'truss-export-description'},'The original truss members are shown as dotted lines. The solved deformation is colored by tension or compression and amplified for visibility.');svg.insertBefore(title,svg.firstChild);svg.insertBefore(description,title.nextSibling);const background=svgNode('rect',{x:0,y:0,width:620,height:380,fill:'#09152a'});svg.insertBefore(background,description.nextSibling);download('promath-truss-deformation.svg',new XMLSerializer().serializeToString(svg),'image/svg+xml;charset=utf-8');});
   updateSectionShape();
-  renderModel(fem.examples.triangle);analyze();
+  renderModel(fem.getExample('triangle'));analyze();
 })();

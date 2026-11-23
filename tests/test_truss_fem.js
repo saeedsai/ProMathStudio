@@ -1302,3 +1302,36 @@ test('thin-walled hollow rectangle retains net properties without subtractive ca
   width:1e6,height:1e6,innerWidth:1e6,innerHeight:999999
  }),/inner width and depth must be positive and smaller/);
 });
+
+
+test('thin-walled hollow circle retains area and inertia without subtractive cancellation',()=>{
+ const dimensions={diameter:1e6,innerDiameter:999999.9999999};
+ const original={...dimensions};
+ const section=fem.sectionProperties('hollow-circle',dimensions);
+ // 100-digit reference evaluated from the exact binary64 input dimensions.
+ const expectedArea=0.15708082876130342;
+ const expectedMoment=19635103595.160965;
+ const closeRelative=(actual,expected,label)=>{
+  assert.ok(Number.isFinite(actual)&&Math.abs(actual-expected)<=Math.abs(expected)*1e-12,
+   label+' '+actual+' must match '+expected);
+ };
+ closeRelative(section.area,expectedArea,'annulus area');
+ closeRelative(section.secondMoment,expectedMoment,'Ixx');
+ closeRelative(section.secondMomentPerpendicular,expectedMoment,'Iyy');
+ closeRelative(section.sectionModulusX,expectedMoment/500000,'Sx');
+ closeRelative(section.sectionModulusY,expectedMoment/500000,'Sy');
+ closeRelative(section.radiusOfGyrationX,Math.sqrt(expectedMoment/expectedArea),'rx');
+ closeRelative(section.radiusOfGyrationY,Math.sqrt(expectedMoment/expectedArea),'ry');
+ assert.deepEqual(section.centroid,{x:500000,y:500000});
+ assert.equal(section.secondMomentPerpendicular,section.secondMoment);
+ const outerSquare=dimensions.diameter*dimensions.diameter;
+ const innerSquare=dimensions.innerDiameter*dimensions.innerDiameter;
+ const naiveArea=Math.PI*(outerSquare-innerSquare)/4;
+ const naiveMoment=Math.PI*(outerSquare*outerSquare-innerSquare*innerSquare)/64;
+ assert.ok(Math.abs(naiveArea-expectedArea)/expectedArea>1e-4,
+  'reference geometry must expose direct area-subtraction cancellation');
+ assert.ok(Math.abs(naiveMoment-expectedMoment)/expectedMoment>1e-5,
+  'reference geometry must expose direct inertia-subtraction cancellation');
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});

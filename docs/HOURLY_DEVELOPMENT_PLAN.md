@@ -1,3 +1,30 @@
+## 2026-11-23 — TRUSS-HOLLOW-CIRCLE-THIN-WALL-STABILITY (implemented on dev; exact-head QA pending)
+
+Starting refs: dev `307301bd9fc81e77c09a0faa7e2e0e85eb075b6a`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, Unified Master Implementation Plan, Engineering Architecture/Toolbox catalogs, Structural Truss source/tests/contract, PR #189/reviews, branch refs, Actions and Pages evidence.
+
+**P0 CI baseline:** Exact-head PR Quality [#45254681504](https://github.com/saeedsai/ProMathStudio/actions/runs/45254681504) completed successfully with **218/218 steps green, zero failures and zero skipped steps**, including spreadsheet 78–80, Truss Studio 212 and FEM analytical/browser 214–215. Exact-head Push Quality [#45254671579](https://github.com/saeedsai/ProMathStudio/actions/runs/45254671579) was cancelled, not failed. No exact-head failing CI defect remained at the start.
+
+**P1 numerical correctness defect:** Hollow-circle section properties used direct outer-minus-inner subtraction for (D^2-D_i^2) and (D^4-D_i^4). For (D=1,000,000) mm and (D_i=999,999.9999999) mm, direct binary64 subtraction loses about (2.52\times10^{-4}) relative area and (8.55\times10^{-5}) relative inertia despite valid, representable geometry.
+
+**Source correction:** In `tools/truss-fem.js`, use (r=D_i/D), (g=(D-D_i)/D), (A=(\pi D^2/4)g(1+r)), and (I=(\pi D^4/64)g(1+r)(1+r^2)). Preserve the existing positive/finite dimension checks, inner-square/fourth-power representability checks, solid-circle arithmetic and immutable result contract.
+
+**Regressions:** Added a direct Node reference test for area, Ixx/Iyy, Sx/Sy, rx/ry, centroid, immutability and a guard proving the chosen geometry exposes the old cancellation. Independent 100-digit calculations from exact binary64 inputs give area (0.15708082876130341665) mm² and I (19,635,103,595.160963556) mm⁴. Extended the real Chromium Truss Studio smoke at both 1280px and 390px: render the hollow-circle preview, apply to AB, compare the full-precision member area/I to independent references, prove E/density/K and all AC/BC inputs are unchanged, then restore the original AB section before remaining solver tests.
+
+Updated FEM source, Node test, Chromium test, Structural Truss contract, living plan, execution ledger and changelog atomically. Truss Studio uses adjacent JavaScript assets; root `index.html` synchronization does not apply.
+
+**Validation limits:** The factored formula was independently evaluated in the isolated V8 runtime against the high-precision reference; the old formula showed the expected cancellation. The repository has no local checkout, so the full local Node/Playwright commands cannot run here. New exact-head Push/PR Quality must certify the committed browser regression. Candidate is **Implemented on dev / In QA**, not released.
+
+PR #189 is open and mergeable, currently at 473 commits / 98 changed files before this commit, with zero independent reviews; its head matched dev and base matched main. Both dev and main report `protected: false`; no enforceable required-check protection was found in the inspected branch metadata. No merge, direct main update, force push or governance bypass was attempted. Latest main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remain successful on main `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03); no newer main deployment was found.
+
+The October 26 historical baseline remains frozen at **166 gaps / 95 partial**; no historical count or status was reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Push and PR Quality must target the new dev SHA and finish green with all 218 steps successful and zero failures/skips. Verify hollow-circle Node/browser references at 1280px/390px, Truss 212, FEM 214/215, spreadsheet 78–80, import integrity and concurrency tests.
+2. **P0 — Release governance and ordinary promotion.** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required checks. Only after exact-head checks and review gates pass, merge via the ordinary dev-to-main PR; verify exact-main Quality, Pages and hosted critical paths.
+3. **P1 — Spreadsheet formula-reference edge audit.** Cover mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity, atomic refusal of unsafe noncontiguous sort/delete and source/standalone parity.
+4. **P1 — Section-helper seven-shape numerical/browser matrix.** Independently verify solid/hollow rectangle, solid/hollow circle, channel, I-section and L-angle references, selected-axis application, invalid/overflow rollback, E/density/K preservation and 390px layout.
+5. **P1 — Source-backed Engineering Toolbox expansion.** Select one approved unfinished canonical tool; reuse shared solver/units/plot services, add stable tool ID, independent numerical references, negative tests and responsive keyboard/browser coverage, with truthful status and no placeholder action.
+
 ## 2026-11-23 — TRUSS-HOLLOW-RECTANGLE-THIN-WALL-STABILITY (implemented on dev; exact-head QA pending)
 
 Starting refs: dev `c5df9b79fb69af16164547539add12455e4a2603`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root AGENTS.md, the living plan, frozen October 26 inventory, unified/engineering architecture and structural catalog, Truss FEM source/tests/contract, PR #189/reviews, branch refs and current Actions/Pages evidence.

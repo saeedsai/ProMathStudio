@@ -45,6 +45,56 @@ def main():
               return [r.reactions[0].ry,r.reactions[1].ry,r.maxDisplacement.magnitude,r.residual,r.energyError]; }''')
             assert abs(results[0] - 10000) < 1e-6 and abs(results[1] - 10000) < 1e-6
             assert results[2] > 0 and results[3] < 1e-10 and results[4] < 1e-10
+            # A very thin concentric annulus must retain high-precision section properties
+            # through the actual helper preview and selected-member application at both widths.
+            page.locator('#section-member').select_option('AB')
+            page.locator('#section-shape').select_option('hollow-circle')
+            page.locator('#section-diameter').fill('1000000')
+            page.locator('#section-inner-diameter').fill('999999.9999999')
+            circle_caption = page.locator('#section-sketch-caption').inner_text()
+            assert circle_caption.startswith('Hollow circle Do='), circle_caption
+            assert page.locator('#section-sketch').get_attribute('aria-label') == circle_caption
+            assert page.locator('#section-sketch circle[data-centroid]').count() == 1
+            assert page.locator('#section-sketch line[data-centroid-axis]').count() == 2
+            before_section = page.evaluate("""() => Object.fromEntries(
+                [...document.querySelectorAll('#members tr')].map(row => {
+                    const id = row.querySelector('input[data-field="id"]')?.value;
+                    return id ? [id, Object.fromEntries(
+                        [...row.querySelectorAll('input[data-field]')].map(input => [input.dataset.field, input.value])
+                    )] : null;
+                }).filter(Boolean)
+            )""")
+            assert set(before_section) == {'AB', 'AC', 'BC'}, before_section
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text().startswith('Hollow circle: area ')
+            after_section = page.evaluate("""() => Object.fromEntries(
+                [...document.querySelectorAll('#members tr')].map(row => {
+                    const id = row.querySelector('input[data-field="id"]')?.value;
+                    return id ? [id, Object.fromEntries(
+                        [...row.querySelectorAll('input[data-field]')].map(input => [input.dataset.field, input.value])
+                    )] : null;
+                }).filter(Boolean)
+            )""")
+            expected_circle_area = 0.15708082876130342
+            expected_circle_moment = 19635103595.160965
+            assert abs(float(after_section['AB']['area']) - expected_circle_area) <= expected_circle_area * 1e-12
+            assert abs(float(after_section['AB']['I']) - expected_circle_moment) <= expected_circle_moment * 1e-12
+            for field, value in before_section['AB'].items():
+                if field not in ('area', 'I'):
+                    assert after_section['AB'][field] == value, (field, before_section['AB'], after_section['AB'])
+            assert after_section['AC'] == before_section['AC']
+            assert after_section['BC'] == before_section['BC']
+            # Restore the original member section before the remaining solver regressions.
+            page.evaluate("""(original) => {
+                const row = [...document.querySelectorAll('#members tr')].find(
+                    item => item.querySelector('input[data-field="id"]')?.value === 'AB');
+                for (const field of ['area', 'I']) {
+                    const input = row.querySelector('input[data-field="' + field + '"]');
+                    input.value = original[field];
+                    input.dispatchEvent(new Event('input', {bubbles:true}));
+                    input.dispatchEvent(new Event('change', {bubbles:true}));
+                }
+            }""", before_section['AB'])
             # Simulate an underconstrained joint, then recover without page reload.
             page.locator('#nodes tr').nth(1).locator('input[data-field="fixY"]').uncheck()
             page.get_by_role('button', name='Analyze truss').click()

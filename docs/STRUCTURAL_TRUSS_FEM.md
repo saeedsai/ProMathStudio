@@ -47,7 +47,7 @@ The standalone helper uses dimensions in mm and returns area in mm², centroidal
 - Solid rectangle: A = b·h, Ixx = b·h³/12, Iyy = h·b³/12.
 - Concentric hollow rectangle: subtract the centered inner rectangle from the outer rectangle for A, Ixx and Iyy.
 - Solid circle: A = π·d²/4, Ixx = Iyy = π·d⁴/64.
-- Concentric hollow circle: subtract the inner circle from the outer circle for A and equal centroidal I.
+- Concentric hollow circle: with r = Di/Do and g = (Do−Di)/Do, compute A = (πDo²/4)·g·(1+r) and Ixx = Iyy = (πDo⁴/64)·g·(1+r)·(1+r²). The factored annulus expressions avoid subtracting nearly equal squared/fourth-power diameters for thin walls.
 - Open channel: the web is on the left and both flanges extend right. It is assembled from a full-height web and two non-overlapping flange rectangles.
 - I-section: two full-width flanges and a centered non-overlapping web rectangle.
 - L-angle: one full-height left leg and one bottom leg extending right, decomposed into two non-overlapping rectangles so the shared corner is counted once.

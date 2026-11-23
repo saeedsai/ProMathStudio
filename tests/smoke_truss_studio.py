@@ -106,6 +106,15 @@ def set_nan_number_input(page, field_id):
 
 
 def main():
+    # Keep the active-request check at the DOM mutation boundary, not only at the caller.
+    ui_source = (ROOT / 'tools' / 'truss-fem-ui.js').read_text(encoding='utf-8')
+    render_start = ui_source.index('  function renderModel(')
+    render_end = ui_source.index('  function readRows(', render_start)
+    render_model = ui_source[render_start:render_end]
+    stale_guard = 'if(preserveImportRequest!==null&&!isCurrentImport(preserveImportRequest))return false;'
+    assert stale_guard in render_model
+    assert render_model.index(stale_guard) < render_model.index("$('nodes').replaceChildren()")
+    assert 'if(!renderModel(model,request))return;' in ui_source
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True, executable_path=os.getenv('CHROMIUM_PATH') or None, args=['--no-sandbox'])
         page = browser.new_page(viewport={'width': 390, 'height': 844})
@@ -681,6 +690,7 @@ def main():
         assert page.locator('#plot line').count() >= 6
         # Import a model produced by the old SI-only JSON editor: retain N, Pa, m² semantics.
         prior = page.evaluate('TrussStudio.example')
+        triangle_bytes = json.dumps(prior).encode('utf-8')
         # A newer selection must finish before an older invalid File read is released.
         page.evaluate("""() => {
             const file = new File(['{bad'], 'slow-invalid.json', {type:'application/json'});
@@ -710,7 +720,7 @@ def main():
         }""")
         page.wait_for_function("window.__slowInvalidImport?.started && typeof window.__slowInvalidImport.release === 'function'")
         page.locator('#import-model').set_input_files({'name':'fast-valid.json','mimeType':'application/json',
-                                                       'buffer':triangle_json.encode('utf-8')})
+                                                       'buffer':triangle_bytes})
         page.wait_for_function("""() => {
             const status = document.querySelector('#status');
             return status?.textContent.startsWith('Analysis complete') &&
@@ -850,7 +860,6 @@ def main():
                 return read.call(this);
             };
         }''')
-        triangle_bytes = triangle_json.encode('utf-8')
         oversized_ascii = triangle_bytes + b' ' * (byte_limit + 1 - len(triangle_bytes))
         assert len(oversized_ascii) == byte_limit + 1
         page.locator('#import-model').set_input_files({'name':'oversized-ascii.json','mimeType':'application/json',

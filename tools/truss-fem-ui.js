@@ -47,11 +47,14 @@
     btn.addEventListener('click',()=>{tr.remove(); if(kind==='members')syncSectionMembers(); invalidate();});td.append(btn);tr.append(td);tbody.append(tr);
   }
   function renderModel(model,preserveImportRequest=null) {
+    // A stale import must never mutate the active model, even if future work adds an async boundary.
+    if(preserveImportRequest!==null&&!isCurrentImport(preserveImportRequest))return false;
     $('nodes').replaceChildren();$('members').replaceChildren();
     model.nodes.forEach(node=>appendRow('nodes',node));
     model.members.forEach(m=>appendRow('members',m));
     syncSectionMembers();
     invalidate(preserveImportRequest);
+    return true;
   }
   function readRows(kind) {
     return Array.from($(kind).querySelectorAll('tr')).map(tr=>{
@@ -455,7 +458,7 @@
       const inputUnits=fem.describeUnits(imported);
       const model=fem.fromLegacy(imported);
       if(!isCurrentImport(request))return;
-      renderModel(model,request);
+      if(!renderModel(model,request))return;
       if(!finishCurrentImport(request))return;
       const unitNotice=inputUnits.system==='legacy-si'
         ? 'Legacy SI input converted to Studio units.'

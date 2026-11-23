@@ -290,6 +290,81 @@ def main():
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#member-results tr').count() == 1
             assert abs(page.evaluate('ProMathTrussFEM.solve(ProMathTrussFEM.examples.bar).displacements[1].x') - 1e-5) < 1e-12
+
+            # Section properties apply atomically to one selected member only.
+            page.locator('#example').select_option('triangle')
+            page.get_by_role('button', name='Load example').click()
+            assert page.locator('#members tr').count() == 3
+
+            def section_member_snapshot():
+                return page.evaluate("""() => [...document.querySelectorAll('#members tr')].map(tr =>
+                    Object.fromEntries([...tr.querySelectorAll('input[data-field]')].map(input =>
+                        [input.dataset.field, input.type === 'checkbox' ? input.checked : input.value])))""")
+
+            distinct_member_values = [
+                {'E': '190', 'area': '1100', 'density': '7800', 'I': '111000', 'K': '0.9'},
+                {'E': '200', 'area': '1200', 'density': '7850', 'I': '222000', 'K': '1.1'},
+                {'E': '210', 'area': '1300', 'density': '7900', 'I': '333000', 'K': '1.2'}
+            ]
+            for index, values in enumerate(distinct_member_values):
+                row = page.locator('#members tr').nth(index)
+                for field, value in values.items():
+                    row.locator(f'input[data-field="{field}"]').fill(value)
+
+            section_target = page.locator('#members tr').nth(1).locator('input[data-field="id"]').input_value()
+            page.locator('#section-member').select_option(section_target)
+            page.locator('#section-shape').select_option('rectangle')
+            page.locator('#section-axis').select_option('width')
+            page.locator('#section-width').fill('40')
+            page.locator('#section-height').fill('60')
+            section_before = section_member_snapshot()
+            page.locator('#section-properties-apply').click()
+            section_after = section_member_snapshot()
+            assert section_after[1]['area'] == '2400', section_after
+            assert section_after[1]['I'] == '720000', section_after
+            for field, value in section_before[1].items():
+                if field not in ('area', 'I'):
+                    assert section_after[1][field] == value, (field, section_before, section_after)
+            assert section_after[0] == section_before[0]
+            assert section_after[2] == section_before[2]
+            assert f'applied to member {section_target}.' in page.locator('#section-result').inner_text()
+
+            # Invalid and overflowing geometry must leave every member unchanged.
+            section_before_invalid = section_member_snapshot()
+            page.locator('#section-width').fill('0')
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text().startswith(
+                'Not applied: Rectangle width and depth must be positive.')
+            assert section_member_snapshot() == section_before_invalid
+            page.locator('#section-width').fill('1e308')
+            page.locator('#section-height').fill('1e308')
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text().startswith('Not applied:')
+            assert section_member_snapshot() == section_before_invalid
+
+            # If either destination field is absent, preflight prevents a partial write.
+            page.locator('#section-width').fill('40')
+            page.locator('#section-height').fill('60')
+            section_before_missing_field = section_member_snapshot()
+            page.evaluate("""memberId => {
+                const row = [...document.querySelectorAll('#members tr')].find(tr =>
+                    tr.querySelector('input[data-field="id"]')?.value.trim() === memberId);
+                row.querySelector('input[data-field="I"]').remove();
+            }""", section_target)
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text() == (
+                'Not applied: Selected member row is missing area and I fields.')
+            section_after_missing_field = section_member_snapshot()
+            assert 'I' not in section_after_missing_field[1]
+            assert section_after_missing_field[1]['area'] == section_before_missing_field[1]['area']
+            for field in ('id', 'a', 'b', 'E', 'density', 'K'):
+                assert section_after_missing_field[1][field] == section_before_missing_field[1][field]
+            assert section_after_missing_field[0] == section_before_missing_field[0]
+            assert section_after_missing_field[2] == section_before_missing_field[2]
+
+            # Restore a clean one-member model for the subsequent asynchronous import tests.
+            page.locator('#example').select_option('bar')
+            page.get_by_role('button', name='Load example').click()
             # A pending file import must not overwrite edits made to the active model.
             slow_model = {
                 'nodes': [

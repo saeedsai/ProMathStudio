@@ -290,8 +290,14 @@
       else if(angle&&axis==='principal-minor') {appliedI=properties.principalMomentMinor;axisName='I2 (minor principal)';}
       else if(rectangle&&axis==='depth') {appliedI=properties.secondMomentPerpendicular;axisName='Iyy';}
       else if(!rectangle) axisName='I';
-      row.querySelector('input[data-field="area"]').value=String(properties.area);
-      row.querySelector('input[data-field="I"]').value=String(appliedI);
+      // Resolve both destination controls before writing either, so a malformed row cannot
+      // receive a partial section update if one field is missing from the editor.
+      const areaInput=row.querySelector('input[data-field="area"]');
+      const momentInput=row.querySelector('input[data-field="I"]');
+      if(!areaInput||!momentInput) throw Error('Selected member row is missing area and I fields.');
+      const areaValue=String(properties.area), momentValue=String(appliedI);
+      areaInput.value=areaValue;
+      momentInput.value=momentValue;
       invalidate();
       const shapeName=shape==='rectangle'?'Solid rectangle':shape==='hollow-rectangle'?'Hollow rectangle':shape==='solid-circle'?'Solid circle':shape==='hollow-circle'?'Hollow circle':shape==='channel'?'Open channel (web left)':shape==='i-section'?'I-section':'L-angle (web left, bottom leg right)';
       const centroidText=properties.centroid

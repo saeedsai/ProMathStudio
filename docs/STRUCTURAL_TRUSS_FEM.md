@@ -56,7 +56,7 @@ The section-property helper returns an immutable centroid for solid and concentr
 
 The open-section geometry assumes sharp corners, uniform web/flange thickness, no lips, no fillets and no eccentricity. The L-angle assumes two equal leg thicknesses meeting at a sharp right angle, with no fillet or toe radius. It does not calculate torsional constant, shear centre, shear area, warping, connection effects or code resistance. The formulas describe ideal prismatic cross-sections only.
 
-All dimensions must be finite and strictly positive, with web thickness smaller than B and two flange thicknesses smaller than H. Area, moments, section moduli and radii that underflow or overflow are rejected before any member is changed. Applying a valid result updates only the selected member's area and I; E, density, K and other members are preserved.
+All dimensions must be finite and strictly positive, with web thickness smaller than B and two flange thicknesses smaller than H. Area, moments, section moduli and radii that underflow or overflow are rejected before any member is changed. Applying a valid result updates only the selected member's area and I; E, density, K and other members are preserved. The browser preflights both destination fields before writing either, so a missing field or invalid/overflowing geometry cannot leave a partial section update.
 
 ## Optional ideal Euler member estimate
 

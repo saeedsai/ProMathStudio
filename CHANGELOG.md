@@ -1,3 +1,9 @@
+## 2026-11-23 — Make Truss section-property application atomic
+
+- Preflight the selected member's area and second-moment controls before writing either value, preventing partial updates when the editor row is incomplete.
+- Added a 1280px/390px Chromium regression for selected-member-only updates, preservation of E/density/K and other members, invalid/overflow geometry rollback, and missing-field atomicity.
+- Parent exact-head Push/PR Quality passed all 218 steps; the new candidate requires fresh exact-head Quality and is not released.
+
 ## 2026-11-23 — Centralize Truss file byte-count validation
 
 - Added a shared FEM-kernel validator for safe declared File.size and actual ArrayBuffer.byteLength values, using one 1 MiB constant.

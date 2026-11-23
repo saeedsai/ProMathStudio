@@ -1,3 +1,9 @@
+## 2026-11-23 — Truss legacy example isolation and browser assertion correction
+
+- Fixed both Truss Studio latest-import assertions to match the canonical modern triangle member order: AB, AC, BC.
+- Changed the legacy `TrussStudio.example` property to return a fresh editable SI-unit model copy on each read, preventing cross-caller mutation of the compatibility reference.
+- Added a Node regression for independent legacy copies, canonical SI values and successful legacy solving. Exact-head Push/PR Quality is required before certification; not released.
+
 ## 2026-11-23 — TRUSS-EXAMPLE-ISOLATION-AND-CI-FIXTURE (implemented on dev; exact-head Quality pending)
 
 Started from dev `04540961065d129ca008f583440a7b8f3a6693af` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, Structural Truss contract/source/tests, current branch refs, PR #189/reviews, exact-head Actions and Pages evidence.

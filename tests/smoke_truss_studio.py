@@ -731,7 +731,7 @@ def main():
         assert [page.locator('#nodes tr').nth(i).locator('input[data-field="id"]').input_value()
                 for i in range(3)] == ['A','B','C']
         assert [page.locator('#members tr').nth(i).locator('input[data-field="id"]').input_value()
-                for i in range(3)] == ['AC','BC','AB']
+                for i in range(3)] == ['AB','AC','BC']
         assert page.locator('#member-metrics tr').count() == 3
         latest_status = page.locator('#status').inner_text()
         page.evaluate('window.__slowInvalidImport.release()')
@@ -741,7 +741,7 @@ def main():
         assert 'Analysis complete' in page.locator('#status').inner_text()
         assert page.locator('#status').get_attribute('aria-busy') == 'false'
         assert [page.locator('#members tr').nth(i).locator('input[data-field="id"]').input_value()
-                for i in range(3)] == ['AC','BC','AB']
+                for i in range(3)] == ['AB','AC','BC']
         assert page.locator('#member-metrics tr').count() == 3
         # The BOM belongs to the actual File bytes, so File.size matches arrayBuffer().byteLength.
         legacy_bytes = b'\xef\xbb\xbf' + json.dumps(prior).encode('utf-8')

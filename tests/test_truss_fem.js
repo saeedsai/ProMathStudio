@@ -29,6 +29,23 @@ test('built-in truss examples are immutable and getExample returns independent e
  assert.throws(()=>fem.getExample('toString'),/Unknown truss example/);
 });
 
+test('legacy TrussStudio.example reads return independent editable SI copies',()=>{
+ const first=globalThis.TrussStudio.example;
+ const second=globalThis.TrussStudio.example;
+ assert.deepEqual(first,second);
+ assert.notEqual(first,second);
+ assert.notEqual(first.nodes,second.nodes);
+ assert.notEqual(first.members,second.members);
+ assert.equal(first.members[0].A,0.001);
+ assert.equal(first.members[0].E,200e9);
+ first.nodes[0].x=99;
+ first.members[0].A=0.5;
+ const fresh=globalThis.TrussStudio.example;
+ assert.equal(fresh.nodes[0].x,0);
+ assert.equal(fresh.members[0].A,0.001);
+ assert.equal(globalThis.TrussStudio.solve(fresh).members.length,3);
+});
+
 
 test('truss JSON preview counts independently loaded free DOFs',()=>{
  const bar=clone(fem.examples.bar);

@@ -1,3 +1,30 @@
+## 2026-11-23 — TRUSS-L-ANGLE-STABLE-PRINCIPAL-MOMENT (implemented on dev; exact-head QA pending)
+
+Starting refs: dev c12e41e5c340a2ebcb2e0c6c3e311071b67db61b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read root AGENTS.md, this plan, the frozen October 26 inventory, Truss FEM source/tests/contract, PR #189 and reviews, current refs, exact-head Actions and main Quality/Pages evidence.
+
+**P0 CI baseline:** The exact starting head passed Push Quality [#45224844018](https://github.com/saeedsai/ProMathStudio/actions/runs/45224844018) and PR Quality [#45224855434](https://github.com/saeedsai/ProMathStudio/actions/runs/45224855434). Each completed all **218/218 steps**, with zero failures and zero skipped steps. Truss Studio 212, FEM analytical 214 and FEM browser/mobile 215 all passed. No failing exact-head CI defect remained at the start of this iteration.
+
+**P1 numerical defect:** L-angle principal moments were computed as mean ± radius in the unscaled inertia tensor. For a valid slender angle (B=1,000,000 mm, H=1 mm, t=0.001 mm), the true positive minor principal moment is approximately 4.161659185863228e-4 mm⁴, but floating-point subtraction of two nearly equal large terms rounded it to zero and incorrectly rejected the section as underflow. The geometry, area and centroid are representable; this is avoidable eigenvalue cancellation, not an invalid section.
+
+**Source correction:** Normalize Ixx, Iyy and Ixy by their maximum magnitude before computing the symmetric 2×2 eigenvalues. Compute I1 from normalized mean + radius and I2 from the normalized determinant divided by the normalized I1. Compute the principal-axis angle from the normalized tensor as well, avoiding overflow in the unscaled sum and doubled Ixy. Retain explicit finite and strictly-positive checks; do not clamp invalid determinants or moments.
+
+**Regression:** Added a direct Node test for the 1,000,000 × 1 mm L-angle with 0.001 mm thickness. It checks a high-precision composite-rectangle reference for I2, finite positive I1/I2, principal-axis angle, trace invariant and immutable result. Existing ordinary/asymmetric/near-limit L-angle references remain unchanged.
+
+Updated the FEM kernel, direct Node regression, Structural Truss contract, living plan, execution ledger and changelog in one atomic dev commit. Truss Studio uses adjacent JS assets; no root standalone index.html synchronization applies.
+
+**Validation:** A focused isolated Node calculation passed the new extreme-aspect reference and rechecked the existing 100 × 80 × 10 mm L-angle I1/I2/angle values. The execution workspace still has no repository checkout and the local GitHub DNS path is unavailable, so the complete repository node --test and Chromium/Playwright suites were not run locally. Fresh exact-head Push and PR Quality are required for full certification. Candidate remains **Implemented on dev / In QA**, not released.
+
+PR #189 remains open with zero independent reviews; main remains 70fc483cb1cec3d2372d37484e4a8ef7942343da. Branch-protection read is HTTP 403 to the connected integration and rulesets are empty; no merge or governance bypass was attempted. The inherited claude/sharp-babbage-pqhvgr branch remains preserved because its unique history is not proven contained in main. Main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remain successful on the November 3 main SHA; no newer deployment is claimed.
+
+The October 26 historical inventory remains frozen at **166 gaps / 95 partial**; no historical count or completion status was reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Both Push and PR Quality must pass on the new dev SHA with all 218 steps successful and zero failures/skips. Verify FEM analytical 214, FEM browser 215, Truss Studio 212, and spreadsheet 78–80; retain the existing desktop/390px section-helper, import rollback, UTF-8/BOM and 1 MiB tests.
+2. **P1 — Import concurrency completion.** Add the missing race where an older read remains pending while a newer selected file is rejected; release the old success afterward and prove it cannot replace the newer error or clear its settled busy state. Also verify Analyze cancels a pending import and late success/rejection remains inert.
+3. **P1 — Spreadsheet formula-reference edge audit.** Cover mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes, and row/column boundaries. Verify structural edits preserve logical-cell identity, unsafe noncontiguous sort/delete aborts transactionally, and src/data-tables.js remains byte-identical to its generated index.html module.
+4. **P1 — Section-helper browser edge coverage.** At desktop and 390px, apply the extreme-aspect L-angle and verify visible positive I1/I2, selected-axis application to exactly one member, unchanged E/density/K and no partial mutation on invalid dimensions. Retain independent references for all seven shapes.
+5. **P0 — Release governance.** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required-check configuration. Only after exact-head CI and review gates pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted critical paths.
+
 ## 2026-11-23 — TRUSS-IMPORT-CI-RECOVERY-AND-DECLARED-SIZE-VALIDATION (implemented on dev; exact-head QA pending)
 
 Starting refs: dev `c1edd94ff9c48bd5d3f69abcb6c7140174dbf756`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen October 26 inventory, Truss FEM source/tests/contract, PR #189, review submissions, current refs and Actions/Pages evidence.

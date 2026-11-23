@@ -1,3 +1,9 @@
+## 2026-11-23 — Truss L-angle stable principal moments (dev; exact-head QA pending)
+
+- Fixed avoidable floating-point cancellation in L-angle principal inertia: normalize the inertia tensor and calculate the minor eigenvalue as det(I)/I1 rather than mean − radius.
+- Added a direct Node reference regression for a valid 1,000,000 × 1 × 0.001 mm L-angle whose positive I2 previously rounded to zero.
+- Preserved strict finite/positive guards and existing standard/asymmetric section references. Full exact-head Quality required; not released.
+
 ## 2026-11-23 — Truss import CI recovery and declared-size validation
 
 - Fixed the exact-head browser regression failure: Truss Studio's short-read test now expects the validator's direction-specific `fewer bytes than declared` diagnostic and exact expected/received counts.

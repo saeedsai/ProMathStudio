@@ -1261,3 +1261,18 @@ test('legacy SI optional properties normalize null and blank values while retain
  assert.equal(metricK.eulerCriticalLoad,null);assert.equal(metricK.mass,null);
 });
 
+
+
+test('L-angle principal minor remains resolvable for an extreme aspect-ratio section',()=>{
+ const section=fem.sectionProperties('l-angle',{width:1e6,height:1,thickness:1e-3});
+ const referenceMinor=4.161659185863228e-4; // 80-digit Decimal composite-rectangle reference, mm^4.
+ assert.ok(Number.isFinite(section.principalMomentMajor)&&section.principalMomentMajor>0);
+ assert.ok(Number.isFinite(section.principalMomentMinor)&&section.principalMomentMinor>0);
+ assert.ok(Math.abs(section.principalMomentMinor-referenceMinor)<=referenceMinor*1e-10,
+  'minor principal moment '+section.principalMomentMinor+' must match '+referenceMinor);
+ close(section.principalMomentMajor,83333583083083.333,1e-12);
+ close(section.principalAxisAngleDegrees,89.99999999982829,1e-12);
+ close(section.principalMomentMajor+section.principalMomentMinor,
+  section.secondMoment+section.secondMomentPerpendicular,1e-12);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});

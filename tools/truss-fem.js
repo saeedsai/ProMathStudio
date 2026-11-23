@@ -131,12 +131,25 @@
       productOfInertia = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*(piece.cx-centroidX)*(piece.cy-centroidY),0),
         'L-angle product of inertia Ixy (mm⁴)');
       if (productOfInertia === 0) throw Error('L-angle product of inertia underflow; increase dimensions.');
-      const meanMoment = finite((secondMoment+secondMomentPerpendicular)/2, 'L-angle mean principal moment (mm⁴)');
-      const principalRadius = finite(Math.hypot((secondMoment-secondMomentPerpendicular)/2,productOfInertia), 'L-angle principal moment radius (mm⁴)');
-      principalMomentMajor = finite(meanMoment+principalRadius, 'L-angle major principal moment I1 (mm⁴)');
-      principalMomentMinor = finite(meanMoment-principalRadius, 'L-angle minor principal moment I2 (mm⁴)');
+      // Normalize the inertia tensor before diagonalizing it. Subtracting the
+      // nearly equal mean and radius loses the minor eigenvalue for slender angles.
+      const momentScale = Math.max(secondMoment,secondMomentPerpendicular,Math.abs(productOfInertia));
+      const scaledIxx = secondMoment/momentScale;
+      const scaledIyy = secondMomentPerpendicular/momentScale;
+      const scaledIxy = productOfInertia/momentScale;
+      const meanMoment = (scaledIxx+scaledIyy)/2;
+      const principalRadius = Math.hypot((scaledIxx-scaledIyy)/2,scaledIxy);
+      const majorNormalized = meanMoment+principalRadius;
+      const determinantNormalized = scaledIxx*scaledIyy-scaledIxy*scaledIxy;
+      if (!(majorNormalized > 0) || !(determinantNormalized > 0)) {
+        throw Error('L-angle principal second moment underflow; increase dimensions.');
+      }
+      principalMomentMajor = finite(momentScale*majorNormalized, 'L-angle major principal moment I1 (mm⁴)');
+      // For a positive-definite 2×2 inertia tensor, λmin = det(I)/λmax.
+      // This avoids catastrophic cancellation in meanMoment-principalRadius.
+      principalMomentMinor = finite(momentScale*(determinantNormalized/majorNormalized), 'L-angle minor principal moment I2 (mm⁴)');
       if (!(principalMomentMajor > 0) || !(principalMomentMinor > 0)) throw Error('L-angle principal second moment underflow; increase dimensions.');
-      principalAxisAngleDegrees = finite(0.5*Math.atan2(-2*productOfInertia,secondMoment-secondMomentPerpendicular)*180/Math.PI,
+      principalAxisAngleDegrees = finite(0.5*Math.atan2(-2*scaledIxy,scaledIxx-scaledIyy)*180/Math.PI,
         'L-angle principal-axis angle (degrees)');
       centroid = {x:centroidX,y:centroidY};
       axis = 'centroidal horizontal axis (Ixx)';

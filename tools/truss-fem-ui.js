@@ -11,7 +11,6 @@
   let importPending = false;
   let importCancelledNotice = false;
   const IMPORT_CANCELLED_STATUS = 'Pending import cancelled because the model was edited.';
-  const MAX_IMPORT_BYTES = 1024 * 1024;
   const fmt = (x, digits=5) => Number(x).toPrecision(digits).replace(/(\.\d*?)0+(e|$)/,'$1$2').replace(/\.(e|$)/,'$1');
   const fmtAngle = x => Number(x).toFixed(3);
   // Keep whole-number section properties readable; retain compact precision for fractional values.
@@ -444,13 +443,12 @@
     importPending=true;
     status('Importing model…',false,true);
     try {
-      if(!Number.isSafeInteger(declaredSize)||declaredSize<0||declaredSize>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
+      fem.validateImportByteLength(declaredSize);
       const bytes=await file.arrayBuffer();
       // A newer selection supersedes a slower earlier read; stale data/errors must not win.
       if(!isCurrentImport(request))return;
       // Enforce the same budget against the actual payload, not only File.size metadata.
-      if(!Number.isSafeInteger(bytes?.byteLength)||bytes.byteLength>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
-      if(bytes.byteLength!==declaredSize)throw Error(`Model JSON file size does not match the bytes read. (expected ${declaredSize} bytes, received ${bytes.byteLength} bytes).`);
+      fem.validateImportByteLength(declaredSize,bytes?.byteLength);
       let text;
       try {
         // File.text() replaces malformed UTF-8, which can silently corrupt imported IDs.

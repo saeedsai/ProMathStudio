@@ -923,6 +923,46 @@ def main():
             return {size:file.size, byteLength:bytes.byteLength};
         }""")
         assert native_file_probe == {'size':5,'byteLength':5}, native_file_probe
+        # A valid File whose asynchronous read returns one byte fewer must be rejected before decoding.
+        mismatch_json = json.dumps(prior)
+        mismatch_size = len(mismatch_json.encode('utf-8'))
+        before_mismatch = page.evaluate("""() => {
+            const rows = selector => Array.from(document.querySelectorAll(selector + ' tr')).map(row =>
+                Array.from(row.querySelectorAll('input')).map(input => [input.dataset.field || '', input.value]));
+            const resultSelectors = ['#disp-card','#stress-card','#res-card','#member-results',
+                                     '#joint-results','#reactions','#verification'];
+            return {nodes:rows('#nodes'), members:rows('#members'),
+                    results:resultSelectors.map(selector => document.querySelector(selector)?.textContent ?? null)};
+        }""")
+        page.evaluate("""() => {
+            const nativeRead = Blob.prototype.arrayBuffer;
+            File.prototype.arrayBuffer = function() {
+                const read = nativeRead.call(this);
+                return this.name === 'short-read.json'
+                    ? read.then(bytes => bytes.slice(0, bytes.byteLength - 1))
+                    : read;
+            };
+        }""")
+        page.locator('#import-model').set_input_files({'name':'short-read.json','mimeType':'application/json',
+                                                      'buffer':mismatch_json.encode('utf-8')})
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status.classList.contains('error') &&
+                   status.textContent.includes('Model JSON file size does not match the bytes read.') &&
+                   status.getAttribute('aria-busy') === 'false';
+        }""")
+        mismatch_status = page.locator('#status').inner_text()
+        assert f'(expected {mismatch_size} bytes, received {mismatch_size - 1} bytes).' in mismatch_status
+        assert page.evaluate("""() => {
+            const rows = selector => Array.from(document.querySelectorAll(selector + ' tr')).map(row =>
+                Array.from(row.querySelectorAll('input')).map(input => [input.dataset.field || '', input.value]));
+            const resultSelectors = ['#disp-card','#stress-card','#res-card','#member-results',
+                                     '#joint-results','#reactions','#verification'];
+            return {nodes:rows('#nodes'), members:rows('#members'),
+                    results:resultSelectors.map(selector => document.querySelector(selector)?.textContent ?? null)};
+        }""") == before_mismatch, 'A byte-count mismatch must preserve the active model and solved results'
+        assert page.locator('#status').get_attribute('aria-busy') == 'false'
+        page.evaluate('delete File.prototype.arrayBuffer')
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         page.locator('#export-csv').click()

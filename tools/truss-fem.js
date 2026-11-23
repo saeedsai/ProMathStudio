@@ -34,7 +34,7 @@
   }
 })(typeof window !== 'undefined' ? window : globalThis, function () {
   'use strict';
-  const MAX_NODES = 80, MAX_MEMBERS = 240;
+  const MAX_NODES = 80, MAX_MEMBERS = 240, MAX_IMPORT_BYTES = 1024 * 1024;
   const finite = (v, name) => {
     if (v === null || v === undefined || (typeof v === 'string' && !v.trim()) || typeof v === 'boolean' || typeof v === 'bigint' || typeof v === 'symbol' || typeof v === 'object' || typeof v === 'function') throw Error(name + ' must be a finite number.');
     const n = Number(v);
@@ -49,6 +49,18 @@
   // Null and whitespace-only optional properties mean "not supplied"; numeric zero remains present.
   const hasOptionalValue = value => value !== undefined && value !== null &&
     !(typeof value === 'string' && !value.trim());
+  // Share the File.size / ArrayBuffer.byteLength contract between the browser UI and tests.
+  function validateImportByteLength(declaredSize, actualByteLength) {
+    const valid = value => Number.isSafeInteger(value) && value >= 0 && value <= MAX_IMPORT_BYTES;
+    if (!valid(declaredSize)) throw Error('Model JSON exceeds 1 MiB.');
+    if (arguments.length > 1) {
+      if (!valid(actualByteLength)) throw Error('Model JSON exceeds 1 MiB.');
+      if (actualByteLength !== declaredSize) {
+        throw Error(`Model JSON file size does not match the bytes read. (expected ${declaredSize} bytes, received ${actualByteLength} bytes).`);
+      }
+    }
+    return declaredSize;
+  }
   // Solid, concentric hollow, open-channel and I-section properties in mm units.
   // Returns centroidal Ixx/Iyy, section moduli and radii of gyration for both axes.
   // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
@@ -439,7 +451,7 @@
   function importJSON(text) {
     if (typeof text !== 'string') throw Error('Truss JSON input must be a string.');
     // Bound UTF-8 bytes (not UTF-16 code units) before parsing oversized imports.
-    if (new TextEncoder().encode(text).byteLength > 1024 * 1024) throw Error('Truss JSON document exceeds the 1 MiB import limit.');
+    if (new TextEncoder().encode(text).byteLength > MAX_IMPORT_BYTES) throw Error('Truss JSON document exceeds the 1 MiB import limit.');
     let model;
     // Accept a single UTF-8 BOM from imported text files; count it toward the byte limit.
     try { model = JSON.parse(text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text); } catch (_) { throw Error('Invalid truss JSON document.'); }
@@ -454,7 +466,7 @@
     catch (_) { throw Error('Truss JSON export could not serialize the model.'); }
     if (typeof document !== 'string') throw Error('Truss JSON export must produce a document.');
     // Keep exports importable under the same UTF-8 byte budget.
-    if (new TextEncoder().encode(document).byteLength > 1024 * 1024) throw Error('Truss JSON document exceeds the 1 MiB export limit.');
+    if (new TextEncoder().encode(document).byteLength > MAX_IMPORT_BYTES) throw Error('Truss JSON document exceeds the 1 MiB export limit.');
     // JSON.stringify invokes toJSON hooks; validate the actual serialized model too.
     parseModel(fromLegacy(JSON.parse(document)));
     return document;
@@ -579,5 +591,5 @@
   function solveJSON(text) {
     return solveDocument(importJSON(text));
   }
-  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
+  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, validateImportByteLength, MAX_IMPORT_BYTES, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
 });

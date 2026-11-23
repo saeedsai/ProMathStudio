@@ -370,6 +370,24 @@ test('truss JSON importer bounds input before parsing without rejecting normal m
 });
 
 
+test('shared file-import byte validator enforces safe 1 MiB and exact byte-count boundaries',()=>{
+ const limit=fem.MAX_IMPORT_BYTES;
+ assert.equal(limit,1024*1024);
+ for(const size of [0,1,limit]){
+  assert.equal(fem.validateImportByteLength(size),size);
+  assert.equal(fem.validateImportByteLength(size,size),size);
+ }
+ for(const size of [undefined,-1,1.5,NaN,Infinity,Number.MAX_SAFE_INTEGER+1,limit+1]){
+  assert.throws(()=>fem.validateImportByteLength(size),/Model JSON exceeds 1 MiB/);
+ }
+ for(const actual of [undefined,-1,1.5,NaN,Infinity,limit+1]){
+  assert.throws(()=>fem.validateImportByteLength(5,actual),/Model JSON exceeds 1 MiB/);
+ }
+ assert.throws(()=>fem.validateImportByteLength(17,16),/expected 17 bytes, received 16 bytes/);
+ assert.throws(()=>fem.validateImportByteLength(17,18),/expected 17 bytes, received 18 bytes/);
+ assert.equal(fem.validateImportByteLength(17,17),17);
+});
+
 test('truss JSON importer accepts an exact 1 MiB UTF-8 document',()=>{
  const limit=1024*1024;
  const prefix=JSON.stringify({...fem.examples.bar,note:'é'.repeat(100)});

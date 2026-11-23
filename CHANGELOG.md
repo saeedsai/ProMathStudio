@@ -1,3 +1,10 @@
+## 2026-11-23 — Centralize Truss file byte-count validation
+
+- Added a shared FEM-kernel validator for safe declared File.size and actual ArrayBuffer.byteLength values, using one 1 MiB constant.
+- The browser now rejects shorter or longer reads with exact expected/received byte counts before UTF-8 decoding.
+- Added Node boundary/negative coverage and a Chromium short-read regression that verifies the active model and solved results remain unchanged.
+- Parent exact-head Push/PR Quality passed all 218 steps; this new candidate requires fresh exact-head Quality and is not released.
+
 ## 2026-11-23 — Normalize optional legacy SI truss properties consistently
 
 - Unified the FEM parser and legacy SI converter's optional-value rule for density, second moment I and effective-length factor K: undefined, null and whitespace-only values are absent; numeric zero remains present.

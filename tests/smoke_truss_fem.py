@@ -295,6 +295,9 @@ def main():
             page.locator('#example').select_option('triangle')
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#members tr').count() == 3
+            # The helper is intentionally inside the collapsed material-breakdown details.
+            page.locator('#member-material-details > summary').click()
+            assert page.locator('#section-helper').is_visible()
 
             def section_member_snapshot():
                 return page.evaluate("""() => [...document.querySelectorAll('#members tr')].map(tr =>
@@ -312,6 +315,18 @@ def main():
                     row.locator(f'input[data-field="{field}"]').fill(value)
 
             section_target = page.locator('#members tr').nth(1).locator('input[data-field="id"]').input_value()
+            other_member_id = page.locator('#members tr').nth(2).locator('input[data-field="id"]').input_value()
+
+            # Duplicate IDs make a target ambiguous; applying properties must not pick
+            # the first matching row or modify any member until the ID is unique again.
+            page.locator('#members tr').nth(2).locator('input[data-field="id"]').fill(section_target)
+            page.locator('#section-member').select_option(section_target)
+            section_before_ambiguous = section_member_snapshot()
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text() == (
+                'Not applied: Selected member ID is ambiguous.')
+            assert section_member_snapshot() == section_before_ambiguous
+            page.locator('#members tr').nth(2).locator('input[data-field="id"]').fill(other_member_id)
             page.locator('#section-member').select_option(section_target)
             page.locator('#section-shape').select_option('rectangle')
             page.locator('#section-axis').select_option('width')

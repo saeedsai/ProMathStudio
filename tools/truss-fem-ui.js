@@ -259,8 +259,11 @@
   function applySectionProperties() {
     try {
       const memberId=$('section-member').value;
-      const row=Array.from($('members').querySelectorAll('tr')).find(tr=>tr.querySelector('input[data-field="id"]')?.value.trim()===memberId);
-      if(!row) throw Error('Choose an existing member.');
+      const matchingRows=Array.from($('members').querySelectorAll('tr')).filter(tr=>
+        tr.querySelector('input[data-field="id"]')?.value.trim()===memberId);
+      if(!matchingRows.length) throw Error('Choose an existing member.');
+      if(matchingRows.length!==1) throw Error('Selected member ID is ambiguous.');
+      const row=matchingRows[0];
       const shape=$('section-shape').value;
       const composite=shape==='channel'||shape==='i-section';
       const angle=shape==='l-angle';

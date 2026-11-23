@@ -1,3 +1,10 @@
+## 2026-11-23 — Reject ambiguous Truss section-helper targets and repair browser fixture
+
+- Exact-head Push Quality #45162019117 and PR Quality #45162337628 both failed at Truss FEM browser step 215 because the test attempted to select a control inside the intentionally collapsed `details#member-material-details`. Opened the disclosure in the browser regression and asserted the helper is visible before interaction; no production visibility behavior or assertions were weakened.
+- Hardened section application to reject duplicate member IDs instead of silently updating the first matching row.
+- Added a Chromium regression for ambiguous-ID rejection and complete member-state preservation before restoring a unique ID and continuing existing section-property tests.
+- Updated the Structural Truss contract, living plan and execution ledger. New exact-head Quality is pending; not released.
+
 ## 2026-11-23 — Make Truss section-property application atomic
 
 - Preflight the selected member's area and second-moment controls before writing either value, preventing partial updates when the editor row is incomplete.

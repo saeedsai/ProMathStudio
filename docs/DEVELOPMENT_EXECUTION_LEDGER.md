@@ -1,3 +1,20 @@
+## 2026-11-23 — Truss section-target identity and exact-head CI recovery
+
+- Starting refs: dev `4640ec7ea1732a6d079a4534068168e90e85a9fd`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`.
+- Exact-head failures: Push Quality [#45162019117](https://github.com/saeedsai/ProMathStudio/actions/runs/45162019117) and PR Quality [#45162337628](https://github.com/saeedsai/ProMathStudio/actions/runs/45162337628), both failed mandatory browser step 215. Truss FEM Node tests passed. Both browser logs show Playwright timeout at `tests/smoke_truss_fem.py:315` because `#section-member` is nested in collapsed `details#member-material-details`.
+- Root cause: test omitted opening the intentional “Per-member material breakdown” disclosure. Corrected the regression to click its summary and assert `#section-helper` visible before using it; no UI visibility policy or test assertion was weakened.
+- Production change: `applySectionProperties()` now requires exactly one matching member ID and rejects ambiguous duplicate IDs before any write. Browser regression duplicates a selected ID, verifies exact error plus unchanged full member snapshot, restores the unique ID and continues the normal selected-only, invalid/overflow and missing-field tests.
+- Files changed atomically: `tools/truss-fem-ui.js`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, `docs/HOURLY_DEVELOPMENT_PLAN.md`, `docs/DEVELOPMENT_EXECUTION_LEDGER.md`, `CHANGELOG.md`.
+- Local full Node/Playwright tests unavailable because no checkout is mounted. Exact-head GitHub Push/PR Quality is required for full certification. No release/deployment claim.
+- PR #189 remains open/unreviewed; main protection is unverified and branch listing reports unprotected. Main SHA remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Frozen baseline unchanged: 166 gaps / 95 partial.
+
+**NEXT FIVE:**
+1. P0 exact-head Push and PR Quality green; step 215 must pass disclosure visibility, duplicate-ID rollback, 40×60 reference, invalid/overflow and missing-field checks at desktop/390px, plus all other mandatory gates.
+2. P1 all seven section shapes through UI with independent A/Ixx/Iyy references and L-angle principal-axis ordering.
+3. P1 Truss import malformed UTF-8/JSON, BOM, short/long reads, 1 MiB boundary and stale-request rollback.
+4. P1 spreadsheet mixed/absolute references, quoted sheets, reversed ranges, escaped strings and boundary mutations with source/bundle parity.
+5. P0 independent PR #189 review, authorized main protection verification, ordinary PR merge, exact-main Quality and Pages/hosted QA.
+
 ## 2026-11-23 — TRUSS-SECTION-APPLICATION-ATOMICITY (implemented on dev; exact-head QA pending)
 
 Started from verified refs: dev `7d1ed2023453f9b40085db9467ccb06479fdc84f`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, the current living plan, frozen October 26 inventory, unified master plan, engineering architecture/catalog, Structural Engineering catalog, Truss source/tests/contract, PR #189/reviews, branch refs, and current Actions/Pages evidence.

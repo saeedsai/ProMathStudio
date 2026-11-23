@@ -1,5 +1,8 @@
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
+**Latest section-helper targeting correction (dev; exact-head QA pending):** Section application now rejects duplicate member IDs rather than silently updating the first matching row. The helper remains intentionally inside the collapsed “Per-member material breakdown” details disclosure; browser tests must open its summary and verify the helper is visible before using it. The new regression verifies ambiguous-ID rejection with no member mutation, then restores a unique ID and continues selected-member, invalid-geometry and missing-field atomicity checks. The previous exact-head Push/PR workflows failed because the test did not expand this disclosure; see the living plan and execution ledger for run IDs and diagnosis.
+
+
 **Status:** Solid, concentric hollow, open-channel, I-section and L-angle helpers report area, centroidal Ixx/Iyy, Sx/Sy and rx/ry on dev. Live previews cover all seven supported section shapes with canonical geometry metadata and accessible dimension/axis labels. Built-in FEM examples are deeply immutable; `ProMathTrussFEM.getExample('triangle'|'bar')` returns an independent editable copy, and the standalone editor uses copies when loading/resetting examples. The legacy `TrussStudio.example` property also returns a fresh editable SI-unit copy on each read. The parent dev SHA `497b15bd2468a25c0b58eb16bf1fbdc37d2c7234` passed exact-head Push Quality [#45144101145](https://github.com/saeedsai/ProMathStudio/actions/runs/45144101145) and PR Quality [#45144109328](https://github.com/saeedsai/ProMathStudio/actions/runs/45144109328), each with all 218 steps successful, including Truss Studio 212 and FEM 214/215. This candidate centralizes file byte-count validation and adds a short-read rollback regression; its own exact-head QA is pending. No release or inventory reclassification is claimed.
 
 ## How to use
@@ -124,3 +127,10 @@ The private canonical `TrussStudio.example` reference is recursively immutable. 
 ## Legacy optional-property normalization
 
 When legacy SI JSON is converted by §fromLegacy§, optional member properties density, second moment §I§ and effective-length factor §K§ use one presence rule: §undefined§, §null§ and whitespace-only strings mean “not supplied” and are omitted from the normalized Studio member. Numeric zero remains present: density zero is valid and produces zero mass, while zero §I§ or §K§ remains invalid because each supplied buckling property must be strictly positive. §I§ and §K§ are independent; either may be retained alone, but the ideal Euler estimate is available only when both are supplied. The direct Node regression covers null/empty/whitespace values, zero density, legacy I-only and K-only conversions, and the absence of a false Euler estimate.
+
+
+## Section-helper target identity and disclosure
+
+The section-property helper is inside the native `<details id="member-material-details">` disclosure. It is intentionally collapsed on initial load; a user opens “Per-member material breakdown” to access the material schedule and helper. Browser regressions must activate that summary and assert `#section-helper` is visible before interacting with its controls.
+
+Applying section properties requires the selected member ID to match exactly one current member row. No match reports that an existing member must be chosen; duplicate matches report an ambiguous ID and leave all member fields untouched. This prevents a pre-analysis edit that introduces duplicate IDs from silently applying section properties to whichever duplicate happens to appear first. The Chromium regression creates a duplicate ID, checks the exact diagnostic and full model snapshot, restores the unique ID, then verifies normal selected-member application and rollback cases.

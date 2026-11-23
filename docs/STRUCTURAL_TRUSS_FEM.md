@@ -119,3 +119,8 @@ The compatibility property `TrussStudio.example` retains the original SI-unit mo
 ## Legacy SI compatibility reference and optional-property regression
 
 The private canonical `TrussStudio.example` reference is recursively immutable. Each public getter read remains a fresh editable copy, preserving the legacy SI JSON contract (N, Pa, m² and m⁴). Legacy imports with optional density, second moment I and effective-length factor K must preserve physical equivalence after conversion to Studio units. The reference case uses density 7850 kg/m³, I=1e-6 m⁴ and K=1: the 2 m AB member mass is 15.7 kg and its Euler critical load is 493480.22005446785 N. Direct Node and Chromium regressions cover conversion and analysis; the browser fixture must restore native File prototype behavior after byte-boundary monkeypatches.
+
+
+## Legacy optional-property normalization
+
+When legacy SI JSON is converted by §fromLegacy§, optional member properties density, second moment §I§ and effective-length factor §K§ use one presence rule: §undefined§, §null§ and whitespace-only strings mean “not supplied” and are omitted from the normalized Studio member. Numeric zero remains present: density zero is valid and produces zero mass, while zero §I§ or §K§ remains invalid because each supplied buckling property must be strictly positive. §I§ and §K§ are independent; either may be retained alone, but the ideal Euler estimate is available only when both are supplied. The direct Node regression covers null/empty/whitespace values, zero density, legacy I-only and K-only conversions, and the absence of a false Euler estimate.

@@ -1,3 +1,10 @@
+## 2026-11-23 — Normalize optional legacy SI truss properties consistently
+
+- Unified the FEM parser and legacy SI converter's optional-value rule for density, second moment I and effective-length factor K: undefined, null and whitespace-only values are absent; numeric zero remains present.
+- Legacy conversion now omits absent optional values instead of leaking null/blank density or K into normalized Studio member records.
+- Preserved valid zero density and independent I-only/K-only inputs; the Euler estimate remains unavailable unless both positive I and K are supplied.
+- Added direct Node regression coverage and updated the Structural Truss compatibility contract. New exact-head Push/PR Quality is pending; not released.
+
 ## 2026-11-23 — Prevent stale blur events from cancelling a newly selected Truss import
 
 - Made bubbling `input` events the authoritative model-edit signal for Truss node/member controls; member-ID selector synchronization now occurs on member-ID input.

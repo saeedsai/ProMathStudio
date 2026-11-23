@@ -46,6 +46,9 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
+  // Null and whitespace-only optional properties mean "not supplied"; numeric zero remains present.
+  const hasOptionalValue = value => value !== undefined && value !== null &&
+    !(typeof value === 'string' && !value.trim());
   // Solid, concentric hollow, open-channel and I-section properties in mm units.
   // Returns centroidal Ixx/Iyy, section moduli and radii of gyration for both axes.
   // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
@@ -271,13 +274,12 @@
       if (!(EAbyL > 0)) throw Error('Member ' + id + ': stiffness underflow; increase E or area.');
       // Density is an optional SI quantity shared by Studio and legacy imports.
       // Blank/null means unknown; zero is valid, while negative/non-finite values are not.
-      const density = row.density === undefined || row.density === null ||
-        (typeof row.density === 'string' && !row.density.trim()) ? null : finite(row.density, id + ' density (kg/m³)');
+      const density = hasOptionalValue(row.density) ? finite(row.density, id + ' density (kg/m³)') : null;
       if (density !== null && density < 0) throw Error('Member ' + id + ': density must be non-negative.');
       const mass = density === null ? null : finite(finite(L * A, 'Member ' + id + ' material volume (m³)') * density, 'Member ' + id + ' mass (kg)');
       // I and K are independent member properties; the Euler estimate is available only when both are supplied.
-      const hasI = row.I !== undefined && row.I !== null && !(typeof row.I === 'string' && !row.I.trim());
-      const hasK = row.K !== undefined && row.K !== null && !(typeof row.K === 'string' && !row.K.trim());
+      const hasI = hasOptionalValue(row.I);
+      const hasK = hasOptionalValue(row.K);
       let secondMoment = null, effectiveLengthFactor = null, eulerCriticalLoad = null;
       if (hasI) {
         secondMoment = finiteScaled(row.I, id + ' I (mm⁴)', 1e-12);
@@ -428,9 +430,9 @@
       fy: finite(n.fy ?? 0, 'Legacy Fy (N)') / 1000})),
       members: model.members.map(m => ({id: m.id, a: m.a, b: m.b,
         E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finiteScaled(m.A, 'Legacy area (m²)', 1e6),
-        ...(m.density === undefined ? {} : {density: m.density}),
-        ...(m.I === undefined || m.I === null || (typeof m.I === 'string' && !m.I.trim()) ? {} : {I: finiteScaled(m.I, 'Legacy I (m⁴)', 1e12)}),
-        ...(m.K === undefined ? {} : {K: m.K})}))};
+        ...(hasOptionalValue(m.density) ? {density: m.density} : {}),
+        ...(hasOptionalValue(m.I) ? {I: finiteScaled(m.I, 'Legacy I (m⁴)', 1e12)} : {}),
+        ...(hasOptionalValue(m.K) ? {K: m.K} : {})}))};
   }
   // Import JSON as a model, retaining the original public-unit values and IDs.
   // Validation is performed on a converted copy, not on the returned document.

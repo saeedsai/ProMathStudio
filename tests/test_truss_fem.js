@@ -1180,3 +1180,46 @@ test('legacy SI JSON import preserves optional density, second moment and effect
  assert.ok(result.residual<1e-12);
  assert.ok(Number.isFinite(result.energyError));
 });
+ 
+test('legacy SI optional properties normalize null and blank values while retaining zero density and independent I/K',()=>{
+ const template=globalThis.TrussStudio.example;
+ const absent=[null,'',' \t '];
+ for(const value of absent){
+  const legacy=clone(template);
+  for(const member of legacy.members){member.density=value;member.I=value;member.K=value;}
+  const json=JSON.stringify(legacy);
+  const normalized=fem.fromLegacy(fem.importJSON(json));
+  for(const member of normalized.members){
+   assert.equal(Object.prototype.hasOwnProperty.call(member,'density'),false);
+   assert.equal(Object.prototype.hasOwnProperty.call(member,'I'),false);
+   assert.equal(Object.prototype.hasOwnProperty.call(member,'K'),false);
+  }
+  for(const metric of fem.inspectJSON(json).memberMetrics){
+   assert.equal(metric.density,null);assert.equal(metric.mass,null);
+   assert.equal(metric.secondMoment,null);assert.equal(metric.effectiveLengthFactor,null);
+   assert.equal(metric.eulerCriticalLoad,null);
+  }
+ }
+ const zero=clone(template);
+ for(const member of zero.members)member.density=0;
+ const normalizedZero=fem.fromLegacy(fem.importJSON(JSON.stringify(zero)));
+ assert.equal(normalizedZero.members[0].density,0);
+ assert.equal(fem.inspectJSON(JSON.stringify(zero)).memberMetrics[0].mass,0);
+ const onlyI=clone(template);
+ for(const member of onlyI.members){member.density=' ';member.I=1e-6;member.K=' \t ';}
+ const normalizedI=fem.fromLegacy(fem.importJSON(JSON.stringify(onlyI)));
+ assert.equal(normalizedI.members[0].I,1000000);
+ assert.equal(Object.prototype.hasOwnProperty.call(normalizedI.members[0],'K'),false);
+ const metricI=fem.inspectJSON(JSON.stringify(onlyI)).memberMetrics[0];
+ assert.equal(metricI.secondMoment,1e-6);assert.equal(metricI.effectiveLengthFactor,null);
+ assert.equal(metricI.eulerCriticalLoad,null);assert.equal(metricI.mass,null);
+ const onlyK=clone(template);
+ for(const member of onlyK.members){member.density=null;member.I=null;member.K=1;}
+ const normalizedK=fem.fromLegacy(fem.importJSON(JSON.stringify(onlyK)));
+ assert.equal(Object.prototype.hasOwnProperty.call(normalizedK.members[0],'I'),false);
+ assert.equal(normalizedK.members[0].K,1);
+ const metricK=fem.inspectJSON(JSON.stringify(onlyK)).memberMetrics[0];
+ assert.equal(metricK.secondMoment,null);assert.equal(metricK.effectiveLengthFactor,1);
+ assert.equal(metricK.eulerCriticalLoad,null);assert.equal(metricK.mass,null);
+});
+

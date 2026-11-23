@@ -4,7 +4,7 @@ Starting refs: dev `307301bd9fc81e77c09a0faa7e2e0e85eb075b6a`, main `70fc483cb1c
 
 **P0 CI baseline:** Exact-head PR Quality [#45254681504](https://github.com/saeedsai/ProMathStudio/actions/runs/45254681504) completed successfully with **218/218 steps green, zero failures and zero skipped steps**, including spreadsheet 78–80, Truss Studio 212 and FEM analytical/browser 214–215. Exact-head Push Quality [#45254671579](https://github.com/saeedsai/ProMathStudio/actions/runs/45254671579) was cancelled, not failed. No exact-head failing CI defect remained at the start.
 
-**P1 numerical correctness defect:** Hollow-circle section properties used direct outer-minus-inner subtraction for (D^2-D_i^2) and (D^4-D_i^4). For (D=1,000,000) mm and (D_i=999,999.9999999) mm, direct binary64 subtraction loses about (2.52\times10^{-4}) relative area and (8.55\times10^{-5}) relative inertia despite valid, representable geometry.
+**P1 numerical correctness defect:** Hollow-circle section properties used direct outer-minus-inner subtraction for (D^2-D_i^2) and (D^4-D_i^4). For (D=1,000,000) mm and (D_i=999,999.9999999) mm, direct binary64 subtraction loses about (2.52\times10^{-4}) relative area and (4.21\times10^{-4}) relative inertia despite valid, representable geometry.
 
 **Source correction:** In `tools/truss-fem.js`, use (r=D_i/D), (g=(D-D_i)/D), (A=(\pi D^2/4)g(1+r)), and (I=(\pi D^4/64)g(1+r)(1+r^2)). Preserve the existing positive/finite dimension checks, inner-square/fourth-power representability checks, solid-circle arithmetic and immutable result contract.
 

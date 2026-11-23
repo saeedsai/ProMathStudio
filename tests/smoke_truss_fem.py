@@ -493,6 +493,43 @@ def main():
             assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
             assert '0.015 mm' in page.locator('#disp-card').inner_text()
 
+            # Malformed UTF-8 bytes must fail before parsing or replacing the active model.
+            def import_state_snapshot():
+                return page.evaluate("""() => ({
+                    nodes: [...document.querySelectorAll('#nodes tr')].map(tr =>
+                        [...tr.querySelectorAll('input[data-field]')].map(input =>
+                            [input.dataset.field, input.type === 'checkbox' ? input.checked : input.value])),
+                    members: [...document.querySelectorAll('#members tr')].map(tr =>
+                        [...tr.querySelectorAll('input[data-field]')].map(input =>
+                            [input.dataset.field, input.type === 'checkbox' ? input.checked : input.value])),
+                    solved: ['disp-card', 'stress-card', 'res-card', 'verification'].map(id =>
+                        document.getElementById(id).textContent)
+                })""")
+
+            before_invalid_utf8 = import_state_snapshot()
+            invalid_utf8_bytes = b'{"nodes":[{"id":"bad-\xc3("}],"members":[]}'
+            page.locator('#import-model').set_input_files({
+                'name': 'invalid-utf8.json', 'mimeType': 'application/json',
+                'buffer': invalid_utf8_bytes
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent ===
+                'Import failed: Model JSON must be valid UTF-8.'""")
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+            assert import_state_snapshot() == before_invalid_utf8
+
+            # A subsequent valid file must recover normally after the rejected byte sequence.
+            page.locator('#import-model').set_input_files({
+                'name': 'utf8-recovery.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(slow_model).encode('utf-8')
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
+                'Analysis complete')""")
+            assert [page.locator('#nodes tr').nth(i).locator('input[data-field="id"]').input_value()
+                    for i in range(2)] == ['S', 'T']
+            assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'ST'
+            assert '0.02 mm' in page.locator('#disp-card').inner_text()
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+
             # A newer file selection must win even when an older read resolves or rejects later.
             def race_model(prefix, length=2.0, load=1.0):
                 return {

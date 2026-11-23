@@ -139,3 +139,10 @@ Applying section properties requires the selected member ID to match exactly one
 ## Section-axis selection validation
 
 The section helper applies a centroidal or principal second moment only when the selected axis is valid for the current shape. Solid/hollow rectangles, channels and I-sections accept the width-parallel Ixx or depth-parallel Iyy axis. L-angles accept those two centroidal axes plus the major I1 and minor I2 principal axes. Circular sections do not use the axis selector. An invalid or stale selector value is rejected before either the selected member's area or I field is written; the browser regression injects an unsupported value and verifies the full member snapshot is unchanged before restoring Ixx and continuing the normal application test.
+
+
+## Strict UTF-8 decoding of uploaded model bytes
+
+The FEM kernel owns uploaded-byte decoding through `decodeImportBytes(bytes)`. It accepts an `ArrayBuffer` or typed-array view, enforces the shared 1 MiB byte budget, and uses a fatal UTF-8 decoder. Malformed, truncated or overlong byte sequences are rejected with the explicit `Model JSON must be valid UTF-8.` diagnostic rather than being replaced by U+FFFD and silently changing identifiers or numeric text. The decoder preserves a leading U+FEFF in its returned string so `importJSON` can strip the BOM only after the original bytes have already been counted by the File-size validator. The UI calls this canonical kernel helper only after the immutable declared File size and actual ArrayBuffer length have matched.
+
+Node coverage exercises valid ArrayBuffer and typed-array input, actual UTF-8 BOM bytes, malformed two-, three- and four-byte sequences, invalid input types and the byte limit. The Chromium File-input regression uploads a real invalid byte sequence, verifies the exact error and `aria-busy=false`, and compares every node/member input plus the last solved displacement/stress/residual/verification text before and after rejection. It then imports a valid model and verifies analysis recovery. The browser scenario runs at the existing desktop and 390px viewports.

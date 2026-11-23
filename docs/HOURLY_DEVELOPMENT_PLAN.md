@@ -1,4 +1,29 @@
-## 2026-11-23 — TRUSS-SECTION-AXIS-SELECTION-GUARD (implemented on dev; exact-head QA pending)
+## 2026-11-23 — TRUSS-STRICT-UTF8-IMPORT-DECODER (implemented on dev; exact-head QA pending)
+
+Started from verified refs: dev `0713c2b02edd4300aa3803d2817a4bb3f525c2d7`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, Structural Truss source/tests/contract, PR #189/reviews, current branch refs, exact-head Actions and main Quality/Pages evidence.
+
+**P0 CI baseline:** Push Quality [#45180189010](https://github.com/saeedsai/ProMathStudio/actions/runs/45180189010) and PR Quality [#45180197870](https://github.com/saeedsai/ProMathStudio/actions/runs/45180197870) both passed on the exact current head `0713c2b02edd4300aa3803d2817a4bb3f525c2d7`. Each completed all **218/218 steps**, with zero failed or skipped steps; spreadsheet 78–80, Truss 212, FEM analytical 214 and FEM browser/mobile 215 all succeeded. No failing exact-head CI blocker remained at the start of this iteration.
+
+**P1 import correctness:** Strict UTF-8 decoding previously lived inline in the browser event handler, making malformed-byte handling difficult to exercise directly in the canonical kernel. Added `ProMathTrussFEM.decodeImportBytes(bytes)`: accept only an ArrayBuffer or typed-array view, enforce the shared 1 MiB limit, decode with fatal UTF-8 semantics, and preserve a counted leading BOM for the existing canonical JSON importer to strip. The UI now delegates to this kernel boundary after its immutable File.size/actual ArrayBuffer byte-count equality check. Invalid byte sequences fail with the stable `Model JSON must be valid UTF-8.` error before parsing or replacing the active model.
+
+**Regression:** Node tests cover valid ArrayBuffer and typed-array inputs, actual EF BB BF BOM bytes (retained by the decoder and accepted by `importJSON`), malformed/truncated 2-, 3- and 4-byte sequences, invalid input types and over-limit bytes. The 1280px/390px Chromium test uploads a real File with malformed UTF-8, asserts the exact diagnostic and `aria-busy=false`, compares all node/member inputs and prior solved cards/verification before and after rejection, then imports a valid model and verifies a fresh 0.02 mm reference displacement. No FEM equations, byte limits, import schema or prior assertions were relaxed.
+
+Updated the FEM kernel/UI, direct Node and browser regressions, Structural Truss contract, living plan, execution ledger and changelog in one atomic commit. Truss Studio loads adjacent JS assets; no standalone root `index.html` synchronization applies.
+
+**Validation limits:** The local workspace has no Git checkout, so full local `node --test` and Chromium commands could not be run. The isolated Node runtime confirmed the chosen fatal TextDecoder behavior: valid BOM bytes preserve U+FEFF and malformed sequences are rejected. Fresh exact-head Push/PR Quality must execute the committed Node/browser regressions. The feature remains **Implemented on dev / In QA**, not released.
+
+PR #189 remains open with head on dev and base main; its latest inspected head was `0713c2b02edd4300aa3803d2817a4bb3f525c2d7`, with no submitted independent reviews. Branch listing reports `protected:false` for dev/main; branch-protection read is unavailable to this integration. Main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Latest main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) succeeded on that main SHA on November 3, 2026; no newer main deployment was found. No merge or deployment is claimed.
+
+The frozen October 26 inventory remains **166 gaps / 95 partial**; no historical counts or completion states were reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality for the new candidate.** Both Push and PR workflows green on the new dev SHA, all 218 required steps with zero failures/skips. Verify the new Node decoder cases and Truss browser step 215 at 1280px/390px, including malformed-byte rollback and valid recovery; retain spreadsheet 78–80 and FEM 212/214.
+2. **P1 — Actual BOM and file-boundary browser audit.** Upload actual EF BB BF bytes and verify the three bytes count toward immutable File.size while JSON import succeeds; exercise exact 1 MiB and over-limit files with no model/result mutation on rejection.
+3. **P1 — Long-read and latest-request rollback.** Simulate an under-limit longer ArrayBuffer than declared, then stale success and stale rejection; only the current request may settle busy/status or change model/solution.
+4. **P1 — Spreadsheet formula-reference edge audit.** Add mixed absolute/relative anchors, quoted sheet names, reversed ranges, multiple escaped quotes and row/column boundaries; verify logical-cell identity, transactional rejection of unsafe sort/delete and standalone `index.html` parity.
+5. **P0 — Release governance and promotion.** Obtain an eligible independent PR #189 review and authorized verification of enforceable main protection/required checks. Only after exact-head checks and review pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted critical paths.
+
+## 2026-11-23 — TRUSS-SECTION-AXIS-SELECTION-GUARD (verified on dev; exact-head Quality passed)
 
 Started from verified refs: dev `3ca78fbc2ced1d48003bb9a550ee2b3d753c06f8`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen October 26 inventory, unified master implementation plan, engineering architecture/toolbox catalogs, Structural Truss contract/source/tests, PR #189/reviews, exact-head Actions and Pages evidence.
 
@@ -10,7 +35,7 @@ Started from verified refs: dev `3ca78fbc2ced1d48003bb9a550ee2b3d753c06f8`, main
 
 Updated the Structural Truss contract, living plan, execution ledger and changelog atomically with source/test. Truss Studio loads adjacent JavaScript assets; no standalone `index.html` bundle synchronization applies. The frozen October 26 baseline remains **166 gaps / 95 partial**.
 
-Full local Node/Playwright execution remains unavailable because this workspace has no checkout; exact-head GitHub Push and PR Quality must certify the new test. No release/deployment is claimed.
+Full local Node/Playwright execution remains unavailable because this workspace has no checkout. Post-commit exact-head verification subsequently completed: Push Quality #45180189010 and PR Quality #45180197870 both passed all 218/218 steps on `0713c2b02edd4300aa3803d2817a4bb3f525c2d7`, with zero failures/skips, including Truss 212 and FEM 214/215. No release/deployment is claimed.
 
 **NEXT FIVE (status and acceptance tests):**
 1. **P0 — Exact-head Quality.** Both Push and PR workflows green on this commit, all 218 required steps with zero failures/skips; step 215 must pass invalid-axis rejection/rollback plus existing selected-member, duplicate-ID, overflow and missing-field tests at 1280px/390px; retain FEM Node 214 and spreadsheet 78–80.

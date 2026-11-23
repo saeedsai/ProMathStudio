@@ -61,6 +61,21 @@
     }
     return declaredSize;
   }
+  // Decode actual uploaded bytes strictly; preserve a counted BOM for importJSON to strip.
+  function decodeImportBytes(bytes) {
+    const view = bytes instanceof ArrayBuffer
+      ? new Uint8Array(bytes)
+      : ArrayBuffer.isView(bytes)
+        ? new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+        : null;
+    if (!view) throw Error('Model JSON bytes must be an ArrayBuffer or typed array.');
+    validateImportByteLength(view.byteLength);
+    try {
+      return new TextDecoder('utf-8', {fatal:true, ignoreBOM:true}).decode(view);
+    } catch (_) {
+      throw Error('Model JSON must be valid UTF-8.');
+    }
+  }
   // Solid, concentric hollow, open-channel and I-section properties in mm units.
   // Returns centroidal Ixx/Iyy, section moduli and radii of gyration for both axes.
   // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
@@ -591,5 +606,5 @@
   function solveJSON(text) {
     return solveDocument(importJSON(text));
   }
-  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, validateImportByteLength, MAX_IMPORT_BYTES, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
+  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, validateImportByteLength, decodeImportBytes, MAX_IMPORT_BYTES, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
 });

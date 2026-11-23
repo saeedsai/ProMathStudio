@@ -1,3 +1,15 @@
+## 2026-11-23 — Truss strict UTF-8 byte decoding and rollback regression
+
+- Starting exact refs: dev `0713c2b02edd4300aa3803d2817a4bb3f525c2d7`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`.
+- Parent exact-head Push Quality [#45180189010](https://github.com/saeedsai/ProMathStudio/actions/runs/45180189010) and PR Quality [#45180197870](https://github.com/saeedsai/ProMathStudio/actions/runs/45180197870) passed all 218 steps with zero failures/skips; spreadsheet 78–80 and Truss/FEM 212/214/215 passed.
+- Production change: added canonical `decodeImportBytes(ArrayBuffer|typed-array)` in the FEM kernel, enforcing the 1 MiB limit and fatal UTF-8 decoding while preserving a counted BOM for `importJSON`. UI delegates byte decoding to the kernel after declared/actual byte-length equality.
+- Node regression covers ArrayBuffer/view, BOM, malformed 2/3/4-byte sequences, invalid type and oversize. Chromium regression uploads actual malformed UTF-8, checks exact diagnostic, busy-state clearing and complete model/solved-result preservation, then verifies valid import recovery at 1280px and 390px.
+- Changed atomically: `tools/truss-fem.js`, `tools/truss-fem-ui.js`, `tests/test_truss_fem.js`, `tests/smoke_truss_fem.py`, Structural Truss contract, hourly plan, execution ledger and changelog.
+- Local checkout absent; full local Node/Playwright suites not run. Only isolated TextDecoder semantics were verified locally. New exact-head GitHub Push/PR Quality is required; no release/deployment claim.
+- PR #189 remains open/unreviewed; main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Branch listing reports dev/main unprotected; protection read is unavailable to this integration. Latest main Quality/Pages are successful on November 3 main SHA. Frozen historical baseline remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) both exact-head Quality workflows green on this commit, all 218 steps and new UTF-8 Node/browser tests; (2) actual BOM and exact/over-1-MiB File-input boundary with rollback; (3) longer-read and latest-request success/rejection isolation; (4) spreadsheet mixed/absolute formula references, quoted sheets, reversed ranges, escaped quotes and boundary tests with standalone bundle parity; (5) independent PR #189 review plus enforceable main protection, then ordinary PR promotion and exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-23 — Truss section-axis validation guard
 
 - Starting exact refs: dev `3ca78fbc2ced1d48003bb9a550ee2b3d753c06f8`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`.

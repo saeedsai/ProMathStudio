@@ -462,13 +462,8 @@
       if(!isCurrentImport(request))return;
       // Enforce the same budget against the actual payload, not only File.size metadata.
       fem.validateImportByteLength(declaredSize,bytes?.byteLength);
-      let text;
-      try {
-        // File.text() replaces malformed UTF-8, which can silently corrupt imported IDs.
-        text=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
-      } catch (_) {
-        throw Error('Model JSON must be valid UTF-8.');
-      }
+      // Keep strict byte decoding in the canonical FEM import boundary.
+      const text=fem.decodeImportBytes(bytes);
       if(!isCurrentImport(request))return;
       const imported=fem.importJSON(text);
       const inputUnits=fem.describeUnits(imported);

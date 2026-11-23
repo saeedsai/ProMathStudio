@@ -1,3 +1,10 @@
+## 2026-11-23 — Centralize strict UTF-8 decoding for Truss model imports
+
+- Added the FEM-kernel `decodeImportBytes` boundary for ArrayBuffer/typed-array input, shared 1 MiB enforcement and fatal UTF-8 decoding; counted BOM bytes remain visible to the canonical JSON importer.
+- The browser UI now uses the same decoder after File.size/ArrayBuffer length equality validation.
+- Added direct Node cases for valid input, BOM, malformed/truncated 2/3/4-byte sequences, invalid types and oversized bytes; added a real malformed-byte File-input rollback/recovery regression for desktop and 390px.
+- Parent exact-head Push/PR Quality passed 218/218 steps. New candidate requires fresh exact-head Quality; not released.
+
 ## 2026-11-23 — Reject unsupported Truss section-axis selections
 
 - Validate the selected section axis before writing area or second moment: rectangular/composite profiles accept width/depth, L-angles additionally accept principal-major/principal-minor, and circles do not use the selector.

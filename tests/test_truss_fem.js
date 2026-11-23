@@ -388,6 +388,24 @@ test('shared file-import byte validator enforces safe 1 MiB and exact byte-count
  assert.equal(fem.validateImportByteLength(17,17),17);
 });
 
+
+test('file-byte decoder rejects malformed UTF-8 and preserves a counted BOM',()=>{
+ const json=JSON.stringify(fem.examples.bar);
+ const encoded=new TextEncoder().encode(json);
+ assert.equal(fem.decodeImportBytes(encoded.buffer),json);
+ const withBom=new Uint8Array(encoded.length+3);
+ withBom.set([0xef,0xbb,0xbf]);
+ withBom.set(encoded,3);
+ const decoded=fem.decodeImportBytes(withBom);
+ assert.equal(decoded.charCodeAt(0),0xfeff);
+ assert.deepEqual(fem.importJSON(decoded).nodes,fem.examples.bar.nodes);
+ for(const invalid of [[0xc3,0x28],[0xe2,0x82],[0xf0,0x28,0x8c,0x28]]){
+  assert.throws(()=>fem.decodeImportBytes(new Uint8Array(invalid)),/Model JSON must be valid UTF-8/);
+ }
+ assert.throws(()=>fem.decodeImportBytes('not bytes'),/ArrayBuffer or typed array/);
+ assert.throws(()=>fem.decodeImportBytes(new Uint8Array(fem.MAX_IMPORT_BYTES+1)),/Model JSON exceeds 1 MiB/);
+});
+
 test('truss JSON importer accepts an exact 1 MiB UTF-8 document',()=>{
  const limit=1024*1024;
  const prefix=JSON.stringify({...fem.examples.bar,note:'é'.repeat(100)});

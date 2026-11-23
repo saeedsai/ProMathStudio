@@ -54,7 +54,11 @@
     const valid = value => Number.isSafeInteger(value) && value >= 0 && value <= MAX_IMPORT_BYTES;
     if (!valid(declaredSize)) throw Error('Model JSON exceeds 1 MiB.');
     if (arguments.length > 1) {
-      if (!valid(actualByteLength)) throw Error('Model JSON exceeds 1 MiB.');
+      // Distinguish a broken/invalid read result from a legitimate file over the size budget.
+      if (!Number.isSafeInteger(actualByteLength) || actualByteLength < 0) {
+        throw Error('Model JSON read returned an invalid byte length.');
+      }
+      if (actualByteLength > MAX_IMPORT_BYTES) throw Error('Model JSON exceeds 1 MiB.');
       if (actualByteLength !== declaredSize) {
         throw Error(`Model JSON file size does not match the bytes read. (expected ${declaredSize} bytes, received ${actualByteLength} bytes).`);
       }

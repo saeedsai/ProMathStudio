@@ -1,3 +1,11 @@
+## 2026-11-23 — Clarify Truss read-byte diagnostics and verify actual BOM at the 1 MiB boundary
+
+- validateImportByteLength now distinguishes invalid actual byte-length metadata from a valid payload exceeding 1 MiB; existing exact mismatch diagnostics remain unchanged.
+- Added Node regressions for undefined/null/negative/fractional/non-finite/unsafe actual lengths and safe over-limit bytes.
+- Added a real Chromium File-input regression for EF BB BF + JSON at exactly 1 MiB, proving BOM bytes count in File.size and ArrayBuffer.byteLength; a 1 MiB+1 file is rejected before reading and preserves the active model/results.
+- Added browser rollback coverage for a malformed read result with no byteLength. Desktop and 390px coverage remain mandatory.
+- Parent exact-head Push/PR Quality passed 218/218 steps. New candidate requires fresh exact-head Quality; not released.
+
 ## 2026-11-23 — Centralize strict UTF-8 decoding for Truss model imports
 
 - Added the FEM-kernel `decodeImportBytes` boundary for ArrayBuffer/typed-array input, shared 1 MiB enforcement and fatal UTF-8 decoding; counted BOM bytes remain visible to the canonical JSON importer.

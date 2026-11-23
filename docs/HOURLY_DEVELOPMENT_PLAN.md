@@ -1,3 +1,28 @@
+## 2026-11-23 — TRUSS-IMPORT-BOM-AND-EXACT-LIMIT-BOUNDARY (implemented on dev; exact-head QA pending)
+
+Starting refs: dev `dc8fb5d8fbdef4efd22ee0fa0f67b399f59ec6a0`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, Structural Truss source/tests/contract, PR #189/reviews, current refs, Actions and main Pages evidence.
+
+**P0 CI baseline:** exact-head Push Quality [#45191000845](https://github.com/saeedsai/ProMathStudio/actions/runs/45191000845) and PR Quality [#45191016056](https://github.com/saeedsai/ProMathStudio/actions/runs/45191016056) both completed **218/218 steps**, zero failures and zero skipped steps on `dc8fb5d8fbdef4efd22ee0fa0f67b399f59ec6a0`. Spreadsheet 78–80 and Truss/FEM 212/214/215 all passed. No failing exact-head CI blocker remained at the start of this iteration.
+
+**P1 byte-read diagnostics:** `validateImportByteLength` now distinguishes missing, negative, fractional, non-finite and unsafe actual byte counts from a valid payload above the 1 MiB limit. Invalid read metadata reports `Model JSON read returned an invalid byte length.`; a safe over-limit read remains `Model JSON exceeds 1 MiB.`; shorter/longer valid lengths retain exact expected/received diagnostics. This avoids misclassifying a broken File adapter as an oversized document.
+
+**Regressions:** Node tests cover invalid actual lengths and a valid over-limit actual count. Chromium uploads a real BOM-prefixed JSON File padded with legal trailing whitespace to exactly 1 MiB; it captures the EF BB BF prefix and asserts declared `File.size` and actual `ArrayBuffer.byteLength` both equal 1,048,576, then checks successful import and unchanged model/solution. A one-byte-over File must be rejected before its read method is called and preserve the full model/solution snapshot. A malformed read result without `byteLength` must produce the distinct diagnostic and preserve state. Both browser scenarios run at 1280px and 390px.
+
+Updated FEM kernel, Node/browser regressions, Structural Truss contract, living plan, execution ledger and changelog in one atomic commit. The Truss page uses adjacent JS assets; no standalone root `index.html` synchronization applies.
+
+**Validation limits:** local `git ls-remote` failed once with `Could not resolve host: github.com`; stopped retrying and used the connected GitHub integration. The full local Node/Playwright suites are unavailable without a checkout. A focused isolated Node check is run for the changed byte-length classifications; the new browser cases require exact-head Actions. The feature is **Implemented on dev / In QA**, not released.
+
+PR #189 remains open with head on dev and base main, and no independent reviews. Branch listing reports three refs (`dev`, `main`, inherited `claude/sharp-babbage-pqhvgr`), all `protected:false`; no unsafe branch deletion or merge was attempted. Main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Latest main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) succeeded on November 3, 2026; no newer main deployment was found. No production release is claimed.
+
+The October 26 historical baseline remains **166 gaps / 95 partial**; no historical inventory count or status was reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Both Push and PR Quality green on this new dev SHA, all 218 steps, zero failures/skips. Verify the invalid-byte-length Node/browser cases, actual BOM + exact 1 MiB success, 1 MiB+1 pre-read rejection, and retain spreadsheet 78–80 plus Truss/FEM 212/214/215.
+2. **P1 — Longer-than-declared read rollback.** Add a real File whose read returns one extra byte while remaining under 1 MiB; assert exact expected/received diagnostics, no model/result mutation, and busy-state reset. Keep the existing short-read case.
+3. **P1 — Latest-request concurrency matrix.** Exercise stale success, stale rejection, cancellation by genuine model edit, and a newer rejected request while an older success remains pending; only the current request may update model/status/busy state.
+4. **P1 — Spreadsheet formula-reference edge audit.** Cover mixed absolute/relative anchors, quoted sheet names, reversed ranges, multiple escaped quotes and row/column boundaries; verify logical-cell identity, transactional rejection of unsafe sort/delete and standalone `index.html` parity.
+5. **P0 — Release governance and promotion.** Obtain an eligible independent PR #189 review and authorized verification of enforceable main protection/required checks. Only after exact-head checks and reviews pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted critical paths.
+
 ## 2026-11-23 — TRUSS-STRICT-UTF8-IMPORT-DECODER (implemented on dev; exact-head QA pending)
 
 Started from verified refs: dev `0713c2b02edd4300aa3803d2817a4bb3f525c2d7`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, Structural Truss source/tests/contract, PR #189/reviews, current branch refs, exact-head Actions and main Quality/Pages evidence.

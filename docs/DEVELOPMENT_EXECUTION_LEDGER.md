@@ -1,3 +1,17 @@
+## 2026-11-23 — Truss import byte-length classification and actual BOM boundary
+
+- Starting exact refs: dev `dc8fb5d8fbdef4efd22ee0fa0f67b399f59ec6a0`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`.
+- Parent exact-head Push/PR Quality [#45191000845](https://github.com/saeedsai/ProMathStudio/actions/runs/45191000845) and [#45191016056](https://github.com/saeedsai/ProMathStudio/actions/runs/45191016056) both passed 218/218 steps with zero failed/skipped steps; spreadsheet 78–80 and Truss/FEM 212/214/215 passed.
+- Source change: distinguish invalid actual byte-length metadata from a valid actual payload above 1 MiB; the former reports “Model JSON read returned an invalid byte length.”, while over-limit and short/long mismatch diagnostics remain explicit.
+- Node regression: undefined/null/negative/fractional/non-finite/unsafe actual lengths are classified as invalid metadata; safe over-limit actual length remains an over-limit error.
+- Chromium regression: actual EF BB BF BOM + valid JSON + whitespace exactly 1 MiB; assert File.size and ArrayBuffer length, successful import and full state preservation. A 1 MiB+1 File must fail before reading and preserve the model/results. A malformed read object with no byteLength gets the distinct diagnostic and rollback. Runs at 1280px and 390px.
+- Changed atomically: FEM kernel, Node test, Truss FEM Chromium smoke, Structural Truss contract, hourly plan, execution ledger and changelog. No root index.html bundle change applies to the adjacent-asset Truss page.
+- Local git access failed once with DNS resolution error; no repeated network retries. Full local Node/Playwright not run because no checkout; focused isolated Node behavior check and exact-head GitHub Actions are used.
+- PR #189 remains open/unreviewed; main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`; branches report unprotected. Main Quality and Pages remain successful on November 3. No release/deployment claim. Frozen historical baseline remains 166 gaps / 95 partial.
+- Candidate commit SHA is the new single dev HEAD created with this atomic change and is reported in the run result.
+
+**NEXT FIVE:** (1) both exact-head Quality workflows green, all 218 steps and new BOM/exact-limit/oversize/invalid-length browser tests; (2) add longer-than-declared under-limit read rollback while retaining short-read coverage; (3) complete latest-request stale success/rejection and edit-cancellation matrix; (4) spreadsheet mixed/absolute formula references, quoted sheets, reversed ranges, escaped quotes and boundary tests with bundle parity; (5) independent PR #189 review plus enforceable main protection, then ordinary PR promotion and exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-23 — Truss strict UTF-8 byte decoding and rollback regression
 
 - Starting exact refs: dev `0713c2b02edd4300aa3803d2817a4bb3f525c2d7`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`.

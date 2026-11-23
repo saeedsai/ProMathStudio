@@ -530,6 +530,83 @@ def main():
             assert '0.02 mm' in page.locator('#disp-card').inner_text()
             assert page.locator('#status').get_attribute('aria-busy') == 'false'
 
+            # A malformed File adapter result has a distinct diagnostic and cannot replace the model.
+            before_invalid_length = import_state_snapshot()
+            page.evaluate("""() => {
+                const nativeRead = File.prototype.arrayBuffer;
+                window.__restoreInvalidLengthRead = () => { File.prototype.arrayBuffer = nativeRead; };
+                File.prototype.arrayBuffer = function() {
+                    if (this.name === 'invalid-byte-length.json') return Promise.resolve({});
+                    return nativeRead.call(this);
+                };
+            }""")
+            page.locator('#import-model').set_input_files({
+                'name': 'invalid-byte-length.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(slow_model).encode('utf-8')
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent ===
+                'Import failed: Model JSON read returned an invalid byte length.'""")
+            page.evaluate('window.__restoreInvalidLengthRead()')
+            assert import_state_snapshot() == before_invalid_length
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+
+            # A real UTF-8 BOM is part of File.size; accept it at the exact 1 MiB boundary.
+            exact_limit = 1024 * 1024
+            bom_prefix = b'\\xef\\xbb\\xbf' + json.dumps(slow_model, separators=(',', ':')).encode('utf-8')
+            assert len(bom_prefix) < exact_limit
+            bom_exact_payload = bom_prefix + b' ' * (exact_limit - len(bom_prefix))
+            before_bom = import_state_snapshot()
+            page.evaluate("""() => {
+                const nativeRead = File.prototype.arrayBuffer;
+                window.__bomRead = null;
+                File.prototype.arrayBuffer = function() {
+                    if (this.name !== 'bom-exact-boundary.json') return nativeRead.call(this);
+                    return nativeRead.call(this).then(bytes => {
+                        window.__bomRead = {
+                            declared: this.size,
+                            actual: bytes.byteLength,
+                            prefix: Array.from(new Uint8Array(bytes).slice(0, 3))
+                        };
+                        File.prototype.arrayBuffer = nativeRead;
+                        return bytes;
+                    });
+                };
+            }""")
+            page.locator('#import-model').set_input_files({
+                'name': 'bom-exact-boundary.json', 'mimeType': 'application/json',
+                'buffer': bom_exact_payload
+            })
+            page.wait_for_function("""() => window.__bomRead !== null &&
+                document.querySelector('#status').textContent.includes('Studio units retained from file.')""")
+            assert page.evaluate('window.__bomRead') == {
+                'declared': exact_limit, 'actual': exact_limit, 'prefix': [239, 187, 191]
+            }
+            assert import_state_snapshot() == before_bom
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+
+            # One byte beyond the limit is rejected from immutable File.size before reading.
+            over_limit_payload = bom_exact_payload + b' '
+            before_over_limit = import_state_snapshot()
+            page.evaluate("""() => {
+                const nativeRead = File.prototype.arrayBuffer;
+                window.__oversizeReadStarted = false;
+                window.__restoreOversizeRead = () => { File.prototype.arrayBuffer = nativeRead; };
+                File.prototype.arrayBuffer = function() {
+                    if (this.name === 'over-limit.json') window.__oversizeReadStarted = true;
+                    return nativeRead.call(this);
+                };
+            }""")
+            page.locator('#import-model').set_input_files({
+                'name': 'over-limit.json', 'mimeType': 'application/json',
+                'buffer': over_limit_payload
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent ===
+                'Import failed: Model JSON exceeds 1 MiB.'""")
+            assert page.evaluate('window.__oversizeReadStarted') is False
+            page.evaluate('window.__restoreOversizeRead()')
+            assert import_state_snapshot() == before_over_limit
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+
             # A newer file selection must win even when an older read resolves or rejects later.
             def race_model(prefix, length=2.0, load=1.0):
                 return {

@@ -1,3 +1,13 @@
+## 2026-11-23 — TRUSS-IMPORT-BYTE-DIAGNOSTIC-UNITS-FOLLOW-UP (implemented on dev; exact-head Quality pending)
+
+Follow-up from dev a19c3d44ea4e9284469b6afc86067ffd0223a136; main remains 70fc483cb1cec3d2372d37484e4a8ef7942343da. The new a19 exact-head Push/PR runs #45086780436 and #45086786266 were still running when inspected. A focused local assertion caught one more formatting mismatch before treating that candidate as certified: the diagnostic included the received byte count but omitted the word bytes after the number, while the browser regression requires both declared and returned quantities to carry the unit.
+
+Added the missing bytes unit to the production diagnostic and strengthened the Chromium regression to require the complete terminal suffix (expected N bytes, received M bytes). as well as the stable prefix. This keeps the diagnostic self-contained and ensures the test checks both values and their units. No import validation, byte limits, parser behavior, model rollback or FEM calculations changed.
+
+Updated the source, browser test, plan, ledger and changelog atomically on dev. The Structural Truss contract already specifies both values in bytes and remains consistent. The local repository checkout is absent; full local Playwright/Node commands remain unavailable. The a19 workflows are not counted as certification; fresh exact-head Push and PR Quality must pass on this follow-up SHA. Historical inventory remains 166 gaps / 95 partial; main and production Pages remain unchanged.
+
+**NEXT FIVE:** (1) both exact-head Push/PR Quality green on the follow-up SHA, including exact diagnostic prefix/suffix, 59 FEM Node tests, Truss Studio, CSV/SVG and 390px; (2) latest-file success/failure ordering race; (3) JSON density/I/K, malformed UTF-8/BOM, 1 MiB and failed-read rollback boundaries; (4) selected-member isolation and CSV/SVG export correctness; (5) eligible independent PR #189 review and verified main protection, then ordinary PR promotion and exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-23 — TRUSS-IMPORT-BYTE-DIAGNOSTIC-PREFIX-CI-FIX (implemented on dev; exact-head Quality pending)
 
 Started from dev `d805f8694652ac2f763288cc69ab00dafdf789b2` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 feature inventory, Structural Truss contract/source/tests, PR #189/reviews, branch refs, exact-head Actions and Pages evidence.

@@ -1,3 +1,9 @@
+## 2026-11-23 — Truss byte-count unit follow-up (dev; exact-head QA pending)
+
+- Added the missing bytes unit after the received count in the production mismatch diagnostic.
+- Strengthened the Chromium regression to require the exact terminal (expected N bytes, received M bytes). suffix and stable diagnostic prefix.
+- The a19 exact-head Push/PR workflows were still running; fresh final-head Quality is required. Not released.
+
 ## 2026-11-23 — Truss byte-mismatch diagnostic prefix CI fix (dev; exact-head QA pending)
 
 - Diagnosed Push Quality #45081246742 and PR Quality #45081250517: both passed 59/59 FEM Node tests but failed at Truss browser step 215 because the wait expected the stable diagnostic prefix to end with a period before the detailed byte counts.

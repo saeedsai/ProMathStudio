@@ -324,7 +324,7 @@
   }
   function isCurrentImport(request){return request===importRequest&&importPending;}
   function finishCurrentImport(request){if(!isCurrentImport(request))return false;importPending=false;return true;}
-  function cancelPendingImport(){if(!importPending)return;importRequest++;importPending=false;status(IMPORT_CANCELLED_STATUS);}
+  function cancelPendingImport(){if(!importPending)return false;importRequest++;importPending=false;status(IMPORT_CANCELLED_STATUS);return true;}
   function invalidate(preserveImportRequest=null){if(preserveImportRequest===null||preserveImportRequest!==importRequest||!importPending)cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function dimensionLabel(name,value,attrs){const formatted=fmt(value,4);return svgNode('text',{...attrs,'data-dimension-label':name,role:'text','aria-label':'Section dimension '+name+': '+formatted+' millimetres'},name+'='+formatted+' mm');}
@@ -422,7 +422,18 @@
     $('verification').textContent='Force balance: ΣFx = '+fmt(result.forceBalance.x)+' N, ΣFy = '+fmt(result.forceBalance.y)+' N. Max free DOF residual / load scale = '+result.residual.toExponential(3)+'. Elastic strain energy = '+fmt(result.elasticEnergy)+' J. Normalized energy identity error = '+result.energyError.toExponential(3)+'.';
     draw();status('Analysis complete · '+result.nodes.length+' joints, '+result.members.length+' members.');
   }
-  function analyze(successNotice=''){cancelPendingImport();try{const model=readModel();showResult(fem.solve(model),model);if(typeof successNotice==='string'&&successNotice)status($('status').textContent+' · '+successNotice);}catch(error){invalidate();status(error.message,true);}}
+  function analyze(successNotice=''){
+    const cancelledImport=cancelPendingImport();
+    try {
+      const model=readModel();
+      showResult(fem.solve(model),model);
+      if(typeof successNotice==='string'&&successNotice)status($('status').textContent+' · '+successNotice);
+      if(cancelledImport)status($('status').textContent+' · Pending import cancelled; analysis used the current model.');
+    } catch(error) {
+      invalidate();
+      status((cancelledImport?'Pending import cancelled; ':'')+error.message,true);
+    }
+  }
   function download(name,content,mime){const link=el('a',null);const url=URL.createObjectURL(new Blob([content],{type:mime}));link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
   function downloadCsv(name,content,mime){
     // Canonicalize records to CRLF, terminate non-empty CSV with CRLF, and emit one leading UTF-8 BOM.

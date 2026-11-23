@@ -1,3 +1,30 @@
+## 2026-11-23 — TRUSS-IMPORT-RACE-SETTLEMENT-AND-ANALYZE-CANCELLATION (implemented on dev; exact-head QA pending)
+
+Starting refs: dev `fefbd52bb49fe17b16714fe657dd4fe0c4f73e52`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, Structural Truss source/tests/contract, PR #189/reviews, current refs, exact-head Actions and main Quality/Pages evidence.
+
+**P0 CI baseline:** Exact-head Push Quality [#45235262933](https://github.com/saeedsai/ProMathStudio/actions/runs/45235262933) and PR Quality [#45235278067](https://github.com/saeedsai/ProMathStudio/actions/runs/45235278067) both passed all **218/218 steps**, with zero failures and zero skipped steps on `fefbd52bb49fe17b16714fe657dd4fe0c4f73e52`. Truss Studio 212, FEM analytical 214, FEM browser/mobile 215 and spreadsheet 78–80 were successful. No failing exact-head CI blocker remained at the start of this run.
+
+**P1 concurrency completion:** The existing import token correctly makes stale requests inert, but the committed browser matrix did not yet cover a newer selected file rejected while an older File read remained pending. Added a real File race: keep the older read unresolved, select malformed JSON as the newer file, wait for the newer import error and settled busy state, then release the older successful bytes. The complete active model/solved snapshot, newer error text and `aria-busy=false` must remain unchanged.
+
+**Source/UI improvement:** `cancelPendingImport()` now reports whether it cancelled a live request. Clicking Analyze uses that result to preserve an explicit status suffix — `Pending import cancelled; analysis used the current model.` — after a successful solve; if the current model cannot be solved, the cancellation context is retained in the error status. Normal Analyze behavior and import completion (which has already settled its request) remain unchanged.
+
+**Analyze cancellation regressions:** Added two real delayed-File browser cases. After Analyze cancels the pending request and solves the currently displayed model, release a late successful read in one case and reject the late read in another. Both must leave the complete input/solution snapshot, analysis-plus-cancellation status and settled busy state unchanged. The newer-rejection and Analyze-cancellation cases run at both existing 1280px and 390px viewports. Existing older-success/newer-success, older-rejection/newer-success, UTF-8/BOM/1 MiB, short/long-read, rollback and export checks remain intact.
+
+Updated the FEM UI, Chromium regression, Structural Truss contract, this plan, execution ledger and changelog in one atomic dev commit. Truss Studio uses adjacent JS assets; no root `index.html` synchronization applies.
+
+**Validation limits:** The bounded local Git check confirmed the execution workspace has no repository checkout; no repeated DNS/network retry was made. Full local Node/Chromium execution is therefore unavailable. The changed UI and real File races require exact-head GitHub Actions. Candidate remains **Implemented on dev / In QA**, not released.
+
+PR #189 remains open from dev to main with zero independent review submissions. Main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Latest main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) passed 193/193 steps; GitHub Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) passed build 5/5, deploy 3/3 and report 3/3 on November 3. No newer main deployment was found. The branch-protection read remains unavailable to this integration (HTTP 403); repository rulesets are empty. No merge or governance bypass was attempted. The inherited `claude/sharp-babbage-pqhvgr` branch remains preserved because its unique commits are not proven contained in main.
+
+The October 26 historical inventory remains frozen at **166 gaps / 95 partial**; no historical count or status was reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Both Push and PR workflows must pass on the new dev SHA with all 218 required steps successful and zero failures/skips. Verify Truss Studio 212, FEM analytical 214, FEM browser/mobile 215, spreadsheet 78–80, and all five import-race cases at 1280px/390px.
+2. **P0 — Release governance and ordinary promotion.** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required-check configuration. Only after exact-head CI and review gates pass, merge via the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted critical paths.
+3. **P1 — Spreadsheet formula-reference edge audit.** Cover mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries. Verify logical-cell identity, transactional refusal of unsafe noncontiguous sort/delete, and `src/data-tables.js` parity with the generated `index.html` module.
+4. **P1 — Section-helper browser edge coverage.** At desktop and 390px, apply the extreme-aspect L-angle and verify visible positive I1/I2, selected-axis application to exactly one member, unchanged E/density/K, and no partial mutation on invalid dimensions; retain independent references for all seven shapes.
+5. **P1 — Source-backed Engineering Toolbox expansion.** Select one approved unfinished canonical tool from the five approved toolbox catalogs; reuse the shared solver/units/plot pipeline, add a stable tool ID and reference/negative/browser-mobile regressions, and retain truthful planned/implemented labels without placeholder actions.
+
 ## 2026-11-23 — TRUSS-L-ANGLE-STABLE-PRINCIPAL-MOMENT (implemented on dev; exact-head QA pending)
 
 Starting refs: dev c12e41e5c340a2ebcb2e0c6c3e311071b67db61b, main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read root AGENTS.md, this plan, the frozen October 26 inventory, Truss FEM source/tests/contract, PR #189 and reviews, current refs, exact-head Actions and main Quality/Pages evidence.

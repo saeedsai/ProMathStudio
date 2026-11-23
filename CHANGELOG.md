@@ -1,3 +1,9 @@
+## 2026-11-23 — Truss import race settlement and Analyze cancellation (dev; exact-head QA pending)
+
+- Analyze now explicitly reports when it cancels a pending JSON import and confirms that the current displayed model was analyzed; cancellation context is retained on solve failure.
+- Added Chromium regressions for an older pending read released after a newer malformed-file rejection, and for late success/rejection after Analyze cancellation. Assert unchanged complete model/solution snapshots, status and settled busy state at desktop and 390px.
+- Preserved the existing stale-success/stale-rejection, strict UTF-8, BOM/1 MiB, short/long-read, rollback and export regressions. Requires fresh exact-head Push/PR Quality; not released.
+
 ## 2026-11-23 — Truss L-angle stable principal moments (dev; exact-head QA pending)
 
 - Fixed avoidable floating-point cancellation in L-angle principal inertia: normalize the inertia tensor and calculate the minor eigenvalue as det(I)/I1 rather than mean − radius.

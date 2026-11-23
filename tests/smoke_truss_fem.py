@@ -745,6 +745,72 @@ def main():
             assert page.locator('#status').inner_text() == latest_failure_status
             assert page.locator('#disp-card').inner_text() == latest_failure_result
 
+            # A newer rejected selection settles the current request; a previously pending
+            # older success must not replace its diagnostic or clear its settled busy state.
+            start_delayed_import('older-before-rejection.json',
+                                 race_model('OLD-BEFORE-REJECTION', length=7),
+                                 '__staleAfterRejectedSelection')
+            before_newer_rejection = import_state_snapshot()
+            page.locator('#import-model').set_input_files({
+                'name': 'latest-invalid.json', 'mimeType': 'application/json',
+                'buffer': b'{'
+            })
+            page.wait_for_function("""() => {
+                const status = document.querySelector('#status');
+                return status?.classList.contains('error') &&
+                       status.textContent.startsWith('Import failed:');
+            }""")
+            newer_rejection_status = page.locator('#status').inner_text()
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+            assert import_state_snapshot() == before_newer_rejection
+            page.evaluate('window.__staleAfterRejectedSelection.release()')
+            page.wait_for_function('window.__staleAfterRejectedSelection.settled === true')
+            page.wait_for_timeout(20)
+            assert import_state_snapshot() == before_newer_rejection
+            assert page.locator('#status').inner_text() == newer_rejection_status
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+
+            # Analyze explicitly cancels a pending import and keeps that decision visible.
+            # A late successful read must not replace the current model or analysis status.
+            start_delayed_import('cancelled-by-analyze-success.json',
+                                 race_model('CANCELLED-BY-ANALYZE-SUCCESS', length=8),
+                                 '__staleAfterAnalyzeSuccess')
+            page.get_by_role('button', name='Analyze truss').click()
+            page.wait_for_function("""() => {
+                const status = document.querySelector('#status');
+                return status?.textContent.includes('Analysis complete') &&
+                       status.textContent.includes('Pending import cancelled; analysis used the current model.');
+            }""")
+            analyze_success_status = page.locator('#status').inner_text()
+            analyze_success_snapshot = import_state_snapshot()
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+            page.evaluate('window.__staleAfterAnalyzeSuccess.release()')
+            page.wait_for_function('window.__staleAfterAnalyzeSuccess.settled === true')
+            page.wait_for_timeout(20)
+            assert import_state_snapshot() == analyze_success_snapshot
+            assert page.locator('#status').inner_text() == analyze_success_status
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+
+            # The same cancellation guard must ignore a late rejected read.
+            start_delayed_import('cancelled-by-analyze-rejection.json',
+                                 race_model('CANCELLED-BY-ANALYZE-REJECTION', length=9),
+                                 '__staleAfterAnalyzeRejection')
+            page.get_by_role('button', name='Analyze truss').click()
+            page.wait_for_function("""() => {
+                const status = document.querySelector('#status');
+                return status?.textContent.includes('Analysis complete') &&
+                       status.textContent.includes('Pending import cancelled; analysis used the current model.');
+            }""")
+            analyze_rejection_status = page.locator('#status').inner_text()
+            analyze_rejection_snapshot = import_state_snapshot()
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+            page.evaluate("window.__staleAfterAnalyzeRejection.reject(new Error('deliberately stale Analyze read failure'))")
+            page.wait_for_function('window.__staleAfterAnalyzeRejection.settled === true')
+            page.wait_for_timeout(20)
+            assert import_state_snapshot() == analyze_rejection_snapshot
+            assert page.locator('#status').inner_text() == analyze_rejection_status
+            assert page.locator('#status').get_attribute('aria-busy') == 'false'
+
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
             assert not errors, errors

@@ -1,3 +1,15 @@
+## 2026-11-23 — TRUSS-IMPORT-RACE-SETTLEMENT-AND-ANALYZE-CANCELLATION
+
+- Starting exact refs: dev `fefbd52bb49fe17b16714fe657dd4fe0c4f73e52`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; PR #189 remained open with zero independent reviews.
+- Starting exact-head Push Quality [#45235262933](https://github.com/saeedsai/ProMathStudio/actions/runs/45235262933) and PR Quality [#45235278067](https://github.com/saeedsai/ProMathStudio/actions/runs/45235278067) both passed **218/218 steps**, zero failures/skips. Truss 212, FEM 214/215 and spreadsheet 78–80 passed.
+- Source change: `cancelPendingImport()` now returns whether a live import was cancelled. Analyze preserves a clear `Pending import cancelled; analysis used the current model.` notice after successful analysis and retains cancellation context if solving fails.
+- Browser regressions: (1) hold an older File read pending, select newer malformed JSON, then release the old success; assert the newer error, complete input/solution snapshot and `aria-busy=false` remain unchanged; (2) Analyze cancels pending import, then a late success is ignored; (3) repeat with a late rejection. Existing older-success/newer-success and older-rejection/newer-success cases remain. New cases run at 1280px and 390px.
+- Updated `tools/truss-fem-ui.js`, `tests/smoke_truss_fem.py`, Structural Truss contract, living plan, ledger and changelog in one atomic dev commit. No root index bundle sync applies to Truss Studio adjacent JS assets.
+- Bounded local check confirmed there is no Git checkout; full local Node/Playwright execution unavailable. Exact-head GitHub Push/PR Quality must execute the new real-browser tests. Candidate is implemented on dev, not released.
+- Main Quality #41730966059 passed 193/193 and Pages #41730962844 passed build/deploy/report (5/5, 3/3, 3/3) on main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, November 3. No newer deployment found.
+- PR #189 remains open/unreviewed. Branch-protection read remains HTTP 403; rulesets query empty. No merge/bypass. Inherited unmerged branch preserved. Frozen historical inventory unchanged: 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) exact-head Push/PR Quality green on the new SHA, all 218 checks including race regressions at desktop/mobile; (2) independent PR #189 review plus enforceable main protection, then ordinary PR merge and exact-main Quality/Pages verification; (3) spreadsheet formula references and transactional structural edits with offline bundle parity; (4) seven-shape section-helper reference/axis/rollback browser coverage including extreme L-angle; (5) one approved Engineering Toolbox feature reusing canonical solver, units and plots with numerical/browser regression.
 ## 2026-11-23 — TRUSS-L-ANGLE-STABLE-PRINCIPAL-MOMENT
 
 - Starting refs: dev c12e41e5c340a2ebcb2e0c6c3e311071b67db61b; main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 head/base matched, zero independent reviews.

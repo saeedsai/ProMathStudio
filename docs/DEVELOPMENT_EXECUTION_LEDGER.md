@@ -1,3 +1,22 @@
+## 2026-11-23 — TRUSS-IMPORT-LATEST-REQUEST-ORDERING (implemented on dev; exact-head Quality pending)
+
+Starting refs: dev `397c349d981157343b0665443c6227cd74429087`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Verified exact-head Push Quality [#45087003921](https://github.com/saeedsai/ProMathStudio/actions/runs/45087003921) and PR Quality [#45087008879](https://github.com/saeedsai/ProMathStudio/actions/runs/45087008879) both completed successfully on the starting SHA. The successful Quality job includes Truss Studio browser step 212, FEM Node reference step 214 and Truss UI/import/export/mobile browser step 215. There was no existing failing exact-head workflow to repair.
+
+Hardened `tools/truss-fem-ui.js` by centralizing request validity and settlement. A request is current only while its monotonic token matches and its import remains pending. The same helper now guards post-read/post-decode continuation and prevents stale success/error handlers from settling or changing UI state. The current request alone can clear pending state; edit cancellation retains its token invalidation behavior.
+
+Added a real Chromium regression in `tests/smoke_truss_fem.py`: an older delayed valid file resolves only after a newer valid file has imported and solved, and an older delayed read rejects only after a newer valid import has completed. Both stale completions must leave the latest joint/member IDs, exact status text, solved displacement and `aria-busy=false` unchanged. The test uses per-instance File reads and preserves the existing byte-integrity, BOM, cancellation and analytical-reference checks.
+
+Updated `docs/STRUCTURAL_TRUSS_FEM.md`, this living plan, this ledger and `CHANGELOG.md` in the same atomic source/test/docs commit. The standalone Truss companion page loads the adjacent JavaScript assets; no root bundle synchronization was needed. Historical October 26 inventory remains frozen at **166 gaps / 95 partial**. No merge/deployment was attempted: PR #189 has no independent review, branch-protection API reads are forbidden to this integration (HTTP 403), and the repository rulesets endpoint returned an empty list.
+
+Validation: GitHub source/test transformation anchors and required new browser scenario anchors were checked before writing. The local checkout is absent, so local Playwright/Node suite execution is unavailable; exact-head Push/PR Quality on the new commit remains the full browser/unit acceptance gate. Main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`; latest known main Quality and Pages evidence is November 3, 2026 (runs #41730966059 and #41730962844), not a new deployment.
+
+**NEXT FIVE:**
+1. **P0 — New exact-head Push and PR Quality green**, including Truss steps 212/214/215; both stale-read ordering scenarios, edit cancellation, byte-count mismatch, all FEM Node tests, CSV/SVG, responsive and console-error checks.
+2. **P1 — JSON boundary audit:** null/blank/zero density, independent I-only/K-only in both unit systems, malformed UTF-8, real BOM, exact/over-1-MiB and rollback.
+3. **P1 — Section application isolation/export:** selected member only; preserve all other members/E/density/K; validate CSV and SVG output contracts.
+4. **P0 — Spreadsheet formula-reference rewriting:** direct relative/absolute/mixed-reference tests across insert/delete/sort and transactional rollback for unsafe cases.
+5. **Release governance:** independent eligible PR #189 review and authorized main-protection/required-check verification; ordinary PR merge and exact-main Quality/Pages only after all gates.
+
 ## 2026-11-22 — TRUSS-IMPORT-BOM-FIXTURE-AND-BYTE-DIAGNOSTICS (implemented on dev; exact-head Quality pending)
 
 Started from exact refs dev `c21e281ab1409d30f24f90310eda98ef4ac8554c` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, engineering architecture, Structural Truss contract, importer/source tests, PR #189/reviews, branch refs, latest Actions, rulesets and main Pages evidence.

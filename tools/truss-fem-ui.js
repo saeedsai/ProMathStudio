@@ -307,6 +307,8 @@
       $('section-result').textContent='Not applied: '+error.message;
     }
   }
+  function isCurrentImport(request){return request===importRequest&&importPending;}
+  function finishCurrentImport(request){if(!isCurrentImport(request))return false;importPending=false;return true;}
   function cancelPendingImport(){if(!importPending)return;importRequest++;importPending=false;status(IMPORT_CANCELLED_STATUS);}
   function invalidate(){cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
@@ -437,7 +439,7 @@
       if(!Number.isSafeInteger(declaredSize)||declaredSize<0||declaredSize>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
       const bytes=await file.arrayBuffer();
       // A newer selection supersedes a slower earlier read; stale data/errors must not win.
-      if(request!==importRequest)return;
+      if(!isCurrentImport(request))return;
       // Enforce the same budget against the actual payload, not only File.size metadata.
       if(!Number.isSafeInteger(bytes?.byteLength)||bytes.byteLength>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
       if(bytes.byteLength!==declaredSize)throw Error(`Model JSON file size does not match the bytes read. (expected ${declaredSize} bytes, received ${bytes.byteLength} bytes).`);
@@ -448,12 +450,13 @@
       } catch (_) {
         throw Error('Model JSON must be valid UTF-8.');
       }
-      if(request!==importRequest)return;
+      if(!isCurrentImport(request))return;
       const imported=fem.importJSON(text);
       const inputUnits=fem.describeUnits(imported);
       const model=fem.fromLegacy(imported);
-      importPending=false;
+      if(!isCurrentImport(request))return;
       renderModel(model);
+      if(!finishCurrentImport(request))return;
       const unitNotice=inputUnits.system==='legacy-si'
         ? 'Legacy SI input converted to Studio units.'
         : 'Studio units retained from file.';
@@ -461,8 +464,7 @@
         ', I '+inputUnits.secondMoment+', K '+inputUnits.effectiveLengthFactor+'.';
       analyze(unitNotice+' '+optionalUnitsNotice);
     } catch(err) {
-      if(request!==importRequest)return;
-      importPending=false;
+      if(!finishCurrentImport(request))return;
       status('Import failed: '+err.message,true);
     }
   });

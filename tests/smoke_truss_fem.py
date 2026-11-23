@@ -394,6 +394,90 @@ def main():
             assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
             assert '0.015 mm' in page.locator('#disp-card').inner_text()
 
+            # A newer file selection must win even when an older read resolves or rejects later.
+            def race_model(prefix, length=2.0, load=1.0):
+                return {
+                    'nodes': [
+                        {'id': prefix + '-A', 'x': 0, 'y': 0, 'fixX': True, 'fixY': True, 'fx': 0, 'fy': 0},
+                        {'id': prefix + '-B', 'x': length, 'y': 0, 'fixX': False, 'fixY': True, 'fx': load, 'fy': 0}
+                    ],
+                    'members': [{'id': prefix + '-AB', 'a': prefix + '-A', 'b': prefix + '-B', 'E': 200, 'area': 1000}]
+                }
+
+            def start_delayed_import(name, model, key):
+                page.evaluate("""({name, payload, key}) => {
+                    const file = new File([payload], name, {type:'application/json'});
+                    const nativeRead = Blob.prototype.arrayBuffer;
+                    const pending = window[key] = {settled:false, release:null, reject:null};
+                    Object.defineProperty(file, 'arrayBuffer', {
+                        configurable:true,
+                        value:function() {
+                            const target = this;
+                            return new Promise((resolve, reject) => {
+                                pending.release = () => nativeRead.call(target).then(bytes => {
+                                    pending.settled = true;
+                                    resolve(bytes);
+                                }, error => {
+                                    pending.settled = true;
+                                    reject(error);
+                                });
+                                pending.reject = error => {
+                                    pending.settled = true;
+                                    reject(error);
+                                };
+                            });
+                        }
+                    });
+                    const transfer = new DataTransfer();
+                    transfer.items.add(file);
+                    const input = document.querySelector('#import-model');
+                    input.files = transfer.files;
+                    input.dispatchEvent(new Event('change', {bubbles:true}));
+                }""", {'name': name, 'payload': json.dumps(model), 'key': key})
+                page.wait_for_function(f"window.{key}.release !== null && window.{key}.reject !== null")
+
+            def assert_race_model(prefix):
+                assert page.locator('#nodes tr').nth(0).locator('input[data-field="id"]').input_value() == prefix + '-A'
+                assert page.locator('#nodes tr').nth(1).locator('input[data-field="id"]').input_value() == prefix + '-B'
+                assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == prefix + '-AB'
+                assert 'Analysis complete' in page.locator('#status').inner_text()
+                assert page.locator('#status').get_attribute('aria-busy') == 'false'
+                assert page.locator('#disp-card').inner_text().strip()
+
+            # Older successful read after a newer successful import is ignored.
+            start_delayed_import('older-success.json', race_model('OLD-SUCCESS', length=5), '__staleSuccess')
+            page.locator('#import-model').set_input_files({
+                'name': 'latest-success.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(race_model('LATEST-SUCCESS')).encode('utf-8')
+            })
+            page.wait_for_function("document.querySelector('#status')?.textContent.includes('Analysis complete')")
+            assert_race_model('LATEST-SUCCESS')
+            latest_success_status = page.locator('#status').inner_text()
+            latest_success_result = page.locator('#disp-card').inner_text()
+            page.evaluate('window.__staleSuccess.release()')
+            page.wait_for_function('window.__staleSuccess.settled === true')
+            page.wait_for_timeout(20)
+            assert_race_model('LATEST-SUCCESS')
+            assert page.locator('#status').inner_text() == latest_success_status
+            assert page.locator('#disp-card').inner_text() == latest_success_result
+
+            # An older rejected read after a newer successful import cannot replace its status.
+            start_delayed_import('older-failure.json', race_model('OLD-FAILURE', length=6), '__staleFailure')
+            page.locator('#import-model').set_input_files({
+                'name': 'latest-after-failure.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(race_model('LATEST-AFTER-FAILURE', length=3)).encode('utf-8')
+            })
+            page.wait_for_function("document.querySelector('#status')?.textContent.includes('Analysis complete')")
+            assert_race_model('LATEST-AFTER-FAILURE')
+            latest_failure_status = page.locator('#status').inner_text()
+            latest_failure_result = page.locator('#disp-card').inner_text()
+            page.evaluate("window.__staleFailure.reject(new Error('deliberately stale read failure'))")
+            page.wait_for_function('window.__staleFailure.settled === true')
+            page.wait_for_timeout(20)
+            assert_race_model('LATEST-AFTER-FAILURE')
+            assert page.locator('#status').inner_text() == latest_failure_status
+            assert page.locator('#disp-card').inner_text() == latest_failure_result
+
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
             assert not errors, errors

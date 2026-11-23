@@ -1,3 +1,9 @@
+## 2026-11-23 — Truss latest-import request ordering (dev; exact-head QA pending)
+
+- Centralized current-request validation and pending-state settlement so only the latest still-pending file import can update the model, busy state or error status.
+- Added Chromium regressions for an older valid read resolving after a newer successful import and an older read failing after a newer successful import; both require latest model, status, solved result and `aria-busy=false` to remain unchanged.
+- Starting SHA `397c349d981157343b0665443c6227cd74429087` had green exact-head Push Quality #45087003921 and PR Quality #45087008879, including Truss browser step 215. New commit requires fresh exact-head certification; not released.
+
 ## 2026-11-23 — Truss byte-count unit follow-up (dev; exact-head QA pending)
 
 - Added the missing bytes unit after the received count in the production mismatch diagnostic.

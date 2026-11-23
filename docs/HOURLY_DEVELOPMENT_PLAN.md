@@ -1,3 +1,26 @@
+## 2026-11-23 — TRUSS-LEGACY-OPTIONAL-PROPERTIES-AND-FILE-API-RESTORE (implemented on dev; exact-head Quality pending)
+
+Started from the live GitHub refs: dev `508d2a64a3c8affccd5e4075c229f6996eed35a7`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen October 26 inventory, current Truss source/tests/contracts, PR #189/reviews, exact-head Actions and Pages evidence.
+
+The exact current-head Push Quality [#45115913834](https://github.com/saeedsai/ProMathStudio/actions/runs/45115913834) and PR Quality [#45115919806](https://github.com/saeedsai/ProMathStudio/actions/runs/45115919806) both fail at mandatory Truss Studio browser step 212, `tests/smoke_truss_studio.py:1063`. The timeout is on the final legacy SI JSON import after optional density, second moment I and effective-length factor K are added. Earlier structural tests and browser scenarios, including BOM, UTF-8, exact/over-limit byte checks and stale import ordering, complete before this failure. The job logs establish the timeout but do not expose the browser's final status text, so the precise browser-side rejection is not yet proven.
+
+The exact legacy model with density 7850 kg/m³, I=1e-6 m⁴ and K=1 was independently exercised in the V8 runtime through the actual FEM kernel: legacy unit detection, conversion to E=200 GPa / A=1000 mm² / I=1,000,000 mm⁴, mass 15.7 kg for member AB, Euler Pcr 493480.22005446785 N and the analytical solve all passed. This isolates the remaining uncertainty to the browser/import fixture path rather than the underlying legacy FEM conversion.
+
+Hardened the production compatibility reference by recursively freezing the private canonical legacy SI example while retaining the public getter's fresh editable JSON copy. Added a direct Node regression for importing legacy SI JSON with density/I/K, checking unit conversion, mass, Euler load and residual. In the Chromium fixture, restored the native File prototype chain by deleting temporary `File.prototype.arrayBuffer` shadows (rather than assigning an inherited Blob method and leaving an own override), added a real File size/ArrayBuffer-length probe, and added a browser-side legacy import/solve preflight with reference values. The final import wait now first waits for the busy state to settle and then asserts the actual status text, so a future rejection is reported directly instead of an opaque 30-second timeout. No production import limits, solver assertions or feature checks were weakened.
+
+The local checkout is absent; one bounded clone attempt failed with `Could not resolve host: github.com`. The connected GitHub integration was used. V8 checks of the actual FEM source and legacy optional-property reference passed. Full Node/Chromium execution remains pending exact-head Actions.
+
+Repository-state correction: the live `dev` and PR #189 heads are both `508d2a64a3c8affccd5e4075c229f6996eed35a7`; `70fc483cb1cec3d2372d37484e4a8ef7942343da` is still main. Later SHAs mentioned in earlier conversational summaries are not present in the live branch refs or PR head and are not treated as repository commits. No changes from those unverified claims are assumed.
+
+Frozen historical inventory remains **166 gaps / 95 partial**; it was not edited or reclassified.
+
+**NEXT FIVE (status and acceptance tests):**
+1. **P0 — Exact-head Quality recovery.** Both Push and PR Quality green on the new SHA. Step 212 must pass the native File API restoration probe, legacy SI optional-property preflight/import, 7850 kg/m³, 1,000,000 mm⁴, K=1, 15.7 kg and 493.48 kN references; steps 214/215 and all remaining FEM/CSV/SVG/mobile/console checks must also pass.
+2. **P0 — Spreadsheet formula-reference rewriting.** Audit same-sheet and cross-sheet relative, absolute and mixed references through row insertion/deletion/sorting; formulas must follow logical cells, and unsupported/noncontiguous sort operations must fail transactionally with data unchanged. Keep modular source and standalone `index.html` synchronized.
+3. **P1 — Remaining Truss JSON boundaries.** Cover null/blank/zero density, independent I-only/K-only, malformed UTF-8, actual BOM bytes, exact/over-1-MiB limits, byte mismatch and failed-read rollback; preserve IDs, units and physical quantities.
+4. **P1 — Selected-member isolation and export audit.** Applying section properties changes only the selected member's A/I, preserving other members and E/density/K; verify CSV quoting/units/BOM/CRLF and SVG XML/accessibility/geometry.
+5. **P0 — Release governance and promotion.** Obtain an eligible independent PR #189 review and authorized verification of enforceable main protection and required checks. Only after exact-head gates pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted behavior.
+
 ## 2026-11-23 — TRUSS-LEGACY-EXAMPLE-ISOLATION-AND-CI-ORDER-FIX (implemented on dev; exact-head Quality pending)
 
 Started from dev `8ae65148f79defc39ec667db192d539e88c97abb` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, Structural Truss source/contract/tests, current branch refs, PR #189/reviews, exact-head Push/PR Quality, and production Pages evidence.

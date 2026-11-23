@@ -833,7 +833,7 @@ def main():
         assert page.locator('#nodes tr').count() == 3
         assert page.locator('#nodes tr').nth(2).locator('input[data-field="fy"]').input_value() == '-10'
         assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
-        page.evaluate('''() => { File.prototype.arrayBuffer = Blob.prototype.arrayBuffer; }''')
+        page.evaluate('''() => { delete File.prototype.arrayBuffer; }''')
         # The 1 MiB boundary is measured in UTF-8 bytes, including multibyte text.
         byte_limit = 1024 * 1024
         exact_text = json.dumps({**prior, 'note': 'é' * 100}, ensure_ascii=False)
@@ -914,9 +914,15 @@ def main():
         assert page.locator('#nodes tr').count() == 3
         assert page.locator('#members tr').first.locator('input[data-field="id"]').input_value() == 'AB'
         page.evaluate('''() => {
-            File.prototype.arrayBuffer = Blob.prototype.arrayBuffer;
+            delete File.prototype.arrayBuffer;
             window.__restoreFileSize();
         }''')
+        native_file_probe = page.evaluate("""async () => {
+            const file = new File(['probe'], 'native-file-api-probe.txt');
+            const bytes = await file.arrayBuffer();
+            return {size:file.size, byteLength:bytes.byteLength};
+        }""")
+        assert native_file_probe == {'size':5,'byteLength':5}, native_file_probe
         page.locator('#solve').click()
         assert 'Analysis complete' in page.locator('#status').inner_text()
         page.locator('#export-csv').click()
@@ -1053,14 +1059,39 @@ def main():
         density_input.fill('')
         assert 'Preview ready' in page.locator('#status').inner_text()
         # Legacy SI import keeps density and the Euler estimate physically equivalent.
-        legacy_model = page.evaluate('TrussStudio.example')
+        legacy_model = page.evaluate('''() => JSON.parse(JSON.stringify(TrussStudio.example))''')
+        legacy_preflight = page.evaluate("""model => {
+            const json = JSON.stringify(model);
+            const imported = ProMathTrussFEM.importJSON(json);
+            const normalized = ProMathTrussFEM.fromLegacy(imported);
+            const first = ProMathTrussFEM.inspectJSON(json).memberMetrics[0];
+            const solved = ProMathTrussFEM.solve(normalized);
+            return {
+                unitSystem:ProMathTrussFEM.describeUnits(imported).system,
+                E:normalized.members[0].E, area:normalized.members[0].area,
+                density:normalized.members[0].density, I:normalized.members[0].I, K:normalized.members[0].K,
+                mass:first.mass, eulerCriticalLoad:first.eulerCriticalLoad, residual:solved.residual
+            };
+        }""", legacy_model)
+        assert legacy_preflight['unitSystem'] == 'legacy-si', legacy_preflight
+        assert math.isclose(legacy_preflight['E'],200,rel_tol=1e-12)
+        assert math.isclose(legacy_preflight['area'],1000,rel_tol=1e-12)
+        assert legacy_preflight['density'] == 7850 and legacy_preflight['I'] == 1000000 and legacy_preflight['K'] == 1
+        assert math.isclose(legacy_preflight['mass'],15.7,rel_tol=1e-12)
+        assert math.isclose(legacy_preflight['eulerCriticalLoad'],493480.22005446785,rel_tol=1e-12)
+        assert legacy_preflight['residual'] < 1e-12
         for member in legacy_model['members']:
             member['density'] = 7850
             member['I'] = 1e-6
             member['K'] = 1
         page.locator('#import-model').set_input_files({'name':'legacy-density-buckling.json','mimeType':'application/json',
                                                        'buffer':json.dumps(legacy_model).encode('utf-8')})
-        page.wait_for_function("""() => document.querySelector('#status').textContent.startsWith('Analysis complete')""")
+        page.wait_for_function("""() => {
+            const status = document.querySelector('#status');
+            return status?.getAttribute('aria-busy') === 'false';
+        }""")
+        legacy_import_status = page.locator('#status').inner_text()
+        assert legacy_import_status.startswith('Analysis complete'), legacy_import_status
         legacy_cells = page.locator('#member-metrics tr').first.locator('td')
         assert legacy_cells.nth(8).inner_text() == '7850'
         assert legacy_cells.nth(9).inner_text() == '15.7'

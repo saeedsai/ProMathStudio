@@ -114,3 +114,8 @@ The Chromium regression delays a real older File read, completes a newer valid i
 ## Legacy example copy semantics
 
 The compatibility property `TrussStudio.example` retains the original SI-unit model shape (forces in N, modulus in Pa and member area in m²), but each property read returns a new editable deep copy. Mutating one retrieved model therefore cannot contaminate a later caller's reference example. Existing code that stores the property once and passes that object to `TrussStudio.solve(model)` remains supported. The Node regression checks independent object/array identity, editability, canonical SI values and successful solving of a fresh copy.
+
+
+## Legacy SI compatibility reference and optional-property regression
+
+The private canonical `TrussStudio.example` reference is recursively immutable. Each public getter read remains a fresh editable copy, preserving the legacy SI JSON contract (N, Pa, m² and m⁴). Legacy imports with optional density, second moment I and effective-length factor K must preserve physical equivalence after conversion to Studio units. The reference case uses density 7850 kg/m³, I=1e-6 m⁴ and K=1: the 2 m AB member mass is 15.7 kg and its Euler critical load is 493480.22005446785 N. Direct Node and Chromium regressions cover conversion and analysis; the browser fixture must restore native File prototype behavior after byte-boundary monkeypatches.

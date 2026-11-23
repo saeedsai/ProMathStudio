@@ -1157,3 +1157,26 @@ test('legacy TrussStudio.solve retains its original member result shape',()=>{
  assert.deepEqual(Object.keys(result.members[0]).sort(),['force','id','strain','stress']);
  assert.ok(result.members.every(m=>Number.isFinite(m.force)&&Number.isFinite(m.stress)&&Number.isFinite(m.strain)));
 });
+
+
+test('legacy SI JSON import preserves optional density, second moment and effective-length factor',()=>{
+ const legacy=globalThis.TrussStudio.example;
+ for(const member of legacy.members){member.density=7850;member.I=1e-6;member.K=1;}
+ const json=JSON.stringify(legacy);
+ const imported=fem.importJSON(json);
+ assert.equal(fem.describeUnits(imported).system,'legacy-si');
+ const normalized=fem.fromLegacy(imported);
+ assert.equal(normalized.members[0].E,200);
+ assert.equal(normalized.members[0].area,1000);
+ assert.equal(normalized.members[0].density,7850);
+ assert.equal(normalized.members[0].I,1000000);
+ assert.equal(normalized.members[0].K,1);
+ const first=fem.inspectJSON(json).memberMetrics[0];
+ close(first.mass,15.7,1e-12);
+ close(first.secondMoment,1e-6,1e-12);
+ close(first.effectiveLengthFactor,1,1e-12);
+ close(first.eulerCriticalLoad,493480.22005446785,1e-12);
+ const result=fem.solve(normalized);
+ assert.ok(result.residual<1e-12);
+ assert.ok(Number.isFinite(result.energyError));
+});

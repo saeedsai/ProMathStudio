@@ -1,3 +1,10 @@
+## 2026-11-23 — Truss legacy import regression and immutable compatibility reference
+
+- Recursively froze the private canonical legacy SI example while preserving fresh editable copies from `TrussStudio.example`.
+- Added direct Node coverage for legacy JSON imports with density, second moment I and effective-length factor K, including mass, Euler critical load and solver residual references.
+- Restored native `File.prototype.arrayBuffer` behavior in the Chromium smoke after temporary test overrides, added an actual size/byte-length probe and a browser-side legacy import preflight.
+- Improved the final import assertion to surface the settled status message instead of hiding an import rejection behind a timeout. Exact-head Quality is pending; not released.
+
 ## 2026-11-23 — Truss legacy example isolation and browser assertion correction
 
 - Fixed both Truss Studio latest-import assertions to match the canonical modern triangle member order: AB, AC, BC.

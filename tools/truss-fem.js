@@ -4,10 +4,18 @@
 (function (root, make) {
   'use strict';
   // Keep the legacy SI reference private; each public read receives an editable copy.
-  const legacyExample = {
-    nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true},{id:'C',x:1,y:1,fy:-10000}],
-    members:[{id:'AB',a:'A',b:'B',E:200e9,A:0.001},{id:'AC',a:'A',b:'C',E:200e9,A:0.001},{id:'BC',a:'B',b:'C',E:200e9,A:0.001}]
-  };
+  const legacyExample = Object.freeze({
+    nodes:Object.freeze([
+      Object.freeze({id:'A',x:0,y:0,fixX:true,fixY:true}),
+      Object.freeze({id:'B',x:2,y:0,fixY:true}),
+      Object.freeze({id:'C',x:1,y:1,fy:-10000})
+    ]),
+    members:Object.freeze([
+      Object.freeze({id:'AB',a:'A',b:'B',E:200e9,A:0.001}),
+      Object.freeze({id:'AC',a:'A',b:'C',E:200e9,A:0.001}),
+      Object.freeze({id:'BC',a:'B',b:'C',E:200e9,A:0.001})
+    ])
+  });
   const api = make();
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (root) {

@@ -1,3 +1,28 @@
+## 2026-11-23 — TRUSS-IMPORT-CI-RECOVERY-AND-DECLARED-SIZE-VALIDATION (implemented on dev; exact-head QA pending)
+
+Starting refs: dev `c1edd94ff9c48bd5d3f69abcb6c7140174dbf756`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen October 26 inventory, Truss FEM source/tests/contract, PR #189, review submissions, current refs and Actions/Pages evidence.
+
+**P0 exact-head CI failure:** Both Push Quality [#45213285943](https://github.com/saeedsai/ProMathStudio/actions/runs/45213285943) and PR Quality [#45213304669](https://github.com/saeedsai/ProMathStudio/actions/runs/45213304669) failed on exact head `c1edd94ff9c48bd5d3f69abcb6c7140174dbf756` at job step 212, `tests/smoke_truss_studio.py:955`. The test still expected the old `(expected …, received …)` suffix after the validator had intentionally added `read returned fewer bytes than declared;`. Both runs show the same assertion failure; steps 213–215 were skipped as a consequence. The FEM byte-validation code and the newer Truss FEM short/long browser checks were not the cause. Updated the older Truss Studio regression to assert the complete direction-specific short-read diagnostic; no production behavior or test coverage was weakened.
+
+**P1 source hardening:** `validateImportByteLength` now distinguishes invalid declared `File.size` metadata from a valid safe file that exceeds 1 MiB. Undefined, null, negative, fractional, non-finite and unsafe declared sizes report `Model JSON file size is invalid.`; a safe declared size above the limit retains `Model JSON exceeds 1 MiB.`. The same safe-integer predicate is reused for actual byte length, while its existing invalid-read diagnostic and short/long exact-count diagnostics remain intact.
+
+**Regression:** Node tests cover all invalid declared-size categories separately from a valid over-limit size, and retain actual-length, exact, short and long cases. The failing Chromium short-read assertion now checks the direction-specific diagnostic and exact expected/received counts. Existing Truss FEM browser regressions continue to cover actual File short/long reads, malformed UTF-8, BOM, exact/over-1-MiB boundaries, state rollback and busy-state clearing at desktop and 390px.
+
+Updated FEM source, Node/browser regressions, Structural Truss contract, this plan, execution ledger and changelog in one atomic dev commit. Truss Studio uses adjacent FEM JavaScript assets; no root `index.html` synchronization applies.
+
+**Validation:** The local workspace has no repository checkout; full local Node/Playwright runs are unavailable. Focused isolated JavaScript assertions verify the new declared-size classifications and both directional diagnostics. Fresh exact-head Push and PR Quality are required to certify the browser suite. Candidate remains **Implemented on dev / In QA**, not released.
+
+PR #189 remains open from dev to main with zero independent reviews. Main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`; branch listing reports dev/main unprotected and ruleset/protection administration remains unavailable to this integration. No merge or governance bypass was attempted. The inherited `claude/sharp-babbage-pqhvgr` branch is preserved because its unique commits are not proven contained in main. Production main Quality and Pages evidence remains the November 3 deployment on `70fc483cb1cec3d2372d37484e4a8ef7942343da`; no newer main deployment is claimed.
+
+The October 26 historical inventory remains frozen at **166 gaps / 95 partial**; no historical status was reclassified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head CI recovery.** Both Push and PR Quality must pass on this candidate with zero failures/skips. Verify Truss Studio step 212's direction-specific short-read assertion; Truss FEM 215 short/long, UTF-8, BOM and size-boundary cases; analytical FEM 214; and spreadsheet 78–80.
+2. **P1 — Latest-request concurrency matrix.** Verify stale success after newer success, stale rejection after newer success, newer rejected import while an older read is pending, and cancellation by a genuine model edit. Only the current request may update model, status or busy state.
+3. **P1 — Spreadsheet formula-reference edge audit.** Cover mixed absolute/relative anchors, quoted sheet names, reversed ranges, escaped quotes and row/column boundaries; verify transactional mutation and standalone `index.html` parity.
+4. **P1 — Section-helper numerical matrix.** Exercise all seven supported shapes with independent area/Ixx/Iyy references, L-angle principal-axis ordering, selected-axis application and invalid/overflow rollback.
+5. **P0 — Release governance.** Obtain an independent PR #189 review and authorized enforceable main protection/required-check configuration. Only after exact-head CI and reviews pass, merge via the ordinary PR and verify exact-main Quality, Pages and hosted critical paths.
+
 ## 2026-11-23 — TRUSS-IMPORT-OVERREAD-DIAGNOSTICS (implemented on dev; exact-head QA pending)
 
 Starting refs: dev d1c25300184851af0c52c9619571c2878af5c458, main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read root AGENTS.md, this plan, the frozen October 26 inventory, Structural Truss source/tests/contract, PR #189, review submissions, exact refs, Actions and main Quality/Pages evidence.

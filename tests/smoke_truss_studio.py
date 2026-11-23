@@ -952,7 +952,10 @@ def main():
                    status.getAttribute('aria-busy') === 'false';
         }""")
         mismatch_status = page.locator('#status').inner_text()
-        assert f'(expected {mismatch_size} bytes, received {mismatch_size - 1} bytes).' in mismatch_status
+        assert mismatch_status.endswith(
+            f'(read returned fewer bytes than declared; expected {mismatch_size} bytes, '
+            f'received {mismatch_size - 1} bytes).'
+        ), mismatch_status
         assert page.evaluate("""() => {
             const rows = selector => Array.from(document.querySelectorAll(selector + ' tr')).map(row =>
                 Array.from(row.querySelectorAll('input')).map(input => [input.dataset.field || '', input.value]));

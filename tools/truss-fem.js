@@ -51,11 +51,12 @@
     !(typeof value === 'string' && !value.trim());
   // Share the File.size / ArrayBuffer.byteLength contract between the browser UI and tests.
   function validateImportByteLength(declaredSize, actualByteLength) {
-    const valid = value => Number.isSafeInteger(value) && value >= 0 && value <= MAX_IMPORT_BYTES;
-    if (!valid(declaredSize)) throw Error('Model JSON exceeds 1 MiB.');
+    const safeLength = value => Number.isSafeInteger(value) && value >= 0;
+    if (!safeLength(declaredSize)) throw Error('Model JSON file size is invalid.');
+    if (declaredSize > MAX_IMPORT_BYTES) throw Error('Model JSON exceeds 1 MiB.');
     if (arguments.length > 1) {
       // Distinguish a broken/invalid read result from a legitimate file over the size budget.
-      if (!Number.isSafeInteger(actualByteLength) || actualByteLength < 0) {
+      if (!safeLength(actualByteLength)) {
         throw Error('Model JSON read returned an invalid byte length.');
       }
       if (actualByteLength > MAX_IMPORT_BYTES) throw Error('Model JSON exceeds 1 MiB.');

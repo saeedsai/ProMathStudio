@@ -377,9 +377,10 @@ test('shared file-import byte validator enforces safe 1 MiB and exact byte-count
   assert.equal(fem.validateImportByteLength(size),size);
   assert.equal(fem.validateImportByteLength(size,size),size);
  }
- for(const size of [undefined,-1,1.5,NaN,Infinity,Number.MAX_SAFE_INTEGER+1,limit+1]){
-  assert.throws(()=>fem.validateImportByteLength(size),/Model JSON exceeds 1 MiB/);
+ for(const size of [undefined,null,-1,1.5,NaN,Infinity,Number.MAX_SAFE_INTEGER+1]){
+  assert.throws(()=>fem.validateImportByteLength(size),/Model JSON file size is invalid/);
  }
+ assert.throws(()=>fem.validateImportByteLength(limit+1),/Model JSON exceeds 1 MiB/);
  for(const actual of [undefined,null,-1,1.5,NaN,Infinity,Number.MAX_SAFE_INTEGER+1]){
   assert.throws(()=>fem.validateImportByteLength(5,actual),/Model JSON read returned an invalid byte length/);
  }

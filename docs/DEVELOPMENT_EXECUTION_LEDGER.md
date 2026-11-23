@@ -1,3 +1,16 @@
+## 2026-11-23 — TRUSS-IMPORT-CI-RECOVERY-AND-DECLARED-SIZE-VALIDATION
+
+- Starting exact refs: dev `c1edd94ff9c48bd5d3f69abcb6c7140174dbf756`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`; PR #189 head/base matched; zero independent review submissions.
+- Exact-head failure: Push Quality [#45213285943](https://github.com/saeedsai/ProMathStudio/actions/runs/45213285943) and PR Quality [#45213304669](https://github.com/saeedsai/ProMathStudio/actions/runs/45213304669) both failed at step 212, `tests/smoke_truss_studio.py:955`. The test expected the old generic short-read suffix; production now correctly includes `read returned fewer bytes than declared;`. Steps 213–215 were skipped. Corrected the assertion without removing checks.
+- Source improvement: distinguish invalid declared File.size metadata (undefined/null/negative/fractional/non-finite/unsafe) from a safe file size above 1 MiB. Preserve the separate invalid actual-read diagnostic and direction-specific mismatch details.
+- Node regression: assert every invalid declared-size category and a legitimate safe over-limit size separately; retain actual byte-count and short/long tests.
+- Browser regression: assert the full direction-specific short-read diagnostic and exact expected/received byte counts in the previously failing Truss Studio test. Existing FEM browser tests retain actual short/long read, UTF-8, BOM, size boundary and rollback coverage.
+- Updated source, tests, Structural Truss contract, plan, ledger and changelog in one atomic dev commit. No root index bundle synchronization applies to Truss Studio's adjacent JS assets.
+- Local checkout absent; full local Node/Playwright unavailable. Focused isolated JavaScript checks are run; exact-head GitHub Actions must certify the full browser suite.
+- PR #189 remains open/unreviewed; main remains `70fc483cb1cec3d2372d37484e4a8ef7942343da`; no merge/protection bypass. Main production Quality/Pages remain on the November 3 deployment; no new deployment claim. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) exact-head Push/PR Quality green, especially Truss Studio 212 and Truss FEM 214/215 plus spreadsheet 78–80; (2) latest-request stale success/rejection/edit-cancellation matrix; (3) spreadsheet absolute/relative references, quoted sheets, reversed ranges, escaped quotes, boundary edits and index bundle parity; (4) seven-shape section helper numerical/axis/rollback matrix; (5) independent PR #189 review and enforceable main protection, then ordinary PR merge and exact-main Quality/Pages/hosted verification.
+
 ## 2026-11-23 — TRUSS-IMPORT-OVERREAD-DIAGNOSTICS
 
 - Starting exact refs: dev d1c25300184851af0c52c9619571c2878af5c458, main 70fc483cb1cec3d2372d37484e4a8ef7942343da; PR #189 head/base matched these refs and had no independent review submissions.

@@ -1,3 +1,9 @@
+## 2026-11-23 — Truss import CI recovery and declared-size validation
+
+- Fixed the exact-head browser regression failure: Truss Studio's short-read test now expects the validator's direction-specific `fewer bytes than declared` diagnostic and exact expected/received counts.
+- Hardened the FEM byte validator to distinguish invalid declared File.size metadata from a safe file exceeding 1 MiB; added Node regression coverage for undefined/null/negative/fractional/non-finite/unsafe sizes.
+- Preserved the existing actual-read invalid-length, short/long mismatch, UTF-8, BOM and 1 MiB browser-import regressions. Fresh exact-head Push/PR Quality is required; not released.
+
 ## 2026-11-23 — Truss short/long read diagnostics
 
 - Distinguish shorter-than-declared and longer-than-declared Truss file reads while retaining exact expected/received byte counts.

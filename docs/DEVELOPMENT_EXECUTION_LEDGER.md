@@ -1,3 +1,17 @@
+## 2026-11-23 — TRUSS-SECTION-DISCLOSURE-STATE-AND-ARIA-CONTROL
+
+- Starting refs: dev `0bf1fdf3f755f317ffada3ccdf303499c8af78a0`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Read root contract, living plan, frozen inventory, Truss source/test/contract, PR/reviews, refs, Actions and Pages.
+- Exact-head Push Quality [#45276115270](https://github.com/saeedsai/ProMathStudio/actions/runs/45276115270) and PR Quality [#45276130069](https://github.com/saeedsai/ProMathStudio/actions/runs/45276130069) both failed at step 215. FEM Node tests passed 68/68 in each. Both logs show line 360: `#section-helper` not visible.
+- Root cause: the first browser scenario opens the native details disclosure and leaves it open; a later scenario on the same page blindly clicks the summary, correctly toggling it closed. This is a test state-management defect.
+- Added an `aria-controls="member-material-content"` relationship to the disclosure summary and wrapped its metrics/helper content in the referenced region. The disclosure remains collapsed by default.
+- Regression now asserts the controlled region is hidden while collapsed, opens it and checks visibility, then conditionally opens it in the later scenario only if it is closed. Existing numerical/member-isolation assertions remain unchanged.
+- Updated Structural Truss contract, plan, ledger and changelog atomically. No root index.html sync applies to this standalone page.
+- Static source/test consistency checks passed in the isolated V8 execution. Full local Playwright unavailable (no checkout). New exact-head Push/PR Quality pending.
+- PR #189 remains open/mergeable with zero reviews; dev/main unprotected, rulesets empty, branch-protection read HTTP 403. No merge or bypass. Main Quality #41730966059 and Pages #41730962844 remain successful on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03).
+- Frozen October 26 baseline remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) certify new exact-head Push/PR Quality, especially step 215 at desktop/mobile for aria-controls, collapsed/expanded state and idempotent repeated access; (2) independent PR #189 review and authorized enforceable main protection, then ordinary promotion and exact-main Quality/Pages verification; (3) seven-shape section-helper numerical/browser matrix with rollback and E/density/K preservation; (4) spreadsheet reference edge audit with source/standalone parity and transactional sort/delete tests; (5) one approved source-backed Engineering Toolbox tool with canonical ID, numerical/negative/responsive tests and truthful status.
+
 ## 2026-11-23 — TRUSS-SECTION-HELPER-DISCLOSURE-CI-RECOVERY
 
 - Starting refs: dev `acd12a7f5b5e0a1779b93c93b10d930ad38b305d`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Inspected AGENTS.md, living plan, frozen inventory, engineering/structural catalogs, source/tests, PR/reviews, branches, Actions and Pages.

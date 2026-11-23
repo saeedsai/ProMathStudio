@@ -48,11 +48,15 @@ def main():
             # The section helper is intentionally collapsed with the material breakdown.
             # Exercise the real disclosure before interacting with its controls at both widths.
             details = page.locator('#member-material-details')
+            content = page.locator('#member-material-content')
             assert not details.evaluate('(node) => node.open'), 'member details should start collapsed'
+            assert not content.is_visible(), 'controlled content should be hidden while collapsed'
             summary = details.locator('summary')
             assert summary.inner_text().strip() == 'Member materials and section properties'
+            assert summary.get_attribute('aria-controls') == 'member-material-content'
             summary.click()
             assert details.evaluate('(node) => node.open'), 'summary activation should expand member details'
+            assert content.is_visible(), 'summary should reveal its controlled content region'
             page.locator('#section-helper').wait_for(state='visible')
             page.locator('#section-member').wait_for(state='visible')
             # A very thin concentric annulus must retain high-precision section properties
@@ -355,8 +359,13 @@ def main():
             page.locator('#example').select_option('triangle')
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#members tr').count() == 3
-            # The helper is intentionally inside the collapsed material-breakdown details.
-            page.locator('#member-material-details > summary').click()
+            # The first section-helper scenario leaves this disclosure open. Reopening must
+            # be idempotent: do not blindly click an already-open native summary and collapse it.
+            details = page.locator('#member-material-details')
+            if not details.evaluate('(node) => node.open'):
+                details.locator('summary').click()
+            assert details.evaluate('(node) => node.open'), 'member details must be open before helper use'
+            assert page.locator('#member-material-content').is_visible()
             assert page.locator('#section-helper').is_visible()
 
             def section_member_snapshot():

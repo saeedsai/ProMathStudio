@@ -1,3 +1,10 @@
+## 2026-11-23 — Truss section disclosure state and accessible controlled region (dev; exact-head QA pending)
+
+- Linked the native “Member materials and section properties” summary to a stable `#member-material-content` region using `aria-controls`; the wrapper contains the metrics table and section helper, and the disclosure remains collapsed by default.
+- Fixed the repeated browser scenario to open the disclosure only when currently closed. The first scenario intentionally leaves it open; a blind second summary click had correctly collapsed it and caused FEM browser step 215 to fail.
+- Added desktop/390px assertions for the hidden collapsed region, ARIA target, expansion and repeat-open idempotence. Existing numerical and member-preservation assertions are unchanged.
+- Exact-head Push/PR Quality required; not released.
+
 ## 2026-11-23 — Truss section-helper disclosure discoverability and CI recovery
 
 - Renamed the collapsed member-details disclosure to “Member materials and section properties” so the nested section helper is discoverable; it remains intentionally collapsed by default.

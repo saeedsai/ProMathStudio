@@ -440,7 +440,7 @@
       if(request!==importRequest)return;
       // Enforce the same budget against the actual payload, not only File.size metadata.
       if(!Number.isSafeInteger(bytes?.byteLength)||bytes.byteLength>MAX_IMPORT_BYTES)throw Error('Model JSON exceeds 1 MiB.');
-      if(bytes.byteLength!==declaredSize)throw Error(`Model JSON file size does not match the bytes read (expected ${declaredSize} bytes, received ${bytes.byteLength}).`);
+      if(bytes.byteLength!==declaredSize)throw Error(`Model JSON file size does not match the bytes read. (expected ${declaredSize} bytes, received ${bytes.byteLength}).`);
       let text;
       try {
         // File.text() replaces malformed UTF-8, which can silently corrupt imported IDs.

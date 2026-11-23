@@ -1,3 +1,9 @@
+## 2026-11-23 — Truss byte-mismatch diagnostic prefix CI fix (dev; exact-head QA pending)
+
+- Diagnosed Push Quality #45081246742 and PR Quality #45081250517: both passed 59/59 FEM Node tests but failed at Truss browser step 215 because the wait expected the stable diagnostic prefix to end with a period before the detailed byte counts.
+- Restored the stable `Model JSON file size does not match the bytes read.` prefix while retaining exact expected/received byte counts; strengthened the browser assertion to require the prefix and detailed values.
+- Updated the Structural Truss contract, hourly plan and execution ledger. Fresh exact-head Push/PR Quality remains required; not released.
+
 ## 2026-11-22 — Truss JSON byte-mismatch regression isolation (dev; exact-head QA pending)
 
 - Diagnosed Push Quality [#45075912260](https://github.com/saeedsai/ProMathStudio/actions/runs/45075912260) and PR Quality [#45075916799](https://github.com/saeedsai/ProMathStudio/actions/runs/45075916799): both passed the 59-test FEM Node suite but timed out at Truss browser step 215 waiting for the mismatch status.

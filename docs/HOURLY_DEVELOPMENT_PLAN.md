@@ -1,3 +1,22 @@
+## 2026-11-23 — TRUSS-IMPORT-BYTE-DIAGNOSTIC-PREFIX-CI-FIX (implemented on dev; exact-head Quality pending)
+
+Started from dev `d805f8694652ac2f763288cc69ab00dafdf789b2` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 feature inventory, Structural Truss contract/source/tests, PR #189/reviews, branch refs, exact-head Actions and Pages evidence.
+
+Prioritized an observed exact-head CI failure. Push Quality [#45081246742](https://github.com/saeedsai/ProMathStudio/actions/runs/45081246742) and PR Quality [#45081250517](https://github.com/saeedsai/ProMathStudio/actions/runs/45081250517) both fail at Truss browser step 215, `tests/smoke_truss_fem.py:372`, while waiting for the byte-mismatch status. Both runs pass all **59/59** analytical FEM Node tests. The importer emits `Model JSON file size does not match the bytes read (expected …)`, while the browser wait requires the stable prefix `Model JSON file size does not match the bytes read.`; the missing period before the detailed counts prevents the correct import rejection from satisfying the wait.
+
+Kept the detailed byte counts and restored the stable diagnostic prefix by placing the sentence-ending period before the parenthesized expected/received values. Strengthened the browser regression to require the complete `Import failed: Model JSON file size does not match the bytes read. (` prefix and retain the exact declared/returned byte-count assertion. The test still verifies the prior A/B/AB model, 3 m edit and 0.015 mm solved result remain unchanged. No import validation, FEM math, byte limits or assertions were relaxed.
+
+Updated the Structural Truss contract, this plan, execution ledger and changelog in the same atomic source/test/docs commit. The Truss companion page loads adjacent JavaScript assets; no `index.html` synchronization is required. Frozen historical baseline remains **166 gaps / 95 partial**. No release or Pages promotion is claimed.
+
+The local repository checkout is absent, so full local Playwright/Node commands cannot run. The two exact-head GitHub logs are the source of the failure diagnosis and independently show 59/59 Node tests passing on the parent candidate. Fresh Push and PR Quality must execute the corrected browser step on the new exact SHA.
+
+**NEXT FIVE (status and acceptance tests):**
+1. **P0 — Exact-head Quality certification.** Both Push and PR Quality green on the final SHA; step 215 must pass the byte-mismatch import, stable prefix and exact expected/received counts, unchanged active model/results, all 59 FEM Node tests, Truss Studio, CSV/SVG and 390px checks.
+2. **P1 — Latest-file selection and stale failure ordering.** Delay two real file reads, complete the newer valid selection first, then resolve and separately reject the older read; the latest model, status, busy state and solved result must remain unchanged.
+3. **P1 — Remaining JSON boundaries.** Cover null/blank/zero density, independent I-only/K-only, malformed UTF-8, real BOM bytes, exact/over-1-MiB files, byte-count mismatch and failed-read rollback; preserve IDs and physical quantities.
+4. **P1 — Member isolation and export audit.** Applying section properties changes only the selected member and preserves other members/E/density/K; verify CSV quoting/units/single BOM/CRLF and SVG XML/accessibility/semantic geometry.
+5. **Release governance and promotion.** Obtain an eligible independent PR #189 review and authorized verification of enforceable main protection/required checks. Only after exact-head CI and all release gates pass, merge through the ordinary dev-to-main PR and verify exact-main Quality, Pages and hosted assets/downloads.
+
 ## 2026-11-22 — TRUSS-IMPORT-MISMATCH-FIXTURE-ISOLATION (implemented on dev; exact-head Quality pending)
 
 Started from dev `9f4267bc7b2f9e440d104f9abe4e3c86b7c6af44` and main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, Structural Truss contract/source/tests, PR #189/reviews, branch refs/rulesets and latest Quality/Pages evidence.

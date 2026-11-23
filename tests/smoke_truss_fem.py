@@ -381,7 +381,9 @@ def main():
                 'returned': len(mismatched_payload) - 10
             }, mismatch_read
             mismatch_status = page.locator('#status').inner_text()
-            assert 'Import failed:' in mismatch_status
+            assert mismatch_status.startswith(
+                'Import failed: Model JSON file size does not match the bytes read. ('
+            ), mismatch_status
             assert (f'(expected {len(mismatched_payload)} bytes, received '
                     f'{len(mismatched_payload) - 10} bytes)') in mismatch_status
             assert [page.locator('#nodes tr').nth(i).locator('input[data-field="id"]').input_value()

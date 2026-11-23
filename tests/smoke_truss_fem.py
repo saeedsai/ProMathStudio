@@ -552,7 +552,7 @@ def main():
 
             # A real UTF-8 BOM is part of File.size; accept it at the exact 1 MiB boundary.
             exact_limit = 1024 * 1024
-            bom_prefix = b'\\xef\\xbb\\xbf' + json.dumps(slow_model, separators=(',', ':')).encode('utf-8')
+            bom_prefix = bytes((0xEF, 0xBB, 0xBF)) + json.dumps(slow_model, separators=(',', ':')).encode('utf-8')
             assert len(bom_prefix) < exact_limit
             bom_exact_payload = bom_prefix + b' ' * (exact_limit - len(bom_prefix))
             before_bom = import_state_snapshot()

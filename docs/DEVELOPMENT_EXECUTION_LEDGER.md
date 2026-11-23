@@ -1,3 +1,7 @@
+## 2026-11-23 — TRUSS-BOM-BROWSER-FIXTURE-CORRECTION
+
+A post-commit GitHub readback caught an escaping defect in the new Python browser fixture: its byte literal contained doubled backslashes and therefore encoded the characters “\\xef” instead of the actual EF BB BF bytes. Replaced it with the unambiguous bytes tuple `bytes((0xEF, 0xBB, 0xBF))`. The test still constructs a real 1 MiB File, checks the BOM prefix and both byte lengths, and verifies exact-limit success plus pre-read rejection at 1 MiB+1. The preceding candidate's full Quality result is not used to certify this corrected fixture; fresh exact-head Push/PR Quality is required.
+
 ## 2026-11-23 — Truss import byte-length classification and actual BOM boundary
 
 - Starting exact refs: dev `dc8fb5d8fbdef4efd22ee0fa0f67b399f59ec6a0`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`.

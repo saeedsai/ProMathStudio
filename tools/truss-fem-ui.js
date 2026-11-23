@@ -46,12 +46,12 @@
     const td=el('td',null), btn=el('button','×',{'type':'button','class':'remove','aria-label':'Remove '+kind.slice(0,-1)+' '+(row.id||'row')});
     btn.addEventListener('click',()=>{tr.remove(); if(kind==='members')syncSectionMembers(); invalidate();});td.append(btn);tr.append(td);tbody.append(tr);
   }
-  function renderModel(model) {
+  function renderModel(model,preserveImportRequest=null) {
     $('nodes').replaceChildren();$('members').replaceChildren();
     model.nodes.forEach(node=>appendRow('nodes',node));
     model.members.forEach(m=>appendRow('members',m));
     syncSectionMembers();
-    invalidate();
+    invalidate(preserveImportRequest);
   }
   function readRows(kind) {
     return Array.from($(kind).querySelectorAll('tr')).map(tr=>{
@@ -310,7 +310,7 @@
   function isCurrentImport(request){return request===importRequest&&importPending;}
   function finishCurrentImport(request){if(!isCurrentImport(request))return false;importPending=false;return true;}
   function cancelPendingImport(){if(!importPending)return;importRequest++;importPending=false;status(IMPORT_CANCELLED_STATUS);}
-  function invalidate(){cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
+  function invalidate(preserveImportRequest=null){if(preserveImportRequest===null||preserveImportRequest!==importRequest||!importPending)cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function dimensionLabel(name,value,attrs){const formatted=fmt(value,4);return svgNode('text',{...attrs,'data-dimension-label':name,role:'text','aria-label':'Section dimension '+name+': '+formatted+' millimetres'},name+'='+formatted+' mm');}
   function updatePreview() {
@@ -455,7 +455,7 @@
       const inputUnits=fem.describeUnits(imported);
       const model=fem.fromLegacy(imported);
       if(!isCurrentImport(request))return;
-      renderModel(model);
+      renderModel(model,request);
       if(!finishCurrentImport(request))return;
       const unitNotice=inputUnits.system==='legacy-si'
         ? 'Legacy SI input converted to Studio units.'

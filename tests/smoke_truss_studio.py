@@ -681,31 +681,57 @@ def main():
         assert page.locator('#plot line').count() >= 6
         # Import a model produced by the old SI-only JSON editor: retain N, Pa, m² semantics.
         prior = page.evaluate('TrussStudio.example')
-        # Two overlapping imports must be ordered by selection, not by File.text() completion.
-        triangle_json = page.evaluate("() => ProMathTrussFEM.exportJSON(ProMathTrussFEM.examples.triangle)")
+        # A newer selection must finish before an older invalid File read is released.
         page.evaluate("""() => {
-            const read = Blob.prototype.arrayBuffer;
-            window.__importReads = [];
-            File.prototype.arrayBuffer = function() {
-                const name = this.name;
-                const delay = name === 'slow-invalid.json' ? 120 : 0;
-                return new Promise(resolve => setTimeout(resolve, delay))
-                    .then(() => read.call(this))
-                    .then(value => { window.__importReads.push(name); return value; });
-            };
+            const file = new File(['{bad'], 'slow-invalid.json', {type:'application/json'});
+            const nativeRead = Blob.prototype.arrayBuffer;
+            const pending = window.__slowInvalidImport = {started:false, settled:false, release:null};
+            Object.defineProperty(file, 'arrayBuffer', {
+                configurable:true,
+                value:function() {
+                    const target = this;
+                    pending.started = true;
+                    return new Promise((resolve, reject) => {
+                        pending.release = () => nativeRead.call(target).then(bytes => {
+                            pending.settled = true;
+                            resolve(bytes);
+                        }, error => {
+                            pending.settled = true;
+                            reject(error);
+                        });
+                    });
+                }
+            });
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            const input = document.querySelector('#import-model');
+            input.files = transfer.files;
+            input.dispatchEvent(new Event('change', {bubbles:true}));
         }""")
-        page.locator('#import-model').set_input_files({'name':'slow-invalid.json','mimeType':'application/json',
-                                                       'buffer':b'{bad'})
+        page.wait_for_function("window.__slowInvalidImport?.started && typeof window.__slowInvalidImport.release === 'function'")
         page.locator('#import-model').set_input_files({'name':'fast-valid.json','mimeType':'application/json',
                                                        'buffer':triangle_json.encode('utf-8')})
         page.wait_for_function("""() => {
             const status = document.querySelector('#status');
-            return window.__importReads?.length === 2 &&
-                   status?.textContent.startsWith('Analysis complete') &&
+            return status?.textContent.startsWith('Analysis complete') &&
                    status.getAttribute('aria-busy') === 'false';
         }""")
-        assert page.evaluate('window.__importReads') == ['fast-valid.json','slow-invalid.json']
+        assert page.evaluate('window.__slowInvalidImport.started') is True
         assert 'total member length 11.21 m' in page.locator('#preview-summary').inner_text()
+        assert [page.locator('#nodes tr').nth(i).locator('input[data-field="id"]').input_value()
+                for i in range(3)] == ['A','B','C']
+        assert [page.locator('#members tr').nth(i).locator('input[data-field="id"]').input_value()
+                for i in range(3)] == ['AC','BC','AB']
+        assert page.locator('#member-metrics tr').count() == 3
+        latest_status = page.locator('#status').inner_text()
+        page.evaluate('window.__slowInvalidImport.release()')
+        page.wait_for_function('window.__slowInvalidImport.settled === true')
+        page.wait_for_timeout(20)
+        assert page.locator('#status').inner_text() == latest_status
+        assert 'Analysis complete' in page.locator('#status').inner_text()
+        assert page.locator('#status').get_attribute('aria-busy') == 'false'
+        assert [page.locator('#members tr').nth(i).locator('input[data-field="id"]').input_value()
+                for i in range(3)] == ['AC','BC','AB']
         assert page.locator('#member-metrics tr').count() == 3
         # The BOM belongs to the actual File bytes, so File.size matches arrayBuffer().byteLength.
         legacy_bytes = b'\xef\xbb\xbf' + json.dumps(prior).encode('utf-8')

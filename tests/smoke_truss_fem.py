@@ -126,7 +126,7 @@ def main():
             assert 'Magnified leg detail shown below is not to scale.' in angle_caption
             sketch = page.locator('#section-sketch')
             assert sketch.get_attribute('aria-label') == angle_caption
-            assert page.locator('#section-sketch-desc').inner_text() == angle_caption
+            assert page.locator('#section-sketch-desc').text_content().strip() == angle_caption
             outline = page.locator('#section-sketch path[data-section-outline="l-angle"]')
             assert outline.count() == 1
             assert outline.get_attribute('data-section-width-mm') == '1000000'
@@ -134,7 +134,7 @@ def main():
             assert outline.get_attribute('data-section-thickness-mm') == '0.001'
             assert page.locator('#section-sketch rect[data-section-detail-frame="l-angle"]').count() == 1
             assert page.locator('#section-sketch path[data-section-detail="l-angle"]').count() == 1
-            assert page.locator('#section-sketch [data-section-detail-label="l-angle"]').inner_text() == 'Leg detail — not to scale'
+            assert page.locator('#section-sketch [data-section-detail-label="l-angle"]').text_content().strip() == 'Leg detail — not to scale'
             assert page.locator('#section-sketch line[data-principal-axis]').count() == 2
             assert page.locator('#section-axis').input_value() == 'principal-major'
             before_angle = page.evaluate("""() => Object.fromEntries(

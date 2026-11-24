@@ -4627,7 +4627,10 @@ self.onmessage=async ({data})=>{
     let at=0;const peek=()=>tokens[at]?.type;
     function primary(){const tok=tokens[at++];if(!tok)throw Error('#FORMULA');if(tok.type==='num')return tok.v;
       if(tok.type==='cell'){let target=t,ref=tok.v;const bang=ref.lastIndexOf('!');if(bang>=0){target=getByName(sheetNameFromQualifier(ref.slice(0,bang)));ref=ref.slice(bang+1);if(!target)throw Error('#SHEET');}
-        const m=/^(\$?)([A-Za-z]+)(\$?)(\d+)$/.exec(ref);if(!m)throw Error('#REF');return number(value(target,Number(m[4])-1,colIndex(m[2]),stack));}
+        const m=/^(\$?)([A-Za-z]+)(\$?)(\d+)$/.exec(ref);if(!m)throw Error('#REF');
+        const row=Number(m[4])-1,column=colIndex(m[2]);
+        if(row<0||row>=MAX_ROWS||column<0||column>=MAX_COLUMNS)throw Error('#REF!');
+        return number(value(target,row,column,stack));}
       if(tok.type==='('){const v=addition();if(peek()!==')')throw Error('#PAREN');at++;return v;}
       if(tok.type==='+'||tok.type==='-'){const v=primary();return tok.type==='-'?-v:v;}throw Error('#FORMULA');}
     function power(){let v=primary();if(peek()==='^'){at++;v=Math.pow(v,power());}return v;}

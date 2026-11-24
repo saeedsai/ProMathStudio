@@ -1,0 +1,30 @@
+"""Regression for scalar spreadsheet references outside the supported grid."""
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = (ROOT / "src/data-tables.js").read_text(encoding="utf-8")
+HTML = (ROOT / "index.html").read_text(encoding="utf-8")
+SMOKE = (ROOT / "tests/smoke_sheet_references.py").read_text(encoding="utf-8")
+WORKFLOW = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+
+
+class SpreadsheetReferenceBoundsTests(unittest.TestCase):
+    def test_scalar_parser_rejects_coordinates_outside_the_workbook_grid(self):
+        self.assertIn("const row=Number(m[4])-1,column=colIndex(m[2]);", SOURCE)
+        self.assertIn(
+            "if(row<0||row>=MAX_ROWS||column<0||column>=MAX_COLUMNS)throw Error('#REF!');",
+            SOURCE,
+        )
+        for formula in ("=A0", "=A6001", "=AG1", "=AF6000", "=SUM(AG1:AG1)", "=SUM(AF6000:AF6000)"):
+            self.assertIn(formula, SMOKE)
+        self.assertIn("python tests/smoke_sheet_references.py", WORKFLOW)
+
+    def test_standalone_bundle_matches_the_modular_source(self):
+        start = HTML.index("/* ProMathStudio Data Tables workspace.")
+        end = HTML.index("</script>", start)
+        self.assertEqual(HTML[start:end], SOURCE)
+
+
+if __name__ == "__main__":
+    unittest.main()

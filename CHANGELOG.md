@@ -1,3 +1,10 @@
+## 2026-11-24 — Spreadsheet scalar references enforce grid bounds (dev; exact-head QA pending)
+
+- Scalar references outside the supported `A1:AF6000` grid now return `#REF!` instead of silently reading as zero; valid empty cells inside the grid remain blank.
+- Added Chromium coverage for row 0, row 6001, column AG, the maximum valid AF6000 coordinate, aggregate-range consistency and arithmetic on an empty in-grid cell.
+- Added structural coverage for the bounds guard and exact source/standalone-bundle parity. Updated the Data Tables guide, plan and execution ledger.
+- Candidate is on dev only; exact-head Quality is required before promotion. Not released.
+
 **Follow-up fixture check:** the protected formula literal intentionally remains ="Obrien!A1" after rename, sort and row/column insertion; corrected both post-sort/post-column expected rows to match the unchanged literal. No behavior assertion was removed.
 
 ## 2026-11-24 — Spreadsheet rename keeps qualified formulas valid (dev; exact-head QA pending)

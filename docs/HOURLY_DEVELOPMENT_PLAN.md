@@ -1,3 +1,26 @@
+## 2026-11-24 — SPREADSHEET-SCALAR-REFERENCE-GRID-BOUNDS
+
+**Starting refs:** dev `4c273232c16de899fcbacbd95ca0033ac37c1280`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, current source/bundle/test contracts, branch refs, open PRs, and exact-head CI/Pages evidence.
+
+**Starting CI:** dev Quality [#45390197625](https://github.com/saeedsai/ProMathStudio/actions/runs/45390197625) passed all 218 steps with zero failed or skipped steps on the exact starting dev SHA. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) passed 218/218 on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) completed successfully on the same main SHA.
+
+**Defect:** Scalar formula evaluation delegated coordinates directly to `value()`, which treats absent rows/columns as blank zero. Thus `=A0`, `=A6001`, and `=AG1` could silently calculate as zero, even though aggregate-range evaluation already rejects coordinates outside the 6,000-row/32-column workbook grid.
+
+**Fix and regression:** Scalar parsing now validates zero-based row and column against `MAX_ROWS` and `MAX_COLUMNS` before reading the cell, returning `#REF!` for invalid coordinates. Valid but currently empty in-grid `AF6000` remains a blank cell (zero in arithmetic). Extended the registered Chromium smoke with invalid scalar and aggregate references, the maximum valid coordinate, and arithmetic on that valid blank cell. Added a structural test that checks the guard, browser cases, workflow registration, and exact source/standalone-bundle parity. Updated the Data Tables guide, changelog, plan and execution ledger atomically.
+
+**Validation:** The current modular source and standalone inline module were byte-identical before editing; the same module was updated in both files. Local repository/Chromium execution is unavailable because this runtime has no checkout; the new focused structural and browser regressions require exact-head GitHub Quality. Status: **Implemented on dev / In QA / not released**.
+
+**Release blocker:** No open PR; only `dev` and `main` exist. Both branch refs report unprotected, rulesets are empty, and branch-protection reads return HTTP 403 to this integration. No ordinary PR promotion is attempted until protections and eligible independent review can be verified. Main remains deployed at `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; this candidate is not live. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+**NEXT FIVE:**
+1. **P0 — Release governance (blocked):** admin-verifiable main required-check/no-force/no-delete protection and eligible independent review; then ordinary dev→main PR, exact-main Quality, Pages deployment and hosted critical-path smoke.
+2. **P1 — Spreadsheet structural-reference completion:** test first/last row and column edits with mixed anchors, delete-to-empty `#REF!`, escaped literals, and noncontiguous-sort rejection with byte-for-byte workbook rollback; run Chromium at desktop and 390px.
+3. **P1 — Seven-shape Truss boundary audit:** independent low-exponent, near-solid and thin-wall references for area/centroid/inertia/moduli/radii/principal invariants, invalid rollback and 390px keyboard behavior.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed-import rollback must preserve every existing workspace and selection.
+5. **P1 — ODE solver verification:** analytical forward/backward IVP references, unsupported-class diagnostics, tolerance/step convergence and 390px recovery.
+
+---
+
 **Follow-up fixture check:** the protected formula literal intentionally remains ="Obrien!A1" after rename, sort and row/column insertion; corrected both post-sort/post-column expected rows to match the unchanged literal. No behavior assertion was removed.
 
 ## 2026-11-24 — SPREADSHEET-RENAME-QUALIFIER-REWRITE-AND-CI-RECOVERY

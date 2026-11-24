@@ -53,6 +53,19 @@ def main():
         page.evaluate("MathStudio.dataTables.active.rows[0][0]='=A1'")
         assert page.evaluate("MathStudio.dataTables.calculate()[0][0]") == "#CYCLE"
 
+        # Scalar references must respect the same supported grid as aggregate ranges.
+        bounds_state = {"version": 1, "selected": "bounds", "tables": [
+            {"id": "bounds", "name": "Bounds", "columns": ["A", "B", "C", "D", "E", "F", "G"],
+             "rows": [[
+                 "=A0", "=A6001", "=AG1", "=AF6000", "=AF6000+1",
+                 "=SUM(AG1:AG1)", "=SUM(AF6000:AF6000)"
+             ]]}
+        ]}
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", bounds_state)
+        assert page.evaluate("MathStudio.dataTables.calculate()")[0] == [
+            "#REF!", "#REF!", "#REF!", 0, 1, "#REF!", 0
+        ]
+
         # Escaped apostrophes in sheet names are doubled inside single-quoted qualifiers.
         quoted_state = {"version": 1, "selected": "sheet-1", "tables": [
             {"id": "sheet-1", "name": "Obrien", "columns": ["A"],

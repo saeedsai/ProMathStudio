@@ -3,6 +3,7 @@ keyboard and mobile layout, import recovery, CSV/SVG output and console integrit
 import csv
 import io
 import json
+import math
 from pathlib import Path
 import os
 from playwright.sync_api import sync_playwright

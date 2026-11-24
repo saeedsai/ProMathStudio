@@ -2,6 +2,7 @@
 
 - Recover a positive representable L-angle minor principal moment when the normalized inertia determinant underflows, using the unscaled determinant only when finite and positive; retain explicit rejection when neither path is representable.
 - Added 100-digit Decimal-backed Node coverage and Chromium engine coverage at desktop/390px for a synthetic extreme-aspect L-angle whose I2 rounds to 8.35e-322 mm⁴.
+- Added the required Python math import to the new browser smoke assertion.
 - No geometry, FEM solver, or member-application behavior changed. Requires fresh exact-head Push/PR Quality; not released.
 
 ## 2026-11-24 — Truss hollow-circle fourth-power range safety (dev; exact-head QA pending)

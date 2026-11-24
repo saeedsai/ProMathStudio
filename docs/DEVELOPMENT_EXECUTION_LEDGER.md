@@ -1,3 +1,16 @@
+## 2026-11-24 — TRUSS-COMPOSITE-AXIS-SEPARATED-SCALE-RECOVERY
+
+Starting dev `540d86ad81b6b92269c2bb4b26a04b767fa289d8`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact starting dev Quality #45487505257 green **218/218**, zero failures/skips; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 16 ahead/0 behind. Both branches unprotected, rulesets empty, protection reads HTTP 403.
+
+Fixed channel/I-section extreme-aspect property loss when max(B,H)-only normalized Ixx underflowed despite representable physical subnormal Ixx, rx and Sx. Added an axis-separated x/B, y/H normalized rectangle tensor fallback only when the common-scale area/inertias fall below normal binary64; dimensional area/inertias and ordinary common-scale paths remain unchanged. Exponent-scaled products restore Sx/Sy without intermediate range loss. Added direct Node and mandatory 1280px/390px Chromium exact-binary64/120-digit Decimal regressions for B=1e150, H=1e-154, tw=1e-154, tf=4.9e-155; old rx/Sx errors >1e-11 are reproduced and corrected rx/ry/Sx/Sy match within 5e-13. Input immutability/frozen outputs and ordinary I/c parity covered. Actual modified production module passed isolated V8 checks within 2.3e-16; full Node/Chromium awaits new exact-head Quality. Updated Structural Truss guide, living plan and changelog. Implemented on dev, not released. Historical baseline unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority, status and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion, plus eligible independent approval; then use one ordinary dev→main PR and verify PR checks, main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Finish seven-shape Truss property audit (in progress):** complete remaining thin-wall/subnormal/high-scale references across rectangle, hollow rectangle, circles, channel, I-section and L-angle; verify area, centroid, inertias, principal properties, Sx/Sy and rx/ry, invalid rollback, selected-member isolation and 1280px/390px Chromium.
+3. **P1 — Spreadsheet grid-edge structural references:** row 6000/column AF insertion/deletion and #REF! recovery, reversed ranges, mixed anchors, rejected-sort byte-for-byte rollback and desktop/390px checks.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed imports preserve all workspaces, selections and prior results at desktop/390px.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, unsupported-class diagnostics, tolerance/step convergence, stale-export invalidation and desktop/390px recovery.
+
 ## 2026-11-24 — TRUSS-COMPOSITE-SUBNORMAL-SECTION-MODULUS
 
 Starting dev `de0ccc300fd81ceb72dfaecbd55aef1a46780f78`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact dev Quality #45477244278 green **218/218**, zero failures/skips; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 15 ahead/0 behind. Both refs unprotected, rulesets empty, protection reads HTTP 403.

@@ -1111,6 +1111,43 @@ test('channel and I-section section moduli use normalized geometry when physical
  }
 });
 
+test('channel and I-section use axis-separated normalization at extreme aspect ratios',()=>{
+ const minNormal=2.2250738585072014e-308;
+ const references=[
+  {shape:'channel',rx:2.9160475533388224e-155,ry:2.8867513459481288e149,
+   sx:1.6666533333333332e-159,sy:1.6333333333333333e145},
+  {shape:'i-section',rx:2.9160475533388224e-155,ry:2.8867513459481288e149,
+   sx:1.6666533333333332e-159,sy:1.6333333333333333e145}
+ ];
+ const relative=(actual,want,label)=>assert.ok(Number.isFinite(actual)&&want>0&&
+  Math.abs(actual/want-1)<=5e-13,label+' '+actual+' must match '+want);
+ for(const expected of references){
+  const dimensions={width:1e150,height:1e-154,webThickness:1e-154,flangeThickness:4.9e-155};
+  const original={...dimensions};
+  const section=fem.sectionProperties(expected.shape,dimensions);
+  assert.ok(Number.isFinite(section.area)&&section.area>0,expected.shape+' area must remain representable');
+  assert.ok(section.secondMoment>0&&section.secondMoment<minNormal,
+   expected.shape+' Ixx must remain positive and subnormal');
+  assert.ok(section.secondMomentPerpendicular>minNormal,
+   expected.shape+' Iyy must remain in the normal range');
+  const oldRx=Math.sqrt(section.secondMoment/section.area);
+  const oldSx=section.secondMoment/section.extremeFiberDistanceAboutX;
+  assert.ok(Math.abs(oldRx/expected.rx-1)>1e-11,
+   expected.shape+' rounded Ixx/A must reproduce the previous extreme-aspect radius error');
+  assert.ok(Math.abs(oldSx/expected.sx-1)>1e-11,
+   expected.shape+' rounded Ixx/c must reproduce the previous extreme-aspect modulus error');
+  relative(section.radiusOfGyrationX,expected.rx,expected.shape+' rx');
+  relative(section.radiusOfGyrationY,expected.ry,expected.shape+' ry');
+  relative(section.sectionModulusX,expected.sx,expected.shape+' Sx');
+  relative(section.sectionModulusY,expected.sy,expected.shape+' Sy');
+  assert.deepEqual(dimensions,original);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+ const ordinary=fem.sectionProperties('channel',{width:100,height:80,webThickness:10,flangeThickness:8});
+ assert.equal(ordinary.sectionModulusX,ordinary.secondMoment/ordinary.extremeFiberDistanceAboutX,
+  'ordinary channel sections retain the dimensional I/c path');
+});
+
 test('solid and concentric hollow section helpers return validated area and centroidal principal moments in mm units',()=>{
  const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
  assert.deepEqual(rectangle.centroid,{x:20,y:30});

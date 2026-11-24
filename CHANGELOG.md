@@ -1,3 +1,9 @@
+## 2026-11-24 — Composite section properties retain accuracy at extreme aspect ratios (dev; exact-head QA pending)
+
+- Channel and I-section now fall back from max-dimension normalization to independent x/B and y/H coordinate scales when a normalized area/inertia loses normal binary64 range; physical area/inertias and ordinary paths remain unchanged.
+- Added Node and 1280px/390px Chromium regressions for a 1e304 aspect ratio, reproducing >1e-11 thin-axis rx/Sx error and checking exact-binary64 120-digit Decimal rx/ry/Sx/Sy references within 5e-13.
+- Updated the Structural Truss guide, living development plan and execution ledger. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
 ## 2026-11-24 — Composite section moduli preserve subnormal-inertia precision (dev; exact-head QA pending)
 
 - Channel and I-section Sx/Sy now reuse normalized inertia and normalized extreme-fibre geometry when the corresponding physical Ixx/Iyy is subnormal; ordinary I/c behavior and dimensional area/inertias remain unchanged.

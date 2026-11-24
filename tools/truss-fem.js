@@ -303,6 +303,7 @@
       // representable. Recompute I/A in coordinates normalized by the largest length,
       // then restore that length once; keep the reported dimensional area and inertias intact.
       const lengthScale = Math.max(width, depth);
+      const MIN_NORMAL = 2.2250738585072014e-308;
       const normalizedMetrics = pieces.map(piece => {
         const normalizedPiece = {
           x:piece.x/lengthScale, y:piece.y/lengthScale,
@@ -314,6 +315,7 @@
           cy:normalizedPiece.y+normalizedPiece.height/2};
       });
       const normalizedArea = normalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+      let commonScaleResolved = false;
       if (normalizedArea > 0 && Number.isFinite(normalizedArea)) {
         const normalizedCentroidX = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/normalizedArea;
         const normalizedCentroidY = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/normalizedArea;
@@ -327,6 +329,9 @@
           const offset = piece.area*(piece.cx-normalizedCentroidX)*(piece.cx-normalizedCentroidX);
           return sum+local+offset;
         },0);
+        commonScaleResolved = normalizedArea >= MIN_NORMAL &&
+          normalizedIxx >= MIN_NORMAL && Number.isFinite(normalizedIxx) &&
+          normalizedIyy >= MIN_NORMAL && Number.isFinite(normalizedIyy);
         if (normalizedIxx > 0 && Number.isFinite(normalizedIxx)) {
           analyticRadiusOfGyrationX = finite(lengthScale*Math.sqrt(normalizedIxx/normalizedArea),
             'Radius of gyration rx (mm)');
@@ -354,6 +359,78 @@
           const normalizedModulus = normalizedIyy/normalizedExtremeFiberDistanceAboutY;
           const candidate = lengthScale*(lengthScale*(lengthScale*normalizedModulus));
           if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusY = candidate;
+        }
+      }
+      // A single max-dimension scale can underflow one normalized inertia for an
+      // extreme aspect ratio. Normalize each coordinate by its own section
+      // dimension so both axis tensors remain well-scaled before restoring units.
+      const scaleProduct = (...values) => {
+        let sign=1, mantissa=1, exponent=0;
+        for (const value of values) {
+          if (value === 0) return 0;
+          if (!Number.isFinite(value)) return value;
+          if (value < 0) sign=-sign;
+          const absolute=Math.abs(value);
+          let power=Math.floor(Math.log2(absolute));
+          let unit=Math.pow(2,power);
+          if (!Number.isFinite(unit)) { power=1023; unit=Math.pow(2,1023); }
+          else if (unit === 0) { power=-1074; unit=Number.MIN_VALUE; }
+          let part=absolute/unit;
+          if (part >= 2) { part/=2; power++; }
+          else if (part < 1) { part*=2; power--; }
+          mantissa*=part;
+          exponent+=power;
+          const adjustment=Math.floor(Math.log2(mantissa));
+          mantissa/=Math.pow(2,adjustment);
+          exponent+=adjustment;
+        }
+        if (exponent < -1075) return sign*0;
+        const magnitude=exponent < -1022
+          ? mantissa*Math.pow(2,exponent+1022)*MIN_NORMAL
+          : mantissa*Math.pow(2,exponent);
+        return sign*magnitude;
+      };
+      if (!commonScaleResolved) {
+        const axisNormalizedMetrics = pieces.map(piece => {
+          const normalizedPiece = {
+            x:piece.x/width, y:piece.y/depth,
+            width:piece.width/width, height:piece.height/depth
+          };
+          return {...normalizedPiece,
+            area:normalizedPiece.width*normalizedPiece.height,
+            cx:normalizedPiece.x+normalizedPiece.width/2,
+            cy:normalizedPiece.y+normalizedPiece.height/2};
+        });
+        const axisNormalizedArea = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+        if (axisNormalizedArea > 0 && Number.isFinite(axisNormalizedArea)) {
+          const axisNormalizedCentroidX = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/axisNormalizedArea;
+          const axisNormalizedCentroidY = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/axisNormalizedArea;
+          const axisNormalizedIxx = axisNormalizedMetrics.reduce((sum,piece)=>{
+            const dy=piece.cy-axisNormalizedCentroidY;
+            return sum+piece.area*(piece.height*piece.height/12+dy*dy);
+          },0);
+          const axisNormalizedIyy = axisNormalizedMetrics.reduce((sum,piece)=>{
+            const dx=piece.cx-axisNormalizedCentroidX;
+            return sum+piece.area*(piece.width*piece.width/12+dx*dx);
+          },0);
+          const axisExtremeY = Math.max(axisNormalizedCentroidY,1-axisNormalizedCentroidY);
+          const axisExtremeX = Math.max(axisNormalizedCentroidX,1-axisNormalizedCentroidX);
+          if (axisNormalizedIxx > 0 && Number.isFinite(axisNormalizedIxx)) {
+            const radius=depth*Math.sqrt(axisNormalizedIxx/axisNormalizedArea);
+            if (radius > 0 && Number.isFinite(radius)) analyticRadiusOfGyrationX=radius;
+            if (secondMoment < MIN_NORMAL && axisExtremeY > 0) {
+              const candidate=scaleProduct(width,depth,depth,axisNormalizedIxx/axisExtremeY);
+              if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusX=candidate;
+            }
+          }
+          if (axisNormalizedIyy > 0 && Number.isFinite(axisNormalizedIyy)) {
+            const radius=width*Math.sqrt(axisNormalizedIyy/axisNormalizedArea);
+            if (radius > 0 && Number.isFinite(radius)) analyticRadiusOfGyrationY=radius;
+            if (secondMomentPerpendicular < MIN_NORMAL && axisExtremeX > 0) {
+              const candidate=scaleProduct(width,width,depth,axisNormalizedIyy/axisExtremeX);
+              if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusY=candidate;
+            }
+          }
         }
       }
       centroid = {x:centroidX,y:centroidY};

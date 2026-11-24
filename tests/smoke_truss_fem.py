@@ -986,6 +986,41 @@ def main():
             assert abs(old_ry - expected_low_exponent_regular['ry']) > expected_low_exponent_regular['ry'] * 0.01
             assert abs(old_angle - expected_low_exponent_regular['angle']) > 1.0
 
+            # A max-dimension-only normalization loses the thin-axis inertia for B/H=1e304.
+            # Axis-separated coordinates must retain representable radii and section moduli.
+            extreme_aspect_composites = page.evaluate("""() => {
+                const dimensions = {
+                    width: 1e150, height: 1e-154,
+                    webThickness: 1e-154, flangeThickness: 4.9e-155
+                };
+                return ['channel', 'i-section'].map(shape => {
+                    const section = ProMathTrussFEM.sectionProperties(shape, dimensions);
+                    return {
+                        shape, area: section.area, ixx: section.secondMoment,
+                        iyy: section.secondMomentPerpendicular,
+                        sx: section.sectionModulusX, sy: section.sectionModulusY,
+                        rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY,
+                        oldRx: Math.sqrt(section.secondMoment / section.area),
+                        oldSx: section.secondMoment / section.extremeFiberDistanceAboutX
+                    };
+                });
+            }""")
+            extreme_aspect_reference = {
+                'rx': 2.9160475533388224e-155,
+                'ry': 2.8867513459481288e149,
+                'sx': 1.6666533333333332e-159,
+                'sy': 1.6333333333333333e145
+            }
+            for section in extreme_aspect_composites:
+                assert math.isfinite(section['area']) and section['area'] > 0, section
+                assert 0 < section['ixx'] < 2.2250738585072014e-308, section
+                assert section['iyy'] > 2.2250738585072014e-308, section
+                assert abs(section['oldRx'] / extreme_aspect_reference['rx'] - 1) > 1e-11, section
+                assert abs(section['oldSx'] / extreme_aspect_reference['sx'] - 1) > 1e-11, section
+                for key, expected in extreme_aspect_reference.items():
+                    assert math.isfinite(section[key]) and abs(section[key] / expected - 1) <= 5e-13, (
+                        section['shape'], key, section[key], expected, section)
+
             # Restore the ordinary rectangle setup for the missing-destination-field test.
             page.locator('#section-shape').select_option('rectangle')
             page.locator('#section-width').fill('40')

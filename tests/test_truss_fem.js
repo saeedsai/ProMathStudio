@@ -1000,6 +1000,36 @@ test('radius of gyration uses a finite quotient and a range-safe split-root fall
  close(slender.radiusOfGyrationY,2.8867513459481287e199,5e-13);
 });
 
+test('rectangular radii use geometry factors when subnormal inertias lose relative precision',()=>{
+ const relative=(got,want,label)=>assert.ok(Number.isFinite(got)&&want>0&&Math.abs(got/want-1)<=2e-15,
+  label+' '+got+' != '+want);
+ const solidDimensions={width:1e-6,height:3.5e-106};
+ const solid=fem.sectionProperties('rectangle',solidDimensions);
+ assert.equal(solid.secondMoment,Number.MIN_VALUE);
+ const solidExpectedX=solidDimensions.height/Math.sqrt(12);
+ assert.ok(Math.abs(Math.sqrt(solid.secondMoment/solid.area)/solidExpectedX-1)>0.1,
+  'rounded subnormal Ixx/A must expose the previous radius precision loss');
+ relative(solid.radiusOfGyrationX,solidExpectedX,'solid rectangle rx');
+ relative(solid.radiusOfGyrationY,solidDimensions.width/Math.sqrt(12),'solid rectangle ry');
+
+ const hollowDimensions={width:1e-6,height:3.5e-106,innerWidth:5e-7,innerHeight:1.75e-106};
+ const hollow=fem.sectionProperties('hollow-rectangle',hollowDimensions);
+ assert.equal(hollow.secondMoment,Number.MIN_VALUE);
+ const widthRatio=hollowDimensions.innerWidth/hollowDimensions.width;
+ const heightRatio=hollowDimensions.innerHeight/hollowDimensions.height;
+ const widthGap=(hollowDimensions.width-hollowDimensions.innerWidth)/hollowDimensions.width;
+ const heightGap=(hollowDimensions.height-hollowDimensions.innerHeight)/hollowDimensions.height;
+ const areaFactor=widthGap+widthRatio*heightGap;
+ const ixxFactor=widthGap+widthRatio*heightGap*(1+heightRatio+heightRatio*heightRatio);
+ const iyyFactor=heightGap+heightRatio*widthGap*(1+widthRatio+widthRatio*widthRatio);
+ const hollowExpectedX=hollowDimensions.height*Math.sqrt(ixxFactor/areaFactor/12);
+ const hollowExpectedY=hollowDimensions.width*Math.sqrt(iyyFactor/areaFactor/12);
+ assert.ok(Math.abs(Math.sqrt(hollow.secondMoment/hollow.area)/hollowExpectedX-1)>0.1,
+  'rounded hollow Ixx/A must expose the previous radius precision loss');
+ relative(hollow.radiusOfGyrationX,hollowExpectedX,'hollow rectangle rx');
+ relative(hollow.radiusOfGyrationY,hollowExpectedY,'hollow rectangle ry');
+});
+
 test('solid and concentric hollow section helpers return validated area and centroidal principal moments in mm units',()=>{
  const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
  assert.deepEqual(rectangle.centroid,{x:20,y:30});

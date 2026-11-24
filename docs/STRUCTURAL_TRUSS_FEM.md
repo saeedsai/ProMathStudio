@@ -37,6 +37,25 @@ For a solid circle, the centroidal inertia is evaluated as `(π/64)·Do²·Do²`
 
 A synthetic exact-binary64 regression uses `Do=2.45e77 mm`. The old `Do²·Do²` intermediate overflows, while area, Ixx/Iyy, section moduli and radii of gyration remain finite and match 120-digit Decimal references. A 40 mm reference remains unchanged, and the existing tiny-diameter underflow case remains rejected. These extreme dimensions are floating-point boundary tests only, not physically meaningful design examples.
 
+## Rectangular radius-of-gyration precision
+
+Solid and concentric hollow rectangles now calculate their radii directly from the section geometry instead of taking the square root of a rounded binary64 inertia/area quotient:
+
+\[
+r_x=h\sqrt{\frac{f_x}{12f_A}},\qquad
+r_y=b\sqrt{\frac{f_y}{12f_A}}
+\]
+
+For a solid rectangle, all three factors are 1. For a hollow rectangle, with \(r_b=b_i/b\), \(r_h=h_i/h\), \(g_b=(b-b_i)/b\), and \(g_h=(h-h_i)/h\):
+
+\[
+f_A=g_b+r_b g_h,\quad
+f_x=g_b+r_b g_h(1+r_h+r_h^2),\quad
+f_y=g_h+r_h g_b(1+r_b+r_b^2)
+\]
+
+This avoids propagating severe relative error from a subnormal inertia. A synthetic binary64 case with \(b=10^{-6}\) mm and \(h=3.5\times10^{-106}\) mm produces a representable \(I_{xx}=5\times10^{-324}\) mm⁴, but the rounded \(\sqrt{I_{xx}/A}\) is about 17.6% above the geometric radius. The hollow-rectangle counterpart has the same issue. The direct geometric radii retain the analytical reference while the reported inertia remains the correctly rounded binary64 value. These dimensions are floating-point stress tests only, not physical design examples.
+
 ## How to use
 
 Open `tools/truss-studio.html` in a browser (requires its adjacent `truss-fem.js` and `truss-fem-ui.js`). Select a reference model or edit **Joints**: unique ID, X/Y in metres, Fix X/ Fix Y, forces Fx/Fy in kN (positive right/up). In **Members**, enter start/end IDs, E in GPa, area in mm² and optional density in kg/m³. The **Section property helper** in the material breakdown calculates area, centroidal Ixx/Iyy, elastic section moduli Sx/Sy, extreme-fibre distances cX/cY and radii of gyration rx/ry for solid/hollow rectangles and circles, plus open channels, I-sections and L-angles. L-angles also report Ixy, principal I1/I2 and the major-principal-axis angle; the selected centroidal/principal moment is applied to one member. Sx = Ixx/cX and Sy = Iyy/cY; rx = sqrt(Ixx/A) and ry = sqrt(Iyy/A). Rectangle Ixx is about the horizontal centroidal axis parallel to width; circle I is about any centroidal diameter. These are geometric properties, not design resistances. Optional Euler estimate inputs are I (second moment of area, mm⁴) and K (dimensionless effective-length factor); provide both to calculate Pcr. Either property may be stored alone without producing an Euler estimate; the geometry/member preview remains available and the status explains when the pair is incomplete. Click Analyze truss. Results show member tension/compression force (kN), stress (MPa), joint displacements (mm), support reactions (kN), residual/energy verification and, when I/K are supplied, a compression-only ideal Euler comparison. Gray dotted members represent the original truss; colored amplified lines represent deformed geometry (green tension, orange compression). Change scale or label visibility, export the model as JSON, results as CSV, diagram as SVG; imported legacy SI JSON is converted explicitly. The import status identifies the file's units for optional density (kg/m³), second moment I (m⁴ in legacy SI or mm⁴ in Studio) and effective-length factor K (dimensionless), in addition to the core force, modulus and area units.

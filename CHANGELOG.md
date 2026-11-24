@@ -1,3 +1,9 @@
+## 2026-11-24 — Truss rectangular radii avoid subnormal-inertia precision loss (dev; exact-head QA pending)
+
+- Solid and concentric hollow rectangle radii of gyration now use dimensionless geometry factors instead of the rounded binary64 I/A quotient. This preserves accurate rx/ry when a representable Ixx is subnormal.
+- Added Node and 1280px/390px Chromium regressions for solid and hollow rectangles; the tests demonstrate the prior >10% radius error and verify independent geometric references.
+- Updated the Truss FEM guide, hourly plan and execution ledger. Implemented on dev; not released.
+
 ## 2026-11-24 — Spreadsheet structural edits preserve invalid grid references (dev; exact-head QA pending)
 
 - Row/column deletion no longer shifts an already out-of-grid scalar or aggregate reference into a valid cell (for example, A6001 stays #REF! after deleting row 1, and AG1 stays #REF! after deleting column A).

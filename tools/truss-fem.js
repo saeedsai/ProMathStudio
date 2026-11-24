@@ -102,6 +102,7 @@
     if (!rectangular && !circular && !composite && !angle) throw Error('Section shape must be rectangle, hollow-rectangle, solid-circle, hollow-circle, channel, i-section or l-angle.');
     if (!dimensions || typeof dimensions !== 'object' || Array.isArray(dimensions)) throw Error('Section dimensions must be an object.');
     let area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis, centroid = null;
+    let analyticRadiusOfGyrationX = null, analyticRadiusOfGyrationY = null;
     let productOfInertia = null, principalMomentMajor = null, principalMomentMinor = null, principalAxisAngleDegrees = null;
     let boundsWidth, boundsHeight, centroidX, centroidY;
     if (angle) {
@@ -259,6 +260,10 @@
         ? heightGap + heightRatio * widthGap * (1 + widthRatio + widthRatio * widthRatio)
         : 1;
       secondMomentPerpendicular = rectangleIyy({width,height:depth}, 'Rectangle Iyy (mm⁴)', iyyFactor);
+      // Compute rectangular radii from dimensionless geometry rather than rounded I/A.
+      // A representable subnormal inertia can be quantized enough to corrupt sqrt(I/A).
+      analyticRadiusOfGyrationX = finite(depth*Math.sqrt(ixxFactor/netAreaFactor/12), 'Radius of gyration rx (mm)');
+      analyticRadiusOfGyrationY = finite(width*Math.sqrt(iyyFactor/netAreaFactor/12), 'Radius of gyration ry (mm)');
       axis = 'centroidal axis parallel to width';
       perpendicularAxis = 'centroidal axis parallel to depth';
     } else {
@@ -315,8 +320,10 @@
         : Math.sqrt(moment) / Math.sqrt(area);
       return finite(value, label);
     };
-    const radiusOfGyrationX = radiusOfGyration(secondMoment, 'Radius of gyration rx (mm)');
-    const radiusOfGyrationY = radiusOfGyration(secondMomentPerpendicular, 'Radius of gyration ry (mm)');
+    const radiusOfGyrationX = analyticRadiusOfGyrationX === null
+      ? radiusOfGyration(secondMoment, 'Radius of gyration rx (mm)') : analyticRadiusOfGyrationX;
+    const radiusOfGyrationY = analyticRadiusOfGyrationY === null
+      ? radiusOfGyration(secondMomentPerpendicular, 'Radius of gyration ry (mm)') : analyticRadiusOfGyrationY;
     if (!(sectionModulusX > 0) || !(sectionModulusY > 0)) throw Error('Section modulus underflow; increase the section dimensions or wall thickness.');
     if (!(radiusOfGyrationX > 0) || !(radiusOfGyrationY > 0)) throw Error('Radius of gyration underflow; increase the section dimensions.');
     return Object.freeze({shape, area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis,

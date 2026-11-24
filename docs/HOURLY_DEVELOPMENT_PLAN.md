@@ -1,3 +1,28 @@
+## 2026-11-24 — TRUSS-RECTANGULAR-RADIUS-SUBNORMAL-PRECISION
+
+**Starting refs:** dev `168a2c2574f7be994d1ea2ac32ffc47e9e24dbfa`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, unified implementation plan, engineering architecture, Truss FEM guide, source/tests, branch refs, PRs and current CI/Pages evidence were inspected.
+
+**Starting exact-head QA:** dev Quality [#45410392286](https://github.com/saeedsai/ProMathStudio/actions/runs/45410392286) passed all 218 steps on the exact starting dev SHA, including spreadsheet browser steps 78–80 and Truss FEM analytical/browser steps 214–215. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) passed on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No open PRs; only `dev` and `main` exist.
+
+**Defect:** For a solid rectangle `b=1e-6 mm, h=3.5e-106 mm`, area remains positive and Ixx rounds to the smallest positive binary64 value. The old `sqrt(Ixx/A)` then overstates rx by about 17.6%, despite the exact geometric radius `h/sqrt(12)` being representable. A concentric hollow rectangle with `bi=5e-7 mm, hi=1.75e-106 mm` exhibits a similar error. Existing zero-underflow guards do not catch this because the inertia is subnormal but nonzero.
+
+**Fix:** Solid and concentric hollow rectangles now compute rx/ry from their exact dimensionless area/inertia factors and dimensions. Other section shapes retain the existing finite-quotient/split-root path. The standalone Truss Studio loads `tools/truss-fem.js` as an adjacent asset, so this bounded change does not modify the main `index.html` bundle.
+
+**Regression:** Added a direct Node regression for both solid and hollow rectangles. It asserts the subnormal Ixx boundary, demonstrates the previous >10% quotient error, and compares both radii to independent geometric formulas. Extended the registered Chromium Truss smoke at 1280px and 390px with the same cases. Updated the Truss FEM guide, changelog, plan and execution ledger.
+
+**Local validation:** Node v22.16.0 reproduced both old errors and confirmed the direct geometric references. The repository checkout is absent (`git rev-parse --show-toplevel` returned `fatal: not a git repository`), so the complete Node/Playwright suites could not run locally. Exact-head GitHub Quality is required for certification.
+
+**Release status:** Implemented on dev / exact-head QA pending / not released. Main remains deployed at `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Branch listing shows only dev/main and both are unprotected; rulesets are empty; branch-protection reads return HTTP 403 to the connected integration. Repository metadata reports account admin permission, but the integration has no branch-protection write action. No PR/merge attempted; no safeguards bypassed. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+**NEXT FIVE:**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main required-check/no-force/no-delete protection and an eligible independent review; then use one ordinary dev-to-main PR, verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Seven-shape Truss numerical audit:** add independent low-exponent, near-solid and thin-wall references for channel, I-section, L-angle, solid/hollow circles and remaining rectangular cases; verify area, centroid, inertias, moduli, radii, principal invariants, invalid rollback and 390px keyboard behavior.
+3. **P1 — Spreadsheet grid-edge structural references:** insert at row 6000/column AF and remove to verify #REF!/recovery, reversed ranges, mixed absolute anchors and byte-for-byte rollback at desktop/390px.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed-import rollback preserves every workspace, selection and prior result.
+5. **P1 — ODE solver verification:** analytical forward/backward IVP references, unsupported-class diagnostics, tolerance/step convergence, error recovery and 390px interaction.
+
+---
+
 ## 2026-11-24 — STRUCTURAL-EDITS-PRESERVE-INVALID-SPREADSHEET-REFERENCES
 
 **Starting refs:** dev 6d9ab6911acf8f2ce1f67c17133f74127b677b3f, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, docs/UNIFIED_MASTER_IMPLEMENTATION_PLAN.md, this living plan, the frozen 2026-10-26 inventory, Data Tables source/bundle/tests, branch refs, open PRs and latest exact-head CI/Pages evidence.

@@ -79,6 +79,35 @@ def main():
             assert abs(slender['radiusOfGyrationY'] / 2.8867513459481287e199 - 1) <= 5e-13
             assert abs(slender['radiusOfGyrationX'] / 5.773502691896258e49 - 1) <= 5e-13
 
+            # Subnormal Ixx values remain finite but are too coarsely quantized for sqrt(I/A).
+            # Rectangular radii must use the unrounded dimensionless geometry at both viewports.
+            thin = page.evaluate("""() => {
+                const solid = ProMathTrussFEM.sectionProperties('rectangle', {width: 1e-6, height: 3.5e-106});
+                const hollow = ProMathTrussFEM.sectionProperties('hollow-rectangle', {
+                    width: 1e-6, height: 3.5e-106, innerWidth: 5e-7, innerHeight: 1.75e-106
+                });
+                return {
+                    solid: {area: solid.area, ixx: solid.secondMoment, rx: solid.radiusOfGyrationX, ry: solid.radiusOfGyrationY},
+                    hollow: {area: hollow.area, ixx: hollow.secondMoment, rx: hollow.radiusOfGyrationX, ry: hollow.radiusOfGyrationY}
+                };
+            }""")
+            assert thin['solid']['ixx'] == math.ulp(0.0)
+            assert thin['hollow']['ixx'] == math.ulp(0.0)
+            assert abs(thin['solid']['rx'] / (3.5e-106 / math.sqrt(12)) - 1) <= 2e-15
+            assert abs(thin['solid']['ry'] / (1e-6 / math.sqrt(12)) - 1) <= 2e-15
+            assert abs(math.sqrt(thin['solid']['ixx'] / thin['solid']['area']) /
+                       (3.5e-106 / math.sqrt(12)) - 1) > 0.1
+            bw, bh, bi, hi = 1e-6, 3.5e-106, 5e-7, 1.75e-106
+            rb, rh = bi / bw, hi / bh
+            gb, gh = (bw - bi) / bw, (bh - hi) / bh
+            fa = gb + rb * gh
+            fx = gb + rb * gh * (1 + rh + rh * rh)
+            fy = gh + rh * gb * (1 + rb + rb * rb)
+            assert abs(thin['hollow']['rx'] / (bh * math.sqrt(fx / fa / 12)) - 1) <= 2e-15
+            assert abs(thin['hollow']['ry'] / (bw * math.sqrt(fy / fa / 12)) - 1) <= 2e-15
+            assert abs(math.sqrt(thin['hollow']['ixx'] / thin['hollow']['area']) /
+                       (bh * math.sqrt(fx / fa / 12)) - 1) > 0.1
+
             # A very thin concentric annulus must retain high-precision section properties
             # through the actual helper preview and selected-member application at both widths.
             page.locator('#section-member').select_option('AB')

@@ -1,3 +1,9 @@
+## 2026-11-24 — Composite section moduli preserve subnormal-inertia precision (dev; exact-head QA pending)
+
+- Channel and I-section Sx/Sy now reuse normalized inertia and normalized extreme-fibre geometry when the corresponding physical Ixx/Iyy is subnormal; ordinary I/c behavior and dimensional area/inertias remain unchanged.
+- Added direct Node and registered 1280px/390px Chromium regressions with exact-binary64 120-digit Decimal references; former I/c errors of 5–24% are reproduced and corrected results are checked within 5e-13 relative error.
+- Updated the Structural Truss guide, living plan and execution ledger. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
 ## 2026-11-24 — Circular section moduli avoid subnormal-inertia quantization (dev; exact-head QA pending)
 
 - Solid and concentric hollow circle Sx/Sy now use the factored analytic (π/32)·Do³·inertiaFactor only when dimensional inertia is subnormal; ordinary sections retain I/c.

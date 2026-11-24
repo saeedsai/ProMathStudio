@@ -1,3 +1,26 @@
+## 2026-11-24 — TRUSS-COMPOSITE-SUBNORMAL-SECTION-MODULUS
+
+**Starting refs:** dev `de0ccc300fd81ceb72dfaecbd55aef1a46780f78`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the frozen 2026-10-26 inventory, unified master plan, engineering architecture/workspace plan, toolbox catalog, living plan, Truss source/tests/guide, branch refs, open PRs and exact-head CI/Pages evidence. Used the connected GitHub integration; no local checkout was assumed.
+
+**Starting QA:** dev Quality [#45477244278](https://github.com/saeedsai/ProMathStudio/actions/runs/45477244278) passed all **218/218** steps on exact SHA `de0ccc300fd81ceb72dfaecbd55aef1a46780f78`, zero failures/skips. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No open PRs; only dev/main exist; dev is 15 ahead and 0 behind. Both refs are unprotected, rulesets are empty, and branch-protection reads return HTTP 403 to the connected integration; no protection-write action is exposed.
+
+**Defect:** The channel/I-section normalized path already retained accurate radii, but section moduli still fell back to physical I/c. At B=100·10^-82.2 mm, H=80·10^-82.2 mm, tw=10·10^-82.2 mm and tf=8·10^-82.2 mm, positive Ixx/Iyy are subnormal while Sx/Sy remain representable. Rounded I/c errors were -5.15% in Sx for both shapes, +23.90% in channel Sy and -6.85% in I-section Sy.
+
+**Fix:** Reuse normalized composite Ixx/Iyy and normalized extreme-fibre distances to calculate Sx=L³·IxxNorm/cYNorm and Sy=L³·IyyNorm/cXNorm, multiplying the normalized ratio before restoring the three length scales. Each axis switches only when its physical inertia is subnormal and the normalized candidate is positive/finite; ordinary I/c paths and dimensional area/inertia outputs are unchanged.
+
+**Regression:** Added a direct Node test and extended the registered Chromium Truss smoke at 1280px and 390px. Tests require positive subnormal Ixx/Iyy, reproduce >4% old I/c errors, compare exact-binary64 120-digit Decimal references within 5e-13 relative error, and verify input immutability/frozen outputs. References: channel Sx=1.444703108127935e-242, Sy=9.048880575086456e-243 mm³; I-section Sx=1.444703108127935e-242, Sy=6.725157272628184e-243 mm³.
+
+**Validation:** Independent Decimal calculations from exact binary64 dimensions and isolated V8 normalized-geometry calculations matched all four references within 5e-16 relative error. The full Node/Chromium suites cannot run in this checkout-less execution runtime; the new exact-head GitHub Quality run must certify them.
+
+**Release state:** implemented on dev only; not released. Main and Pages remain on the verified main SHA above. No PR opened because enforceable protection and eligible independent review cannot be verified. Historical baseline remains **166 gaps / 95 partial**, unchanged.
+
+**NEXT FIVE (priority, status and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion, plus eligible independent approval; then use one ordinary dev→main PR and verify PR checks, new main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Finish seven-shape Truss property audit (in progress):** remaining thin-wall/subnormal/high-scale cases across rectangle, hollow rectangle, circles, channel, I-section and L-angle; independent area/centroid/inertia/principal/Sx/Sy/rx/ry references, invalid rollback and selected-member isolation; Node and 1280px/390px Chromium.
+3. **P1 — Spreadsheet grid-edge structural references:** row 6000/column AF insert/delete and #REF! recovery, reversed ranges, mixed anchors, rejected-sort byte-for-byte rollback and desktop/390px checks.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed imports preserve all workspaces, selections and prior results at desktop/390px.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, unsupported-class diagnostics, tolerance/step convergence, stale-export invalidation and desktop/390px recovery.
+
 ## 2026-11-24 — TRUSS-CIRCULAR-SUBNORMAL-SECTION-MODULUS
 
 **Starting refs:** dev b433c0db406e72a74488fd2c20fd4d473af81b29, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, the frozen 2026-10-26 inventory, this living plan, engineering architecture/workspace plan, toolbox catalog, Truss FEM source/tests/guide, branch refs, open PRs, exact-head Quality and main Pages evidence. Used the connected GitHub integration for repository inspection and the atomic dev commit; no local checkout was assumed.

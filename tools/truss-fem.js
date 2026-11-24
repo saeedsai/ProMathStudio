@@ -335,6 +335,26 @@
           analyticRadiusOfGyrationY = finite(lengthScale*Math.sqrt(normalizedIyy/normalizedArea),
             'Radius of gyration ry (mm)');
         }
+        // A subnormal dimensional inertia is too coarsely quantized for I/c.
+        // Reuse the normalized tensor and extreme-fibre distance, then restore L³.
+        const normalizedBoundsWidth = width/lengthScale;
+        const normalizedBoundsHeight = depth/lengthScale;
+        const normalizedExtremeFiberDistanceAboutX =
+          Math.max(normalizedCentroidY, normalizedBoundsHeight-normalizedCentroidY);
+        const normalizedExtremeFiberDistanceAboutY =
+          Math.max(normalizedCentroidX, normalizedBoundsWidth-normalizedCentroidX);
+        if (secondMoment < 2.2250738585072014e-308 &&
+            normalizedIxx > 0 && normalizedExtremeFiberDistanceAboutX > 0) {
+          const normalizedModulus = normalizedIxx/normalizedExtremeFiberDistanceAboutX;
+          const candidate = lengthScale*(lengthScale*(lengthScale*normalizedModulus));
+          if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusX = candidate;
+        }
+        if (secondMomentPerpendicular < 2.2250738585072014e-308 &&
+            normalizedIyy > 0 && normalizedExtremeFiberDistanceAboutY > 0) {
+          const normalizedModulus = normalizedIyy/normalizedExtremeFiberDistanceAboutY;
+          const candidate = lengthScale*(lengthScale*(lengthScale*normalizedModulus));
+          if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusY = candidate;
+        }
       }
       centroid = {x:centroidX,y:centroidY};
       axis = 'centroidal horizontal axis (Ixx)';

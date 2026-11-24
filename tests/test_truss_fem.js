@@ -1081,6 +1081,36 @@ test('channel and I-section radii use normalized geometry when physical inertias
  }
 });
 
+test('channel and I-section section moduli use normalized geometry when physical inertias are subnormal',()=>{
+ const scale=10**-82.2;
+ const references=[
+  {shape:'channel',sx:1.444703108127935e-242,sy:9.048880575086456e-243},
+  {shape:'i-section',sx:1.444703108127935e-242,sy:6.725157272628184e-243}
+ ];
+ for(const expected of references){
+  const dimensions={width:100*scale,height:80*scale,webThickness:10*scale,flangeThickness:8*scale};
+  const original={...dimensions};
+  const section=fem.sectionProperties(expected.shape,dimensions);
+  assert.ok(Number.isFinite(section.area)&&section.area>0,expected.shape+' area must remain representable');
+  assert.ok(section.secondMoment>0&&section.secondMoment<16*Number.MIN_VALUE,
+   expected.shape+' Ixx must remain positive and subnormal');
+  assert.ok(section.secondMomentPerpendicular>0&&section.secondMomentPerpendicular<16*Number.MIN_VALUE,
+   expected.shape+' Iyy must remain positive and subnormal');
+  const oldSx=section.secondMoment/section.extremeFiberDistanceAboutX;
+  const oldSy=section.secondMomentPerpendicular/section.extremeFiberDistanceAboutY;
+  assert.ok(Math.abs(oldSx/expected.sx-1)>0.04,
+   expected.shape+' rounded Ixx/c must reproduce the previous section-modulus error');
+  assert.ok(Math.abs(oldSy/expected.sy-1)>0.04,
+   expected.shape+' rounded Iyy/c must reproduce the previous section-modulus error');
+  assert.ok(Math.abs(section.sectionModulusX/expected.sx-1)<=5e-13,
+   expected.shape+' Sx '+section.sectionModulusX+' must match the exact-binary64 Decimal reference '+expected.sx);
+  assert.ok(Math.abs(section.sectionModulusY/expected.sy-1)<=5e-13,
+   expected.shape+' Sy '+section.sectionModulusY+' must match the exact-binary64 Decimal reference '+expected.sy);
+  assert.deepEqual(dimensions,original);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+});
+
 test('solid and concentric hollow section helpers return validated area and centroidal principal moments in mm units',()=>{
  const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
  assert.deepEqual(rectangle.centroid,{x:20,y:30});

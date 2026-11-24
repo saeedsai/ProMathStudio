@@ -1,3 +1,11 @@
+## 2026-11-24 — TRUSS-COMPOSITE-SUBNORMAL-SECTION-MODULUS
+
+Starting dev `de0ccc300fd81ceb72dfaecbd55aef1a46780f78`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact dev Quality #45477244278 green **218/218**, zero failures/skips; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 15 ahead/0 behind. Both refs unprotected, rulesets empty, protection reads HTTP 403.
+
+Fixed channel/I-section Sx/Sy precision when dimensional Ixx/Iyy are subnormal. Reuse normalized composite inertias and normalized extreme-fibre distances to evaluate L³·I/c without dividing quantized physical inertias. Old errors: Sx -5.15% for both, channel Sy +23.90%, I-section Sy -6.85%. Added Node and registered Chromium 1280px/390px exact-binary64/120-digit Decimal regressions, immutability and frozen-output checks. Updated Truss guide, living plan and changelog. Independent Decimal and isolated V8 normalized calculations matched references within 5e-16; full Node/Chromium run awaits exact-head GitHub Quality because no local checkout is available. Implemented on dev, not released. Historical baseline unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 release governance: verifiable main protections, eligible independent review, ordinary PR, exact checks and Pages verification. (2) P1 finish seven-shape Truss thin-wall/subnormal/high-scale audit with independent references, invalid rollback, selected-member isolation and desktop/390px tests. (3) P1 spreadsheet row-6000/column-AF grid-edge insert/delete, #REF! recovery, mixed anchors, reversed ranges and atomic rollback. (4) P1 current/legacy Matrix/Graph/Table round-trips with malformed-import rollback and focus/mobile checks. (5) P1 ODE analytical forward/backward references, convergence, unsupported classes, stale exports and mobile recovery.
+
 ## 2026-11-24 — TRUSS-CIRCULAR-SUBNORMAL-SECTION-MODULUS
 
 Starting dev b433c0db406e72a74488fd2c20fd4d473af81b29, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; exact starting dev Quality #45467047779 green 218/218; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 14 ahead/0 behind. Both refs unprotected, rulesets empty, protection read HTTP 403.

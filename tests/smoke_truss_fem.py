@@ -212,6 +212,36 @@ def main():
                 assert abs(result['rx'] / result['expected']['rx'] - 1) <= 5e-13, (shape, result)
                 assert abs(result['ry'] / result['expected']['ry'] - 1) <= 5e-13, (shape, result)
 
+            # Composite Sx/Sy must use normalized inertia and extreme-fibre geometry when
+            # dimensional inertias are subnormal; I/c previously lost 5–24% here.
+            composite_moduli = page.evaluate("""() => {
+                const scale = 10 ** -82.2;
+                const references = {
+                    channel: {sx: 1.444703108127935e-242, sy: 9.048880575086456e-243},
+                    'i-section': {sx: 1.444703108127935e-242, sy: 6.725157272628184e-243}
+                };
+                return Object.fromEntries(Object.entries(references).map(([shape, expected]) => {
+                    const section = ProMathTrussFEM.sectionProperties(shape, {
+                        width: 100 * scale, height: 80 * scale,
+                        webThickness: 10 * scale, flangeThickness: 8 * scale
+                    });
+                    return [shape, {
+                        area: section.area, ixx: section.secondMoment, iyy: section.secondMomentPerpendicular,
+                        oldSx: section.secondMoment / section.extremeFiberDistanceAboutX,
+                        oldSy: section.secondMomentPerpendicular / section.extremeFiberDistanceAboutY,
+                        sx: section.sectionModulusX, sy: section.sectionModulusY, expected
+                    }];
+                }));
+            }""")
+            for shape, result in composite_moduli.items():
+                assert result['area'] > 0 and math.isfinite(result['area']), (shape, result)
+                assert 0 < result['ixx'] < 16 * math.ulp(0.0), (shape, result)
+                assert 0 < result['iyy'] < 16 * math.ulp(0.0), (shape, result)
+                assert abs(result['oldSx'] / result['expected']['sx'] - 1) > 0.04, (shape, result)
+                assert abs(result['oldSy'] / result['expected']['sy'] - 1) > 0.04, (shape, result)
+                assert abs(result['sx'] / result['expected']['sx'] - 1) <= 5e-13, (shape, result)
+                assert abs(result['sy'] / result['expected']['sy'] - 1) <= 5e-13, (shape, result)
+
             # A very thin concentric annulus must retain high-precision section properties
             # through the actual helper preview and selected-member application at both widths.
             page.locator('#section-member').select_option('AB')

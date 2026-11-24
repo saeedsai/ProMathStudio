@@ -16,24 +16,36 @@ def main():
         state = {"version":1,"selected":"sheet-1","tables":[
             {"id":"sheet-1","name":"Data1","columns":["A","B","C"],"rows":[
                 ["20","=A1+1","=SUM(A1:A3)"],["5","=A2+1",""],["10","=A3+1",""]]},
-            {"id":"sheet-2","name":"Other","columns":["A","B"],"rows":[
-                ["=Data1!$A$1+Data1!A2","='Data1'!B3"]]}]}
+            {"id":"sheet-2","name":"Other","columns":["A","B","C","D"],"rows":[
+                ["=Data1!$A$1+Data1!A2","='Data1'!B3",'="A1"','="A""1"']]}]}
         page.evaluate("(s) => MathStudio.dataTables.restoreState(s)", state)
-        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == [25,11]
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0].slice(0,2)") == [25,11]
+        # Structural row/column edits must not rewrite A1-like text inside quoted formula literals.
+        page.evaluate("MathStudio.dataTables.insertRow(0)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(0,2)") == ["=Data1!$A$2+Data1!A3","='Data1'!B4"]
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(2)") == ['="A1"','="A""1"']
+        page.evaluate("MathStudio.dataTables.deleteRow(0)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(0,2)") == ["=Data1!$A$1+Data1!A2","='Data1'!B3"]
+        page.evaluate("MathStudio.dataTables.insertColumn(0)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(0,2)") == ["=Data1!$B$1+Data1!B2","='Data1'!C3"]
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(2)") == ['="A1"','="A""1"']
+        page.evaluate("MathStudio.dataTables.deleteColumn(0)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(0,2)") == ["=Data1!$A$1+Data1!A2","='Data1'!B3"]
         page.evaluate("document.getElementById('dt-sortcol').value='0'")
         page.evaluate("document.getElementById('dt-sort').click()")
         assert page.evaluate("MathStudio.dataTables.active.rows.map(r => r[0])") == ["5","10","20"]
         assert page.evaluate("MathStudio.dataTables.active.rows.map(r => r[1])") == ["=A1+1","=A2+1","=A3+1"]
         assert page.evaluate("MathStudio.dataTables.active.rows[2][2]") == "=SUM(A1:A3)"
         assert page.evaluate("MathStudio.dataTables.calculate()[2][2]") == 35
-        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == ["=Data1!$A$3+Data1!A1","='Data1'!B2"]
-        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == [25,11]
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == ["=Data1!$A$3+Data1!A1","='Data1'!B2",'="A1"','="A""1"']
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0].slice(0,2)") == [25,11]
         saved = page.evaluate("MathStudio.dataTables.exportState()")
         page.evaluate("(s) => MathStudio.dataTables.restoreState(s)", saved)
-        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == [25,11]
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0].slice(0,2)") == [25,11]
         page.evaluate("MathStudio.dataTables.sortRows(0,'desc')")
         assert page.evaluate("MathStudio.dataTables.active.rows.map(r => r[0])") == ["20","10","5"]
-        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == [25,11]
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0].slice(0,2)") == [25,11]
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(2)") == ['="A1"','="A""1"']
         page.evaluate("(s) => MathStudio.dataTables.restoreState(s)", state)
         page.evaluate("MathStudio.dataTables.active.rows[0][2]='=SUM(A1:A2)'")
         before = page.evaluate("MathStudio.dataTables.exportState()")

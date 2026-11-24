@@ -128,9 +128,10 @@ def main():
         # --- Catalog routes: simulations are available tools; unrelated planned tools stay planned.
         statuses = page.evaluate("Object.fromEntries(MathStudio.engineeringCatalog.tools.map(t=>[t.id,t.status]))")
         for tool in ("structures.beam.deflection", "aerospace.orbit.propagation", "circuits.rlc.series.transient",
-                     "mechanics.projectile.drag", "thermal.conduction.rod"):
+                     "mechanics.projectile.drag", "thermal.conduction.rod", "thermal.cycle.analysis",
+                     "circuits.network.analysis", "fluids.pipe.network", "electronics.digital.logic"):
             assert statuses[tool] == "available", tool
-        for tool in ("circuits.network.analysis", "fluids.pipe.network", "thermal.cycle.analysis"):
+        for tool in ("signals.spectral.analysis",):  # the only catalog entry still planned
             assert statuses[tool] == "planned", tool
         page.locator('[data-workspace="engineering"]').click()
         status = page.locator("#eng-visual-status")

@@ -1,3 +1,10 @@
+## 2026-11-24 — Spreadsheet sheet names with escaped apostrophes (dev; exact-head QA pending)
+
+- Table rename now preserves internal apostrophes; formulas refer to those names using doubled apostrophes inside single quotes, e.g. `='O''Brien'!A1` and `=SUM('O''Brien'!A1:A3)`.
+- Applied the same qualifier grammar/decoder to scalar cells, aggregate ranges, structural row/column edits and sorting. Mixed anchors, reversed cross-sheet ranges and quoted formula literals are covered.
+- Extended the registered Chromium spreadsheet-reference smoke and added structural/source-bundle parity coverage. Updated the Data Tables guide and synchronized modular source with standalone `index.html`.
+- Implemented on dev only; exact-head full Quality and the ordinary protected, independently reviewed PR gate are still required before release.
+
 ## 2026-11-24 — Spreadsheet aggregate structural-test recovery (dev; exact-head QA pending)
 
 - Updated the numeric-hardening structural test to match the new scaled compensated AVERAGE/AVG and safe MEDIAN midpoint implementation rather than asserting the retired expression.

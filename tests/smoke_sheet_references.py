@@ -52,6 +52,57 @@ def main():
         assert page.evaluate("MathStudio.dataTables.active.rows[0].every(v => v==='')") is True
         page.evaluate("MathStudio.dataTables.active.rows[0][0]='=A1'")
         assert page.evaluate("MathStudio.dataTables.calculate()[0][0]") == "#CYCLE"
+
+        # Escaped apostrophes in sheet names are doubled inside single-quoted qualifiers.
+        quoted_state = {"version": 1, "selected": "sheet-1", "tables": [
+            {"id": "sheet-1", "name": "Obrien", "columns": ["A"],
+             "rows": [["20"], ["5"], ["10"]]},
+            {"id": "sheet-2", "name": "Summary", "columns": ["A", "B", "C", "D", "E"],
+             "rows": [[
+                 "='O''Brien'!$A$1+'O''Brien'!A2",
+                 "=SUM('O''Brien'!$A$1:A3)",
+                 "=SUM('O''Brien'!A3:$A$1)",
+                 "='O''Brien'!A3",
+                 '="O\'\'Brien!A1"'
+             ]]}
+        ]}
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", quoted_state)
+        page.evaluate("""() => {
+            window.prompt = () => "O'Brien";
+            document.getElementById('dt-rename').click();
+        }""")
+        assert page.evaluate("MathStudio.dataTables.tables[0].name") == "O'Brien"
+        summary = "MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]"
+        assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
+        page.evaluate("MathStudio.dataTables.sortRows(0, 'asc')")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == [
+            "='O''Brien'!$A$3+'O''Brien'!A1",
+            "=SUM('O''Brien'!$A$1:A3)",
+            "=SUM('O''Brien'!A3:$A$1)",
+            "='O''Brien'!A2",
+            '="O\'\'Brien!A1"'
+        ]
+        assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
+        page.evaluate("MathStudio.dataTables.insertRow(0)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0][:4]") == [
+            "='O''Brien'!$A$4+'O''Brien'!A2",
+            "=SUM('O''Brien'!$A$2:A4)",
+            "=SUM('O''Brien'!A4:$A$2)",
+            "='O''Brien'!A3"
+        ]
+        page.evaluate("MathStudio.dataTables.insertColumn(0)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == [
+            "='O''Brien'!$B$4+'O''Brien'!B2",
+            "=SUM('O''Brien'!$B$2:B4)",
+            "=SUM('O''Brien'!B4:$B$2)",
+            "='O''Brien'!B3",
+            '="O\'\'Brien!A1"'
+        ]
+        assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
+        saved = page.evaluate("MathStudio.dataTables.exportState()")
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", saved)
+        assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
+
         assert not errors, errors
         browser.close()
     print("PASS structural references, cross-sheet, absolute anchors, #REF!, project round-trip and context row index")

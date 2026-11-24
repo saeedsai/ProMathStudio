@@ -1,3 +1,26 @@
+## 2026-11-24 — SPREADSHEET-ESCAPED-APOSTROPHE-SHEET-REFERENCES
+
+**Starting refs:** dev `21688a3f534db3691c303462cf294a49f15feee1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root AGENTS.md, this plan, the frozen 2026-10-26 inventory, source/bundle contract, reference tests, exact-head Actions, open PRs and Pages evidence were inspected first.
+
+**Starting exact-head evidence:** dev Quality [#45383550606](https://github.com/saeedsai/ProMathStudio/actions/runs/45383550606) completed successfully on `21688a3f534db3691c303462cf294a49f15feee1`, 218/218 steps with no failures or skips. This includes the repair of the prior stale structural assertion failure [#45382903210](https://github.com/saeedsai/ProMathStudio/actions/runs/45382903210). Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+
+**Change:** Sheet names may now contain internal apostrophes. Formula qualifiers use the spreadsheet convention of doubling apostrophes inside single quotes, for example `='O''Brien'!A1` and `=SUM('O''Brien'!A1:A3)`. The same decoder and escaped-quote grammar are used by scalar references, aggregate ranges, row/column insertion/deletion, and sorting. Table rename preserves internal apostrophes; unsupported punctuation is still sanitized. Mixed absolute/relative anchors, reversed cross-sheet ranges and double-quoted formula literals are covered.
+
+**Regression:** Extended the already registered Chromium `tests/smoke_sheet_references.py` to rename a table to O'Brien, evaluate scalar and forward/reversed aggregate references, sort rows while preserving referenced identities, insert a row and column, preserve a quoted literal, and round-trip the workbook. Added `tests/test_sheet_quoted_names.py` for qualifier decoding, source grammar and standalone bundle parity. Updated `docs/DATA_TABLES.md`, synchronized `src/data-tables.js` with the matching inline module in `index.html`, and updated this plan, execution ledger and changelog atomically.
+
+**Validation:** Isolated V8 regex/qualifier checks pass for `'O''Brien'!$A$1`, `'O''Brien'!$A$1:A3`, reversed ranges and a quoted name with spaces. The pre-change source and inline bundle were byte-identical; the patched inline module is byte-identical to the patched source. This runtime has no repository checkout, so local Python/Chromium commands cannot run; exact-head GitHub Quality is pending for the new dev commit. Status: **Implemented on dev / In QA / not released**.
+
+**Release governance:** No open PR; only `dev` and `main` exist. Both branches are reported unprotected, the rulesets list is empty and branch-protection reads return HTTP 403 to this integration. No PR or merge is attempted without verifiable protections and eligible independent review. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+**NEXT FIVE:**
+1. **P0 — Exact-head dev Quality.** Require all 218 structural/Node/Chromium checks green with zero skips; specifically verify escaped sheet-name scalar/range parsing, sorting, row/column edits and source/bundle parity.
+2. **P0 — Safe release governance.** Obtain admin-capable verification/configuration of main required checks, no direct pushes/force/deletion, and eligible independent review; then use an ordinary dev→main PR and verify main Quality, Pages and hosted critical paths.
+3. **P1 — Remaining spreadsheet reference boundaries.** Test escaped-quote literals, mixed anchors at first/last row and column, reversed cross-sheet ranges, delete-to-empty `#REF!`, and transactional sort rollback with exact identity preservation.
+4. **P1 — Seven-shape Truss numerical boundaries.** Add independent low-exponent, near-solid and thin-wall references for area, centroid, inertia, moduli, radii and principal invariants; test invalid rollback and 390px keyboard behavior.
+5. **P1 — Saved projects and ODE compatibility.** Verify current/legacy Matrix, Graph and Table round-trips, malformed-import rollback, forward/backward analytical ODE references and mobile recovery.
+
+---
+
 ## 2026-11-24 — SPREADSHEET-AGGREGATE-STRUCTURAL-TEST-RECOVERY
 
 **Starting refs:** dev 2bd810a0cd6a56ad9eff9d5ea70c95b4596add05; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, the living plan, frozen inventory, exact-head Actions, open PRs and Pages state before repairing the failed candidate.

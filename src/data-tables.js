@@ -406,9 +406,11 @@
     const unique=uniqueName(name);const table={id:'sheet-'+(serial++),name:unique,columns:columns.map(String),rows:rows.map(r=>columns.map((_,i)=>r[i]===undefined?'':String(r[i])))};
     validate(table);tables.push(table);selected=table.id;render();save();return table;
   };
-  const uniqueName=(n,excludeId=null)=>{let base=String(n||'Table').replace(/[^a-zA-Z0-9_ ]/g,'_').trim().slice(0,44)||'Table';let title=base,number=2;while(tables.some(t=>t.id!==excludeId&&t.name.toLowerCase()===title.toLowerCase()))title=base+'_'+number++;return title;};
+  const uniqueName=(n,excludeId=null)=>{let base=String(n||'Table').replace(/[^a-zA-Z0-9_ ']/g,'_').trim().replace(/^'+|'+$/g,'').slice(0,44)||'Table';let title=base,number=2;while(tables.some(t=>t.id!==excludeId&&t.name.toLowerCase()===title.toLowerCase()))title=base+'_'+number++;return title;};
   const validate=t=>{if(!t||!Array.isArray(t.columns)||!Array.isArray(t.rows)||!t.columns.length||t.columns.length>MAX_COLUMNS||t.rows.length>MAX_ROWS)throw Error('Table exceeds 32 columns or 6,000 rows.');for(const row of t.rows)if(!Array.isArray(row)||row.length!==t.columns.length)throw Error('Inconsistent data row width.');};
   const getByName=name=>tables.find(t=>t.name.toLowerCase()===String(name).toLowerCase());
+  // Sheet qualifiers use Excel-style doubled apostrophes inside single quotes.
+  const sheetNameFromQualifier=qualifier=>{const raw=String(qualifier||'').replace(/!$/,'');return raw.startsWith("'")&&raw.endsWith("'")?raw.slice(1,-1).replace(/''/g,"'"):raw;};
   const value=(t,r,c,stack=new Set())=>{
     if(!t||r<0||r>=t.rows.length||c<0||c>=t.columns.length)return 0;
     const raw=t.rows[r][c];if(!String(raw).startsWith('='))return raw;
@@ -418,10 +420,10 @@
   };
   // Structural edits preserve the referenced cell identity, including $-anchored
   // addresses. References to a deleted cell become an explicit #REF! error.
-  const referencePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)/g;
+  const referencePattern=/((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)/g;
   // Protect complete aggregate ranges before scalar reference rewriting.
   // Deleting inside a range shrinks its surviving rectangle; an empty range is #REF!.
-  const structuralRangePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
+  const structuralRangePattern=/((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
   // Formula string literals are data, not cell addresses. Preserve doubled-quote escapes
   // and leave an unterminated literal untouched rather than rewriting its contents.
   function protectFormulaStringLiterals(raw){
@@ -453,7 +455,7 @@
       const protectedFormula=protectFormulaStringLiterals(raw),ranges=[];
       let next=protectedFormula.text.replace(structuralRangePattern,(match,prefix,left,right,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
-        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         let mapped=match;
         if(name.toLowerCase()===edited.name.toLowerCase()){
           const a=coord(left),b=coord(right),lo=Math.min(a,b),hi=Math.max(a,b);
@@ -467,7 +469,7 @@
       next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
         if(offset&&/[A-Za-z0-9_.$]/.test(whole[offset-1]))return match;
         const after=whole[offset+match.length];if(after&&/[A-Za-z0-9_.$]/.test(after))return match;
-        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         if(name.toLowerCase()!==edited.name.toLowerCase())return match;
         const position=axis==='row'?Number(digits)-1:colIndex(letters);
         if(delta<0&&position===index)return '#REF!';
@@ -491,14 +493,14 @@
     });
     if(order.every((entry,i)=>entry.i===i))return;
     const newRow=Array(t.rows.length);order.forEach((entry,i)=>{newRow[entry.i]=i;});
-    const rangePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
+    const rangePattern=/((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
     const rowOf=ref=>Number(/[1-9]\d*$/.exec(ref)[0])-1;
     const rewrite=(raw,sheet)=>{
       if(!String(raw).startsWith('='))return raw;
       const protectedFormula=protectFormulaStringLiterals(raw),ranges=[];
       let next=protectedFormula.text.replace(rangePattern,(match,prefix,left,right,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
-        const target=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        const target=prefix?sheetNameFromQualifier(prefix):sheet.name;
         let mapped=match;
         if(target.toLowerCase()===t.name.toLowerCase()){
           const lo=Math.min(rowOf(left),rowOf(right)),hi=Math.max(rowOf(left),rowOf(right));
@@ -514,7 +516,7 @@
       });
       next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$']/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
-        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         if(name.toLowerCase()!==t.name.toLowerCase())return match;
         const old=Number(digits)-1;if(old>=newRow.length)return match;
         return (prefix||'')+colAnchor+letters+rowAnchor+(newRow[old]+1);
@@ -670,8 +672,8 @@
       if(aggregatePattern.test(expr)){
         changed=true;
         expr=String(expr).replace(aggregatePattern,(all,fn,body)=>{
-      const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
-        if(range){const target=range[1]?getByName(range[1].slice(0,-1).replace(/^'|'$/g,'')):t;
+      const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
+        if(range){const target=range[1]?getByName(sheetNameFromQualifier(range[1])):t;
           if(!target)throw Error('#SHEET');
           const c0=colIndex(range[3]),r0=+range[5]-1,c1=colIndex(range[7]),r1=+range[9]-1;
           if((Math.abs(c1-c0)+1)*(Math.abs(r1-r0)+1)>6000)throw Error('#RANGE');
@@ -714,12 +716,12 @@
       if(++compositionPasses>40)throw Error('#LIMIT');
     }
     // Limited token grammar intentionally avoids eval()/Function() and script execution.
-    const src=expr.trim();const rx=/\s*(?:((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!\$?[A-Za-z]+\$?\d+|\$?[A-Za-z]+\$?\d+)|((?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)|([()+\-*/^]))/giy;
+    const src=expr.trim();const rx=/\s*(?:((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!\$?[A-Za-z]+\$?\d+|\$?[A-Za-z]+\$?\d+)|((?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)|([()+\-*/^]))/giy;
     const tokens=[];let pos=0;
     while(pos<src.length){rx.lastIndex=pos;const m=rx.exec(src);if(!m||m.index!==pos)throw Error('#FORMULA');tokens.push(m[1]?{type:'cell',v:m[1]}:m[2]?{type:'num',v:Number(m[2])}:{type:m[3]});pos=rx.lastIndex;if(tokens.length>400)throw Error('#LIMIT');}
     let at=0;const peek=()=>tokens[at]?.type;
     function primary(){const tok=tokens[at++];if(!tok)throw Error('#FORMULA');if(tok.type==='num')return tok.v;
-      if(tok.type==='cell'){let target=t,ref=tok.v;const bang=ref.lastIndexOf('!');if(bang>=0){target=getByName(ref.slice(0,bang).replace(/^'|'$/g,''));ref=ref.slice(bang+1);if(!target)throw Error('#SHEET');}
+      if(tok.type==='cell'){let target=t,ref=tok.v;const bang=ref.lastIndexOf('!');if(bang>=0){target=getByName(sheetNameFromQualifier(ref.slice(0,bang)));ref=ref.slice(bang+1);if(!target)throw Error('#SHEET');}
         const m=/^(\$?)([A-Za-z]+)(\$?)(\d+)$/.exec(ref);if(!m)throw Error('#REF');return number(value(target,Number(m[4])-1,colIndex(m[2]),stack));}
       if(tok.type==='('){const v=addition();if(peek()!==')')throw Error('#PAREN');at++;return v;}
       if(tok.type==='+'||tok.type==='-'){const v=primary();return tok.type==='-'?-v:v;}throw Error('#FORMULA');}
@@ -767,7 +769,7 @@
   const safeAction=fn=>{try{fn();}catch(error){notify(error.message,true);}};
   $('dt-new').addEventListener('click',()=>safeAction(()=>makeTable('Data'+(tables.length+1),['A','B','C'],[['','',''],['','',''],['','','']])));
   $('dt-copy').addEventListener('click',()=>safeAction(()=>{const t=active();makeTable(t.name+'_copy',t.columns,t.rows);}));
-  $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, underscores):',t.name);if(name===null)return;t.name=uniqueName(name,t.id);save();render();}));
+  $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, spaces, underscores and apostrophes):',t.name);if(name===null)return;t.name=uniqueName(name,t.id);save();render();}));
   $('dt-remove').addEventListener('click',()=>safeAction(()=>{if(tables.length===1)throw Error('Keep at least one table.');if(!confirm('Delete selected table?'))return;tables=tables.filter(t=>t.id!==selected);selected=tables[0].id;render();save();}));
   $('dt-add-row').addEventListener('click',()=>safeAction(()=>structuralEdit('row',active().rows.length,1)));
   $('dt-add-col').addEventListener('click',()=>safeAction(()=>structuralEdit('column',active().columns.length,1)));

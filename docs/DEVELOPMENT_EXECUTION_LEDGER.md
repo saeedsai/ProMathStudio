@@ -1,3 +1,17 @@
+## 2026-11-24 — SPREADSHEET-ESCAPED-APOSTROPHE-SHEET-REFERENCES
+
+- Starting refs: dev `21688a3f534db3691c303462cf294a49f15feee1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; root contract, frozen inventory, plan, source/bundle parity, exact CI, open PRs and Pages were inspected.
+- Exact starting dev Quality #45383550606 passed 218/218 with no failures/skips. Previous #45382903210 failed only on a stale structural string assertion; commit 21688a3 corrected the expectation and the full exact-head run passed.
+- Implemented escaped apostrophes in spreadsheet sheet names using doubled apostrophes inside quoted qualifiers. Updated scalar formula tokens, aggregate range parsing, structural row/column reference rewriting and sort rewriting to share one decoded qualifier helper. Table rename now preserves internal apostrophes while still sanitizing unsupported punctuation.
+- Extended registered Chromium smoke `tests/smoke_sheet_references.py` for O'Brien rename, scalar and forward/reversed aggregate references, mixed anchors, sorting, row/column insertion, quoted literal preservation and project round-trip. Added `tests/test_sheet_quoted_names.py`; updated Data Tables guide.
+- Updated `src/data-tables.js` and its inline standalone `index.html` module together; source and bundle parity was checked before and after the patch. Isolated V8 qualifier/regex checks passed. Local Python/Chromium execution is unavailable without a checkout; full exact-head GitHub Quality is pending.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No open PR; only dev/main exist. Branches are reported unprotected, rulesets empty, and branch-protection reads return HTTP 403. No promotion attempted.
+- Historical inventory unchanged: **166 gaps / 95 partial**. Status: **Implemented on dev / In QA / not released**.
+
+**NEXT FIVE:** (1) exact-head full Quality, 218/218 with zero skips and escaped-qualifier browser regression; (2) admin-verifiable main protections plus eligible independent review and ordinary PR; (3) remaining spreadsheet anchor/edge/rollback tests; (4) seven-shape Truss independent numerical boundaries and mobile tests; (5) saved-project compatibility and forward/backward ODE analytical/mobile regressions.
+
+---
+
 ## 2026-11-24 — SPREADSHEET-AGGREGATE-STRUCTURAL-TEST-RECOVERY
 
 - Starting refs: dev 2bd810a0cd6a56ad9eff9d5ea70c95b4596add05, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5.

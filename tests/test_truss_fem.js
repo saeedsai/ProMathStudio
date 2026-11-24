@@ -990,6 +990,16 @@ test('post-solve Euler comparison reports compression-only utilization and load 
 });
 
 
+test('radius of gyration uses a finite quotient and a range-safe split-root fallback',()=>{
+ const circle=fem.sectionProperties('solid-circle',{diameter:40});
+ assert.equal(circle.secondMoment/circle.area,100);
+ assert.equal(circle.radiusOfGyrationX,10);
+ assert.equal(circle.radiusOfGyrationY,10);
+ const slender=fem.sectionProperties('l-angle',{width:1e200,height:1e100,thickness:1e-293});
+ assert.equal(Number.isFinite(slender.secondMomentPerpendicular/slender.area),false);
+ close(slender.radiusOfGyrationY,2.8867513459481287e199,5e-13);
+});
+
 test('solid and concentric hollow section helpers return validated area and centroidal principal moments in mm units',()=>{
  const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
  assert.deepEqual(rectangle.centroid,{x:20,y:30});

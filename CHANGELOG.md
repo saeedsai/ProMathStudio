@@ -1,3 +1,9 @@
+## 2026-11-24 — Truss radius precision and exact-head CI recovery (dev; QA pending)
+
+- Use `sqrt(I/A)` when the quotient is finite and positive, with the previous split-square-root calculation as overflow/underflow fallback. The 40 mm solid-circle reference now returns 10 mm exactly without losing the extreme L-angle range case.
+- Added a focused Node regression for both the finite quotient and overflowing L-angle quotient/fallback path.
+- Diagnosed exact-head Quality #45361913324: step 214 failed on a one-ULP strict reference discrepancy (`9.999999999999998` vs `10`). New candidate requires full exact-head Quality; not released.
+
 ## 2026-11-24 — Truss L-angle radius-of-gyration overflow safety (dev; exact-head QA pending)
 
 - Radius of gyration now evaluates `sqrt(I)/sqrt(A)`, avoiding an overflowing `I/A` intermediate when the final radius is finite.

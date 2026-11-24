@@ -1,3 +1,28 @@
+## 2026-11-24 — TRUSS-RADIUS-OF-GYRATION-PRECISION-AND-EXACT-HEAD-CI-RECOVERY
+
+**Starting refs:** dev `538ce581e0e020997b632066fa7e6c5ad620443b`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Truss/FEM source and test contract, current branch refs, open PRs, exact-head Actions and main Pages evidence. Only `dev` and `main` exist; no PR is open.
+
+**P0 exact-head CI failure:** Push Quality [#45361913324](https://github.com/saeedsai/ProMathStudio/actions/runs/45361913324) failed at step 214, `node --test tests/test_truss_fem.js`. The solid-circle 40 mm reference expected radius 10 mm but the split-square-root evaluation returned `9.999999999999998`. The failure is a one-ULP precision discrepancy in the finite-ratio path; the same split-root evaluation is required for extreme cases where `I/A` overflows. The workflow log and failing assertion were inspected; no CI test was disabled or weakened.
+
+**Source correction:** Evaluate `sqrt(I/A)` directly when the quotient is finite and positive, which avoids an unnecessary extra pair of rounding operations and gives the exact 10 mm circular reference. When the quotient is zero from underflow or non-finite from overflow, retain the range-safe `sqrt(I)/sqrt(A)` fallback. Existing positive/finite result guards remain.
+
+**Regression:** Added a focused Node test that checks the exact finite quotient and 10 mm radius for a 40 mm solid circle, then proves the extreme L-angle `Iyy/A` quotient overflows while its split-root radius remains finite and matches the 120-digit Decimal reference. The existing high-range L-angle regression and all section-property guards remain active.
+
+**Validation:** Isolated Node/V8 checks passed: the circle quotient is exactly 100 and radius exactly 10; the former split-root result was `9.999999999999998`. For the extreme L-angle, `Iyy/A` is Infinity and the fallback returns `2.8867513459481283e199 mm`, within the existing `5e-13` reference tolerance. The execution workspace has no Git checkout (`git rev-parse --show-toplevel` returned `fatal: not a git repository`), so full local Node/Chromium suites are unavailable; the new exact-head GitHub Actions run must certify the complete suite.
+
+**Release state:** Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) passed on main SHA `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; GitHub Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) completed successfully on the same SHA. The previous dev Quality is failed and this new candidate is not released. The branch-protection endpoint returns HTTP 403 to the connected integration; repository rulesets are empty. No PR will be merged or safeguard bypassed before exact-head CI, eligible review and enforceable release protections are satisfied.
+
+The October 26 historical inventory remains frozen at **166 gaps / 95 partial**; no historical count or feature classification changed.
+
+**NEXT FIVE concrete priorities and acceptance tests:**
+1. **P0 — Exact-head dev Quality recovery.** Require all structural, Node and Chromium steps to pass on this candidate SHA with zero failures/skips; specifically verify the 40 mm circle precision case, extreme L-angle overflow fallback, all seven section shapes, selected-member isolation and desktop/390px Truss browser smoke.
+2. **P0 — Safe ordinary dev-to-main promotion.** Only after exact-head dev and PR Quality are green, inspect one ordinary dev→main PR, obtain an eligible independent review and enforceable main required-check/no-force protections, then merge through GitHub PR. Verify exact-main Quality, Pages deployment and hosted critical paths. Protection reads currently return HTTP 403 and no rulesets are configured.
+3. **P1 — Complete seven-shape section-helper numerical boundaries.** Add independent low-exponent, near-solid and thin-wall references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle; verify area, centroid, Ixx/Iyy, section moduli, radii, principal moments, invalid rollback and 390px keyboard behavior.
+4. **P1 — Spreadsheet formula-reference edge audit.** Test mixed absolute/relative anchors, quoted sheet names, reversed ranges, escaped quotes and row/column limits; verify logical-cell identity, atomic rejection of unsafe noncontiguous sort/delete and source/standalone bundle parity.
+5. **P1 — Saved-project and numerical ODE compatibility.** Round-trip current/legacy Matrix/Graph/Table fixtures; malformed imports must roll back without losing focus. Verify ODE forward/backward analytical references, bounded failure recovery, stale-export disabling and 390px keyboard behavior.
+
+---
+
 ## 2026-11-24 — TRUSS-L-ANGLE-RADIUS-OF-GYRATION-RANGE-SAFETY
 
 **Starting refs:** dev and main both `0d8ac89f7c9177806a266e56b27980c83d2c3ff5` after PR #189 was merged. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, Truss/FEM source and test contract, branch refs, open PRs, and exact-head CI/Pages evidence.

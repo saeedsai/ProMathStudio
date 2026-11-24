@@ -305,10 +305,18 @@
     if (!(extremeFiberDistanceAboutX > 0) || !(extremeFiberDistanceAboutY > 0)) throw Error('Section extreme-fibre distance underflow.');
     const sectionModulusX = finite(secondMoment/extremeFiberDistanceAboutX, 'Section modulus Sx (mm³)');
     const sectionModulusY = finite(secondMomentPerpendicular/extremeFiberDistanceAboutY, 'Section modulus Sy (mm³)');
-    // Take square roots before dividing: I/area can overflow even when the
-    // physical radius of gyration sqrt(I/area) is still representable.
-    const radiusOfGyrationX = finite(Math.sqrt(secondMoment)/Math.sqrt(area), 'Radius of gyration rx (mm)');
-    const radiusOfGyrationY = finite(Math.sqrt(secondMomentPerpendicular)/Math.sqrt(area), 'Radius of gyration ry (mm)');
+    // Use the canonical I/area quotient when representable; it avoids the extra
+    // rounding of two square roots. If the quotient over/underflows, split the
+    // square roots so a representable physical radius is not lost to the ratio.
+    const radiusOfGyration = (moment, label) => {
+      const ratio = moment / area;
+      const value = Number.isFinite(ratio) && ratio > 0
+        ? Math.sqrt(ratio)
+        : Math.sqrt(moment) / Math.sqrt(area);
+      return finite(value, label);
+    };
+    const radiusOfGyrationX = radiusOfGyration(secondMoment, 'Radius of gyration rx (mm)');
+    const radiusOfGyrationY = radiusOfGyration(secondMomentPerpendicular, 'Radius of gyration ry (mm)');
     if (!(sectionModulusX > 0) || !(sectionModulusY > 0)) throw Error('Section modulus underflow; increase the section dimensions or wall thickness.');
     if (!(radiusOfGyrationX > 0) || !(radiusOfGyrationY > 0)) throw Error('Radius of gyration underflow; increase the section dimensions.');
     return Object.freeze({shape, area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis,

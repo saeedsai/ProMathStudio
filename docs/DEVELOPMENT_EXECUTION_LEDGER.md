@@ -1,3 +1,13 @@
+## 2026-11-24 — TRUSS-RADIUS-OF-GYRATION-PRECISION-AND-CI-RECOVERY
+
+- Starting refs: dev `538ce581e0e020997b632066fa7e6c5ad620443b`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read AGENTS.md, the living plan, frozen MATLAB inventory, Truss/FEM contract/source/tests, branch refs, open PRs, exact-head Actions and Pages evidence.
+- Exact-head dev Push Quality [#45361913324](https://github.com/saeedsai/ProMathStudio/actions/runs/45361913324) failed at step 214, Node test `solid and concentric hollow section helpers...`: the 40 mm circle's radius was `9.999999999999998` rather than the exact reference `10`. Inspected the failed job log and exact assertion; no test was skipped or weakened.
+- Updated the radius calculation to use `sqrt(I/A)` when the quotient is finite and positive, with `sqrt(I)/sqrt(A)` fallback when the quotient overflows or underflows. This keeps the extreme-range protection while avoiding unnecessary rounding for ordinary finite quotients.
+- Added a focused Node regression covering the exact 40 mm circle quotient/radii and the extreme L-angle whose Iyy/area quotient overflows but whose fallback radius remains finite against the independent Decimal reference.
+- Isolated Node/V8 validation passed: circle ratio 100 and radius 10 exactly; extreme L-angle ratio Infinity and fallback radius `2.8867513459481283e199 mm` within tolerance. Full local Node/Chromium suites were unavailable because `git rev-parse --show-toplevel` returned `fatal: not a git repository`; exact-head Actions is required.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) both passed on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No open PR; only dev/main exist. Main protection read returns HTTP 403; rulesets list is empty. No PR/merge attempted while candidate CI is not green and release protections/review are unavailable.
+- Frozen October 26 historical inventory unchanged: **166 gaps / 95 partial**.
+
 ## 2026-11-24 — TRUSS-SOLID-CIRCLE-FOURTH-POWER-RANGE-SAFETY
 
 - Starting refs: dev `7f05e2a35d8fd15f34b6d83e0653a3b528e78c2d`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Read root AGENTS.md, living plan, frozen MATLAB inventory, Structural Truss source/tests/contract, PR #189/reviews, refs, Actions and Pages.

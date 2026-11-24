@@ -87,7 +87,7 @@ def main():
             "=SUM('O''Brien'!$A$1:A3)",
             "=SUM('O''Brien'!A3:$A$1)",
             "='O''Brien'!A2",
-            '="O\'\'Brien!A1"'
+            '="Obrien!A1"'
         ]
         assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
         page.evaluate("MathStudio.dataTables.insertRow(0)")
@@ -103,7 +103,7 @@ def main():
             "=SUM('O''Brien'!$B$2:B4)",
             "=SUM('O''Brien'!B4:$B$2)",
             "='O''Brien'!B3",
-            '="O\'\'Brien!A1"'
+            '="Obrien!A1"'
         ]
         assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
         saved = page.evaluate("MathStudio.dataTables.exportState()")

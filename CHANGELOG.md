@@ -1,3 +1,5 @@
+**Follow-up fixture check:** the protected formula literal intentionally remains ="Obrien!A1" after rename, sort and row/column insertion; corrected both post-sort/post-column expected rows to match the unchanged literal. No behavior assertion was removed.
+
 ## 2026-11-24 — Spreadsheet rename keeps qualified formulas valid (dev; exact-head QA pending)
 
 - Renaming a sheet now rewrites matching qualified scalar and aggregate-range references across the workbook; both quoted and unquoted old names are recognized case-insensitively.

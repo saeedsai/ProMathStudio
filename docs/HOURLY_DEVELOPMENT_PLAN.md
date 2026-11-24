@@ -1,3 +1,5 @@
+**Follow-up fixture check:** the protected formula literal intentionally remains ="Obrien!A1" after rename, sort and row/column insertion; corrected both post-sort/post-column expected rows to match the unchanged literal. No behavior assertion was removed.
+
 ## 2026-11-24 — SPREADSHEET-RENAME-QUALIFIER-REWRITE-AND-CI-RECOVERY
 
 **Starting refs:** dev 180122c81616157c244afc067db241db30fcfff6; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, this plan, the frozen MATLAB baseline, source/bundle contract, current PRs, exact-head CI and main Quality/Pages evidence.

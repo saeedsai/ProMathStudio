@@ -1,3 +1,24 @@
+## 2026-11-24 — SPREADSHEET-AGGREGATE-STRUCTURAL-TEST-RECOVERY
+
+**Starting refs:** dev 2bd810a0cd6a56ad9eff9d5ea70c95b4596add05; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, the living plan, frozen inventory, exact-head Actions, open PRs and Pages state before repairing the failed candidate.
+
+**Exact-head failure:** Quality [#45382903210](https://github.com/saeedsai/ProMathStudio/actions/runs/45382903210) failed at step 7, "Structural tests and embedded Python compile check"; setup, inventory validation, toolbox registry and CI smoke registration passed, and subsequent steps were skipped. Inspection found tests/test_sheet_numeric_hardening.py still asserted the obsolete source expression nums.reduce((a,b)=>a+b/nums.length,0). The production implementation intentionally replaced that expression with stableMean after the new numerical boundary work. The failure is a stale structural test contract, not a failure of the new arithmetic behavior. Exact source/inline-bundle equality was independently read back and confirmed before this correction.
+
+**Correction:** Update the structural regression to require stableMean, normalized scaling, separate underflow-residual accumulation, the AVERAGE/AVG dispatch and the finite-result error guard; explicitly reject the obsolete expression. Add structural checks for safeMidpoint and its even-count MEDIAN dispatch. Preserve the exact standalone source/bundle equality assertion and mandatory browser-test workflow assertion. No production code, numerical tolerance or CI workflow was weakened.
+
+**Validation:** The previous commit's isolated V8 checks passed for subnormal average/median, adjacent-subnormal midpoint, maximum-finite average and cancellation residual. This correction is a test-contract update; local unittest execution remains unavailable because this runtime has no checkout. Fresh exact-head Quality is required to verify structural tests and then all Chromium checks.
+
+**Release state:** Still dev-only and not released. Main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; its Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on that main SHA. No open PR. Branches report unprotected, rulesets query is empty and branch-protection read returns HTTP 403; do not promote until exact-head checks, independent review and required protections are satisfied. Historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:**
+1. **P0 — Re-run exact-head Quality after this test fix.** Require structural unittest discovery, standalone build/source parity, numeric-hardening browser smoke, all 218 workflow steps and zero failures/skips.
+2. **P0 — Release governance.** Obtain repository administration access to verify/configure main required checks, no force/deletion/direct pushes; obtain eligible independent review and then use an ordinary dev→main PR. Verify main Quality, Pages and hosted critical paths.
+3. **P1 — Spreadsheet reference edges.** Escaped-apostrophe sheet names, mixed anchors, reversed cross-sheet ranges, quoted literals and first/last row/column edits; preserve identity or roll back atomically.
+4. **P1 — Seven-shape Truss numerical boundaries.** Independent low-exponent, near-solid and thin-wall references for all seven shapes, principal invariants, invalid rollback and 390px keyboard behavior.
+5. **P1 — Saved projects and ODE compatibility.** Current/legacy Matrix/Graph/Table round-trips, malformed-import rollback, forward/backward analytical ODE references and responsive recovery.
+
+---
+
 ## 2026-11-24 — SPREADSHEET-SUBNORMAL-AND-CANCELLATION-SAFE-AGGREGATES
 
 **Starting refs:** dev 77a12298a1996d5acc578fc1e3bcba07725d6411; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, this plan, the frozen 2026-10-26 MATLAB inventory, Data Tables source, standalone build contract, numeric-hardening browser regression, branch refs, open PRs, and latest exact-head CI/Pages evidence.

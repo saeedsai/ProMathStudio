@@ -1,3 +1,9 @@
+## 2026-11-24 — Spreadsheet aggregate structural-test recovery (dev; exact-head QA pending)
+
+- Updated the numeric-hardening structural test to match the new scaled compensated AVERAGE/AVG and safe MEDIAN midpoint implementation rather than asserting the retired expression.
+- Added direct structural checks for underflow-residual preservation, scaled midpoint dispatch and the retained finite-result error guard. Exact source/bundle parity and browser-gate assertions remain mandatory.
+- Root cause of Quality #45382903210 step 7 failure was a stale test expectation; production code was not weakened. Fresh exact-head Quality required.
+
 ## 2026-11-24 — Spreadsheet subnormal and cancellation-safe aggregates (dev; exact-head QA pending)
 
 - AVERAGE/AVG now use scaled compensated accumulation and preserve separately accumulated terms whose normalized quotient underflows; small residuals survive cancellation of large positive/negative values.

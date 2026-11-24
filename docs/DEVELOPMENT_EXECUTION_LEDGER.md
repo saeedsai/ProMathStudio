@@ -1,3 +1,17 @@
+## 2026-11-24 — SPREADSHEET-AGGREGATE-STRUCTURAL-TEST-RECOVERY
+
+- Starting refs: dev 2bd810a0cd6a56ad9eff9d5ea70c95b4596add05, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5.
+- Exact-head Quality #45382903210 failed at step 7, Structural tests and embedded Python compile check. Steps 1–6 passed; later browser steps were skipped.
+- Root cause: tests/test_sheet_numeric_hardening.py asserted the previous AVERAGE/AVG implementation string. The new production implementation intentionally uses stableMean; the old string assertion was stale. Exact source/inline-bundle parity was read back and confirmed true.
+- Updated the structural test to assert scaled compensated mean, normalized underflow residual preservation, aggregate dispatch, finite-result error guard, safe even-count MEDIAN midpoint, and absence of the obsolete implementation. Retained standalone exact-parity and mandatory browser gate assertions.
+- No production behavior or CI gate was weakened. Local unittest execution is unavailable without a checkout; fresh exact-head Quality must verify this correction.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; no open PR. Main is reported unprotected, rulesets empty and protection read HTTP 403. No promotion attempted.
+- Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) exact-head full Quality, all 218 steps green/no skips; (2) enforceable main protection plus independent review and ordinary PR; (3) spreadsheet escaped-quote/anchor/range boundaries with atomic rollback; (4) seven-shape Truss numerical boundary references and mobile tests; (5) current/legacy project round-trips and forward/backward ODE regressions.
+
+---
+
 ## 2026-11-24 — SPREADSHEET-SUBNORMAL-AND-CANCELLATION-SAFE-AGGREGATES
 
 - Starting refs: dev 77a12298a1996d5acc578fc1e3bcba07725d6411, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, living plan, frozen inventory, Data Tables source/tests/build contract, refs, open PRs and latest Actions/Pages evidence.

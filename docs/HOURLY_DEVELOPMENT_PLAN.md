@@ -1,3 +1,30 @@
+## 2026-11-24 — TRUSS-COMPOSITE-SUBPIXEL-PREVIEW-DETAIL
+
+**Starting refs:** dev `966711b5e925c820d9f7477c55e22249db6cb221`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, Engineering Architecture/Toolbox contracts, Structural Truss source/tests/contract, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.
+
+**P0 CI baseline:** Exact-head Push Quality [#45309618036](https://github.com/saeedsai/ProMathStudio/actions/runs/45309618036) and PR Quality [#45309624322](https://github.com/saeedsai/ProMathStudio/actions/runs/45309624322) both passed 218/218 steps, zero failures and zero skipped steps. The previous FEM high-range Node regression and all Truss/FEM browser checks passed.
+
+**P1 UI defect:** Channel and I-section sketches retained true-scale dimensions but did not provide a magnified detail when the web or flange was below 2 SVG pixels. Their geometry could therefore be mathematically valid yet practically invisible in the preview, unlike the already-supported L-angle detail.
+
+**Source improvement:** `tools/truss-fem-ui.js` now adds a fixed-size channel- or I-section detail inset only when the minimum displayed web/flange thickness is below 2 SVG pixels. The measured outline and its exact B/H/tw/tf metadata remain unchanged. The inset is explicitly labelled “Web/flange detail — not to scale”; the live caption, SVG accessible name and SVG description all announce the schematic. The inset does not enter numerical calculations or member application.
+
+**Regression:** `tests/smoke_truss_fem.py` extends real Chromium coverage at 1280px and 390px. Normal 100×80×10×8 mm channel/I sections must not show an inset. The test applies Iyy to selected member AC and checks area 2,240 mm² plus independent channel/I-section Iyy references 2,264,380.9523809524 and 1,338,666.6666666665 mm⁴, preserving E/density/K and AB/BC. With B=H=1,000,000 mm and tw=tf=1 mm, both profiles must retain exact outline metadata and axes while exposing the labelled not-to-scale inset and synchronized accessible caption/description. Solid-circle browser coverage applies D=40 mm and checks A=1,256.6370614359173 mm² and I=125,663.70614359172 mm⁴, completing browser application coverage across all seven supported shapes alongside existing rectangle, hollow rectangle, hollow circle and L-angle cases.
+
+**Validation:** Source and FEM API syntax plus independent normal-section references are checked in the isolated V8 runtime. The execution workspace has no repository checkout, so the complete local Node/Chromium suite cannot run; new exact-head Push/PR Quality is required. Candidate is Implemented on dev / In QA, not released.
+
+**Release state:** PR #189 remains open/mergeable with exact head `966711b5e925c820d9f7477c55e22249db6cb221`, base main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, 482 commits/98 changed files and zero submitted reviews. Rulesets query is empty; branch-protection read returns HTTP 403 to the connected integration, so protection cannot be independently verified or configured here. No merge, direct main update, force push or governance bypass was attempted. Main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) remains successful (193/193) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remains successful (build 5/5, deploy 3/3, report 3/3) on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da`, 2026-11-03; no newer main run/deployment was found.
+
+The October 26 historical baseline remains frozen at **166 gaps / 95 partial**; no historical count or completion classification changed.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality and release governance.** Both Push and PR Quality must pass every required step on the new dev SHA, including all seven section shapes, desktop/390px preview and application regressions. PR #189 also needs an eligible independent review and authorized enforceable main protection/required checks; only then inspect the full diff, merge through the ordinary PR and verify exact-main Quality, Pages and hosted critical paths.
+2. **P1 — Seven-shape section-helper matrix (in progress).** Complete independent area/inertia/centroid/section-modulus/radius references for solid/hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Cover thin walls, finite-range overflow, both Ixx/Iyy or principal-axis selection, selected-member isolation, invalid rollback, E/density/K preservation, keyboard access and 390px behavior.
+3. **P1 — Spreadsheet formula-reference edge audit (planned).** Test mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity, transactional refusal of unsafe noncontiguous sort/delete and source/standalone `index.html` parity.
+4. **P1 — Source-backed Engineering Toolbox expansion (planned).** Select one approved unfinished canonical tool, reuse shared solver/units/plot services, assign one stable tool ID, and add independent numerical references, negative tests, keyboard/mobile coverage and truthful status without placeholder actions.
+5. **P1 — Saved-project and numerical ODE compatibility (planned).** Round-trip current/legacy Matrix/Graph/Table projects; malformed imports must roll back atomically and preserve focus. Verify selected ODE forward/backward analytical references, bounded failure recovery, stale-export disabling and 390px keyboard behavior.
+
+---
+
 ## 2026-11-24 — TRUSS-COMPOSITE-SECTION-MOMENT-OVERFLOW-SAFETY
 
 **Starting refs:** dev 61ea34c025f169ea235611fbed99560d7f503e4b; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read root AGENTS.md, this plan, the frozen 2026-10-26 inventory, Structural Truss contract/source/tests, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.

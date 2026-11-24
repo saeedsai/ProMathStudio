@@ -174,6 +174,105 @@ def main():
                     input.dispatchEvent(new Event('change', {bubbles:true}));
                 }
             }""", before_angle['AB'])
+            # Complete the seven-shape browser matrix: solid-circle application plus channel/I-section
+            # axis mapping, selected-member isolation and truthful sub-pixel web/flange details.
+            def section_member_snapshot():
+                return page.evaluate("""() => Object.fromEntries(
+                    [...document.querySelectorAll('#members tr')].map(row => {
+                        const id = row.querySelector('input[data-field="id"]')?.value;
+                        return id ? [id, Object.fromEntries(
+                            [...row.querySelectorAll('input[data-field]')].map(input => [input.dataset.field, input.value])
+                        )] : null;
+                    }).filter(Boolean)
+                )""")
+
+            def restore_section_member(member_id, original):
+                page.evaluate("""(args) => {
+                    const row = [...document.querySelectorAll('#members tr')].find(
+                        item => item.querySelector('input[data-field="id"]')?.value === args.id);
+                    for (const field of ['area', 'I']) {
+                        const input = row.querySelector('input[data-field="' + field + '"]');
+                        input.value = args.original[field];
+                        input.dispatchEvent(new Event('input', {bubbles:true}));
+                        input.dispatchEvent(new Event('change', {bubbles:true}));
+                    }
+                }""", {'id': member_id, 'original': original[member_id]})
+
+            # Solid-circle preview and application must use the circular I=pi*D^4/64 path.
+            page.locator('#section-shape').select_option('solid-circle')
+            page.locator('#section-diameter').fill('40')
+            solid_circle_caption = page.locator('#section-sketch-caption').inner_text()
+            assert solid_circle_caption.startswith('Solid circle D=40 mm'), solid_circle_caption
+            assert page.locator('#section-sketch').get_attribute('aria-label') == solid_circle_caption
+            assert page.locator('#section-sketch circle[data-section-outline="solid-circle"]').count() == 1
+            assert page.locator('#section-sketch line[data-centroid-axis]').count() == 2
+            before_solid_circle = section_member_snapshot()
+            page.locator('#section-member').select_option('AB')
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text().startswith('Solid circle: area ')
+            after_solid_circle = section_member_snapshot()
+            expected_solid_circle_area = 1256.6370614359173
+            expected_solid_circle_moment = 125663.70614359172
+            assert abs(float(after_solid_circle['AB']['area']) - expected_solid_circle_area) <= expected_solid_circle_area * 1e-12
+            assert abs(float(after_solid_circle['AB']['I']) - expected_solid_circle_moment) <= expected_solid_circle_moment * 1e-12
+            for field, value in before_solid_circle['AB'].items():
+                if field not in ('area', 'I'):
+                    assert after_solid_circle['AB'][field] == value, (field, before_solid_circle['AB'], after_solid_circle['AB'])
+            assert after_solid_circle['AC'] == before_solid_circle['AC']
+            assert after_solid_circle['BC'] == before_solid_circle['BC']
+            restore_section_member('AB', before_solid_circle)
+
+            for shape, expected_i_yy in (('channel', 2264380.9523809524), ('i-section', 1338666.6666666665)):
+                page.locator('#section-shape').select_option(shape)
+                page.locator('#section-width').fill('100')
+                page.locator('#section-height').fill('80')
+                page.locator('#section-web-thickness').fill('10')
+                page.locator('#section-flange-thickness').fill('8')
+                normal_caption = page.locator('#section-sketch-caption').inner_text()
+                assert normal_caption.startswith('Open channel B=' if shape == 'channel' else 'I-section B='), normal_caption
+                assert page.locator('#section-sketch').get_attribute('aria-label') == normal_caption
+                assert page.locator('#section-sketch [data-section-outline="' + shape + '"]').count() == 1
+                assert page.locator('#section-sketch [data-section-detail-frame]').count() == 0
+                assert page.locator('#section-sketch line[data-centroid-axis]').count() == 2
+                before_composite = section_member_snapshot()
+                page.locator('#section-member').select_option('AC')
+                page.locator('#section-axis').select_option('depth')
+                page.locator('#section-properties-apply').click()
+                assert page.locator('#section-result').inner_text().startswith(
+                    'Open channel' if shape == 'channel' else 'I-section')
+                after_composite = section_member_snapshot()
+                assert abs(float(after_composite['AC']['area']) - 2240) <= 2240 * 1e-12
+                assert abs(float(after_composite['AC']['I']) - expected_i_yy) <= expected_i_yy * 1e-12
+                for field, value in before_composite['AC'].items():
+                    if field not in ('area', 'I'):
+                        assert after_composite['AC'][field] == value, (shape, field, before_composite['AC'], after_composite['AC'])
+                assert after_composite['AB'] == before_composite['AB']
+                assert after_composite['BC'] == before_composite['BC']
+                restore_section_member('AC', before_composite)
+
+                # At extreme but valid dimensions, the true-scale web/flanges are sub-pixel.
+                # Keep the measured outline and axes, and add only a labelled schematic inset.
+                page.locator('#section-width').fill('1000000')
+                page.locator('#section-height').fill('1000000')
+                page.locator('#section-web-thickness').fill('1')
+                page.locator('#section-flange-thickness').fill('1')
+                detail_caption = page.locator('#section-sketch-caption').inner_text()
+                assert 'Magnified web/flange detail shown below is not to scale.' in detail_caption, detail_caption
+                sketch = page.locator('#section-sketch')
+                assert sketch.get_attribute('aria-label') == detail_caption
+                assert page.locator('#section-sketch-desc').text_content().strip() == detail_caption
+                outline = page.locator('#section-sketch [data-section-outline="' + shape + '"]')
+                assert outline.count() == 1
+                assert outline.get_attribute('data-section-width-mm') == '1000000'
+                assert outline.get_attribute('data-section-height-mm') == '1000000'
+                assert outline.get_attribute('data-web-thickness-mm') == '1'
+                assert outline.get_attribute('data-flange-thickness-mm') == '1'
+                assert page.locator('#section-sketch [data-section-detail-frame="' + shape + '"]').count() == 1
+                assert page.locator('#section-sketch [data-section-detail="' + shape + '"]').count() == 1
+                assert page.locator('#section-sketch [data-section-detail-label="' + shape + '"]').text_content().strip() == 'Web/flange detail — not to scale'
+                assert page.locator('#section-sketch line[data-centroid-axis]').count() == 2
+                assert page.locator('#section-sketch [data-centroid="true"]').count() == 1
+
             # Simulate an underconstrained joint, then recover without page reload.
             page.locator('#nodes tr').nth(1).locator('input[data-field="fixY"]').uncheck()
             page.get_by_role('button', name='Analyze truss').click()

@@ -1,3 +1,14 @@
+## 2026-11-24 — TRUSS-COMPOSITE-SUBPIXEL-PREVIEW-DETAIL
+
+- Starting refs: dev `966711b5e925c820d9f7477c55e22249db6cb221`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root AGENTS, living plan, frozen inventory, engineering architecture/toolbox contracts, Truss source/tests/contract, PR #189/reviews, branches, Actions and Pages.
+- Starting exact-head Push Quality #45309618036 and PR Quality #45309624322 both passed 218/218 steps, zero failures/skips. Main Quality #41730966059 passed 193/193; Pages #41730962844 passed build 5/5, deploy 3/3 and report 3/3 on main 70fc483cb1cec3d2372d37484e4a8ef7942343da (2026-11-03).
+- Added a channel/I-section schematic detail inset when the true-scale displayed web or flange is below 2 SVG pixels. Original outline dimensions remain true-scale; the inset is labelled not to scale and caption/ARIA/SVG description stay synchronized. No numerical calculations changed.
+- Added desktop/390px browser regression for normal/no-inset and extreme/sub-pixel channel/I-section previews; applies Iyy to AC against independent references and verifies AB/BC plus E/density/K are unchanged. Added solid-circle D=40 mm application references, completing real browser application coverage for the seven supported section shapes.
+- Updated Structural Truss contract, hourly plan, execution ledger and changelog. Standalone Truss Studio assets do not require root index.html synchronization.
+- Isolated V8 source/API syntax and numerical checks run before commit; full local Node/Chromium unavailable because execution workspace has no checkout. Fresh exact-head Push/PR Quality required; candidate is implemented on dev / In QA, not released.
+- PR #189 remains open/mergeable, 482 commits/98 files, zero reviews. Rulesets query empty; branch-protection read HTTP 403. No merge, direct main update, force push or bypass. Inherited unmerged claude branch preserved.
+- Frozen October 26 baseline unchanged: 166 gaps / 95 partial.
+
 ## 2026-11-24 — TRUSS-COMPOSITE-SECTION-MOMENT-OVERFLOW-SAFETY
 
 - Starting refs: dev 61ea34c025f169ea235611fbed99560d7f503e4b; main 70fc483cb1cec3d2372d37484e4a8ef7942343da.

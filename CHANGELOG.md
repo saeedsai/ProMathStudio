@@ -1,3 +1,10 @@
+## 2026-11-24 — Truss channel/I-section sub-pixel preview detail (dev; exact-head QA pending)
+
+- Added a separately labelled web/flange detail inset when a channel or I-section's true-scale web/flange would be below 2 SVG pixels; the measured outline remains at true scale and is never distorted.
+- Synchronized the live caption, SVG accessible name and SVG description with the explicit “not to scale” notice.
+- Added desktop/390px Chromium coverage for normal/no-inset and extreme/sub-pixel channel/I-section previews, Iyy application to a selected member, and solid-circle application. Preserves other members and E/density/K.
+- Requires fresh exact-head Push/PR Quality; not released.
+
 ## 2026-11-24 — Truss composite-section local inertia overflow safety (dev; exact-head QA pending)
 
 - Reordered local rectangle Ixx/Iyy evaluation to divide by 12 before the final dimension multiplication, preventing intermediate overflow when the final local moment is finite.

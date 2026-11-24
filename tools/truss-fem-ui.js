@@ -146,6 +146,7 @@
       svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical',...centroidMetadata}));
       svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600',role:'text','aria-label':'Horizontal centroidal axis Ixx'},'Ixx'));
       svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600',role:'text','aria-label':'Vertical centroidal axis Iyy'},'Iyy'));
+      if(Math.min(tw,tf)<2) appendCompositeSectionDetail(svg,'channel',webThickness,flangeThickness);
     }else if(iSection){
       const tw=webThickness*scale,tf=flangeThickness*scale,webLeft=(w-tw)/2,webRight=webLeft+tw;
       const path='M '+x+' '+y+' H '+(x+w)+' V '+(y+tf)+' H '+(x+webRight)+' V '+(y+h-tf)+' H '+(x+w)+' V '+(y+h)+' H '+x+' V '+(y+h-tf)+' H '+(x+webLeft)+' V '+(y+tf)+' H '+x+' Z';
@@ -155,6 +156,7 @@
       svg.append(svgNode('line',{x1:cx,y1:y+padY,x2:cx,y2:y+h-padY,stroke:'#2b7a65','stroke-width':2,'stroke-dasharray':'6 4','data-centroid-axis':'vertical',...centroidMetadata}));
       svg.append(svgNode('text',{x:x+w-30,y:cy-6,fill:'#c47b19','font-size':10,'font-weight':'600',role:'text','aria-label':'Horizontal centroidal axis Ixx'},'Ixx'));
       svg.append(svgNode('text',{x:cx+5,y:y+flangeThickness*scale+13,fill:'#2b7a65','font-size':10,'font-weight':'600',role:'text','aria-label':'Vertical centroidal axis Iyy'},'Iyy'));
+      if(Math.min(tw,tf)<2) appendCompositeSectionDetail(svg,'i-section',webThickness,flangeThickness);
     }else if(angle){
       const t=thickness*scale,theta=properties.principalAxisAngleDegrees*Math.PI/180,axisLength=Math.max(18,Math.min(78,Math.hypot(w,h)*0.45));
       svg.append(svgNode('path',{d:'M '+x+' '+y+' H '+(x+t)+' V '+(y+h-t)+' H '+(x+w)+' V '+(y+h)+' H '+x+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-outline':'l-angle',...outlineMetadata,'data-section-thickness-mm':thickness}));
@@ -232,9 +234,9 @@
       }
     }
     const summary=channel
-      ?'Open channel B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, tw='+fmt(webThickness,4)+' mm, tf='+fmt(flangeThickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes; web on left, flanges extend right.'
+      ?'Open channel B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, tw='+fmt(webThickness,4)+' mm, tf='+fmt(flangeThickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes; web on left, flanges extend right.'+(Math.min(webThickness*scale,flangeThickness*scale)<2?' Magnified web/flange detail shown below is not to scale.':'')
       :iSection
-        ?'I-section B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, tw='+fmt(webThickness,4)+' mm, tf='+fmt(flangeThickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes; centered web and equal-width flanges.'
+        ?'I-section B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, tw='+fmt(webThickness,4)+' mm, tf='+fmt(flangeThickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes; centered web and equal-width flanges.'+(Math.min(webThickness*scale,flangeThickness*scale)<2?' Magnified web/flange detail shown below is not to scale.':'')
       :circle
       ?(hollowCircle
         ?'Hollow circle Do='+fmt(diameter,4)+' mm, Di='+fmt(innerDiameter,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal and vertical centroidal diameter axes Ixx and Iyy.'
@@ -345,6 +347,16 @@
   function invalidate(preserveImportRequest=null){if(preserveImportRequest===null||preserveImportRequest!==importRequest||!importPending)cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function dimensionLabel(name,value,attrs){const formatted=fmt(value,4);return svgNode('text',{...attrs,'data-dimension-label':name,role:'text','aria-label':'Section dimension '+name+': '+formatted+' millimetres'},name+'='+formatted+' mm');}
+  function appendCompositeSectionDetail(svg,shape,webThickness,flangeThickness){
+    const x=220,y=116,width=120,height=108,left=x+12,right=x+width-12,top=y+12,bottom=y+height-12,web=12,flange=12,mid=x+width/2;
+    const path=shape==='channel'
+      ?'M '+left+' '+top+' H '+right+' V '+(top+flange)+' H '+(left+web)+' V '+(bottom-flange)+' H '+right+' V '+bottom+' H '+left+' Z'
+      :'M '+left+' '+top+' H '+right+' V '+(top+flange)+' H '+(mid+web/2)+' V '+(bottom-flange)+' H '+right+' V '+bottom+' H '+left+' V '+(bottom-flange)+' H '+(mid-web/2)+' V '+(top+flange)+' H '+left+' Z';
+    svg.append(svgNode('rect',{x,y,width,height,fill:'none',stroke:'currentColor','stroke-dasharray':'4 3','data-section-detail-frame':shape}));
+    svg.append(svgNode('path',{d:path,fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-detail':shape,
+      'data-section-detail-web-thickness-mm':webThickness,'data-section-detail-flange-thickness-mm':flangeThickness}));
+    svg.append(svgNode('text',{x:x+width/2,y:y+height-1,'text-anchor':'middle',fill:'currentColor','font-size':10,'data-section-detail-label':shape},'Web/flange detail — not to scale'));
+  }
   function updatePreview() {
     try {
       const info=fem.inspectJSON(fem.exportJSON(readModel()));

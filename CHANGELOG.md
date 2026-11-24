@@ -1,3 +1,10 @@
+## 2026-11-24 — Spreadsheet subnormal and cancellation-safe aggregates (dev; exact-head QA pending)
+
+- AVERAGE/AVG now use scaled compensated accumulation and preserve separately accumulated terms whose normalized quotient underflows; small residuals survive cancellation of large positive/negative values.
+- Even-count MEDIAN now uses a scaled midpoint, preserving minimum/adjacent subnormal values without overflowing large same-sign inputs.
+- Added browser regressions for raw workbook subnormal ranges, maximum-finite average, cancellation residuals, negative/adjacent subnormal medians and workbook round-trip.
+- Updated the modular Data Tables source and synchronized inline standalone bundle, plus the Data Tables guide and hourly execution records. Not released until exact-head Quality and the normal protected, independently reviewed PR gate pass.
+
 ## 2026-11-24 — Truss radius precision and exact-head CI recovery (dev; QA pending)
 
 - Use `sqrt(I/A)` when the quotient is finite and positive, with the previous split-square-root calculation as overflow/underflow fallback. The 40 mm solid-circle reference now returns 10 mm exactly without losing the extreme L-angle range case.

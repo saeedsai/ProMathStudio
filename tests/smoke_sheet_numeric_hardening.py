@@ -1,4 +1,5 @@
 """Browser regression: reserved aggregate names, finite means and nonfinite errors."""
+import math
 import os
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -77,15 +78,43 @@ def main():
         assert failure('COUNT(BROKEN(1))') == '#VALUE'
         assert formula('IF(0,BROKEN(1),SUM(1,2))') == 3
 
-        state = page.evaluate("MathStudio.dataTables.exportState()")
-        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", state)
+        # Exercise raw workbook cells so binary64 subnormals and the true maximum
+        # finite value reach the aggregate engine without the expression parser's display rounding.
+        original_state = page.evaluate("MathStudio.dataTables.exportState()")
+        page.evaluate("""() => MathStudio.dataTables.restoreState({
+          version:1,selected:'sheet-1',tables:[{
+            id:'sheet-1',name:'Data1',columns:['A'],rows:[
+              ['5e-324'],['5e-324'],
+              ['1.7976931348623157e308'],['1.7976931348623157e308'],['1.7976931348623157e308'],
+              ['1e308'],['1e-300'],['-1e308'],
+              ['-5e-324'],['-5e-324'],
+              ['5e-324'],['1e-323']
+            ]
+          }]
+        })""")
+        assert formula('AVERAGE(A1:A2)') == 5e-324
+        assert formula('AVG(A1:A2)') == 5e-324
+        assert formula('MEDIAN(A1:A2)') == 5e-324
+        assert formula('MEDIAN(A9:A10)') == -5e-324
+        assert formula('MEDIAN(A11:A12)') == 1e-323
+        largest_average = formula('AVERAGE(A3:A5)')
+        assert math.isfinite(largest_average) and largest_average > 1.7e308, largest_average
+        cancellation_average = formula('AVERAGE(A6:A8)')
+        expected_cancellation_average = 1e-300 / 3
+        assert abs(cancellation_average - expected_cancellation_average) <= expected_cancellation_average * 1e-12, (
+            cancellation_average, expected_cancellation_average)
+        aggregate_state = page.evaluate("MathStudio.dataTables.exportState()")
+        aggregate_values = page.evaluate("MathStudio.dataTables.calculate()")
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", aggregate_state)
+        assert page.evaluate("MathStudio.dataTables.calculate()") == aggregate_values
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", original_state)
         assert page.evaluate("MathStudio.dataTables.calculate()") == values
         for width in (390, 768, 1280):
             page.set_viewport_size({"width": width, "height": 850})
             assert page.locator('#dt-sheet').count() == 1
         assert not errors, errors
         browser.close()
-    print("PASS spreadsheet built-in priority, finite averages, overflow and custom errors")
+    print("PASS spreadsheet built-in priority, subnormal/cancellation-safe averages and medians, overflow and custom errors")
 
 
 if __name__ == "__main__":

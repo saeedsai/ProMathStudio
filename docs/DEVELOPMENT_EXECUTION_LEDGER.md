@@ -1,3 +1,22 @@
+## 2026-11-24 — SPREADSHEET-SUBNORMAL-AND-CANCELLATION-SAFE-AGGREGATES
+
+- Starting refs: dev 77a12298a1996d5acc578fc1e3bcba07725d6411, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, living plan, frozen inventory, Data Tables source/tests/build contract, refs, open PRs and latest Actions/Pages evidence.
+- Exact starting dev Quality #45371139051 passed 218/218; main Quality #45360386408 passed 218/218; Pages #45360367251 passed build 5/5, status 3/3 and deploy 3/3. No open PR; only dev/main exist. Both branches are reported unprotected, rulesets query is empty, and branch-protection read returns HTTP 403. No release PR was opened.
+- Fixed AVERAGE/AVG losing minimum-subnormal terms and small residuals after large-value cancellation; fixed even-count MEDIAN underflowing the midpoint of subnormal values. Added scaled Neumaier accumulation with a separate residual accumulator and a scaled midpoint. SUM behavior and binary64 scope are unchanged.
+- Extended tests/smoke_sheet_numeric_hardening.py for subnormal AVERAGE/AVG/MEDIAN, negative/adjacent subnormals, a maximum-finite three-value average, cancellation residual preservation, and workbook round-trip. Updated docs/DATA_TABLES.md.
+- Updated src/data-tables.js and the inline Data Tables module in index.html together; exact source/bundle module parity was verified before and after editing. Plan, execution ledger and changelog updated in this commit.
+- Isolated V8 checks passed for all arithmetic boundary cases. Local Playwright/repository commands were unavailable because this runtime has no checkout; no local browser result is claimed. Exact-head GitHub Quality must certify the committed smoke test, build parity and full suite.
+- Status: Implemented on dev / In QA / not released. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:**
+1. Exact-head dev Quality: all steps green/no skips; numeric-hardening browser test, python scripts/build.py --check, structural and full Chromium suite.
+2. Enforce main branch protection/rulesets and independent review; only then ordinary dev→main PR, exact-main Quality, Pages and hosted smoke.
+3. Spreadsheet escaped-apostrophe sheet names, mixed anchors, reversed cross-sheet ranges and boundary edits; verify identity or atomic rollback.
+4. Seven-shape Truss independent low-exponent/near-solid/thin-wall references, principal invariants, invalid rollback and 390px keyboard.
+5. Current/legacy Matrix/Graph/Table project round-trips and forward/backward ODE analytical/mobile regressions.
+
+---
+
 ## 2026-11-24 — TRUSS-RADIUS-OF-GYRATION-PRECISION-AND-CI-RECOVERY
 
 - Starting refs: dev `538ce581e0e020997b632066fa7e6c5ad620443b`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read AGENTS.md, the living plan, frozen MATLAB inventory, Truss/FEM contract/source/tests, branch refs, open PRs, exact-head Actions and Pages evidence.

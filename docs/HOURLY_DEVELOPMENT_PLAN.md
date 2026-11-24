@@ -1,3 +1,28 @@
+## 2026-11-24 — SPREADSHEET-SUBNORMAL-AND-CANCELLATION-SAFE-AGGREGATES
+
+**Starting refs:** dev 77a12298a1996d5acc578fc1e3bcba07725d6411; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, this plan, the frozen 2026-10-26 MATLAB inventory, Data Tables source, standalone build contract, numeric-hardening browser regression, branch refs, open PRs, and latest exact-head CI/Pages evidence.
+
+**Starting CI/CD evidence:** Exact dev Quality [#45371139051](https://github.com/saeedsai/ProMathStudio/actions/runs/45371139051) passed all 218/218 steps with zero failures/skips on 77a12298a1996d5acc578fc1e3bcba07725d6411. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) passed 218/218 on 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) passed build 5/5, build-status 3/3 and deploy 3/3 on the same main SHA. No open PRs; only dev and main exist. Branch listing reports both unprotected, rulesets query is empty, and branch-protection read returns HTTP 403 to the connected integration. The release gate remains blocked; no PR or merge was attempted.
+
+**Numerical defect:** The previous AVERAGE/AVG avoided overflow by summing each input divided by the count, but every minimum-subnormal contribution could round to zero (for example, averaging two 5e-324 cells). It also lost a small residual when large positive and negative inputs cancelled in sequence. Even-count MEDIAN used a/2+b/2, which also turns the midpoint of two minimum-subnormal values into zero.
+
+**Source correction:** Added a range-safe mean: scale inputs by the largest absolute value, use Neumaier compensation for normalized terms, and accumulate terms whose normalized ratio underflows separately so they survive cancellation. Clamp only floating-point overshoot to the mathematical bound that a mean cannot exceed the largest absolute input. Even-count MEDIAN now uses a scaled midpoint, avoiding overflow and preserving subnormal values. SUM's existing overflow error and the binary64 precision contract remain unchanged.
+
+**Regression and bundle:** Extended tests/smoke_sheet_numeric_hardening.py with raw workbook-range checks for subnormal AVERAGE/AVG/MEDIAN, negative subnormal median, adjacent subnormal midpoint, a three-Number.MAX_VALUE mean, and cancellation of 1e308 + (-1e308) while retaining the 1e-300 residual. The test also round-trips the aggregate workbook and restores the original workbook. Updated docs/DATA_TABLES.md. Updated src/data-tables.js and the matching inline module in standalone index.html in the same commit; source/bundle module parity was checked before and after the edit.
+
+**Validation:** Isolated V8 checks passed for minimum-subnormal means/medians, adjacent-subnormal midpoint, opposite maximum values, maximum-value average, and cancellation residual. Local repository/Playwright execution is unavailable because this runtime has no checkout; no local browser pass is claimed. The new exact-head GitHub Quality run must execute the registered numeric-hardening smoke test, standalone build/source-parity checks, and all other structural/Chromium steps.
+
+**Release state:** Implemented on dev / In QA; not released. Main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5 with successful Quality and Pages evidence above. No PR was opened because the required enforceable main protection/review gate is not satisfied (both branch refs report unprotected; rulesets empty; protection read HTTP 403). Historical MATLAB inventory remains frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE concrete priorities and acceptance tests:**
+1. **P0 — Certify this exact-head candidate.** Require all exact-commit dev Quality steps to pass with zero failures/skips; specifically run tests/smoke_sheet_numeric_hardening.py, python scripts/build.py --check, structural tests and the full Chromium suite. Preserve subnormal, cancellation, maximum-finite and project round-trip assertions.
+2. **P0 — Restore the enforceable release gate.** Verify main branch protection/rulesets with repository administration access; require Quality, prohibit force/deletion/direct main pushes, obtain eligible independent review, then use one ordinary dev→main PR only after exact-head checks are green. Verify exact-main Quality, Pages and hosted critical paths.
+3. **P1 — Finish spreadsheet reference edge coverage.** Test sheet names containing escaped apostrophes, mixed absolute/relative anchors, reversed cross-sheet ranges, quoted string literals, and first/last row/column edits; assert identity preservation or atomic rejection and source/bundle parity.
+4. **P1 — Complete seven-shape Truss numerical boundaries.** Add independent low-exponent, near-solid and thin-wall references for all seven section shapes; verify area, centroid, Ixx/Iyy, moduli, radii, L-angle principal invariants, invalid rollback and 390px keyboard behavior.
+5. **P1 — Verify saved-project and ODE compatibility.** Round-trip current/legacy Matrix, Graph and Table projects; malformed import must roll back without losing selection/focus. Check forward/backward analytical ODE references, bounded failures and 390px recovery.
+
+---
+
 ## 2026-11-24 — TRUSS-RADIUS-OF-GYRATION-PRECISION-AND-EXACT-HEAD-CI-RECOVERY
 
 **Starting refs:** dev `538ce581e0e020997b632066fa7e6c5ad620443b`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Truss/FEM source and test contract, current branch refs, open PRs, exact-head Actions and main Pages evidence. Only `dev` and `main` exist; no PR is open.

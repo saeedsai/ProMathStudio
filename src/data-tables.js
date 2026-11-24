@@ -542,6 +542,41 @@
     render();save();
   }
   const number=v=>{if(v===null||v==='')return 0;const n=Number(v);if(!Number.isFinite(n))throw Error('Not numeric: '+v);return n;};
+  // Neumaier accumulation keeps low-order terms when large normalized values cancel.
+  function addCompensated(state,value){
+    const next=state.sum+value;
+    if(Math.abs(state.sum)>=Math.abs(value))state.correction+=(state.sum-next)+value;
+    else state.correction+=(value-next)+state.sum;
+    state.sum=next;
+  }
+  // Scale finite inputs to [-1,1] before summation so the mean cannot overflow.
+  // Keep terms whose normalized quotient underflows in a separate, unscaled sum:
+  // they may be the only surviving contribution after large positive/negative values cancel.
+  function stableMean(values){
+    const count=values.length;
+    if(!count)return 0;
+    let scale=0;
+    for(const value of values)scale=Math.max(scale,Math.abs(value));
+    if(scale===0)return 0;
+    const scaled={sum:0,correction:0},residual={sum:0,correction:0};
+    for(const value of values){
+      const normalized=value/scale;
+      if(normalized===0&&value!==0)addCompensated(residual,value);
+      else addCompensated(scaled,normalized);
+    }
+    const normalizedMean=(scaled.sum+scaled.correction)/count;
+    const primary=Math.max(-1,Math.min(1,normalizedMean))*scale;
+    const residualMean=(residual.sum+residual.correction)/count;
+    // A mean is bounded by the largest absolute input; clamp only rounding overshoot.
+    return Math.max(-scale,Math.min(scale,primary+residualMean));
+  }
+  // Scale before taking the midpoint to avoid overflow and retain subnormal values.
+  function safeMidpoint(a,b){
+    const scale=Math.max(Math.abs(a),Math.abs(b));
+    if(scale===0)return 0;
+    const midpoint=((a/scale)+(b/scale))/2*scale;
+    return Math.max(-scale,Math.min(scale,midpoint));
+  }
   const splitArgs=str=>{const out=[];let depth=0,start=0;for(let i=0;i<str.length;i++){if(str[i]==='(')depth++;else if(str[i]===')')depth--;else if(str[i]===','&&depth===0){out.push(str.slice(start,i));start=i+1;}}out.push(str.slice(start));return out;};
   // Find comparisons only at the top level: nested IF conditions may contain
   // their own comparisons, which must not split the outer condition.
@@ -654,11 +689,11 @@
       if(upper==='MEDIAN'){
         if(!nums.length)throw Error('#NUM!');
         const ordered=nums.slice().sort((a,b)=>a-b),mid=Math.floor(ordered.length/2);
-        x=ordered.length%2?ordered[mid]:ordered[mid-1]/2+ordered[mid]/2;
+        x=ordered.length%2?ordered[mid]:safeMidpoint(ordered[mid-1],ordered[mid]);
       }else if(upper==='AVERAGE'||upper==='AVG'){
         // Scale finite terms before accumulation so a finite mean cannot
         // overflow merely because its unscaled intermediate sum would.
-        x=nums.length?nums.reduce((a,b)=>a+b/nums.length,0):0;
+        x=nums.length?stableMean(nums):0;
       }else if(upper==='SUM'){
         x=nums.reduce((a,b)=>a+b,0);
       }else if(upper==='COUNT'){

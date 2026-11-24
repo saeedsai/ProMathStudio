@@ -1,3 +1,9 @@
+## 2026-11-24 — Truss hollow-rectangle high-range inertia safety (dev; exact-head QA pending)
+
+- Hollow-rectangle Ixx/Iyy no longer construct overflowing outer/inner solid-rectangle fourth-power intermediates before applying the thin-wall factor. The dimensionless factor is split across the repeated depth/width terms.
+- Added exact-binary64 100-digit Decimal Node references and Chromium engine coverage at desktop/390px for finite area, Ixx/Iyy, section moduli and radii despite both old Ixx intermediates overflowing.
+- Existing area cancellation protection, geometry validation, selected-member application behavior and composite/L-angle calculations remain; not released until exact-head Push/PR Quality passes.
+
 ## 2026-11-24 — Truss L-angle subnormal principal-moment recovery (dev; exact-head QA pending)
 
 - Recover a positive representable L-angle minor principal moment when the normalized inertia determinant underflows, using the unscaled determinant only when finite and positive; retain explicit rejection when neither path is representable.

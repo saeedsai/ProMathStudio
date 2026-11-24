@@ -87,8 +87,14 @@
   // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
   function sectionProperties(shape, dimensions) {
     // Divide before the final multiplication: b*h^3/12 can be finite even when b*h^3 overflows.
-    const rectangleIxx = (piece, label) => finite(piece.width*piece.height*(piece.height/12)*piece.height, label);
-    const rectangleIyy = (piece, label) => finite(piece.height*piece.width*(piece.width/12)*piece.width, label);
+    const rectangleIxx = (piece, label, factor = 1) => {
+      const scaledHeight = piece.height * Math.sqrt(factor);
+      return finite(piece.width*piece.height*(scaledHeight/12)*scaledHeight, label);
+    };
+    const rectangleIyy = (piece, label, factor = 1) => {
+      const scaledWidth = piece.width * Math.sqrt(factor);
+      return finite(piece.height*piece.width*(scaledWidth/12)*scaledWidth, label);
+    };
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
     const circular = shape === 'solid-circle' || shape === 'hollow-circle';
     const composite = shape === 'channel' || shape === 'i-section';
@@ -242,18 +248,17 @@
       const heightGap = hollow ? (depth - innerHeight) / depth : 1;
       const netAreaFactor = hollow ? widthGap + widthRatio * heightGap : 1;
       area = finite(outerArea * netAreaFactor, 'Rectangle net area (mm²)');
-      const outerIxx = finite(width * depth * depth * depth / 12, 'Rectangle outer Ixx (mm⁴)');
-      if (hollow) finite(innerWidth * innerHeight * innerHeight * innerHeight / 12, 'Hollow rectangle inner Ixx (mm⁴)');
       const ixxFactor = hollow
         ? widthGap + widthRatio * heightGap * (1 + heightRatio + heightRatio * heightRatio)
         : 1;
-      secondMoment = finite(outerIxx * ixxFactor, 'Rectangle Ixx (mm⁴)');
-      const outerIyy = finite(depth * width * width * width / 12, 'Rectangle outer Iyy (mm⁴)');
-      if (hollow) finite(innerHeight * innerWidth * innerWidth * innerWidth / 12, 'Hollow rectangle inner Iyy (mm⁴)');
+      // Split the dimensionless hollow-section factor between the two depth
+      // factors. This keeps a finite thin-wall Ixx even when the full outer
+      // and inner solid-rectangle fourth-power intermediates would overflow.
+      secondMoment = rectangleIxx({width,height:depth}, 'Rectangle Ixx (mm⁴)', ixxFactor);
       const iyyFactor = hollow
         ? heightGap + heightRatio * widthGap * (1 + widthRatio + widthRatio * widthRatio)
         : 1;
-      secondMomentPerpendicular = finite(outerIyy * iyyFactor, 'Rectangle Iyy (mm⁴)');
+      secondMomentPerpendicular = rectangleIyy({width,height:depth}, 'Rectangle Iyy (mm⁴)', iyyFactor);
       axis = 'centroidal axis parallel to width';
       perpendicularAxis = 'centroidal axis parallel to depth';
     } else {

@@ -1340,6 +1340,33 @@ test('thin-walled hollow rectangle retains net properties without subtractive ca
 });
 
 
+test('hollow rectangle retains finite thin-wall inertias when outer and inner fourth-power intermediates overflow',()=>{
+ const dimensions={width:1e-10,height:1e110,innerWidth:9.999999999999998e-11,innerHeight:9.999999999999999e109};
+ const original={...dimensions};
+ assert.equal(dimensions.width*dimensions.height*dimensions.height*dimensions.height/12,Infinity);
+ assert.equal(dimensions.innerWidth*dimensions.innerHeight*dimensions.innerHeight*dimensions.innerHeight/12,Infinity);
+ const section=fem.sectionProperties('hollow-rectangle',dimensions);
+ // 100-digit Decimal references evaluated from the exact binary64 input dimensions.
+ const expected={
+  area:4.253679286041422e84,
+  secondMoment:6.325965858056535e303,
+  secondMomentPerpendicular:7.852965095414868e63,
+  sectionModulusX:1.2651931716113071e194,
+  sectionModulusY:1.5705930190829738e74,
+  radiusOfGyrationX:3.856390911208362e109,
+  radiusOfGyrationY:4.296694365821575e-11
+ };
+ const closeRelative=(actual,want,label)=>{
+  assert.ok(Number.isFinite(actual)&&Math.abs(actual-want)<=Math.abs(want)*5e-13,label+' '+actual+' must match '+want);
+ };
+ for(const [key,want] of Object.entries(expected)) closeRelative(section[key],want,key);
+ assert.deepEqual(section.centroid,{x:dimensions.width/2,y:dimensions.height/2});
+ assert.equal(section.extremeFiberDistanceAboutX,dimensions.height/2);
+ assert.equal(section.extremeFiberDistanceAboutY,dimensions.width/2);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});
+
 test('thin-walled hollow circle retains area and inertia without subtractive cancellation',()=>{
  const dimensions={diameter:1e6,innerDiameter:999999.9999999};
  const original={...dimensions};

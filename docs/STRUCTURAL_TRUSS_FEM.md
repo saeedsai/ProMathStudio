@@ -7,6 +7,19 @@
 **Verification baseline:** The immediately preceding dev head d1c25300184851af0c52c9619571c2878af5c458 passed exact-head Push Quality [#45202567594](https://github.com/saeedsai/ProMathStudio/actions/runs/45202567594) and PR Quality [#45202584053](https://github.com/saeedsai/ProMathStudio/actions/runs/45202584053), each with 218/218 steps successful and zero failures/skips. This new read-direction candidate requires fresh exact-head CI; it is not released.
 
 
+## Hollow-rectangle inertia range safety
+
+Hollow-rectangle centroidal inertias use the existing dimensionless wall-gap factors without first constructing the outer and inner solid-rectangle fourth-power moments. For the Ixx path, the dimensionless factor is split evenly across the two depth factors:
+
+\[
+I_{xx}=A_o\left(\frac{h\sqrt{f_x}}{12}\right)(h\sqrt{f_x}),
+\qquad A_o=bh
+\]
+
+Iyy uses the corresponding width factor. This is algebraically equivalent to the factored outer-minus-inner expression, but it avoids overflowing the full solid-envelope inertia before a very small wall factor is applied. Composite-section and L-angle rectangle pieces continue to use the same helper with factor 1.
+
+A synthetic exact-binary64 boundary regression uses B=1e-10 mm, H=1e110 mm, bi=9.999999999999998e-11 mm and hi=9.999999999999999e109 mm. Both the old outer and inner Ixx fourth-power intermediates overflow, while area, Ixx/Iyy, section moduli and radii of gyration remain finite and match 100-digit Decimal references. These dimensions are a floating-point range test only, not a physically meaningful design example.
+
 ## Composite-section inertia range safety
 
 The local centroidal moments of each non-overlapping rectangle are evaluated in an overflow-aware order:

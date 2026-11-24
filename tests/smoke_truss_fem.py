@@ -668,6 +668,52 @@ def main():
             assert 'Hollow rectangle' in page.locator('#section-result').inner_text()
             assert 'applied Ixx' in page.locator('#section-result').inner_text()
 
+            # A thin hollow rectangle can have finite net inertias even when both
+            # outer and inner solid-rectangle fourth-power intermediates overflow.
+            extreme_hollow_rectangle = page.evaluate("""() => {
+                const dimensions = {
+                    width: 1e-10,
+                    height: 1e110,
+                    innerWidth: 9.999999999999998e-11,
+                    innerHeight: 9.999999999999999e109
+                };
+                const oldOuterIxx = dimensions.width * dimensions.height *
+                    dimensions.height * dimensions.height / 12;
+                const oldInnerIxx = dimensions.innerWidth * dimensions.innerHeight *
+                    dimensions.innerHeight * dimensions.innerHeight / 12;
+                const section = ProMathTrussFEM.sectionProperties('hollow-rectangle', dimensions);
+                return {
+                    oldOuterOverflow: !Number.isFinite(oldOuterIxx),
+                    oldInnerOverflow: !Number.isFinite(oldInnerIxx),
+                    area: section.area,
+                    ixx: section.secondMoment,
+                    iyy: section.secondMomentPerpendicular,
+                    sx: section.sectionModulusX,
+                    sy: section.sectionModulusY,
+                    rx: section.radiusOfGyrationX,
+                    ry: section.radiusOfGyrationY,
+                    cx: section.centroid.x,
+                    cy: section.centroid.y
+                };
+            }""")
+            assert extreme_hollow_rectangle['oldOuterOverflow']
+            assert extreme_hollow_rectangle['oldInnerOverflow']
+            expected_extreme_hollow_rectangle = {
+                'area': 4.253679286041422e84,
+                'ixx': 6.325965858056535e303,
+                'iyy': 7.852965095414868e63,
+                'sx': 1.2651931716113071e194,
+                'sy': 1.5705930190829738e74,
+                'rx': 3.856390911208362e109,
+                'ry': 4.296694365821575e-11,
+                'cx': 5e-11,
+                'cy': 5e109
+            }
+            for key, expected in expected_extreme_hollow_rectangle.items():
+                actual = extreme_hollow_rectangle[key]
+                assert math.isfinite(actual) and abs(actual - expected) <= abs(expected) * 5e-13, (
+                    key, actual, expected, extreme_hollow_rectangle)
+
             # A normalized L-angle determinant can underflow even when I2 is still a
             # representable subnormal; the browser engine must retain the Decimal reference.
             extreme_principal = page.evaluate("""() => {

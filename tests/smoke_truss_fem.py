@@ -492,7 +492,7 @@ def main():
             assert page.locator('#section-result').inner_text() == ''
             assert section_member_snapshot() == section_after
             page.locator('#section-axis').select_option('width')
-            page.locator('#section-member').select_option('AC')
+            page.locator('#section-member').select_option('AB')
             assert page.locator('#section-result').inner_text() == ''
             assert section_member_snapshot() == section_after
             page.locator('#section-member').select_option(section_target)

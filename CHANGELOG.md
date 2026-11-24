@@ -1,7 +1,7 @@
 ## 2026-11-24 — Truss section-application result freshness (dev; exact-head QA pending)
 
 - Clear the previous “applied to member” result when section geometry/shape, selected member, axis, member ID/area/I or loaded model changes; do not rewrite member values until the user explicitly reapplies.
-- Added desktop and 390px browser regression for stale-result clearing after axis, target and geometry edits, unchanged member snapshots, successful reapplication and existing invalid/overflow rollback.
+- Added desktop and 390px browser regression for stale-result clearing after axis changes, an actual AC→AB→AC target switch, and geometry edits; member snapshots stay unchanged, reapplication restores the success result, and invalid/overflow rollback remains covered.
 - Updated the Structural Truss contract and living development records. Requires fresh exact-head Push/PR Quality; not released.
 
 ## 2026-11-24 — Truss extreme-aspect L-angle preview detail (dev; exact-head QA pending)

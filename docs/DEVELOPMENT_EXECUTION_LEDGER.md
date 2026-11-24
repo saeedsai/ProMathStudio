@@ -1,3 +1,15 @@
+## 2026-11-24 — TRUSS-SOLID-CIRCLE-FOURTH-POWER-RANGE-SAFETY
+
+- Starting refs: dev `7f05e2a35d8fd15f34b6d83e0653a3b528e78c2d`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Read root AGENTS.md, living plan, frozen MATLAB inventory, Structural Truss source/tests/contract, PR #189/reviews, refs, Actions and Pages.
+- Exact starting-head Push Quality [#45338352630](https://github.com/saeedsai/ProMathStudio/actions/runs/45338352630) and PR Quality [#45338358666](https://github.com/saeedsai/ProMathStudio/actions/runs/45338358666) both passed 218/218 steps with zero failures/skips.
+- Fixed solid-circle inertia range handling: apply π/64 before the final multiplication of the two finite diameter-squared terms, rather than requiring the unscaled diameter fourth power to be finite. The final inertia guard, geometry validation, area, hollow-circle path and small-section underflow rejection remain.
+- Added exact-binary64 120-digit Decimal Node references for `Do=2.45e77 mm`; the old fourth-power intermediate overflows while area, Ixx/Iyy, section moduli and radii remain finite. Added Chromium preview/application coverage at 1280px/390px, selected-member isolation and restoration.
+- Isolated V8 formula validation passed: old Do⁴ is Infinity; area, inertia, section modulus and radius match references within 5e-13; 40 mm result is unchanged at binary64 precision; 1e-100 mm still underflows. Full local Node/Chromium suites were not run because no checkout is mounted; exact-head Actions on the new commit are required.
+- Updated Structural Truss contract, hourly plan, execution ledger and changelog atomically with source/tests. The standalone Truss Studio uses adjacent assets; root index.html synchronization is not applicable.
+- PR #189 remains open/mergeable at 487 commits/98 files, exact-head/base matched, zero independent reviews. dev/main are reported unprotected, rulesets empty, and branch-protection reads return HTTP 403. No merge or bypass.
+- Main Quality [#41730966059] passed 193/193 and Pages [#41730962844] passed build 5/5, deploy 3/3 and report 3/3 on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03); no newer main deployment found.
+- Frozen October 26 inventory unchanged: **166 gaps / 95 partial**. No branch cleanup: inherited branch history is not proven fully merged.
+
 ## 2026-11-24 — TRUSS-HOLLOW-RECTANGLE-FOURTH-POWER-RANGE-SAFETY
 
 **Starting refs:** dev ceb225e2e25b03aebb09a0f7ababa26f0de619a1; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read root AGENTS.md, this plan, the frozen 2026-10-26 inventory, Structural Truss source/tests/contract, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.

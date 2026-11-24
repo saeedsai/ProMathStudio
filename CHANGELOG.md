@@ -1,3 +1,9 @@
+## 2026-11-24 — Truss solid-circle high-range inertia safety (dev; exact-head QA pending)
+
+- Solid-circle inertia now applies π/64 before the final multiplication of the diameter-squared terms, avoiding an unnecessary overflowing Do⁴ intermediate when the final moment is finite.
+- Added 120-digit Decimal-backed Node coverage and desktop/390px Chromium preview/application coverage for Do=2.45e77 mm, including selected-member isolation and preservation of other member fields.
+- Existing final finite guard, ordinary 40 mm result, hollow-circle path and tiny-diameter underflow rejection remain. Requires fresh exact-head Push/PR Quality; not released.
+
 ## 2026-11-24 — Truss hollow-rectangle high-range inertia safety (dev; exact-head QA pending)
 
 - Hollow-rectangle Ixx/Iyy no longer construct overflowing outer/inner solid-rectangle fourth-power intermediates before applying the thin-wall factor. The dimensionless factor is split across the repeated depth/width terms.

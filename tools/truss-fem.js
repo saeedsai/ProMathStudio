@@ -288,9 +288,10 @@
         area = finite((Math.PI / 4) * outerSquare * areaFactor, 'Circle net area (mm²)');
         secondMoment = finite((Math.PI / 64) * outerSquare * inertiaFactor * outerSquare, 'Circle centroidal second moment I (mm⁴)');
       } else {
-        const outerFourth = finite(outerSquare * outerSquare, 'Circle outer diameter to fourth power (mm⁴)');
         area = finite(Math.PI * outerSquare / 4, 'Circle net area (mm²)');
-        secondMoment = finite(Math.PI * outerFourth / 64, 'Circle centroidal second moment I (mm⁴)');
+        // Apply the coefficient before the final square: Do^4 may overflow even
+        // when the physical solid-circle inertia (pi/64)*Do^4 is representable.
+        secondMoment = finite((Math.PI / 64) * outerSquare * outerSquare, 'Circle centroidal second moment I (mm⁴)');
       }
       secondMomentPerpendicular = secondMoment;
       axis = 'centroidal diameter axis';

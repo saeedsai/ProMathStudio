@@ -1458,3 +1458,38 @@ test('L-angle minor principal moment survives normalized determinant underflow',
  assert.deepEqual(dimensions,original);
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
+
+ 
+test('solid circle retains finite inertia when the unscaled diameter fourth power overflows',()=>{
+ const dimensions={diameter:2.45e77};
+ const original={...dimensions};
+ const outerSquare=dimensions.diameter*dimensions.diameter;
+ assert.ok(Number.isFinite(outerSquare));
+ assert.equal(Number.isFinite(outerSquare*outerSquare),false,
+  'the unscaled diameter fourth power must overflow to exercise the former rejection');
+ const section=fem.sectionProperties('solid-circle',dimensions);
+ // 120-digit Decimal references evaluated from the exact binary64 diameter.
+ const expected={
+  area:4.714352475793184e154,
+  secondMoment:1.768618795996787e308,
+  sectionModulus:1.4437704457116628e231,
+  radiusOfGyration:6.125e76
+ };
+ const closeRelative=(actual,want,label)=>{
+  assert.ok(Number.isFinite(actual)&&Math.abs(actual-want)<=Math.abs(want)*5e-13,
+   label+' '+actual+' must match '+want);
+ };
+ closeRelative(section.area,expected.area,'solid-circle area');
+ closeRelative(section.secondMoment,expected.secondMoment,'solid-circle I');
+ closeRelative(section.secondMomentPerpendicular,expected.secondMoment,'solid-circle Iyy');
+ closeRelative(section.sectionModulusX,expected.sectionModulus,'solid-circle Sx');
+ closeRelative(section.sectionModulusY,expected.sectionModulus,'solid-circle Sy');
+ closeRelative(section.radiusOfGyrationX,expected.radiusOfGyration,'solid-circle rx');
+ closeRelative(section.radiusOfGyrationY,expected.radiusOfGyration,'solid-circle ry');
+ assert.deepEqual(section.centroid,{x:dimensions.diameter/2,y:dimensions.diameter/2});
+ assert.equal(section.extremeFiberDistanceAboutX,dimensions.diameter/2);
+ assert.equal(section.extremeFiberDistanceAboutY,dimensions.diameter/2);
+ assert.equal(section.secondMomentPerpendicular,section.secondMoment);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});

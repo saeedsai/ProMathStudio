@@ -223,6 +223,29 @@ def main():
             assert after_solid_circle['BC'] == before_solid_circle['BC']
             restore_section_member('AB', before_solid_circle)
 
+            # A solid circle's coefficient can make I finite even when the unscaled Do^4 overflows.
+            page.locator('#section-shape').select_option('solid-circle')
+            page.locator('#section-diameter').fill('2.45e77')
+            range_solid_circle_caption = page.locator('#section-sketch-caption').inner_text()
+            assert range_solid_circle_caption.startswith('Solid circle D='), range_solid_circle_caption
+            assert page.locator('#section-sketch').get_attribute('aria-label') == range_solid_circle_caption
+            assert page.locator('#section-sketch circle[data-section-outline="solid-circle"]').count() == 1
+            before_range_solid_circle = section_member_snapshot()
+            page.locator('#section-member').select_option('AC')
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text().startswith('Solid circle: area ')
+            after_range_solid_circle = section_member_snapshot()
+            expected_range_solid_circle_area = 4.714352475793184e154
+            expected_range_solid_circle_moment = 1.768618795996787e308
+            assert abs(float(after_range_solid_circle['AC']['area']) - expected_range_solid_circle_area) <= expected_range_solid_circle_area * 5e-13
+            assert abs(float(after_range_solid_circle['AC']['I']) - expected_range_solid_circle_moment) <= expected_range_solid_circle_moment * 5e-13
+            for field, value in before_range_solid_circle['AC'].items():
+                if field not in ('area', 'I'):
+                    assert after_range_solid_circle['AC'][field] == value, (field, before_range_solid_circle['AC'], after_range_solid_circle['AC'])
+            assert after_range_solid_circle['AB'] == before_range_solid_circle['AB']
+            assert after_range_solid_circle['BC'] == before_range_solid_circle['BC']
+            restore_section_member('AC', before_range_solid_circle)
+
             # A thin annulus can have a finite I even when Do^4 and Di^4 overflow.
             page.locator('#section-shape').select_option('hollow-circle')
             page.locator('#section-diameter').fill('1e78')

@@ -1140,6 +1140,42 @@ test('open channel and I sections use composite rectangles and the parallel-axis
 });
 
 
+test('composite section local inertias avoid intermediate overflow when final properties are finite',()=>{
+ // Synthetic floating-range stress cases (dimensions in mm), not physical design examples.
+ // The old left-to-right b*h*h*h/12 expression overflows before division although Ixx is finite.
+ assert.equal(1e74*2e78*2e78*2e78/12,Infinity);
+ assert.equal(2.25e73*2e78*2e78*2e78/12,Infinity);
+ const cases=[
+  {shape:'channel',dimensions:{width:5e78,height:2e78,webThickness:1e74,flangeThickness:1e71},
+   expected:{area:2.0099998e152,cx:1.2487563426623227e76,cy:1e78,ixx:6.766664656666867e307,iyy:8.301990215811596e306}},
+  {shape:'i-section',dimensions:{width:5e78,height:2e78,webThickness:1e74,flangeThickness:1e71},
+   expected:{area:2.0099998e152,cx:2.5e78,cy:1e78,ixx:6.766664656666867e307,iyy:2.0833335e306}},
+  {shape:'l-angle',dimensions:{width:1e78,height:2e78,thickness:2.25e73},
+   expected:{area:6.749949375e151,cx:1.6667541664791653e77,cy:6.6667541664791653e77,
+    ixx:2.999943750622263e307,iyy:5.624817191824194e306,
+    major:3.212217891384522e307,minor:3.502075784201607e306}}
+ ];
+ const closeRelative=(got,want,label)=>{
+  assert.ok(Number.isFinite(got)&&Math.abs(got-want)<=Math.abs(want)*2e-13,
+   label+' '+got+' must match '+want);
+ };
+ for(const {shape,dimensions,expected} of cases){
+  const section=fem.sectionProperties(shape,dimensions);
+  closeRelative(section.area,expected.area,shape+' area');
+  closeRelative(section.centroid.x,expected.cx,shape+' centroid x');
+  closeRelative(section.centroid.y,expected.cy,shape+' centroid y');
+  closeRelative(section.secondMoment,expected.ixx,shape+' Ixx');
+  closeRelative(section.secondMomentPerpendicular,expected.iyy,shape+' Iyy');
+  for(const key of ['sectionModulusX','sectionModulusY','radiusOfGyrationX','radiusOfGyrationY'])
+   assert.ok(Number.isFinite(section[key])&&section[key]>0,shape+' '+key+' must remain finite and positive');
+  if(shape==='l-angle'){
+   closeRelative(section.principalMomentMajor,expected.major,'L-angle I1');
+   closeRelative(section.principalMomentMinor,expected.minor,'L-angle I2');
+  }
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+});
+
 test('L-angle section returns centroidal and principal properties with validated dimensions',()=>{
  const angle=fem.sectionProperties('l-angle',{width:100,height:80,thickness:10});
  close(angle.area,1700,1e-12);

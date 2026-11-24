@@ -86,6 +86,9 @@
   // Returns centroidal Ixx/Iyy, section moduli and radii of gyration for both axes.
   // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
   function sectionProperties(shape, dimensions) {
+    // Divide before the final multiplication: b*h^3/12 can be finite even when b*h^3 overflows.
+    const rectangleIxx = (piece, label) => finite(piece.width*piece.height*(piece.height/12)*piece.height, label);
+    const rectangleIyy = (piece, label) => finite(piece.height*piece.width*(piece.width/12)*piece.width, label);
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
     const circular = shape === 'solid-circle' || shape === 'hollow-circle';
     const composite = shape === 'channel' || shape === 'i-section';
@@ -119,12 +122,12 @@
       centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'L-angle centroid x (mm)');
       centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'L-angle centroid y (mm)');
       secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = finite(piece.width*piece.height*piece.height*piece.height/12, 'L-angle local Ixx (mm⁴)');
+        const local = rectangleIxx(piece, 'L-angle local Ixx (mm⁴)');
         const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'L-angle Ixx offset (mm⁴)');
         return sum+local+offset;
       },0), 'L-angle Ixx (mm⁴)');
       secondMomentPerpendicular = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = finite(piece.height*piece.width*piece.width*piece.width/12, 'L-angle local Iyy (mm⁴)');
+        const local = rectangleIyy(piece, 'L-angle local Iyy (mm⁴)');
         const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'L-angle Iyy offset (mm⁴)');
         return sum+local+offset;
       },0), 'L-angle Iyy (mm⁴)');
@@ -190,12 +193,12 @@
       centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'Composite section centroid x (mm)');
       centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'Composite section centroid y (mm)');
       secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = finite(piece.width*piece.height*piece.height*piece.height/12, 'Composite rectangle local Ixx (mm⁴)');
+        const local = rectangleIxx(piece, 'Composite rectangle local Ixx (mm⁴)');
         const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'Composite rectangle Ixx offset (mm⁴)');
         return sum+local+offset;
       },0), 'Composite section Ixx (mm⁴)');
       secondMomentPerpendicular = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = finite(piece.height*piece.width*piece.width*piece.width/12, 'Composite rectangle local Iyy (mm⁴)');
+        const local = rectangleIyy(piece, 'Composite rectangle local Iyy (mm⁴)');
         const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'Composite rectangle Iyy offset (mm⁴)');
         return sum+local+offset;
       },0), 'Composite section Iyy (mm⁴)');

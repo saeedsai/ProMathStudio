@@ -1,3 +1,10 @@
+## 2026-11-24 — Truss composite-section local inertia overflow safety (dev; exact-head QA pending)
+
+- Reordered local rectangle Ixx/Iyy evaluation to divide by 12 before the final dimension multiplication, preventing intermediate overflow when the final local moment is finite.
+- Applied the shared calculation to channel, I-section and L-angle decompositions; no solver or ordinary-size geometry behavior changed.
+- Added high-precision Node references for synthetic extreme-range channel, I-section and L-angle cases, including a check that the old operation order overflows.
+- Fresh exact-head Push/PR Quality required; not released.
+
 ## 2026-11-24 — Truss section-application result freshness (dev; exact-head QA pending)
 
 - Clear the previous “applied to member” result when section geometry/shape, selected member, axis, member ID/area/I or loaded model changes; do not rewrite member values until the user explicitly reapplies.

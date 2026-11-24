@@ -7,6 +7,17 @@
 **Verification baseline:** The immediately preceding dev head d1c25300184851af0c52c9619571c2878af5c458 passed exact-head Push Quality [#45202567594](https://github.com/saeedsai/ProMathStudio/actions/runs/45202567594) and PR Quality [#45202584053](https://github.com/saeedsai/ProMathStudio/actions/runs/45202584053), each with 218/218 steps successful and zero failures/skips. This new read-direction candidate requires fresh exact-head CI; it is not released.
 
 
+## Composite-section inertia range safety
+
+The local centroidal moments of each non-overlapping rectangle are evaluated in an overflow-aware order:
+
+- Ixx = (b*h)*(h/12)*h
+- Iyy = (b*h)*(b/12)*b
+
+These are algebraically identical to b*h^3/12 and h*b^3/12, but divide by 12 before the final multiplication. This prevents an intermediate b*h^3 or h*b^3 overflow when the final local moment is still representable. The same helper is used for the L-angle and channel/I-section rectangle decompositions; the parallel-axis terms, centroid calculation, validation and ordinary-size results are unchanged.
+
+A synthetic floating-range regression uses 120-digit Decimal references for channel, I-section and L-angle properties. Its dimensions are intentionally far outside physical design practice and are solely a binary64 numerical-boundary test, not an engineering sizing example.
+
 ## How to use
 
 Open `tools/truss-studio.html` in a browser (requires its adjacent `truss-fem.js` and `truss-fem-ui.js`). Select a reference model or edit **Joints**: unique ID, X/Y in metres, Fix X/ Fix Y, forces Fx/Fy in kN (positive right/up). In **Members**, enter start/end IDs, E in GPa, area in mm² and optional density in kg/m³. The **Section property helper** in the material breakdown calculates area, centroidal Ixx/Iyy, elastic section moduli Sx/Sy, extreme-fibre distances cX/cY and radii of gyration rx/ry for solid/hollow rectangles and circles, plus open channels, I-sections and L-angles. L-angles also report Ixy, principal I1/I2 and the major-principal-axis angle; the selected centroidal/principal moment is applied to one member. Sx = Ixx/cX and Sy = Iyy/cY; rx = sqrt(Ixx/A) and ry = sqrt(Iyy/A). Rectangle Ixx is about the horizontal centroidal axis parallel to width; circle I is about any centroidal diameter. These are geometric properties, not design resistances. Optional Euler estimate inputs are I (second moment of area, mm⁴) and K (dimensionless effective-length factor); provide both to calculate Pcr. Either property may be stored alone without producing an Euler estimate; the geometry/member preview remains available and the status explains when the pair is incomplete. Click Analyze truss. Results show member tension/compression force (kN), stress (MPa), joint displacements (mm), support reactions (kN), residual/energy verification and, when I/K are supplied, a compression-only ideal Euler comparison. Gray dotted members represent the original truss; colored amplified lines represent deformed geometry (green tension, orange compression). Change scale or label visibility, export the model as JSON, results as CSV, diagram as SVG; imported legacy SI JSON is converted explicitly. The import status identifies the file's units for optional density (kg/m³), second moment I (m⁴ in legacy SI or mm⁴ in Studio) and effective-length factor K (dimensionless), in addition to the core force, modulus and area units.

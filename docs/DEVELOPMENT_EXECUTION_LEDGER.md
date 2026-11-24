@@ -1,3 +1,15 @@
+## 2026-11-24 — TRUSS-COMPOSITE-SECTION-MOMENT-OVERFLOW-SAFETY
+
+- Starting refs: dev 61ea34c025f169ea235611fbed99560d7f503e4b; main 70fc483cb1cec3d2372d37484e4a8ef7942343da.
+- Starting exact-head Push Quality #45303082063 and PR Quality #45303087913 both passed 218/218 steps, zero failures/skips.
+- Found local rectangle b*h^3/12 and h*b^3/12 multiplication could overflow before division although the final local moment was representable.
+- Reordered local Ixx/Iyy expressions to (b*h)*(h/12)*h and (b*h)*(b/12)*b, shared by L-angle and channel/I-section decompositions.
+- Added a Node regression with 120-digit Decimal references for extreme-range channel, I-section and L-angle cases; asserts the old expression overflows while final area, centroid, inertias, section moduli, radii and principal moments remain finite and match references.
+- Isolated Node 22 arithmetic checks passed; independent 120-digit references calculated. Full local Node/Chromium suite unavailable because this workspace has no repository checkout; fresh exact-head Push/PR Quality pending.
+- PR #189 remains open/mergeable, 481 commits/98 files, zero submitted reviews. Rulesets query empty; branch-protection read HTTP 403. No merge, direct main update, force push or bypass.
+- Main Quality #41730966059 passed 193/193 and Pages #41730962844 passed on main 70fc483cb1cec3d2372d37484e4a8ef7942343da (2026-11-03); no newer deployment found.
+- Frozen historical inventory unchanged: 166 gaps / 95 partial.
+
 ## 2026-11-24 — TRUSS-SECTION-RESULT-FRESHNESS
 
 - Starting refs: dev `37c1925b59fd0e62dd56dcefa4ad60b6b375474c`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root contract, living plan, frozen inventory, engineering architecture/toolbox contracts, Structural Truss source/tests/contract, PR #189/reviews, branch refs, Actions and Pages.

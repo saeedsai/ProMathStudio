@@ -1,3 +1,30 @@
+## 2026-11-24 — TRUSS-COMPOSITE-SECTION-MOMENT-OVERFLOW-SAFETY
+
+**Starting refs:** dev 61ea34c025f169ea235611fbed99560d7f503e4b; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read root AGENTS.md, this plan, the frozen 2026-10-26 inventory, Structural Truss contract/source/tests, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.
+
+**P0 CI baseline:** Exact-head Push Quality [#45303082063](https://github.com/saeedsai/ProMathStudio/actions/runs/45303082063) and PR Quality [#45303087913](https://github.com/saeedsai/ProMathStudio/actions/runs/45303087913) both passed 218/218 steps, zero failures and zero skipped steps. The FEM Node/browser and existing Truss Studio regressions are green on the starting SHA.
+
+**P1 numerical defect:** The local rectangle moments in composite channel, I-section and L-angle decompositions were evaluated left-to-right as b*h*h*h/12 and h*b*b*b/12. Floating-point multiplication can overflow before division even when the final local moment is finite. For example, a channel web with b=1e74 mm and h=2e78 mm has a finite Decimal-reference Ixx, but the previous intermediate b*h^3 becomes Infinity before /12.
+
+**Source fix:** tools/truss-fem.js now evaluates the same exact formulas in an overflow-aware order: (b*h)*(h/12)*h and (b*h)*(b/12)*b. Shared local-rectangle helpers are used by both the composite and L-angle decompositions. No solver stiffness, load, displacement, parallel-axis term, centroid, normal-size result or import contract changed.
+
+**Regression:** tests/test_truss_fem.js adds 120-digit Decimal references (evaluated from exact binary64 inputs) for extreme-range channel, I-section and L-angle cases. It first proves the previous multiplication order overflows, then checks finite positive area, centroid, Ixx/Iyy, section moduli, radii and L-angle principal moments within relative tolerance 2e-13. These dimensions are synthetic floating-range stress cases, not practical engineering sizes.
+
+**Validation:** Isolated Node 22 formula checks reproduced the old overflow and matched channel/I-section references after reordering. Independent 120-digit Decimal references were calculated for all three shapes. The execution workspace has no repository checkout, so the complete local Node and Chromium suites could not run; fresh exact-head Push/PR Quality is required. Candidate is Implemented on dev / In QA, not released.
+
+**Release state:** PR #189 remains open/mergeable with head matched to starting dev, base main, 481 commits/98 changed files and zero submitted reviews. Repository rulesets query is empty; branch-protection read returns HTTP 403 to the connected integration, so protection state cannot be independently verified in this run. No merge, direct main update, force push or governance bypass was attempted. Main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) remains successful (193/193) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remains successful on main 70fc483cb1cec3d2372d37484e4a8ef7942343da, 2026-11-03; no newer main run/deployment was found.
+
+The October 26 historical baseline remains frozen at 166 gaps / 95 partial; no historical count or completion classification changed.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. P0 — Exact-head Quality and release governance. Both Push and PR Quality must pass all required steps on the new exact dev SHA, including the new high-range Node references and all 218 browser/structural checks. PR #189 additionally needs an eligible independent review and authorized enforceable main protection/required checks; only then inspect the full diff, ordinary-merge and verify exact-main Quality, Pages and hosted critical paths.
+2. P1 — Seven-shape section-helper matrix (in progress). Independently verify solid/hollow rectangle, solid/hollow circle, channel, I-section and L-angle area/inertia/centroid/section modulus/radius references; cover thin walls and finite-range overflow, selected-axis/member isolation, invalid rollback, E/density/K preservation, keyboard and 390px behavior.
+3. P1 — Spreadsheet formula-reference edge audit (planned). Test mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity, transactional refusal of unsafe noncontiguous sort/delete and source/standalone index.html parity.
+4. P1 — Source-backed Engineering Toolbox expansion (planned). Select one approved unfinished canonical tool; reuse shared solver, units and plot services; assign one stable tool ID; add independent numerical references, negative tests, keyboard/mobile browser coverage and truthful status without placeholder actions.
+5. P1 — Saved-project and numerical ODE compatibility (planned). Round-trip current and legacy Matrix/Graph/Table projects; malformed imports must roll back atomically and preserve focus. Verify selected ODE forward/backward analytical references, bounded failure recovery, stale-export disabling and 390px keyboard behavior.
+
+---
+
 ## 2026-11-24 — TRUSS-SECTION-RESULT-FRESHNESS (implemented on dev; exact-head QA pending)
 
 Starting refs: dev `37c1925b59fd0e62dd56dcefa4ad60b6b375474c`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Engineering Architecture/Toolbox contracts, Structural Truss source/tests/contract, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.

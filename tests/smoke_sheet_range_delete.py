@@ -45,9 +45,36 @@ def main():
         assert page.evaluate("MathStudio.dataTables.active.rows.map(r => r[1])") == [
             "=SUM(A1:A2)","=SUM(#REF!)","=SUM(A2:A3)"]
         assert page.evaluate("MathStudio.dataTables.calculate().map(r => r[1])") == [10,"#REF!",14]
+
+        # Structural edits must not turn an already out-of-grid reference into a valid cell.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
+            {id:'sheet-1',name:'Data',columns:['A'],rows:[['10'],['30']]},
+            {id:'sheet-2',name:'Refs',columns:['A','B','C'],rows:[[
+                '=Data!A2','=Data!A6001','=SUM(Data!A6001:A6001)'
+            ]]}
+        ]})""")
+        row_refs = "MathStudio.dataTables.tables[1].rows[0]"
+        row_values = "MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]"
+        assert page.evaluate(row_values) == [30, "#REF!", "#REF!"]
+        page.evaluate("MathStudio.dataTables.deleteRow(0)")
+        assert page.evaluate(row_refs) == ["=Data!A1", "=Data!A6001", "=SUM(Data!A6001:A6001)"]
+        assert page.evaluate(row_values) == [30, "#REF!", "#REF!"]
+
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
+            {id:'sheet-1',name:'Data',columns:['A','B'],rows:[['10','20']]},
+            {id:'sheet-2',name:'Refs',columns:['A','B','C'],rows:[[
+                '=Data!B1','=Data!AG1','=SUM(Data!AG1:AG1)'
+            ]]}
+        ]})""")
+        column_refs = "MathStudio.dataTables.tables[1].rows[0]"
+        column_values = "MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]"
+        assert page.evaluate(column_values) == [20, "#REF!", "#REF!"]
+        page.evaluate("MathStudio.dataTables.deleteColumn(0)")
+        assert page.evaluate(column_refs) == ["=Data!A1", "=Data!AG1", "=SUM(Data!AG1:AG1)"]
+        assert page.evaluate(column_values) == [20, "#REF!", "#REF!"]
         assert not errors, errors
         browser.close()
-    print("PASS row/column range shrink, cross-sheet aggregates, anchors, #REF!, persistence and browser")
+    print("PASS row/column range shrink, invalid-reference preservation, cross-sheet aggregates, anchors, #REF!, persistence and browser")
 
 if __name__ == "__main__":
     main()

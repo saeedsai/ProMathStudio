@@ -20,6 +20,15 @@ class SpreadsheetReferenceBoundsTests(unittest.TestCase):
             self.assertIn(formula, SMOKE)
         self.assertIn("python tests/smoke_sheet_references.py", WORKFLOW)
 
+    def test_structural_edits_do_not_revive_out_of_grid_references(self):
+        self.assertIn("const isSupportedReference=ref=>", SOURCE)
+        self.assertIn("if(!isSupportedReference(left)||!isSupportedReference(right))return match;", SOURCE)
+        self.assertIn("if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;", SOURCE)
+        smoke = (ROOT / "tests/smoke_sheet_range_delete.py").read_text(encoding="utf-8")
+        for formula in ("=Data!A6001", "=SUM(Data!A6001:A6001)", "=Data!AG1", "=SUM(Data!AG1:AG1)"):
+            self.assertIn(formula, smoke)
+        self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
+
     def test_standalone_bundle_matches_the_modular_source(self):
         start = HTML.index("/* ProMathStudio Data Tables workspace.")
         end = HTML.index("</script>", start)

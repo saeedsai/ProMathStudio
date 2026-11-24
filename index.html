@@ -4351,6 +4351,10 @@ self.onmessage=async ({data})=>{
     }
   }
   function shiftReferences(edited,axis,index,delta){
+    const isSupportedReference=ref=>{
+      const m=/^\$?([A-Za-z]{1,3})\$?([1-9]\d*)$/.exec(ref);
+      return !!m&&colIndex(m[1])<MAX_COLUMNS&&Number(m[2])<=MAX_ROWS;
+    };
     const coord=ref=>{const m=/^(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)$/.exec(ref);
       return axis==='row'?Number(m[4])-1:colIndex(m[2]);};
     const at=(ref,pos)=>axis==='row'?ref.replace(/[1-9]\d*$/,String(pos+1))
@@ -4363,6 +4367,8 @@ self.onmessage=async ({data})=>{
         const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         let mapped=match;
         if(name.toLowerCase()===edited.name.toLowerCase()){
+          // Keep already-invalid grid addresses invalid instead of reviving them after a shift.
+          if(!isSupportedReference(left)||!isSupportedReference(right))return match;
           const a=coord(left),b=coord(right),lo=Math.min(a,b),hi=Math.max(a,b);
           if(delta>0)mapped=(prefix||'')+at(left,a>=index?a+delta:a)+':'+at(right,b>=index?b+delta:b);
           else{const lower=lo-(index<lo?1:0),upper=hi-(index<=hi?1:0);
@@ -4376,6 +4382,7 @@ self.onmessage=async ({data})=>{
         const after=whole[offset+match.length];if(after&&/[A-Za-z0-9_.$]/.test(after))return match;
         const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         if(name.toLowerCase()!==edited.name.toLowerCase())return match;
+        if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;
         const position=axis==='row'?Number(digits)-1:colIndex(letters);
         if(delta<0&&position===index)return '#REF!';
         const moved=position>=index+(delta<0?1:0)?position+delta:position;

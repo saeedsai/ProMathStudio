@@ -1,3 +1,28 @@
+## 2026-11-24 — STRUCTURAL-EDITS-PRESERVE-INVALID-SPREADSHEET-REFERENCES
+
+**Starting refs:** dev 6d9ab6911acf8f2ce1f67c17133f74127b677b3f, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, docs/UNIFIED_MASTER_IMPLEMENTATION_PLAN.md, this living plan, the frozen 2026-10-26 inventory, Data Tables source/bundle/tests, branch refs, open PRs and latest exact-head CI/Pages evidence.
+
+**Starting exact-head QA:** dev Quality [#45400541287](https://github.com/saeedsai/ProMathStudio/actions/runs/45400541287) passed all 218 steps with zero failures or skips on 6d9ab6911acf8f2ce1f67c17133f74127b677b3f. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. No open PRs; only dev and main exist.
+
+**Defect:** Structural row/column deletion could revive an already-invalid out-of-grid formula reference. Deleting the first row rewrote Data!A6001 to Data!A6000; deleting column A rewrote Data!AG1 to Data!AF1. Since the new addresses are inside the supported grid, formulas that correctly returned #REF! could silently become blank-cell zero.
+
+**Fix:** shiftReferences now validates every scalar address and both endpoints of each aggregate range against the supported A1:AF6000 grid before remapping. Already-invalid addresses are left unchanged and therefore remain #REF!; valid in-grid references still shift with their original cell identities.
+
+**Regression:** Extended the existing registered Chromium range-deletion smoke with cross-sheet scalar and aggregate cases for A6001 and AG1, plus valid controls A2 and B1. It asserts formula text and evaluated values before/after deleting the first row and first column. Extended the structural unittest to require both guards and workflow registration. Updated Data Tables documentation. The modular source and standalone inline module were checked for exact parity and updated together.
+
+**Validation:** In-memory source/bundle parity, source guard presence, smoke/workflow registration and boundary-helper checks passed. This runtime has no repository checkout, so local Playwright/Python suites could not run; the exact-head Quality workflow must certify the new browser and structural regressions. Status: Implemented on dev / In QA / not released.
+
+**Release blocker:** Branch listing reports only dev and main, both unprotected; rulesets are empty and branch-protection reads return HTTP 403 to the connected integration. No open PR and no eligible independent review are available. No PR/merge attempted. Main remains deployed at 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; this change is dev-only. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main required-check/no-force/no-delete protection and eligible independent review; then use one ordinary dev-to-main PR, verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Spreadsheet grid-edge structural references:** test insertion at row 6000/column AF (valid references leaving the supported grid become #REF! and recover when the inserted edge is removed), reversed ranges, mixed $ anchors, and exact workbook rollback; run desktop and 390px Chromium.
+3. **P1 — Seven-shape Truss boundary audit:** independent low-exponent, near-solid and thin-wall references for area/centroid/inertia/moduli/radii/principal invariants, invalid rollback and 390px keyboard behavior.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed-import rollback must preserve every existing workspace and selection.
+5. **P1 — ODE solver verification:** analytical forward/backward IVP references, unsupported-class diagnostics, tolerance/step convergence and 390px recovery.
+
+---
+
 ## 2026-11-24 — SPREADSHEET-SCALAR-REFERENCE-GRID-BOUNDS
 
 **Starting refs:** dev `4c273232c16de899fcbacbd95ca0033ac37c1280`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, current source/bundle/test contracts, branch refs, open PRs, and exact-head CI/Pages evidence.

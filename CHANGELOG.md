@@ -1,3 +1,9 @@
+## 2026-11-24 — Spreadsheet structural edits preserve invalid grid references (dev; exact-head QA pending)
+
+- Row/column deletion no longer shifts an already out-of-grid scalar or aggregate reference into a valid cell (for example, A6001 stays #REF! after deleting row 1, and AG1 stays #REF! after deleting column A).
+- Added cross-sheet Chromium regressions with valid-reference controls and structural assertions; retained the existing registered range-deletion smoke and source/standalone-bundle parity check.
+- Updated the Data Tables guide, living plan and execution ledger. Implemented on dev; not released.
+
 ## 2026-11-24 — Spreadsheet scalar references enforce grid bounds (dev; exact-head QA pending)
 
 - Scalar references outside the supported `A1:AF6000` grid now return `#REF!` instead of silently reading as zero; valid empty cells inside the grid remain blank.

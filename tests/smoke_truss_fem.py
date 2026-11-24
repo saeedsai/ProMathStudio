@@ -108,6 +108,36 @@ def main():
             assert abs(math.sqrt(thin['hollow']['ixx'] / thin['hollow']['area']) /
                        (bh * math.sqrt(fx / fa / 12)) - 1) > 0.1
 
+            # Circular I values can be subnormal while the exact radii remain representable.
+            # Solid and hollow circles must use their analytic geometry rather than rounded I/A.
+            thin_circles = page.evaluate("""() => {
+                const diameter = 3e-81;
+                const solid = ProMathTrussFEM.sectionProperties('solid-circle', {diameter});
+                const hollowDimensions = {diameter, innerDiameter: 1.5e-81};
+                const hollow = ProMathTrussFEM.sectionProperties('hollow-circle', hollowDimensions);
+                const ratio = hollowDimensions.innerDiameter / hollowDimensions.diameter;
+                return {
+                    solid: {
+                        area: solid.area, i: solid.secondMoment,
+                        oldRadius: Math.sqrt(solid.secondMoment / solid.area),
+                        rx: solid.radiusOfGyrationX, ry: solid.radiusOfGyrationY,
+                        expected: diameter / 4
+                    },
+                    hollow: {
+                        area: hollow.area, i: hollow.secondMoment,
+                        oldRadius: Math.sqrt(hollow.secondMoment / hollow.area),
+                        rx: hollow.radiusOfGyrationX, ry: hollow.radiusOfGyrationY,
+                        expected: (diameter / 4) * Math.sqrt(1 + ratio * ratio)
+                    }
+                };
+            }""")
+            for shape in ('solid', 'hollow'):
+                assert thin_circles[shape]['i'] == math.ulp(0.0), (shape, thin_circles[shape])
+                assert math.isfinite(thin_circles[shape]['area']) and thin_circles[shape]['area'] > 0
+                assert abs(thin_circles[shape]['oldRadius'] / thin_circles[shape]['expected'] - 1) > 0.1
+                for axis in ('rx', 'ry'):
+                    assert abs(thin_circles[shape][axis] / thin_circles[shape]['expected'] - 1) <= 2e-15
+
             # A very thin concentric annulus must retain high-precision section properties
             # through the actual helper preview and selected-member application at both widths.
             page.locator('#section-member').select_option('AB')

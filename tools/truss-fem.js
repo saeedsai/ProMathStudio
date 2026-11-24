@@ -292,11 +292,19 @@
         const inertiaFactor = finite(areaFactor * (1 + innerRatio * innerRatio), 'Hollow circle inertia factor');
         area = finite((Math.PI / 4) * outerSquare * areaFactor, 'Circle net area (mm²)');
         secondMoment = finite((Math.PI / 64) * outerSquare * inertiaFactor * outerSquare, 'Circle centroidal second moment I (mm⁴)');
+        // The annulus identity is I/A = Do²·(1 + (Di/Do)²)/16.
+        // Evaluate its radius directly so a subnormal rounded I/A cannot corrupt it.
+        const circularRadius = diameter * (Math.sqrt(1 + innerRatio * innerRatio) / 4);
+        analyticRadiusOfGyrationX = finite(circularRadius, 'Radius of gyration rx (mm)');
+        analyticRadiusOfGyrationY = finite(circularRadius, 'Radius of gyration ry (mm)');
       } else {
         area = finite(Math.PI * outerSquare / 4, 'Circle net area (mm²)');
         // Apply the coefficient before the final square: Do^4 may overflow even
         // when the physical solid-circle inertia (pi/64)*Do^4 is representable.
         secondMoment = finite((Math.PI / 64) * outerSquare * outerSquare, 'Circle centroidal second moment I (mm⁴)');
+        // For a solid circle, I/A = Do²/16; avoid a rounded subnormal quotient.
+        analyticRadiusOfGyrationX = finite(diameter / 4, 'Radius of gyration rx (mm)');
+        analyticRadiusOfGyrationY = finite(diameter / 4, 'Radius of gyration ry (mm)');
       }
       secondMomentPerpendicular = secondMoment;
       axis = 'centroidal diameter axis';

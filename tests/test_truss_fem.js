@@ -1030,6 +1030,29 @@ test('rectangular radii use geometry factors when subnormal inertias lose relati
  relative(hollow.radiusOfGyrationY,hollowExpectedY,'hollow rectangle ry');
 });
 
+test('circular radii use geometry factors when subnormal inertias lose relative precision',()=>{
+ const relative=(got,want,label)=>assert.ok(Number.isFinite(got)&&want>0&&Math.abs(got/want-1)<=2e-15,
+  label+' '+got+' != '+want);
+ const solidDiameter=3e-81;
+ const solid=fem.sectionProperties('solid-circle',{diameter:solidDiameter});
+ assert.equal(solid.secondMoment,Number.MIN_VALUE);
+ const solidExpected=solidDiameter/4;
+ assert.ok(Math.abs(Math.sqrt(solid.secondMoment/solid.area)/solidExpected-1)>0.1,
+  'rounded subnormal solid-circle I/A must expose the previous radius precision loss');
+ relative(solid.radiusOfGyrationX,solidExpected,'solid circle rx');
+ relative(solid.radiusOfGyrationY,solidExpected,'solid circle ry');
+
+ const hollowDimensions={diameter:3e-81,innerDiameter:1.5e-81};
+ const hollow=fem.sectionProperties('hollow-circle',hollowDimensions);
+ assert.equal(hollow.secondMoment,Number.MIN_VALUE);
+ const ratio=hollowDimensions.innerDiameter/hollowDimensions.diameter;
+ const hollowExpected=(hollowDimensions.diameter/4)*Math.sqrt(1+ratio*ratio);
+ assert.ok(Math.abs(Math.sqrt(hollow.secondMoment/hollow.area)/hollowExpected-1)>0.1,
+  'rounded subnormal hollow-circle I/A must expose the previous radius precision loss');
+ relative(hollow.radiusOfGyrationX,hollowExpected,'hollow circle rx');
+ relative(hollow.radiusOfGyrationY,hollowExpected,'hollow circle ry');
+});
+
 test('solid and concentric hollow section helpers return validated area and centroidal principal moments in mm units',()=>{
  const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
  assert.deepEqual(rectangle.centroid,{x:20,y:30});

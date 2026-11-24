@@ -1,3 +1,9 @@
+## 2026-11-24 — Truss circular radii avoid subnormal-inertia precision loss (dev; exact-head QA pending)
+
+- Solid-circle radii now use Do/4; concentric hollow-circle radii use (Do/4)·sqrt(1+(Di/Do)^2), avoiding large relative error from a rounded subnormal I/A quotient.
+- Added direct Node and 1280px/390px Chromium regressions for solid and hollow circles; both reproduce the old >10% radius error while retaining a positive subnormal inertia.
+- Updated the Structural Truss guide, living plan and execution ledger. Implemented on dev; not released.
+
 ## 2026-11-24 — Truss rectangular radii avoid subnormal-inertia precision loss (dev; exact-head QA pending)
 
 - Solid and concentric hollow rectangle radii of gyration now use dimensionless geometry factors instead of the rounded binary64 I/A quotient. This preserves accurate rx/ry when a representable Ixx is subnormal.

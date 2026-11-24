@@ -1,3 +1,28 @@
+## 2026-11-24 — TRUSS-CIRCULAR-RADIUS-SUBNORMAL-PRECISION
+
+**Starting refs:** dev 6f4df9efbb1534b89cc51ec0f86616eed720c0de, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, the living development plan, frozen 2026-10-26 inventory, unified implementation plan, engineering architecture, Truss FEM source/tests/guide, exact branch refs, PR history and current Actions/Pages evidence.
+
+**Starting exact-head CI:** dev Quality [#45422323307](https://github.com/saeedsai/ProMathStudio/actions/runs/45422323307) completed successfully on the exact starting dev SHA with **218/218 steps**, zero failures and zero skips. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and GitHub Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) both completed successfully on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. PRs #189 and #190 are merged; no PR is open. Only dev and main remain.
+
+**Defect:** The section helper still derived circular radii from the rounded binary64 I/A quotient. For a solid circle with Do=3e-81 mm, area is positive and I rounds to Number.MIN_VALUE, but sqrt(I/A) overstates the exact Do/4 radius by about 11.47%. A concentric hollow circle with Do=3e-81 mm and Di=1.5e-81 mm has the same subnormal I and about 15.13% error. This is a representable-radius precision defect, not an area/inertia calculation failure.
+
+**Fix:** Solid circles now use rx=ry=Do/4. Hollow circles use rx=ry=(Do/4)*sqrt(1+(Di/Do)^2), derived from the exact annulus I/A identity. The reported area and inertia calculations, finite/positive guards, public API and ordinary dimensions are unchanged. Truss Studio loads tools/truss-fem.js as an adjacent asset, so the main index.html bundle is not applicable to this standalone page.
+
+**Regression:** Added a direct Node test for solid and hollow circles that proves I is Number.MIN_VALUE, demonstrates the old >10% quotient error, and compares both radii with independent geometric formulas. Extended the already registered Chromium Truss smoke with the same cases; the workflow runs it at both 1280px and 390px. Existing 40 mm and 100/80 mm circular references remain in the suite. Updated the Structural Truss guide, living plan, execution ledger and changelog.
+
+**Validation:** The pre-change source was loaded from the exact dev blob into isolated V8. It reproduced the old solid radius 8.36038222132745e-82 mm versus 7.5e-82 mm (+11.47%) and hollow radius 9.65373785202313e-82 mm versus 8.385254915624211e-82 mm (+15.13%). The new source and focused assertions are being checked in isolated V8 before commit. Local Git checkout/Playwright is unavailable in this runtime; full Node/Chromium certification must come from the new exact-head Quality run.
+
+**Release state:** This candidate is implemented on dev only, exact-head QA pending, not released. Main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Branch listing reports only dev/main and both unprotected; repository rulesets are empty; the branch-protection read returns HTTP 403 to this integration. Repository metadata reports admin permission, but no branch-protection/ruleset write action is exposed here. No PR/merge attempted and no safeguard bypassed. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+**NEXT FIVE (priority, status, acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main required-check/no-force/no-delete protection and an eligible independent review; only then open one ordinary dev→main PR, verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Complete seven-shape Truss radius/boundary audit:** channel, I-section and L-angle low-exponent/subnormal I/A references; all seven shapes must match independent area/centroid/I/modulus/radius/principal references, reject unrepresentable results without member mutation, and pass 1280px/390px keyboard/recovery checks.
+3. **P1 — Spreadsheet grid-edge structural references:** insert at row 6000/column AF and remove to verify #REF!/recovery, reversed ranges, mixed absolute anchors and byte-for-byte workbook rollback at desktop/390px.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed-import rollback preserves every workspace, selection and prior result.
+5. **P1 — ODE solver verification:** analytical forward/backward IVP references, unsupported-class diagnostics, tolerance/step convergence, error recovery and 390px interaction.
+
+---
+
 ## 2026-11-24 — TRUSS-RECTANGULAR-RADIUS-SUBNORMAL-PRECISION
 
 **Starting refs:** dev `168a2c2574f7be994d1ea2ac32ffc47e9e24dbfa`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, unified implementation plan, engineering architecture, Truss FEM guide, source/tests, branch refs, PRs and current CI/Pages evidence were inspected.

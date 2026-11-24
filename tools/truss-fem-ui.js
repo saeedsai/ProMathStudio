@@ -48,6 +48,7 @@
   function renderModel(model,preserveImportRequest=null) {
     // A stale import must never mutate the active model, even if future work adds an async boundary.
     if(preserveImportRequest!==null&&!isCurrentImport(preserveImportRequest))return false;
+    clearSectionResult();
     $('nodes').replaceChildren();$('members').replaceChildren();
     model.nodes.forEach(node=>appendRow('nodes',node));
     model.members.forEach(m=>appendRow('members',m));
@@ -63,14 +64,20 @@
     });
   }
   function readModel() {return {nodes:readRows('nodes'),members:readRows('members')};}
+  function clearSectionResult() {
+    $('section-result').textContent='';
+  }
   function syncSectionMembers() {
     const select=$('section-member'), previous=select.value;
     const ids=readRows('members').map(member=>String(member.id??'').trim()).filter(Boolean);
     select.replaceChildren(...ids.map(id=>el('option',id,{value:id})));
     if(ids.includes(previous)) select.value=previous;
     else if(ids.length) select.value=ids[0];
+    if(select.value!==previous) clearSectionResult();
   }
   function updateSectionSketch() {
+    // A prior successful application is no longer evidence for edited geometry.
+    clearSectionResult();
     const control=$('section-sketch-control'),svg=$('section-sketch'),caption=$('section-sketch-caption'),shape=$('section-shape').value;
     const channel=shape==='channel',iSection=shape==='i-section',composite=channel||iSection,angle=shape==='l-angle',hollowRectangle=shape==='hollow-rectangle',rectangle=shape==='rectangle'||hollowRectangle,circle=shape==='solid-circle'||shape==='hollow-circle',hollowCircle=shape==='hollow-circle';
     if(!control||(!composite&&!angle&&!rectangle&&!circle)) return;
@@ -455,6 +462,8 @@
   function materialCsv(){try{downloadCsv('promath-truss-material-schedule.csv',fem.exportMaterialCSV(readModel()),'text/csv;charset=utf-8');status('Validated member material schedule exported.');}catch(error){status('Material schedule export failed: '+error.message,true);}}
   $('section-shape').addEventListener('change',updateSectionShape);
   ['section-width','section-height','section-inner-width','section-inner-height','section-web-thickness','section-flange-thickness','section-angle-thickness','section-diameter','section-inner-diameter'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));
+  $('section-member').addEventListener('change',clearSectionResult);
+  $('section-axis').addEventListener('change',clearSectionResult);
   $('section-properties-apply').addEventListener('click',applySectionProperties);
   $('load-example').addEventListener('click',()=>{renderModel(fem.getExample($('example').value));analyze();});
   $('reset').addEventListener('click',()=>{renderModel(fem.getExample($('example').value));analyze();});
@@ -464,7 +473,9 @@
   // edited before file selection must not cancel the newer asynchronous import.
   $('nodes').addEventListener('input',invalidate);
   $('members').addEventListener('input',event=>{
-    if(event.target?.dataset?.field==='id')syncSectionMembers();
+    const field=event.target?.dataset?.field;
+    if(field==='id')syncSectionMembers();
+    if(['id','area','I'].includes(field))clearSectionResult();
     invalidate();
   });
   $('solve').addEventListener('click',analyze);$('scale').addEventListener('change',draw);$('show-labels').addEventListener('change',draw);

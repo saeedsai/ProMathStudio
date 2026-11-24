@@ -1,3 +1,15 @@
+## 2026-11-24 — TRUSS-SECTION-RESULT-FRESHNESS
+
+- Starting refs: dev `37c1925b59fd0e62dd56dcefa4ad60b6b375474c`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root contract, living plan, frozen inventory, engineering architecture/toolbox contracts, Structural Truss source/tests/contract, PR #189/reviews, branch refs, Actions and Pages.
+- Starting exact-head Push Quality [#45294374856](https://github.com/saeedsai/ProMathStudio/actions/runs/45294374856) and PR Quality [#45294385820](https://github.com/saeedsai/ProMathStudio/actions/runs/45294385820) both passed 218/218, zero failures/skips; Truss 212, FEM analytical/browser 214–215 and spreadsheet 78–80 passed.
+- Fixed stale section-application status: edits to geometry/shape, selected member, axis, member ID/area/I, selected-member changes during row synchronization and model reload now clear the old success result. Existing applied member values remain unchanged until the user reapplies.
+- Added desktop/390px Chromium regression: after a 40×60 mm rectangle application, change axis, target member and dimensions; each change clears the stale result while the member snapshot remains unchanged. Reapply to restore the current success message; invalid/overflow rollback assertions remain.
+- Updated Structural Truss contract, hourly plan, ledger and changelog. No root index.html synchronization applies to the separate Truss Studio page.
+- Local full Node/Chromium execution unavailable because the execution workspace has no repository checkout. Exact-head prior Push/PR Quality is green; fresh candidate Quality is required.
+- PR #189 remains open/mergeable at 479 commits/98 files, zero independent reviews. Branch API reports dev/main unprotected, rulesets empty, protection read HTTP 403. No merge or bypass.
+- Main Quality #41730966059 passed 193/193; Pages #41730962844 passed build 5/5, deploy 3/3, report 3/3 on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03); no newer main deployment.
+- Frozen October 26 inventory unchanged: **166 gaps / 95 partial**.
+
 ## 2026-11-24 — TRUSS-L-ANGLE-SUBPIXEL-LEG-DETAIL
 
 - Starting refs: dev `e7222f2772c0daa13a924ca391f3a82d75c45923`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root contract, plan, frozen inventory, Structural Truss source/tests/contract, PR #189/reviews, refs and CI/Pages evidence.

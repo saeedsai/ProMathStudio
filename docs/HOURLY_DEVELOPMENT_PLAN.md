@@ -1,3 +1,32 @@
+## 2026-11-24 — TRUSS-SECTION-RESULT-FRESHNESS (implemented on dev; exact-head QA pending)
+
+Starting refs: dev `37c1925b59fd0e62dd56dcefa4ad60b6b375474c`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Engineering Architecture/Toolbox contracts, Structural Truss source/tests/contract, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.
+
+**P0 CI baseline:** Exact-head Push Quality [#45294374856](https://github.com/saeedsai/ProMathStudio/actions/runs/45294374856) and PR Quality [#45294385820](https://github.com/saeedsai/ProMathStudio/actions/runs/45294385820) both passed **218/218 steps**, with zero failures and zero skipped steps. FEM browser step 215, analytical step 214, Truss step 212 and spreadsheet steps 78–80 all passed. No failing exact-head CI defect remained at the start.
+
+**P1 correctness/UX fix:** After a successful section-helper application, editing the geometry, changing the selected member or axis, or manually changing the member ID/area/I left the previous “applied to member …” success text visible. That message could describe an obsolete configuration and mislead users about which section properties were actually applied.
+
+**Source change:** `tools/truss-fem-ui.js` now clears the previous application result when section shape/dimensions change, when the selected member or axis changes, when member ID/area/I is edited, when the selected member changes during row synchronization, and when a new model is rendered. The applied member values are not silently rewritten; users must explicitly apply the current configuration again. Material-only edits (E/density/K) do not erase an otherwise accurate section-application result.
+
+**Browser regression:** `tests/smoke_truss_fem.py` exercises the real UI at 1280px and 390px. After applying a 40×60 mm rectangle to the selected member, it changes I-axis, target member and dimensions, asserting the old success result clears each time while the existing member snapshot remains unchanged. Reapplying restores the current success message; invalid and overflowing geometry still rejects without changing any member. Existing hollow-circle, hollow-rectangle, L-angle, import/concurrency, solver, export and responsive checks remain intact.
+
+**Documentation:** Updated the Structural Truss contract, this plan, execution ledger and changelog. Truss Studio is a separate HTML page with adjacent JavaScript assets; root `index.html` synchronization is not applicable.
+
+**Validation:** Starting exact-head Push/PR Quality passed 218/218 with zero failures/skips. This execution workspace has no repository checkout, so the full local Node/Chromium suite could not be run. Exact source/test replacement guards and GitHub blob/tree readback will be checked; fresh exact-head Push/PR Quality must certify the new desktop/mobile regression. Candidate is **Implemented on dev / In QA**, not released.
+
+PR #189 remains open/mergeable, with head `37c1925b59fd0e62dd56dcefa4ad60b6b375474c`, base `70fc483cb1cec3d2372d37484e4a8ef7942343da`, 479 commits/98 changed files and zero submitted reviews. Current branch API reports dev/main `protected: false`; repository rulesets are empty; branch-protection read returns HTTP 403 to the connected integration. No merge, direct main update, force push or governance bypass was attempted. Main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) remains successful (193/193) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remains successful (build 5/5, deploy 3/3, report 3/3) on main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, 2026-11-03; no newer main run/deployment was found.
+
+The October 26 historical baseline remains frozen at **166 gaps / 95 partial**; no historical counts or completion classifications were changed.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Release governance and ordinary promotion (blocked on independent review/protection).** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required checks. Only after all exact-head checks/review gates pass, inspect the full diff, merge through the ordinary dev-to-main PR, and verify exact-main Quality, Pages and hosted critical paths.
+2. **P1 — Seven-shape section-helper matrix (in progress).** Cover solid/hollow rectangle, solid/hollow circle, channel, I-section and L-angle with independent area/inertia/centroid/section-modulus/radius references; verify selected-axis application changes only the target member, invalid/overflow rollback, E/density/K preservation, keyboard access and 390px behavior. Include stale-result invalidation for geometry, target and axis changes.
+3. **P1 — Spreadsheet formula-reference edge audit (planned).** Test mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity, transactional refusal of unsafe noncontiguous sort/delete and source/standalone `index.html` parity.
+4. **P1 — Source-backed Engineering Toolbox expansion (planned).** Select one approved unfinished canonical tool; reuse shared solver, units and plot services; assign one stable tool ID; add independent numerical references, negative tests, keyboard/mobile browser coverage and truthful status without placeholder actions.
+5. **P1 — Saved-project and numerical ODE compatibility (planned).** Round-trip current and legacy Matrix/Graph/Table projects; malformed imports must roll back atomically and preserve focus. For the selected shared ODE path, verify analytic forward/backward references, bounded failure recovery, stale-export disabling and 390px keyboard behavior.
+
+---
+
 ## 2026-11-24 — TRUSS-L-ANGLE-SUBPIXEL-LEG-DETAIL (implemented on dev; exact-head QA pending)
 
 Starting refs: dev `e7222f2772c0daa13a924ca391f3a82d75c45923`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Structural Truss contract/source/tests, PR #189/reviews, exact branch refs, Actions and main Quality/Pages evidence.

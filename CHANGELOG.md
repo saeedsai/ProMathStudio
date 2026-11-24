@@ -1,3 +1,9 @@
+## 2026-11-24 — Truss section-application result freshness (dev; exact-head QA pending)
+
+- Clear the previous “applied to member” result when section geometry/shape, selected member, axis, member ID/area/I or loaded model changes; do not rewrite member values until the user explicitly reapplies.
+- Added desktop and 390px browser regression for stale-result clearing after axis, target and geometry edits, unchanged member snapshots, successful reapplication and existing invalid/overflow rollback.
+- Updated the Structural Truss contract and living development records. Requires fresh exact-head Push/PR Quality; not released.
+
 ## 2026-11-24 — Truss extreme-aspect L-angle preview detail (dev; exact-head QA pending)
 
 - Added a separately labelled leg-detail inset when an L-angle's true-scale thickness would be below 2 SVG pixels; the measured outline remains at true scale and is never distorted.

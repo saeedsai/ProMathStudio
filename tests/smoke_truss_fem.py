@@ -487,6 +487,29 @@ def main():
             assert section_after[2] == section_before[2]
             assert f'applied to member {section_target}.' in page.locator('#section-result').inner_text()
 
+            # A successful application is current only while its geometry, target and axis stay unchanged.
+            page.locator('#section-axis').select_option('depth')
+            assert page.locator('#section-result').inner_text() == ''
+            assert section_member_snapshot() == section_after
+            page.locator('#section-axis').select_option('width')
+            page.locator('#section-member').select_option('AC')
+            assert page.locator('#section-result').inner_text() == ''
+            assert section_member_snapshot() == section_after
+            page.locator('#section-member').select_option(section_target)
+            assert page.locator('#section-result').inner_text() == ''
+            page.locator('#section-properties-apply').click()
+            assert f'applied to member {section_target}.' in page.locator('#section-result').inner_text()
+            section_after_current = section_member_snapshot()
+
+            # Editing valid geometry clears the old success without mutating the applied member.
+            page.locator('#section-height').fill('61')
+            assert page.locator('#section-result').inner_text() == ''
+            assert section_member_snapshot() == section_after_current
+            page.locator('#section-height').fill('60')
+            assert page.locator('#section-result').inner_text() == ''
+            page.locator('#section-properties-apply').click()
+            assert f'applied to member {section_target}.' in page.locator('#section-result').inner_text()
+
             # Invalid and overflowing geometry must leave every member unchanged.
             section_before_invalid = section_member_snapshot()
             page.locator('#section-width').fill('0')

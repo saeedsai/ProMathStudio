@@ -222,6 +222,28 @@ def main():
             assert after_solid_circle['BC'] == before_solid_circle['BC']
             restore_section_member('AB', before_solid_circle)
 
+            # A thin annulus can have a finite I even when Do^4 and Di^4 overflow.
+            page.locator('#section-shape').select_option('hollow-circle')
+            page.locator('#section-diameter').fill('1e78')
+            page.locator('#section-inner-diameter').fill('9.999999999999998e77')
+            range_circle_caption = page.locator('#section-sketch-caption').inner_text()
+            assert range_circle_caption.startswith('Hollow circle Do='), range_circle_caption
+            page.locator('#section-member').select_option('AC')
+            before_range_circle = section_member_snapshot()
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text().startswith('Hollow circle: area ')
+            after_range_circle = section_member_snapshot()
+            expected_range_circle_area = 3.230940642955516e140
+            expected_range_circle_moment = 4.038675803694394e295
+            assert abs(float(after_range_circle['AC']['area']) - expected_range_circle_area) <= expected_range_circle_area * 5e-13
+            assert abs(float(after_range_circle['AC']['I']) - expected_range_circle_moment) <= expected_range_circle_moment * 5e-13
+            for field, value in before_range_circle['AC'].items():
+                if field not in ('area', 'I'):
+                    assert after_range_circle['AC'][field] == value, (field, before_range_circle['AC'], after_range_circle['AC'])
+            assert after_range_circle['AB'] == before_range_circle['AB']
+            assert after_range_circle['BC'] == before_range_circle['BC']
+            restore_section_member('AC', before_range_circle)
+
             for shape, expected_i_yy in (('channel', 2264380.9523809524), ('i-section', 1338666.6666666665)):
                 page.locator('#section-shape').select_option(shape)
                 page.locator('#section-width').fill('100')

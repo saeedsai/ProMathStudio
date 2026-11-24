@@ -1371,3 +1371,35 @@ test('thin-walled hollow circle retains area and inertia without subtractive can
  assert.deepEqual(dimensions,original);
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
+
+
+test('extreme thin hollow circle remains representable when both fourth powers overflow',()=>{
+ const dimensions={diameter:1e78,innerDiameter:9.999999999999998e77};
+ const outerSquare=dimensions.diameter*dimensions.diameter;
+ const innerSquare=dimensions.innerDiameter*dimensions.innerDiameter;
+ assert.ok(Number.isFinite(outerSquare)&&Number.isFinite(innerSquare));
+ assert.equal(Number.isFinite(outerSquare*outerSquare),false,
+  'the outer fourth power must overflow to exercise the former rejection');
+ assert.equal(Number.isFinite(innerSquare*innerSquare),false,
+  'the inner fourth power must also overflow for this boundary case');
+ const original={...dimensions};
+ const section=fem.sectionProperties('hollow-circle',dimensions);
+ // 120-digit Decimal references evaluated from the exact binary64 input dimensions.
+ const expectedArea=3.230940642955516e140;
+ const expectedMoment=4.038675803694394e295;
+ const closeRelative=(actual,expected,label)=>{
+  assert.ok(Number.isFinite(actual)&&Math.abs(actual-expected)<=Math.abs(expected)*5e-13,
+   label+' '+actual+' must match '+expected);
+ };
+ closeRelative(section.area,expectedArea,'annulus area');
+ closeRelative(section.secondMoment,expectedMoment,'Ixx');
+ closeRelative(section.secondMomentPerpendicular,expectedMoment,'Iyy');
+ closeRelative(section.sectionModulusX,expectedMoment/(dimensions.diameter/2),'Sx');
+ closeRelative(section.sectionModulusY,expectedMoment/(dimensions.diameter/2),'Sy');
+ closeRelative(section.radiusOfGyrationX,Math.sqrt(expectedMoment/expectedArea),'rx');
+ closeRelative(section.radiusOfGyrationY,Math.sqrt(expectedMoment/expectedArea),'ry');
+ assert.deepEqual(section.centroid,{x:5e77,y:5e77});
+ assert.equal(section.secondMomentPerpendicular,section.secondMoment);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});

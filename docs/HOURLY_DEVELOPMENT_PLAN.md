@@ -1,3 +1,30 @@
+## 2026-11-24 — TRUSS-HOLLOW-CIRCLE-FOURTH-POWER-RANGE-SAFETY
+
+**Starting refs:** dev `4333e3a3333828ec50acf76ea7340d55ec16fcab`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 MATLAB inventory, Structural Truss source/tests/contract, current PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.
+
+**Starting exact-head CI:** Push Quality [#45317090572](https://github.com/saeedsai/ProMathStudio/actions/runs/45317090572) and PR Quality [#45317095940](https://github.com/saeedsai/ProMathStudio/actions/runs/45317095940) both completed successfully on the exact starting SHA, with the full 218-step quality/test matrix green and zero failures/skips. The seven-shape Truss/FEM browser matrix and 59 FEM Node tests were included. No failing exact-head CI defect remained, so the highest-priority feasible numerical correctness gap was selected.
+
+**P1 numerical defect:** Hollow-circle formulas already factor the annulus wall gap to avoid subtractive cancellation, but the implementation still eagerly formed (D_o^4) and (D_i^4) and rejected overflow before applying the small annulus factor. For (D_o=10^{78}) mm and (D_i=9.999999999999998\times10^{77}) mm, both fourth-power intermediates overflow while the actual annulus area and centroidal inertia are finite and representable.
+
+**Source correction:** `tools/truss-fem.js` now avoids fourth-power intermediates for hollow circles. It computes (I=(\pi/64)D_o^2 f_I D_o^2), placing the dimensionless annulus factor between the two finite (D_o^2) factors. The solid-circle path retains its direct fourth-power finite guard. Existing geometry validation, thin-wall cancellation protection and underflow/finite-result checks remain intact.
+
+**Regression:** `tests/test_truss_fem.js` adds exact-binary64-input 120-digit Decimal references for the extreme annulus, first proving both old fourth-power intermediates overflow, then checking area, Ixx/Iyy, section moduli, radii, centroid, immutability and unchanged inputs. `tests/smoke_truss_fem.py` applies the same section in real Chromium at desktop and 390px, verifies the successful UI result and independent area/I references, and proves only the selected member's area/I change while E/density/K and the other members remain unchanged.
+
+**Validation:** Isolated Node 22 arithmetic check passed: old (D_o^4) is Infinity; reordered area and inertia are finite and match the Decimal references within (1.4\times10^{-16}) relative error; section modulus and radius remain finite. The bounded local Git check returned `fatal: not a git repository`, so full local Node/Playwright suite is unavailable. Fresh exact-head Push and PR Quality must certify the committed regression. Candidate is **Implemented on dev / In QA**, not released.
+
+**Release state:** PR #189 remains open/mergeable, exact head `4333e3a3333828ec50acf76ea7340d55ec16fcab`, base main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, 483 commits/98 changed files, zero submitted reviews. All listed branches report unprotected; rulesets query is empty; branch-protection read returns HTTP 403 to the connected integration. No merge, direct main update, force push or safeguard bypass. Latest main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remain successful on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da`, 2026-11-03; no newer main runs/deployments were found. The Pages API itself is not accessible through the current integration.
+
+The October 26 historical inventory remains frozen at **166 gaps / 95 partial**; no counts or classifications changed.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head Quality and release governance.** Both Push and PR Quality must pass the full 218-step matrix on the new SHA, including the extreme hollow-circle Node and desktop/390px browser cases, Truss/FEM and spreadsheet regressions. PR #189 still needs an eligible independent review and authorized enforceable main protection/required checks; only then inspect the complete diff, merge through the ordinary PR and verify exact-main Quality, Pages and hosted critical paths.
+2. **P1 — Seven-shape section-helper numerical boundaries (in progress).** Complete independent area/inertia/centroid/section-modulus/radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle. Add representable high/low exponent boundaries, invalid/overflow rollback, selected-axis/member isolation, E/density/K preservation, keyboard and 390px coverage.
+3. **P1 — Spreadsheet formula-reference edge audit (planned).** Test mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity, transactional refusal of unsafe noncontiguous sort/delete and source/standalone `index.html` parity.
+4. **P1 — Source-backed Engineering Toolbox expansion (planned).** Select one approved unfinished canonical tool, reuse shared solver/units/plot services, assign one stable tool ID, and add independent numerical references, negative tests, keyboard/mobile coverage and truthful status without placeholder actions.
+5. **P1 — Saved-project and numerical ODE compatibility (planned).** Round-trip current/legacy Matrix/Graph/Table projects; malformed imports must roll back atomically and preserve focus. Verify selected ODE forward/backward analytical references, bounded failure recovery, stale-export disabling and 390px keyboard behavior.
+
+---
+
 ## 2026-11-24 — TRUSS-COMPOSITE-SUBPIXEL-PREVIEW-DETAIL
 
 **Starting refs:** dev `966711b5e925c820d9f7477c55e22249db6cb221`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, Engineering Architecture/Toolbox contracts, Structural Truss source/tests/contract, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.

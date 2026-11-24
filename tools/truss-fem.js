@@ -261,18 +261,18 @@
       const outerSquare = finite(diameter * diameter, 'Circle outer diameter squared (mm²)');
       const innerSquare = hollow ? finite(innerDiameter * innerDiameter, 'Hollow circle inner diameter squared (mm²)') : 0;
       if (hollow && !(innerSquare > 0)) throw Error('Hollow circle inner area underflow; increase the inner diameter.');
-      const outerFourth = finite(outerSquare * outerSquare, 'Circle outer diameter to fourth power (mm⁴)');
       if (hollow) {
-        finite(innerSquare * innerSquare, 'Hollow circle inner diameter to fourth power (mm⁴)');
         // Factor the concentric annulus differences to preserve thin-wall precision.
-        // Directly subtracting nearly equal squared/fourth-power diameters loses digits.
+        // Do not form Do^4 or Di^4: either can overflow while the thin-annulus
+        // inertia is still representable. Keep the small factor between Do² terms.
         const innerRatio = finite(innerDiameter / diameter, 'Hollow circle inner/outer diameter ratio');
         const radialGap = finite((diameter - innerDiameter) / diameter, 'Hollow circle relative radial wall thickness');
         const areaFactor = finite(radialGap * (1 + innerRatio), 'Hollow circle net area factor');
         const inertiaFactor = finite(areaFactor * (1 + innerRatio * innerRatio), 'Hollow circle inertia factor');
         area = finite((Math.PI / 4) * outerSquare * areaFactor, 'Circle net area (mm²)');
-        secondMoment = finite((Math.PI / 64) * outerFourth * inertiaFactor, 'Circle centroidal second moment I (mm⁴)');
+        secondMoment = finite((Math.PI / 64) * outerSquare * inertiaFactor * outerSquare, 'Circle centroidal second moment I (mm⁴)');
       } else {
+        const outerFourth = finite(outerSquare * outerSquare, 'Circle outer diameter to fourth power (mm⁴)');
         area = finite(Math.PI * outerSquare / 4, 'Circle net area (mm²)');
         secondMoment = finite(Math.PI * outerFourth / 64, 'Circle centroidal second moment I (mm⁴)');
       }

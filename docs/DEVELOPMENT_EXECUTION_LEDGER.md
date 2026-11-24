@@ -1359,3 +1359,23 @@ The a19 exact-head Push #45086780436 and PR #45086786266 workflows were still ru
 - Frozen October 26 baseline unchanged: **166 gaps / 95 partial**.
 - **NEXT FIVE:** (1) exact-head Push+PR Quality green on the new SHA, all 218 steps, including hollow-circle 1280px/390px, Truss 212, FEM 214/215, spreadsheet 78–80 and existing import/concurrency cases; (2) eligible independent PR #189 review plus authorized main protection/required checks, then ordinary PR promotion and exact-main Quality/Pages/hosted verification; (3) spreadsheet formula-reference edge audit with source/standalone parity and transactional sort/delete tests; (4) seven-shape section-helper reference, application, rollback and responsive browser matrix; (5) one approved source-backed Engineering Toolbox tool with canonical ID, shared solver/units/plots, numerical references and keyboard/mobile tests.
 
+
+
+## 2026-11-24 — TRUSS-HOLLOW-CIRCLE-FOURTH-POWER-RANGE-SAFETY
+
+Starting refs: dev `4333e3a3333828ec50acf76ea7340d55ec16fcab`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Starting exact-head Push Quality [#45317090572](https://github.com/saeedsai/ProMathStudio/actions/runs/45317090572) and PR Quality [#45317095940](https://github.com/saeedsai/ProMathStudio/actions/runs/45317095940) both passed the full 218-step quality matrix with zero failures/skips, including Truss/FEM browser coverage and the 59-test FEM Node suite.
+
+Found a representable-range defect in hollow-circle inertia. Although annulus area/inertia were already factored to avoid thin-wall cancellation, the code eagerly computed (D_o^4) and (D_i^4) before applying the annulus factor. For (D_o=10^{78}) mm and (D_i=9.999999999999998\times10^{77}) mm, both fourth-power intermediates overflow although the final area and Ixx/Iyy are finite.
+
+Changed `tools/truss-fem.js` to compute hollow-circle inertia as ((\pi/64)D_o^2 f_I D_o^2), keeping the small dimensionless wall factor between finite squared-diameter terms. The solid-circle path still validates its direct fourth power. No FEM solver equations or ordinary-size geometry behavior changed.
+
+Added a Node regression in `tests/test_truss_fem.js` with 120-digit Decimal references evaluated from exact binary64 inputs. It asserts the old outer/inner fourth powers overflow, while area, both inertias, section moduli, radii and centroid remain finite and accurate; input dimensions and immutable results are preserved. Added a real Chromium desktop/390px scenario in `tests/smoke_truss_fem.py` that applies the same hollow circle to member AC and verifies only its area/I change; E, density, K, AB and BC remain unchanged.
+
+Updated the Structural Truss numerical contract, hourly plan, execution ledger and changelog in the same atomic commit. Truss Studio uses adjacent JavaScript assets; root `index.html` synchronization is not applicable.
+
+Validation: Node 22 isolated arithmetic/reference check passed. The former (D_o^4) is Infinity; reordered area and inertia match the Decimal references within approximately (1.4\times10^{-16}) relative error, and section modulus/radius are finite. Full local repository Node/Playwright tests could not run because `git rev-parse --show-toplevel` reports no checkout in this execution workspace. Fresh exact-head Push/PR Quality is pending.
+
+Release state at start: PR #189 open/mergeable, head matched dev, base matched main, 483 commits/98 changed files, zero submitted reviews. Branch listing reports dev/main unprotected, rulesets empty, branch-protection read HTTP 403. No merge/direct main update/force push/bypass. Latest main Quality #41730966059 and Pages #41730962844 remain successful on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03); no newer main run/deployment. Frozen historical baseline unchanged: **166 gaps / 95 partial**.
+
+**NEXT FIVE:** (1) both exact-head Quality workflows green on the new SHA, including the extreme annulus Node/browser regression, 59 FEM Node tests, Truss 212/214/215 and spreadsheet 78–80; (2) finish seven-shape numeric boundary/invalid rollback and selected-member isolation matrix; (3) spreadsheet mixed/absolute references, quoted sheet names, reversed ranges and transactional sort/delete; (4) one approved source-backed Engineering Toolbox tool with canonical ID, shared solver/units/plots and mobile tests; (5) independent PR #189 review plus authorized main protection, then ordinary PR promotion and exact-main Quality/Pages/hosted verification.
+

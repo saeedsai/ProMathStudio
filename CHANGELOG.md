@@ -1,3 +1,10 @@
+## 2026-11-24 — Truss hollow-circle fourth-power range safety (dev; exact-head QA pending)
+
+- Hollow-circle inertia no longer eagerly forms outer/inner diameter fourth powers. A very thin annulus can now retain finite area and Ixx/Iyy even when both fourth-power intermediates overflow.
+- The solid-circle calculation retains its direct fourth-power finite guard; existing annulus cancellation, geometry validation and underflow checks remain.
+- Added 120-digit Decimal-backed Node coverage and desktop/390px Chromium selected-member application coverage for an extreme synthetic floating-range annulus.
+- Requires fresh exact-head Push/PR Quality; not released.
+
 ## 2026-11-24 — Truss channel/I-section sub-pixel preview detail (dev; exact-head QA pending)
 
 - Added a separately labelled web/flange detail inset when a channel or I-section's true-scale web/flange would be below 2 SVG pixels; the measured outline remains at true scale and is never distorted.

@@ -874,6 +874,44 @@ def main():
                 assert math.isfinite(extreme_principal[key]) and extreme_principal[key] > 0, (
                     key, extreme_principal)
             
+            # Subnormal L-angle moments lose precision if derived properties use rounded dimensional I values.
+            low_exponent_angle = page.evaluate("""() => {
+                const section = ProMathTrussFEM.sectionProperties('l-angle', {
+                    width: 1e-80, height: 8e-81, thickness: 1e-81
+                });
+                return {
+                    area: section.area, ixx: section.secondMoment, iyy: section.secondMomentPerpendicular,
+                    ixy: section.productOfInertia, major: section.principalMomentMajor,
+                    minor: section.principalMomentMinor, sx: section.sectionModulusX,
+                    sy: section.sectionModulusY, rx: section.radiusOfGyrationX,
+                    ry: section.radiusOfGyrationY, angle: section.principalAxisAngleDegrees,
+                    cx: section.centroid.x, cy: section.centroid.y
+                };
+            }""")
+            expected_low_exponent_subnormal = {
+                'ixx': 9.4e-323, 'iyy': 1.7e-322, 'ixy': -7.4e-323,
+                'major': 2.1e-322, 'minor': 5e-323
+            }
+            for key, expected in expected_low_exponent_subnormal.items():
+                assert low_exponent_angle[key] == expected, (key, low_exponent_angle, expected)
+            expected_low_exponent_regular = {
+                'area': 1.7e-161,
+                'cx': 3.1470588235294115e-81, 'cy': 2.1470588235294115e-81,
+                'sx': 1.62822445561139e-242, 'sy': 2.4412732474964233e-242,
+                'rx': 2.3676622822552844e-81, 'ry': 3.1370557534830907e-81,
+                'angle': 57.953253999757194
+            }
+            for key, expected in expected_low_exponent_regular.items():
+                actual = low_exponent_angle[key]
+                assert math.isfinite(actual) and math.isclose(actual, expected, rel_tol=5e-13, abs_tol=0.0), (
+                    key, actual, expected, low_exponent_angle)
+            old_rx = math.sqrt(1e-322 / 1.7000000000000001e-161)
+            old_ry = math.sqrt(1.63e-322 / 1.7000000000000001e-161)
+            old_angle = 0.5 * math.degrees(math.atan2(-2 * -7.4e-323, 1e-322 - 1.63e-322))
+            assert abs(old_rx - expected_low_exponent_regular['rx']) > expected_low_exponent_regular['rx'] * 0.01
+            assert abs(old_ry - expected_low_exponent_regular['ry']) > expected_low_exponent_regular['ry'] * 0.01
+            assert abs(old_angle - expected_low_exponent_regular['angle']) > 1.0
+
             # Restore the ordinary rectangle setup for the missing-destination-field test.
             page.locator('#section-shape').select_option('rectangle')
             page.locator('#section-width').fill('40')

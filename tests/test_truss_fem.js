@@ -1608,3 +1608,54 @@ test('L-angle radius of gyration remains finite when I/area overflows but sqrt(I
  assert.deepEqual(dimensions,original);
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
+
+test('L-angle subnormal inertia tensor is recomputed from normalized geometry',()=>{
+ const dimensions={width:1e-80,height:8e-81,thickness:1e-81};
+ const original={...dimensions};
+ const section=fem.sectionProperties('l-angle',dimensions);
+ const expected={
+  area:1.7e-161,
+  cx:3.1470588235294115e-81,
+  cy:2.1470588235294115e-81,
+  ixx:Number('9.52990196078431225503842701523049063955259240565224190364284583596076919536930220340547140677992483958724978455638912481e-323'),
+  iyy:Number('1.67299019607843111440875714007922131082398244026801792052583038699400798245336615863394544335163857234850701042706138800e-322'),
+  ixy:Number('-7.41176470588235179755058980866647901188391529105817075166297150556693741237507583537321782164047443930657974088229018912e-323'),
+  major:Number('2.13696990490240033485848025461171882260390032664760984885065784831439903362470541950069389676999098048873387796463550738e-322'),
+  minor:Number('4.89010487254462005054119586990551552175341354185632262039457122275685868365590959473798687259640075818498110918064793104e-323'),
+  sx:1.62822445561139e-242,
+  sy:2.4412732474964233e-242,
+  rx:2.3676622822552844e-81,
+  ry:3.1370557534830907e-81,
+  angle:57.953253999757194
+ };
+ const closeRelative=(actual,want,label)=>{
+  assert.ok(Number.isFinite(actual)&&Math.abs(actual-want)<=Math.abs(want)*5e-13,
+   label+' '+actual+' must match the exact-binary64 Decimal reference '+want);
+ };
+ closeRelative(section.area,expected.area,'area');
+ closeRelative(section.centroid.x,expected.cx,'centroid x');
+ closeRelative(section.centroid.y,expected.cy,'centroid y');
+ closeRelative(section.sectionModulusX,expected.sx,'Sx');
+ closeRelative(section.sectionModulusY,expected.sy,'Sy');
+ closeRelative(section.radiusOfGyrationX,expected.rx,'rx');
+ closeRelative(section.radiusOfGyrationY,expected.ry,'ry');
+ closeRelative(section.principalAxisAngleDegrees,expected.angle,'principal axis angle');
+ assert.equal(section.secondMoment,expected.ixx);
+ assert.equal(section.secondMomentPerpendicular,expected.iyy);
+ assert.equal(section.productOfInertia,expected.ixy);
+ assert.equal(section.principalMomentMajor,expected.major);
+ assert.equal(section.principalMomentMinor,expected.minor);
+ assert.equal(section.principalMomentMajor+section.principalMomentMinor,
+  section.secondMoment+section.secondMomentPerpendicular);
+ const oldArea=1.7000000000000001e-161,oldIxx=1e-322,oldIyy=1.63e-322,oldIxy=-7.4e-323;
+ const oldRx=Math.sqrt(oldIxx/oldArea),oldRy=Math.sqrt(oldIyy/oldArea);
+ const oldAngle=0.5*Math.atan2(-2*oldIxy,oldIxx-oldIyy)*180/Math.PI;
+ assert.ok(Math.abs(oldRx-expected.rx)>expected.rx*0.01,'the former dimensional radius path must reproduce >1% error');
+ assert.ok(Math.abs(oldRy-expected.ry)>expected.ry*0.01,'the former dimensional radius path must reproduce >1% error');
+ assert.ok(Math.abs(oldAngle-expected.angle)>1,'the former dimensional principal angle must reproduce >1 degree error');
+ assert.ok(section.secondMoment>0&&section.secondMoment<2.2250738585072014e-308);
+ assert.ok(section.secondMomentPerpendicular>0&&section.secondMomentPerpendicular<2.2250738585072014e-308);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});
+

@@ -103,6 +103,7 @@
     if (!dimensions || typeof dimensions !== 'object' || Array.isArray(dimensions)) throw Error('Section dimensions must be an object.');
     let area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis, centroid = null;
     let analyticRadiusOfGyrationX = null, analyticRadiusOfGyrationY = null;
+    let analyticSectionModulusX = null, analyticSectionModulusY = null;
     let productOfInertia = null, principalMomentMajor = null, principalMomentMinor = null, principalAxisAngleDegrees = null;
     let boundsWidth, boundsHeight, centroidX, centroidY;
     if (angle) {
@@ -141,37 +142,115 @@
       productOfInertia = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*(piece.cx-centroidX)*(piece.cy-centroidY),0),
         'L-angle product of inertia Ixy (mm⁴)');
       if (productOfInertia === 0) throw Error('L-angle product of inertia underflow; increase dimensions.');
-      // Normalize the inertia tensor before diagonalizing it. Subtracting the
-      // nearly equal mean and radius loses the minor eigenvalue for slender angles.
-      const momentScale = Math.max(secondMoment,secondMomentPerpendicular,Math.abs(productOfInertia));
-      const scaledIxx = secondMoment/momentScale;
-      const scaledIyy = secondMomentPerpendicular/momentScale;
-      const scaledIxy = productOfInertia/momentScale;
-      const meanMoment = (scaledIxx+scaledIyy)/2;
-      const principalRadius = Math.hypot((scaledIxx-scaledIyy)/2,scaledIxy);
-      const majorNormalized = meanMoment+principalRadius;
-      const determinantNormalized = scaledIxx*scaledIyy-scaledIxy*scaledIxy;
-      if (!(majorNormalized > 0)) {
-        throw Error('L-angle principal second moment underflow; increase dimensions.');
+      // A subnormal physical inertia tensor has too few binary64 bits for
+      // reliable centroid, principal-axis and radius ratios. Re-evaluate this
+      // two-rectangle geometry at unit scale, then restore physical units once.
+      const MIN_NORMAL = 2.2250738585072014e-308;
+      const physicalMomentScale = Math.max(secondMoment,secondMomentPerpendicular,Math.abs(productOfInertia));
+      let normalizedLowExponentResolved = false;
+      if (physicalMomentScale < MIN_NORMAL) {
+        const lengthScale = Math.max(width,depth);
+        const lengthScaleSquared = lengthScale*lengthScale;
+        if (Number.isFinite(lengthScaleSquared) && lengthScaleSquared >= MIN_NORMAL) {
+          const normalizedWidth = width/lengthScale;
+          const normalizedDepth = depth/lengthScale;
+          const normalizedThickness = thickness/lengthScale;
+          const normalizedPieces = [
+            {x:0,y:0,width:normalizedThickness,height:normalizedDepth},
+            {x:normalizedThickness,y:0,width:normalizedWidth-normalizedThickness,height:normalizedThickness}
+          ];
+          const normalizedMetrics = normalizedPieces.map(piece => {
+            const pieceArea = piece.width*piece.height;
+            return {...piece,area:pieceArea,cx:piece.x+piece.width/2,cy:piece.y+piece.height/2};
+          });
+          const normalizedArea = normalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+          const normalizedCentroidX = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/normalizedArea;
+          const normalizedCentroidY = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/normalizedArea;
+          const normalizedIxx = normalizedMetrics.reduce((sum,piece)=>
+            sum+piece.width*piece.height*piece.height*piece.height/12+
+              piece.area*(piece.cy-normalizedCentroidY)*(piece.cy-normalizedCentroidY),0);
+          const normalizedIyy = normalizedMetrics.reduce((sum,piece)=>
+            sum+piece.height*piece.width*piece.width*piece.width/12+
+              piece.area*(piece.cx-normalizedCentroidX)*(piece.cx-normalizedCentroidX),0);
+          const normalizedIxy = normalizedMetrics.reduce((sum,piece)=>
+            sum+piece.area*(piece.cx-normalizedCentroidX)*(piece.cy-normalizedCentroidY),0);
+          const normalizedMean = (normalizedIxx+normalizedIyy)/2;
+          const normalizedRadius = Math.hypot((normalizedIxx-normalizedIyy)/2,normalizedIxy);
+          const normalizedMajor = normalizedMean+normalizedRadius;
+          const normalizedDeterminant = normalizedIxx*normalizedIyy-normalizedIxy*normalizedIxy;
+          const normalizedMinor = normalizedDeterminant/normalizedMajor;
+          const normalizedExtremeX = Math.max(normalizedCentroidY,normalizedDepth-normalizedCentroidY);
+          const normalizedExtremeY = Math.max(normalizedCentroidX,normalizedWidth-normalizedCentroidX);
+          const candidate = {
+            centroidX:normalizedCentroidX*lengthScale,
+            centroidY:normalizedCentroidY*lengthScale,
+            ixx:(normalizedIxx*lengthScaleSquared)*lengthScaleSquared,
+            iyy:(normalizedIyy*lengthScaleSquared)*lengthScaleSquared,
+            ixy:(normalizedIxy*lengthScaleSquared)*lengthScaleSquared,
+            major:(normalizedMajor*lengthScaleSquared)*lengthScaleSquared,
+            minor:(normalizedMinor*lengthScaleSquared)*lengthScaleSquared,
+            sx:((normalizedIxx/normalizedExtremeX)*lengthScaleSquared)*lengthScale,
+            sy:((normalizedIyy/normalizedExtremeY)*lengthScaleSquared)*lengthScale,
+            rx:lengthScale*Math.sqrt(normalizedIxx/normalizedArea),
+            ry:lengthScale*Math.sqrt(normalizedIyy/normalizedArea),
+            angle:0.5*Math.atan2(-2*normalizedIxy,normalizedIxx-normalizedIyy)*180/Math.PI
+          };
+          if (normalizedArea>0 && normalizedIxx>0 && normalizedIyy>0 &&
+              normalizedDeterminant>0 && normalizedMajor>0 && normalizedMinor>0 &&
+              normalizedExtremeX>0 && normalizedExtremeY>0 &&
+              Object.values(candidate).every(Number.isFinite) &&
+              candidate.ixx>0 && candidate.iyy>0 && candidate.ixy!==0 &&
+              candidate.major>0 && candidate.minor>0 && candidate.sx>0 && candidate.sy>0 &&
+              candidate.rx>0 && candidate.ry>0) {
+            centroidX = candidate.centroidX;
+            centroidY = candidate.centroidY;
+            secondMoment = candidate.ixx;
+            secondMomentPerpendicular = candidate.iyy;
+            productOfInertia = candidate.ixy;
+            principalMomentMajor = candidate.major;
+            principalMomentMinor = candidate.minor;
+            analyticSectionModulusX = candidate.sx;
+            analyticSectionModulusY = candidate.sy;
+            analyticRadiusOfGyrationX = candidate.rx;
+            analyticRadiusOfGyrationY = candidate.ry;
+            principalAxisAngleDegrees = candidate.angle;
+            normalizedLowExponentResolved = true;
+          }
+        }
       }
-      principalMomentMajor = finite(momentScale*majorNormalized, 'L-angle major principal moment I1 (mm⁴)');
-      // For a positive-definite 2×2 inertia tensor, λmin = det(I)/λmax.
-      // Usually the normalized determinant is safest; at extreme aspect ratios it
-      // can underflow even when the minor eigenvalue is still representable.
-      let minorMoment = momentScale*(determinantNormalized/majorNormalized);
-      if (!(minorMoment > 0) || !Number.isFinite(minorMoment)) {
-        // Recover only when the unscaled determinant itself remains finite and positive.
-        // Otherwise retain the explicit underflow rejection rather than inventing a value.
-        const determinant = secondMoment*secondMomentPerpendicular-productOfInertia*productOfInertia;
-        if (!(determinant > 0) || !Number.isFinite(determinant)) {
+      if (!normalizedLowExponentResolved) {
+        // Normalize the inertia tensor before diagonalizing it. Subtracting the
+        // nearly equal mean and radius loses the minor eigenvalue for slender angles.
+        const momentScale = physicalMomentScale;
+        const scaledIxx = secondMoment/momentScale;
+        const scaledIyy = secondMomentPerpendicular/momentScale;
+        const scaledIxy = productOfInertia/momentScale;
+        const meanMoment = (scaledIxx+scaledIyy)/2;
+        const principalRadius = Math.hypot((scaledIxx-scaledIyy)/2,scaledIxy);
+        const majorNormalized = meanMoment+principalRadius;
+        const determinantNormalized = scaledIxx*scaledIyy-scaledIxy*scaledIxy;
+        if (!(majorNormalized > 0)) {
           throw Error('L-angle principal second moment underflow; increase dimensions.');
         }
-        minorMoment = determinant/principalMomentMajor;
+        principalMomentMajor = finite(momentScale*majorNormalized, 'L-angle major principal moment I1 (mm⁴)');
+        // For a positive-definite 2×2 inertia tensor, λmin = det(I)/λmax.
+        // Usually the normalized determinant is safest; at extreme aspect ratios it
+        // can underflow even when the minor eigenvalue is still representable.
+        let minorMoment = momentScale*(determinantNormalized/majorNormalized);
+        if (!(minorMoment > 0) || !Number.isFinite(minorMoment)) {
+          // Recover only when the unscaled determinant itself remains finite and positive.
+          // Otherwise retain the explicit underflow rejection rather than inventing a value.
+          const determinant = secondMoment*secondMomentPerpendicular-productOfInertia*productOfInertia;
+          if (!(determinant > 0) || !Number.isFinite(determinant)) {
+            throw Error('L-angle principal second moment underflow; increase dimensions.');
+          }
+          minorMoment = determinant/principalMomentMajor;
+        }
+        principalMomentMinor = finite(minorMoment, 'L-angle minor principal moment I2 (mm⁴)');
+        if (!(principalMomentMajor > 0) || !(principalMomentMinor > 0)) throw Error('L-angle principal second moment underflow; increase dimensions.');
+        principalAxisAngleDegrees = finite(0.5*Math.atan2(-2*scaledIxy,scaledIxx-scaledIyy)*180/Math.PI,
+          'L-angle principal-axis angle (degrees)');
       }
-      principalMomentMinor = finite(minorMoment, 'L-angle minor principal moment I2 (mm⁴)');
-      if (!(principalMomentMajor > 0) || !(principalMomentMinor > 0)) throw Error('L-angle principal second moment underflow; increase dimensions.');
-      principalAxisAngleDegrees = finite(0.5*Math.atan2(-2*scaledIxy,scaledIxx-scaledIyy)*180/Math.PI,
-        'L-angle principal-axis angle (degrees)');
       centroid = {x:centroidX,y:centroidY};
       axis = 'centroidal horizontal axis (Ixx)';
       perpendicularAxis = 'centroidal vertical axis (Iyy)';
@@ -353,8 +432,12 @@
     const extremeFiberDistanceAboutX = finite(Math.max(centroidY, boundsHeight-centroidY), 'Extreme-fibre distance about X (mm)');
     const extremeFiberDistanceAboutY = finite(Math.max(centroidX, boundsWidth-centroidX), 'Extreme-fibre distance about Y (mm)');
     if (!(extremeFiberDistanceAboutX > 0) || !(extremeFiberDistanceAboutY > 0)) throw Error('Section extreme-fibre distance underflow.');
-    const sectionModulusX = finite(secondMoment/extremeFiberDistanceAboutX, 'Section modulus Sx (mm³)');
-    const sectionModulusY = finite(secondMomentPerpendicular/extremeFiberDistanceAboutY, 'Section modulus Sy (mm³)');
+    const sectionModulusX = analyticSectionModulusX === null
+      ? finite(secondMoment/extremeFiberDistanceAboutX, 'Section modulus Sx (mm³)')
+      : finite(analyticSectionModulusX, 'Section modulus Sx (mm³)');
+    const sectionModulusY = analyticSectionModulusY === null
+      ? finite(secondMomentPerpendicular/extremeFiberDistanceAboutY, 'Section modulus Sy (mm³)')
+      : finite(analyticSectionModulusY, 'Section modulus Sy (mm³)');
     // Use the canonical I/area quotient when representable; it avoids the extra
     // rounding of two square roots. If the quotient over/underflows, split the
     // square roots so a representable physical radius is not lost to the ratio.

@@ -1,3 +1,9 @@
+## 2026-11-24 — L-angle subnormal inertia and principal-property precision (dev; exact-head QA pending)
+
+- L-angle sections whose physical inertia tensor is subnormal now recompute the same two rectangles at normalized length scale before restoring Ixx/Iyy/Ixy, principal moments/axis, section moduli and radii. Ordinary and extreme-aspect fallback paths are retained.
+- Added exact-binary64/120-digit Decimal Node and 1280px/390px Chromium regressions; the prior path reproduced >1% radius and >1° principal-axis errors.
+- Updated the Structural Truss guide, hourly plan and execution ledger. Implemented on dev; not released until exact-head Quality and ordinary reviewed release gates pass.
+
 ## 2026-11-24 — Composite section radii avoid subnormal I/A quantization (dev; exact-head QA pending)
 
 - Channel and I-section radii now recompute the composite area, centroid and inertias at a normalized length scale, then restore the scale once. Existing dimensional area and Ixx/Iyy outputs are unchanged.

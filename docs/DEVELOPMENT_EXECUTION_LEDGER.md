@@ -1,3 +1,17 @@
+## 2026-11-24 — SPREADSHEET-RENAME-QUALIFIER-REWRITE-AND-CI-RECOVERY
+
+Starting dev 180122c81616157c244afc067db241db30fcfff6, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Inspected AGENTS.md, living plan, frozen inventory, branch refs, current diff, PR list, and exact-head CI/Pages.
+
+Exact-head dev Quality [#45386201181](https://github.com/saeedsai/ProMathStudio/actions/runs/45386201181) failed in tests/smoke_sheet_references.py:87: Python slice syntax rows[0][:4] was evaluated as JavaScript, causing a syntax error. The 595-test Python suite and quoted-name structural/source-bundle tests passed. Changed the expression to JavaScript .slice(0,4) without removing the check.
+
+Also fixed a real rename behavior defect: formulas referring to a sheet by its old name were not updated when the sheet was renamed. Added workbook-wide qualifier rewriting, preserving quoted formula string literals and doubling apostrophes in newly quoted names. The browser regression now starts with Obrien references, renames to O'Brien, asserts scalar/range qualifiers update, and verifies calculations, sort identity, structural row/column edits and literal preservation. Updated the structural test, Data Tables guide, changelog and plan. Updated modular source and standalone inline module in one change; exact module parity is required.
+
+Isolated V8 helper checks passed for quoted/unquoted qualifiers, apostrophe escaping, anchors/ranges and protected literals. Local checkout/Playwright unavailable. Fresh exact-head Quality is pending for the resulting dev commit. Main Quality #45360386408 and Pages #45360367251 remain successful on main SHA 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. No open PR. Only dev/main exist; both are reported unprotected, rulesets empty and protection reads HTTP 403. No release promotion attempted. Frozen inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) full exact-head 217-step Quality green, especially quoted-sheet browser test and zero skips; (2) admin-verifiable main protections and independent review before ordinary PR promotion, then exact-main Quality/Pages/hosted verification; (3) spreadsheet first/last anchor, delete-to-empty #REF!, escaped literal and transactional sort rollback tests; (4) seven-shape Truss independent numerical boundary/rollback/390px matrix; (5) current/legacy project round-trips, malformed-import rollback and analytical forward/backward ODE tests.
+
+---
+
 ## 2026-11-24 — SPREADSHEET-ESCAPED-APOSTROPHE-SHEET-REFERENCES
 
 - Starting refs: dev `21688a3f534db3691c303462cf294a49f15feee1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; root contract, frozen inventory, plan, source/bundle parity, exact CI, open PRs and Pages were inspected.

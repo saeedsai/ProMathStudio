@@ -1,3 +1,26 @@
+## 2026-11-24 — SPREADSHEET-RENAME-QUALIFIER-REWRITE-AND-CI-RECOVERY
+
+**Starting refs:** dev 180122c81616157c244afc067db241db30fcfff6; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, this plan, the frozen MATLAB baseline, source/bundle contract, current PRs, exact-head CI and main Quality/Pages evidence.
+
+**Exact-head failure:** dev Quality [#45386201181](https://github.com/saeedsai/ProMathStudio/actions/runs/45386201181) failed in the registered tests/smoke_sheet_references.py at line 87. The browser test passed the Python-style slice rows[0][:4] to JavaScript page.evaluate, causing SyntaxError: Unexpected token ':'. The 595-test Python suite completed; the new quoted-name structural/parity checks passed. Corrected the browser expression to .slice(0,4); no assertion was removed or weakened.
+
+**Source correctness fix:** Found that renaming a sheet changed only its display name. Existing formulas qualified with the old name then returned #SHEET. Added a workbook-wide rename pass for scalar and range qualifiers. It recognizes both quoted and unquoted old names, matches case-insensitively, emits a correctly quoted new qualifier and doubles embedded apostrophes. Formula string literals are masked before rewriting and restored unchanged. Example: =Obrien!$A$1+'Obrien'!A2 becomes ='O''Brien'!$A$1+'O''Brien'!A2 when the sheet is renamed to O'Brien.
+
+**Regression and documentation:** Extended the already registered Chromium smoke to start with real references to Obrien, rename the sheet to O'Brien, assert every qualifier was rewritten, and verify calculated scalar/forward/reversed-range results, sort identity, row/column insertion and formula-literal preservation. Fixed the JavaScript slice syntax that caused the prior CI failure. Added source/registration assertions, documented rename semantics, and synchronized src/data-tables.js with its exact inline module in standalone index.html.
+
+**Validation:** The helper's isolated V8 behavior checks cover unquoted and quoted old qualifiers, mixed anchors, range qualifiers, apostrophe escaping and formula-string preservation. Source and inline bundle are checked byte-for-byte before/after synchronization. Full local Playwright/Python execution remains unavailable because this runtime has no repository checkout; fresh exact-head GitHub Quality must certify the registered browser scenario. Status: Implemented on dev / In QA / not released.
+
+**Release state:** main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are successful on that SHA. No open PR; only dev/main exist. Branches report unprotected, rulesets are empty and branch-protection reads return HTTP 403 to this integration. No PR/merge is attempted without verifiable protections and eligible independent review. Frozen historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:**
+1. P0 — Exact-head Quality recovery. Require all 217 workflow steps green with zero failures/skips on the resulting dev head; specifically verify the quoted-sheet Chromium rename, calculations, sort, row/column edits, formula-literal preservation and source/bundle parity.
+2. P0 — Safe release governance. Obtain admin-verifiable main required checks/no-force/no-delete protections and eligible independent review; only then use an ordinary dev→main PR and verify main Quality, Pages and hosted critical paths.
+3. P1 — Remaining spreadsheet reference boundaries. Test first/last row/column mixed anchors, escaped-quote literals, delete-to-empty #REF!, quoted cross-sheet ranges and transactional noncontiguous-sort rollback with exact identity.
+4. P1 — Seven-shape Truss numerical boundaries. Independent low-exponent, near-solid and thin-wall references for area/centroid/inertia/moduli/radii/principal invariants, invalid rollback and 390px keyboard behavior.
+5. P1 — Saved projects and ODE compatibility. Current/legacy Matrix/Graph/Table round-trips, malformed-import atomic rollback, forward/backward analytical ODE references and responsive recovery.
+
+---
+
 ## 2026-11-24 — SPREADSHEET-ESCAPED-APOSTROPHE-SHEET-REFERENCES
 
 **Starting refs:** dev `21688a3f534db3691c303462cf294a49f15feee1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root AGENTS.md, this plan, the frozen 2026-10-26 inventory, source/bundle contract, reference tests, exact-head Actions, open PRs and Pages evidence were inspected first.

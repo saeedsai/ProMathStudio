@@ -445,6 +445,20 @@
     }
     return {text:masked,restore:value=>value.replace(/\uE100(\d+)\uE101/g,(_,index)=>literals[Number(index)])};
   }
+  const sheetQualifier=name=>{const value=String(name);return /^[A-Za-z_][A-Za-z0-9_]*$/.test(value)?value+'!':"'"+value.replace(/'/g,"''")+"'!";};
+  function rewriteSheetNameReferences(oldName,newName){
+    const oldKey=String(oldName).toLowerCase(),replacement=sheetQualifier(newName);
+    const qualifierPattern=/(?:'((?:[^']|'')+)'|([A-Za-z_][A-Za-z0-9_]*))!/g;
+    for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
+      const raw=String(row[c]);if(!raw.startsWith('='))continue;
+      const protectedFormula=protectFormulaStringLiterals(raw);
+      const rewritten=protectedFormula.text.replace(qualifierPattern,(match,quoted,plain)=>{
+        const referenced=quoted===undefined?plain:quoted.replace(/''/g,"'");
+        return referenced.toLowerCase()===oldKey?replacement:match;
+      });
+      row[c]=protectedFormula.restore(rewritten);
+    }
+  }
   function shiftReferences(edited,axis,index,delta){
     const coord=ref=>{const m=/^(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)$/.exec(ref);
       return axis==='row'?Number(m[4])-1:colIndex(m[2]);};
@@ -769,7 +783,7 @@
   const safeAction=fn=>{try{fn();}catch(error){notify(error.message,true);}};
   $('dt-new').addEventListener('click',()=>safeAction(()=>makeTable('Data'+(tables.length+1),['A','B','C'],[['','',''],['','',''],['','','']])));
   $('dt-copy').addEventListener('click',()=>safeAction(()=>{const t=active();makeTable(t.name+'_copy',t.columns,t.rows);}));
-  $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, spaces, underscores and apostrophes):',t.name);if(name===null)return;t.name=uniqueName(name,t.id);save();render();}));
+  $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, spaces, underscores and apostrophes):',t.name);if(name===null)return;const oldName=t.name,newName=uniqueName(name,t.id);if(newName!==oldName)rewriteSheetNameReferences(oldName,newName);t.name=newName;save();render();}));
   $('dt-remove').addEventListener('click',()=>safeAction(()=>{if(tables.length===1)throw Error('Keep at least one table.');if(!confirm('Delete selected table?'))return;tables=tables.filter(t=>t.id!==selected);selected=tables[0].id;render();save();}));
   $('dt-add-row').addEventListener('click',()=>safeAction(()=>structuralEdit('row',active().rows.length,1)));
   $('dt-add-col').addEventListener('click',()=>safeAction(()=>structuralEdit('column',active().columns.length,1)));

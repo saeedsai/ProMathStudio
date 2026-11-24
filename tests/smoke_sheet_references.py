@@ -59,11 +59,11 @@ def main():
              "rows": [["20"], ["5"], ["10"]]},
             {"id": "sheet-2", "name": "Summary", "columns": ["A", "B", "C", "D", "E"],
              "rows": [[
-                 "='O''Brien'!$A$1+'O''Brien'!A2",
-                 "=SUM('O''Brien'!$A$1:A3)",
-                 "=SUM('O''Brien'!A3:$A$1)",
-                 "='O''Brien'!A3",
-                 '="O\'\'Brien!A1"'
+                 "=Obrien!$A$1+'Obrien'!A2",
+                 "=SUM(Obrien!$A$1:A3)",
+                 "=SUM('Obrien'!A3:$A$1)",
+                 "=Obrien!A3",
+                 '="Obrien!A1"'
              ]]}
         ]}
         page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", quoted_state)
@@ -72,6 +72,13 @@ def main():
             document.getElementById('dt-rename').click();
         }""")
         assert page.evaluate("MathStudio.dataTables.tables[0].name") == "O'Brien"
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == [
+            "='O''Brien'!$A$1+'O''Brien'!A2",
+            "=SUM('O''Brien'!$A$1:A3)",
+            "=SUM('O''Brien'!A3:$A$1)",
+            "='O''Brien'!A3",
+            '="Obrien!A1"'
+        ]
         summary = "MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]"
         assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
         page.evaluate("MathStudio.dataTables.sortRows(0, 'asc')")
@@ -84,7 +91,7 @@ def main():
         ]
         assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
         page.evaluate("MathStudio.dataTables.insertRow(0)")
-        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0][:4]") == [
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(0,4)") == [
             "='O''Brien'!$A$4+'O''Brien'!A2",
             "=SUM('O''Brien'!$A$2:A4)",
             "=SUM('O''Brien'!A4:$A$2)",

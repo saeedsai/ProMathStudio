@@ -1,3 +1,10 @@
+## 2026-11-24 — Spreadsheet rename keeps qualified formulas valid (dev; exact-head QA pending)
+
+- Renaming a sheet now rewrites matching qualified scalar and aggregate-range references across the workbook; both quoted and unquoted old names are recognized case-insensitively.
+- New names that require quoting are emitted with doubled embedded apostrophes. Double-quoted formula string literals are protected from rewriting.
+- Expanded the registered Chromium smoke to verify rename, scalar/range calculations, sorting, structural edits, and literal preservation. Fixed its invalid JavaScript slice expression (rows[0][:4] to rows[0].slice(0,4)) without weakening assertions.
+- Synchronized src/data-tables.js with its inline standalone index.html module and updated the Data Tables guide, plan and execution ledger. Full exact-head Quality is required; not released.
+
 ## 2026-11-24 — Spreadsheet sheet names with escaped apostrophes (dev; exact-head QA pending)
 
 - Table rename now preserves internal apostrophes; formulas refer to those names using doubled apostrophes inside single quotes, e.g. `='O''Brien'!A1` and `=SUM('O''Brien'!A1:A3)`.

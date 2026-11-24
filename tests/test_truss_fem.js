@@ -1493,3 +1493,27 @@ test('solid circle retains finite inertia when the unscaled diameter fourth powe
  assert.deepEqual(dimensions,original);
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
+
+test('L-angle radius of gyration remains finite when I/area overflows but sqrt(I/area) is representable',()=>{
+ const dimensions={width:1e200,height:1e100,thickness:1e-293};
+ const original={...dimensions};
+ // The direct ratio overflows although the physical radius is about 2.89e199 mm.
+ const section=fem.sectionProperties('l-angle',dimensions);
+ assert.equal(Number.isFinite(section.secondMomentPerpendicular/section.area),false,
+  'the unscaled Iyy/area intermediate must overflow for this boundary case');
+ const expected={
+  area:1.0000000000000001e-93,
+  secondMoment:3333333.3333333335,
+  secondMomentPerpendicular:8.333333333333333e305,
+  radiusOfGyrationX:5.773502691896258e49,
+  radiusOfGyrationY:2.8867513459481287e199
+ };
+ for(const [key,want] of Object.entries(expected)){
+  const actual=section[key];
+  assert.ok(Number.isFinite(actual)&&Math.abs(actual-want)<=Math.abs(want)*5e-13,
+   key+' '+actual+' must match the 120-digit Decimal reference '+want);
+ }
+ assert.ok(section.radiusOfGyrationY>0);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});

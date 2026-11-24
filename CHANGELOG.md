@@ -1,3 +1,9 @@
+## 2026-11-24 — Truss L-angle radius-of-gyration overflow safety (dev; exact-head QA pending)
+
+- Radius of gyration now evaluates `sqrt(I)/sqrt(A)`, avoiding an overflowing `I/A` intermediate when the final radius is finite.
+- Added a 120-digit Decimal-backed Node regression and Chromium desktop/390px coverage for a slender L-angle (`B=1e200 mm`, `H=1e100 mm`, `t=1e-293 mm`); the former code reproduced a finite-range rejection.
+- Other section properties and the explicit positive/finite result guards remain. Not released until exact-head Quality and the normal reviewed PR gate pass.
+
 ## 2026-11-24 — Truss solid-circle high-range inertia safety (dev; exact-head QA pending)
 
 - Solid-circle inertia now applies π/64 before the final multiplication of the diameter-squared terms, avoiding an unnecessary overflowing Do⁴ intermediate when the final moment is finite.

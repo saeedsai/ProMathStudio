@@ -60,6 +60,25 @@ def main():
             assert content.is_visible(), 'summary should reveal its controlled content region'
             page.locator('#section-helper').wait_for(state='visible')
             page.locator('#section-member').wait_for(state='visible')
+            # A slender L-angle can have finite Iyy and area while Iyy/area overflows;
+            # the square-root-first radius calculation must remain finite in Chromium.
+            slender = page.evaluate("""() => {
+                const section = ProMathTrussFEM.sectionProperties('l-angle', {
+                    width: 1e200, height: 1e100, thickness: 1e-293
+                });
+                return {
+                    area: section.area,
+                    secondMoment: section.secondMoment,
+                    secondMomentPerpendicular: section.secondMomentPerpendicular,
+                    radiusOfGyrationX: section.radiusOfGyrationX,
+                    radiusOfGyrationY: section.radiusOfGyrationY
+                };
+            }""")
+            assert not math.isfinite(slender['secondMomentPerpendicular'] / slender['area'])
+            assert math.isfinite(slender['radiusOfGyrationY'])
+            assert abs(slender['radiusOfGyrationY'] / 2.8867513459481287e199 - 1) <= 5e-13
+            assert abs(slender['radiusOfGyrationX'] / 5.773502691896258e49 - 1) <= 5e-13
+
             # A very thin concentric annulus must retain high-precision section properties
             # through the actual helper preview and selected-member application at both widths.
             page.locator('#section-member').select_option('AB')

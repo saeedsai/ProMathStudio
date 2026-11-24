@@ -1686,3 +1686,31 @@ test('rectangular section moduli use geometry factors when subnormal inertias lo
   assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
  }
 });
+
+ 
+test('circular section moduli avoid subnormal inertia quantization',()=>{
+ const minNormal=2.2250738585072014e-308;
+ const cases=[
+  {shape:'solid-circle',dimensions:{diameter:3e-81},sx:2.6507188014663876e-243},
+  {shape:'hollow-circle',dimensions:{diameter:3e-81,innerDiameter:1.5e-81},sx:2.4850488763747383e-243}
+ ];
+ for(const item of cases){
+  const original={...item.dimensions};
+  const section=fem.sectionProperties(item.shape,item.dimensions);
+  assert.ok(section.secondMoment>0&&section.secondMoment<minNormal,
+   item.shape+' Ixx must remain positive and subnormal');
+  assert.equal(section.secondMomentPerpendicular,section.secondMoment);
+  const oldSx=section.secondMoment/section.extremeFiberDistanceAboutX;
+  assert.ok(Math.abs(oldSx/item.sx-1)>0.2,
+   item.shape+' rounded I/c must reproduce the previous >20% section-modulus error');
+  for(const [axis,value] of [['Sx',section.sectionModulusX],['Sy',section.sectionModulusY]]){
+   assert.ok(Number.isFinite(value)&&Math.abs(value/item.sx-1)<=5e-13,
+    item.shape+' '+axis+' '+value+' must match the 120-digit Decimal reference '+item.sx);
+  }
+  assert.deepEqual(item.dimensions,original);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+ const ordinary=fem.sectionProperties('solid-circle',{diameter:40});
+ assert.equal(ordinary.sectionModulusX,ordinary.secondMoment/ordinary.extremeFiberDistanceAboutX,
+  'ordinary solid circles retain the existing I/c path');
+});

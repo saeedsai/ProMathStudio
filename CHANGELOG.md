@@ -1,3 +1,8 @@
+## 2026-11-24 — Circular section moduli avoid subnormal-inertia quantization (dev; exact-head QA pending)
+
+- Solid and concentric hollow circle Sx/Sy now use the factored analytic (π/32)·Do³·inertiaFactor only when dimensional inertia is subnormal; ordinary sections retain I/c.
+- Added direct Node and registered 1280px/390px Chromium regressions for exact-binary64 thin solid/annular circles. The old I/c path reproduced >20% error; corrected values match independent 120-digit Decimal references within 5e-13 relative error.
+- Updated the Structural Truss guide, hourly plan and execution ledger. Implemented on dev; not released pending exact-head Quality and reviewed promotion.
 ## 2026-11-24 — Truss rectangular section moduli avoid subnormal-inertia precision loss (dev; exact-head QA pending)
 
 - Solid and concentric hollow rectangle Sx/Sy now use dimensionless geometry factors only when the corresponding Ixx/Iyy is subnormal, avoiding 2–4% errors from dividing rounded inertia by extreme-fibre distance while preserving the ordinary I/c path.

@@ -1,3 +1,25 @@
+## 2026-11-24 — TRUSS-CIRCULAR-SUBNORMAL-SECTION-MODULUS
+
+**Starting refs:** dev b433c0db406e72a74488fd2c20fd4d473af81b29, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, the frozen 2026-10-26 inventory, this living plan, engineering architecture/workspace plan, toolbox catalog, Truss FEM source/tests/guide, branch refs, open PRs, exact-head Quality and main Pages evidence. Used the connected GitHub integration for repository inspection and the atomic dev commit; no local checkout was assumed.
+
+**Starting exact-head QA:** dev Quality #45467047779 passed 218/218 steps on exact SHA b433c0db406e72a74488fd2c20fd4d473af81b29, zero failures/skips. Main Quality #45360386408 and Pages deployment #45360367251 succeeded on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. No open PRs; only dev and main branches; dev is 14 ahead and 0 behind. Both refs are unprotected, rulesets are empty, and branch-protection reads return HTTP 403 to this integration; no protection-write action is exposed.
+
+**Defect:** Solid and hollow circle section moduli used rounded dimensional I/c. At Do=3e-81 mm and Di=1.5e-81 mm, both physical inertias quantize to the minimum positive binary64 value (5e-324) while section moduli remain normal. The former result was 3.293770972274977e-243 mm³ for both shapes, versus exact-binary64 120-digit Decimal references of 2.6507188014663876e-243 mm³ (solid) and 2.4850488763747383e-243 mm³ (annulus), errors of about 24.3% and 32.5%.
+
+**Fix:** For circular sections only when physical inertia is subnormal, calculate S = (π/32)·Do³·inertiaFactor, where the solid factor is 1 and the annulus factor is the existing stable (1−r²)(1+r²)=1−r⁴. Assign the same analytic value to both axes. Ordinary circles retain the original I/c path; factored area/inertia and direct radius formulas are unchanged. Truss Studio loads adjacent tools/truss-fem.js, so no standalone index.html bundle change is applicable.
+
+**Regression:** Added a direct Node test and extended the existing Chromium subnormal-circle case at 1280px and 390px. Both shapes must have positive subnormal Ixx/Iyy, reproduce >20% error from old I/c, match independent 120-digit Decimal Sx/Sy references within 5e-13 relative error, preserve input dimensions and frozen outputs, and retain ordinary 40 mm circle I/c behavior.
+
+**Isolated validation:** Executed the actual modified production module in the V8 tool runtime. Solid/hollow old values both reproduced as 3.293770972274977e-243; corrected values were 2.6507188014663876e-243 and 2.4850488763747383e-243, matching the binary64-rounded high-precision references. Both inertias were 5e-324; ordinary 40 mm circle area, I and S stayed unchanged; equal inner/outer diameter was rejected. Full Node/Chromium CI for the new commit remains pending.
+
+**Release state:** implemented on dev only; not released. Main and Pages remain on 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. No PR opened because protections and independent review are not verifiable. Frozen historical baseline remains 166 gaps / 95 partial.
+
+**NEXT FIVE (status and acceptance tests):**
+1. **P0 — Release governance (blocked):** verify enforceable main protection requiring exact-head Quality and forbidding direct push/force/deletion; obtain eligible independent approval; use one ordinary dev-to-main PR, then verify PR checks, merge, new main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Finish seven-shape Truss property audit (in progress):** channel/I-section and remaining thin-wall/subnormal/high-scale cases; independent references for area, centroid, inertias, section moduli and radii; invalid geometry must reject without member mutation; Node plus 1280px/390px Chromium.
+3. **P1 — Spreadsheet grid-edge structural references:** row 6000/column AF insertion/deletion, #REF! transitions, reversed ranges, mixed anchors and byte-for-byte rollback after rejected sort; desktop/390px browser checks.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed imports preserve all workspace data, selection and prior results; desktop/390px.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, unsupported-class diagnostics, tolerance/step convergence, stale-export invalidation and desktop/390px recovery.
 ## 2026-11-24 — TRUSS-RECTANGULAR-SUBNORMAL-SECTION-MODULUS
 
 **Starting refs:** dev `9f07a13caa491175a466cd32e8484039e6d6a4e0`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, unified master implementation plan, engineering architecture/workspace plan, toolbox catalog, Truss FEM source/tests/guide, branch refs, open PRs and latest exact-head CI/Pages evidence. One bounded local Git check is unavailable because this runtime has no repository checkout; used the connected GitHub integration without retrying local Git/DNS.

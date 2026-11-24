@@ -1,3 +1,15 @@
+## 2026-11-24 — TRUSS-CIRCULAR-SUBNORMAL-SECTION-MODULUS
+
+Starting dev b433c0db406e72a74488fd2c20fd4d473af81b29, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; exact starting dev Quality #45467047779 green 218/218; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 14 ahead/0 behind. Both refs unprotected, rulesets empty, protection read HTTP 403.
+
+Fixed solid/hollow circle Sx/Sy when I is subnormal: use (π/32)·Do³·inertiaFactor with the existing factored annulus term only below the normal-inertia threshold. Old I/c overestimated the solid and hollow references by 24.3% and 32.5%; corrected production-module results match independent 120-digit Decimal values. Ordinary 40 mm circle path unchanged. Added Node and registered Chromium 1280px/390px regressions; source, tests, Structural Truss guide, living plan and changelog updated atomically. Actual modified module passed isolated V8 checks for subnormal cases, ordinary circle parity, immutability and invalid annulus rejection. New exact-head Quality pending; no local full Node/Chromium suite. Implemented on dev, not released. Historical inventory unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE:**
+1. P0 release governance — required main protections, independent review, ordinary PR, exact-head checks and Pages verification.
+2. P1 seven-shape Truss boundary audit — independent thin-wall/subnormal/high-scale references, invalid rollback and desktop/390px.
+3. P1 spreadsheet grid edges — row 6000/column AF, #REF!, mixed anchors, reversed ranges, atomic rollback.
+4. P1 saved-project compatibility — current/legacy Matrix/Graph/Table round-trip and malformed-import rollback.
+5. P1 ODE verification — analytical forward/backward IVPs, convergence, unsupported classes and mobile recovery.
 ## 2026-11-24 — TRUSS-RECTANGULAR-SUBNORMAL-SECTION-MODULUS
 
 Starting dev `9f07a13caa491175a466cd32e8484039e6d6a4e0`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact starting dev Quality #45457066031 green 218/218; main Quality #45360386408 green; Pages #45360367251 successful. No open PRs; only dev/main; dev 13 ahead/0 behind. Both branches unprotected, rulesets empty, protection read HTTP 403; integration exposes no protection-write action.

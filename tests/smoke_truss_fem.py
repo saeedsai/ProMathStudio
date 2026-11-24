@@ -156,13 +156,19 @@ def main():
                         area: solid.area, i: solid.secondMoment,
                         oldRadius: Math.sqrt(solid.secondMoment / solid.area),
                         rx: solid.radiusOfGyrationX, ry: solid.radiusOfGyrationY,
-                        expected: diameter / 4
+                        oldS: solid.secondMoment / solid.extremeFiberDistanceAboutX,
+                        sx: solid.sectionModulusX, sy: solid.sectionModulusY,
+                        expected: diameter / 4,
+                        expectedS: 2.6507188014663876e-243
                     },
                     hollow: {
                         area: hollow.area, i: hollow.secondMoment,
                         oldRadius: Math.sqrt(hollow.secondMoment / hollow.area),
                         rx: hollow.radiusOfGyrationX, ry: hollow.radiusOfGyrationY,
-                        expected: (diameter / 4) * Math.sqrt(1 + ratio * ratio)
+                        oldS: hollow.secondMoment / hollow.extremeFiberDistanceAboutX,
+                        sx: hollow.sectionModulusX, sy: hollow.sectionModulusY,
+                        expected: (diameter / 4) * Math.sqrt(1 + ratio * ratio),
+                        expectedS: 2.4850488763747383e-243
                     }
                 };
             }""")
@@ -170,8 +176,11 @@ def main():
                 assert thin_circles[shape]['i'] == math.ulp(0.0), (shape, thin_circles[shape])
                 assert math.isfinite(thin_circles[shape]['area']) and thin_circles[shape]['area'] > 0
                 assert abs(thin_circles[shape]['oldRadius'] / thin_circles[shape]['expected'] - 1) > 0.1
+                assert abs(thin_circles[shape]['oldS'] / thin_circles[shape]['expectedS'] - 1) > 0.2
                 for axis in ('rx', 'ry'):
                     assert abs(thin_circles[shape][axis] / thin_circles[shape]['expected'] - 1) <= 2e-15
+                for axis in ('sx', 'sy'):
+                    assert abs(thin_circles[shape][axis] / thin_circles[shape]['expectedS'] - 1) <= 5e-13
 
             # Composite section inertias can be subnormal while both radii remain representable.
             # The normalized geometry path must avoid quantized physical I/A at desktop and mobile.

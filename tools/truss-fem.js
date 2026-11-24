@@ -399,6 +399,7 @@
       centroidY = diameter/2;
       centroid = {x:centroidX,y:centroidY};
       const hollow = shape === 'hollow-circle';
+      let inertiaFactor = 1;
       const innerDiameter = hollow ? finite(dimensions.innerDiameter, 'Hollow circle inner diameter Di (mm)') : 0;
       if (hollow && (!(innerDiameter > 0) || !(innerDiameter < diameter))) {
         throw Error('Hollow circle inner diameter must be positive and smaller than the outer diameter.');
@@ -413,7 +414,7 @@
         const innerRatio = finite(innerDiameter / diameter, 'Hollow circle inner/outer diameter ratio');
         const radialGap = finite((diameter - innerDiameter) / diameter, 'Hollow circle relative radial wall thickness');
         const areaFactor = finite(radialGap * (1 + innerRatio), 'Hollow circle net area factor');
-        const inertiaFactor = finite(areaFactor * (1 + innerRatio * innerRatio), 'Hollow circle inertia factor');
+        inertiaFactor = finite(areaFactor * (1 + innerRatio * innerRatio), 'Hollow circle inertia factor');
         area = finite((Math.PI / 4) * outerSquare * areaFactor, 'Circle net area (mm²)');
         secondMoment = finite((Math.PI / 64) * outerSquare * inertiaFactor * outerSquare, 'Circle centroidal second moment I (mm⁴)');
         // The annulus identity is I/A = Do²·(1 + (Di/Do)²)/16.
@@ -429,6 +430,15 @@
         // For a solid circle, I/A = Do²/16; avoid a rounded subnormal quotient.
         analyticRadiusOfGyrationX = finite(diameter / 4, 'Radius of gyration rx (mm)');
         analyticRadiusOfGyrationY = finite(diameter / 4, 'Radius of gyration ry (mm)');
+      }
+      // Subnormal inertia values are too coarsely quantized for I/c, even when S remains normal.
+      // The circular identity S = (pi/32)·Do³·(1 - (Di/Do)^4) uses the
+      // same factored annulus term and avoids dividing a rounded subnormal I.
+      if (secondMoment < 2.2250738585072014e-308) {
+        const circularSectionModulus = finite((Math.PI / 32) * outerSquare * diameter * inertiaFactor,
+          'Circular section modulus (mm³)');
+        analyticSectionModulusX = circularSectionModulus;
+        analyticSectionModulusY = circularSectionModulus;
       }
       secondMomentPerpendicular = secondMoment;
       axis = 'centroidal diameter axis';

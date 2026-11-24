@@ -109,6 +109,71 @@ def main():
                     input.dispatchEvent(new Event('change', {bubbles:true}));
                 }
             }""", before_section['AB'])
+            # A normal L-angle stays on the true-scale preview without a detail inset.
+            page.locator('#section-shape').select_option('l-angle')
+            page.locator('#section-width').fill('100')
+            page.locator('#section-height').fill('80')
+            page.locator('#section-angle-thickness').fill('10')
+            assert page.locator('#section-sketch path[data-section-outline="l-angle"]').count() == 1
+            assert page.locator('#section-sketch path[data-section-detail="l-angle"]').count() == 0
+            # An extreme-aspect L-angle keeps its measured outline at true scale and
+            # adds an explicitly labelled detail inset for its sub-pixel leg thickness.
+            page.locator('#section-width').fill('1000000')
+            page.locator('#section-height').fill('1')
+            page.locator('#section-angle-thickness').fill('0.001')
+            angle_caption = page.locator('#section-sketch-caption').inner_text()
+            assert 'L-angle B=' in angle_caption and 't=0.001 mm' in angle_caption
+            assert 'Magnified leg detail shown below is not to scale.' in angle_caption
+            sketch = page.locator('#section-sketch')
+            assert sketch.get_attribute('aria-label') == angle_caption
+            assert page.locator('#section-sketch-desc').inner_text() == angle_caption
+            outline = page.locator('#section-sketch path[data-section-outline="l-angle"]')
+            assert outline.count() == 1
+            assert outline.get_attribute('data-section-width-mm') == '1000000'
+            assert outline.get_attribute('data-section-height-mm') == '1'
+            assert outline.get_attribute('data-section-thickness-mm') == '0.001'
+            assert page.locator('#section-sketch rect[data-section-detail-frame="l-angle"]').count() == 1
+            assert page.locator('#section-sketch path[data-section-detail="l-angle"]').count() == 1
+            assert page.locator('#section-sketch [data-section-detail-label="l-angle"]').inner_text() == 'Leg detail — not to scale'
+            assert page.locator('#section-sketch line[data-principal-axis]').count() == 2
+            assert page.locator('#section-axis').input_value() == 'principal-major'
+            before_angle = page.evaluate("""() => Object.fromEntries(
+                [...document.querySelectorAll('#members tr')].map(row => {
+                    const id = row.querySelector('input[data-field="id"]')?.value;
+                    return id ? [id, Object.fromEntries(
+                        [...row.querySelectorAll('input[data-field]')].map(input => [input.dataset.field, input.value])
+                    )] : null;
+                }).filter(Boolean)
+            )""")
+            page.locator('#section-properties-apply').click()
+            assert page.locator('#section-result').inner_text().startswith('L-angle (web left, bottom leg right): area ')
+            after_angle = page.evaluate("""() => Object.fromEntries(
+                [...document.querySelectorAll('#members tr')].map(row => {
+                    const id = row.querySelector('input[data-field="id"]')?.value;
+                    return id ? [id, Object.fromEntries(
+                        [...row.querySelectorAll('input[data-field]')].map(input => [input.dataset.field, input.value])
+                    )] : null;
+                }).filter(Boolean)
+            )""")
+            expected_angle_area = 1000.000999
+            expected_angle_major = 83333583083083.333
+            assert abs(float(after_angle['AB']['area']) - expected_angle_area) <= expected_angle_area * 1e-12
+            assert abs(float(after_angle['AB']['I']) - expected_angle_major) <= expected_angle_major * 1e-12
+            for field, value in before_angle['AB'].items():
+                if field not in ('area', 'I'):
+                    assert after_angle['AB'][field] == value, (field, before_angle['AB'], after_angle['AB'])
+            assert after_angle['AC'] == before_angle['AC']
+            assert after_angle['BC'] == before_angle['BC']
+            page.evaluate("""(original) => {
+                const row = [...document.querySelectorAll('#members tr')].find(
+                    item => item.querySelector('input[data-field="id"]')?.value === 'AB');
+                for (const field of ['area', 'I']) {
+                    const input = row.querySelector('input[data-field="' + field + '"]');
+                    input.value = original[field];
+                    input.dispatchEvent(new Event('input', {bubbles:true}));
+                    input.dispatchEvent(new Event('change', {bubbles:true}));
+                }
+            }""", before_angle['AB'])
             # Simulate an underconstrained joint, then recover without page reload.
             page.locator('#nodes tr').nth(1).locator('input[data-field="fixY"]').uncheck()
             page.get_by_role('button', name='Analyze truss').click()

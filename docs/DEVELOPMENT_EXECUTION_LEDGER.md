@@ -1,3 +1,15 @@
+## 2026-11-24 — TRUSS-L-ANGLE-SUBPIXEL-LEG-DETAIL
+
+- Starting refs: dev `e7222f2772c0daa13a924ca391f3a82d75c45923`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root contract, plan, frozen inventory, Structural Truss source/tests/contract, PR #189/reviews, refs and CI/Pages evidence.
+- Starting exact-head Push Quality [#45285607450](https://github.com/saeedsai/ProMathStudio/actions/runs/45285607450) and PR Quality [#45285616892](https://github.com/saeedsai/ProMathStudio/actions/runs/45285616892) both passed 218/218, zero failures/skips. Spreadsheet 78–80, Truss 212 and FEM 214/215 passed.
+- Added a separate “Leg detail — not to scale” inset when an L-angle leg would be sub-pixel in the true-scale SVG. The measured outline remains unchanged; live caption, accessible name and SVG description announce the schematic inset.
+- Added Chromium coverage at 1280px/390px for a normal section (no inset) and B=1,000,000 mm, H=1 mm, t=0.001 mm (inset shown), including dimension metadata, principal-axis selection, major-axis member application against A=1000.000999 mm² and I1=83333583083083.333 mm⁴, preservation of E/density/K and AC/BC, and restoration of the original section.
+- Updated Structural Truss contract, living plan, ledger and changelog atomically with the source and browser regression. No root index.html synchronization applies to this standalone Truss Studio page and adjacent assets.
+- Local workspace has no checkout; full local Node/Chromium execution unavailable. Fresh exact-head Push/PR Quality required for the new browser scenario; candidate is implemented on dev, not released.
+- PR #189 remains open/mergeable, head-matched to starting dev, base-matched to main, zero independent reviews. Earlier branch evidence: dev/main unprotected, rulesets empty, branch-protection read HTTP 403. No merge/direct main update/force push/bypass.
+- Main Quality #41730966059 passed 193/193; Pages #41730962844 passed build 5/5, deploy 3/3 and report 3/3 on main SHA `70fc483cb1cec3d2372d37484e4a8ef7942343da` (2026-11-03); no newer main commit/deployment found.
+- Frozen October 26 inventory unchanged: **166 gaps / 95 partial**.
+
 ## 2026-11-23 — TRUSS-SECTION-DISCLOSURE-STATE-AND-ARIA-CONTROL
 
 - Starting refs: dev `0bf1fdf3f755f317ffada3ccdf303499c8af78a0`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Read root contract, living plan, frozen inventory, Truss source/test/contract, PR/reviews, refs, Actions and Pages.

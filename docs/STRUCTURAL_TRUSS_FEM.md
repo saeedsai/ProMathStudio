@@ -178,3 +178,10 @@ I_{yy}=\frac{hb^3}{12}\left[g_h+r_h g_b(1+r_b+r_b^2)\right].
 These are algebraically equivalent to subtracting the inner rectangle from the outer rectangle, but avoid catastrophic cancellation when valid walls are very thin. Existing finite/positive geometry checks remain in force; no invalid dimensions are clamped.
 
 The direct Node and Chromium desktop/390px regressions use \(b=h=1{,}000{,}000\) mm and \(b_i=h_i=999{,}999.9999999\) mm. Independent 80-digit Decimal references evaluated from the exact binary64 inputs are \(A=0.20000152289866402\) mm² and \(I_{xx}=I_{yy}=33333587149.774002\) mm⁴. The prior subtractive calculation lost about \(2.52\times10^{-4}\) relative area and \(4.21\times10^{-4}\) relative inertia. The browser test also verifies only the selected member's area/I fields change; E, density, K and every other member remain unchanged.
+
+
+## Extreme-aspect L-angle preview detail
+
+The L-angle sketch preserves its measured outline at the same uniform scale used for the entered dimensions. When the displayed leg thickness would be below 2 SVG pixels, the preview adds a separate fixed-size leg-detail inset labelled **“Leg detail — not to scale”**. The live caption, SVG accessible name and SVG description announce that the inset is schematic; the original outline continues to expose the exact outer dimensions and leg thickness as metadata. The inset never participates in area, inertia, principal-axis or member-application calculations.
+
+The Chromium regression checks a normal 100 × 80 × 10 mm L-angle has no inset, then checks B=1,000,000 mm, H=1 mm and t=0.001 mm at 1280px and 390px. It verifies the true-scale outline metadata, visible labelled inset, synchronized caption/ARIA description, principal-axis controls, and selected-member application against A=1000.000999 mm² and I1=83333583083083.333 mm⁴. E, density, K and every non-selected member must remain unchanged; the original section is restored before the remaining solver tests.

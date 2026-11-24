@@ -1,3 +1,30 @@
+## 2026-11-24 — TRUSS-L-ANGLE-SUBPIXEL-LEG-DETAIL (implemented on dev; exact-head QA pending)
+
+Starting refs: dev `e7222f2772c0daa13a924ca391f3a82d75c45923`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Structural Truss contract/source/tests, PR #189/reviews, exact branch refs, Actions and main Quality/Pages evidence.
+
+**P0 CI baseline:** The exact starting dev head passed Push Quality [#45285607450](https://github.com/saeedsai/ProMathStudio/actions/runs/45285607450) and PR Quality [#45285616892](https://github.com/saeedsai/ProMathStudio/actions/runs/45285616892), each with **218/218 successful steps, zero failures and zero skipped steps**. Spreadsheet 78–80, Truss Studio 212 and FEM analytical/browser 214–215 all passed. No failing exact-head CI defect remained at the start.
+
+**P1 section-helper improvement:** An extreme-aspect L-angle can be mathematically valid while its true-scale leg thickness occupies far less than one SVG pixel. The existing preview retained correct dimensions but gave users no legible indication of the cross-section detail.
+
+**Source change:** `tools/truss-fem-ui.js` now adds a separate fixed-size L-angle leg-detail inset only when the true-scale displayed thickness is below 2 SVG pixels. The measured outline is not distorted or enlarged; the inset is explicitly labelled “Leg detail — not to scale”. The live caption, SVG accessible name and SVG description are synchronized to announce the schematic detail. The inset is presentation-only and never affects section calculations or member application.
+
+**Browser regression:** `tests/smoke_truss_fem.py` now verifies a normal 100×80×10 mm L-angle has no inset, then exercises B=1,000,000 mm, H=1 mm, t=0.001 mm at 1280px and 390px. It checks the original outline's exact dimension metadata, detail frame/path/label, principal-axis controls, matching caption/ARIA/description, and applies the major principal moment to AB. Independent references are A=1000.000999 mm² and I1=83333583083083.333 mm⁴. E, density, K and AC/BC remain unchanged; the original member section is restored before subsequent solver tests.
+
+**Validation:** The starting exact-head Push/PR Quality passed 218/218 with zero failures/skips, including spreadsheet 78–80 and Truss/FEM 212/214/215. A bounded local Git check confirms this execution workspace has no checkout; full local Node/Chromium execution is unavailable. Source/test static consistency will be checked before commit; new exact-head Push/PR Quality must certify the new browser regression. Candidate will be **Implemented on dev / In QA**, not released.
+
+PR #189 remains open and mergeable, head-matched to the starting dev SHA and base-matched to main, with **zero submitted reviews**. Earlier branch metadata reports dev/main unprotected, rulesets empty and branch-protection read HTTP 403 to the connected integration; no authorized protection-write operation is exposed. No merge, direct main update, force push or governance bypass was attempted. Main Quality [#41730966059](https://github.com/saeedsai/ProMathStudio/actions/runs/41730966059) remains successful (193/193) and Pages [#41730962844](https://github.com/saeedsai/ProMathStudio/actions/runs/41730962844) remains successful (build 5/5, deploy 3/3, report 3/3) on main `70fc483cb1cec3d2372d37484e4a8ef7942343da`, 2026-11-03. No newer main commit or deployment was found.
+
+The October 26 historical baseline remains frozen at **166 gaps / 95 partial**; no historical counts or classifications were changed.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Release governance and ordinary promotion (blocked on independent review/protection).** Obtain an eligible independent PR #189 review and authorized enforceable main protection/required checks. After all exact-head checks and review gates are green, inspect the full diff, merge only through the ordinary dev-to-main PR, then verify exact-main Quality, Pages and hosted critical paths.
+2. **P1 — Seven-shape section-helper matrix (in progress).** Cover solid/hollow rectangle, solid/hollow circle, channel, I-section and L-angle with independent area/inertia/centroid/section-modulus/radius references; verify selected-axis application changes only the target member, invalid/overflow rollback, E/density/K preservation, keyboard access and 390px behavior.
+3. **P1 — Spreadsheet formula-reference edge audit (planned).** Test mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity, transactional refusal of unsafe noncontiguous sort/delete and source/standalone `index.html` parity.
+4. **P1 — Source-backed Engineering Toolbox expansion (planned).** Select one approved unfinished canonical tool; reuse shared solver, units and plot services; assign one stable tool ID; add independent numerical references, negative tests, keyboard/mobile browser coverage and truthful status without placeholder actions.
+5. **P1 — Saved-project and numerical ODE compatibility (planned).** Round-trip current and legacy Matrix/Graph/Table projects; malformed imports must roll back atomically and preserve focus. For the selected shared ODE path, verify analytic forward/backward references, bounded failure recovery, stale-export disabling and 390px keyboard behavior.
+
+---
+
 ## 2026-11-23 — TRUSS-SECTION-DISCLOSURE-STATE-AND-ARIA-CONTROL (implemented on dev; exact-head QA pending)
 
 Starting refs: dev `0bf1fdf3f755f317ffada3ccdf303499c8af78a0`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, current Truss Studio source/tests/contract, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.

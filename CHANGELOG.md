@@ -1,3 +1,10 @@
+## 2026-11-24 — Truss extreme-aspect L-angle preview detail (dev; exact-head QA pending)
+
+- Added a separately labelled leg-detail inset when an L-angle's true-scale thickness would be below 2 SVG pixels; the measured outline remains at true scale and is never distorted.
+- Synchronized the live caption, SVG accessible name and description with the explicit “not to scale” notice.
+- Added Chromium coverage at desktop and 390px for normal/no-inset and extreme-aspect/inset behavior, exact dimension metadata, principal-axis selection, major-principal application reference and preservation of E/density/K/other members.
+- Requires fresh exact-head Push/PR Quality; not released.
+
 ## 2026-11-23 — Truss section disclosure state and accessible controlled region (dev; exact-head QA pending)
 
 - Linked the native “Member materials and section properties” summary to a stable `#member-material-content` region using `aria-controls`; the wrapper contains the metrics table and section helper, and the disclosure remains collapsed by default.

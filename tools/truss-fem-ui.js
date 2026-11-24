@@ -161,6 +161,14 @@
         svg.append(svgNode('text',{x:x2+5,y:y2-5,fill:axis.color,'font-size':11,'font-weight':'600','data-principal-axis-label':axis.name,role:'text','aria-label':axis.name==='major'?'Major principal axis I1':'Minor principal axis I2','data-axis-angle-deg':axis.angle*180/Math.PI},axis.label));
       });
       svg.append(dimensionLabel('t',thickness,{x:x+w-62,y:y+h-t/2+4,fill:'#20364f','font-size':10,'font-weight':'600'}));
+      // Keep the measured outline at true scale. When the leg is sub-pixel, add
+      // a separately labelled schematic detail instead of silently exaggerating it.
+      if(thickness*scale<2){
+        const detailX=220,detailY=116,detailWidth=120,detailHeight=108,leg=12;
+        svg.append(svgNode('rect',{x:detailX,y:detailY,width:detailWidth,height:detailHeight,fill:'none',stroke:'currentColor','stroke-dasharray':'4 3','data-section-detail-frame':'l-angle'}));
+        svg.append(svgNode('path',{d:'M '+(detailX+12)+' '+(detailY+12)+' H '+(detailX+detailWidth-12)+' V '+(detailY+12+leg)+' H '+(detailX+12+leg)+' V '+(detailY+detailHeight-12)+' H '+(detailX+12)+' Z',fill:'#b8cbe2',stroke:'#355578','stroke-width':2,'data-section-detail':'l-angle','data-section-detail-thickness-mm':thickness}));
+        svg.append(svgNode('text',{x:detailX+detailWidth/2,y:detailY+detailHeight-1,'text-anchor':'middle',fill:'currentColor','font-size':10,'data-section-detail-label':'l-angle'},'Leg detail — not to scale'));
+      }
     }else{
       const innerW=hollowRectangle?innerWidth*scale:0,innerH=hollowRectangle?innerHeight*scale:0;
       const innerX=x+(w-innerW)/2,innerY=y+(h-innerH)/2;
@@ -225,10 +233,12 @@
         ?'Hollow circle Do='+fmt(diameter,4)+' mm, Di='+fmt(innerDiameter,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal and vertical centroidal diameter axes Ixx and Iyy.'
         :'Solid circle D='+fmt(diameter,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal and vertical centroidal diameter axes Ixx and Iyy.')
       :angle
-        ?'L-angle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, t='+fmt(thickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; major principal axis '+fmtAngle(properties.principalAxisAngleDegrees)+'° counter-clockwise from +x; minor principal axis '+fmtAngle(properties.principalAxisAngleDegrees+90)+'° counter-clockwise from +x.'
+        ?'L-angle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, t='+fmt(thickness,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; major principal axis '+fmtAngle(properties.principalAxisAngleDegrees)+'° counter-clockwise from +x; minor principal axis '+fmtAngle(properties.principalAxisAngleDegrees+90)+'° counter-clockwise from +x.'+(thickness*scale<2?' Magnified leg detail shown below is not to scale.':'')
         :hollowRectangle
           ?'Hollow rectangle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm, bi='+fmt(innerWidth,4)+' mm, hi='+fmt(innerHeight,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes.'
           :'Solid rectangle B='+fmt(width,4)+' mm, H='+fmt(height,4)+' mm; centroid x '+fmt(properties.centroid.x,5)+' mm, y '+fmt(properties.centroid.y,5)+' mm; horizontal Ixx and vertical Iyy centroidal axes.';
+    const descriptionNode=svg.querySelector('#section-sketch-desc');
+    if(descriptionNode) descriptionNode.textContent=summary;
     caption.textContent=summary;svg.setAttribute('aria-label',summary);
   }
   function updateSectionShape() {

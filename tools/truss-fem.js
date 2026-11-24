@@ -220,6 +220,43 @@
         const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'Composite rectangle Iyy offset (mm⁴)');
         return sum+local+offset;
       },0), 'Composite section Iyy (mm⁴)');
+      // Physical composite inertias can be subnormal even when the section radii are
+      // representable. Recompute I/A in coordinates normalized by the largest length,
+      // then restore that length once; keep the reported dimensional area and inertias intact.
+      const lengthScale = Math.max(width, depth);
+      const normalizedMetrics = pieces.map(piece => {
+        const normalizedPiece = {
+          x:piece.x/lengthScale, y:piece.y/lengthScale,
+          width:piece.width/lengthScale, height:piece.height/lengthScale
+        };
+        return {...normalizedPiece,
+          area:normalizedPiece.width*normalizedPiece.height,
+          cx:normalizedPiece.x+normalizedPiece.width/2,
+          cy:normalizedPiece.y+normalizedPiece.height/2};
+      });
+      const normalizedArea = normalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+      if (normalizedArea > 0 && Number.isFinite(normalizedArea)) {
+        const normalizedCentroidX = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/normalizedArea;
+        const normalizedCentroidY = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/normalizedArea;
+        const normalizedIxx = normalizedMetrics.reduce((sum,piece)=>{
+          const local = rectangleIxx(piece, 'Normalized composite rectangle local Ixx');
+          const offset = piece.area*(piece.cy-normalizedCentroidY)*(piece.cy-normalizedCentroidY);
+          return sum+local+offset;
+        },0);
+        const normalizedIyy = normalizedMetrics.reduce((sum,piece)=>{
+          const local = rectangleIyy(piece, 'Normalized composite rectangle local Iyy');
+          const offset = piece.area*(piece.cx-normalizedCentroidX)*(piece.cx-normalizedCentroidX);
+          return sum+local+offset;
+        },0);
+        if (normalizedIxx > 0 && Number.isFinite(normalizedIxx)) {
+          analyticRadiusOfGyrationX = finite(lengthScale*Math.sqrt(normalizedIxx/normalizedArea),
+            'Radius of gyration rx (mm)');
+        }
+        if (normalizedIyy > 0 && Number.isFinite(normalizedIyy)) {
+          analyticRadiusOfGyrationY = finite(lengthScale*Math.sqrt(normalizedIyy/normalizedArea),
+            'Radius of gyration ry (mm)');
+        }
+      }
       centroid = {x:centroidX,y:centroidY};
       axis = 'centroidal horizontal axis (Ixx)';
       perpendicularAxis = 'centroidal vertical axis (Iyy)';

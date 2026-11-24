@@ -1053,6 +1053,34 @@ test('circular radii use geometry factors when subnormal inertias lose relative 
  relative(hollow.radiusOfGyrationY,hollowExpected,'hollow circle ry');
 });
 
+test('channel and I-section radii use normalized geometry when physical inertias are subnormal',()=>{
+ const scale=10**-82.2;
+ const references=[
+  {shape:'channel',expected:{rx:2.0220658289055487e-81,ry:2.0060914979751612e-81}},
+  {shape:'i-section',expected:{rx:2.0220658289055487e-81,ry:1.5424539802421713e-81}}
+ ];
+ const relative=(actual,want,label)=>assert.ok(Number.isFinite(actual)&&want>0&&
+  Math.abs(actual/want-1)<=5e-13,label+' '+actual+' must match '+want);
+ for(const {shape,expected} of references){
+  const dimensions={width:100*scale,height:80*scale,webThickness:10*scale,flangeThickness:8*scale};
+  const original={...dimensions};
+  const section=fem.sectionProperties(shape,dimensions);
+  assert.ok(section.area>0&&Number.isFinite(section.area),shape+' area must remain representable');
+  assert.ok(section.secondMoment>0&&section.secondMoment<16*Number.MIN_VALUE,
+   shape+' Ixx must be positive and subnormal');
+  assert.ok(section.secondMomentPerpendicular>0&&section.secondMomentPerpendicular<16*Number.MIN_VALUE,
+   shape+' Iyy must be positive and subnormal');
+  assert.ok(Math.abs(Math.sqrt(section.secondMoment/section.area)/expected.rx-1)>0.01,
+   shape+' rounded Ixx/A must reproduce the previous rx precision loss');
+  assert.ok(Math.abs(Math.sqrt(section.secondMomentPerpendicular/section.area)/expected.ry-1)>0.01,
+   shape+' rounded Iyy/A must reproduce the previous ry precision loss');
+  relative(section.radiusOfGyrationX,expected.rx,shape+' rx');
+  relative(section.radiusOfGyrationY,expected.ry,shape+' ry');
+  assert.deepEqual(dimensions,original);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+});
+
 test('solid and concentric hollow section helpers return validated area and centroidal principal moments in mm units',()=>{
  const rectangle=fem.sectionProperties('rectangle',{width:'40',height:'60'});
  assert.deepEqual(rectangle.centroid,{x:20,y:30});

@@ -1,3 +1,9 @@
+## 2026-11-24 — Composite section radii avoid subnormal I/A quantization (dev; exact-head QA pending)
+
+- Channel and I-section radii now recompute the composite area, centroid and inertias at a normalized length scale, then restore the scale once. Existing dimensional area and Ixx/Iyy outputs are unchanged.
+- Added Node and 1280px/390px Chromium regressions proving subnormal physical inertias previously distorted both radii by more than 1%, with independent high-precision references and input immutability checks.
+- Updated the Structural Truss guide, living plan and execution ledger. Implemented on dev; not released until exact-head Quality and ordinary reviewed release gates pass.
+
 ## 2026-11-24 — Truss circular radii avoid subnormal-inertia precision loss (dev; exact-head QA pending)
 
 - Solid-circle radii now use Do/4; concentric hollow-circle radii use (Do/4)·sqrt(1+(Di/Do)^2), avoiding large relative error from a rounded subnormal I/A quotient.

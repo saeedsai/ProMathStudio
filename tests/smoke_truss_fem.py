@@ -138,6 +138,36 @@ def main():
                 for axis in ('rx', 'ry'):
                     assert abs(thin_circles[shape][axis] / thin_circles[shape]['expected'] - 1) <= 2e-15
 
+            # Composite section inertias can be subnormal while both radii remain representable.
+            # The normalized geometry path must avoid quantized physical I/A at desktop and mobile.
+            composite_thin = page.evaluate("""() => {
+                const scale = 10 ** -82.2;
+                const references = {
+                    channel: {rx: 2.0220658289055487e-81, ry: 2.0060914979751612e-81},
+                    'i-section': {rx: 2.0220658289055487e-81, ry: 1.5424539802421713e-81}
+                };
+                return Object.fromEntries(Object.entries(references).map(([shape, expected]) => {
+                    const section = ProMathTrussFEM.sectionProperties(shape, {
+                        width: 100 * scale, height: 80 * scale,
+                        webThickness: 10 * scale, flangeThickness: 8 * scale
+                    });
+                    return [shape, {
+                        area: section.area, ixx: section.secondMoment, iyy: section.secondMomentPerpendicular,
+                        oldRx: Math.sqrt(section.secondMoment / section.area),
+                        oldRy: Math.sqrt(section.secondMomentPerpendicular / section.area),
+                        rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY, expected
+                    }];
+                }));
+            }""")
+            for shape, result in composite_thin.items():
+                assert result['area'] > 0 and math.isfinite(result['area']), (shape, result)
+                assert 0 < result['ixx'] < 16 * math.ulp(0.0), (shape, result)
+                assert 0 < result['iyy'] < 16 * math.ulp(0.0), (shape, result)
+                assert abs(result['oldRx'] / result['expected']['rx'] - 1) > 0.01, (shape, result)
+                assert abs(result['oldRy'] / result['expected']['ry'] - 1) > 0.01, (shape, result)
+                assert abs(result['rx'] / result['expected']['rx'] - 1) <= 5e-13, (shape, result)
+                assert abs(result['ry'] / result['expected']['ry'] - 1) <= 5e-13, (shape, result)
+
             # A very thin concentric annulus must retain high-precision section properties
             # through the actual helper preview and selected-member application at both widths.
             page.locator('#section-member').select_option('AB')

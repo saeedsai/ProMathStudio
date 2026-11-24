@@ -1,3 +1,30 @@
+## 2026-11-24 — TRUSS-L-ANGLE-PRINCIPAL-MINOR-SUBNORMAL-RECOVERY
+
+**Starting refs:** dev d730138d9e871716d25bfb7b06ed1f46f078909a; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read root AGENTS.md, this plan, the frozen 2026-10-26 inventory, Structural Truss source/tests/contract, PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.
+
+**Starting exact-head CI:** PR Quality #45323696348 completed successfully on exact dev SHA d730138d9e871716d25bfb7b06ed1f46f078909a; the full workflow passed, including FEM/Truss browser steps 212–215. Push Quality #45323690661 on the same SHA was cancelled at browser step 210; step 210 was cancelled and later steps skipped, with no failing assertion reported. The successful PR run provides a complete exact-head QA result; the cancelled push run is recorded accurately, not reclassified as a failure.
+
+**P1 numerical defect:** L-angle principal inertia used a normalized 2×2 determinant to recover the minor eigenvalue. For B=1e100 mm, H=1e-139 mm and t=1e-140 mm, the normalized Ixx and Ixy both underflow to zero relative to Iyy, so the normalized determinant is zero even though the physical minor principal moment is still representable as a positive subnormal. The section's area, centroidal moments, major/minor principal moments, section moduli and radii remain finite.
+
+**Source correction:** tools/truss-fem.js keeps the normalized determinant path when it yields a positive finite minor moment. If that path underflows/non-finite, it now tries the unscaled determinant Ixx*Iyy-Ixy² only when that determinant is finite and positive, then divides by the already-computed major eigenvalue. If neither path can produce a positive finite result, the existing explicit underflow error remains. No section geometry, solver, model or member-application behavior changed.
+
+**Regression:** tests/test_truss_fem.js proves the normalized determinant is exactly zero for the synthetic geometry, then checks the returned minor principal moment against a 100-digit Decimal reference evaluated from the exact binary64 dimensions (rounding to 8.35e-322 mm⁴). It also verifies positive finite major moment, section moduli, radii and angle, nonzero product of inertia, unchanged inputs and immutable output. tests/smoke_truss_fem.py exercises the same engine through Chromium at 1280px and 390px and checks the subnormal result plus all other finite section outputs.
+
+**Validation:** Independent 100-digit Decimal reference and isolated V8 arithmetic reproduce the zero normalized determinant, finite raw determinant and positive subnormal I2. Local repository checkout is absent (git rev-parse --show-toplevel returned “not a git repository”); complete local Node/Playwright suites cannot run. New exact-head Push/PR Quality must certify the committed Node and browser regressions. Candidate will be Implemented on dev / In QA, not released.
+
+**Release state:** PR #189 remains open/mergeable, head-matched to starting dev d730138d9e871716d25bfb7b06ed1f46f078909a, base main 70fc483cb1cec3d2372d37484e4a8ef7942343da, 484 commits/98 changed files, zero submitted reviews. Branch listing reports dev/main unprotected; rulesets query is empty; branch-protection read returns HTTP 403 to the connected integration. No merge, direct main update, force push or safeguard bypass. Latest main Quality #41730966059 and Pages #41730962844 remain successful on main SHA 70fc483cb1cec3d2372d37484e4a8ef7942343da (2026-11-03); no newer main run/deployment was found. Pages settings/deployment API reads are not available through the current integration.
+
+The October 26 historical inventory remains frozen at **166 gaps / 95 partial**; no counts or classifications changed.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Exact-head QA and safe release governance.** Both Push and PR Quality must complete on the new SHA, including the subnormal L-angle Node and desktop/390px browser cases and all existing structural/spreadsheet checks. PR #189 needs an eligible independent review and authorized enforceable main protection/required checks; only then inspect the complete diff, merge through the ordinary PR and verify exact-main Quality, Pages and hosted critical paths.
+2. **P1 — Seven-shape section-helper numerical boundaries (in progress).** Complete independent area/inertia/centroid/section-modulus/radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle. Cover thin walls, high/low exponent limits, normalized determinant underflow, invalid rollback, selected-axis/member isolation, E/density/K preservation, keyboard and 390px behavior.
+3. **P1 — Spreadsheet formula-reference edge audit (planned).** Test mixed absolute/relative anchors, quoted sheet names, reversed ranges, doubled/escaped formula-string quotes and row/column boundaries; verify logical-cell identity, transactional refusal of unsafe noncontiguous sort/delete and source/standalone index.html parity.
+4. **P1 — Source-backed Engineering Toolbox expansion (planned).** Select one approved unfinished canonical tool, reuse shared solver/units/plot services, assign one stable tool ID, and add independent numerical references, negative tests, keyboard/mobile coverage and truthful status without placeholder actions.
+5. **P1 — Saved-project and numerical ODE compatibility (planned).** Round-trip current/legacy Matrix/Graph/Table projects; malformed imports must roll back atomically and preserve focus. Verify selected ODE forward/backward analytical references, bounded failure recovery, stale-export disabling and 390px keyboard behavior.
+
+---
+
 ## 2026-11-24 — TRUSS-HOLLOW-CIRCLE-FOURTH-POWER-RANGE-SAFETY
 
 **Starting refs:** dev `4333e3a3333828ec50acf76ea7340d55ec16fcab`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 MATLAB inventory, Structural Truss source/tests/contract, current PR #189/reviews, branch refs, exact-head Actions and main Quality/Pages evidence.

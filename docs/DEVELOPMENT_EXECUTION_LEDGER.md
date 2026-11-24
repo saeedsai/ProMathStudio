@@ -1,3 +1,16 @@
+## 2026-11-24 — TRUSS-L-ANGLE-PRINCIPAL-MINOR-SUBNORMAL-RECOVERY
+
+- Starting refs: dev d730138d9e871716d25bfb7b06ed1f46f078909a; main 70fc483cb1cec3d2372d37484e4a8ef7942343da. Re-read AGENTS, plan, frozen inventory, Truss contract/source/tests, PR #189/reviews, branches, Actions and Pages.
+- Exact-head PR Quality #45323696348 passed the complete workflow on starting dev. Push Quality #45323690661 was cancelled at browser step 210; no failed assertion was reported, and later steps were skipped. Cancellation is not reported as a failure.
+- Found a valid L-angle extreme-aspect case where the normalized inertia determinant underflows to zero even though the minor principal moment remains a representable positive subnormal: B=1e100 mm, H=1e-139 mm, t=1e-140 mm.
+- The engine now uses the normalized determinant when it yields a positive finite minor eigenvalue, otherwise tries the unscaled determinant only when finite/positive and divides by the computed major eigenvalue. Existing explicit underflow rejection remains if neither path is valid.
+- Added a 100-digit Decimal-backed Node regression and desktop/390px Chromium engine regression. The exact-binary64 reference rounds to I2=8.35e-322 mm⁴; the test proves the normalized determinant is zero and verifies all other section outputs remain finite/positive.
+- Isolated V8 arithmetic and independent Decimal reference passed. Local checkout absent (git rev-parse --show-toplevel: not a git repository), so full local Node/Playwright cannot run; new exact-head Push/PR Quality is pending.
+- Updated Structural Truss contract, hourly plan, ledger and changelog atomically with source and tests. Standalone Truss Studio assets do not require root index.html synchronization.
+- PR #189 remains open/mergeable, 484 commits/98 files, zero submitted reviews. Branch list reports dev/main unprotected; rulesets empty; branch-protection read HTTP 403. No merge, direct main update, force push or bypass.
+- Main Quality #41730966059 and Pages #41730962844 remain successful on main 70fc483cb1cec3d2372d37484e4a8ef7942343da (2026-11-03); no newer main runs/deployments. Pages settings API is unavailable to this integration.
+- Frozen October 26 inventory unchanged: **166 gaps / 95 partial**.
+
 ## 2026-11-24 — TRUSS-COMPOSITE-SUBPIXEL-PREVIEW-DETAIL
 
 - Starting refs: dev `966711b5e925c820d9f7477c55e22249db6cb221`; main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Re-read root AGENTS, living plan, frozen inventory, engineering architecture/toolbox contracts, Truss source/tests/contract, PR #189/reviews, branches, Actions and Pages.

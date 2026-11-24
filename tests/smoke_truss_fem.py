@@ -667,6 +667,35 @@ def main():
             assert 'Hollow rectangle' in page.locator('#section-result').inner_text()
             assert 'applied Ixx' in page.locator('#section-result').inner_text()
 
+            # A normalized L-angle determinant can underflow even when I2 is still a
+            # representable subnormal; the browser engine must retain the Decimal reference.
+            extreme_principal = page.evaluate("""() => {
+                const section = ProMathTrussFEM.sectionProperties('l-angle', {
+                    width: 1e100, height: 1e-139, thickness: 1e-140
+                });
+                const scale = Math.max(section.secondMoment, section.secondMomentPerpendicular,
+                    Math.abs(section.productOfInertia));
+                const ixx = section.secondMoment / scale;
+                const iyy = section.secondMomentPerpendicular / scale;
+                const ixy = section.productOfInertia / scale;
+                return {
+                    normalizedDeterminant: ixx * iyy - ixy * ixy,
+                    minor: section.principalMomentMinor,
+                    major: section.principalMomentMajor,
+                    area: section.area,
+                    sx: section.sectionModulusX, sy: section.sectionModulusY,
+                    rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY,
+                    angle: section.principalAxisAngleDegrees
+                };
+            }""")
+            expected_extreme_minor = float(
+                '8.333333333333333047120026461242959511255978638690079422571566289435343033091377208870550837651415192e-322')
+            assert extreme_principal['normalizedDeterminant'] == 0
+            assert extreme_principal['minor'] == expected_extreme_minor
+            for key in ('major', 'area', 'sx', 'sy', 'rx', 'ry', 'angle'):
+                assert math.isfinite(extreme_principal[key]) and extreme_principal[key] > 0, (
+                    key, extreme_principal)
+            
             # Restore the ordinary rectangle setup for the missing-destination-field test.
             page.locator('#section-shape').select_option('rectangle')
             page.locator('#section-width').fill('40')

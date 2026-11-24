@@ -144,13 +144,24 @@
       const principalRadius = Math.hypot((scaledIxx-scaledIyy)/2,scaledIxy);
       const majorNormalized = meanMoment+principalRadius;
       const determinantNormalized = scaledIxx*scaledIyy-scaledIxy*scaledIxy;
-      if (!(majorNormalized > 0) || !(determinantNormalized > 0)) {
+      if (!(majorNormalized > 0)) {
         throw Error('L-angle principal second moment underflow; increase dimensions.');
       }
       principalMomentMajor = finite(momentScale*majorNormalized, 'L-angle major principal moment I1 (mm⁴)');
       // For a positive-definite 2×2 inertia tensor, λmin = det(I)/λmax.
-      // This avoids catastrophic cancellation in meanMoment-principalRadius.
-      principalMomentMinor = finite(momentScale*(determinantNormalized/majorNormalized), 'L-angle minor principal moment I2 (mm⁴)');
+      // Usually the normalized determinant is safest; at extreme aspect ratios it
+      // can underflow even when the minor eigenvalue is still representable.
+      let minorMoment = momentScale*(determinantNormalized/majorNormalized);
+      if (!(minorMoment > 0) || !Number.isFinite(minorMoment)) {
+        // Recover only when the unscaled determinant itself remains finite and positive.
+        // Otherwise retain the explicit underflow rejection rather than inventing a value.
+        const determinant = secondMoment*secondMomentPerpendicular-productOfInertia*productOfInertia;
+        if (!(determinant > 0) || !Number.isFinite(determinant)) {
+          throw Error('L-angle principal second moment underflow; increase dimensions.');
+        }
+        minorMoment = determinant/principalMomentMajor;
+      }
+      principalMomentMinor = finite(minorMoment, 'L-angle minor principal moment I2 (mm⁴)');
       if (!(principalMomentMajor > 0) || !(principalMomentMinor > 0)) throw Error('L-angle principal second moment underflow; increase dimensions.');
       principalAxisAngleDegrees = finite(0.5*Math.atan2(-2*scaledIxy,scaledIxx-scaledIyy)*180/Math.PI,
         'L-angle principal-axis angle (degrees)');

@@ -1403,3 +1403,31 @@ test('extreme thin hollow circle remains representable when both fourth powers o
  assert.deepEqual(dimensions,original);
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
+
+
+test('L-angle minor principal moment survives normalized determinant underflow',()=>{
+ const dimensions={width:1e100,height:1e-139,thickness:1e-140};
+ const original={...dimensions};
+ const section=fem.sectionProperties('l-angle',dimensions);
+ const momentScale=Math.max(section.secondMoment,section.secondMomentPerpendicular,Math.abs(section.productOfInertia));
+ const scaledIxx=section.secondMoment/momentScale;
+ const scaledIyy=section.secondMomentPerpendicular/momentScale;
+ const scaledIxy=section.productOfInertia/momentScale;
+ const normalizedDeterminant=scaledIxx*scaledIyy-scaledIxy*scaledIxy;
+ assert.equal(normalizedDeterminant,0,
+  'the normalized determinant must underflow for this representable minor-moment case');
+ // 100-digit Decimal determinant/eigenvalue reference from the exact binary64 input dimensions.
+ const expectedMinor=Number('8.333333333333333047120026461242959511255978638690079422571566289435343033091377208870550837651415192e-322');
+ assert.equal(section.principalMomentMinor,expectedMinor,
+  'minor principal moment must retain the representable subnormal reference');
+ assert.equal(section.principalMomentMinor,section.secondMoment);
+ assert.ok(Number.isFinite(section.principalMomentMajor)&&section.principalMomentMajor>0);
+ assert.ok(Number.isFinite(section.sectionModulusX)&&section.sectionModulusX>0);
+ assert.ok(Number.isFinite(section.sectionModulusY)&&section.sectionModulusY>0);
+ assert.ok(Number.isFinite(section.radiusOfGyrationX)&&section.radiusOfGyrationX>0);
+ assert.ok(Number.isFinite(section.radiusOfGyrationY)&&section.radiusOfGyrationY>0);
+ assert.ok(Number.isFinite(section.principalAxisAngleDegrees));
+ assert.notEqual(section.productOfInertia,0);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});

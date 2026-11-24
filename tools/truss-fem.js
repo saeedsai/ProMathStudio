@@ -380,6 +380,14 @@
       // A representable subnormal inertia can be quantized enough to corrupt sqrt(I/A).
       analyticRadiusOfGyrationX = finite(depth*Math.sqrt(ixxFactor/netAreaFactor/12), 'Radius of gyration rx (mm)');
       analyticRadiusOfGyrationY = finite(width*Math.sqrt(iyyFactor/netAreaFactor/12), 'Radius of gyration ry (mm)');
+      // Preserve section-modulus precision only when the corresponding inertia is subnormal.
+      // Sx=b*h²*fx/6 and Sy=h*b²*fy/6 avoid dividing a quantized Ixx/Iyy by c.
+      if (secondMoment < 2.2250738585072014e-308) {
+        analyticSectionModulusX = finite(outerArea * (depth * (ixxFactor / 6)), 'Section modulus Sx (mm³)');
+      }
+      if (secondMomentPerpendicular < 2.2250738585072014e-308) {
+        analyticSectionModulusY = finite(outerArea * (width * (iyyFactor / 6)), 'Section modulus Sy (mm³)');
+      }
       axis = 'centroidal axis parallel to width';
       perpendicularAxis = 'centroidal axis parallel to depth';
     } else {

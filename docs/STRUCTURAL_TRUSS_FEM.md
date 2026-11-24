@@ -56,6 +56,16 @@ f_y=g_h+r_h g_b(1+r_b+r_b^2)
 
 This avoids propagating severe relative error from a subnormal inertia. A synthetic binary64 case with \(b=10^{-6}\) mm and \(h=3.5\times10^{-106}\) mm produces a representable \(I_{xx}=5\times10^{-324}\) mm⁴, but the rounded \(\sqrt{I_{xx}/A}\) is about 17.6% above the geometric radius. The hollow-rectangle counterpart has the same issue. The direct geometric radii retain the analytical reference while the reported inertia remains the correctly rounded binary64 value. These dimensions are floating-point stress tests only, not physical design examples.
 
+## Rectangular section-modulus precision
+
+Solid and concentric hollow rectangles evaluate elastic section moduli directly from their dimensionless geometry factors when the corresponding dimensional inertia is subnormal:
+
+\[
+S_x=\frac{b h^2 f_x}{6},\qquad S_y=\frac{h b^2 f_y}{6}.
+\]
+
+This avoids dividing a coarsely quantized binary64 inertia by an extreme-fibre distance when the resulting section modulus is still normally representable. The reported Ixx/Iyy remain the correctly rounded binary64 values; Sx/Sy retain the precision of the original rectangle geometry. Ordinary, normal-inertia sections keep the existing I/c path. A synthetic exact-binary64 case with B=4.5e-81 mm and H=6e-81 mm, plus its concentric half-width/half-height hollow counterpart, previously produced 2–4% section-modulus errors from I/c. The direct formulas agree with 120-digit Decimal references within 5e-13 relative error. These dimensions are floating-point stress tests only, not physical design examples.
+
 ## Circular radius-of-gyration precision
 
 For a solid circle, both centroidal radii are analytically (r_x=r_y=D_o/4). For a concentric hollow circle, with (q=D_i/D_o), cancellation of the common annulus factor gives

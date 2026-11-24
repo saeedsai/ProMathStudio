@@ -1659,3 +1659,30 @@ test('L-angle subnormal inertia tensor is recomputed from normalized geometry',(
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
 
+
+
+test('rectangular section moduli use geometry factors when subnormal inertias lose precision',()=>{
+ const minNormal=2.2250738585072014e-308;
+ const cases=[
+  {shape:'rectangle',dimensions:{width:4.5e-81,height:6e-81},sx:2.7e-242,sy:2.025e-242},
+  {shape:'hollow-rectangle',dimensions:{width:4.5e-81,height:6e-81,innerWidth:2.25e-81,innerHeight:3e-81},
+   sx:2.53125e-242,sy:1.8984375e-242}
+ ];
+ const relative=(actual,want,label)=>assert.ok(Number.isFinite(actual)&&want>0&&
+  Math.abs(actual/want-1)<=5e-13,label+' '+actual+' must match '+want);
+ for(const item of cases){
+  const original={...item.dimensions};
+  const section=fem.sectionProperties(item.shape,item.dimensions);
+  assert.ok(section.secondMoment>0&&section.secondMoment<minNormal,item.shape+' Ixx must remain subnormal');
+  assert.ok(section.secondMomentPerpendicular>0&&section.secondMomentPerpendicular<minNormal,
+   item.shape+' Iyy must remain subnormal');
+  const oldSx=section.secondMoment/section.extremeFiberDistanceAboutX;
+  const oldSy=section.secondMomentPerpendicular/section.extremeFiberDistanceAboutY;
+  assert.ok(Math.abs(oldSx/item.sx-1)>0.02,item.shape+' rounded Ixx/cX must reproduce the previous section-modulus error');
+  assert.ok(Math.abs(oldSy/item.sy-1)>0.02,item.shape+' rounded Iyy/cY must reproduce the previous section-modulus error');
+  relative(section.sectionModulusX,item.sx,item.shape+' Sx');
+  relative(section.sectionModulusY,item.sy,item.shape+' Sy');
+  assert.deepEqual(item.dimensions,original);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+});

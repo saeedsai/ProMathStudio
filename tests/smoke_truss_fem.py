@@ -108,6 +108,41 @@ def main():
             assert abs(math.sqrt(thin['hollow']['ixx'] / thin['hollow']['area']) /
                        (bh * math.sqrt(fx / fa / 12)) - 1) > 0.1
 
+            # Section moduli must use unrounded rectangle geometry when Ixx/Iyy are subnormal.
+            # Dividing the quantized inertia by the extreme-fibre distance previously lost 2–4%.
+            thin_moduli = page.evaluate("""() => {
+                const dimensions = {width: 4.5e-81, height: 6e-81};
+                const solid = ProMathTrussFEM.sectionProperties('rectangle', dimensions);
+                const hollowDimensions = {...dimensions, innerWidth: 2.25e-81, innerHeight: 3e-81};
+                const hollow = ProMathTrussFEM.sectionProperties('hollow-rectangle', hollowDimensions);
+                return {
+                    solid: {
+                        ixx: solid.secondMoment, iyy: solid.secondMomentPerpendicular,
+                        oldSx: solid.secondMoment / solid.extremeFiberDistanceAboutX,
+                        oldSy: solid.secondMomentPerpendicular / solid.extremeFiberDistanceAboutY,
+                        sx: solid.sectionModulusX, sy: solid.sectionModulusY
+                    },
+                    hollow: {
+                        ixx: hollow.secondMoment, iyy: hollow.secondMomentPerpendicular,
+                        oldSx: hollow.secondMoment / hollow.extremeFiberDistanceAboutX,
+                        oldSy: hollow.secondMomentPerpendicular / hollow.extremeFiberDistanceAboutY,
+                        sx: hollow.sectionModulusX, sy: hollow.sectionModulusY
+                    }
+                };
+            }""")
+            expected_moduli = {
+                'solid': {'sx': 2.7e-242, 'sy': 2.025e-242},
+                'hollow': {'sx': 2.53125e-242, 'sy': 1.8984375e-242}
+            }
+            for shape, expected in expected_moduli.items():
+                result = thin_moduli[shape]
+                assert 0 < result['ixx'] < 2.2250738585072014e-308, (shape, result)
+                assert 0 < result['iyy'] < 2.2250738585072014e-308, (shape, result)
+                assert abs(result['oldSx'] / expected['sx'] - 1) > 0.02, (shape, result)
+                assert abs(result['oldSy'] / expected['sy'] - 1) > 0.02, (shape, result)
+                assert abs(result['sx'] / expected['sx'] - 1) <= 5e-13, (shape, result)
+                assert abs(result['sy'] / expected['sy'] - 1) <= 5e-13, (shape, result)
+
             # Circular I values can be subnormal while the exact radii remain representable.
             # Solid and hollow circles must use their analytic geometry rather than rounded I/A.
             thin_circles = page.evaluate("""() => {

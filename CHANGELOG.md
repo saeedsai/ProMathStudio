@@ -1,3 +1,9 @@
+## 2026-11-24 — Truss rectangular section moduli avoid subnormal-inertia precision loss (dev; exact-head QA pending)
+
+- Solid and concentric hollow rectangle Sx/Sy now use dimensionless geometry factors only when the corresponding Ixx/Iyy is subnormal, avoiding 2–4% errors from dividing rounded inertia by extreme-fibre distance while preserving the ordinary I/c path.
+- Added direct Node and 1280px/390px Chromium regressions with independent 120-digit Decimal references; prior I/c errors are reproduced and corrected values match within 5e-13 relative error.
+- Updated the Structural Truss guide, living development plan and execution ledger. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
 ## 2026-11-24 — L-angle subnormal inertia and principal-property precision (dev; exact-head QA pending)
 
 - L-angle sections whose physical inertia tensor is subnormal now recompute the same two rectangles at normalized length scale before restoring Ixx/Iyy/Ixy, principal moments/axis, section moduli and radii. Ordinary and extreme-aspect fallback paths are retained.

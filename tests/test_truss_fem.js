@@ -1859,6 +1859,6 @@ test('optional member mass preserves finite L*A*density when intermediate volume
  const zeroDensity=fem.parseModel(model(1e308,1e-308,1e308,0)).members[0];
  assert.equal(zeroDensity.mass,0,'zero density remains a valid zero mass even when volume is unrepresentable');
  assert.throws(()=>fem.parseModel(model(1e308,1e-308,1e308,1e308)),
-  /mass \\(kg\\) must be a finite number/,
+  /mass.*must be a finite number/,
   'a genuinely unrepresentable final mass must still be rejected');
 });

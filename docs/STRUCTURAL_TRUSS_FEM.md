@@ -345,3 +345,10 @@ The Node and desktop/390px Chromium regressions cover a 2e-12 m member with a mi
 ## Preview and material-export volume range
 
 A positive member can have a representable mass even when its SI geometric volume L·A is smaller than the binary64 range. The FEM parser retains the scale-safe mass calculation, but the pre-solve preview and material-schedule CSV require the volume itself to be representable. They now reject a positive L·A product that rounds to zero with an explicit member-specific underflow diagnostic, rather than displaying or exporting a false zero. Existing overflow rejection is unchanged. This does not alter parseModel, the stiffness calculation or the FEM solve path; it only prevents inspectJSON and exportMaterialCSV from publishing an unrepresentable volume.
+
+
+## Final positive member-mass underflow
+
+A positive density and positive member geometry whose final scale-safe product L·A·ρ rounds to zero is rejected with a member-specific mass-underflow diagnostic rather than being exposed as a valid zero mass. Explicit density zero remains valid and produces zero mass. This is distinct from an intermediate L·A underflow: when a positive final mass remains representable, the exponent-scaled product continues to accept it.
+
+The direct Node and registered Chromium desktop/390px regressions use a 2e-12 m member, E=200 GPa, area=5e-318 mm² (which converts to Number.MIN_VALUE m²), and density=1e-300 kg/m³. Its axial stiffness remains positive (~4.940656458412466e-301 N/m), but its final mass is below binary64 range and must be rejected. The same member with zero density remains valid; with density 1e308 kg/m³ its mass remains 9.88131291682493e-28 kg despite the intermediate volume underflow. These are synthetic floating-point boundary fixtures, not physical design dimensions.

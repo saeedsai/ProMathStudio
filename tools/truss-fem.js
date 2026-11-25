@@ -718,7 +718,14 @@
       // Blank/null means unknown; zero is valid, while negative/non-finite values are not.
       const density = hasOptionalValue(row.density) ? finite(row.density, id + ' density (kg/m³)') : null;
       if (density !== null && density < 0) throw Error('Member ' + id + ': density must be non-negative.');
-      const mass = density === null ? null : finite(positiveProduct(L, A, density), 'Member ' + id + ' mass (kg)');
+      let mass = null;
+      if (density !== null) {
+        const calculatedMass = positiveProduct(L, A, density);
+        if (density > 0 && !(calculatedMass > 0)) {
+          throw Error('Member ' + id + ': mass underflow; increase dimensions or density.');
+        }
+        mass = finite(calculatedMass, 'Member ' + id + ' mass (kg)');
+      }
       // I and K are independent member properties; the Euler estimate is available only when both are supplied.
       const hasI = hasOptionalValue(row.I);
       const hasK = hasOptionalValue(row.K);

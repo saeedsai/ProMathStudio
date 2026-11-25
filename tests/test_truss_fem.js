@@ -1917,3 +1917,27 @@ test('inspectJSON and material CSV reject positive member volume that underflows
   /Total member volume \(m³\) must be a finite number/,
   'the existing material-volume overflow rejection remains intact');
 });
+
+
+test('positive optional member mass rejects final underflow while preserving zero density',()=>{
+ const model=density=>({
+  nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2e-12,y:0,fixY:true}],
+  members:[{id:'AB',a:'A',b:'B',E:200,area:5e-318,density}]
+ });
+ const underflow=model(1e-300);
+ const areaSI=underflow.members[0].area*1e-6;
+ assert.equal(areaSI,Number.MIN_VALUE,'the SI area must remain representable');
+ assert.ok((200*1e9*areaSI)/2e-12>0,'the same member retains positive finite axial stiffness');
+ assert.equal((2e-12*areaSI)*1e-300,0,'the final positive mass is below binary64 range');
+ assert.throws(()=>fem.parseModel(underflow),
+  /Member AB: mass underflow; increase dimensions or density/,
+  'positive density must not silently produce a zero mass');
+ assert.throws(()=>fem.solve(underflow),/Member AB: mass underflow/);
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(underflow)),/Member AB: mass underflow/);
+ assert.throws(()=>fem.exportMaterialCSV(underflow),/Member AB: mass underflow/);
+ const zeroDensity=fem.parseModel(model(0)).members[0];
+ assert.equal(zeroDensity.mass,0,'explicit zero density remains a valid zero mass');
+ const retained=fem.parseModel(model(1e308)).members[0];
+ assert.equal(retained.mass,9.88131291682493e-28,
+  'a positive mass remains accepted when only the intermediate volume underflows');
+});

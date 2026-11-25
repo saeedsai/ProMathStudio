@@ -1,3 +1,10 @@
+## 2026-11-25 — Truss rejects positive final member mass that underflows to zero (dev; exact-head QA pending)
+
+- A positive density/geometry combination can no longer be reported as zero mass when the final L·A·ρ product itself underflows; the diagnostic identifies the member.
+- Explicit zero density remains valid, representable mass after intermediate volume underflow remains supported, and genuine final overflow remains rejected.
+- Added Node and registered 1280px/390px Chromium regressions for final underflow, zero density and retained representable mass. No FEM equations or standalone UI bundle changes.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — Truss preview rejects an unrepresentable positive member volume instead of reporting zero (dev; exact-head QA pending)
 
 - Pre-solve inspection now rejects positive L·A products that underflow to zero, while preserving the independently representable scale-safe mass; existing volume overflow rejection remains.

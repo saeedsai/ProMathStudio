@@ -1893,3 +1893,27 @@ test('optional member mass preserves finite L*A*density when intermediate volume
   /mass.*must be a finite number/,
   'a genuinely unrepresentable final mass must still be rejected');
 });
+
+test('inspectJSON and material CSV reject positive member volume that underflows to zero',()=>{
+ const model={
+  nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2e-12,y:0,fixY:true}],
+  members:[{id:'AB',a:'A',b:'B',E:1e299,area:4.940656458412465e-318,density:1e308}]
+ };
+ const member=fem.parseModel(model).members[0];
+ assert.equal(member.L*member.A,0,'the positive physical member volume must underflow in binary64');
+ assert.ok(Number.isFinite(member.mass)&&member.mass>0,
+  'the independently scale-safe member mass remains representable');
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(model)),
+  /Member AB material volume underflow; increase dimensions/,
+  'the preview must not publish a false zero material volume');
+ assert.throws(()=>fem.exportMaterialCSV(model),
+  /Member AB material volume underflow; increase dimensions/,
+  'the material schedule must not export a false zero material volume');
+ const huge={
+  nodes:[{id:'A',x:0,y:0},{id:'B',x:1e308,y:0}],
+  members:[{id:'AB',a:'A',b:'B',E:1e-308,area:1e308,density:1e-310}]
+ };
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(huge)),
+  /Total member volume \(m³\) must be a finite number/,
+  'the existing material-volume overflow rejection remains intact');
+});

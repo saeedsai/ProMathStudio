@@ -65,7 +65,16 @@ def main():
                     volumeUnderflowIntermediate: volumeUnderflow.L * volumeUnderflow.A === 0,
                     massAfterVolumeUnderflow: volumeUnderflow.mass,
                     volumeOverflowIntermediate: !Number.isFinite(volumeOverflow.L * volumeOverflow.A),
-                    massAfterVolumeOverflow: volumeOverflow.mass
+                    massAfterVolumeOverflow: volumeOverflow.mass,
+                    previewVolumeUnderflow: (() => {
+                        try {
+                            ProMathTrussFEM.inspectJSON(JSON.stringify({
+                                nodes: [{id:'A',x:0,y:0},{id:'B',x:2e-12,y:0}],
+                                members: [{id:'AB',a:'A',b:'B',E:1e299,area:4.940656458412465e-318,density:1e308}]
+                            }));
+                            return null;
+                        } catch (error) { return error.message; }
+                    })()
                 };
             }""")
             assert stiffness_range['overflowIntermediate'] is True
@@ -79,6 +88,8 @@ def main():
             assert stiffness_range['volumeOverflowIntermediate'] is True
             assert math.isfinite(stiffness_range['massAfterVolumeOverflow'])
             assert abs(stiffness_range['massAfterVolumeOverflow'] / 9.999999999999968e299 - 1) <= 5e-15
+            assert isinstance(stiffness_range['previewVolumeUnderflow'], str)
+            assert stiffness_range['previewVolumeUnderflow'].startswith('Member AB material volume underflow; increase dimensions.')
             # Optional Euler Pcr must survive numerator/effective-length intermediate range loss.
             euler_range = page.evaluate("""() => {
                 const parse = (length, E, area, I, K) => ProMathTrussFEM.parseModel({

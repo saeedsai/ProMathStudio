@@ -1,3 +1,10 @@
+## 2026-11-25 — Truss preview rejects an unrepresentable positive member volume instead of reporting zero (dev; exact-head QA pending)
+
+- Pre-solve inspection now rejects positive L·A products that underflow to zero, while preserving the independently representable scale-safe mass; existing volume overflow rejection remains.
+- Reuses each validated member volume for total and per-member preview metrics, preventing divergent checks.
+- Added Node and registered 1280px/390px Chromium regressions for preview and material-CSV rejection; FEM parsing, stiffness, mass and solve paths are unchanged.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — Truss Euler critical load preserves representable results across intermediate range limits (dev; exact-head QA pending)
 
 - Optional Pcr now retains the existing direct calculation for ordinary values and falls back to binary-exponent product/quotient evaluation when π²·E·I, K·L or (K·L)² overflows/underflows.

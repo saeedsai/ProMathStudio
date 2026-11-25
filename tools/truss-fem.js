@@ -924,6 +924,14 @@
   function inspectJSON(text) {
     const model = importJSON(text);
     const normalized = parseModel(fromLegacy(model));
+    // Positive member geometry must not silently appear as zero when L*A underflows.
+    const memberVolumes = normalized.members.map(member => {
+      const volume = member.L * member.A;
+      if (!Number.isFinite(volume)) throw Error('Total member volume (m³) must be a finite number.');
+      if (!(volume > 0)) throw Error('Member ' + member.id + ' material volume underflow; increase dimensions.');
+      return volume;
+    });
+    const totalMemberVolume = finite(memberVolumes.reduce((sum, volume) => sum + volume, 0), 'Total member volume (m³)');
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
       // Topological components include isolated nodes; this is not a stability certificate.
@@ -951,9 +959,9 @@
       // Sum member centreline lengths for material estimates; do not silently overflow.
       totalMemberLength: finite(normalized.members.reduce((sum, m) => sum + m.L, 0), 'Total member length (m)'),
       // Sum physical axial-bar volumes in m³; reject overflow before UI/material estimates.
-      totalMemberVolume: finite(normalized.members.reduce((sum, m) => sum + finite(m.L * m.A, 'Total member volume (m³)'), 0), 'Total member volume (m³)'),
+      totalMemberVolume,
       // Per-member quantities stay in SI and are available even when the structure is unstable.
-      memberMetrics: Object.freeze(normalized.members.map(member => Object.freeze({
+      memberMetrics: Object.freeze(normalized.members.map((member, index) => Object.freeze({
         id: member.id,
         startNodeId: normalized.nodes[member.a].id,
         endNodeId: normalized.nodes[member.b].id,
@@ -962,7 +970,7 @@
         elasticModulus: member.E,
         // EA/L is axial stiffness in N/m; the existing validated FEM stiffness is reused.
         axialStiffness: member.stiffness,
-        volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)'),
+        volume: memberVolumes[index],
         density: member.density,
         mass: member.mass,
         secondMoment: member.secondMoment,

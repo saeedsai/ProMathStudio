@@ -1,3 +1,9 @@
+## 2026-11-25 — Truss axial stiffness retains representable EA/L across intermediate range limits (dev; exact-head QA pending)
+
+- Preserve the ordinary direct E*A/L path while using binary exponent scaling when the intermediate product overflows/underflows or the quotient is otherwise lost.
+- Added Node Decimal-reference regressions for a finite ~1e302 N/m quotient with an overflowing product and a positive ~2.5e-316 N/m quotient with a zero product; true final overflow/underflow and ordinary bit-level behavior remain guarded.
+- Extended the registered standalone Truss Chromium smoke at 1280px/390px and documented the numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — Hollow section cavity underflow no longer rejects representable net properties (dev; exact-head QA pending)
 
 - Hollow rectangle and hollow circle helpers no longer require the cavity area / inner-diameter square to be representable when the positive contained geometry and all net section properties are representable.

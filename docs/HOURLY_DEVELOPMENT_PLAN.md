@@ -1,3 +1,26 @@
+## 2026-11-25 — TRUSS-AXIAL-STIFFNESS-SCALE-SAFE-EA-OVER-L
+
+**Starting refs:** dev 2d74692089a45150608c9d801953282a2d0e03af, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; only the target branches dev and main exist, although both currently report unprotected. Re-read root AGENTS.md, this living queue, the frozen 2026-10-26 inventory, Engineering Architecture/Toolbox contracts, Truss implementation/tests/guide, PR #191 and current exact-head CI/Pages evidence.
+
+**Existing CI/release state:** dev Push Quality [#45544386574](https://github.com/saeedsai/ProMathStudio/actions/runs/45544386574) and PR Quality [#45544393053](https://github.com/saeedsai/ProMathStudio/actions/runs/45544393053) both completed successfully on exact head 2d74692089a45150608c9d801953282a2d0e03af; each job's 218 steps passed with zero failures/skips. PR #191 remains open, mergeable and has zero submitted reviews. Branch listing reports protected:false for both refs, rulesets are empty, and main protection read returns HTTP 403 to the connected integration. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; no new main deployment is claimed.
+
+**Defect reproduced in the actual production module:** the parser calculated axial member stiffness as E*A/L. For E=1e299 GPa, A=1e308 mm², L=1e308 m, the intermediate E*A overflowed although the quotient is a finite ~1e302 N/m. For E=1e-16 GPa, A=5e-315 mm², L=2e-12 m, the intermediate rounded to zero although the quotient is a positive subnormal ~2.49997217e-316 N/m. Both inputs are synthetic binary64 boundary fixtures, not physical design examples.
+
+**Fix:** retain the direct E*A/L path when E*A is normal and the quotient is finite/positive, preserving ordinary bit-level behavior. Otherwise decompose positive operands into binary mantissas/exponents, combine exponents before restoring the result, and handle subnormal output rounding explicitly. Existing parser checks continue rejecting a genuinely overflowing or underflowing final stiffness.
+
+**Regression:** direct Node tests assert both old intermediate failures, compare final stiffness against 120-digit Decimal references from the exact binary64 E/A/L operands, retain true final-overflow and existing final-underflow rejection, and verify ordinary bar stiffness remains exactly 1e8 N/m. The registered standalone Truss Chromium smoke repeats both representable-range cases at 1280px and 390px. No index.html bundle edit is applicable: the standalone Truss Studio loads its own adjacent tools/truss-fem.js asset.
+
+**Validation:** pre-fix actual module rejected both representable cases with stiffness overflow / stiffness underflow. The updated production module is executed in isolated V8 before commit; full Node and Chromium checks are delegated to fresh exact-head Push/PR Quality because this execution runtime has no local checkout. The candidate remains implemented on dev/in QA until both workflows pass; not released.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main protection requiring exact-head Quality, forbidding direct push/force/deletion, plus eligible independent PR #191 approval; inspect full diff, verify exact PR head/checks, merge only through ordinary PR, then verify new main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Complete Truss numerical boundary audit (in progress):** finish remaining thin-wall/subnormal/high-scale cases for all seven section shapes and member EA/L/material metrics; acceptance: independent exact-binary64 Decimal references, true overflow/underflow rejection, invalid rollback, selected-member isolation, Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed import preserves every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics, stale-export invalidation; acceptance: independent numeric references, failure/recovery tests and desktop/390px browser checks.
+
+Historical MATLAB inventory remains frozen at 166 gaps / 95 partial; no baseline count is changed by this bounded numerical fix.
+
 ## 2026-11-25 — TRUSS-HOLLOW-CAVITY-AREA-UNDERFLOW-RECOVERY
 
 **Starting refs:** dev `530dc4ac299db7b4ea1017cd68e33047db602543`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; dev was 20 commits ahead and 0 behind. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified engineering plans/catalogs, Truss source/tests/guide, current refs, PR #191, exact-head Quality and main Pages evidence.

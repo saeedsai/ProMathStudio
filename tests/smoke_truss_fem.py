@@ -46,6 +46,27 @@ def main():
               return [r.reactions[0].ry,r.reactions[1].ry,r.maxDisplacement.magnitude,r.residual,r.energyError]; }''')
             assert abs(results[0] - 10000) < 1e-6 and abs(results[1] - 10000) < 1e-6
             assert results[2] > 0 and results[3] < 1e-10 and results[4] < 1e-10
+            # EA/L must remain representable when E*A alone overflows or underflows.
+            stiffness_range = page.evaluate("""() => {
+                const parse = (length, E, area) => ProMathTrussFEM.parseModel({
+                    nodes: [{id:'A',x:0,y:0},{id:'B',x:length,y:0}],
+                    members: [{id:'AB',a:'A',b:'B',E,area}]
+                }).members[0].stiffness;
+                const overflowE = 1e299 * 1e9, overflowA = 1e308 * 1e-6;
+                const underflowE = 1e-16 * 1e9, underflowA = 5e-315 * 1e-6;
+                return {
+                    overflowIntermediate: !Number.isFinite(overflowE * overflowA),
+                    overflowStiffness: parse(1e308, 1e299, 1e308),
+                    underflowIntermediate: underflowE * underflowA === 0,
+                    underflowStiffness: parse(2e-12, 1e-16, 5e-315)
+                };
+            }""")
+            assert stiffness_range['overflowIntermediate'] is True
+            assert stiffness_range['underflowIntermediate'] is True
+            assert math.isfinite(stiffness_range['overflowStiffness'])
+            assert abs(stiffness_range['overflowStiffness'] / 9.999999999999999e301 - 1) <= 5e-15
+            assert stiffness_range['underflowStiffness'] > 0 and math.isfinite(stiffness_range['underflowStiffness'])
+            assert abs(stiffness_range['underflowStiffness'] / 2.49997217e-316 - 1) <= 5e-15
             # The section helper is intentionally collapsed with the material breakdown.
             # Exercise the real disclosure before interacting with its controls at both widths.
             details = page.locator('#member-material-details')

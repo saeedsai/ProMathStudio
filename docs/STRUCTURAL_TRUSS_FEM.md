@@ -327,3 +327,10 @@ The regression uses synthetic binary64 boundary inputs only (not engineering des
 - Hollow circle: outer diameter 1e-50 mm, inner diameter 1e-200 mm. The inner-diameter square rounds to zero, while annulus area is approximately 7.853981633974483e-101 mm², inertia is approximately 4.908738521234052e-202 mm⁴, and section modulus/radius remain finite.
 
 For both cases, all returned net properties match the corresponding solid envelope at binary64 precision because the cavity contribution is below the representable resolution. Direct Node and Chromium regressions also verify input immutability, frozen results and desktop/390px execution.
+
+
+## Scale-safe axial member stiffness EA/L
+
+The parser normally evaluates axial stiffness as the direct binary64 expression E*A/L. It keeps that path whenever the intermediate product is normal and the final quotient is finite and positive, preserving established ordinary-scale results. If E*A overflows or underflows (or the final quotient is not representable on that path), a positive-binary exponent decomposition evaluates the same product/quotient without materializing the dangerous intermediate. The final value is still required to be finite and strictly positive: genuinely overflowing or underflowing stiffness is rejected with the existing diagnostic.
+
+Two synthetic exact-binary64 cases exercise both sides of the range. With E=1e299 GPa, A=1e308 mm² and L=1e308 m, the old E*A intermediate overflows although EA/L rounds to 9.999999999999999e301 N/m. With E=1e-16 GPa, A=5e-315 mm² and L=2e-12 m, the old intermediate rounds to zero although EA/L rounds to 2.49997217e-316 N/m. Node references use 120-digit Decimal arithmetic on the exact binary64 inputs; the Chromium smoke repeats both cases at 1280px and 390px. These are numerical-range fixtures, not physical design examples.

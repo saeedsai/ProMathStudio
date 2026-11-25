@@ -46,6 +46,33 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
+  // Preserve a representable EA/L when the intermediate E*A overflows or underflows.
+  // Keep the direct expression for ordinary products so established results stay bit-identical.
+  function positiveProductQuotient(a, b, c) {
+    const product = a * b;
+    const direct = product / c;
+    const minNormal = 2.2250738585072014e-308;
+    if (Number.isFinite(product) && product >= minNormal && Number.isFinite(direct) && direct > 0) {
+      return direct;
+    }
+    const binaryParts = value => {
+      let exponent = Math.floor(Math.log2(value));
+      exponent = Math.max(-1074, Math.min(1023, exponent));
+      let mantissa = value / (2 ** exponent);
+      if (mantissa < 1) { mantissa *= 2; exponent--; }
+      else if (mantissa >= 2) { mantissa /= 2; exponent++; }
+      return {mantissa, exponent};
+    };
+    const left = binaryParts(a), right = binaryParts(b), divisor = binaryParts(c);
+    let mantissa = left.mantissa * right.mantissa / divisor.mantissa;
+    let exponent = left.exponent + right.exponent - divisor.exponent;
+    if (mantissa >= 2) { mantissa /= 2; exponent++; }
+    else if (mantissa < 1) { mantissa *= 2; exponent--; }
+    if (exponent > 1023) return Infinity;
+    if (exponent >= -1022) return mantissa * (2 ** exponent);
+    if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
+    return 0;
+  }
   // Null and whitespace-only optional properties mean "not supplied"; numeric zero remains present.
   const hasOptionalValue = value => value !== undefined && value !== null &&
     !(typeof value === 'string' && !value.trim());
@@ -622,7 +649,7 @@
       const dx = nodes[b].x - nodes[a].x, dy = nodes[b].y - nodes[a].y;
       const L = Math.hypot(dx, dy);
       if (!Number.isFinite(L) || L <= 1e-12) throw Error('Member ' + id + ': zero/invalid length.');
-      const EAbyL = E * A / L;
+      const EAbyL = positiveProductQuotient(E, A, L);
       if (!Number.isFinite(EAbyL)) throw Error('Member ' + id + ': stiffness overflow.');
       if (!(EAbyL > 0)) throw Error('Member ' + id + ': stiffness underflow; increase E or area.');
       // Density is an optional SI quantity shared by Studio and legacy imports.

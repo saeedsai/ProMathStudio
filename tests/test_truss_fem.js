@@ -298,6 +298,30 @@ test('truss parser rejects positive properties whose assembled stiffness underfl
 });
 
 
+test('axial stiffness preserves representable EA/L when the intermediate product overflows or underflows',()=>{
+ // Synthetic binary64 range fixtures, not physical engineering design dimensions.
+ const overflowModel={nodes:[{id:'A',x:0,y:0},{id:'B',x:1e308,y:0}],
+  members:[{id:'AB',a:'A',b:'B',E:1e299,area:1e308}]};
+ const overflowE=1e299*1e9,overflowA=1e308*1e-6;
+ assert.equal(overflowE*overflowA,Infinity,'the former E*A intermediate must overflow');
+ const overflowExpected=Number('9.99999999999999885958866505692717215321468788319296420214711529659623043742459952401017773115158026984853220263372612120e301');
+ const overflowMember=fem.parseModel(overflowModel).members[0];
+ assert.equal(overflowMember.stiffness,overflowExpected,'EA/L must match the exact-binary64 Decimal reference');
+ assert.equal(overflowMember.L,1e308);
+ const underflowModel={nodes:[{id:'A',x:0,y:0},{id:'B',x:2e-12,y:0}],
+  members:[{id:'AB',a:'A',b:'B',E:1e-16,area:5e-315}]};
+ const underflowE=1e-16*1e9,underflowA=5e-315*1e-6;
+ assert.equal(underflowE*underflowA,0,'the former E*A intermediate must underflow to zero');
+ const underflowExpected=Number('2.49997216795670745068779824030659627302515457676733811374660615827877680162392969010589166580326478124861920201213291582e-316');
+ const underflowMember=fem.parseModel(underflowModel).members[0];
+ assert.equal(underflowMember.stiffness,underflowExpected,'EA/L must retain the representable subnormal result');
+ assert.ok(underflowMember.stiffness>0&&Number.isFinite(underflowMember.stiffness));
+ const trulyOverflowing={...overflowModel,nodes:[overflowModel.nodes[0],{...overflowModel.nodes[1],x:2e-12}]};
+ assert.throws(()=>fem.parseModel(trulyOverflowing),/stiffness overflow/);
+ assert.equal(fem.parseModel(fem.examples.bar).members[0].stiffness,1e8,
+  'ordinary member stiffness must retain the existing direct calculation');
+});
+
 test('member endpoints require string IDs; no array or object coercion',()=>{
  const reference=fem.solve(fem.examples.bar);
  close(reference.displacements[1].x,1e-5,1e-13);

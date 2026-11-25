@@ -640,6 +640,48 @@ test('inspectJSON computes immutable applied-force resultant in SI',()=>{
 });
 
 
+test('inspectJSON preserves finite signed resultants after overflowing intermediate sums',()=>{
+ const horizontal=clone(fem.examples.bar);
+ horizontal.nodes.forEach(n=>{n.fx=0;n.fy=0;});
+ horizontal.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true});
+ horizontal.nodes[0].fx=1e305;horizontal.nodes[1].fx=1e305;horizontal.nodes[2].fx=-1e305;
+ assert.equal((1e308+1e308)-1e308,Infinity);
+ const horizontalPreview=fem.inspectJSON(JSON.stringify(horizontal));
+ assert.equal(horizontalPreview.appliedForce.x,1e308);
+ assert.equal(horizontalPreview.appliedForce.y,0);
+
+ const vertical=clone(fem.examples.bar);
+ vertical.nodes.forEach(n=>{n.fx=0;n.fy=0;});
+ vertical.nodes[1].x=0;vertical.nodes[1].y=2;
+ vertical.nodes.push({id:'C',x:0,y:1,fixX:true,fixY:true});
+ vertical.nodes[0].fy=1e305;vertical.nodes[1].fy=1e305;vertical.nodes[2].fy=-1e305;
+ const verticalPreview=fem.inspectJSON(JSON.stringify(vertical));
+ assert.equal(verticalPreview.appliedForce.y,1e308);
+ assert.equal(verticalPreview.appliedMoment,0);
+
+ const residual=clone(fem.examples.bar);
+ residual.nodes.forEach(n=>{n.fx=0;n.fy=0;});
+ residual.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true});
+ residual.nodes[0].fx=1e305;residual.nodes[1].fx=Number.MIN_VALUE;residual.nodes[2].fx=-1e305;
+ assert.equal((1e308+(Number.MIN_VALUE*1000))-1e308,0);
+ assert.equal(fem.inspectJSON(JSON.stringify(residual)).appliedForce.x,Number.MIN_VALUE*1000);
+
+ const moment=clone(fem.examples.bar);
+ moment.nodes.forEach(n=>{n.fx=0;n.fy=0;});
+ moment.nodes[0].y=1;moment.nodes[0].fx=-1e305;moment.nodes[1].fy=5e304;
+ moment.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true,fy:-1e305});
+ const naiveMoment=moment.nodes.reduce((sum,n)=>sum+n.x*(n.fy*1000)-n.y*(n.fx*1000),0);
+ assert.equal(naiveMoment,Infinity);
+ const momentPreview=fem.inspectJSON(JSON.stringify(moment));
+ assert.equal(momentPreview.appliedMoment,1e308);
+ assert.equal(momentPreview.appliedForce.x,-1e308);
+ assert.equal(momentPreview.appliedForce.y,-5e307);
+
+ const overflow=clone(fem.examples.bar);
+ overflow.nodes[0].fx=1e305;overflow.nodes[1].fx=1e305;
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(overflow)),/Applied force x.*finite number/);
+});
+
 test('inspectJSON reports signed applied moment about origin in SI N m',()=>{
  const studio=clone(fem.examples.bar);
  studio.nodes[0].fx=0;studio.nodes[0].fy=0;

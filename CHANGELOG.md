@@ -1,3 +1,10 @@
+## 2026-11-25 — Truss preview preserves finite signed resultants after cancellation
+
+- Replaced naive applied-force and global-origin moment reductions with scale-normalized Neumaier accumulation, retaining terms that underflow only after normalization in a separately compensated residual.
+- Finite x/y force totals and signed moment resultants no longer fail solely because an overflowing intermediate partial sum is later cancelled; individually non-finite moment products and genuinely non-finite final resultants remain rejected.
+- Added Node and registered Chromium regressions for horizontal/vertical cancellation, a minimum-subnormal residual between large cancelling loads, moment cancellation and true final overflow at 1280px/390px.
+- No FEM stiffness/displacement solver or root bundle change; Truss Studio uses adjacent JS assets. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-25 — Data Tables chart regression assertion matches combined declaration
 
 - Repaired a brittle structural assertion that expected `const scale=...` as a standalone declaration even though production correctly declares `const margin=90,scale=...` in one statement.

@@ -46,6 +46,31 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
+  // Sum signed finite terms without overflowing intermediate partial sums.
+  // Normalize by the largest magnitude, compensate rounding, and retain terms
+  // whose normalized quotient underflows in a separately compensated residual.
+  function finiteSignedSum(values, name) {
+    const terms = Array.from(values, value => finite(value, name));
+    const scale = Math.max(0, ...terms.map(value => Math.abs(value)));
+    if (scale === 0) return 0;
+    const normalized = {sum:0, correction:0};
+    const residual = {sum:0, correction:0};
+    const add = (state, value) => {
+      const next = state.sum + value;
+      state.correction += Math.abs(state.sum) >= Math.abs(value)
+        ? (state.sum - next) + value
+        : (value - next) + state.sum;
+      state.sum = next;
+    };
+    for (const term of terms) {
+      const scaled = term / scale;
+      if (scaled === 0 && term !== 0) add(residual, term);
+      else add(normalized, scaled);
+    }
+    const restored = (normalized.sum + normalized.correction) * scale;
+    const smallResidual = residual.sum + residual.correction;
+    return finite(restored + smallResidual, name);
+  }
   // Preserve a representable EA/L when the intermediate E*A overflows or underflows.
   // Keep the direct expression for ordinary products so established results stay bit-identical.
   function positiveProductQuotient(a, b, c) {
@@ -1000,6 +1025,18 @@
       return volume;
     });
     const totalMemberVolume = finite(memberVolumes.reduce((sum, volume) => sum + volume, 0), 'Total member volume (m³)');
+    const appliedForce = Object.freeze({
+      x: finiteSignedSum(normalized.nodes.map(node => node.fx), 'Applied force x (N)'),
+      y: finiteSignedSum(normalized.nodes.map(node => node.fy), 'Applied force y (N)')
+    });
+    // Keep each moment product finite-checked, then sum signed terms without
+    // overflowing a partial resultant when later nodes cancel it.
+    const appliedMomentTerms = [];
+    for (const node of normalized.nodes) {
+      appliedMomentTerms.push(finite(node.x * node.fy, 'Applied moment term (N·m)'));
+      appliedMomentTerms.push(finite(-node.y * node.fx, 'Applied moment term (N·m)'));
+    }
+    const appliedMoment = finiteSignedSum(appliedMomentTerms, 'Applied moment (N·m)');
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
       // Topological components include isolated nodes; this is not a stability certificate.
@@ -1067,14 +1104,8 @@
       restrainedLoadedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX && n.fx !== 0) + Number(n.fixY && n.fy !== 0), 0),
       // Nonzero applied loads on unconstrained translations, excluding support reactions.
       freeLoadedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(!n.fixX && n.fx !== 0) + Number(!n.fixY && n.fy !== 0), 0),
-      appliedForce: Object.freeze((() => {
-        const total = normalized.nodes.reduce((sum, n) => ({
-          x: sum.x + n.fx, y: sum.y + n.fy
-        }), {x: 0, y: 0});
-        return {x: finite(total.x, 'Applied force x (N)'), y: finite(total.y, 'Applied force y (N)')};
-      })()),
-      // Signed z-axis moment about the global origin, in SI N·m.
-      appliedMoment: finite(normalized.nodes.reduce((sum, n) => sum + n.x*n.fy - n.y*n.fx, 0), 'Applied moment (N·m)')};
+      appliedForce,
+      appliedMoment};
   }
   // Export a validated per-member material schedule in explicit SI units without solving.
   function exportMaterialCSV(model) {

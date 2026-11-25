@@ -378,3 +378,12 @@ The synthetic exact-binary64 fixture uses B=H=1e-75 mm and t=B·(1−1e-14). Its
 ## L-angle dimensional Ixy signed-zero presentation
 
 When the dimensional product of inertia is smaller than the binary64 range, its returned value is canonicalized to positive zero rather than exposing `-0`. The normalized two-rectangle tensor retains the signed Ixy value and remains authoritative for the principal-axis angle, so this presentation normalization does not discard the orientation information used by the calculation.
+
+
+## Signed force and moment resultant range safety
+
+The Truss JSON preview now evaluates signed applied-force resultants and the signed global-origin moment with scale-normalized Neumaier accumulation. This avoids rejecting a finite physical resultant merely because an early partial sum overflows before later nodal loads cancel it. Terms that underflow only after normalization are accumulated in a separate compensated residual, so a subnormal load is not silently discarded when it lies between two much larger cancelling loads.
+
+For example, the SI sequence (1e308, 1e308, -1e308) has the finite resultant 1e308 even though ordinary left-to-right binary64 addition overflows at the second term. The same rule applies independently to x/y force totals and to the signed moment terms x·Fy and -y·Fx. Each individual moment product must still be representable, and a genuinely non-finite final resultant remains rejected with a finite-number diagnostic. This is compensated binary64 summation, not arbitrary-precision arithmetic.
+
+The Node regression covers horizontal and vertical force cancellation, a minimum-subnormal force between cancelling large loads, moment cancellation, and true final force overflow. The registered Chromium regression repeats these cases at 1280px and 390px. This preview change does not alter the FEM stiffness matrix or displacement solver.

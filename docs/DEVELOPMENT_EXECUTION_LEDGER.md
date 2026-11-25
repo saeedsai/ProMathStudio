@@ -1,3 +1,16 @@
+## 2026-11-25 — TRUSS-SIGNED-RESULTANT-CANCELLATION
+
+Starting dev 243f8801229fe53a87715ce61c0ced521ef0c15a; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Existing exact-head Push Quality #45660525258 and PR Quality #45660549181 both passed 218/218, zero failures/skips. Main Quality #45360386408 passed 218/218; Pages #45360367251 passed build 5/5, status 3/3, deploy 3/3.
+
+Implemented finite signed-resultant accumulation in tools/truss-fem.js: scaled Neumaier summation plus a separately compensated residual for terms that underflow only after normalization. Applied force x/y and global-origin moment now preserve finite results after intermediate overflow/cancellation; individually non-finite moment products and genuinely non-finite final resultants remain rejected.
+
+Regression changes: tests/test_truss_fem.js adds horizontal/vertical force cancellation, a minimum-subnormal force residual, moment cancellation and true overflow. tests/smoke_truss_fem.py repeats the cases in Chromium at 1280px and 390px and checks the old naive reductions would overflow or lose the residual. docs/STRUCTURAL_TRUSS_FEM.md, docs/HOURLY_DEVELOPMENT_PLAN.md and CHANGELOG.md updated. Truss Studio loads adjacent JS assets; root index.html does not embed this module.
+
+Connector V8 executed the actual production module: all finite-resultant fixtures passed; true final overflow was rejected. Node test syntax compiled. No local checkout, so full local Node/Playwright unavailable. New exact-head Push/PR Quality pending; not released. PR #191 has no independent reviews; main protection read returns HTTP 403, rulesets empty. No merge or main update. Historical inventory unchanged at 166 gaps / 95 partial.
+
+Next five: (1) P0 release governance—independent PR #191 approval, verifiable main protection, ordinary PR merge and post-merge Quality/Pages/hosted verification; (2) P0 exact-head signed-resultant Quality—218/218 Push and PR, including 1280px/390px Chromium; (3) P1 seven-shape Truss Decimal audit—area/centroid/inertia/modulus/radius, thin-wall/subnormal/high-scale, rollback and overflow/underflow; (4) P1 Data Tables reference bounds—row 6000/AF, #REF!, mixed anchors, quoted names, atomic rollback; (5) P1 saved-project compatibility—current/legacy Matrix/Graph/Table round-trips and malformed-import rollback. ODE forward/backward IVPs follow.
+
+---
 ## 2026-11-25 — DATA-TABLES-CHART-STRUCTURAL-ASSERTION-REPAIR
 
 Starting dev: `445ca63f47b271919de6be4404a8393bc60af98a`; main: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The categorical-chart source/test feature was committed on dev and PR #191 was advanced. Exact-head Push Quality [#45660047059](https://github.com/saeedsai/ProMathStudio/actions/runs/45660047059) and PR Quality [#45660060834](https://github.com/saeedsai/ProMathStudio/actions/runs/45660060834) both failed at structural step 7, before browser tests ran. The Push job executed 604 tests: 603 passed, one existing skip and one failure. The sole failure was a brittle source-string assertion in `tests/test_sheet_numeric_hardening.py`: it expected a standalone `const scale=...`, while the correct production declaration is `const margin=90,scale=...`. The actual scale normalization is present in `src/data-tables.js`; the assertion was too specific about declaration grouping.

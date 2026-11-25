@@ -1,3 +1,28 @@
+## 2026-11-25 — TRUSS-SIGNED-RESULTANT-CANCELLATION
+
+Starting refs: dev 243f8801229fe53a87715ce61c0ced521ef0c15a, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; branches are dev/main and PR #191 remains the release PR. Before this change, exact-head Push Quality #45660525258 and PR Quality #45660549181 both passed 218/218 with zero failures or skips. Main Quality #45360386408 passed 218/218 on unchanged main; Pages deployment #45360367251 passed build 5/5, status 3/3 and deploy 3/3.
+
+Defect: inspectJSON computed x/y applied-force resultants and the signed global-origin moment with ordinary left-to-right reductions. Finite signed nodal loads could overflow an intermediate partial sum and later cancel to a finite resultant. The same issue affected moment accumulation even when every individual x·Fy and -y·Fx term was finite. Very small loads between large cancelling terms could also be rounded away.
+
+Implementation on dev: added a finite signed-sum helper that scales by the maximum term magnitude, applies Neumaier compensation to normalized terms, and retains terms whose normalized quotient underflows in a separately compensated residual. Applied-force x/y and signed moment products now use it. Each moment product remains individually finite-checked; a genuinely non-finite final resultant is still rejected. No stiffness matrix, FEM displacement or unit-conversion behavior changed.
+
+Regression: Node tests cover (1e308 + 1e308 - 1e308) = 1e308 for horizontal and vertical resultants, a minimum-subnormal input load between cancelling large terms, moment terms +1e308 +1e308 -1e308, and genuine final force overflow. The registered Chromium smoke repeats those scenarios at 1280px and 390px and explicitly proves the old naive reductions overflow/lose the residual. Structural test registration is unchanged.
+
+Validation: the actual production module was loaded in the connector isolated V8 runtime. The new horizontal/vertical force, subnormal-residual and moment cases returned their expected finite values; genuine final overflow remained rejected. The new Node test source compiled. Full local Node/Playwright suites are unavailable because this execution environment has no repository checkout; exact-head GitHub Push and PR Quality are pending for this candidate. Truss Studio HTML loads truss-fem.js and truss-fem-ui.js as adjacent assets, so no root index.html bundle edit is required.
+
+Release: PR #191 remains open with no independent review submissions. Main branch-protection reads return HTTP 403 to the connected integration; repository rulesets are empty. No merge or direct main update. Main and Pages remain unchanged. Frozen historical MATLAB inventory remains 166 gaps / 95 partial.
+
+### Next five features
+
+1. **P0 — Release governance (blocked).** Acceptance: eligible independent PR #191 approval; verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; full diff review; ordinary PR merge; successful main Quality, Pages and hosted critical-path verification.
+2. **P0 — Verify the signed-resultant Truss regression.** Acceptance: exact-head Push and PR Quality pass all 218 required steps with zero failures/skips; Node and Chromium confirm finite x/y force and moment cancellation, minimum-subnormal residual preservation and genuine overflow rejection at 1280px and 390px.
+3. **P1 — Finish the seven-shape Truss numerical audit.** Acceptance: exact-binary64 Decimal references for area, centroid, inertia, modulus and radius across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; thin-wall/subnormal/high-scale cases; true overflow/underflow rejection, invalid rollback and selected-member isolation; Node and 1280px/390px Chromium.
+4. **P1 — Complete Data Tables formula-reference edge coverage.** Acceptance: row 6000/column AF insertion/deletion, scalar/range #REF!, already-invalid references, blank/reversed/mixed-anchor ranges, quoted names and doubled-quote literals; correct recalculation, atomic rollback/recovery and desktop/390px Chromium.
+5. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix, Graph and Table round-trips; malformed import preserves every workspace, focus, selection and prior result; desktop/390px Chromium.
+
+ODE forward/backward IVP verification remains queued immediately after these five.
+
+---
 ## 2026-11-25 — DATA-TABLES-CHART-STRUCTURAL-ASSERTION-REPAIR
 
 Starting dev: `445ca63f47b271919de6be4404a8393bc60af98a`; main: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The categorical-chart source/test feature was committed on dev and PR #191 was advanced. Exact-head Push Quality [#45660047059](https://github.com/saeedsai/ProMathStudio/actions/runs/45660047059) and PR Quality [#45660060834](https://github.com/saeedsai/ProMathStudio/actions/runs/45660060834) both failed at structural step 7, before browser tests ran. The Push job executed 604 tests: 603 passed, one existing skip and one failure. The sole failure was a brittle source-string assertion in `tests/test_sheet_numeric_hardening.py`: it expected a standalone `const scale=...`, while the correct production declaration is `const margin=90,scale=...`. The actual scale normalization is present in `src/data-tables.js`; the assertion was too specific about declaration grouping.

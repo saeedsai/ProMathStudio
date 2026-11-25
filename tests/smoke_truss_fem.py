@@ -46,6 +46,75 @@ def main():
               return [r.reactions[0].ry,r.reactions[1].ry,r.maxDisplacement.magnitude,r.residual,r.energyError]; }''')
             assert abs(results[0] - 10000) < 1e-6 and abs(results[1] - 10000) < 1e-6
             assert results[2] > 0 and results[3] < 1e-10 and results[4] < 1e-10
+            # Signed resultants must survive overflowing partial sums and retain subnormal residuals.
+            resultant_range = page.evaluate("""() => {
+                const copy = model => JSON.parse(JSON.stringify(model));
+                const horizontal = copy(ProMathTrussFEM.examples.bar);
+                horizontal.nodes.forEach(node => { node.fx = 0; node.fy = 0; });
+                horizontal.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true});
+                horizontal.nodes[0].fx = 1e305;
+                horizontal.nodes[1].fx = 1e305;
+                horizontal.nodes[2].fx = -1e305;
+                const naiveForceOverflow = !Number.isFinite(horizontal.nodes.reduce((sum,node) => sum + node.fx*1000, 0));
+                const horizontalPreview = ProMathTrussFEM.inspectJSON(JSON.stringify(horizontal));
+
+                const residual = copy(ProMathTrussFEM.examples.bar);
+                residual.nodes.forEach(node => { node.fx = 0; node.fy = 0; });
+                residual.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true});
+                residual.nodes[0].fx = 1e305;
+                residual.nodes[1].fx = Number.MIN_VALUE;
+                residual.nodes[2].fx = -1e305;
+                const naiveResidualLost = residual.nodes.reduce((sum,node) => sum + node.fx*1000, 0) === 0;
+                const residualPreview = ProMathTrussFEM.inspectJSON(JSON.stringify(residual));
+
+                const vertical = copy(ProMathTrussFEM.examples.bar);
+                vertical.nodes.forEach(node => { node.fx = 0; node.fy = 0; });
+                vertical.nodes[1].x = 0; vertical.nodes[1].y = 2;
+                vertical.nodes.push({id:'C',x:0,y:1,fixX:true,fixY:true});
+                vertical.nodes[0].fy = 1e305;
+                vertical.nodes[1].fy = 1e305;
+                vertical.nodes[2].fy = -1e305;
+                const verticalPreview = ProMathTrussFEM.inspectJSON(JSON.stringify(vertical));
+
+                const moment = copy(ProMathTrussFEM.examples.bar);
+                moment.nodes.forEach(node => { node.fx = 0; node.fy = 0; });
+                moment.nodes[0].y = 1;
+                moment.nodes[0].fx = -1e305;
+                moment.nodes[1].fy = 5e304;
+                moment.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true,fy:-1e305});
+                const naiveMomentOverflow = !Number.isFinite(moment.nodes.reduce(
+                    (sum,node) => sum + node.x*(node.fy*1000) - node.y*(node.fx*1000), 0));
+                const momentPreview = ProMathTrussFEM.inspectJSON(JSON.stringify(moment));
+
+                const overflow = copy(ProMathTrussFEM.examples.bar);
+                overflow.nodes[0].fx = 1e305;
+                overflow.nodes[1].fx = 1e305;
+                let overflowError = null;
+                try { ProMathTrussFEM.inspectJSON(JSON.stringify(overflow)); }
+                catch (error) { overflowError = error.message; }
+                return {
+                    naiveForceOverflow,
+                    horizontalForce: horizontalPreview.appliedForce.x,
+                    naiveResidualLost,
+                    residualForce: residualPreview.appliedForce.x,
+                    verticalForce: verticalPreview.appliedForce.y,
+                    naiveMomentOverflow,
+                    appliedMoment: momentPreview.appliedMoment,
+                    momentForceX: momentPreview.appliedForce.x,
+                    momentForceY: momentPreview.appliedForce.y,
+                    overflowError
+                };
+            }""")
+            assert resultant_range['naiveForceOverflow'] is True
+            assert resultant_range['horizontalForce'] == 1e308
+            assert resultant_range['naiveResidualLost'] is True
+            assert resultant_range['residualForce'] == math.ulp(0.0) * 1000
+            assert resultant_range['verticalForce'] == 1e308
+            assert resultant_range['naiveMomentOverflow'] is True
+            assert resultant_range['appliedMoment'] == 1e308
+            assert resultant_range['momentForceX'] == -1e308
+            assert resultant_range['momentForceY'] == -5e307
+            assert resultant_range['overflowError'].startswith('Applied force x (N) must be a finite number.')
             # EA/L must remain representable when E*A alone overflows or underflows.
             stiffness_range = page.evaluate("""() => {
                 const parseMember = (length, E, area, density) => ProMathTrussFEM.parseModel({

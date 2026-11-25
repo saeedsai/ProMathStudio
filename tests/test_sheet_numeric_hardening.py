@@ -33,7 +33,7 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
     def test_categorical_charts_use_scaled_totals_and_finite_geometry(self):
         self.assertIn("const total=stableSum(values);", SOURCE)
         self.assertIn("const otherTotal=stableSum(entries.slice(23).map(entry=>entry[1]));", SOURCE)
-        self.assertIn("const scale=Math.max(0,...entries.map(entry=>Math.abs(entry[1])));", SOURCE)
+        self.assertIn("scale=Math.max(0,...entries.map(entry=>Math.abs(entry[1])));", SOURCE)
         self.assertIn("const weights=positive.map(entry=>entry[1]/scale),total=stableSum(weights);", SOURCE)
         self.assertIn("const y=100+(hi-normalizedValue)/span*(h-195);", SOURCE)
         self.assertIn("total exceeds finite numeric range.", SOURCE)

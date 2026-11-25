@@ -1,3 +1,25 @@
+## 2026-11-25 — DATA-TABLES-CHART-STRUCTURAL-ASSERTION-REPAIR
+
+Starting dev: `445ca63f47b271919de6be4404a8393bc60af98a`; main: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The categorical-chart source/test feature was committed on dev and PR #191 was advanced. Exact-head Push Quality [#45660047059](https://github.com/saeedsai/ProMathStudio/actions/runs/45660047059) and PR Quality [#45660060834](https://github.com/saeedsai/ProMathStudio/actions/runs/45660060834) both failed at structural step 7, before browser tests ran. The Push job executed 604 tests: 603 passed, one existing skip and one failure. The sole failure was a brittle source-string assertion in `tests/test_sheet_numeric_hardening.py`: it expected a standalone `const scale=...`, while the correct production declaration is `const margin=90,scale=...`. The actual scale normalization is present in `src/data-tables.js`; the assertion was too specific about declaration grouping.
+
+Correction: change only the structural assertion to match the existing `scale=Math.max(...)` declaration independent of the preceding `margin` declarator. Keep the actual scale-normalized bar-coordinate implementation, all numerical assertions, browser tests and genuine-overflow rejection unchanged. No test was removed or weakened; the corrected assertion still requires the exact scale calculation to exist.
+
+Isolated validation in the connector runtime: fetched the exact dev source and test, confirmed the old assertion fails to match the production declaration and the corrected assertion matches it. The original source/bundle parity was verified in the implementation commit; this repair changes only the structural test and development records. Full local Python/Chromium execution is unavailable because the execution workspace has no checkout. New exact-head Push and PR Quality must run the complete structural suite and registered Chromium chart cases.
+
+Release: PR #191 remains open; no independent review submissions. Branches remain exactly dev and main. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Do not merge until independent approval, verifiable main protection and exact-head green Quality are satisfied. Historical MATLAB inventory remains **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Verify the categorical-chart CI repair.** Acceptance: exact-head Push and PR Quality both pass structural step 7, then run the registered numeric-hardening Chromium smoke; cancellation category totals, equal huge pie slices, mixed-sign bar geometry and genuine overflow all pass without skipped required checks.
+2. **P0 — Release governance.** Acceptance: eligible independent PR #191 approval; verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; full diff review; ordinary PR merge; successful post-merge main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Finish the seven-shape Truss numerical audit.** Acceptance: exact-binary64 Decimal references for area, centroid, inertia, modulus and radius across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; thin-wall/subnormal/high-scale cases; genuine overflow/underflow rejection, invalid rollback and selected-member isolation; Node and 1280px/390px Chromium.
+4. **P1 — Complete Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion, scalar/range `#REF!`, already-invalid references, blank/reversed/mixed-anchor ranges, quoted names and doubled-quote literals; correct recalculation, atomic rollback/recovery and desktop/390px Chromium.
+5. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix, Graph and Table round-trips; malformed import preserves every workspace, focus, selection and prior result; desktop/390px Chromium.
+
+ODE forward/backward verification remains queued after these five.
+
+---
+
 ## 2026-11-25 — DATA-TABLES-CATEGORICAL-CHART-RANGE-SAFETY
 
 Starting refs: dev `dc0e0380eea5ed51506e3270e036251eb7122cb6`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root `AGENTS.md`, the living plan and frozen 2026-10-26 inventory were inspected. The only long-lived branches are dev/main; PR #191 is the only open release PR. Exact-head Push Quality #45643183397 and PR Quality #45643192090 both completed successfully on the starting dev SHA, including the previously failing Data Tables disclosure and range-deletion browser tests. Main Quality #45360386408 and Pages deployment #45360367251 succeeded on unchanged main.

@@ -1,3 +1,9 @@
+## 2026-11-25 — Data Tables chart regression assertion matches combined declaration
+
+- Repaired a brittle structural assertion that expected `const scale=...` as a standalone declaration even though production correctly declares `const margin=90,scale=...` in one statement.
+- The assertion still requires the exact scale-normalization expression; no source behavior or numerical/browser coverage was weakened.
+- Exact-head Push and PR Quality must rerun the structural suite and registered Chromium chart regressions. Not released.
+
 ## 2026-11-25 — Data Tables categorical charts avoid numeric overflow
 
 - Replaced naive repeated-category addition with scale-normalized compensated accumulation, including the grouped Other category; genuinely unrepresentable category totals now produce an explicit error.

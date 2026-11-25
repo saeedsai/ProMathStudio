@@ -1,3 +1,22 @@
+## 2026-11-25 — TRUSS-SIGNED-RESULTANT-SUBNORMAL-QUOTIENT-REPAIR
+
+Follow-up to candidate 30ce57660a82d93c572129ea243ecfe3ded60bdc. An isolated exact-production-module probe found a remaining precision edge: when a finite summand divided by the maximum force scale produces a nonzero subnormal quotient (rather than zero), Neumaier compensation preserves the quotient but the quotient itself is coarsely quantized. Fixture +1e308 N, +1e-10 N, -1e308 N returned 9.999987484955998e-11 N (about 1.25 ppm low).
+
+Correction: route every nonzero term whose normalized quotient is subnormal (absolute value below 2.2250738585072014e-308) into the separately compensated original-unit residual. This preserves the small term without changing the normal normalized path. Added Node and Chromium regressions that reproduce the old 1.25 ppm error, verify the 1e-10 N result, and retain the minimum-subnormal residual, force/moment cancellation and true-overflow rejection cases.
+
+The preceding candidate's exact-head Push/PR workflows were still running when this follow-up was prepared; this new commit requires fresh exact-head Quality. Connector V8 validation is performed against the actual production module before the guarded ref update. Local repository checkout remains unavailable; full Node/Playwright validation must come from GitHub Actions. Main, Pages and the frozen 166-gap/95-partial historical inventory remain unchanged. PR #191 remains open, with no independent review and no verifiable main protection.
+
+### Next five features
+
+1. **P0 — Release governance (blocked).** Acceptance: eligible independent PR #191 approval; verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; full diff review; ordinary PR merge; successful main Quality, Pages and hosted critical-path verification.
+2. **P0 — Verify signed-resultant Quality on the final exact head.** Acceptance: Push and PR Quality both pass all 218 steps with zero failures/skips; Node/Chromium verify overflowing intermediate cancellation, minimum-subnormal residual, nonzero-subnormal normalized residual, moment cancellation and true final overflow at 1280px/390px.
+3. **P1 — Finish the seven-shape Truss numerical audit.** Acceptance: exact-binary64 Decimal references for area, centroid, inertia, modulus and radius across all seven shapes; thin-wall/subnormal/high-scale cases; overflow/underflow rejection, rollback and selected-member isolation; Node and responsive Chromium.
+4. **P1 — Complete Data Tables formula-reference edge coverage.** Acceptance: row 6000/column AF, scalar/range #REF!, invalid-reference preservation, blank/reversed/mixed-anchor ranges, quoted names/literals, atomic rollback/recovery and desktop/390px tests.
+5. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed import preserves every workspace, focus, selection and prior result; desktop/390px Chromium.
+
+ODE forward/backward IVP verification follows these five.
+
+---
 ## 2026-11-25 — TRUSS-SIGNED-RESULTANT-CANCELLATION
 
 Starting refs: dev 243f8801229fe53a87715ce61c0ced521ef0c15a, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; branches are dev/main and PR #191 remains the release PR. Before this change, exact-head Push Quality #45660525258 and PR Quality #45660549181 both passed 218/218 with zero failures or skips. Main Quality #45360386408 passed 218/218 on unchanged main; Pages deployment #45360367251 passed build 5/5, status 3/3 and deploy 3/3.

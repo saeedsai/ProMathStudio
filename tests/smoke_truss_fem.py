@@ -67,6 +67,15 @@ def main():
                 const naiveResidualLost = residual.nodes.reduce((sum,node) => sum + node.fx*1000, 0) === 0;
                 const residualPreview = ProMathTrussFEM.inspectJSON(JSON.stringify(residual));
 
+                const subnormalRatio = copy(ProMathTrussFEM.examples.bar);
+                subnormalRatio.nodes.forEach(node => { node.fx = 0; node.fy = 0; });
+                subnormalRatio.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true});
+                subnormalRatio.nodes[0].fx = 1e305;
+                subnormalRatio.nodes[1].fx = 1e-13;
+                subnormalRatio.nodes[2].fx = -1e305;
+                const naiveSubnormalRatioLost = subnormalRatio.nodes.reduce((sum,node) => sum + node.fx*1000, 0) === 0;
+                const subnormalRatioPreview = ProMathTrussFEM.inspectJSON(JSON.stringify(subnormalRatio));
+
                 const vertical = copy(ProMathTrussFEM.examples.bar);
                 vertical.nodes.forEach(node => { node.fx = 0; node.fy = 0; });
                 vertical.nodes[1].x = 0; vertical.nodes[1].y = 2;
@@ -97,6 +106,8 @@ def main():
                     horizontalForce: horizontalPreview.appliedForce.x,
                     naiveResidualLost,
                     residualForce: residualPreview.appliedForce.x,
+                    naiveSubnormalRatioLost,
+                    subnormalRatioForce: subnormalRatioPreview.appliedForce.x,
                     verticalForce: verticalPreview.appliedForce.y,
                     naiveMomentOverflow,
                     appliedMoment: momentPreview.appliedMoment,
@@ -109,6 +120,8 @@ def main():
             assert resultant_range['horizontalForce'] == 1e308
             assert resultant_range['naiveResidualLost'] is True
             assert resultant_range['residualForce'] == math.ulp(0.0) * 1000
+            assert resultant_range['naiveSubnormalRatioLost'] is True
+            assert resultant_range['subnormalRatioForce'] == 1e-10
             assert resultant_range['verticalForce'] == 1e308
             assert resultant_range['naiveMomentOverflow'] is True
             assert resultant_range['appliedMoment'] == 1e308

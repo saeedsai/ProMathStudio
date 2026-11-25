@@ -64,7 +64,7 @@
     };
     for (const term of terms) {
       const scaled = term / scale;
-      if (scaled === 0 && term !== 0) add(residual, term);
+      if (Math.abs(scaled) < 2.2250738585072014e-308 && term !== 0) add(residual, term);
       else add(normalized, scaled);
     }
     const restored = (normalized.sum + normalized.correction) * scale;

@@ -666,6 +666,15 @@ test('inspectJSON preserves finite signed resultants after overflowing intermedi
  assert.equal((1e308+(Number.MIN_VALUE*1000))-1e308,0);
  assert.equal(fem.inspectJSON(JSON.stringify(residual)).appliedForce.x,Number.MIN_VALUE*1000);
 
+ const subnormalRatio=clone(fem.examples.bar);
+ subnormalRatio.nodes.forEach(n=>{n.fx=0;n.fy=0;});
+ subnormalRatio.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true});
+ subnormalRatio.nodes[0].fx=1e305;
+ subnormalRatio.nodes[1].fx=1e-13;
+ subnormalRatio.nodes[2].fx=-1e305;
+ assert.equal((1e308+1e-10)-1e308,0);
+ assert.equal(fem.inspectJSON(JSON.stringify(subnormalRatio)).appliedForce.x,1e-10);
+
  const moment=clone(fem.examples.bar);
  moment.nodes.forEach(n=>{n.fx=0;n.fy=0;});
  moment.nodes[0].y=1;moment.nodes[0].fx=-1e305;moment.nodes[1].fy=5e304;

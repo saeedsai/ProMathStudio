@@ -387,3 +387,10 @@ The Truss JSON preview now evaluates signed applied-force resultants and the sig
 For example, the SI sequence (1e308, 1e308, -1e308) has the finite resultant 1e308 even though ordinary left-to-right binary64 addition overflows at the second term. The same rule applies independently to x/y force totals and to the signed moment terms x·Fy and -y·Fx. Each individual moment product must still be representable, and a genuinely non-finite final resultant remains rejected with a finite-number diagnostic. This is compensated binary64 summation, not arbitrary-precision arithmetic.
 
 The Node regression covers horizontal and vertical force cancellation, a minimum-subnormal force between cancelling large loads, moment cancellation, and true final force overflow. The registered Chromium regression repeats these cases at 1280px and 390px. This preview change does not alter the FEM stiffness matrix or displacement solver.
+
+
+## Subnormal normalized summands in signed resultants
+
+The compensated resultant helper treats every normalized quotient below the smallest normal binary64 value as a residual term, not only quotients that round all the way to zero. A nonzero subnormal quotient is too coarsely quantized to preserve its relative precision when multiplied back by a very large scale. Retaining the original finite term in the residual avoids that precision loss after large positive/negative cancellation.
+
+The additional regression uses a 1e-10 N term between +1e308 N and -1e308 N. The naive normalized quotient is subnormal and the previous compensated-only path returned about 9.999987484955998e-11 N (approximately 1.25 ppm low); the revised residual path returns the expected binary64 1e-10 N. The existing minimum-subnormal residual, horizontal/vertical force, moment cancellation and genuine-overflow tests remain.

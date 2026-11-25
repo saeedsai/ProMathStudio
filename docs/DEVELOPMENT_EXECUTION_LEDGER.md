@@ -1,3 +1,10 @@
+## 2026-11-25 — TRUSS-SIGNED-RESULTANT-SUBNORMAL-QUOTIENT-REPAIR
+
+Follow-up to 30ce57660a82d93c572129ea243ecfe3ded60bdc. An isolated exact-module fixture exposed a 1.25 ppm error when a nonzero normalized quotient was subnormal: +1e308 N, +1e-10 N, -1e308 N returned 9.999987484955998e-11 N. The helper now routes every normalized quotient below the smallest normal binary64 value into its separately compensated original-unit residual, preserving 1e-10 N. Added Node and Chromium regressions while retaining minimum-subnormal residual, x/y force cancellation, moment cancellation and true-overflow checks. Guide, plan, ledger and changelog updated. New exact-head Push/PR Quality pending; no local checkout for full Node/Playwright. Main/Pages unchanged; PR #191 still lacks independent review and verifiable main protection. Frozen inventory remains 166 gaps / 95 partial.
+
+Next five: (1) P0 release governance—independent PR #191 approval, enforceable main protection, ordinary PR merge and post-merge Quality/Pages/hosted verification; (2) P0 exact-head Quality—218/218 Push and PR with the new subnormal quotient browser test at 1280px/390px; (3) P1 seven-shape Truss Decimal references and boundary rollback; (4) P1 Data Tables row-6000/AF and formula-reference atomicity; (5) P1 saved-project current/legacy Matrix/Graph/Table round-trips and malformed-import rollback. ODE forward/backward IVPs follow.
+
+---
 ## 2026-11-25 — TRUSS-SIGNED-RESULTANT-CANCELLATION
 
 Starting dev 243f8801229fe53a87715ce61c0ced521ef0c15a; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Existing exact-head Push Quality #45660525258 and PR Quality #45660549181 both passed 218/218, zero failures/skips. Main Quality #45360386408 passed 218/218; Pages #45360367251 passed build 5/5, status 3/3, deploy 3/3.

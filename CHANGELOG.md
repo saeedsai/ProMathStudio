@@ -1,3 +1,9 @@
+## 2026-11-25 — Truss signed-resultant summation retains subnormal normalized terms
+
+- Extended the separate residual path to every normalized quotient below the smallest normal binary64 value, not only quotients that underflow to zero.
+- Added a regression for a 1e-10 N term between +1e308 N and -1e308 N; the previous path lost about 1.25 ppm due to subnormal quotient quantization.
+- Preserved minimum-subnormal residual, x/y force and moment cancellation, and genuine final-overflow rejection coverage. Exact-head Quality pending; not released.
+
 ## 2026-11-25 — Truss preview preserves finite signed resultants after cancellation
 
 - Replaced naive applied-force and global-origin moment reductions with scale-normalized Neumaier accumulation, retaining terms that underflow only after normalization in a separately compensated residual.

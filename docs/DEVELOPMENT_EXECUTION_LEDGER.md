@@ -1,3 +1,29 @@
+## 2026-11-25 — TRUSS-FEM-FORCE-BALANCE-CANCELLATION
+
+**Starting refs:** dev `214ada3d75f865223236186357f412cd1480f59f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Branches inspected: exactly `dev` and `main`. PR #191 remains the sole release PR.
+
+**P0 exact-head CI diagnosis:** Push Quality [#45678476170](https://github.com/saeedsai/ProMathStudio/actions/runs/45678476170) and PR Quality [#45678484660](https://github.com/saeedsai/ProMathStudio/actions/runs/45678484660) both failed on the exact starting SHA. Structural tests and all browser steps through 213 passed; Node step 214 failed in `tests/test_truss_fem.js:683`. The fixture appended node C without `fx:0`, so the naive moment expression evaluated `0 * undefined` as NaN rather than demonstrating the intended overflowing intermediate. Corrected the fixture in Node and Chromium to set the explicit zero horizontal load; the assertion still requires a non-finite naive reduction, now for the intended overflow rather than accidental NaN.
+
+**Additional source defect found while diagnosing:** `solve()` reduced applied nodal forces and support reactions separately, then added those totals. For a finite equilibrium case with applied x loads (1e308, 1e308, -1e308) N and corresponding reactions (-1e308, -1e308, 1e308) N, the two intermediate reductions become +Infinity and -Infinity, producing a NaN forceBalance despite exact net balance zero. Changed the diagnostic to use the existing scale-normalized compensated signed-sum helper over the combined applied-load and reaction terms per axis. The stiffness matrix, displacement solve, reactions and energy calculation are unchanged.
+
+**Regression:** Added a direct Node case and extended the registered Chromium smoke to prove the old separate totals are non-finite while the corrected forceBalance is exactly {x:0,y:0}. Fixed the moment fixture's missing `fx:0` in both Node and browser tests. The Chromium test runs at 1280px and 390px. Updated the Truss FEM guide with the force-balance contract.
+
+**Living-plan recovery:** `docs/HOURLY_DEVELOPMENT_PLAN.md` was empty on starting dev (blob `b659f2c1c4ef963b0e5dd67ff0f7a30f444f55e8`). Restored the complete historical plan from main's non-empty copy (blob `a79b3cccb7efc4ed26a43a8265d135f97a1b55bc`) and prepended this dated entry; prior plan history is retained. Updated the execution ledger and changelog. The frozen 26-Oct inventory remains **166 gaps / 95 partial**.
+
+**Validation:** The actual modified production module was executed in isolated V8. It reproduced the old non-finite separate totals and returned exact forceBalance {x:0,y:0}; the corrected moment fixture produced a non-finite naive reduction while inspectJSON returned 1e308 N·m. The full Node test previously ran in GitHub Actions and exposed the fixture failure (91 passed, 1 failed). Full local Node/Playwright execution is unavailable because this environment has no repository checkout. New exact-head Push/PR Quality must rerun the complete suite, including Node step 214 and Chromium step 215; no pass is claimed yet.
+
+**Release:** PR #191 remains open with zero independent reviews. Main protection read returned HTTP 403 and repository rulesets are empty. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest Main Quality #45360386408 and Pages deployment #45360367251 both succeeded on 24-Nov-2026. No merge or main update.
+
+### NEXT FIVE
+
+1. **P0 — Verify exact-head Truss and full Quality.** Acceptance: both Push and PR Quality complete on the new dev SHA; Node step 214 passes the corrected moment fixture and finite force-balance cancellation; Chromium step 215 passes at 1280px/390px; zero failed/skipped required checks.
+2. **P0 — Release governance (blocked).** Acceptance: eligible independent approval on PR #191; enforceable main protection requiring exact-head Quality and forbidding direct push/force/deletion; full diff review; ordinary PR merge; successful main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Finish seven-shape Truss numerical boundaries.** Acceptance: independent exact-binary64 Decimal references for area, centroid, Ixx/Iyy, section moduli and radii for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining thin-wall/low-exponent/near-solid cases, rollback, selected-member isolation, E/density/K preservation and desktop/390px tests.
+4. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion, scalar/range #REF!, already-invalid references, blank/reversed/mixed-anchor ranges, quoted sheet names/doubled-quote literals, correct recalculation, transactional rollback and standalone bundle parity.
+5. **P1 — Saved-project and ODE compatibility.** Acceptance: current/legacy Matrix, Graph and Table round-trips; malformed import preserves all workspaces/focus/selection/results; analytical forward/backward ODE references, bounded failure recovery and stale-export invalidation; desktop/390px browser tests.
+
+---
+
 ## 2026-11-25 — TRUSS-SIGNED-RESULTANT-SUBNORMAL-QUOTIENT-REPAIR
 
 Follow-up to 30ce57660a82d93c572129ea243ecfe3ded60bdc. An isolated exact-module fixture exposed a 1.25 ppm error when a nonzero normalized quotient was subnormal: +1e308 N, +1e-10 N, -1e308 N returned 9.999987484955998e-11 N. The helper now routes every normalized quotient below the smallest normal binary64 value into its separately compensated original-unit residual, preserving 1e-10 N. Added Node and Chromium regressions while retaining minimum-subnormal residual, x/y force cancellation, moment cancellation and true-overflow checks. Guide, plan, ledger and changelog updated. New exact-head Push/PR Quality pending; no local checkout for full Node/Playwright. Main/Pages unchanged; PR #191 still lacks independent review and verifiable main protection. Frozen inventory remains 166 gaps / 95 partial.

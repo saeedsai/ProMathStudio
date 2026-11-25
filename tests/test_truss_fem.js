@@ -678,7 +678,7 @@ test('inspectJSON preserves finite signed resultants after overflowing intermedi
  const moment=clone(fem.examples.bar);
  moment.nodes.forEach(n=>{n.fx=0;n.fy=0;});
  moment.nodes[0].y=1;moment.nodes[0].fx=-1e305;moment.nodes[1].fy=5e304;
- moment.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true,fy:-1e305});
+ moment.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true,fx:0,fy:-1e305});
  const naiveMoment=moment.nodes.reduce((sum,n)=>sum+n.x*(n.fy*1000)-n.y*(n.fx*1000),0);
  assert.equal(naiveMoment,Infinity);
  const momentPreview=fem.inspectJSON(JSON.stringify(moment));
@@ -689,6 +689,22 @@ test('inspectJSON preserves finite signed resultants after overflowing intermedi
  const overflow=clone(fem.examples.bar);
  overflow.nodes[0].fx=1e305;overflow.nodes[1].fx=1e305;
  assert.throws(()=>fem.inspectJSON(JSON.stringify(overflow)),/Applied force x.*finite number/);
+});
+
+test('solve force-balance diagnostic preserves finite equilibrium after overflowing partial sums',()=>{
+ const model=clone(fem.examples.triangle);
+ model.nodes.forEach(n=>{n.fx=0;n.fy=0;n.fixX=true;n.fixY=true;});
+ model.nodes[2].fixY=false;
+ model.nodes[0].fx=1e305;
+ model.nodes[1].fx=1e305;
+ model.nodes[2].fx=-1e305;
+ const result=fem.solve(model);
+ const naiveApplied=model.nodes.reduce((sum,node)=>sum+node.fx*1000,0);
+ const naiveReactions=result.reactions.reduce((sum,reaction)=>sum+reaction.rx,0);
+ assert.equal(Number.isFinite(naiveApplied),false);
+ assert.equal(Number.isFinite(naiveReactions),false);
+ assert.ok(Number.isNaN(naiveApplied+naiveReactions));
+ assert.deepEqual(result.forceBalance,{x:0,y:0});
 });
 
 test('inspectJSON reports signed applied moment about origin in SI N m',()=>{

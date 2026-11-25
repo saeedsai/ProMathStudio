@@ -1,3 +1,11 @@
+## 2026-11-25 — Truss FEM force-balance diagnostics preserve finite cancellation
+
+- Combined applied nodal loads and support reactions before compensated summation, preventing separate overflowing totals from producing a NaN force-balance diagnostic when the true equilibrium residual is finite.
+- Added Node and registered Chromium regressions with +1e308, +1e308, -1e308 N applied loads and corresponding reactions; the previous separate totals were +Infinity/-Infinity while the corrected balance is exactly zero.
+- Corrected the signed-moment test fixture to explicitly initialize the appended node's zero Fx, so its naive overflow assertion proves the intended overflow rather than accidental NaN.
+- Restored the empty dev living plan from the complete main-branch historical plan, preserving the prior history and adding the current dated entry and next five.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-25 — Quality acceptance criteria follow the current workflow
 
 - Removed a fixed 218-step count from the newest living-plan and execution-ledger acceptance criteria; the current exact-head workflow exposes 217 steps.

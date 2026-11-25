@@ -389,6 +389,12 @@ For example, the SI sequence (1e308, 1e308, -1e308) has the finite resultant 1e3
 The Node regression covers horizontal and vertical force cancellation, a minimum-subnormal force between cancelling large loads, moment cancellation, and true final force overflow. The registered Chromium regression repeats these cases at 1280px and 390px. This preview change does not alter the FEM stiffness matrix or displacement solver.
 
 
+## Force-balance diagnostic cancellation safety
+
+The solved-model force-balance diagnostic now combines all applied nodal loads and support reactions in one scale-normalized compensated sum per axis. It no longer reduces external loads and reactions independently before adding the two totals. This matters when both intermediate totals overflow but their combined equilibrium residual is finite.
+
+The regression uses a fully triangulated reference model with one free, unloaded translation and three large restrained horizontal loads. The old separate reductions produce +Infinity and -Infinity, whose sum is NaN; the corrected diagnostic returns exactly zero in both axes. Node and Chromium tests exercise this at desktop and 390px viewports. This changes only the reported force-balance diagnostic; stiffness assembly, displacement solution, reactions and energy verification remain unchanged.
+
 ## Subnormal normalized summands in signed resultants
 
 The compensated resultant helper treats every normalized quotient below the smallest normal binary64 value as a residual term, not only quotients that round all the way to zero. A nonzero subnormal quotient is too coarsely quantized to preserve its relative precision when multiplied back by a very large scale. Retaining the original finite term in the residual avoids that precision loss after large positive/negative cancellation.

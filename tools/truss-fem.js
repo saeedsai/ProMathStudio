@@ -918,8 +918,12 @@
     });
     const reactions = nodes.map((node, i) => ({id: node.id, rx: node.fixX ? r[2*i] : 0, ry: node.fixY ? r[2*i+1] : 0}))
       .filter(q => nodes.find(n => n.id === q.id).fixX || nodes.find(n => n.id === q.id).fixY);
-    const forceSum = nodes.reduce((a, b) => [a[0]+b.fx, a[1]+b.fy], [0, 0]);
-    const reactionSum = reactions.reduce((a, b) => [a[0]+b.rx, a[1]+b.ry], [0, 0]);
+    // Combine external loads and support reactions before summing: separately reducing
+    // either group can overflow even when the final equilibrium residual is finite.
+    const forceBalance = {
+      x: finiteSignedSum([...nodes.map(node => node.fx), ...reactions.map(reaction => reaction.rx)], 'Force balance x (N)'),
+      y: finiteSignedSum([...nodes.map(node => node.fy), ...reactions.map(reaction => reaction.ry)], 'Force balance y (N)')
+    };
     const externalWork = free.reduce((sum, i) => sum + F[i] * u[i], 0);
     const elasticEnergy = results.reduce((sum, m) => sum + m.force*m.extension/2, 0);
     const energyError = Math.abs(2*elasticEnergy-externalWork)/Math.max(1, Math.abs(externalWork));
@@ -927,7 +931,7 @@
     const maxDisplacement = displacements.reduce((a,b)=>b.magnitude>a.magnitude?b:a,displacements[0]);
     const maxStress = results.reduce((a,b)=>Math.abs(b.stress)>Math.abs(a.stress)?b:a,results[0]);
     return {id:'structural-truss-fem-2d',nodes,members:results,displacements,reactions,maxDisplacement,maxStress,
-      residual,energyError,elasticEnergy,forceBalance:{x:forceSum[0]+reactionSum[0],y:forceSum[1]+reactionSum[1]},
+      residual,energyError,elasticEnergy,forceBalance,
       assumptions:'2D pin-connected truss; linear elastic axial bars; small deformation; static loads; supported DOFs fixed at zero. Optional post-solve Euler comparison is an ideal elastic compression-only screen when I/K are supplied; no geometric buckling, imperfections, yielding, code resistance factors or design-code certification.'};
   }
   const examples = {

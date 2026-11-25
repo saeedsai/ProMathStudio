@@ -90,10 +90,23 @@ def main():
                 moment.nodes[0].y = 1;
                 moment.nodes[0].fx = -1e305;
                 moment.nodes[1].fy = 5e304;
-                moment.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true,fy:-1e305});
+                moment.nodes.push({id:'C',x:1,y:0,fixX:true,fixY:true,fx:0,fy:-1e305});
                 const naiveMomentOverflow = !Number.isFinite(moment.nodes.reduce(
                     (sum,node) => sum + node.x*(node.fy*1000) - node.y*(node.fx*1000), 0));
                 const momentPreview = ProMathTrussFEM.inspectJSON(JSON.stringify(moment));
+
+                const balanceModel = copy(ProMathTrussFEM.examples.triangle);
+                balanceModel.nodes.forEach(node => {
+                    node.fx = 0; node.fy = 0; node.fixX = true; node.fixY = true;
+                });
+                balanceModel.nodes[2].fixY = false;
+                balanceModel.nodes[0].fx = 1e305;
+                balanceModel.nodes[1].fx = 1e305;
+                balanceModel.nodes[2].fx = -1e305;
+                const balanceSolution = ProMathTrussFEM.solve(balanceModel);
+                const naiveAppliedForce = balanceModel.nodes.reduce((sum,node) => sum + node.fx*1000, 0);
+                const naiveReactionForce = balanceSolution.reactions.reduce((sum,reaction) => sum + reaction.rx, 0);
+                const naiveForceBalanceNonFinite = !Number.isFinite(naiveAppliedForce + naiveReactionForce);
 
                 const overflow = copy(ProMathTrussFEM.examples.bar);
                 overflow.nodes[0].fx = 1e305;
@@ -113,6 +126,9 @@ def main():
                     appliedMoment: momentPreview.appliedMoment,
                     momentForceX: momentPreview.appliedForce.x,
                     momentForceY: momentPreview.appliedForce.y,
+                    naiveForceBalanceNonFinite,
+                    forceBalanceX: balanceSolution.forceBalance.x,
+                    forceBalanceY: balanceSolution.forceBalance.y,
                     overflowError
                 };
             }""")
@@ -128,6 +144,9 @@ def main():
             assert resultant_range['momentForceX'] == -1e308
             assert resultant_range['momentForceY'] == -5e307
             assert resultant_range['overflowError'].startswith('Applied force x (N) must be a finite number.')
+            assert resultant_range['naiveForceBalanceNonFinite'] is True
+            assert resultant_range['forceBalanceX'] == 0
+            assert resultant_range['forceBalanceY'] == 0
             # EA/L must remain representable when E*A alone overflows or underflows.
             stiffness_range = page.evaluate("""() => {
                 const parseMember = (length, E, area, density) => ProMathTrussFEM.parseModel({

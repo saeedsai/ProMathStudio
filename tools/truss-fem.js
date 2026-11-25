@@ -73,6 +73,36 @@
     if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
     return 0;
   }
+  // Preserve a representable L*A*density result when the intermediate volume overflows or underflows.
+  // Keep the direct left-to-right product when both intermediate and final values are normal.
+  function positiveProduct(a, b, c) {
+    const product = a * b;
+    const direct = product * c;
+    const minNormal = 2.2250738585072014e-308;
+    if (a === 0 || b === 0 || c === 0) return 0;
+    if (Number.isFinite(product) && product >= minNormal &&
+        Number.isFinite(direct) && direct >= minNormal) return direct;
+    const binaryParts = value => {
+      let exponent = Math.floor(Math.log2(value));
+      exponent = Math.max(-1074, Math.min(1023, exponent));
+      let mantissa = value / (2 ** exponent);
+      if (mantissa < 1) { mantissa *= 2; exponent--; }
+      else if (mantissa >= 2) { mantissa /= 2; exponent++; }
+      return {mantissa, exponent};
+    };
+    const factors = [a, b, c].map(binaryParts);
+    let mantissa = 1, exponent = 0;
+    for (const part of factors) {
+      mantissa *= part.mantissa;
+      exponent += part.exponent;
+      if (mantissa >= 2) { mantissa /= 2; exponent++; }
+      else if (mantissa < 1) { mantissa *= 2; exponent--; }
+    }
+    if (exponent > 1023) return Infinity;
+    if (exponent >= -1022) return mantissa * (2 ** exponent);
+    if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
+    return 0;
+  }
   // Null and whitespace-only optional properties mean "not supplied"; numeric zero remains present.
   const hasOptionalValue = value => value !== undefined && value !== null &&
     !(typeof value === 'string' && !value.trim());
@@ -656,7 +686,7 @@
       // Blank/null means unknown; zero is valid, while negative/non-finite values are not.
       const density = hasOptionalValue(row.density) ? finite(row.density, id + ' density (kg/m³)') : null;
       if (density !== null && density < 0) throw Error('Member ' + id + ': density must be non-negative.');
-      const mass = density === null ? null : finite(finite(L * A, 'Member ' + id + ' material volume (m³)') * density, 'Member ' + id + ' mass (kg)');
+      const mass = density === null ? null : finite(positiveProduct(L, A, density), 'Member ' + id + ' mass (kg)');
       // I and K are independent member properties; the Euler estimate is available only when both are supplied.
       const hasI = hasOptionalValue(row.I);
       const hasK = hasOptionalValue(row.K);

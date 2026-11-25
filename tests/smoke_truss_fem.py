@@ -48,17 +48,24 @@ def main():
             assert results[2] > 0 and results[3] < 1e-10 and results[4] < 1e-10
             # EA/L must remain representable when E*A alone overflows or underflows.
             stiffness_range = page.evaluate("""() => {
-                const parse = (length, E, area) => ProMathTrussFEM.parseModel({
+                const parseMember = (length, E, area, density) => ProMathTrussFEM.parseModel({
                     nodes: [{id:'A',x:0,y:0},{id:'B',x:length,y:0}],
-                    members: [{id:'AB',a:'A',b:'B',E,area}]
-                }).members[0].stiffness;
+                    members: [{id:'AB',a:'A',b:'B',E,area,density}]
+                }).members[0];
+                const parse = (length, E, area) => parseMember(length, E, area).stiffness;
                 const overflowE = 1e299 * 1e9, overflowA = 1e308 * 1e-6;
                 const underflowE = 1e-16 * 1e9, underflowA = 5e-315 * 1e-6;
+                const volumeUnderflow = parseMember(2e-12, 1e299, 4.940656458412465e-318, 1e308);
+                const volumeOverflow = parseMember(1e308, 1e-308, 1e308, 1e-310);
                 return {
                     overflowIntermediate: !Number.isFinite(overflowE * overflowA),
                     overflowStiffness: parse(1e308, 1e299, 1e308),
                     underflowIntermediate: underflowE * underflowA === 0,
-                    underflowStiffness: parse(2e-12, 1e-16, 5e-315)
+                    underflowStiffness: parse(2e-12, 1e-16, 5e-315),
+                    volumeUnderflowIntermediate: volumeUnderflow.L * volumeUnderflow.A === 0,
+                    massAfterVolumeUnderflow: volumeUnderflow.mass,
+                    volumeOverflowIntermediate: !Number.isFinite(volumeOverflow.L * volumeOverflow.A),
+                    massAfterVolumeOverflow: volumeOverflow.mass
                 };
             }""")
             assert stiffness_range['overflowIntermediate'] is True
@@ -67,6 +74,11 @@ def main():
             assert abs(stiffness_range['overflowStiffness'] / 9.999999999999999e301 - 1) <= 5e-15
             assert stiffness_range['underflowStiffness'] > 0 and math.isfinite(stiffness_range['underflowStiffness'])
             assert abs(stiffness_range['underflowStiffness'] / 2.49997217e-316 - 1) <= 5e-15
+            assert stiffness_range['volumeUnderflowIntermediate'] is True
+            assert abs(stiffness_range['massAfterVolumeUnderflow'] / 9.88131291682493e-28 - 1) <= 5e-15
+            assert stiffness_range['volumeOverflowIntermediate'] is True
+            assert math.isfinite(stiffness_range['massAfterVolumeOverflow'])
+            assert abs(stiffness_range['massAfterVolumeOverflow'] / 9.999999999999968e299 - 1) <= 5e-15
             # The section helper is intentionally collapsed with the material breakdown.
             # Exercise the real disclosure before interacting with its controls at both widths.
             details = page.locator('#member-material-details')

@@ -1,3 +1,28 @@
+## 2026-11-25 — TRUSS-MEMBER-MASS-SCALE-SAFE-LENGTH-AREA-DENSITY
+
+**Starting refs:** dev `fc93bccac6277d1a086e3ca988e30f7a257f275a`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; the only branches are dev and main. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified implementation/engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, current exact-head CI, branch metadata and Pages evidence.
+
+**Existing exact-head evidence:** Push Quality [#45550682357](https://github.com/saeedsai/ProMathStudio/actions/runs/45550682357) and PR Quality [#45550689187](https://github.com/saeedsai/ProMathStudio/actions/runs/45550689187) both passed all 218 steps on exact head `fc93bccac6277d1a086e3ca988e30f7a257f275a`, with zero failures/skips; Truss FEM analytical/browser steps 214/215 passed. PR #191 is open/mergeable, head `fc93bccac6277d1a086e3ca988e30f7a257f275a`, base `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`, with zero submitted reviews. Both branches report `protected:false`; rulesets are empty and main branch-protection reads return HTTP 403 to the connected integration. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on current main.
+
+**Defect reproduced from the current parser:** optional member mass was evaluated as `(L*A)*density` after first materializing member volume. For L=2e-12 m, SI A=Number.MIN_VALUE (from 4.940656458412465e-318 mm²) and density=1e308 kg/m³, L*A underflows to zero although the exact-binary64 mass is 9.88131291682493e-28 kg; the parser silently reported zero. For L=1e308 m, SI A=9.999999999999999e301 m² (from 1e308 mm²) and density=1e-310 kg/m³, L*A overflows although the exact-binary64 mass is 9.999999999999968e299 kg; the parser rejected the member.
+
+**Fix:** added a positive three-factor product that keeps the direct path when its intermediate and final products are normal/finite, otherwise decomposes each factor into binary mantissa/exponent and restores only the final mass. Density zero remains zero; the existing finite-result validator continues rejecting genuinely overflowing mass. No mass or material-volume field is silently fabricated.
+
+**Regression:** direct Node tests verify both old intermediate failures, positive finite stiffness and mass, exact-binary64 Decimal references, zero-density behavior and genuine final-mass overflow rejection. The already-registered Truss Chromium smoke repeats both cases at 1280px and 390px. Updated the standalone Truss numerical contract; no root `index.html` bundle change applies because Truss Studio loads adjacent JS assets.
+
+**Validation:** Node 22.16 isolated execution of the same exponent-scaled helper reproduced the old volume underflow/overflow and returned both Decimal-rounded mass references exactly; ordinary product behavior and zero density passed. The execution environment has no repository checkout, so the full `node --test tests/test_truss_fem.js` and Chromium smoke are delegated to fresh exact-head Push/PR Quality. Candidate remains implemented on dev/in QA, not released.
+
+**Release state:** PR #191 remains the ordinary dev-to-main promotion path. No independent approval exists; both refs are unprotected, rulesets are empty and the connected integration cannot read/write branch protection. No merge or safeguard bypass was attempted. Main/Pages remain unchanged. Frozen historical baseline remains **166 gaps / 95 partial**.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain verifiable main protection requiring exact-head Quality, prohibiting direct push/force/deletion, and eligible independent PR #191 approval; inspect full diff and exact PR head/checks, merge only through ordinary PR, then verify new main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Complete Truss numerical boundary audit (in progress):** finish thin-wall/subnormal/high-scale cases for all seven section shapes plus EA/L, L·A·density and optional material metrics; acceptance: exact-binary64 Decimal references, true final overflow/underflow rejection, invalid rollback, selected-member isolation, Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed import preserves every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics, stale-export invalidation; acceptance: independent numerical references, failure/recovery tests and desktop/390px browser checks.
+
+Historical MATLAB inventory remains frozen at **166 gaps / 95 partial**; no baseline count is changed by this bounded correctness fix.
+
 ## 2026-11-25 — TRUSS-AXIAL-STIFFNESS-SCALE-SAFE-EA-OVER-L
 
 **Starting refs:** dev 2d74692089a45150608c9d801953282a2d0e03af, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; only the target branches dev and main exist, although both currently report unprotected. Re-read root AGENTS.md, this living queue, the frozen 2026-10-26 inventory, Engineering Architecture/Toolbox contracts, Truss implementation/tests/guide, PR #191 and current exact-head CI/Pages evidence.

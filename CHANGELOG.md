@@ -1,3 +1,9 @@
+## 2026-11-25 — Truss member mass preserves representable L·A·density across volume range limits (dev; exact-head QA pending)
+
+- Optional mass calculation now uses a scale-safe three-factor product when intermediate member volume L·A overflows or underflows, while retaining ordinary left-to-right arithmetic for normal finite values.
+- Added Node and registered 1280px/390px Chromium regressions for a zero-underflow volume with finite 9.88131291682493e-28 kg mass and an overflowing volume with finite 9.999999999999968e299 kg mass; zero density and genuinely overflowing final mass remain covered.
+- Updated the Truss numerical contract. Implemented on dev only; not released pending fresh exact-head Push/PR Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — Truss axial stiffness retains representable EA/L across intermediate range limits (dev; exact-head QA pending)
 
 - Preserve the ordinary direct E*A/L path while using binary exponent scaling when the intermediate product overflows/underflows or the quotient is otherwise lost.

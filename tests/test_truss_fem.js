@@ -1837,3 +1837,28 @@ test('circular section moduli avoid subnormal inertia quantization',()=>{
  assert.equal(ordinary.sectionModulusX,ordinary.secondMoment/ordinary.extremeFiberDistanceAboutX,
   'ordinary solid circles retain the existing I/c path');
 });
+
+ 
+test('optional member mass preserves finite L*A*density when intermediate volume overflows or underflows',()=>{
+ const model=(length,E,area,density)=>({
+  nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:length,y:0,fixY:true}],
+  members:[{id:'AB',a:'A',b:'B',E,area,density}]
+ });
+ const thin=fem.parseModel(model(2e-12,1e299,4.940656458412465e-318,1e308)).members[0];
+ assert.equal(thin.A,Number.MIN_VALUE);
+ assert.equal(thin.L*thin.A,0,'the old intermediate member volume must underflow to zero');
+ assert.ok(Number.isFinite(thin.stiffness)&&thin.stiffness>0);
+ assert.ok(Math.abs(thin.mass/9.88131291682493e-28-1)<=5e-15,
+  'mass must match the exact-binary64 Decimal reference after volume underflow');
+ const huge=fem.parseModel(model(1e308,1e-308,1e308,1e-310)).members[0];
+ assert.equal(huge.L*huge.A,Infinity,'the old intermediate member volume must overflow');
+ assert.ok(Number.isFinite(huge.stiffness)&&huge.stiffness>0);
+ assert.ok(Number.isFinite(huge.mass));
+ assert.ok(Math.abs(huge.mass/9.999999999999968e299-1)<=5e-15,
+  'mass must match the exact-binary64 Decimal reference after volume overflow');
+ const zeroDensity=fem.parseModel(model(1e308,1e-308,1e308,0)).members[0];
+ assert.equal(zeroDensity.mass,0,'zero density remains a valid zero mass even when volume is unrepresentable');
+ assert.throws(()=>fem.parseModel(model(1e308,1e-308,1e308,1e308)),
+  /mass \\(kg\\) must be a finite number/,
+  'a genuinely unrepresentable final mass must still be rejected');
+});

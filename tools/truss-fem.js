@@ -103,6 +103,38 @@
     if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
     return 0;
   }
+  // Preserve a representable product of positive factors divided by positive factors.
+  // The caller supplies the old direct intermediates so ordinary calculations retain their exact order.
+  function positiveProductQuotientFactors(numerators, denominators, directNumerator, directDenominator) {
+    const minNormal = 2.2250738585072014e-308;
+    const direct = directNumerator / directDenominator;
+    if (Number.isFinite(directNumerator) && directNumerator >= minNormal &&
+        Number.isFinite(directDenominator) && directDenominator >= minNormal &&
+        Number.isFinite(direct) && direct > 0) return direct;
+    const binaryParts = value => {
+      let exponent = Math.floor(Math.log2(value));
+      exponent = Math.max(-1074, Math.min(1023, exponent));
+      let mantissa = value / (2 ** exponent);
+      if (mantissa < 1) { mantissa *= 2; exponent--; }
+      else if (mantissa >= 2) { mantissa /= 2; exponent++; }
+      return {mantissa, exponent};
+    };
+    let mantissa = 1, exponent = 0;
+    const accumulate = (value, direction) => {
+      const part = binaryParts(value);
+      mantissa = direction > 0 ? mantissa * part.mantissa : mantissa / part.mantissa;
+      exponent += direction * part.exponent;
+      const adjustment = Math.floor(Math.log2(mantissa));
+      mantissa /= 2 ** adjustment;
+      exponent += adjustment;
+    };
+    for (const value of numerators) accumulate(value, 1);
+    for (const value of denominators) accumulate(value, -1);
+    if (exponent > 1023) return Infinity;
+    if (exponent >= -1022) return mantissa * (2 ** exponent);
+    if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
+    return 0;
+  }
   // Null and whitespace-only optional properties mean "not supplied"; numeric zero remains present.
   const hasOptionalValue = value => value !== undefined && value !== null &&
     !(typeof value === 'string' && !value.trim());
@@ -700,12 +732,15 @@
         if (!(effectiveLengthFactor > 0)) throw Error('Member ' + id + ': K must be positive.');
       }
       if (hasI && hasK) {
-        const effectiveLength = finite(effectiveLengthFactor * L, id + ' effective buckling length (m)');
-        if (!(effectiveLength > 0)) throw Error('Member ' + id + ': effective buckling length underflow.');
-        const numerator = finite(Math.PI * Math.PI * E * secondMoment, id + ' Euler buckling numerator');
-        const denominator = finite(effectiveLength * effectiveLength, id + ' effective buckling length squared');
-        if (!(denominator > 0)) throw Error('Member ' + id + ': effective buckling length squared underflow.');
-        eulerCriticalLoad = finite(numerator / denominator, id + ' Euler critical load (N)');
+        // Keep the established direct numerator / (K·L)² operation order for ordinary inputs.
+        // If any intermediate loses range, evaluate π²·E·I / (K·L·K·L) by binary exponents.
+        const numerator = Math.PI * Math.PI * E * secondMoment;
+        const effectiveLength = effectiveLengthFactor * L;
+        const denominator = effectiveLength * effectiveLength;
+        eulerCriticalLoad = finite(positiveProductQuotientFactors(
+          [Math.PI,Math.PI,E,secondMoment],
+          [effectiveLengthFactor,L,effectiveLengthFactor,L],
+          numerator,denominator), id + ' Euler critical load (N)');
         if (!(eulerCriticalLoad > 0)) throw Error('Member ' + id + ': Euler critical load underflow; increase I or E, or reduce K·L.');
       }
       return {id, a, b, E, A, L, c: dx / L, s: dy / L, stiffness: EAbyL,

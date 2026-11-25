@@ -79,6 +79,31 @@ def main():
             assert stiffness_range['volumeOverflowIntermediate'] is True
             assert math.isfinite(stiffness_range['massAfterVolumeOverflow'])
             assert abs(stiffness_range['massAfterVolumeOverflow'] / 9.999999999999968e299 - 1) <= 5e-15
+            # Optional Euler Pcr must survive numerator/effective-length intermediate range loss.
+            euler_range = page.evaluate("""() => {
+                const parse = (length, E, area, I, K) => ProMathTrussFEM.parseModel({
+                    nodes: [{id:'A',x:0,y:0},{id:'B',x:length,y:0}],
+                    members: [{id:'AB',a:'A',b:'B',E,area,I,K}]
+                }).members[0];
+                const large = parse(1e200, 1e291, 1e-100, 1e308, 1e200);
+                const small = parse(2e-12, 1e-318, 1e300, 1e-310, 5e-151);
+                return {
+                    largeNumerator: Math.PI*Math.PI*large.E*large.secondMoment,
+                    largeEffectiveLength: large.effectiveLengthFactor*large.L,
+                    largeDenominator: (large.effectiveLengthFactor*large.L)**2,
+                    largePcr: large.eulerCriticalLoad,
+                    smallNumerator: Math.PI*Math.PI*small.E*small.secondMoment,
+                    smallDenominator: (small.effectiveLengthFactor*small.L)**2,
+                    smallPcr: small.eulerCriticalLoad
+                };
+            }""")
+            assert math.isinf(euler_range['largeNumerator'])
+            assert math.isinf(euler_range['largeEffectiveLength'])
+            assert math.isinf(euler_range['largeDenominator'])
+            assert abs(euler_range['largePcr'] / 9.869604401089358e-204 - 1) <= 5e-15
+            assert euler_range['smallNumerator'] == 0
+            assert euler_range['smallDenominator'] == 0
+            assert abs(euler_range['smallPcr'] / 9.752452739990855e-307 - 1) <= 5e-15
             # The section helper is intentionally collapsed with the material breakdown.
             # Exercise the real disclosure before interacting with its controls at both widths.
             details = page.locator('#member-material-details')

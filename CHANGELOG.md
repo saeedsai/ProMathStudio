@@ -1,3 +1,9 @@
+## 2026-11-25 — Truss Euler critical load preserves representable results across intermediate range limits (dev; exact-head QA pending)
+
+- Optional Pcr now retains the existing direct calculation for ordinary values and falls back to binary-exponent product/quotient evaluation when π²·E·I, K·L or (K·L)² overflows/underflows.
+- Added Node Decimal-reference cases for simultaneous overflow and underflow, a finite result with Number.MAX_VALUE I, and genuine final overflow/underflow rejection; the registered 1280px/390px Chromium smoke exercises both representable extremes.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending fresh exact-head Push/PR Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — Truss member mass preserves representable L·A·density across volume range limits (dev; exact-head QA pending)
 
 - Optional mass calculation now uses a scale-safe three-factor product when intermediate member volume L·A overflows or underflows, while retaining ordinary left-to-right arithmetic for normal finite values.

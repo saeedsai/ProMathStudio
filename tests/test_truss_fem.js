@@ -978,9 +978,40 @@ test('optional Euler buckling estimate uses SI units, validates I/K and remains 
  const onlyKMetric=fem.inspectJSON(JSON.stringify(onlyK)).memberMetrics[0];
  assert.equal(onlyKMetric.secondMoment,null);assert.equal(onlyKMetric.effectiveLengthFactor,1);assert.equal(onlyKMetric.eulerCriticalLoad,null);
  const overflow=clone(pinned);overflow.members[0].I=Number.MAX_VALUE;
- assert.throws(()=>fem.parseModel(overflow),/Euler buckling numerator.*finite number/);
+ const overflowMember=fem.parseModel(overflow).members[0];
+ assert.equal(Math.PI*Math.PI*overflowMember.E*overflowMember.secondMoment,Infinity,
+  'the direct Euler numerator must overflow while the final load remains representable');
+ assert.ok(Math.abs(overflowMember.eulerCriticalLoad/8.871260037822617e307-1)<=5e-15,
+  'scale-safe Euler load must match the exact-binary64 Decimal reference');
+ const hugeEuler=fem.parseModel({
+  nodes:[{id:'A',x:0,y:0},{id:'B',x:1e200,y:0}],
+  members:[{id:'AB',a:'A',b:'B',E:1e291,area:1e-100,I:1e308,K:1e200}]
+ }).members[0];
+ assert.equal(Math.PI*Math.PI*hugeEuler.E*hugeEuler.secondMoment,Infinity);
+ assert.equal(hugeEuler.effectiveLengthFactor*hugeEuler.L,Infinity);
+ assert.equal((hugeEuler.effectiveLengthFactor*hugeEuler.L)**2,Infinity);
+ assert.ok(Math.abs(hugeEuler.eulerCriticalLoad/9.869604401089358e-204-1)<=5e-15,
+  'Euler load must survive overflowing numerator, effective length and denominator');
+ const tinyEuler=fem.parseModel({
+  nodes:[{id:'A',x:0,y:0},{id:'B',x:2e-12,y:0}],
+  members:[{id:'AB',a:'A',b:'B',E:1e-318,area:1e300,I:1e-310,K:5e-151}]
+ }).members[0];
+ assert.equal(Math.PI*Math.PI*tinyEuler.E*tinyEuler.secondMoment,0,
+  'the direct Euler numerator must underflow');
+ assert.equal((tinyEuler.effectiveLengthFactor*tinyEuler.L)**2,0,
+  'the direct effective-length square must underflow');
+ assert.ok(tinyEuler.eulerCriticalLoad>0&&Number.isFinite(tinyEuler.eulerCriticalLoad));
+ assert.ok(Math.abs(tinyEuler.eulerCriticalLoad/9.752452739990855e-307-1)<=5e-15,
+  'Euler load must survive simultaneous numerator and denominator underflow');
  const shortK=clone(pinned);shortK.members[0].K=Number.MIN_VALUE;
- assert.throws(()=>fem.parseModel(shortK),/effective buckling length squared underflow/);
+ assert.throws(()=>fem.parseModel(shortK),/Euler critical load.*finite number/,
+  'a genuinely overflowing final Euler load must still be rejected');
+ const finalUnderflow={
+  nodes:[{id:'A',x:0,y:0},{id:'B',x:1e308,y:0}],
+  members:[{id:'AB',a:'A',b:'B',E:1e-318,area:1e300,I:1e-310,K:1}]
+ };
+ assert.throws(()=>fem.parseModel(finalUnderflow),/Euler critical load underflow/,
+  'a genuinely underflowing final Euler load must still be rejected');
  close(fem.solve(bar).displacements[1].x,1e-5,1e-13);
 });
 

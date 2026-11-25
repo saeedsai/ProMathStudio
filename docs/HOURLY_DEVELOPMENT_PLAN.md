@@ -1,3 +1,29 @@
+## 2026-11-25 — TRUSS-EULER-CRITICAL-LOAD-SCALE-SAFE-QUOTIENT
+
+**Starting refs:** dev `d7341c7c1867f1ef046872d16d6477624d8f3a07`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exactly the `dev` and `main` branches exist. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, the unified implementation and engineering architecture/toolbox contracts, Structural Truss source/tests/guide, PR #191, exact-head Actions, branch protection and Pages evidence.
+
+**Starting exact-head QA:** Push Quality [#45559832473](https://github.com/saeedsai/ProMathStudio/actions/runs/45559832473) and PR Quality [#45559840058](https://github.com/saeedsai/ProMathStudio/actions/runs/45559840058) both passed **218/218 steps**, zero failures/skips, on exact SHA `d7341c7c1867f1ef046872d16d6477624d8f3a07`. Spreadsheet structural/sort/delete and Truss Studio/FEM analytical/browser checks all passed. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5` on 2026-11-24.
+
+**Defect reproduced:** Optional Euler load used direct `π²·E·I` and `(K·L)²` intermediates. With E=1e291 GPa, I=1e308 mm⁴, K=1e200 and L=1e200 m, the numerator, effective length and denominator overflow although exact-binary64 Pcr is finite at 9.869604401089358e-204 N. With E=1e-318 GPa, I=1e-310 mm⁴, K=5e-151 and L=2e-12 m, both numerator and denominator underflow to zero although Pcr is representable at 9.752452739990855e-307 N. A separate existing case with I=Number.MAX_VALUE mm⁴ also had a finite final Pcr despite numerator overflow.
+
+**Fix:** Preserve the old direct numerator/denominator operation order and exact result for ordinary normal inputs. When either direct intermediate loses range, evaluate the same positive quotient from factors [π, π, E, I] / [K, L, K, L] using binary mantissas and combined exponents. Do not materialize K·L or its square in the fallback. The parser still rejects a genuinely non-finite or zero final Euler load. Axial FEM stiffness, solver equations, units and post-solve compression-only assessment are unchanged.
+
+**Regression:** Updated the direct Node Euler test with the finite Number.MAX_VALUE-I reference, simultaneous overflow and underflow cases, and genuine final overflow/underflow rejection. Extended the registered Chromium Truss smoke to exercise both representable extremes at 1280px and 390px. Updated the Structural Truss numerical contract. The standalone Truss Studio loads adjacent JS assets; root `index.html` synchronization is not applicable.
+
+**Validation:** An isolated JavaScript V8 harness reproduced both old intermediate failures, returned the Decimal-rounded references within 2.3e-16 relative error, preserved the ordinary 493480.22005446785 N result exactly, and returned Infinity/zero only for the true final overflow/underflow cases. The execution environment has no repository checkout, so full `node --test tests/test_truss_fem.js` and Playwright smoke execution are delegated to fresh exact-head Push/PR Quality. Candidate remains Implemented on dev / In QA, not released.
+
+**Release blocker:** PR #191 remains open/mergeable, head was `d7341c7` before this commit, base is main `0d8ac89`, and there are zero submitted independent reviews. Main reports `protected:false`, rulesets are empty, and branch-protection reads return HTTP 403 to the connected integration. No merge, direct main update, force push or safeguard bypass. Main and Pages remain unchanged.
+
+**NEXT FIVE (priority, status and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain verifiable main protection requiring exact-head Quality, prohibiting direct push/force/deletion, and eligible independent PR #191 approval; inspect full diff and exact head/checks, merge only through ordinary PR, then verify new main Quality, Pages and hosted critical paths.
+2. **P1 — Complete Truss numerical boundary audit (in progress):** finish thin-wall/subnormal/high-scale property and member-metric cases for all seven shapes, including EA/L, L·A·density and Euler Pcr; acceptance: exact-binary64 Decimal references, true final overflow/underflow rejection, invalid rollback, selected-member isolation, Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed import preserves every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics, stale-export invalidation; acceptance: independent numerical references, failure/recovery tests and desktop/390px browser checks.
+
+Historical MATLAB inventory remains frozen at **166 gaps / 95 partial**; this bounded fix does not change baseline counts.
+
+
 ## 2026-11-25 — TRUSS-MEMBER-MASS-SCALE-SAFE-LENGTH-AREA-DENSITY
 
 **Starting refs:** dev `fc93bccac6277d1a086e3ca988e30f7a257f275a`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; the only branches are dev and main. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified implementation/engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, current exact-head CI, branch metadata and Pages evidence.

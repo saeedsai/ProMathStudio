@@ -1,3 +1,14 @@
+## 2026-11-25 — TRUSS-EULER-CRITICAL-LOAD-SCALE-SAFE-QUOTIENT
+
+Starting dev `d7341c7c1867f1ef046872d16d6477624d8f3a07`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS, living plan, frozen inventory, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, exact-head CI and Pages. Exact starting Push #45559832473 and PR #45559840058 each passed 218/218, zero failures/skips; main Quality #45360386408 and Pages #45360367251 succeeded on current main.
+
+Found optional Euler Pcr could be rejected when intermediate `π²·E·I`, `K·L` or `(K·L)²` overflowed/underflowed although the exact-binary64 final quotient remained representable. Added an exponent-scaled positive product/quotient fallback while retaining the original direct operation order for ordinary inputs. Node references cover Number.MAX_VALUE I, simultaneous numerator/denominator overflow and underflow, plus genuine final overflow/underflow rejection. Registered Chromium smoke repeats both representable extremes at 1280px and 390px. Updated the Structural Truss contract; no root bundle edit applies to the standalone tool.
+
+Isolated V8 checks matched both Decimal-rounded references within 2.3e-16 relative error and retained the ordinary 493480.22005446785 N result. No local repository checkout exists; full Node/Playwright checks require new exact-head Push/PR Quality. PR #191 remains open with zero independent reviews; main is unprotected, rulesets empty and protection reads HTTP 403. No merge or bypass. Historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 verifiable main protection + eligible independent PR #191 review, then ordinary PR merge and exact-main Quality/Pages/hosted verification; (2) finish seven-shape Truss numeric boundary matrix with Decimal references, rollback, member isolation and desktop/390px tests; (3) spreadsheet row-6000/column-AF, #REF!, mixed-anchor and atomic rollback cases; (4) Matrix/Graph/Table legacy/current round-trip and malformed-import rollback; (5) analytical forward/backward ODE references, convergence, diagnostics and stale-export recovery.
+
+
 ## 2026-11-25 — TRUSS-MEMBER-MASS-SCALE-SAFE-LENGTH-AREA-DENSITY
 
 **Starting refs:** dev `fc93bccac6277d1a086e3ca988e30f7a257f275a`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; the only branches are dev and main. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified implementation/engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, current exact-head CI, branch metadata and Pages evidence.

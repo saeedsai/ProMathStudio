@@ -1,3 +1,9 @@
+## 2026-11-25 — Repair over-escaped Data Tables sort validator after exact-head CI failure
+
+- Exact Quality #45522925339 exposed an invalid regex in the new sort guard during Node inline-script syntax validation (step 7). Corrected the literal to match the existing single-backslash reference validator.
+- Added a structural regression asserting the exact regex spelling; preserved the invalid-reference/blank-grid sort behavior and the existing browser regression.
+- Synchronized src/data-tables.js and index.html. This corrective dev commit awaits a fresh exact-head Quality run; no tests were weakened and no release bypass occurred.
+
 ## 2026-11-25 — Data Tables sorting preserves invalid and blank-grid references (dev; exact-head QA pending)
 
 - Stable row sorting now leaves references outside the supported A1:AF6000 grid unchanged and invalid, while valid blank rows beyond the current materialized table retain fixed coordinates in range-contiguity checks.

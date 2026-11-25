@@ -44,6 +44,7 @@ class SpreadsheetReferenceBoundsTests(unittest.TestCase):
         end = SOURCE.index("function structuralEdit(", start)
         sort = SOURCE[start:end]
         self.assertIn("const isSupportedReference=ref=>", sort)
+        self.assertIn(r"const m=/^\$?([A-Za-z]{1,3})\$?([1-9]\d*)$/.exec(ref);", sort)
         self.assertIn("if(!isSupportedReference(left)||!isSupportedReference(right))return match;", sort)
         self.assertIn("positions.push(i<newRow.length?newRow[i]:i)", sort)
         self.assertIn("if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;", sort)

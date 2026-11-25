@@ -515,7 +515,7 @@
     if(order.every((entry,i)=>entry.i===i))return;
     const newRow=Array(t.rows.length);order.forEach((entry,i)=>{newRow[entry.i]=i;});
     const isSupportedReference=ref=>{
-      const m=/^\\$?([A-Za-z]{1,3})\\$?([1-9]\\d*)$/.exec(ref);
+      const m=/^\$?([A-Za-z]{1,3})\$?([1-9]\d*)$/.exec(ref);
       return !!m&&colIndex(m[1])<MAX_COLUMNS&&Number(m[2])<=MAX_ROWS;
     };
     const rangePattern=/((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;

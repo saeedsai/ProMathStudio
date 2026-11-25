@@ -1,3 +1,13 @@
+## 2026-11-25 — Data Tables sort validator regex CI repair
+
+Starting dev `09cfeb6e971b67f390f4390d9f8cd280a1f2f2b2`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact Quality #45522925339 failed structural step 7: Node syntax validation rejected the new sort helper's over-escaped regex (one failure in 600 tests; browser steps skipped after the structural job failed). The failure was read from the exact job log, not inferred.
+
+Corrected the regex to the same single-backslash JavaScript literal used by the existing spreadsheet reference validator. Added a structural assertion for the exact regex spelling. Preserved the range/blank-row behavior and synchronized standalone index.html with src/data-tables.js. The previous starting-head Quality #45515170826 was green 218/218.
+
+Corrected regex cases: A1, $A$1 and AF6000 accepted; AG1, A6001 and A0 rejected. Remote source/bundle parity checked. Local checkout is absent; full local tests unavailable. New exact-head Quality pending; no test weakening or release bypass. Historical inventory unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 release governance: enforceable main protections, independent review, ordinary PR, exact checks and Pages verification. (2) P1 spreadsheet structural correctness: corrected sort CI, row-6000/column-AF boundaries, #REF!, blank/reversed/mixed-anchor ranges, failed-insert and noncontiguous-sort atomicity, desktop/390px. (3) P1 current/legacy Matrix/Graph/Table round-trips and malformed-import rollback. (4) P1 ODE analytical forward/backward references, convergence, unsupported classes, stale exports and mobile recovery. (5) P1 seven-shape Truss thin-wall/subnormal/high-scale references, invalid rollback and desktop/390px.
+
 ## 2026-11-25 — Data Tables sort preserves invalid and blank-grid references
 
 Starting dev `a7251d6cf2650b778db8d9abc15fba998ecf021d`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; dev Quality [#45515170826](https://github.com/saeedsai/ProMathStudio/actions/runs/45515170826) passed 218/218 with zero failures/skips. Main Quality #45360386408 passed 218/218; Pages #45360367251 build/status/deploy all succeeded. No open PRs; only dev/main. Rulesets empty; main protection read HTTP 403.

@@ -1,3 +1,7 @@
+## 2026-11-25 — DATA-TABLES-ROLLBACK-RECOVERY-ASSERTION-CORRECTION
+
+Review of the new browser regression caught an assertion-index issue before treating the run as green: after a successful insertion at row 1, the original formula row correctly moves from index 0 to index 1. Updated the recovery assertion to inspect that moved row. No product logic or test coverage was weakened; exact-head Quality on the corrected dev/PR head is required.
+
 ## 2026-11-25 — DATA-TABLES-STRUCTURAL-REFERENCE-REWRITE-ATOMICITY
 
 Starting refs: dev `1e6f11ad303f1ee0a3d8db0f18dfaf43a8dc89c3`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; release PR #191 remains open. At the last exact-head snapshot, Push Quality #45610081417 and PR Quality #45610093452 were still running on `1e6f11ad303f1ee0a3d8db0f18dfaf43a8dc89c3`. Earlier candidate failures #45603581050/#45603598028 were traced to the L-angle signed-zero regression; the positive-zero correction is in the current candidate and no assertions were weakened.

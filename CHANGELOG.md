@@ -1,3 +1,7 @@
+## 2026-11-25 — DATA-TABLES-ROLLBACK-RECOVERY-ASSERTION-CORRECTION
+
+Review of the new browser regression caught an assertion-index issue before treating the run as green: after a successful insertion at row 1, the original formula row correctly moves from index 0 to index 1. Updated the recovery assertion to inspect that moved row. No product logic or test coverage was weakened; exact-head Quality on the corrected dev/PR head is required.
+
 ## 2026-11-25 — Data Tables structural reference rewrites commit atomically
 
 - Structural formula rewrites are staged across every workbook sheet and committed only after all cell conversions and rewrites succeed.

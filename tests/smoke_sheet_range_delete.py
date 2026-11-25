@@ -114,7 +114,7 @@ def main():
             };
             tables[1].rows[0][1] = 'safe';
             MathStudio.dataTables.insertRow(0);
-            return {...failed, recoveredLocal: tables[0].rows[0][0],
+            return {...failed, recoveredLocal: tables[0].rows[1][0],
                 recoveredCrossSheet: tables[1].rows[0][0],
                 recoveredRowCount: tables[0].rows.length};
         }""")

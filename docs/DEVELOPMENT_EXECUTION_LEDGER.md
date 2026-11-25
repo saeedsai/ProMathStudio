@@ -1,3 +1,14 @@
+## 2026-11-25 — TRUSS-FEM-EXACT-MIXED-SIGN-RESULTANTS
+
+- Starting dev `61e2fb3dc29181e2b5232dbd2477015ef9cc71f9`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Confirmed starting exact-head Push Quality #45682939079 and PR Quality #45682955688: 218/218 each, zero failures/skips; Truss Node/browser steps 214/215 passed.
+- Reproduced mixed-scale cancellation precision loss in the actual starting module: 79-node applied force `9.99875737761613e-11 N` vs exact binary64 sum `9.99937827510621e-11 N`; origin moment had the opposite-sign error.
+- Added exact BigInt accumulation for mixed-sign finite binary64 terms with one ties-to-even conversion; same-sign reductions retain the scaled compensated path and a BigInt-unavailable compatibility fallback.
+- Added Node and registered Chromium 1280px/390px regressions for exact applied force and signed moment; retained overflow/subnormal/force-balance coverage. Updated Truss numerical contract and changelog.
+- Isolated V8 executed the modified production module: force `9.99937827510621e-11 N`, moment `-9.99937827510621e-11 N·m`; 79-node model validation passed. Full Node/Playwright repository suite pending exact-head Actions.
+- PR #191 remains open with zero independent reviews; branch protection read HTTP 403, rulesets empty, dev/main unprotected. No merge or main update. Main Quality #45360386408 and Pages #45360367251 remain successful on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Historical inventory unchanged at **166 gaps / 95 partial**.
+- Status: implemented on dev candidate; exact-head CI pending; not released.
+
 ## 2026-11-25 — TRUSS-FEM-FORCE-BALANCE-CANCELLATION
 
 **Starting refs:** dev `214ada3d75f865223236186357f412cd1480f59f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Branches inspected: exactly `dev` and `main`. PR #191 remains the sole release PR.

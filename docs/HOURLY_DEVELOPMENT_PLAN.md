@@ -1,3 +1,27 @@
+## 2026-11-25 — TRUSS-FEM-EXACT-MIXED-SIGN-RESULTANTS
+
+**Starting refs:** dev `61e2fb3dc29181e2b5232dbd2477015ef9cc71f9`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the unified implementation plan, engineering architecture/toolbox catalog, the frozen 2026-10-26 inventory, the living queue, Truss source/tests/contract, current refs, PR #191, reviews, exact-head Quality and main/Pages evidence.
+
+**Exact-head CI:** Push Quality [#45682939079](https://github.com/saeedsai/ProMathStudio/actions/runs/45682939079) and PR Quality [#45682955688](https://github.com/saeedsai/ProMathStudio/actions/runs/45682955688) both completed successfully on exact starting SHA `61e2fb3dc29181e2b5232dbd2477015ef9cc71f9`: 218/218 steps, zero failures and zero skipped steps. Truss Node step 214 and desktop/390px browser step 215 passed. No failing exact-head CI defect remained.
+
+**P1/P0 numerical defect:** The scale-normalized Neumaier helper separated normalized terms from original-unit residual terms. When both groups later nearly cancelled, the rounded product of the normalized group lost a small but representable final resultant. A 79-node preview using +1e308 N, -1e308 N, 35×2.3 N, 40×-2 N, -0.5 N and +1e-10 N reproduced the defect in the actual starting module: old applied force `9.99875737761613e-11 N`, while an exact sum of the supplied binary64 inputs rounds to `9.99937827510621e-11 N` (absolute error about `6.21e-15 N`). The same error appeared with opposite sign in the origin moment.
+
+**Source correction:** Added a bounded exact binary64 accumulator for mixed-sign reductions. It decodes finite IEEE-754 terms into integer multiples of 2^-1074, sums those integers with BigInt, and rounds the final result once to nearest/ties-to-even binary64. Same-sign reductions retain the existing scale-normalized Neumaier path. If BigInt is unavailable, the previous compatibility fallback remains. The helper is shared by preview force/moment and solved force-balance diagnostics; FEM stiffness assembly, displacement solving, reactions and energy checks are unchanged.
+
+**Regression:** Added a direct Node regression and extended the already-registered Chromium Truss smoke at both 1280px and 390px. The 79-node mixed-scale fixture checks the correctly rounded applied force and signed origin moment, and confirms ordinary sequential reduction reproduces the lost residual. Existing huge cancellation, subnormal residual, moment, true overflow and force-balance cases remain intact. Updated the Truss numerical contract and changelog.
+
+**Validation:** The actual starting production module reproduced the old `9.99875737761613e-11 N` result. The modified actual module was evaluated in isolated V8 and returned exactly `9.99937827510621e-11 N` and `-9.99937827510621e-11 N·m`; the 79-node count and all model validation passed. A true overflowing final resultant remains rejected by the existing Node/browser regression. Full repository Node/Playwright tests require the exact-head GitHub Actions run because this execution workspace has no checkout.
+
+**Release:** PR #191 remains open; head matched starting dev, base main. It has zero independent reviews. Branches are exactly dev/main and both report unprotected; repository rulesets are empty; main branch-protection read returns HTTP 403 to the connected integration. No merge, direct main update, force push or safeguard bypass. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5` (24-Nov-2026). The frozen inventory remains **166 gaps / 95 partial**.
+
+### NEXT FIVE
+
+1. **P0 — Release governance (blocked externally).** Acceptance: eligible independent approval on PR #191; verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion; complete diff review; ordinary dev-to-main PR merge; successful exact-main Quality, Pages deployment and hosted critical-path verification.
+2. **P1 — Finish seven-shape Truss section boundaries (in progress).** Acceptance: independent exact-binary64 references for area, centroid, Ixx/Iyy, Sx/Sy and rx/ry across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining low-exponent/near-solid cases; invalid rollback, selected-member isolation, E/density/K preservation, keyboard and 390px browser tests.
+3. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion, scalar/range #REF!, already-invalid references, blank/reversed/mixed-anchor ranges, quoted sheet names/doubled-quote literals, recalculation, atomic rollback and source/standalone bundle parity.
+4. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed imports preserve all workspaces, focus, selection and prior results; desktop/390px browser tests.
+5. **P1 — Numerical ODE verification.** Acceptance: independent analytical forward/backward scalar and coupled references, refinement/convergence, bounded stage-overflow failure/recovery, stale-export invalidation and responsive keyboard/browser tests.
+
 ## 2026-11-25 — TRUSS-FEM-FORCE-BALANCE-CANCELLATION
 
 **Starting refs:** dev `214ada3d75f865223236186357f412cd1480f59f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Branches inspected: exactly `dev` and `main`. PR #191 remains the sole release PR.

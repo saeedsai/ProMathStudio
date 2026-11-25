@@ -707,6 +707,27 @@ test('solve force-balance diagnostic preserves finite equilibrium after overflow
  assert.deepEqual(result.forceBalance,{x:0,y:0});
 });
 
+test('mixed-sign resultants retain exact binary64 precision across scale groups',()=>{
+ const model=clone(fem.examples.bar);
+ const nodes=[
+  {id:'A',x:0,y:1,fixX:true,fixY:true,fx:1e305,fy:0},
+  {id:'B',x:2,y:1,fixX:true,fixY:true,fx:-1e305,fy:0},
+  ...Array.from({length:35},(_,i)=>({id:'P'+i,x:0,y:1,fx:0.0023,fy:0})),
+  ...Array.from({length:40},(_,i)=>({id:'N'+i,x:0,y:1,fx:-0.002,fy:0})),
+  {id:'C',x:0,y:1,fx:-0.0005,fy:0},
+  {id:'D',x:0,y:1,fx:1e-13,fy:0}
+ ];
+ model.nodes=nodes;
+ const preview=fem.inspectJSON(JSON.stringify(model));
+ const expected=9.99937827510621e-11;
+ const naive=nodes.reduce((sum,node)=>sum+node.fx*1000,0);
+ assert.equal(nodes.length,79);
+ assert.equal(preview.appliedForce.x,expected);
+ assert.equal(preview.appliedMoment,-expected);
+ assert.ok(Math.abs(naive-expected)>1e-14,
+  'the sequential binary64 reduction must reproduce the lost mixed-scale residual');
+});
+
 test('inspectJSON reports signed applied moment about origin in SI N m',()=>{
  const studio=clone(fem.examples.bar);
  studio.nodes[0].fx=0;studio.nodes[0].fy=0;

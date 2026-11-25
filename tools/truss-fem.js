@@ -46,6 +46,46 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
+  // Correctly round the exact sum of finite binary64 inputs without an overflowing partial sum.
+  // Each finite double is an integer multiple of 2^-1074; BigInt accumulates that integer exactly.
+  // The final conversion rounds once to nearest, ties-to-even, and still returns a binary64 Number.
+  function exactFiniteBinarySum(terms, name) {
+    if (typeof BigInt !== 'function' || typeof DataView !== 'function') return null;
+    const zero=BigInt(0), one=BigInt(1), shift32=BigInt(32), shift52=BigInt(52), shift63=BigInt(63);
+    const signMask=one<<shift63, exponentMask=BigInt(2047), fractionMask=(one<<shift52)-one;
+    const view=new DataView(new ArrayBuffer(8));
+    let total=zero;
+    for (const term of terms) {
+      view.setFloat64(0,term,false);
+      const bits=(BigInt(view.getUint32(0,false))<<shift32)|BigInt(view.getUint32(4,false));
+      const negative=(bits&signMask)!==zero;
+      const exponent=Number((bits>>shift52)&exponentMask);
+      const fraction=bits&fractionMask;
+      if (exponent===0 && fraction===zero) continue;
+      const significand=exponent===0?fraction:(one<<shift52)|fraction;
+      const shift=exponent===0?0:exponent-1;
+      const magnitude=significand<<BigInt(shift);
+      total+=negative?-magnitude:magnitude;
+    }
+    if (total===zero) return 0;
+    const negative=total<zero;
+    const magnitude=negative?-total:total;
+    const bitLength=magnitude.toString(2).length;
+    let result;
+    if (bitLength<=53) {
+      result=Number(magnitude)*Number.MIN_VALUE;
+    } else {
+      let shift=bitLength-53;
+      let significand=magnitude>>BigInt(shift);
+      const remainder=magnitude-(significand<<BigInt(shift));
+      const halfway=one<<BigInt(shift-1);
+      if (remainder>halfway || (remainder===halfway && (significand&one)!==zero)) significand+=one;
+      if (significand===(one<<BigInt(53))) {significand>>=one;shift++;}
+      const exponent=shift-1074;
+      result=exponent>971?Infinity:Number(significand)*Math.pow(2,exponent);
+    }
+    return finite(negative?-result:result,name);
+  }
   // Sum signed finite terms without overflowing intermediate partial sums.
   // Normalize by the largest magnitude, compensate rounding, and retain terms
   // whose normalized quotient underflows in a separately compensated residual.
@@ -53,6 +93,11 @@
     const terms = Array.from(values, value => finite(value, name));
     const scale = Math.max(0, ...terms.map(value => Math.abs(value)));
     if (scale === 0) return 0;
+    const hasPositive=terms.some(value=>value>0),hasNegative=terms.some(value=>value<0);
+    if (hasPositive&&hasNegative) {
+      const exact=exactFiniteBinarySum(terms,name);
+      if (exact!==null) return exact;
+    }
     const normalized = {sum:0, correction:0};
     const residual = {sum:0, correction:0};
     const add = (state, value) => {

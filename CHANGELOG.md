@@ -1,3 +1,10 @@
+## 2026-11-25 — Truss FEM mixed-sign resultants preserve exact binary64 cancellation
+
+- Added an exact integer accumulator for mixed-sign finite binary64 force and moment terms, with a single nearest/ties-to-even binary64 conversion; same-sign reductions retain the scale-normalized compensated path.
+- Fixed a reproducible 79-node cross-scale cancellation error: applied force now returns `9.99937827510621e-11 N` instead of `9.99875737761613e-11 N`, with the corresponding signed origin moment corrected.
+- Added direct Node and registered Chromium desktop/390px regressions; existing huge cancellation, subnormal residual, true-overflow and solved force-balance coverage remains.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-25 — Truss FEM force-balance diagnostics preserve finite cancellation
 
 - Combined applied nodal loads and support reactions before compensated summation, preventing separate overflowing totals from producing a NaN force-balance diagnostic when the true equilibrium residual is finite.

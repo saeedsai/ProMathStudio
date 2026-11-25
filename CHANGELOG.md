@@ -1346,3 +1346,5 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 ## 2026-11-25
 
 - Data Tables: added explicit accessible names to the five native action-menu triggers (Table, Filter, Combine, Files, Python). Corrected the registered sheet-rename browser regression to open the collapsed Table actions menu through its accessible role/name before exercising rollback and recovery. No workbook calculation or persistence behavior changed; exact-head Quality pending.
+
+- Data Tables follow-up: synchronized the new accessible action-menu names in `src/numerical-data.js` with the standalone `index.html` after exact-head structural CI exposed a source/bundle parity mismatch. The browser regression remains enabled; no checks were weakened.

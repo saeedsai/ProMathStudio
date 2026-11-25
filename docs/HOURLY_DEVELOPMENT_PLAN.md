@@ -1,10 +1,28 @@
+## 2026-11-25 — DATA-TABLES-MENU-SOURCE-BUNDLE-PARITY
+
+Starting refs: dev `f241b89e864a801be1f352aa6417c3a78c3214c9`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The first accessible-menu candidate updated `index.html` and the Chromium test but omitted the matching `src/numerical-data.js` source. Exact-head Push Quality [#45627424546](https://github.com/saeedsai/ProMathStudio/actions/runs/45627424546) and PR Quality [#45627436102](https://github.com/saeedsai/ProMathStudio/actions/runs/45627436102) both correctly failed at structural step 7: **15 source/standalone parity assertions** failed across the 602-test structural suite (one pre-existing skip). The mismatch was exactly the menu helper's missing `aria-label` in `src/numerical-data.js`; no browser test ran in those workflows.
+
+Correction: apply the same accessible-name change to `src/numerical-data.js` and keep the existing `index.html` embedded script byte-for-byte synchronized. Retain the registered browser regression that opens `Table actions` through its accessible role/name before checking Rename visibility and atomic rollback/recovery. No tests are weakened or removed.
+
+Validation: source and embedded script are compared in the GitHub integration workspace after the change. Full local checkout/Playwright remains unavailable. Exact-head Push and PR Quality must rerun on the synchronized follow-up commit; browser step 80 remains pending until those workflows reach it. Main and Pages remain unchanged. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Verify source/bundle parity and Data Tables browser repair.** Acceptance: structural source/bundle parity suite passes; exact-head Push and PR Quality both finish with zero failed or skipped required checks; step 80 opens `Table actions`, exposes Rename, and passes failure rollback/recovery.
+2. **P0 — Release governance (blocked).** Obtain eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; inspect full diff, ordinary PR merge only, then verify main Quality, Pages and hosted critical paths.
+3. **P1 — Complete Data Tables grid-boundary verification.** Acceptance: row 6000/column AF insert/delete, scalar/range `#REF!`, already-invalid reference preservation, blank-grid/reversed/mixed-anchor coverage, byte-identical rollback and desktop/390px Chromium.
+4. **P1 — Finish seven-shape Truss numerical audit.** Acceptance: exact-binary64 Decimal references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; thin-wall/subnormal/high-scale cases; final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+5. **P1 — Saved-project compatibility.** Acceptance: current/legacy Matrix, Graph and Table round-trips; malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+
+ODE forward/backward verification remains queued after these five.
+
 ## 2026-11-25 — DATA-TABLES-ACTION-MENU-ACCESSIBLE-NAMES
 
 Starting refs: dev `6f88300e4283888926060fac9863eabda1fd9934`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only long-lived branches are dev and main. Root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, unified master plan, workspace architecture plan and Data Tables contract were inspected.
 
 Exact-head Push Quality [#45624216921](https://github.com/saeedsai/ProMathStudio/actions/runs/45624216921) and PR Quality [#45624229313](https://github.com/saeedsai/ProMathStudio/actions/runs/45624229313) both failed at step 80, **Spreadsheet range deletion regression**, on `6f88300e4283888926060fac9863eabda1fd9934`. Both logs identify the same assertion: `#dt-rename` was not visible. The earlier attempted workspace re-selection did not open the collapsed **Table** action menu. Inspection of the standalone UI showed `simplifyTable()` moves the first toolbar (including Rename) into the first native `details.dt-action-menu`; the test was looking for a child of a collapsed disclosure.
 
-Fix: the standalone `index.html` menu helper now gives each native summary an explicit accessible name (`Table actions`, `Filter actions`, `Combine actions`, `Files actions`, `Python actions`). The registered Chromium regression opens the Table menu using Playwright's accessible role/name before asserting Rename visibility and exercising failed-rename rollback/recovery. This follows the real user interaction path; no assertion was removed or weakened. The menu helper is inline-only in the standalone application, so there is no separate modular source to synchronize. `tests/smoke_sheet_range_delete.py` remains registered as Quality step 80.
+Fix: the standalone `index.html` menu helper now gives each native summary an explicit accessible name (`Table actions`, `Filter actions`, `Combine actions`, `Files actions`, `Python actions`). The registered Chromium regression opens the Table menu using Playwright's accessible role/name before asserting Rename visibility and exercising failed-rename rollback/recovery. This follows the real user interaction path; no assertion was removed or weakened. The helper is also maintained in `src/numerical-data.js`; exact-head structural CI caught a first-candidate source/bundle mismatch, corrected by the follow-up source+standalone synchronization commit. `tests/smoke_sheet_range_delete.py` remains registered as Quality step 80.
 
 Validation: the GitHub logs confirm structural checks and browser steps 1–79 passed before this single failure on both workflows. The local execution workspace has no checkout; full local Python/Playwright execution is unavailable. New exact-head Push and PR Quality are required after this commit. Main and Pages remain unchanged. The historical inventory remains frozen at **166 gaps / 95 partial**.
 

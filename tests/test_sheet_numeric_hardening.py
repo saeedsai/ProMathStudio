@@ -23,6 +23,13 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
         self.assertNotIn("String(Number.isFinite(x)?x:0)", SOURCE)
         self.assertIn("catch(error){throw Error(error?.message?.startsWith('#')?error.message:'#VALUE');}", SOURCE)
 
+    def test_sum_uses_scaled_compensated_accumulation(self):
+        self.assertIn("function stableSum(values)", SOURCE)
+        self.assertIn("if(normalized===0&&value!==0)addCompensated(residual,value);", SOURCE)
+        self.assertIn("x=stableSum(nums);", SOURCE)
+        self.assertNotIn("x=nums.reduce((a,b)=>a+b,0);", SOURCE)
+        self.assertIn("if(!Number.isFinite(x))throw Error('#NUM!')", SOURCE)
+
     def test_even_median_uses_range_safe_midpoint(self):
         self.assertIn("function safeMidpoint(a,b)", SOURCE)
         self.assertIn("safeMidpoint(ordered[mid-1],ordered[mid])", SOURCE)

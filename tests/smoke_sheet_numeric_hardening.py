@@ -88,7 +88,9 @@ def main():
               ['1.7976931348623157e308'],['1.7976931348623157e308'],['1.7976931348623157e308'],
               ['1e308'],['1e-300'],['-1e308'],
               ['-5e-324'],['-5e-324'],
-              ['5e-324'],['1e-323']
+              ['5e-324'],['1e-323'],
+              ['1e308'],['1e308'],['-1e308'],
+              ['1.7976931348623157e308'],['5e-324'],['-1.7976931348623157e308']
             ]
           }]
         })""")
@@ -103,6 +105,12 @@ def main():
         expected_cancellation_average = 1e-300 / 3
         assert abs(cancellation_average - expected_cancellation_average) <= expected_cancellation_average * 1e-12, (
             cancellation_average, expected_cancellation_average)
+        # SUM must preserve finite results after overflowing partial sums or cancellation.
+        assert formula('SUM(A6:A8)') == 1e-300
+        assert formula('SUM(A13:A15)') == 1e308
+        assert formula('SUM(A16:A18)') == 5e-324
+        assert formula('SUM(1e308,1e308,-1e308)') == 1e308
+        assert failure('SUM(A3:A5)') == '#NUM!'
         aggregate_state = page.evaluate("MathStudio.dataTables.exportState()")
         aggregate_values = page.evaluate("MathStudio.dataTables.calculate()")
         page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", aggregate_state)
@@ -114,7 +122,7 @@ def main():
             assert page.locator('#dt-sheet').count() == 1
         assert not errors, errors
         browser.close()
-    print("PASS spreadsheet built-in priority, subnormal/cancellation-safe averages and medians, overflow and custom errors")
+    print("PASS spreadsheet built-in priority, cancellation-safe SUM/AVERAGE, subnormal residuals, median and true overflow errors")
 
 
 if __name__ == "__main__":

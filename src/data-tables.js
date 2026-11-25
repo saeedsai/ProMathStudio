@@ -620,6 +620,24 @@
     // A mean is bounded by the largest absolute input; clamp only rounding overshoot.
     return Math.max(-scale,Math.min(scale,primary+residualMean));
   }
+  // Scale finite inputs before summing so a finite final result survives
+  // overflowing partial sums. Keep terms whose normalized quotient underflows:
+  // they may be the only contribution left after larger values cancel.
+  function stableSum(values){
+    if(!values.length)return 0;
+    let scale=0;
+    for(const value of values)scale=Math.max(scale,Math.abs(value));
+    if(scale===0)return 0;
+    const scaled={sum:0,correction:0},residual={sum:0,correction:0};
+    for(const value of values){
+      const normalized=value/scale;
+      if(normalized===0&&value!==0)addCompensated(residual,value);
+      else addCompensated(scaled,normalized);
+    }
+    const primary=(scaled.sum+scaled.correction)*scale;
+    const remainder=residual.sum+residual.correction;
+    return primary+remainder;
+  }
   // Scale before taking the midpoint to avoid overflow and retain subnormal values.
   function safeMidpoint(a,b){
     const scale=Math.max(Math.abs(a),Math.abs(b));
@@ -745,7 +763,7 @@
         // overflow merely because its unscaled intermediate sum would.
         x=nums.length?stableMean(nums):0;
       }else if(upper==='SUM'){
-        x=nums.reduce((a,b)=>a+b,0);
+        x=stableSum(nums);
       }else if(upper==='COUNT'){
         x=nums.length;
       }else if(upper==='MIN'){

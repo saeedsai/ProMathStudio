@@ -1,3 +1,10 @@
+## 2026-11-25 — Data Tables SUM preserves finite results after cancellation
+
+- Replaced naive left-to-right SUM accumulation with scale-normalized compensated summation, retaining terms whose normalized quotient underflows so they survive cancellation of much larger values.
+- Preserved the existing #NUM! behavior when the final sum is genuinely non-finite.
+- Added Chromium regressions for finite cancellation after an overflowing partial sum, 1e-300 and minimum-subnormal residuals, and true final overflow; added structural source assertions.
+- Synchronized `src/data-tables.js` with the embedded standalone `index.html`. Implemented on dev; exact-head Quality pending; not released.
+
 ## 2026-11-25 — Data Tables action menus expose explicit disclosure relationships
 
 - Added unique content-region IDs and `aria-controls` links to the five native Table, Filter, Combine, Files and Python disclosure summaries while retaining their accessible names.

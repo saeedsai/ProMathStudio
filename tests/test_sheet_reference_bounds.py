@@ -53,6 +53,19 @@ class SpreadsheetReferenceBoundsTests(unittest.TestCase):
             self.assertIn(formula, smoke)
         self.assertIn("python tests/smoke_sheet_sort_references.py", WORKFLOW)
 
+    def test_reference_rewrites_are_staged_before_any_workbook_mutation(self):
+        start = SOURCE.index("function shiftReferences(")
+        end = SOURCE.index("// Stable full-row sort", start)
+        shift = SOURCE[start:end]
+        queued = shift.index("rewrites.push({row,column:c,value:rewritten});")
+        committed = shift.index("for(const rewrite of rewrites)rewrite.row[rewrite.column]=rewrite.value;")
+        self.assertLess(queued, committed)
+        smoke = (ROOT / "tests/smoke_sheet_range_delete.py").read_text(encoding="utf-8")
+        for token in ("formula conversion failed", "afterFailure",
+                      "recoveredCrossSheet", "recoveredRowCount"):
+            self.assertIn(token, smoke)
+        self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
+
     def test_standalone_bundle_matches_the_modular_source(self):
         start = HTML.index("/* ProMathStudio Data Tables workspace.")
         end = HTML.index("</script>", start)

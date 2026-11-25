@@ -1,3 +1,10 @@
+## 2026-11-25 — Data Tables structural reference rewrites commit atomically
+
+- Structural formula rewrites are staged across every workbook sheet and committed only after all cell conversions and rewrites succeed.
+- Added a Chromium regression for a late conversion failure after local and cross-sheet references have been visited; it verifies unchanged workbook export, unchanged formulas/row count, and successful recovery after the bad cell is corrected.
+- Added a structural unittest and clarified the Data Tables guide. Synchronized `src/data-tables.js` with the standalone `index.html` bundle.
+- Implemented on dev; exact-head Push/PR Quality pending. Not released.
+
 ## 2026-11-25 — TRUSS-L-ANGLE-SIGNED-ZERO-CI-REPAIR
 
 Starting refs: dev `183c6500a9d7fc04620d08e385051254c60f76a1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; release PR #191 remains open.

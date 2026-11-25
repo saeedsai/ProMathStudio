@@ -92,6 +92,40 @@ def main():
         assert rollback["before"] == rollback["after"]
         assert rollback["reference"] == "=Data!A2"
         assert rollback["rowCount"] == 2
+
+        # A later formula-cell conversion error must not partially commit earlier rewrites.
+        staged = page.evaluate("""() => {
+            MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
+                {id:'sheet-1',name:'Data',columns:['A'],rows:[['=A2'],['10']]},
+                {id:'sheet-2',name:'Refs',columns:['A','B'],rows:[['=Data!A2','safe']]}
+            ]});
+            const tables = MathStudio.dataTables.tables;
+            tables[1].rows[0][1] = {toString(){throw Error('formula conversion failed');}};
+            const before = JSON.stringify(MathStudio.dataTables.exportState());
+            let message = '';
+            try { MathStudio.dataTables.insertRow(0); }
+            catch (error) { message = error.message; }
+            const afterFailure = JSON.stringify(MathStudio.dataTables.exportState());
+            const failed = {
+                message, before, afterFailure,
+                localFormula: tables[0].rows[0][0],
+                crossSheetFormula: tables[1].rows[0][0],
+                rowCount: tables[0].rows.length
+            };
+            tables[1].rows[0][1] = 'safe';
+            MathStudio.dataTables.insertRow(0);
+            return {...failed, recoveredLocal: tables[0].rows[0][0],
+                recoveredCrossSheet: tables[1].rows[0][0],
+                recoveredRowCount: tables[0].rows.length};
+        }""")
+        assert staged["message"] == "formula conversion failed"
+        assert staged["before"] == staged["afterFailure"]
+        assert staged["localFormula"] == "=A2"
+        assert staged["crossSheetFormula"] == "=Data!A2"
+        assert staged["rowCount"] == 2
+        assert staged["recoveredLocal"] == "=A3"
+        assert staged["recoveredCrossSheet"] == "=Data!A3"
+        assert staged["recoveredRowCount"] == 3
         assert not errors, errors
         browser.close()
     print("PASS row/column range edits, invalid-reference preservation, cross-sheet anchors, conversion-failure atomicity, persistence and browser")

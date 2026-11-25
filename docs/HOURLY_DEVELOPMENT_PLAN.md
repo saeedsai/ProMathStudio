@@ -1,3 +1,23 @@
+## 2026-11-25 — DATA-TABLES-STRUCTURAL-REFERENCE-REWRITE-ATOMICITY
+
+Starting refs: dev `1e6f11ad303f1ee0a3d8db0f18dfaf43a8dc89c3`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; release PR #191 remains open. At the last exact-head snapshot, Push Quality #45610081417 and PR Quality #45610093452 were still running on `1e6f11ad303f1ee0a3d8db0f18dfaf43a8dc89c3`. Earlier candidate failures #45603581050/#45603598028 were traced to the L-angle signed-zero regression; the positive-zero correction is in the current candidate and no assertions were weakened.
+
+A second partial-mutation path existed in Data Tables structural edits: `shiftReferences` rewrote formulas in place while traversing every sheet. If a later cell conversion threw, earlier same-sheet or cross-sheet formulas could already have shifted even though the row/column operation never happened. Reference rewrites are now staged in memory and committed only after the full workbook traversal succeeds.
+
+Added a registered Chromium regression that forces a late conversion failure after local and cross-sheet formulas have been visited, asserts byte-identical exported workbook state and unchanged formulas/row count, then removes the bad cell and verifies a successful insert/recovery. Added a structural unittest and documented the transaction contract. `src/data-tables.js` and the inlined Data Tables module in `index.html` are kept byte-identical.
+
+The local repository checkout is absent in this execution workspace, so local Node/Playwright commands could not be run. Source/bundle parity and the intended source/test/doc edits were checked from the retrieved Git blobs. New exact-head Push and PR Quality are required; pending after this commit. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; main Quality and Pages were previously green. PR #191 still has no independent reviews; both branches report unprotected, rulesets are empty, and branch-protection reads return HTTP 403 to the connected integration. Do not merge or update main directly. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+## Next five features
+
+1. **P0 — Release governance (blocked):** obtain an eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; inspect the complete diff and current exact-head checks; merge only through the ordinary PR process; then verify main Quality, Pages and hosted critical paths. Acceptance: independent approval, required protections visible, all required checks green on the exact PR head, ordinary merge, successful post-merge Quality/Pages and hosted smoke.
+2. **P1 — Finish the seven-shape Truss numerical audit (in progress):** complete thin-wall, subnormal and high-scale independent references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Acceptance: exact-binary64 Decimal references, genuine final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+3. **P1 — Complete Data Tables grid-boundary verification (in progress):** row-6000/column-AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; staged rewrite rollback is implemented on dev. Acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation. Acceptance: independent numerical references, failure/recovery and desktop/390px browser tests.
+
+---
+
 ## 2026-11-25 — TRUSS-L-ANGLE-SIGNED-ZERO-CI-REPAIR
 
 Starting refs: dev `183c6500a9d7fc04620d08e385051254c60f76a1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; release PR #191 remains open.

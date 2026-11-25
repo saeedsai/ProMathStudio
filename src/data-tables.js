@@ -468,6 +468,7 @@
       return axis==='row'?Number(m[4])-1:colIndex(m[2]);};
     const at=(ref,pos)=>axis==='row'?ref.replace(/[1-9]\d*$/,String(pos+1))
       :ref.replace(/^(\$?)[A-Za-z]{1,3}(?=\$?[1-9]\d*$)/,(_,anchor)=>anchor+colLetter(pos));
+    const rewrites=[];
     for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
       const raw=String(row[c]);if(!raw.startsWith('='))continue;
       const protectedFormula=protectFormulaStringLiterals(raw),ranges=[];
@@ -498,8 +499,11 @@
         if(moved===position)return match;
         return (prefix||'')+colAnchor+(axis==='column'?colLetter(moved):letters)+rowAnchor+(axis==='row'?moved+1:digits);
       });
-      row[c]=protectedFormula.restore(next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]));
+      const rewritten=protectedFormula.restore(next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]));
+      if(rewritten!==raw)rewrites.push({row,column:c,value:rewritten});
     }
+    // Commit only after every workbook cell has been converted and rewritten successfully.
+    for(const rewrite of rewrites)rewrite.row[rewrite.column]=rewrite.value;
   }
   // Stable full-row sort preserves referenced cell identities in all sheets.
   // Unsafe noncontiguous ranges abort before any workbook mutation.

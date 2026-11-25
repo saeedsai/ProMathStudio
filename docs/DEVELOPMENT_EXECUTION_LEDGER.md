@@ -1779,3 +1779,12 @@ Release state at start: PR #189 open/mergeable, head matched dev, base matched m
 
 **NEXT FIVE:** (1) both exact-head Quality workflows green on the new SHA, including the extreme annulus Node/browser regression, 59 FEM Node tests, Truss 212/214/215 and spreadsheet 78–80; (2) finish seven-shape numeric boundary/invalid rollback and selected-member isolation matrix; (3) spreadsheet mixed/absolute references, quoted sheet names, reversed ranges and transactional sort/delete; (4) one approved source-backed Engineering Toolbox tool with canonical ID, shared solver/units/plots and mobile tests; (5) independent PR #189 review plus authorized main protection, then ordinary PR promotion and exact-main Quality/Pages/hosted verification.
 
+
+
+## 2026-11-25 — DATA-TABLES-ACTION-MENU-ACCESSIBLE-NAMES
+
+Starting dev `6f88300e4283888926060fac9863eabda1fd9934`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact-head Push Quality #45624216921 and PR Quality #45624229313 both failed at step 80, Spreadsheet range deletion regression. Both job logs show the same Playwright assertion failure at line 166: `#dt-rename` was hidden. Root cause: the first Data Tables toolbar is moved into the collapsed native Table action menu by `simplifyTable()`; reselecting the workspace alone cannot reveal Rename.
+
+Updated the inline standalone `index.html` menu helper to set an explicit accessible name on every native summary (`<name> actions`). Updated the registered Chromium test to open the Table menu through `get_by_role("button", name="Table actions")` before asserting Rename visibility and testing sheet-rename failure/recovery. This fixes the actual hidden-menu assumption and adds accessible names for all five action menus. No workbook logic or assertions were weakened. The helper has no separate modular source file; the standalone application is the source of truth for this inline code.
+
+The local execution workspace has no repository checkout, so full local Python/Playwright tests were not run. Exact-head GitHub Push and PR Quality are pending for the new commit. Main remains unchanged; PR #191 stays open. Branches remain exactly dev/main; both are unprotected, rulesets are empty and branch-protection reads return HTTP 403. Do not merge or update main directly. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence. Frozen historical inventory remains **166 gaps / 95 partial**.

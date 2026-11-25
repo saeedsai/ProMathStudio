@@ -5352,7 +5352,7 @@ const style=el('style');style.textContent=`
 #numeric-calculus-guide{margin:7px 0;font-size:12px;color:#6b7890}
 @media(max-width:700px){.dt-action-menu .dt-action-content{position:fixed;left:3%;top:70px;max-width:94vw;min-width:94vw}.dt-filter-row{grid-template-columns:1fr}#numerical-panel .num-fields{grid-template-columns:1fr 1fr}}
 `;document.head.append(style);
-function menu(name,content){const details=el('details',{class:'dt-action-menu'});const summary=el('summary',{},name+' ▾'),inner=el('div',{class:'dt-action-content'});inner.append(content);details.append(summary,inner);return details;}
+function menu(name,content){const details=el('details',{class:'dt-action-menu'});const summary=el('summary',{'aria-label':name+' actions'},name+' ▾'),inner=el('div',{class:'dt-action-content'});inner.append(content);details.append(summary,inner);return details;}
 function simplifyTable(){const data=$('data-panel'),area=data.querySelector('.data-inner');if(!area)return;
   const bar=el('div',{id:'data-workflow-toolbar'}),nav=el('nav',{id:'data-menu-navigation','aria-label':'Table actions'});
   const toolbars=area.querySelectorAll(':scope > .data-toolbar');const first=toolbars[0],search=toolbars[1];

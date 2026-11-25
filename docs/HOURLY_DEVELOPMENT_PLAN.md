@@ -1,3 +1,23 @@
+## 2026-11-25 — DATA-TABLES-ACTION-MENU-ACCESSIBLE-NAMES
+
+Starting refs: dev `6f88300e4283888926060fac9863eabda1fd9934`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only long-lived branches are dev and main. Root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, unified master plan, workspace architecture plan and Data Tables contract were inspected.
+
+Exact-head Push Quality [#45624216921](https://github.com/saeedsai/ProMathStudio/actions/runs/45624216921) and PR Quality [#45624229313](https://github.com/saeedsai/ProMathStudio/actions/runs/45624229313) both failed at step 80, **Spreadsheet range deletion regression**, on `6f88300e4283888926060fac9863eabda1fd9934`. Both logs identify the same assertion: `#dt-rename` was not visible. The earlier attempted workspace re-selection did not open the collapsed **Table** action menu. Inspection of the standalone UI showed `simplifyTable()` moves the first toolbar (including Rename) into the first native `details.dt-action-menu`; the test was looking for a child of a collapsed disclosure.
+
+Fix: the standalone `index.html` menu helper now gives each native summary an explicit accessible name (`Table actions`, `Filter actions`, `Combine actions`, `Files actions`, `Python actions`). The registered Chromium regression opens the Table menu using Playwright's accessible role/name before asserting Rename visibility and exercising failed-rename rollback/recovery. This follows the real user interaction path; no assertion was removed or weakened. The menu helper is inline-only in the standalone application, so there is no separate modular source to synchronize. `tests/smoke_sheet_range_delete.py` remains registered as Quality step 80.
+
+Validation: the GitHub logs confirm structural checks and browser steps 1–79 passed before this single failure on both workflows. The local execution workspace has no checkout; full local Python/Playwright execution is unavailable. New exact-head Push and PR Quality are required after this commit. Main and Pages remain unchanged. The historical inventory remains frozen at **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Verify the accessible Data Tables menu CI repair.** Acceptance: exact-head Push and PR Quality both complete successfully with zero failed or skipped required steps; step 80 opens `Table actions`, exposes Rename, and passes rollback/recovery.
+2. **P0 — Release governance (blocked).** Obtain eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; inspect the full diff, merge only through the ordinary PR process, then verify main Quality, Pages and hosted critical paths.
+3. **P1 — Complete Data Tables grid-boundary verification.** Cover row 6000/column AF insert/delete, valid-to-invalid `#REF!` transitions, blank-grid, reversed and mixed-anchor ranges. Acceptance: explicit invalidation only when a previously valid reference is shifted outside A1:AF6000; already-invalid references remain unchanged; byte-identical rollback on late conversion failure; desktop/390px Chromium.
+4. **P1 — Finish the seven-shape Truss numerical audit.** Exact-binary64 Decimal references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Acceptance: thin-wall/subnormal/high-scale references, genuine final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+5. **P1 — Saved-project compatibility.** Current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+
+ODE forward/backward verification remains the next queued P1 after these five.
+
 ## 2026-11-25 — DATA-TABLES-GRID-EDGE-INSERTION-INVALIDATION
 
 Starting refs: dev `0adeea293fb7df0ad27ee4182ea3eb072ed26780`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only long-lived branches are dev and main. Exact-head Push Quality [#45616991615](https://github.com/saeedsai/ProMathStudio/actions/runs/45616991615) and PR Quality [#45617002907](https://github.com/saeedsai/ProMathStudio/actions/runs/45617002907) both failed at step 80, **Spreadsheet range deletion regression**. The PR job log shows the sheet-rename browser case timed out because `#dt-rename` was inside the hidden Data Tables workspace. Product logic was not the cause. The test now reselects the Data Tables workspace and asserts the rename button is visible before exercising failure/recovery; no test was skipped or weakened.

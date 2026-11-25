@@ -163,6 +163,8 @@ def main():
             };
         }""")
         page.locator('[data-workspace="data"]').click()
+        # Rename lives in the collapsed Table menu; open it through its accessible name.
+        page.get_by_role("button", name="Table actions").click()
         assert page.locator("#dt-rename").is_visible()
         page.once("dialog", lambda dialog: dialog.accept("Renamed Sheet"))
         page.locator("#dt-rename").click()

@@ -72,3 +72,8 @@ Open **Data Tables → Excel XLSX export · offline** and choose one or two shee
 ### Insertion at the fixed grid edge
 
 The supported cell grid is A1:AF6000. When a structural insertion moves a previously valid scalar reference or either endpoint of a range beyond that grid, the rewrite now records an explicit `#REF!` rather than leaving an out-of-grid coordinate such as `A6001` or `AG1`. References that were already outside the supported grid remain unchanged and are never revived by later edits. The browser regression covers row 6000 and column AF, scalar and range references, and the resulting calculation errors.
+
+
+## Action menus and accessibility
+
+The Data Tables toolbar groups related controls into native disclosure menus: **Table**, **Filter**, **Combine**, **Files** and **Python**. Their summaries expose explicit accessible names (“Table actions”, “Filter actions”, etc.) while retaining the visible labels. Open **Table** to add, duplicate, rename or delete a sheet; the controls are intentionally hidden while that menu is collapsed.

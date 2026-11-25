@@ -1341,3 +1341,8 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - 2026-11-22 (dev, exact-head QA pending): Made Truss Studio SVG downloads self-describing and accessible with a native title/description, image role and aria-labelledby references while preserving the viewBox and solved plot. Chromium regression now parses the generated SVG Blob and checks XML validity, namespace, dimensions, accessible-name references, background and solved geometry.
 
 - 2026-11-23 (dev, exact-head QA pending): Stabilized hollow-circle section properties for thin annulus walls using factored diameter-gap expressions instead of cancellation-prone squared/fourth-power subtraction. Added independent high-precision Node references and real Chromium preview/application regression at 1280px and 390px, including selected-member isolation and E/density/K preservation.
+
+
+## 2026-11-25
+
+- Data Tables: added explicit accessible names to the five native action-menu triggers (Table, Filter, Combine, Files, Python). Corrected the registered sheet-rename browser regression to open the collapsed Table actions menu through its accessible role/name before exercising rollback and recovery. No workbook calculation or persistence behavior changed; exact-head Quality pending.

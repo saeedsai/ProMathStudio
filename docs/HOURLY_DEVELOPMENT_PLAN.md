@@ -8,6 +8,8 @@
 
 **Source correction:** Use JavaScript's shortest round-trippable decimal representation for finite numeric CSV cells, retaining explicit `-0`. Ordinary values such as `2`, `0.001`, `7850` and `0.6666666666666666` remain concise; no artificial 17-digit padding is introduced. This preserves stored binary64 values, not accuracy beyond the inputs.
 
+**Regression fixture correction before accepting CI:** The newly added Node case initially contained a double-escaped CRLF delimiter, which would not split the exported CSV row. Corrected it to the actual CRLF delimiter; the density/mass round-trip assertions remain unchanged. The first exact-head run on `098b58e2c1e8114433fe6109068b30e8c0920f17` is superseded; the corrected test must pass on the follow-up head.
+
 **Regression:** Updated the direct Node material-CSV test to verify exact density and derived-mass round trips for the failing fixture, while retaining ordinary concise-number and 2/3 coverage. Updated the Structural Truss contract. The Truss solver is loaded as an adjacent asset, so no root `index.html` bundle change is required.
 
 **Isolated validation:** The actual starting module reproduced both lossy cells (`0.1` and `0.0002`). The changed formatter was syntax-checked and its shortest-decimal behavior was verified independently; full Node/Chromium repository tests await exact-head GitHub Actions.

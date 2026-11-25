@@ -1,3 +1,10 @@
+## 2026-11-25 — TRUSS-MATERIAL-CSV-REGRESSION-FIXTURE-CORRECTION
+
+- Starting dev `098b58e2c1e8114433fe6109068b30e8c0920f17`; the new exact-head Push/PR runs had started, but review of the committed test source found its CSV row split delimiter was double-escaped.
+- Corrected the Node regression to split actual CRLF rows; the exact density and derived-mass round-trip assertions are unchanged. This is a test-fixture correction, not a product-code change.
+- Supersede the in-progress checks on `098b58e2c1e8114433fe6109068b30e8c0920f17`; full exact-head Quality must pass on the corrected follow-up commit before the CSV precision change is considered QA-verified.
+- Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; PR #191 remains open, with zero independent reviews. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-25 — TRUSS-MATERIAL-CSV-ROUNDTRIP-PRECISION
 
 - Starting dev `b03433d31a9246ba6227af4a2c6386ba552d0a7f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, Truss source/tests/contract, refs, PR #191/reviews, CI and Pages.

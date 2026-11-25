@@ -1025,7 +1025,7 @@ test('material CSV numeric cells use shortest round-trip binary64 values',()=>{
  assert.ok(fem.exportMaterialCSV(precise).includes('"0.6666666666666666"'));
  const exact=clone(fem.examples.bar);exact.members[0].density=0.10000000000000002;
  const metric=fem.inspectJSON(JSON.stringify(exact)).memberMetrics[0];
- const exactRow=fem.exportMaterialCSV(exact).trimEnd().split('\\r\\n')[1].slice(1,-1).split('","');
+ const exactRow=fem.exportMaterialCSV(exact).trimEnd().split('\r\n')[1].slice(1,-1).split('","');
  assert.equal(exactRow[8],'0.10000000000000002');
  assert.equal(Number(exactRow[8]),metric.density);
  assert.equal(exactRow[9],String(metric.mass));

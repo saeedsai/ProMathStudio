@@ -1,3 +1,8 @@
+## 2026-11-25 — Correct Truss CSV round-trip regression row delimiter
+
+- Corrected the new Node regression to split the exported CSV on actual CRLF characters rather than a double-escaped literal; numeric round-trip assertions are unchanged.
+- Exact-head Push/PR Quality must pass on the corrected follow-up commit; not released.
+
 ## 2026-11-25 — Truss material CSV preserves exact binary64 numeric values
 
 - Replaced fixed 16-significant-digit rounding with shortest round-trippable decimal output for finite numeric cells; negative zero is emitted as `-0`.

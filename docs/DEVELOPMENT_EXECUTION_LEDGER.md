@@ -1,3 +1,17 @@
+## 2026-11-25 — TRUSS-I-SECTION-CENTRED-WEB-AREA-UNDERFLOW
+
+Starting refs: dev 822246d054dd48a79d6183550bd4fe14cede768f, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; branch listing contained exactly dev/main. Existing exact-head Push Quality #45583979277 and PR Quality #45583988176 each passed 218/218, zero failures/skips, on the starting dev SHA. Main Quality #45360386408 and Pages #45360367251 succeeded on main.
+
+Found a false rejection in composite I-section section properties: a positive centered web can have a product area below binary64 range while the two flange-dominated net section properties remain representable. For B=1e100 mm, H=1e-100 mm, tw=Number.MIN_VALUE mm and tf=1e-101 mm, web area rounds to zero but the exact-binary64 Decimal references for area, Ixx/Iyy, Sx/Sy and rx/ry are finite and positive.
+
+Changed only the central I-section web allowance: zero rounded area is accepted for piece index 1 only when both web dimensions are below 1 mm and the calculated web center equals the section center exactly. Its local inertias are then below the binary64 area contribution and its parallel-axis offsets are zero by symmetry. All other composite-piece area underflow, positive total area and positive final inertia checks remain enforced. A channel using the same dimensions remains rejected.
+
+Added direct Node and registered Chromium desktop/390px regressions with 120-digit Decimal references, channel negative control, exact-center assertions, input immutability and frozen-output checks. Updated the Structural Truss guide, hourly plan and changelog in the same atomic source/test/documentation commit. No root index.html change is required because Truss Studio uses adjacent assets.
+
+Local checkout is absent, so full local Node/Playwright commands could not run. Independent Decimal/binary64 reference calculations were checked separately; exact-head GitHub Actions must certify the new candidate. PR #191 remains open with no independent reviews; both branches are unprotected, rulesets empty and main-protection reads return HTTP 403. No release was attempted. Main and Pages remain unchanged. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+NEXT FIVE: (1) new exact-head Push/PR Quality must pass all 218+ checks, especially Truss Node and 1280px/390px smoke; (2) P0 release governance: independent PR #191 approval, verifiable main protection, ordinary merge and post-merge main Quality/Pages/hosted verification; (3) complete seven-shape Truss numerical boundary/invalid rollback and selected-member isolation matrix; (4) Data Tables row-6000/column-AF #REF!, reversed/mixed-anchor and transactional rollback matrix; (5) saved-project Matrix/Graph/Table compatibility and ODE analytical forward/backward convergence, failure/recovery and mobile tests.
+
 ## 2026-11-25 — TRUSS-L-ANGLE-MIXED-SCALE-SUBNORMAL-AXIS-PRECISION
 
 **Starting refs:** dev `22d5f45ad533a81b932f3f44cb594cd10a914b88`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exactly `dev` and `main` exist. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, unified implementation plan, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, exact-head Actions and main Pages evidence.

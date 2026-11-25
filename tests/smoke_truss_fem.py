@@ -351,6 +351,39 @@ def main():
                 assert abs(result['rx'] / result['expected']['rx'] - 1) <= 5e-13, (shape, result)
                 assert abs(result['ry'] / result['expected']['ry'] - 1) <= 5e-13, (shape, result)
 
+            # A symmetric I-section may have a positive central web whose area and local
+            # inertias are below binary64 range while both flange-dominated axes remain valid.
+            centered_web = page.evaluate("""() => {
+                const dimensions = {
+                    width: 1e100, height: 1e-100,
+                    webThickness: Number.MIN_VALUE, flangeThickness: 1e-101
+                };
+                const webHeight = dimensions.height - 2 * dimensions.flangeThickness;
+                const section = ProMathTrussFEM.sectionProperties('i-section', dimensions);
+                let channelRejected = false;
+                try { ProMathTrussFEM.sectionProperties('channel', dimensions); }
+                catch (error) { channelRejected = /Composite section area underflow/.test(error.message); }
+                return {
+                    webArea: dimensions.webThickness * webHeight,
+                    webCenterX: (dimensions.width - dimensions.webThickness) / 2 + dimensions.webThickness / 2,
+                    webCenterY: dimensions.flangeThickness + webHeight / 2,
+                    area: section.area, ixx: section.secondMoment, iyy: section.secondMomentPerpendicular,
+                    sx: section.sectionModulusX, sy: section.sectionModulusY,
+                    rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY,
+                    cx: section.centroid.x, cy: section.centroid.y, channelRejected
+                };
+            }""")
+            assert centered_web['webArea'] == 0, centered_web
+            assert centered_web['webCenterX'] == 5e99 and centered_web['webCenterY'] == 5e-101, centered_web
+            for key, expected in {
+                'area': 0.2, 'ixx': 4.066666666666667e-202,
+                'iyy': 1.6666666666666667e198, 'sx': 8.133333333333335e-102,
+                'sy': 3.333333333333333e98, 'rx': 4.509249752822894e-101,
+                'ry': 2.8867513459481287e99, 'cx': 5e99, 'cy': 5e-101
+            }.items():
+                assert math.isfinite(centered_web[key]) and abs(centered_web[key] / expected - 1) <= 5e-13, (key, centered_web)
+            assert centered_web['channelRejected'], centered_web
+
             # Composite Sx/Sy must use normalized inertia and extreme-fibre geometry when
             # dimensional inertias are subnormal; I/c previously lost 5–24% here.
             composite_moduli = page.evaluate("""() => {

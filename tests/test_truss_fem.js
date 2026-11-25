@@ -1385,6 +1385,45 @@ test('open channel and I sections use composite rectangles and the parallel-axis
 });
 
 
+test('I-section accepts a centered web whose area is below binary64 range when flange properties remain representable',()=>{
+ const dimensions={width:1e100,height:1e-100,webThickness:Number.MIN_VALUE,flangeThickness:1e-101};
+ const original={...dimensions};
+ const webHeight=dimensions.height-2*dimensions.flangeThickness;
+ assert.equal(dimensions.webThickness*webHeight,0,
+  'the positive centered-web area must underflow to zero in binary64');
+ assert.equal((dimensions.width-dimensions.webThickness)/2+dimensions.webThickness/2,
+  dimensions.width/2,'the web must be centered on the I-section vertical axis');
+ assert.equal(dimensions.flangeThickness+webHeight/2,dimensions.height/2,
+  'the web must be centered on the I-section horizontal axis');
+ const section=fem.sectionProperties('i-section',dimensions);
+ const expected={
+  area:0.2,
+  ixx:4.066666666666667e-202,
+  iyy:1.6666666666666667e198,
+  sx:8.133333333333335e-102,
+  sy:3.333333333333333e98,
+  rx:4.509249752822894e-101,
+  ry:2.8867513459481287e99
+ };
+ const relative=(actual,want,label)=>assert.ok(Number.isFinite(actual)&&want>0&&
+  Math.abs(actual/want-1)<=5e-13,label+' '+actual+' must match the 120-digit exact-binary64 Decimal reference '+want);
+ relative(section.area,expected.area,'I-section area');
+ relative(section.secondMoment,expected.ixx,'I-section Ixx');
+ relative(section.secondMomentPerpendicular,expected.iyy,'I-section Iyy');
+ relative(section.sectionModulusX,expected.sx,'I-section Sx');
+ relative(section.sectionModulusY,expected.sy,'I-section Sy');
+ relative(section.radiusOfGyrationX,expected.rx,'I-section rx');
+ relative(section.radiusOfGyrationY,expected.ry,'I-section ry');
+ assert.deepEqual(section.centroid,{x:5e99,y:5e-101});
+ assert.equal(section.extremeFiberDistanceAboutX,5e-101);
+ assert.equal(section.extremeFiberDistanceAboutY,5e99);
+ assert.throws(()=>fem.sectionProperties('channel',dimensions),/Composite section area underflow/,
+  'the exception is limited to the exactly centered I-section web');
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});
+
+
 test('composite section local inertias avoid intermediate overflow when final properties are finite',()=>{
  // Synthetic floating-range stress cases (dimensions in mm), not physical design examples.
  // The old left-to-right b*h*h*h/12 expression overflows before division although Ixx is finite.

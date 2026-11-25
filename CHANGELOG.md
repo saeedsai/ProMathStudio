@@ -1,3 +1,10 @@
+## 2026-11-25 — I-section accepts a centered web whose area is below binary64 range (dev; exact-head QA pending)
+
+- The I-section helper now permits only its exactly centered central web to have a zero rounded area when both web dimensions are below 1 mm; its local inertias and parallel-axis contributions are then also below binary64 range.
+- All other composite-piece area-underflow rejection and final positive total-area/inertia checks remain unchanged; the same underflowed web is still rejected for a channel.
+- Added exact-binary64 Decimal-reference Node and registered 1280px/390px Chromium regressions for area, Ixx/Iyy, Sx/Sy and rx/ry, plus a channel negative control.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — L-angle mixed-axis subnormal precision (dev; exact-head QA pending)
 
 - L-angle section-property evaluation now uses independent width/depth normalization when only one centroidal inertia is subnormal, preserving geometric section modulus and radius precision for that axis.

@@ -1,3 +1,26 @@
+## 2026-11-25 — TRUSS-I-SECTION-CENTRED-WEB-AREA-UNDERFLOW
+
+Starting refs: dev 822246d054dd48a79d6183550bd4fe14cede768f, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; only dev and main exist. Re-read root AGENTS.md, the frozen 2026-10-26 inventory, this living plan, unified implementation plan, engineering architecture/toolbox contracts, Truss implementation/tests/guide, PR #191, current exact-head Quality and main Pages evidence.
+
+Starting exact-head QA: Push Quality #45583979277 (https://github.com/saeedsai/ProMathStudio/actions/runs/45583979277) and PR Quality #45583988176 (https://github.com/saeedsai/ProMathStudio/actions/runs/45583988176) both passed 218/218 steps, zero failures/skips, on exact SHA 822246d054dd48a79d6183550bd4fe14cede768f. Main Quality #45360386408 and Pages #45360367251 both succeeded on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; the Pages workflow build, status and deployment jobs completed successfully.
+
+Defect reproduced: Composite I-section parsing rejected a positive central web when webThickness × webHeight rounded below the binary64 range, even though both flange areas and every reported net section property remained representable. Fixture: B=1e100 mm, H=1e-100 mm, tw=Number.MIN_VALUE mm, tf=1e-101 mm. The web is exactly centered; its area and local inertias round to zero, and its parallel-axis offsets are zero by symmetry.
+
+Fix: Permit only I-section piece index 1 (the central web) to have zero rounded area, only when both web dimensions are below 1 mm and the computed web center exactly equals the section center. Keep all other composite piece underflow checks, positive total-area checks and final positive inertia checks unchanged. This avoids silently discarding an off-center channel web or any other composite piece.
+
+Regression: Added a direct Node case with 120-digit Decimal references for area, Ixx/Iyy, Sx/Sy and rx/ry; verifies the web area really underflows, the web center is exact, input dimensions and frozen outputs are preserved, and the same input remains rejected for a channel. Extended the registered Chromium Truss regression at 1280px and 390px with the same references and channel negative case. Truss Studio loads adjacent assets; root index.html synchronization is not applicable.
+
+Validation and limits: Independent 120-digit Decimal references from exact binary64 inputs and a binary64 operation-order harness confirm the accepted I-section properties are representable. Full local repository Node/Chromium tests are unavailable because this execution workspace has no checkout; fresh exact-head Push/PR Quality is required before considering QA complete.
+
+Release blocker: PR #191 remains open/mergeable with zero submitted independent reviews. Branch listing reports only dev and main, both protected:false; rulesets are empty and main-protection reads return HTTP 403 to the connected integration. No merge, direct main update, force push or safeguard bypass. Main and Pages remain unchanged. Frozen historical inventory remains 166 gaps / 95 partial.
+
+NEXT FIVE (priority, status, dependencies and acceptance tests):
+1. P0 — Release governance (blocked): obtain verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion, plus eligible independent PR #191 approval; inspect full diff and exact checks, merge only via ordinary PR, then verify new main Quality, Pages and hosted critical paths.
+2. P1 — Finish seven-shape Truss numerical boundary audit (in progress): thin-wall, subnormal and high-scale references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; exact-binary64 Decimal results, true final overflow/underflow rejection, invalid rollback, selected-member isolation, full Node suite and 1280px/390px Chromium.
+3. P1 — Data Tables grid-boundary edits: row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. P1 — Saved-project compatibility: current and legacy Matrix/Graph/Table round-trips; malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. P1 — ODE solver verification: analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation; independent numerical references, failure/recovery and desktop/390px browser checks.
+
 ## 2026-11-25 — TRUSS-L-ANGLE-MIXED-SCALE-SUBNORMAL-AXIS-PRECISION
 
 **Starting refs:** dev `22d5f45ad533a81b932f3f44cb594cd10a914b88`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exactly `dev` and `main` exist. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, unified implementation plan, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, exact-head Actions and main Pages evidence.

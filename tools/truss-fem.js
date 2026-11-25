@@ -448,7 +448,15 @@
           ];
       const pieceMetrics = pieces.map((piece,index) => {
         const pieceArea = finite(piece.width * piece.height, 'Composite section rectangle '+(index+1)+' area (mm²)');
-        if (!(pieceArea > 0)) throw Error('Composite section area underflow; increase dimensions.');
+        // A centered I-section web whose area rounds below binary64 range can be
+        // omitted only when both web dimensions are below 1 mm: its local inertias
+        // then underflow too, and symmetry makes both parallel-axis offsets zero.
+        const negligibleCenteredIWeb = shape === 'i-section' && index === 1 &&
+          pieceArea === 0 && piece.width < 1 && piece.height < 1 &&
+          piece.x + piece.width/2 === width/2 && piece.y + piece.height/2 === depth/2;
+        if (!(pieceArea > 0) && !negligibleCenteredIWeb) {
+          throw Error('Composite section area underflow; increase dimensions.');
+        }
         return {...piece,area:pieceArea,
           cx:finite(piece.x + piece.width/2, 'Composite section rectangle centroid x (mm)'),
           cy:finite(piece.y + piece.height/2, 'Composite section rectangle centroid y (mm)')};

@@ -1,3 +1,9 @@
+## 2026-11-25 — Data Tables action menus expose explicit disclosure relationships
+
+- Added unique content-region IDs and `aria-controls` links to the five native Table, Filter, Combine, Files and Python disclosure summaries while retaining their accessible names.
+- Corrected the registered Chromium regression to exercise the native summary control directly, assert its accessible name/control target, and verify Rename visibility before atomic rollback/recovery.
+- Synchronized `src/numerical-data.js` with the embedded standalone `index.html`. Exact-head Push/PR Quality is required; not released.
+
 ## 2026-11-25 — Data Tables insertion at the grid edge invalidates shifted references
 
 - Structural insertion now rewrites previously valid scalar references and ranges to explicit `#REF!` when a shifted coordinate would leave A1:AF6000; already-invalid references remain unchanged.

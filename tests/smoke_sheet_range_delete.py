@@ -163,8 +163,14 @@ def main():
             };
         }""")
         page.locator('[data-workspace="data"]').click()
-        # Rename lives in the collapsed Table menu; open it through its accessible name.
-        page.get_by_role("button", name="Table actions").click()
+        # Use the native disclosure control directly; verify its accessible name and controlled region.
+        table_summary = page.locator("#data-menu-navigation > details:first-child > summary")
+        assert table_summary.count() == 1
+        assert table_summary.get_attribute("aria-label") == "Table actions"
+        assert table_summary.get_attribute("aria-controls") == "dt-menu-content-table"
+        assert page.locator("#dt-menu-content-table").count() == 1
+        assert table_summary.is_visible()
+        table_summary.click()
         assert page.locator("#dt-rename").is_visible()
         page.once("dialog", lambda dialog: dialog.accept("Renamed Sheet"))
         page.locator("#dt-rename").click()

@@ -1,3 +1,25 @@
+## 2026-11-25 — DATA-TABLES-MENU-DISCLOSURE-RELATIONSHIP
+
+Starting refs: dev `55d8908906d37ec41e2ea245843f01c25a7f1b79`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; branches were exactly `dev` and `main`, and PR #191 was the only open release PR. Exact-head Push Quality [#45628106794](https://github.com/saeedsai/ProMathStudio/actions/runs/45628106794) and PR Quality [#45628120984](https://github.com/saeedsai/ProMathStudio/actions/runs/45628120984) both failed at the registered **Spreadsheet range deletion regression** (step 80). The job log shows the 602-test structural suite passed (one existing skip), browser steps 1–79 passed, then Playwright timed out at `get_by_role("button", name="Table actions")` in `tests/smoke_sheet_range_delete.py`. The menu is present and the modular source is byte-identical to the standalone bundle; the failure is the role locator's interoperability with the native `summary` disclosure control, not missing source code.
+
+Correction on dev: each native action-menu summary now has a unique `aria-controls` relationship to its content region (`dt-menu-content-table/filter/combine/files/python`), in addition to its accessible label. The registered Chromium test now locates the native first `summary` directly, verifies its `aria-label`, verifies the `aria-controls` target exists, clicks the disclosure, and asserts Rename is visible before exercising the existing failed-rename rollback and recovery checks. No browser assertions are removed or weakened. `src/numerical-data.js` and its embedded standalone `index.html` block are updated in the same commit.
+
+Validation before commit: the complete modular source was found verbatim in the standalone bundle; the exact helper and test blocks matched once; after transformation the new source was again found verbatim and the old embedded source was absent. Full local Node/Playwright execution is unavailable because this execution workspace has no repository checkout. New exact-head Push and PR Quality must pass the structural suite and browser step 80 before this candidate is QA-verified.
+
+Release: PR #191 remains open with no submitted independent reviews. Branch list contains only dev/main and both report `protected:false`; rulesets endpoint returned `[]`, while branch-protection read returned HTTP 403 `Resource not accessible by integration`. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are still successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Pages build, status reporting and deployment jobs all succeeded. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Verify this Data Tables disclosure CI repair.** Acceptance: source/bundle parity passes; exact-head Push and PR Quality both complete with zero failed/skipped required checks; step 80 verifies each summary's accessible label and `aria-controls`, opens Table, exposes Rename, and passes atomic rollback/recovery.
+2. **P0 — Release governance (blocked).** Obtain eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; inspect the complete diff; ordinary PR merge only; then verify main Quality, Pages and hosted critical paths.
+3. **P1 — Complete Data Tables grid-boundary verification.** Cover row 6000/column AF insert/delete, scalar/range `#REF!`, already-invalid reference preservation, blank-grid/reversed/mixed-anchor coverage, byte-identical rollback and desktop/390px Chromium.
+4. **P1 — Finish the seven-shape Truss numerical audit.** Exact-binary64 Decimal references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; thin-wall/subnormal/high-scale cases; final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+5. **P1 — Saved-project compatibility.** Current/legacy Matrix, Graph and Table round-trips; malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+
+ODE forward/backward verification remains queued after these five.
+
+---
+
 ## 2026-11-25 — DATA-TABLES-MENU-SOURCE-BUNDLE-PARITY
 
 Starting refs: dev `f241b89e864a801be1f352aa6417c3a78c3214c9`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The first accessible-menu candidate updated `index.html` and the Chromium test but omitted the matching `src/numerical-data.js` source. Exact-head Push Quality [#45627424546](https://github.com/saeedsai/ProMathStudio/actions/runs/45627424546) and PR Quality [#45627436102](https://github.com/saeedsai/ProMathStudio/actions/runs/45627436102) both correctly failed at structural step 7: **15 source/standalone parity assertions** failed across the 602-test structural suite (one pre-existing skip). The mismatch was exactly the menu helper's missing `aria-label` in `src/numerical-data.js`; no browser test ran in those workflows.

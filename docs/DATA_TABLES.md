@@ -1,5 +1,10 @@
 # Data Tables workspace
 
+## Accessible action-menu disclosures
+
+The Table, Filter, Combine, Files and Python native `details/summary` menus expose an accessible summary name and an `aria-controls` reference to a unique content-region ID. Browser regressions verify that the referenced region exists and that the native summary opens before accessing its controls.
+
+
 ProMathStudio provides an in-browser spreadsheet-style workbook. Open **Data tables** in the top workspace menu. Existing calculator, equation editor, solver, graphs, notebook and connected workspace remain available.
 
 ## Workbooks

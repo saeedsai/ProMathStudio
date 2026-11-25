@@ -62,7 +62,7 @@ Use **Show in graphs** or open Graphs and choose a table, X/category column, Y/v
 - Bar chart: sums repeated category labels; supports positive/negative values.
 - Pie chart: percentages of positive values; zero/negative values are excluded.
 
-Charts with more than 24 categories group the remainder under **Other**. Bar/Pie export to PNG. Equation curves/surfaces can still be plotted with imported data in the original graph engine. Ranges/graph controls remain available there.
+Repeated-category totals use scale-safe compensated accumulation; finite results survive large partial sums and cancellation, while a genuinely unrepresentable category total is reported instead of drawing invalid geometry. Pie percentages are normalized before summation, and bar axes are scaled before coordinate mapping so finite values near the binary64 limits do not overflow chart calculations. Charts with more than 24 categories group the remainder under **Other** using the same safe accumulation. Bar/Pie export to PNG. Equation curves/surfaces can still be plotted with imported data in the original graph engine. Ranges/graph controls remain available there.
 
 ## Persistence and privacy
 

@@ -1,4 +1,4 @@
-"""Browser regression: reserved aggregate names, finite means and nonfinite errors."""
+"""Browser regression: reserved aggregates, finite means, nonfinite errors and scale-safe charts."""
 import math
 import os
 from pathlib import Path
@@ -120,6 +120,72 @@ def main():
         for width in (390, 768, 1280):
             page.set_viewport_size({"width": width, "height": 850})
             assert page.locator('#dt-sheet').count() == 1
+        # Repeated-category aggregation and chart geometry must remain finite at extreme scales.
+        page.evaluate("""() => {
+          MathStudio.dataTables.restoreState({
+            version:1,selected:'chart',tables:[{id:'chart',name:'Chart',
+              columns:['Category','Value'],rows:[
+                ['A','1e308'],['A','1e308'],['A','-1e308'],['B','1e308']
+              ]}]
+          });
+          document.getElementById('dt-graph-table').value='sheet-1';
+          document.getElementById('dt-graph-x').value='0';
+          document.getElementById('dt-graph-y').value='1';
+          document.getElementById('dt-chart-type').value='pie';
+          window.__dtPieSpans=[];
+          const proto=CanvasRenderingContext2D.prototype;
+          window.__dtOriginalArc=proto.arc;
+          proto.arc=function(...args){
+            if(this.canvas?.id==='dt-chart-canvas')window.__dtPieSpans.push([args[3],args[4]]);
+            return window.__dtOriginalArc.apply(this,args);
+          };
+          MathStudio.dataTables.plot();
+          proto.arc=window.__dtOriginalArc;
+        }""")
+        pie_spans = page.evaluate("window.__dtPieSpans")
+        assert len(pie_spans) == 2, pie_spans
+        assert all(math.isfinite(start) and math.isfinite(end) for start, end in pie_spans), pie_spans
+        assert all(abs((end - start) - math.pi) < 1e-12 for start, end in pie_spans), pie_spans
+
+        page.evaluate("""() => {
+          MathStudio.dataTables.restoreState({
+            version:1,selected:'chart',tables:[{id:'chart',name:'Chart',
+              columns:['Category','Value'],rows:[['Positive','1e308'],['Negative','-1e308']]}]
+          });
+          document.getElementById('dt-graph-table').value='sheet-1';
+          document.getElementById('dt-graph-x').value='0';
+          document.getElementById('dt-graph-y').value='1';
+          document.getElementById('dt-chart-type').value='bar';
+          window.__dtBarRects=[];
+          const proto=CanvasRenderingContext2D.prototype;
+          window.__dtOriginalFillRect=proto.fillRect;
+          proto.fillRect=function(...args){
+            if(this.canvas?.id==='dt-chart-canvas')window.__dtBarRects.push(args);
+            return window.__dtOriginalFillRect.apply(this,args);
+          };
+          MathStudio.dataTables.plot();
+          proto.fillRect=window.__dtOriginalFillRect;
+        }""")
+        bar_rects = page.evaluate("window.__dtBarRects")
+        assert len(bar_rects) >= 3, bar_rects
+        assert all(math.isfinite(value) for rect in bar_rects for value in rect), bar_rects
+
+        page.evaluate("""() => {
+          MathStudio.dataTables.restoreState({
+            version:1,selected:'chart',tables:[{id:'chart',name:'Chart',
+              columns:['Category','Value'],rows:[['Overflow','1e308'],['Overflow','1e308']]}]
+          });
+          document.getElementById('dt-graph-table').value='sheet-1';
+          document.getElementById('dt-graph-x').value='0';
+          document.getElementById('dt-graph-y').value='1';
+          document.getElementById('dt-chart-type').value='pie';
+        }""")
+        chart_overflow = page.evaluate("""() => {
+          try { MathStudio.dataTables.plot(); return 'NO_ERROR'; }
+          catch(error) { return error.message; }
+        }""")
+        assert chart_overflow == 'Category "Overflow" total exceeds finite numeric range.', chart_overflow
+
         assert not errors, errors
         browser.close()
     print("PASS spreadsheet built-in priority, cancellation-safe SUM/AVERAGE, subnormal residuals, median and true overflow errors")

@@ -1,3 +1,25 @@
+## 2026-11-25 — DATA-TABLES-CATEGORICAL-CHART-RANGE-SAFETY
+
+Starting refs: dev `dc0e0380eea5ed51506e3270e036251eb7122cb6`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root `AGENTS.md`, the living plan and frozen 2026-10-26 inventory were inspected. The only long-lived branches are dev/main; PR #191 is the only open release PR. Exact-head Push Quality #45643183397 and PR Quality #45643192090 both completed successfully on the starting dev SHA, including the previously failing Data Tables disclosure and range-deletion browser tests. Main Quality #45360386408 and Pages deployment #45360367251 succeeded on unchanged main.
+
+Implemented on dev: Data Tables Bar/Pie chart aggregation now uses the existing compensated scale-safe sum for repeated category labels and the grouped Other category. A genuinely unrepresentable category total is rejected with a category-specific diagnostic. Pie proportions are computed from values normalized by the largest positive category, avoiding overflow in the pie total. Bar coordinates use normalized positive/negative values before axis-range subtraction, preventing infinite ranges and NaN canvas geometry for finite data near binary64 limits.
+
+Regression: extended the registered `tests/smoke_sheet_numeric_hardening.py` Chromium test with (1) repeated-category cancellation `1e308 + 1e308 - 1e308 = 1e308`, (2) two equal `1e308` pie categories producing two finite half-circle sweeps, (3) a `+1e308/-1e308` bar chart whose canvas rectangles must all be finite, and (4) true category-total overflow rejection. Added structural source assertions in `tests/test_sheet_numeric_hardening.py`. Updated `docs/DATA_TABLES.md`, this ledger, the living plan and changelog. Verified the modular source is embedded byte-for-byte in standalone `index.html`.
+
+Local validation: isolated numerical/geometry checks are run separately; full local repository/browser suite is unavailable because this execution environment has no repository checkout. New exact-head Push and PR Quality must complete before this candidate is QA-verified.
+
+Release: PR #191 remains open with zero independent reviews; both branches report unprotected and branch-protection reads return HTTP 403 to the connected integration. No merge or direct main update. Main and Pages remain unchanged. Frozen inventory remains **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Release governance (blocked):** independent PR #191 approval, verifiable main protection, exact-head required Quality, ordinary PR merge, then main Quality, Pages and hosted critical-path verification.
+2. **P1 — Seven-shape Truss numerical audit:** thin-wall/subnormal/high-scale exact-binary64 Decimal references across all seven shapes; final overflow/underflow rejection, invalid rollback, selected-member isolation and desktop/390px browser checks.
+3. **P1 — Data Tables formula-reference edge audit:** row 6000/column AF, scalar/range #REF!, already-invalid references, blank/reversed/mixed-anchor ranges, quoted names and literals; atomic rollback/recovery and desktop/390px tests.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed-import rollback preserving workspaces, focus, selection and results.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, convergence, unsupported-class diagnostics, bounded failure recovery and stale-export invalidation.
+
+---
+
 ## 2026-11-25 — DATA-TABLES-SCALED-COMPENSATED-SUM
 
 Starting refs: dev `c23d5679a1c7637b27c4b2bc3a2505157e376d3f`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; branches are exactly dev/main and PR #191 is the only open release PR. The previous exact-head candidate passed Push Quality [#45630253317](https://github.com/saeedsai/ProMathStudio/actions/runs/45630253317) and PR Quality [#45630269499](https://github.com/saeedsai/ProMathStudio/actions/runs/45630269499), both 218/218 with zero failures/skips; Spreadsheet range deletion step 80 passed. Current main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) passed 218/218, and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) completed build, status reporting and deployment successfully on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.

@@ -1,3 +1,10 @@
+## 2026-11-25 — Data Tables categorical charts avoid numeric overflow
+
+- Replaced naive repeated-category addition with scale-normalized compensated accumulation, including the grouped Other category; genuinely unrepresentable category totals now produce an explicit error.
+- Normalized positive pie weights before computing percentages and normalized mixed-sign bar values before axis mapping, preventing infinite totals/ranges and non-finite canvas coordinates for finite binary64 inputs.
+- Added registered Chromium regressions for large-value category cancellation, finite equal pie slices, finite mixed-sign bar rectangles and true category overflow; added structural source assertions.
+- Synchronized `src/data-tables.js` with the embedded standalone `index.html`. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-25 — Data Tables SUM preserves finite results after cancellation
 
 - Replaced naive left-to-right SUM accumulation with scale-normalized compensated summation, retaining terms whose normalized quotient underflows so they survive cancellation of much larger values.

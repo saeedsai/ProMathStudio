@@ -30,6 +30,15 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
         self.assertNotIn("x=nums.reduce((a,b)=>a+b,0);", SOURCE)
         self.assertIn("if(!Number.isFinite(x))throw Error('#NUM!')", SOURCE)
 
+    def test_categorical_charts_use_scaled_totals_and_finite_geometry(self):
+        self.assertIn("const total=stableSum(values);", SOURCE)
+        self.assertIn("const otherTotal=stableSum(entries.slice(23).map(entry=>entry[1]));", SOURCE)
+        self.assertIn("const scale=Math.max(0,...entries.map(entry=>Math.abs(entry[1])));", SOURCE)
+        self.assertIn("const weights=positive.map(entry=>entry[1]/scale),total=stableSum(weights);", SOURCE)
+        self.assertIn("const y=100+(hi-normalizedValue)/span*(h-195);", SOURCE)
+        self.assertIn("total exceeds finite numeric range.", SOURCE)
+        self.assertIn("python tests/smoke_sheet_numeric_hardening.py", WORKFLOW)
+
     def test_even_median_uses_range_safe_midpoint(self):
         self.assertIn("function safeMidpoint(a,b)", SOURCE)
         self.assertIn("safeMidpoint(ordered[mid-1],ordered[mid])", SOURCE)

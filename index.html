@@ -4863,21 +4863,56 @@ self.onmessage=async ({data})=>{
   }
   $('dt-graph-table').addEventListener('change',chartColumns);
   $('dt-chart-type').addEventListener('change',chartColumns);
-  function drawCategorical(t,kind,xi,yi){const rows=evaluated(t),sums=new Map();for(const row of rows){const key=String(row[xi]??'').trim();const v=Number(row[yi]);if(!key||!Number.isFinite(v))continue;sums.set(key,(sums.get(key)||0)+v);}
-    let entries=[...sums.entries()];if(entries.length>24){entries=entries.slice(0,23).concat([['Other',entries.slice(23).reduce((sum,x)=>sum+x[1],0)]]);}
+  function drawCategorical(t,kind,xi,yi){
+    const rows=evaluated(t),buckets=new Map();
+    for(const row of rows){
+      const key=String(row[xi]??'').trim(),v=Number(row[yi]);
+      if(!key||!Number.isFinite(v))continue;
+      const bucket=buckets.get(key);
+      if(bucket)bucket.push(v);else buckets.set(key,[v]);
+    }
+    let entries=[...buckets.entries()].map(([name,values])=>{
+      const total=stableSum(values);
+      if(!Number.isFinite(total))throw Error('Category "'+name+'" total exceeds finite numeric range.');
+      return [name,total];
+    });
+    if(entries.length>24){
+      const otherTotal=stableSum(entries.slice(23).map(entry=>entry[1]));
+      if(!Number.isFinite(otherTotal))throw Error('Other category total exceeds finite numeric range.');
+      entries=entries.slice(0,23).concat([['Other',otherTotal]]);
+    }
     if(!entries.length)throw Error('Select a numeric values column with nonempty category labels.');
     const canvas=$('dt-chart-canvas'),ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
     ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.fillStyle='#1d2a49';ctx.font='bold 25px Arial';ctx.fillText(t.name+' — '+(kind==='pie'?'Pie':'Bar')+' chart',45,45);
     const colors=Array.from({length:24},(_,i)=>window.MathStudio.graphAppearance?.color(i)||'#536be8');
-    if(kind==='bar'){const margin=90,max=Math.max(0,...entries.map(e=>e[1])),min=Math.min(0,...entries.map(e=>e[1]));const lo=Math.min(0,min),hi=Math.max(1,max),barW=(w-2*margin)/entries.length;
+    if(kind==='bar'){
+      const margin=90,scale=Math.max(0,...entries.map(entry=>Math.abs(entry[1])));
+      const normalized=scale?entries.map(([name,value])=>[name,value/scale]):entries.map(([name])=>[name,0]);
+      let hi=Math.max(0,...normalized.map(entry=>entry[1])),lo=Math.min(0,...normalized.map(entry=>entry[1]));
+      if(hi===lo)hi=1;
+      const span=hi-lo,barW=(w-2*margin)/entries.length;
       ctx.strokeStyle='#90a1c6';ctx.beginPath();ctx.moveTo(margin,100);ctx.lineTo(margin,h-95);ctx.lineTo(w-margin,h-95);ctx.stroke();
-      for(let i=0;i<entries.length;i++){const [name,v]=entries[i],x=margin+i*barW+barW*.13,bw=barW*.74;
-        const y0=100+(hi/(hi-lo))*(h-195),y=100+(hi-v)/(hi-lo)*(h-195);ctx.fillStyle=colors[i%colors.length];ctx.fillRect(x,Math.min(y,y0),bw,Math.max(1,Math.abs(y-y0)));
+      const y0=100+(hi/span)*(h-195);
+      for(let i=0;i<entries.length;i++){
+        const [name,value]=entries[i],normalizedValue=normalized[i][1],x=margin+i*barW+barW*.13,bw=barW*.74;
+        const y=100+(hi-normalizedValue)/span*(h-195);
+        ctx.fillStyle=colors[i%colors.length];ctx.fillRect(x,Math.min(y,y0),bw,Math.max(1,Math.abs(y-y0)));
         ctx.fillStyle='#566783';ctx.font='12px Arial';ctx.save();ctx.translate(x+bw/2,h-84);ctx.rotate(-Math.PI/6);ctx.fillText(name.slice(0,14),-4,0);ctx.restore();
-        ctx.font='bold 12px Arial';ctx.fillText(String(+v.toFixed(4)),x,Math.min(y,y0)-8);}}
-    else{const positive=entries.filter(v=>v[1]>0),sum=positive.reduce((a,b)=>a+b[1],0);if(!sum)throw Error('Pie chart requires positive values.');let angle=-Math.PI/2;
-      for(let i=0;i<positive.length;i++){const [name,v]=positive[i],end=angle+v/sum*Math.PI*2;ctx.beginPath();ctx.moveTo(400,330);ctx.arc(400,330,230,angle,end);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();angle=end;
-        ctx.fillRect(760,115+i*24,13,13);ctx.fillStyle='#2b3d59';ctx.font='15px Arial';ctx.fillText(name.slice(0,30)+' · '+(100*v/sum).toFixed(1)+'%',783,127+i*24);}}
+        ctx.font='bold 12px Arial';ctx.fillText(String(+value.toFixed(4)),x,Math.min(y,y0)-8);
+      }
+    }else{
+      const positive=entries.filter(entry=>entry[1]>0);
+      if(!positive.length)throw Error('Pie chart requires positive values.');
+      const scale=Math.max(...positive.map(entry=>entry[1]));
+      const weights=positive.map(entry=>entry[1]/scale),total=stableSum(weights);
+      if(!(total>0)||!Number.isFinite(total))throw Error('Pie chart values cannot be normalized.');
+      let angle=-Math.PI/2;
+      for(let i=0;i<positive.length;i++){
+        const [name]=positive[i],fraction=weights[i]/total,end=angle+fraction*Math.PI*2;
+        ctx.beginPath();ctx.moveTo(400,330);ctx.arc(400,330,230,angle,end);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();angle=end;
+        ctx.fillRect(760,115+i*24,13,13);ctx.fillStyle='#2b3d59';ctx.font='15px Arial';ctx.fillText(name.slice(0,30)+' · '+(100*fraction).toFixed(1)+'%',783,127+i*24);
+      }
+    }
     chartDiv.hidden=false;document.querySelector('#graph-panel .graph-canvas-wrap').classList.add('workspace-hidden');$('dt-chart-status').textContent=kind+' chart of '+entries.length+' categories from '+t.name+'.';
   }
   function sendToGraph(){const t=tables.find(x=>x.id===$('dt-graph-table').value)||active();if(!t)throw Error('No table selected.');const x=Number($('dt-graph-x').value),y=Number($('dt-graph-y').value),z=Number($('dt-graph-z').value),kind=$('dt-chart-type').value;

@@ -1,3 +1,26 @@
+## 2026-11-25 — TRUSS-L-ANGLE-MIXED-SCALE-SUBNORMAL-AXIS-PRECISION
+
+**Starting refs:** dev `22d5f45ad533a81b932f3f44cb594cd10a914b88`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exactly `dev` and `main` exist. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, unified implementation plan, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, exact-head Actions and main Pages evidence.
+
+**Starting exact-head QA:** Push Quality [#45572832526](https://github.com/saeedsai/ProMathStudio/actions/runs/45572832526) and PR Quality [#45572838546](https://github.com/saeedsai/ProMathStudio/actions/runs/45572838546) both passed **218/218 steps**, zero failures/skips, on exact SHA `22d5f45ad533a81b932f3f44cb594cd10a914b88`. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Pages build/status/deploy jobs were all successful.
+
+**Defect reproduced:** For an L-angle with `B=1e-60 mm`, `H=1e60 mm`, `t=1e-140 mm`, `Ixx` is normal while `Iyy` is subnormal. The dimensional `Iyy` rounds correctly, but deriving `Sy=Iyy/cX` and `ry=sqrt(Iyy/A)` from that coarse subnormal value loses about `4.83e-4` and `2.41e-4` relative precision. Existing L-angle normalization only activates when the *largest* inertia is subnormal, so it misses a mixed normal/subnormal axis.
+
+**Fix:** Share the existing exponent-scaled product restorer across section-property branches. When either L-angle centroidal inertia is subnormal and the common low-exponent tensor path did not resolve it, normalize x and y by their own section dimensions. Compute the affected axis's dimensionless inertia, extreme-fibre distance, section modulus and radius directly; restore `Sx/Sy` with exponent-scaled products. Preserve the correctly rounded dimensional inertias, principal tensor calculation, ordinary-size operation order and unaffected axis outputs.
+
+**Regression:** Added a direct Node test with 160-digit Decimal references for subnormal `Iyy`, `Sy` and `ry`; it reproduces the old `I/c` and `sqrt(I/A)` errors above `1e-4`, checks immutability and frozen results. Extended the registered Chromium Truss smoke with the same case at 1280px and 390px. Updated the Structural Truss numerical contract. Truss Studio uses adjacent assets, so root `index.html` synchronization is not applicable.
+
+**Validation and limits:** Independent 160-digit Decimal evaluation from exact binary64 inputs and a binary64 operation-order emulation reproduced the old errors. Axis-separated normalized formulas returned `Sy` and `ry` within `2.3e-16` relative error of the Decimal-rounded references. The local execution environment has no repository checkout; full Node/Chromium validation is pending the new exact-head Push/PR Quality. Implemented on dev only; not released.
+
+**Release blocker:** PR #191 remains open/mergeable with zero submitted independent reviews. Both branches report `protected:false`, rulesets are empty, and branch-protection reads return HTTP 403 to the connected integration. No merge, direct main update, force push or safeguard bypass. Main and Pages remain unchanged. Frozen inventory remains **166 gaps / 95 partial**.
+
+**NEXT FIVE (priority, status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion, plus eligible independent PR #191 approval; inspect full diff and exact head/checks, merge only via ordinary PR, then verify new main Quality, Pages and hosted critical paths.
+2. **P1 — Complete seven-shape Truss numerical boundary audit (in progress):** thin-wall, subnormal and high-scale references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; acceptance: exact-binary64 Decimal results, true final overflow/underflow rejection, invalid rollback, selected-member isolation, full Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation; acceptance: independent numerical references, failure/recovery and desktop/390px browser checks.
+
 ## 2026-11-25 — TRUSS-POSITIVE-MASS-FINAL-UNDERFLOW-REJECTION
 
 **Starting refs:** dev `ecade0064c0f5c7f9b30153a2122b18086243b68`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only `dev` and `main` exist. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 MATLAB inventory, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, current exact-head CI and main Pages evidence.

@@ -158,6 +158,25 @@ def main():
             assert abs(slender['radiusOfGyrationY'] / 2.8867513459481287e199 - 1) <= 5e-13
             assert abs(slender['radiusOfGyrationX'] / 5.773502691896258e49 - 1) <= 5e-13
 
+            # One L-angle axis can be subnormal while the other is normal; retain
+            # geometric Sy/ry rather than dividing a quantized dimensional Iyy.
+            mixed_axis = page.evaluate("""() => {
+                const section = ProMathTrussFEM.sectionProperties('l-angle', {
+                    width: 1e-60, height: 1e60, thickness: 1e-140
+                });
+                return {
+                    iyy: section.secondMomentPerpendicular, area: section.area,
+                    oldSy: section.secondMomentPerpendicular / section.extremeFiberDistanceAboutY,
+                    oldRy: Math.sqrt(section.secondMomentPerpendicular / section.area),
+                    sy: section.sectionModulusY, ry: section.radiusOfGyrationY
+                };
+            }""")
+            assert 0 < mixed_axis['iyy'] < 2.2250738585072014e-308
+            assert abs(mixed_axis['sy'] / 3.333333333333333e-261 - 1) <= 5e-13
+            assert abs(mixed_axis['ry'] / 5.773502691896258e-121 - 1) <= 5e-13
+            assert abs(mixed_axis['oldSy'] / mixed_axis['sy'] - 1) > 1e-4
+            assert abs(mixed_axis['oldRy'] / mixed_axis['ry'] - 1) > 1e-4
+
             # Subnormal Ixx values remain finite but are too coarsely quantized for sqrt(I/A).
             # Rectangular radii must use the unrounded dimensionless geometry at both viewports.
             thin = page.evaluate("""() => {

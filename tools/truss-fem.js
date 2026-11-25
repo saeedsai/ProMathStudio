@@ -185,6 +185,34 @@
       return finite(piece.height*piece.width*(scaledWidth/12)*scaledWidth, label);
     };
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
+    const MIN_NORMAL = 2.2250738585072014e-308;
+    // Restore products of extreme geometry scales without overflowing intermediate powers.
+    const scaleProduct = (...values) => {
+      let sign=1, mantissa=1, exponent=0;
+      for (const value of values) {
+        if (value === 0) return 0;
+        if (!Number.isFinite(value)) return value;
+        if (value < 0) sign=-sign;
+        const absolute=Math.abs(value);
+        let power=Math.floor(Math.log2(absolute));
+        let unit=Math.pow(2,power);
+        if (!Number.isFinite(unit)) { power=1023; unit=Math.pow(2,1023); }
+        else if (unit === 0) { power=-1074; unit=Number.MIN_VALUE; }
+        let part=absolute/unit;
+        if (part >= 2) { part/=2; power++; }
+        else if (part < 1) { part*=2; power--; }
+        mantissa*=part;
+        exponent+=power;
+        const adjustment=Math.floor(Math.log2(mantissa));
+        mantissa/=Math.pow(2,adjustment);
+        exponent+=adjustment;
+      }
+      if (exponent < -1075) return sign*0;
+      const magnitude=exponent < -1022
+        ? mantissa*Math.pow(2,exponent+1022)*MIN_NORMAL
+        : mantissa*Math.pow(2,exponent);
+      return sign*magnitude;
+    };
     const circular = shape === 'solid-circle' || shape === 'hollow-circle';
     const composite = shape === 'channel' || shape === 'i-section';
     const angle = shape === 'l-angle';
@@ -234,7 +262,6 @@
       // A subnormal physical inertia tensor has too few binary64 bits for
       // reliable centroid, principal-axis and radius ratios. Re-evaluate this
       // two-rectangle geometry at unit scale, then restore physical units once.
-      const MIN_NORMAL = 2.2250738585072014e-308;
       const physicalMomentScale = Math.max(secondMoment,secondMomentPerpendicular,Math.abs(productOfInertia));
       let normalizedLowExponentResolved = false;
       if (physicalMomentScale < MIN_NORMAL) {
@@ -304,6 +331,58 @@
             analyticRadiusOfGyrationY = candidate.ry;
             principalAxisAngleDegrees = candidate.angle;
             normalizedLowExponentResolved = true;
+          }
+        }
+      }
+      // If only one L-angle axis is subnormal, max-dimension normalization can
+      // erase that axis. Normalize x and y independently for its geometric S and r.
+      if (!normalizedLowExponentResolved &&
+          (secondMoment < MIN_NORMAL || secondMomentPerpendicular < MIN_NORMAL)) {
+        const axisNormalizedMetrics = pieces.map(piece => {
+          const normalizedPiece = {
+            x:piece.x/width, y:piece.y/depth,
+            width:piece.width/width, height:piece.height/depth
+          };
+          return {...normalizedPiece,
+            area:normalizedPiece.width*normalizedPiece.height,
+            cx:normalizedPiece.x+normalizedPiece.width/2,
+            cy:normalizedPiece.y+normalizedPiece.height/2};
+        });
+        const axisNormalizedArea = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+        if (axisNormalizedArea > 0 && Number.isFinite(axisNormalizedArea)) {
+          const axisNormalizedCentroidX = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/axisNormalizedArea;
+          const axisNormalizedCentroidY = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/axisNormalizedArea;
+          const axisNormalizedIxx = axisNormalizedMetrics.reduce((sum,piece)=>{
+            const dy=piece.cy-axisNormalizedCentroidY;
+            return sum+piece.area*(piece.height*piece.height/12+dy*dy);
+          },0);
+          const axisNormalizedIyy = axisNormalizedMetrics.reduce((sum,piece)=>{
+            const dx=piece.cx-axisNormalizedCentroidX;
+            return sum+piece.area*(piece.width*piece.width/12+dx*dx);
+          },0);
+          const axisExtremeY = Math.max(axisNormalizedCentroidY,1-axisNormalizedCentroidY);
+          const axisExtremeX = Math.max(axisNormalizedCentroidX,1-axisNormalizedCentroidX);
+          if (axisNormalizedIxx > 0 && Number.isFinite(axisNormalizedIxx) &&
+              axisNormalizedIyy > 0 && Number.isFinite(axisNormalizedIyy) &&
+              axisExtremeY > 0 && axisExtremeX > 0) {
+            const normalizedRadius = (moment,dimensionScale) => {
+              const ratio=moment/axisNormalizedArea;
+              const root=Number.isFinite(ratio) && ratio>0
+                ? Math.sqrt(ratio) : Math.sqrt(moment)/Math.sqrt(axisNormalizedArea);
+              return scaleProduct(dimensionScale,root);
+            };
+            if (secondMoment < MIN_NORMAL) {
+              const radius=normalizedRadius(axisNormalizedIxx,depth);
+              const modulus=scaleProduct(width,depth,depth,axisNormalizedIxx,1/axisExtremeY);
+              if (radius>0 && Number.isFinite(radius)) analyticRadiusOfGyrationX=radius;
+              if (modulus>0 && Number.isFinite(modulus)) analyticSectionModulusX=modulus;
+            }
+            if (secondMomentPerpendicular < MIN_NORMAL) {
+              const radius=normalizedRadius(axisNormalizedIyy,width);
+              const modulus=scaleProduct(width,width,depth,axisNormalizedIyy,1/axisExtremeX);
+              if (radius>0 && Number.isFinite(radius)) analyticRadiusOfGyrationY=radius;
+              if (modulus>0 && Number.isFinite(modulus)) analyticSectionModulusY=modulus;
+            }
           }
         }
       }
@@ -392,7 +471,6 @@
       // representable. Recompute I/A in coordinates normalized by the largest length,
       // then restore that length once; keep the reported dimensional area and inertias intact.
       const lengthScale = Math.max(width, depth);
-      const MIN_NORMAL = 2.2250738585072014e-308;
       const normalizedMetrics = pieces.map(piece => {
         const normalizedPiece = {
           x:piece.x/lengthScale, y:piece.y/lengthScale,
@@ -453,32 +531,6 @@
       // A single max-dimension scale can underflow one normalized inertia for an
       // extreme aspect ratio. Normalize each coordinate by its own section
       // dimension so both axis tensors remain well-scaled before restoring units.
-      const scaleProduct = (...values) => {
-        let sign=1, mantissa=1, exponent=0;
-        for (const value of values) {
-          if (value === 0) return 0;
-          if (!Number.isFinite(value)) return value;
-          if (value < 0) sign=-sign;
-          const absolute=Math.abs(value);
-          let power=Math.floor(Math.log2(absolute));
-          let unit=Math.pow(2,power);
-          if (!Number.isFinite(unit)) { power=1023; unit=Math.pow(2,1023); }
-          else if (unit === 0) { power=-1074; unit=Number.MIN_VALUE; }
-          let part=absolute/unit;
-          if (part >= 2) { part/=2; power++; }
-          else if (part < 1) { part*=2; power--; }
-          mantissa*=part;
-          exponent+=power;
-          const adjustment=Math.floor(Math.log2(mantissa));
-          mantissa/=Math.pow(2,adjustment);
-          exponent+=adjustment;
-        }
-        if (exponent < -1075) return sign*0;
-        const magnitude=exponent < -1022
-          ? mantissa*Math.pow(2,exponent+1022)*MIN_NORMAL
-          : mantissa*Math.pow(2,exponent);
-        return sign*magnitude;
-      };
       if (!commonScaleResolved) {
         const axisNormalizedMetrics = pieces.map(piece => {
           const normalizedPiece = {

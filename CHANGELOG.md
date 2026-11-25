@@ -1,3 +1,9 @@
+## 2026-11-25 — L-angle mixed-axis subnormal precision (dev; exact-head QA pending)
+
+- L-angle section-property evaluation now uses independent width/depth normalization when only one centroidal inertia is subnormal, preserving geometric section modulus and radius precision for that axis.
+- Added exact-binary64 Decimal-reference Node coverage and registered 1280px/390px Chromium coverage; ordinary sections and reported dimensional inertia remain unchanged.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — Truss rejects positive final member mass that underflows to zero (dev; exact-head QA pending)
 
 - A positive density/geometry combination can no longer be reported as zero mass when the final L·A·ρ product itself underflows; the diagnostic identifies the member.

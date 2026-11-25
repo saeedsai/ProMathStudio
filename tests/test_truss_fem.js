@@ -1763,6 +1763,31 @@ test('L-angle radius of gyration remains finite when I/area overflows but sqrt(I
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
 
+test('L-angle mixed-scale subnormal axis retains geometric section modulus and radius precision',()=>{
+ const dimensions={width:1e-60,height:1e60,thickness:1e-140};
+ const original={...dimensions};
+ const section=fem.sectionProperties('l-angle',dimensions);
+ const expected={
+  iyy:Number('3.33333333333333298183631920421949584405656150194446080197909255407398642909353764315625757002364921539649631612465441774e-321'),
+  sy:Number('3.33333333333333308039143949377197100135385266166081762303295114348390848263158407192863184947726846704610772530023857252e-261'),
+  ry:Number('5.77350269189625753514452957713086083520760935289477550500278383336899368867504169740982398221061503994525925291050145305e-121')
+ };
+ const closeRelative=(actual,want,label)=>assert.ok(Number.isFinite(actual)&&
+  Math.abs(actual/want-1)<=5e-13,label+' '+actual+' must match the 160-digit exact-binary64 Decimal reference '+want);
+ assert.ok(section.secondMomentPerpendicular>0&&section.secondMomentPerpendicular<2.2250738585072014e-308,
+  'the minor-axis inertia must remain representable but subnormal');
+ assert.equal(section.secondMomentPerpendicular,expected.iyy,
+  'the reported dimensional inertia must retain its correctly rounded binary64 value');
+ closeRelative(section.sectionModulusY,expected.sy,'L-angle Sy');
+ closeRelative(section.radiusOfGyrationY,expected.ry,'L-angle ry');
+ const oldSy=section.secondMomentPerpendicular/section.extremeFiberDistanceAboutY;
+ const oldRy=Math.sqrt(section.secondMomentPerpendicular/section.area);
+ assert.ok(Math.abs(oldSy/expected.sy-1)>1e-4,'the former I/c path must reproduce the mixed-axis subnormal error');
+ assert.ok(Math.abs(oldRy/expected.ry-1)>1e-4,'the former sqrt(I/A) path must reproduce the mixed-axis subnormal error');
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});
+
 test('L-angle subnormal inertia tensor is recomputed from normalized geometry',()=>{
  const dimensions={width:1e-80,height:8e-81,thickness:1e-81};
  const original={...dimensions};

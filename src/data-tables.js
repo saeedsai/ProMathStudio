@@ -514,6 +514,10 @@
     });
     if(order.every((entry,i)=>entry.i===i))return;
     const newRow=Array(t.rows.length);order.forEach((entry,i)=>{newRow[entry.i]=i;});
+    const isSupportedReference=ref=>{
+      const m=/^\\$?([A-Za-z]{1,3})\\$?([1-9]\\d*)$/.exec(ref);
+      return !!m&&colIndex(m[1])<MAX_COLUMNS&&Number(m[2])<=MAX_ROWS;
+    };
     const rangePattern=/((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
     const rowOf=ref=>Number(/[1-9]\d*$/.exec(ref)[0])-1;
     const rewrite=(raw,sheet)=>{
@@ -524,9 +528,9 @@
         const target=prefix?sheetNameFromQualifier(prefix):sheet.name;
         let mapped=match;
         if(target.toLowerCase()===t.name.toLowerCase()){
+          if(!isSupportedReference(left)||!isSupportedReference(right))return match;
           const lo=Math.min(rowOf(left),rowOf(right)),hi=Math.max(rowOf(left),rowOf(right));
-          if(hi>=newRow.length)throw Error('Cannot sort: formula range '+match+' exceeds the table.');
-          const positions=[];for(let i=lo;i<=hi;i++)positions.push(newRow[i]);
+          const positions=[];for(let i=lo;i<=hi;i++)positions.push(i<newRow.length?newRow[i]:i);
           const lower=Math.min(...positions),upper=Math.max(...positions);
           if(upper-lower+1!==positions.length)throw Error('Cannot sort: formula range '+match+' would split into noncontiguous rows.');
           const forward=rowOf(left)<=rowOf(right);
@@ -539,6 +543,7 @@
         if((offset&&/[A-Za-z0-9_.$']/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
         const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         if(name.toLowerCase()!==t.name.toLowerCase())return match;
+        if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;
         const old=Number(digits)-1;if(old>=newRow.length)return match;
         return (prefix||'')+colAnchor+letters+rowAnchor+(newRow[old]+1);
       });

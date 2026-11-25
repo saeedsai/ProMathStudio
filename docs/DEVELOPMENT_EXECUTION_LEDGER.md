@@ -1,3 +1,13 @@
+## 2026-11-25 — Data Tables sort preserves invalid and blank-grid references
+
+Starting dev `a7251d6cf2650b778db8d9abc15fba998ecf021d`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; dev Quality [#45515170826](https://github.com/saeedsai/ProMathStudio/actions/runs/45515170826) passed 218/218 with zero failures/skips. Main Quality #45360386408 passed 218/218; Pages #45360367251 build/status/deploy all succeeded. No open PRs; only dev/main. Rulesets empty; main protection read HTTP 403.
+
+Fixed Data Tables stable sorting at the supported grid boundary. Sort now leaves invalid scalar/range references outside A1:AF6000 unchanged, keeps valid blank cells beyond the materialized table at fixed coordinates, and still rejects a range whose mapped rows become noncontiguous. Added a registered browser regression for full-grid and blank ranges, invalid AG/A6001 references, reversed mixed-anchor ranges and calculated values; added a structural unittest and clarified DATA_TABLES.md. Updated both modular source and standalone index.html in one tree.
+
+Isolated V8 range-mapping checks passed for full-grid, blank-cell, invalid-reference, reversed-anchor and noncontiguous cases. Local Python/Chromium and build checks are unavailable because this execution runtime has no Git checkout; new exact-head Quality is pending. Implemented on dev only, not released. Frozen inventory unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 release governance: enforceable main protection, independent review, ordinary PR, exact checks and Pages verification. (2) P1 spreadsheet structural correctness: row-6000/column-AF edges, #REF!, blank-grid and reversed/mixed-anchor sorting, failed-insert and noncontiguous-sort atomic rollback, desktop/390px. (3) P1 current/legacy Matrix/Graph/Table project round-trips and malformed-import rollback. (4) P1 ODE analytical forward/backward references, convergence, unsupported classes, stale exports and mobile recovery. (5) P1 remaining seven-shape Truss thin-wall/subnormal/high-scale property references and desktop/390px tests.
+
 ## 2026-11-25 — Data Tables row-insertion preflight atomicity
 
 Starting dev `58a5f8d008268413080cc2594665fb9277bf2c32`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact starting dev Quality [#45506851043](https://github.com/saeedsai/ProMathStudio/actions/runs/45506851043) passed 218/218 with zero failures/skips. Main Quality #45360386408 and Pages #45360367251 succeeded on current main. No open PRs; only dev/main. Rulesets empty; protection reads HTTP 403.

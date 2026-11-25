@@ -39,6 +39,19 @@ class SpreadsheetReferenceBoundsTests(unittest.TestCase):
         self.assertIn("JSON.stringify(MathStudio.dataTables.exportState())", smoke)
         self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
 
+    def test_sort_preserves_invalid_references_and_fixed_blank_grid_rows(self):
+        start = SOURCE.index("function sortRows(column,direction='asc')")
+        end = SOURCE.index("function structuralEdit(", start)
+        sort = SOURCE[start:end]
+        self.assertIn("const isSupportedReference=ref=>", sort)
+        self.assertIn("if(!isSupportedReference(left)||!isSupportedReference(right))return match;", sort)
+        self.assertIn("positions.push(i<newRow.length?newRow[i]:i)", sort)
+        self.assertIn("if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;", sort)
+        smoke = (ROOT / "tests/smoke_sheet_sort_references.py").read_text(encoding="utf-8")
+        for formula in ("A1:A6000", "A6000:A6000", "AG1:AG1", "A6001:A6001", "$A$3:$A$1"):
+            self.assertIn(formula, smoke)
+        self.assertIn("python tests/smoke_sheet_sort_references.py", WORKFLOW)
+
     def test_standalone_bundle_matches_the_modular_source(self):
         start = HTML.index("/* ProMathStudio Data Tables workspace.")
         end = HTML.index("</script>", start)

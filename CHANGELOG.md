@@ -1,3 +1,9 @@
+## 2026-11-25 — Data Tables sorting preserves invalid and blank-grid references (dev; exact-head QA pending)
+
+- Stable row sorting now leaves references outside the supported A1:AF6000 grid unchanged and invalid, while valid blank rows beyond the current materialized table retain fixed coordinates in range-contiguity checks.
+- Added a registered Chromium regression for full-grid/blank ranges, invalid AG/A6001 references, reversed mixed-anchor ranges and calculated values; existing noncontiguous-range rollback remains covered.
+- Added structural coverage and clarified Data Tables documentation. Updated src/data-tables.js and the standalone index.html module together. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — Data Tables row insertion preflights cell conversion (dev; exact-head QA pending)
 
 - Row insertion now validates and materializes supplied cell strings before workbook-wide formula rewrites, preventing a thrown conversion from shifting cross-sheet references without inserting a row.

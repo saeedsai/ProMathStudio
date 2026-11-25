@@ -1,3 +1,10 @@
+## 2026-11-25 — L-angle retains principal-axis results when dimensional Ixy underflows (dev; exact-head QA pending)
+
+- L-angle section properties no longer reject solely because the dimensional product of inertia rounds below binary64 range while area, diagonal inertias and principal properties remain representable.
+- The existing normalized two-rectangle tensor path now also runs for zero-rounded dimensional Ixy; it retains normalized orientation while the exported dimensional product correctly remains zero. Positive determinant/principal-property guards remain.
+- Added exact-binary64 Decimal-reference Node coverage and registered 1280px/390px Chromium coverage for the 45° principal axis, principal moments, moduli and radii.
+- Updated the Structural Truss guide, hourly plan and execution ledger. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — I-section accepts a centered web whose area is below binary64 range (dev; exact-head QA pending)
 
 - The I-section helper now permits only its exactly centered central web to have a zero rounded area when both web dimensions are below 1 mm; its local inertias and parallel-axis contributions are then also below binary64 range.

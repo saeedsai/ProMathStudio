@@ -1827,6 +1827,43 @@ test('L-angle mixed-scale subnormal axis retains geometric section modulus and r
  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
 });
 
+test('L-angle retains principal properties when dimensional product of inertia underflows',()=>{
+ const dimensions={width:1e-75,height:1e-75,thickness:1e-75*(1-1e-14)};
+ const original={...dimensions};
+ const section=fem.sectionProperties('l-angle',dimensions);
+ const expected={
+  area:9.999999999999999e-151,
+  ixx:8.333333333333331e-302,
+  iyy:8.333333333333331e-302,
+  ixy:0,
+  major:8.333333333333331e-302,
+  minor:8.333333333333331e-302,
+  sx:1.6666666666666664e-226,
+  sy:1.6666666666666664e-226,
+  rx:2.886751345948129e-76,
+  ry:2.886751345948129e-76
+ };
+ const relative=(actual,want,label)=>assert.ok(Number.isFinite(actual)&&want>0&&
+  Math.abs(actual/want-1)<=5e-13,label+' '+actual+' must match the exact-binary64 Decimal reference '+want);
+ relative(section.area,expected.area,'L-angle area');
+ relative(section.secondMoment,expected.ixx,'L-angle Ixx');
+ relative(section.secondMomentPerpendicular,expected.iyy,'L-angle Iyy');
+ assert.equal(section.productOfInertia,expected.ixy,
+  'the exact Ixy reference (-2.470544411709329e-329 mm^4) rounds below Number.MIN_VALUE');
+ relative(section.principalMomentMajor,expected.major,'L-angle major principal moment');
+ relative(section.principalMomentMinor,expected.minor,'L-angle minor principal moment');
+ relative(section.sectionModulusX,expected.sx,'L-angle Sx');
+ relative(section.sectionModulusY,expected.sy,'L-angle Sy');
+ relative(section.radiusOfGyrationX,expected.rx,'L-angle rx');
+ relative(section.radiusOfGyrationY,expected.ry,'L-angle ry');
+ assert.ok(Math.abs(section.principalAxisAngleDegrees-45)<=1e-12,
+  'normalized Ixy must retain the 45-degree principal axis after dimensional Ixy underflows');
+ assert.deepEqual(section.centroid,{x:5e-76,y:5e-76});
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});
+
+
 test('L-angle subnormal inertia tensor is recomputed from normalized geometry',()=>{
  const dimensions={width:1e-80,height:8e-81,thickness:1e-81};
  const original={...dimensions};

@@ -258,13 +258,12 @@
       },0), 'L-angle Iyy (mm⁴)');
       productOfInertia = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*(piece.cx-centroidX)*(piece.cy-centroidY),0),
         'L-angle product of inertia Ixy (mm⁴)');
-      if (productOfInertia === 0) throw Error('L-angle product of inertia underflow; increase dimensions.');
-      // A subnormal physical inertia tensor has too few binary64 bits for
-      // reliable centroid, principal-axis and radius ratios. Re-evaluate this
+      // A subnormal tensor or an underflowed Ixy can lose orientation information
+      // even when the diagonal moments are representable. Re-evaluate the
       // two-rectangle geometry at unit scale, then restore physical units once.
       const physicalMomentScale = Math.max(secondMoment,secondMomentPerpendicular,Math.abs(productOfInertia));
       let normalizedLowExponentResolved = false;
-      if (physicalMomentScale < MIN_NORMAL) {
+      if (physicalMomentScale < MIN_NORMAL || productOfInertia === 0) {
         const lengthScale = Math.max(width,depth);
         const lengthScaleSquared = lengthScale*lengthScale;
         if (Number.isFinite(lengthScaleSquared) && lengthScaleSquared >= MIN_NORMAL) {
@@ -315,7 +314,9 @@
               normalizedDeterminant>0 && normalizedMajor>0 && normalizedMinor>0 &&
               normalizedExtremeX>0 && normalizedExtremeY>0 &&
               Object.values(candidate).every(Number.isFinite) &&
-              candidate.ixx>0 && candidate.iyy>0 && candidate.ixy!==0 &&
+              candidate.ixx>0 && candidate.iyy>0 &&
+              candidate.major>0 && candidate.minor>0 && candidate.sx>0 && candidate.sy>0 &&
+              candidate.rx>0 && candidate.ry>0) {
               candidate.major>0 && candidate.minor>0 && candidate.sx>0 && candidate.sy>0 &&
               candidate.rx>0 && candidate.ry>0) {
             centroidX = candidate.centroidX;

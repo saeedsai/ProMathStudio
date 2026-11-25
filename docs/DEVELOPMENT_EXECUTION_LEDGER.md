@@ -1,3 +1,22 @@
+## 2026-11-25 — TRUSS-L-ANGLE-DIMENSIONAL-IXY-UNDERFLOW
+
+Starting dev b9f00f9a19f730a249092057b9ada5e410f743ce; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Prior exact-head Push #45592251939 and PR #45592264589 passed 218/218 each on the starting dev SHA; main Quality #45360386408 and Pages #45360367251 succeeded on unchanged main.
+
+Found and reproduced an L-angle false rejection: exact-binary64 Decimal Ixy≈−2.470544411709329e-329 mm⁴ rounds to zero for B=H=1e-75 mm, t=B·(1−1e-14), although area, diagonal inertias, principal moments, moduli and radii remain representable. The old unconditional Ixy===0 rejection prevented normalized principal-axis recovery.
+
+Changed the L-angle path to normalize the two-rectangle tensor when the physical moment scale is subnormal or dimensional Ixy rounds to zero. The dimensional product may remain correctly rounded to zero; normalized Ixy still supplies the principal angle. Positive determinant, principal moments, section moduli and radii checks remain enforced.
+
+Added exact-binary64 Node references and registered 1280px/390px Chromium regression for area, Ixx/Iyy, zero-rounded Ixy, principal moments, 45° axis, Sx/Sy, and rx/ry. Updated the Structural Truss guide, living plan, this ledger and changelog. Truss Studio loads adjacent assets; no root bundle edit is needed.
+
+Isolated V8 before/after check: old module rejected; patched module returned positive finite section properties, zero-rounded dimensional Ixy and 45° principal angle. Full local Node/Chromium unavailable because the execution workspace has no repository checkout. New exact-head Push/PR Quality pending after the source commit. PR #191 has no independent reviews; both branches remain unprotected, rulesets empty, branch-protection read 403 and no protection-write action exposed. No release attempted. Frozen baseline unchanged at 166 gaps / 95 partial.
+
+NEXT FIVE (priority, status, dependencies and acceptance tests):
+1. P0 — Release governance (blocked): obtain eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; inspect the full diff, merge only through the ordinary PR process, then verify new main Quality, Pages and hosted critical paths. The connected integration currently has no branch-protection write action; do not bypass this.
+2. P1 — Finish the seven-shape Truss numerical audit (in progress): thin-wall, subnormal and high-scale references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; exact-binary64 Decimal results, true final overflow/underflow rejection, invalid rollback and selected-member isolation. Acceptance: full Node suite plus 1280px/390px Chromium, with all relevant exact-head Quality steps green.
+3. P1 — Data Tables grid-boundary edits: row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges. Acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. P1 — Saved-project compatibility: current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. P1 — ODE solver verification: analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation. Acceptance: independent numerical references, failure/recovery and desktop/390px browser checks.
+
 ## 2026-11-25 — TRUSS-I-SECTION-CENTRED-WEB-AREA-UNDERFLOW
 
 Starting refs: dev 822246d054dd48a79d6183550bd4fe14cede768f, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; branch listing contained exactly dev/main. Existing exact-head Push Quality #45583979277 and PR Quality #45583988176 each passed 218/218, zero failures/skips, on the starting dev SHA. Main Quality #45360386408 and Pages #45360367251 succeeded on main.

@@ -384,6 +384,33 @@ def main():
                 assert math.isfinite(centered_web[key]) and abs(centered_web[key] / expected - 1) <= 5e-13, (key, centered_web)
             assert centered_web['channelRejected'], centered_web
 
+            # Dimensional Ixy may underflow while the normalized tensor still
+            # determines finite principal moments and the principal-axis angle.
+            product_underflow = page.evaluate("""() => {
+                const dimensions = {
+                    width: 1e-75, height: 1e-75,
+                    thickness: 1e-75 * (1 - 1e-14)
+                };
+                const section = ProMathTrussFEM.sectionProperties('l-angle', dimensions);
+                return {
+                    area: section.area, ixx: section.secondMoment, iyy: section.secondMomentPerpendicular,
+                    ixy: section.productOfInertia, major: section.principalMomentMajor,
+                    minor: section.principalMomentMinor, angle: section.principalAxisAngleDegrees,
+                    sx: section.sectionModulusX, sy: section.sectionModulusY,
+                    rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY
+                };
+            }""")
+            assert product_underflow['ixy'] == 0, product_underflow
+            assert abs(product_underflow['angle'] - 45) <= 1e-12, product_underflow
+            for key, expected in {
+                'area': 9.999999999999999e-151,
+                'ixx': 8.333333333333331e-302, 'iyy': 8.333333333333331e-302,
+                'major': 8.333333333333331e-302, 'minor': 8.333333333333331e-302,
+                'sx': 1.6666666666666664e-226, 'sy': 1.6666666666666664e-226,
+                'rx': 2.886751345948129e-76, 'ry': 2.886751345948129e-76
+            }.items():
+                assert math.isfinite(product_underflow[key]) and abs(product_underflow[key] / expected - 1) <= 5e-13, (key, product_underflow)
+
             # Composite Sx/Sy must use normalized inertia and extreme-fibre geometry when
             # dimensional inertias are subnormal; I/c previously lost 5–24% here.
             composite_moduli = page.evaluate("""() => {

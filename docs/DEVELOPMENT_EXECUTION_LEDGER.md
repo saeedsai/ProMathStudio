@@ -1,3 +1,7 @@
+## 2026-11-25 — TRUSS-L-ANGLE-Ixy-UNDERFLOW-CANDIDATE-SYNTAX-CHECKPOINT
+
+The first candidate commit b05ff5ee250cf90ac65342de6d6a17db40b12696 contained a duplicated continuation of the normalized-candidate guard after a multi-line source replacement. A bounded isolated V8 syntax check caught the malformed source before claiming validation. The duplicate lines were removed without changing the numerical condition or weakening the new regression. The preceding source/test commit remains intact; this follow-up is a compile correction. Re-run actual production-module syntax and the new L-angle underflow regression, then require fresh exact-head Push and PR Quality. No release or main update.
+
 ## 2026-11-25 — TRUSS-L-ANGLE-DIMENSIONAL-IXY-UNDERFLOW
 
 Starting dev b9f00f9a19f730a249092057b9ada5e410f743ce; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Prior exact-head Push #45592251939 and PR #45592264589 passed 218/218 each on the starting dev SHA; main Quality #45360386408 and Pages #45360367251 succeeded on unchanged main.

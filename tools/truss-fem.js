@@ -317,8 +317,6 @@
               candidate.ixx>0 && candidate.iyy>0 &&
               candidate.major>0 && candidate.minor>0 && candidate.sx>0 && candidate.sy>0 &&
               candidate.rx>0 && candidate.ry>0) {
-              candidate.major>0 && candidate.minor>0 && candidate.sx>0 && candidate.sy>0 &&
-              candidate.rx>0 && candidate.ry>0) {
             centroidX = candidate.centroidX;
             centroidY = candidate.centroidY;
             secondMoment = candidate.ixx;

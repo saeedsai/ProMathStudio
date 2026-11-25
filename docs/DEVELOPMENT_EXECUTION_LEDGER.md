@@ -1,3 +1,7 @@
+## 2026-11-25 — CI-DELIVERY-PLAN-HEADING-REPAIR
+
+Exact-head Push Quality #45602917742 and PR Quality #45602928273 on b37084214b0bce42fb2d2af88c45e4fa120dc975 failed only in structural step 7: tests/test_delivery_policy.py requires the literal heading "Next five features" in docs/HOURLY_DEVELOPMENT_PLAN.md. The five priorities were present under uppercase NEXT FIVE, but the exact compatibility heading was missing. Restored the full historical plan from the preceding b9f00f9 version and added the required heading without changing the five priorities or weakening any assertion. Re-run exact-head Push and PR Quality after this documentation repair.
+
 ## 2026-11-25 — TRUSS-L-ANGLE-Ixy-UNDERFLOW-CANDIDATE-SYNTAX-CHECKPOINT
 
 The first candidate commit b05ff5ee250cf90ac65342de6d6a17db40b12696 contained a duplicated continuation of the normalized-candidate guard after a multi-line source replacement. A bounded isolated V8 syntax check caught the malformed source before claiming validation. The duplicate lines were removed without changing the numerical condition or weakening the new regression. The preceding source/test commit remains intact; this follow-up is a compile correction. Re-run actual production-module syntax and the new L-angle underflow regression, then require fresh exact-head Push and PR Quality. No release or main update.

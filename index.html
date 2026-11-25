@@ -4444,10 +4444,15 @@ self.onmessage=async ({data})=>{
     if(!Number.isInteger(index)||index<0||index>size||(delta<0&&index===size))throw Error('Invalid '+axis+' position.');
     if(delta>0&&size>=limit)throw Error('Maximum '+limit+' '+(axis==='row'?'rows':'columns')+'.');
     if(delta<0&&axis==='column'&&size<=1)throw Error('A table needs one column.');
-    if(axis==='row'&&delta>0&&values&&values.length!==t.columns.length)throw Error('Row width mismatch.');
+    if(axis==='row'&&delta>0&&values&&(!Array.isArray(values)||values.length!==t.columns.length))throw Error('Row width mismatch.');
+    // Materialize caller values before the workbook-wide reference rewrite. A conversion
+    // failure must not leave formulas shifted when the row itself was never inserted.
+    const insertedRow=axis==='row'&&delta>0
+      ? (values?values.map(v=>String(v).slice(0,8000)):t.columns.map(()=>''))
+      : null;
     shiftReferences(t,axis,index,delta);
     if(axis==='row'){
-      if(delta>0)t.rows.splice(index,0,values?values.map(v=>String(v).slice(0,8000)):t.columns.map(()=>''));
+      if(delta>0)t.rows.splice(index,0,insertedRow);
       else t.rows.splice(index,1);
     }else{
       if(delta>0){t.columns.splice(index,0,'Column'+(size+1));t.rows.forEach(r=>r.splice(index,0,''));}

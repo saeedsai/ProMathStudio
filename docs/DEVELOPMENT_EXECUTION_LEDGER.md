@@ -1,3 +1,13 @@
+## 2026-11-25 — Data Tables row-insertion preflight atomicity
+
+Starting dev `58a5f8d008268413080cc2594665fb9277bf2c32`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact starting dev Quality [#45506851043](https://github.com/saeedsai/ProMathStudio/actions/runs/45506851043) passed 218/218 with zero failures/skips. Main Quality #45360386408 and Pages #45360367251 succeeded on current main. No open PRs; only dev/main. Rulesets empty; protection reads HTTP 403.
+
+Fixed a partial-mutation path in Data Tables row insertion: caller cell values are now converted/truncated into a complete row before workbook-wide formula-reference rewriting. A throwing value conversion or invalid row shape therefore cannot shift cross-sheet formulas without inserting the row. Added a Chromium regression asserting the error and exact exported-workbook rollback, plus a structural unittest for preflight ordering. Updated Data Tables guide, living plan and changelog; root standalone bundle remains synchronized with `src/data-tables.js`.
+
+The local runtime has no Git checkout, so local Python/Chromium commands were unavailable. Current dev Quality is green; the new exact-head run is pending. Implemented on dev, not released. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 release governance: verifiable main protections, independent review, ordinary PR, exact checks and Pages verification. (2) P1 spreadsheet structural correctness: row-6000/column-AF edges, #REF!, reversed ranges, mixed anchors, failed-insert atomicity, rejected-sort rollback and 390px. (3) P1 current/legacy Matrix/Graph/Table project round-trips with malformed-import rollback and focus/mobile checks. (4) P1 ODE forward/backward references, convergence, unsupported classes, stale exports and mobile recovery. (5) P1 remaining seven-shape Truss thin-wall/subnormal/high-scale property references and desktop/390px checks.
+
 ## 2026-11-24 — TRUSS-COMPOSITE-AXIS-SEPARATED-SCALE-RECOVERY
 
 Starting dev `540d86ad81b6b92269c2bb4b26a04b767fa289d8`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact starting dev Quality #45487505257 green **218/218**, zero failures/skips; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 16 ahead/0 behind. Both branches unprotected, rulesets empty, protection reads HTTP 403.

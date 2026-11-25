@@ -1,3 +1,22 @@
+## 2026-11-25 — DATA-TABLES-ROW-INSERT-PREFLIGHT-ATOMICITY
+
+**Starting refs:** dev `58a5f8d008268413080cc2594665fb9277bf2c32`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the frozen 2026-10-26 feature inventory, unified master plan, living plan, Data Tables guide/source/tests, current branch refs, open PRs and exact CI/Pages evidence. Current dev Quality [#45506851043](https://github.com/saeedsai/ProMathStudio/actions/runs/45506851043) passed **218/218** steps on the exact starting dev SHA, zero failures/skips. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on current main. No open PRs; only dev/main exist. Rulesets are empty and branch-protection reads return HTTP 403 to the connected integration.
+
+**Defect:** Data Tables `structuralEdit()` rewrote references workbook-wide before converting caller-supplied inserted row values to strings. If one value's `toString()` threw, the row was never inserted but formulas in other sheets had already shifted (for example `=Data!A2` became `=Data!A3`). This left a rejected edit partially applied.
+
+**Fix:** Validate a supplied row as an array of the current column width and fully materialize/truncate its cell strings before calling `shiftReferences()`. The splice now uses that prebuilt row. Normal insert behavior and the existing reference-rewrite semantics are unchanged; conversion/shape failures happen before workbook mutation.
+
+**Regression:** Extended the already-registered Chromium `tests/smoke_sheet_range_delete.py` with two sheets and a cross-sheet scalar reference. It attempts insertion with an object whose `toString()` throws, then asserts the error, byte-identical JSON `exportState()`, unchanged formula and unchanged row count. Added a structural unittest asserting preflight ordering and browser regression registration. Source and standalone `index.html` Data Tables module remain byte-for-byte synchronized; no workflow test was removed or weakened.
+
+**Validation:** The execution container has no Git checkout (`git rev-parse --show-toplevel` returned “not a git repository”); did not retry local Git/DNS. The actual current dev Quality is green as above. New local Python/Chromium execution is unavailable in this runtime; the next exact-head GitHub Quality run must execute the added unittest and registered browser regression. Implemented on dev only, pending new exact-head QA; no release claim. Historical baseline remains frozen at **166 gaps / 95 partial**.
+
+**NEXT FIVE (priority, status and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main protection requiring exact-head Quality, prohibiting direct push/force/deletion, plus eligible independent approval; then one ordinary dev→main PR, green PR checks, normal merge, main Quality, Pages and hosted critical-path verification.
+2. **P1 — Spreadsheet structural-edit correctness (in progress):** complete row-6000/column-AF insertion/deletion, valid and invalid #REF! transitions, reversed aggregate ranges, mixed absolute anchors, rejected noncontiguous sort rollback and 1280px/390px browser checks. New failed-value-conversion insertion regression must preserve the entire exported workbook byte-for-byte.
+3. **P1 — Saved-project compatibility:** current and legacy Matrix, Graph and Table round-trips; malformed imports preserve every workspace, selection and prior result; desktop/390px browser checks.
+4. **P1 — ODE solver verification:** analytical forward/backward IVP references, unsupported-class diagnostics, tolerance/step convergence, stale-export invalidation and desktop/390px recovery.
+5. **P1 — Finish seven-shape Truss boundary audit:** independent thin-wall/subnormal/high-scale area, centroid, inertia, principal-property, section-modulus and radius references; invalid rollback, selected-member isolation and desktop/390px tests.
+
 ## 2026-11-24 — TRUSS-COMPOSITE-AXIS-SEPARATED-SCALE-RECOVERY
 
 **Starting refs:** dev `540d86ad81b6b92269c2bb4b26a04b767fa289d8`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, frozen 2026-10-26 inventory, unified master plan, engineering architecture/workspace plan, toolbox catalog, structural engineering catalog, current Truss source/tests/guide, branch refs, PRs and exact CI/Pages evidence through the connected GitHub integration.

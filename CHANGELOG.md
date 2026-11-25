@@ -1,3 +1,9 @@
+## 2026-11-25 — Data Tables row insertion preflights cell conversion (dev; exact-head QA pending)
+
+- Row insertion now validates and materializes supplied cell strings before workbook-wide formula rewrites, preventing a thrown conversion from shifting cross-sheet references without inserting a row.
+- Added a registered Chromium rollback regression and a structural unittest; the browser asserts identical exported workbook state, formula and row count after failure.
+- Updated the Data Tables guide, living plan and execution ledger. The standalone Data Tables module in `index.html` remains synchronized with `src/data-tables.js`. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
 ## 2026-11-24 — Composite section properties retain accuracy at extreme aspect ratios (dev; exact-head QA pending)
 
 - Channel and I-section now fall back from max-dimension normalization to independent x/B and y/H coordinate scales when a normalized area/inertia loses normal binary64 range; physical area/inertias and ordinary paths remain unchanged.

@@ -29,6 +29,16 @@ class SpreadsheetReferenceBoundsTests(unittest.TestCase):
             self.assertIn(formula, smoke)
         self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
 
+    def test_row_insert_materializes_values_before_rewriting_references(self):
+        preflight = SOURCE.index("const insertedRow=axis==='row'&&delta>0")
+        rewrite = SOURCE.index("shiftReferences(t,axis,index,delta);", preflight)
+        self.assertLess(preflight, rewrite)
+        self.assertIn("Array.isArray(values)", SOURCE)
+        smoke = (ROOT / "tests/smoke_sheet_range_delete.py").read_text(encoding="utf-8")
+        self.assertIn("conversion failed", smoke)
+        self.assertIn("JSON.stringify(MathStudio.dataTables.exportState())", smoke)
+        self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
+
     def test_standalone_bundle_matches_the_modular_source(self):
         start = HTML.index("/* ProMathStudio Data Tables workspace.")
         end = HTML.index("</script>", start)

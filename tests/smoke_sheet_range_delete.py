@@ -1,4 +1,4 @@
-"""Browser regression: deleting rows/columns preserves surviving aggregate ranges."""
+"""Browser regression: structural row/column edits preserve ranges and failed row inserts are atomic."""
 from pathlib import Path
 import os
 from playwright.sync_api import sync_playwright
@@ -72,9 +72,29 @@ def main():
         page.evaluate("MathStudio.dataTables.deleteColumn(0)")
         assert page.evaluate(column_refs) == ["=Data!A1", "=Data!AG1", "=SUM(Data!AG1:AG1)"]
         assert page.evaluate(column_values) == [20, "#REF!", "#REF!"]
+
+        # A failed cell-value conversion must not leave cross-sheet references shifted.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
+            {id:'sheet-1',name:'Data',columns:['A'],rows:[['10'],['20']]},
+            {id:'sheet-2',name:'Refs',columns:['A'],rows:[['=Data!A2']]}
+        ]})""")
+        rollback = page.evaluate("""() => {
+            const before = JSON.stringify(MathStudio.dataTables.exportState());
+            let message = '';
+            try {
+                MathStudio.dataTables.insertRow(0, [{toString(){throw Error('conversion failed')}}]);
+            } catch (error) { message = error.message; }
+            return {message,before,after:JSON.stringify(MathStudio.dataTables.exportState()),
+                reference:MathStudio.dataTables.tables[1].rows[0][0],
+                rowCount:MathStudio.dataTables.tables[0].rows.length};
+        }""")
+        assert rollback["message"] == "conversion failed"
+        assert rollback["before"] == rollback["after"]
+        assert rollback["reference"] == "=Data!A2"
+        assert rollback["rowCount"] == 2
         assert not errors, errors
         browser.close()
-    print("PASS row/column range shrink, invalid-reference preservation, cross-sheet aggregates, anchors, #REF!, persistence and browser")
+    print("PASS row/column range edits, invalid-reference preservation, cross-sheet anchors, conversion-failure atomicity, persistence and browser")
 
 if __name__ == "__main__":
     main()

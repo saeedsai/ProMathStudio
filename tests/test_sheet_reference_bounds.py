@@ -66,6 +66,22 @@ class SpreadsheetReferenceBoundsTests(unittest.TestCase):
             self.assertIn(token, smoke)
         self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
 
+    def test_insertions_that_shift_valid_references_past_the_grid_write_ref(self):
+        self.assertIn(
+            "if(!isSupportedReference(shiftedLeft)||!isSupportedReference(shiftedRight))mapped='#REF!';",
+            SOURCE,
+        )
+        self.assertIn(
+            "if(moved<0||moved>=(axis==='row'?MAX_ROWS:MAX_COLUMNS))return '#REF!';",
+            SOURCE,
+        )
+        smoke = (ROOT / "tests/smoke_sheet_range_delete.py").read_text(encoding="utf-8")
+        for formula in ("=Data!A6000", "=SUM(Data!A5999:A6000)",
+                        "=Data!AF1", "=SUM(Data!AE1:AF1)"):
+            self.assertIn(formula, smoke)
+        self.assertIn("page.locator('[data-workspace=\"data\"]').click()", smoke)
+        self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
+
     def test_standalone_bundle_matches_the_modular_source(self):
         start = HTML.index("/* ProMathStudio Data Tables workspace.")
         end = HTML.index("</script>", start)

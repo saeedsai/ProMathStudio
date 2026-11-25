@@ -1,3 +1,10 @@
+## 2026-11-25 — Data Tables insertion at the grid edge invalidates shifted references
+
+- Structural insertion now rewrites previously valid scalar references and ranges to explicit `#REF!` when a shifted coordinate would leave A1:AF6000; already-invalid references remain unchanged.
+- Added row-6000 and column-AF scalar/range Chromium regressions and structural source assertions.
+- Repaired the sheet-rename regression setup by explicitly activating the Data Tables workspace before clicking Rename; the visibility assertion prevents a hidden-control timeout.
+- Updated modular source and standalone `index.html` together. Implemented on dev; exact-head Quality pending. Not released.
+
 ## 2026-11-25 — Data Tables sheet renames commit references atomically
 
 - Sheet renaming now stages every workbook-wide formula rewrite before mutating any cell or changing the sheet name; a late cell-conversion failure cannot leave earlier formulas partially renamed.

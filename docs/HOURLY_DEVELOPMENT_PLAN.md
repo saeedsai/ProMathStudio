@@ -1,3 +1,23 @@
+## 2026-11-25 — DATA-TABLES-GRID-EDGE-INSERTION-INVALIDATION
+
+Starting refs: dev `0adeea293fb7df0ad27ee4182ea3eb072ed26780`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only long-lived branches are dev and main. Exact-head Push Quality [#45616991615](https://github.com/saeedsai/ProMathStudio/actions/runs/45616991615) and PR Quality [#45617002907](https://github.com/saeedsai/ProMathStudio/actions/runs/45617002907) both failed at step 80, **Spreadsheet range deletion regression**. The PR job log shows the sheet-rename browser case timed out because `#dt-rename` was inside the hidden Data Tables workspace. Product logic was not the cause. The test now reselects the Data Tables workspace and asserts the rename button is visible before exercising failure/recovery; no test was skipped or weakened.
+
+A separate fixed-grid edge defect was found in workbook structural insertion. A previously valid reference to row 6000 or column AF could be shifted beyond the supported A1:AF6000 grid and remain stored as a raw invalid coordinate (for example A6001 or AG1). Formula evaluation returned #REF, but the formula itself did not record the invalidation explicitly. Insertions now convert a shifted scalar reference or a range with an endpoint outside the grid to #REF! at rewrite time. References already outside the grid remain untouched and cannot be revived by subsequent edits.
+
+Added registered Chromium coverage for a 5999-row workbook inserting before row 6000 and a 31-column workbook inserting before column AF. Both scalar and range formulas must become #REF! and calculate as #REF!. Added structural unittest assertions. The modular source and standalone index.html are updated from the same source text and verified byte-identical.
+
+Local repository checkout is absent in this execution workspace; full local Python/Chromium execution is unavailable. An isolated V8 boundary harness and source/bundle parity check are run in this execution, while exact-head GitHub Push/PR Quality must complete the full structural and browser suite. The frozen 26-Oct inventory remains unchanged at 166 gaps / 95 partial.
+
+## Next five features
+
+1. **P0 — Release governance (blocked):** obtain eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; inspect the full diff and exact checks; merge only through the ordinary PR process; verify post-merge main Quality, Pages and hosted critical paths. Acceptance: independent approval, required protection visible, all required exact-head checks green, ordinary merge, successful main/Pages and hosted smoke.
+2. **P1 — Complete Data Tables grid-boundary verification (in progress):** cover row 6000/column AF insertion and deletion, valid-to-invalid #REF! transitions, blank-grid, reversed and mixed-anchor ranges. Acceptance: explicit #REF! when insertion shifts a previously valid reference outside A1:AF6000; already-invalid references remain unchanged; byte-identical rollback on late conversion failure; desktop/390px Chromium.
+3. **P1 — Finish the seven-shape Truss numerical audit (in progress):** thin-wall, subnormal and high-scale independent references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Acceptance: exact-binary64 Decimal references, genuine final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation. Acceptance: independent numerical references, failure/recovery and desktop/390px browser tests.
+
+---
+
 ## 2026-11-25 — DATA-TABLES-SHEET-RENAME-ATOMICITY
 
 Starting refs: dev 6756c32182e4b70fa363900d4eeef05c9dcabd6d, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; the only long-lived branches are dev and main. Re-read root AGENTS.md, this living plan, and the frozen 2026-10-26 feature inventory. The exact starting dev-head Push Quality #45613220803 and PR Quality #45613229309 both completed successfully with 218/218 steps on 6756c32182e4b70fa363900d4eeef05c9dcabd6d; main Quality #45360386408 and Pages deployment #45360367251 remain successful on unchanged main.

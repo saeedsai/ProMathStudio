@@ -1,3 +1,13 @@
+## 2026-11-25 — DATA-TABLES-GRID-EDGE-INSERTION-INVALIDATION
+
+Starting dev `0adeea293fb7df0ad27ee4182ea3eb072ed26780`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan and frozen inventory. The only open PR is #191; branches are exactly dev and main. Exact-head Push #45616991615 and PR #45617002907 failed at the registered Spreadsheet range deletion regression (step 80). The PR job log identifies a Playwright visibility timeout: the sheet-rename case clicked #dt-rename while the Data Tables workspace was hidden. The browser test now reselects the Data Tables workspace and asserts the control is visible before clicking. No assertions were weakened.
+
+Implemented on dev: when a structural insertion shifts a previously valid scalar cell reference or range endpoint outside the supported A1:AF6000 grid, the formula rewrite now writes #REF! instead of retaining an out-of-grid coordinate. Already-invalid references remain unchanged. Added 5999-row/A6000 and 31-column/AF1 scalar/range browser fixtures and a structural unittest. Updated docs/DATA_TABLES.md, the living plan, changelog and this ledger. `src/data-tables.js` and the matching inline block in `index.html` are synchronized byte-for-byte.
+
+Validation: source/bundle parity and JavaScript syntax are checked in the execution tooling; the isolated boundary harness checks A6000→#REF!, A5999:A6000→#REF!, AF1→#REF! and AE1:AF1→#REF!. Full Python/Chromium local execution is unavailable because this execution workspace has no repository checkout. New exact-head Push and PR Quality are required before this candidate is QA-verified.
+
+Release: PR #191 remains open; reviews are empty. Branch-protection reads return HTTP 403 to the connected integration; repository rulesets are empty. Do not merge or update main directly. Main Quality #45360386408 and Pages #45360367251 remain successful on unchanged main. Frozen historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-25 — DATA-TABLES-SHEET-RENAME-ATOMICITY
 
 Starting refs: dev 6756c32182e4b70fa363900d4eeef05c9dcabd6d, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; the only long-lived branches are dev and main. Re-read root AGENTS.md, this living plan, and the frozen 2026-10-26 feature inventory. The exact starting dev-head Push Quality #45613220803 and PR Quality #45613229309 both completed successfully with 218/218 steps on 6756c32182e4b70fa363900d4eeef05c9dcabd6d; main Quality #45360386408 and Pages deployment #45360367251 remain successful on unchanged main.

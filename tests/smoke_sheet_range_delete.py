@@ -73,6 +73,28 @@ def main():
         assert page.evaluate(column_refs) == ["=Data!A1", "=Data!AG1", "=SUM(Data!AG1:AG1)"]
         assert page.evaluate(column_values) == [20, "#REF!", "#REF!"]
 
+        # Inserting before a valid final-row reference must not leave a raw A6001 address.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
+            {id:'sheet-1',name:'Data',columns:['A'],rows:Array.from({length:5999},(_,i)=>[String(i+1)])},
+            {id:'sheet-2',name:'Refs',columns:['A','B'],rows:[['=Data!A6000','=SUM(Data!A5999:A6000)']]}
+        ]})""")
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == [0, 5999]
+        page.evaluate("MathStudio.dataTables.insertRow(5998)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == ["=#REF!", "=SUM(#REF!)"]
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == ["#REF!", "#REF!"]
+
+        # The same fixed-grid boundary applies to AF when inserting a column.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
+            {id:'sheet-1',name:'Data',columns:Array.from({length:31},(_,i)=>'C'+i),
+             rows:[Array.from({length:31},(_,i)=>i===30?'5':'')]},
+            {id:'sheet-2',name:'Refs',columns:['A','B'],rows:[['=Data!AF1','=SUM(Data!AE1:AF1)']]}
+        ]})""")
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == [0, 5]
+        page.evaluate("MathStudio.dataTables.insertColumn(30)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == ["=#REF!", "=SUM(#REF!)"]
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == ["#REF!", "#REF!"]
+
+
         # A failed cell-value conversion must not leave cross-sheet references shifted.
         page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
             {id:'sheet-1',name:'Data',columns:['A'],rows:[['10'],['20']]},
@@ -140,6 +162,8 @@ def main():
                 toString(){throw Error('formula conversion failed');}
             };
         }""")
+        page.locator('[data-workspace="data"]').click()
+        assert page.locator("#dt-rename").is_visible()
         page.once("dialog", lambda dialog: dialog.accept("Renamed Sheet"))
         page.locator("#dt-rename").click()
         failed_rename = page.evaluate("""() => ({

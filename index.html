@@ -4378,7 +4378,12 @@ self.onmessage=async ({data})=>{
           // Keep already-invalid grid addresses invalid instead of reviving them after a shift.
           if(!isSupportedReference(left)||!isSupportedReference(right))return match;
           const a=coord(left),b=coord(right),lo=Math.min(a,b),hi=Math.max(a,b);
-          if(delta>0)mapped=(prefix||'')+at(left,a>=index?a+delta:a)+':'+at(right,b>=index?b+delta:b);
+          if(delta>0){
+             const shiftedLeft=at(left,a>=index?a+delta:a);
+             const shiftedRight=at(right,b>=index?b+delta:b);
+             if(!isSupportedReference(shiftedLeft)||!isSupportedReference(shiftedRight))mapped='#REF!';
+             else mapped=(prefix||'')+shiftedLeft+':'+shiftedRight;
+           }
           else{const lower=lo-(index<lo?1:0),upper=hi-(index<=hi?1:0);
             mapped=upper<lower?'#REF!':(prefix||'')+
               at(left,a<=b?lower:upper)+':'+at(right,a<=b?upper:lower);}
@@ -4395,6 +4400,7 @@ self.onmessage=async ({data})=>{
         if(delta<0&&position===index)return '#REF!';
         const moved=position>=index+(delta<0?1:0)?position+delta:position;
         if(moved===position)return match;
+        if(moved<0||moved>=(axis==='row'?MAX_ROWS:MAX_COLUMNS))return '#REF!';
         return (prefix||'')+colAnchor+(axis==='column'?colLetter(moved):letters)+rowAnchor+(axis==='row'?moved+1:digits);
       });
       const rewritten=protectedFormula.restore(next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]));

@@ -400,7 +400,7 @@ def main():
                     rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY
                 };
             }""")
-            assert product_underflow['ixy'] == 0, product_underflow
+            assert product_underflow['ixy'] == 0 and math.copysign(1.0, product_underflow['ixy']) == 1.0, product_underflow
             assert abs(product_underflow['angle'] - 45) <= 1e-12, product_underflow
             for key, expected in {
                 'area': 9.999999999999999e-151,

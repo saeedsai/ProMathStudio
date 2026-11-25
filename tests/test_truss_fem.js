@@ -1848,8 +1848,8 @@ test('L-angle retains principal properties when dimensional product of inertia u
  relative(section.area,expected.area,'L-angle area');
  relative(section.secondMoment,expected.ixx,'L-angle Ixx');
  relative(section.secondMomentPerpendicular,expected.iyy,'L-angle Iyy');
- assert.equal(section.productOfInertia,expected.ixy,
-  'the exact Ixy reference (-2.470544411709329e-329 mm^4) rounds below Number.MIN_VALUE');
+ assert.ok(Object.is(section.productOfInertia,0),
+  'the underflowed dimensional Ixy is canonical positive zero; normalized Ixy retains its sign for the 45-degree principal axis');
  relative(section.principalMomentMajor,expected.major,'L-angle major principal moment');
  relative(section.principalMomentMinor,expected.minor,'L-angle minor principal moment');
  relative(section.sectionModulusX,expected.sx,'L-angle Sx');

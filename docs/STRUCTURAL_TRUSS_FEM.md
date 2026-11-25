@@ -373,3 +373,8 @@ A thin flange on an otherwise nearly square L-angle can make the dimensional pro
 
 The synthetic exact-binary64 fixture uses B=H=1e-75 mm and t=B·(1−1e-14). Its exact-binary64 Decimal reference has Ixy≈−2.470544411709329e-329 mm⁴, which rounds to zero, while Ixx=Iyy≈8.333333333333331e-302 mm⁴, both principal moments round to the same positive value, and the principal-axis angle is 45°. The section moduli are approximately 1.6666666666666664e-226 mm³ and radii approximately 2.886751345948129e-76 mm. Node and registered Chromium regressions check these values at 1280px and 390px. This is a numerical-range fixture, not an engineering design dimension.
 
+
+
+## L-angle dimensional Ixy signed-zero presentation
+
+When the dimensional product of inertia is smaller than the binary64 range, its returned value is canonicalized to positive zero rather than exposing `-0`. The normalized two-rectangle tensor retains the signed Ixy value and remains authoritative for the principal-axis angle, so this presentation normalization does not discard the orientation information used by the calculation.

@@ -1,3 +1,25 @@
+## 2026-11-25 — TRUSS-L-ANGLE-SIGNED-ZERO-CI-REPAIR
+
+Starting refs: dev `183c6500a9d7fc04620d08e385051254c60f76a1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; release PR #191 remains open.
+
+Exact-head Push Quality [#45603581050](https://github.com/saeedsai/ProMathStudio/actions/runs/45603581050) and PR Quality [#45603598028](https://github.com/saeedsai/ProMathStudio/actions/runs/45603598028) both failed at step 214, **2D truss FEM analytical references, scaling and mechanism rejection**. The Truss Node suite reported 90/91 passing. The failing L-angle regression expected dimensional Ixy to be zero, but the normalized result restored the correctly signed binary64 underflow value `-0`; the normalized tensor still produced the correct 45° principal-axis angle. This is a signed-zero representation defect, not a loss of principal-axis information.
+
+Fix on dev: canonicalize only a zero-valued restored dimensional Ixy to positive zero. Keep the normalized signed Ixy for the principal-axis calculation. Tighten the Node regression with `Object.is(value, 0)` and the registered Chromium regression with a positive-zero sign check. Update the Truss numerical contract, living plan, execution ledger and changelog. No `index.html` edit is needed because Truss Studio loads the adjacent `tools/truss-fem.js` asset.
+
+Local repository checkout is absent in this execution workspace, so local Node/Playwright commands cannot run here. Fresh exact-head Push and PR Quality must validate the committed candidate; pending until GitHub Actions completes. No test assertions are weakened.
+
+Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; its Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) previously passed 218/218 and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) completed build/status/deploy successfully. PR #191 has no independent reviews; both branches report unprotected, rulesets are empty, and the connected integration receives HTTP 403 for branch-protection reads. Do not merge until eligible approval and verifiable required protections are available. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+## Next five features
+
+1. **P0 — Exact-head Truss CI and release governance:** require the new dev Push and PR Quality to pass every required step on the same exact SHA; obtain eligible independent PR #191 approval and verifiable main protection for required checks/no direct push/force/deletion; inspect the full diff, merge only through the ordinary PR process, then verify main Quality, Pages and hosted critical paths. Acceptance: zero failed/skipped required checks on the candidate and successful post-merge main/Pages verification.
+2. **P1 — Complete the seven-shape Truss numerical audit:** thin-wall, subnormal and high-scale references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Acceptance: exact-binary64 Decimal references, genuine final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insertion/deletion, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges. Acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation. Acceptance: independent numerical references, failure/recovery and desktop/390px browser tests.
+
+---
+
 ## 2026-11-25 — CI-DELIVERY-PLAN-HEADING-REPAIR
 
 Exact-head Push Quality #45602917742 and PR Quality #45602928273 on b37084214b0bce42fb2d2af88c45e4fa120dc975 failed only in structural step 7: tests/test_delivery_policy.py requires the literal heading "Next five features" in docs/HOURLY_DEVELOPMENT_PLAN.md. The five priorities were present under uppercase NEXT FIVE, but the exact compatibility heading was missing. Restored the full historical plan from the preceding b9f00f9 version and added the required heading without changing the five priorities or weakening any assertion. Re-run exact-head Push and PR Quality after this documentation repair.

@@ -321,7 +321,9 @@
             centroidY = candidate.centroidY;
             secondMoment = candidate.ixx;
             secondMomentPerpendicular = candidate.iyy;
-            productOfInertia = candidate.ixy;
+            // The normalized tensor retains Ixy's sign for the principal-axis angle.
+            // Canonicalize dimensional underflowed zero so UI/export never emits -0.
+            productOfInertia = candidate.ixy === 0 ? 0 : candidate.ixy;
             principalMomentMajor = candidate.major;
             principalMomentMinor = candidate.minor;
             analyticSectionModulusX = candidate.sx;

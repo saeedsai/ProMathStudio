@@ -452,8 +452,10 @@
         throw Error('Hollow rectangle inner width and depth must be positive and smaller than the outer dimensions.');
       }
       const outerArea = finite(width * depth, 'Rectangle outer area (mm²)');
-      const innerArea = hollow ? finite(innerWidth * innerHeight, 'Hollow rectangle inner area (mm²)') : 0;
-      if (hollow && !(innerArea > 0)) throw Error('Hollow rectangle inner area underflow; increase the inner dimensions.');
+      // Do not form innerWidth*innerHeight as a validity check: the cavity area may
+      // underflow even when the net section area and both centroidal inertias remain
+      // representable. Positive, strictly contained dimensions above validate the
+      // geometry; the factored dimensionless ratios below determine its contribution.
       // Factor the outer-minus-inner expressions into dimensionless wall gaps.
       // Direct subtraction loses significant digits when a valid hollow section has very thin walls.
       const widthRatio = hollow ? innerWidth / width : 0;
@@ -502,8 +504,9 @@
         throw Error('Hollow circle inner diameter must be positive and smaller than the outer diameter.');
       }
       const outerSquare = finite(diameter * diameter, 'Circle outer diameter squared (mm²)');
-      const innerSquare = hollow ? finite(innerDiameter * innerDiameter, 'Hollow circle inner diameter squared (mm²)') : 0;
-      if (hollow && !(innerSquare > 0)) throw Error('Hollow circle inner area underflow; increase the inner diameter.');
+      // Avoid squaring the inner diameter solely for validation. Its square may
+      // underflow while the annulus area, inertia and section modulus are finite;
+      // positive containment is validated above and the ratios below are sufficient.
       if (hollow) {
         // Factor the concentric annulus differences to preserve thin-wall precision.
         // Do not form Do^4 or Di^4: either can overflow while the thin-annulus

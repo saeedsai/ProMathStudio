@@ -1,3 +1,29 @@
+## 2026-11-25 — TRUSS-HOLLOW-CAVITY-AREA-UNDERFLOW-RECOVERY
+
+**Starting refs:** dev `530dc4ac299db7b4ea1017cd68e33047db602543`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; dev was 20 commits ahead and 0 behind. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified engineering plans/catalogs, Truss source/tests/guide, current refs, PR #191, exact-head Quality and main Pages evidence.
+
+**Release evidence:** dev Push Quality [#45523240461](https://github.com/saeedsai/ProMathStudio/actions/runs/45523240461) and PR Quality [#45530344697](https://github.com/saeedsai/ProMathStudio/actions/runs/45530344697) both passed 218/218 on exact head `530dc4ac299db7b4ea1017cd68e33047db602543`. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on main. PR #191 remains open with zero reviews. Only dev/main branches exist; both are unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge or protection bypass was attempted.
+
+**Defect reproduced in the actual production module:** hollow-rectangle dimensions B=1e100, H=1e-100, bi=hi=1e-162 mm and hollow-circle dimensions Do=1e-50, Di=1e-200 mm were rejected because the cavity area / inner-diameter square rounded to zero, even though the ratio-based net area, both inertias, section moduli and radii are finite. These are numerical-range fixtures, not design dimensions.
+
+**Fix:** remove the unnecessary inner-cavity area/square materialization checks. Positive and strictly contained inner dimensions are still validated; the existing factored dimensionless ratios compute net hollow properties, and the final net-area/inertia underflow/overflow checks remain. Ordinary hollow sections are unchanged.
+
+**Regression:** added a direct Node test and the already-registered Chromium smoke at 1280px and 390px. Both compare all net properties against the corresponding solid envelope at binary64 precision, assert the cavity intermediate is zero, require finite positive net properties, and verify input immutability/frozen results. Updated the Structural Truss guide and changelog. The standalone Truss Studio loads adjacent JS assets; root index.html synchronization is not applicable.
+
+**Validation:** the pre-fix actual module reproduced both specific underflow rejections. Independent arithmetic references show rectangle area 1 mm², Ixx ~8.333333333333334e-202 mm⁴, Iyy ~8.333333333333332e198 mm⁴; circle area ~7.853981633974483e-101 mm² and inertia ~4.908738521234052e-202 mm⁴. Modified production-module V8 validation is recorded after commit; full Node/Chromium CI is pending. Local checkout is absent, so no local Playwright or full Node suite is claimed.
+
+**Historical ledger repair:** the dev ledger had been truncated to 7 headings / 14,813 bytes while main retained 131 headings / 340,767 bytes. Restored the complete main historical ledger and preserved all seven unique dev entries before appending this run; the frozen 166-gap/95-partial inventory was not modified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** PR #191 exact-head Quality green; obtain eligible independent approval and admin-verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion; inspect full diff, merge only through ordinary PR, then verify main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Spreadsheet structural correctness (in progress):** complete row-6000/column-AF insertion/deletion, valid/invalid #REF! transitions, reversed/mixed-anchor and blank-grid ranges, failed-insert and noncontiguous-sort byte-identical rollback; structural plus 1280px/390px Chromium.
+3. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; malformed import preserves all workspaces, selections and previous results; desktop/390px.
+4. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics, stale-export invalidation and mobile recovery.
+5. **P1 — Seven-shape Truss boundary audit:** extend independent thin-wall/subnormal/high-scale references beyond hollow rectangle/circle; invalid rollback, selected-member isolation, Node Decimal references and desktop/390px browser checks.
+
+Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+
 ## 2026-11-25 — DATA-TABLES-SORT-REGEX-CI-REPAIR
 
 **Starting refs:** dev `09cfeb6e971b67f390f4390d9f8cd280a1f2f2b2`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact candidate Quality [#45522925339](https://github.com/saeedsai/ProMathStudio/actions/runs/45522925339) failed structural step 7: `test_each_inline_script_parses_in_node` found an invalid regular expression in the newly added sort reference guard. The log shows the validator regex had two literal backslashes before optional-dollar/digit tokens; 600 structural tests ran, one failure and one pre-existing skip. Browser steps were skipped because the job stopped at structural validation. The preceding dev head Quality #45515170826 passed 218/218.

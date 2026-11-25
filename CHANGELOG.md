@@ -1,3 +1,9 @@
+## 2026-11-25 — Hollow section cavity underflow no longer rejects representable net properties (dev; exact-head QA pending)
+
+- Hollow rectangle and hollow circle helpers no longer require the cavity area / inner-diameter square to be representable when the positive contained geometry and all net section properties are representable.
+- Added direct Node and registered Chromium regressions at 1280px/390px for zero-underflow cavity intermediates, finite positive net properties, solid-envelope binary64 parity, input immutability and frozen results.
+- Updated the Structural Truss guide and restored the full historical execution ledger on dev (all main history plus seven unique dev entries). The frozen MATLAB inventory remains 166 gaps / 95 partial. Not released pending exact-head Quality and ordinary reviewed promotion.
+
 ## 2026-11-25 — Repair over-escaped Data Tables sort validator after exact-head CI failure
 
 - Exact Quality #45522925339 exposed an invalid regex in the new sort guard during Node inline-script syntax validation (step 7). Corrected the literal to match the existing single-backslash reference validator.

@@ -315,3 +315,15 @@ The channel and I-section property helper normally normalizes both coordinates b
 With dimensionless area A*, centroidal inertias Ixx* and Iyy*, and normalized extreme-fibre distances cX* and cY*, the dimensional relationships are A=B·H·A*, Ixx=B·H³·Ixx*, Iyy=B³·H·Iyy*, rx=H·sqrt(Ixx*/A*), ry=B·sqrt(Iyy*/A*), Sx=B·H²·Ixx*/cY*, and Sy=B²·H·Iyy*/cX*. The section-modulus scale products are restored with exponent-scaled multiplication so an intermediate product does not overflow or underflow before a representable result is formed. Reported dimensional area and Ixx/Iyy remain on the existing physical calculation path.
 
 The direct Node and Chromium regressions use B=1e150 mm, H=1e-154 mm, tw=1e-154 mm and tf=4.9e-155 mm for both channel and I-section. Ixx is positive subnormal while Iyy is normal. Independent 120-digit Decimal references from the exact binary64 dimensions give rx=2.9160475533388224e-155 mm, ry=2.8867513459481288e149 mm, Sx=1.6666533333333332e-159 mm³ and Sy=1.6333333333333333e145 mm³. The previous max-dimension normalized path lost the thin-axis inertia and fell back to rounded physical I/A and I/c, producing relative errors above 1e-11. Corrected properties are checked within 5e-13 at desktop and 390px. These synthetic dimensions exercise floating-point limits, not practical structural design.
+
+
+## Hollow-cavity area underflow versus net-property representability
+
+Hollow-section validity depends on positive, strictly contained inner dimensions and representable net section properties. The helper does not need to materialize the cavity's own area or squared diameter merely to validate the geometry: either intermediate can underflow to zero even though the outer/net area, both centroidal inertias, section moduli and radii are finite. Hollow-rectangle and hollow-circle properties therefore continue through their factored dimensionless width/depth or inner/outer ratios. Genuinely unrepresentable net area or inertia is still rejected by the existing final property checks.
+
+The regression uses synthetic binary64 boundary inputs only (not engineering design dimensions):
+
+- Hollow rectangle: outer dimensions 1e100 × 1e-100 mm, inner dimensions 1e-162 × 1e-162 mm. The inner area rounds to zero, while net area is 1 mm², Ixx is approximately 8.333333333333334e-202 mm⁴, Iyy is approximately 8.333333333333332e198 mm⁴, and both section moduli/radii remain finite.
+- Hollow circle: outer diameter 1e-50 mm, inner diameter 1e-200 mm. The inner-diameter square rounds to zero, while annulus area is approximately 7.853981633974483e-101 mm², inertia is approximately 4.908738521234052e-202 mm⁴, and section modulus/radius remain finite.
+
+For both cases, all returned net properties match the corresponding solid envelope at binary64 precision because the cavity contribution is below the representable resolution. Direct Node and Chromium regressions also verify input immutability, frozen results and desktop/390px execution.

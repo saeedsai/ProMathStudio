@@ -182,6 +182,47 @@ def main():
                 for axis in ('sx', 'sy'):
                     assert abs(thin_circles[shape][axis] / thin_circles[shape]['expectedS'] - 1) <= 5e-13
 
+            # A hollow cavity's own area/square may underflow even when every net property is representable.
+            # The ratio-based hollow helpers must accept these geometries at desktop and mobile widths.
+            unresolved_cavities = page.evaluate("""() => {
+                const rectangleDimensions = {
+                    width: 1e100, height: 1e-100, innerWidth: 1e-162, innerHeight: 1e-162
+                };
+                const circleDimensions = {diameter: 1e-50, innerDiameter: 1e-200};
+                const before = JSON.stringify([rectangleDimensions, circleDimensions]);
+                const hollowRectangle = ProMathTrussFEM.sectionProperties('hollow-rectangle', rectangleDimensions);
+                const solidRectangle = ProMathTrussFEM.sectionProperties('rectangle', {
+                    width: rectangleDimensions.width, height: rectangleDimensions.height
+                });
+                const hollowCircle = ProMathTrussFEM.sectionProperties('hollow-circle', circleDimensions);
+                const solidCircle = ProMathTrussFEM.sectionProperties('solid-circle', {
+                    diameter: circleDimensions.diameter
+                });
+                const keys = ['area', 'secondMoment', 'secondMomentPerpendicular', 'sectionModulusX',
+                    'sectionModulusY', 'radiusOfGyrationX', 'radiusOfGyrationY'];
+                return {
+                    rectangle: {
+                        cavityArea: rectangleDimensions.innerWidth * rectangleDimensions.innerHeight,
+                        same: keys.every(key => hollowRectangle[key] === solidRectangle[key]),
+                        values: keys.map(key => hollowRectangle[key])
+                    },
+                    circle: {
+                        innerSquare: circleDimensions.innerDiameter * circleDimensions.innerDiameter,
+                        same: keys.every(key => hollowCircle[key] === solidCircle[key]),
+                        values: keys.map(key => hollowCircle[key])
+                    },
+                    unchanged: JSON.stringify([rectangleDimensions, circleDimensions]) === before
+                };
+            }""")
+            assert unresolved_cavities['rectangle']['cavityArea'] == 0, unresolved_cavities
+            assert unresolved_cavities['circle']['innerSquare'] == 0, unresolved_cavities
+            assert unresolved_cavities['rectangle']['same'], unresolved_cavities
+            assert unresolved_cavities['circle']['same'], unresolved_cavities
+            assert unresolved_cavities['unchanged'], unresolved_cavities
+            for shape in ('rectangle', 'circle'):
+                assert all(math.isfinite(value) and value > 0
+                           for value in unresolved_cavities[shape]['values']), unresolved_cavities
+
             # Composite section inertias can be subnormal while both radii remain representable.
             # The normalized geometry path must avoid quantized physical I/A at desktop and mobile.
             composite_thin = page.evaluate("""() => {

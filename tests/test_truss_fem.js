@@ -1242,6 +1242,38 @@ test('solid and concentric hollow section helpers return validated area and cent
  close(fem.solve(fem.examples.bar).displacements[1].x,1e-5,1e-13);
 });
 
+test('hollow cavity area may underflow when all net section properties remain representable',()=>{
+ const rectangleDimensions={width:1e100,height:1e-100,innerWidth:1e-162,innerHeight:1e-162};
+ const originalRectangle={...rectangleDimensions};
+ assert.equal(rectangleDimensions.innerWidth*rectangleDimensions.innerHeight,0,
+  'the synthetic cavity area must underflow to zero');
+ const hollowRectangle=fem.sectionProperties('hollow-rectangle',rectangleDimensions);
+ const solidRectangle=fem.sectionProperties('rectangle',{width:rectangleDimensions.width,height:rectangleDimensions.height});
+ for(const key of ['area','secondMoment','secondMomentPerpendicular','sectionModulusX','sectionModulusY',
+                   'radiusOfGyrationX','radiusOfGyrationY']){
+  assert.ok(Number.isFinite(hollowRectangle[key])&&hollowRectangle[key]>0,key+' must remain finite and positive');
+  assert.equal(hollowRectangle[key],solidRectangle[key],key+' must match the numerically indistinguishable solid envelope');
+ }
+ assert.deepEqual(hollowRectangle.centroid,solidRectangle.centroid);
+ assert.deepEqual(rectangleDimensions,originalRectangle);
+ assert.ok(Object.isFrozen(hollowRectangle)&&Object.isFrozen(hollowRectangle.centroid));
+
+ const circleDimensions={diameter:1e-50,innerDiameter:1e-200};
+ const originalCircle={...circleDimensions};
+ assert.equal(circleDimensions.innerDiameter*circleDimensions.innerDiameter,0,
+  'the synthetic inner-diameter square must underflow to zero');
+ const hollowCircle=fem.sectionProperties('hollow-circle',circleDimensions);
+ const solidCircle=fem.sectionProperties('solid-circle',{diameter:circleDimensions.diameter});
+ for(const key of ['area','secondMoment','secondMomentPerpendicular','sectionModulusX','sectionModulusY',
+                   'radiusOfGyrationX','radiusOfGyrationY']){
+  assert.ok(Number.isFinite(hollowCircle[key])&&hollowCircle[key]>0,key+' must remain finite and positive');
+  assert.equal(hollowCircle[key],solidCircle[key],key+' must match the numerically indistinguishable solid envelope');
+ }
+ assert.deepEqual(hollowCircle.centroid,solidCircle.centroid);
+ assert.deepEqual(circleDimensions,originalCircle);
+ assert.ok(Object.isFrozen(hollowCircle)&&Object.isFrozen(hollowCircle.centroid));
+});
+
 test('open channel and I sections use composite rectangles and the parallel-axis theorem',()=>{
  const channel=fem.sectionProperties('channel',{width:100,height:80,webThickness:10,flangeThickness:8});
  close(channel.area,2240,1e-12);

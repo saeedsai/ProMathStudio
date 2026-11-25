@@ -1,3 +1,14 @@
+## 2026-11-25 — TRUSS-MATERIAL-CSV-ROUNDTRIP-PRECISION
+
+- Starting dev `b03433d31a9246ba6227af4a2c6386ba552d0a7f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, Truss source/tests/contract, refs, PR #191/reviews, CI and Pages.
+- Exact starting-head Push Quality #45701255742 and PR Quality #45701267662 both passed all 218 steps, zero failures/skips; Truss Node/browser steps 214/215 passed.
+- Reproduced export precision loss: density 0.10000000000000002 became 0.1; derived mass 0.00020000000000000004 became 0.0002.
+- Changed finite numeric CSV cells to shortest round-trip decimal strings and preserved negative zero explicitly.
+- Added a Node regression that verifies exact numeric re-import for density and derived mass while retaining concise ordinary values and 2/3 formatting. Updated Structural Truss contract, living plan and changelog.
+- Isolated actual-source execution reproduced the old defect; post-change validation and full exact-head CI are pending the new commit's GitHub Actions.
+- PR #191 remains open with zero independent reviews; dev/main unprotected, rulesets empty. No merge or main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Frozen historical inventory unchanged at **166 gaps / 95 partial**. Status: implemented on dev candidate, QA pending, not released.
+
 ## 2026-11-25 — TRUSS-CHANNEL-NEGLIGIBLE-WEB-UNDERFLOW
 
 - Starting dev `371acb56f07df173cfb0aef456e164f5759b231d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected root AGENTS.md, living plan, frozen inventory, unified plan, engineering architecture/Structural catalog, source/tests, PR #191, reviews, branches and current CI/Pages.

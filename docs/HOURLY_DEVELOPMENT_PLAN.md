@@ -1,3 +1,31 @@
+## 2026-11-25 — TRUSS-MATERIAL-CSV-ROUNDTRIP-PRECISION
+
+**Starting refs:** dev `b03433d31a9246ba6227af4a2c6386ba552d0a7f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen 2026-10-26 inventory, Truss source/tests/contract, current branch refs, PR #191/reviews, exact-head Quality and main/Pages evidence.
+
+**Starting exact-head CI:** Push Quality [#45701255742](https://github.com/saeedsai/ProMathStudio/actions/runs/45701255742) and PR Quality [#45701267662](https://github.com/saeedsai/ProMathStudio/actions/runs/45701267662) both completed successfully on exact starting SHA `b03433d31a9246ba6227af4a2c6386ba552d0a7f`; all 218 workflow steps passed with zero failures/skips, including Truss Node step 214 and Chromium/mobile step 215. No existing exact-head CI failure remained.
+
+**Numerical export defect:** `exportMaterialCSV()` rounded every finite numeric cell through `toPrecision(16)`. This is not guaranteed to round-trip an IEEE-754 binary64 value. Reproduced on the actual production module: density `0.10000000000000002` exported as `0.1`, and derived member mass `0.00020000000000000004` exported as `0.0002`. Both changed when parsed back to numbers.
+
+**Source correction:** Use JavaScript's shortest round-trippable decimal representation for finite numeric CSV cells, retaining explicit `-0`. Ordinary values such as `2`, `0.001`, `7850` and `0.6666666666666666` remain concise; no artificial 17-digit padding is introduced. This preserves stored binary64 values, not accuracy beyond the inputs.
+
+**Regression:** Updated the direct Node material-CSV test to verify exact density and derived-mass round trips for the failing fixture, while retaining ordinary concise-number and 2/3 coverage. Updated the Structural Truss contract. The Truss solver is loaded as an adjacent asset, so no root `index.html` bundle change is required.
+
+**Isolated validation:** The actual starting module reproduced both lossy cells (`0.1` and `0.0002`). The changed formatter was syntax-checked and its shortest-decimal behavior was verified independently; full Node/Chromium repository tests await exact-head GitHub Actions.
+
+**Release:** PR #191 remains open with zero independent reviews. The only branches are dev/main and both report unprotected; repository rulesets are empty. No merge, direct main update or safeguard bypass. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; prior Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) were successful on that unchanged main SHA. The historical inventory remains **166 gaps / 95 partial**.
+
+**Status:** Implemented on dev candidate; new exact-head Push/PR Quality pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Release governance (blocked externally).** Acceptance: eligible independent approval on PR #191; verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion; complete diff review; ordinary dev-to-main PR merge; successful exact-main Quality, Pages deployment and hosted critical-path verification.
+2. **P1 — Finish seven-shape Truss section boundaries.** Acceptance: independent exact-binary64 references for area, centroid, Ixx/Iyy, Sx/Sy and rx/ry across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining low-exponent/near-solid cases; conservative rejection of non-negligible underflowed pieces; invalid rollback, selected-member isolation, E/density/K preservation, keyboard and 390px browser tests.
+3. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion, scalar/range #REF!, already-invalid references, blank/reversed/mixed-anchor ranges, quoted sheet names/doubled-quote literals, recalculation, atomic rollback and source/standalone bundle parity.
+4. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed imports preserve all workspaces, focus, selection and prior results; desktop/390px browser tests.
+5. **P1 — Numerical ODE verification.** Acceptance: independent analytical forward/backward scalar and coupled references, refinement/convergence, bounded stage-overflow failure/recovery, stale-export invalidation and responsive keyboard/browser tests.
+
+---
+
 ## 2026-11-25 — TRUSS-CHANNEL-NEGLIGIBLE-WEB-UNDERFLOW
 
 **Starting refs:** dev `371acb56f07df173cfb0aef456e164f5759b231d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, unified implementation plan, engineering architecture and Structural Engineering catalog, Truss source/tests/contract, current refs, PR #191/reviews, exact-head Quality and main/Pages evidence.

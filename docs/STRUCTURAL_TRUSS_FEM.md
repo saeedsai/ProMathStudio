@@ -7,6 +7,10 @@
 **Verification baseline:** The immediately preceding dev head d1c25300184851af0c52c9619571c2878af5c458 passed exact-head Push Quality [#45202567594](https://github.com/saeedsai/ProMathStudio/actions/runs/45202567594) and PR Quality [#45202584053](https://github.com/saeedsai/ProMathStudio/actions/runs/45202584053), each with 218/218 steps successful and zero failures/skips. This new read-direction candidate requires fresh exact-head CI; it is not released.
 
 
+## Material schedule CSV numeric round-trip
+
+Finite numeric cells in the material schedule use JavaScript's shortest round-trippable decimal representation. This avoids fixed-significant-digit truncation: for example, density `0.10000000000000002` and its derived mass `0.00020000000000000004` must survive CSV export and numeric re-import without changing their binary64 values. Negative zero is emitted explicitly as `-0`. This guarantees binary64 serialization fidelity, not additional physical accuracy beyond the stored inputs.
+
 ## Hollow-rectangle inertia range safety
 
 Hollow-rectangle centroidal inertias use the existing dimensionless wall-gap factors without first constructing the outer and inner solid-rectangle fourth-power moments. For the Ixx path, the dimensionless factor is split evenly across the two depth factors:

@@ -1,3 +1,9 @@
+## 2026-11-25 — Truss material CSV preserves exact binary64 numeric values
+
+- Replaced fixed 16-significant-digit rounding with shortest round-trippable decimal output for finite numeric cells; negative zero is emitted as `-0`.
+- Added a regression for density `0.10000000000000002` and derived mass `0.00020000000000000004`, both previously rounded to different numeric values.
+- Updated the Structural Truss numerical/export contract. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-25 — Truss channel safely handles a negligible underflowed web
 
 - A channel web whose area rounds to zero is accepted only when exponent-scaled upper bounds prove its area, first moments, local/offset inertias, Ixy and both normalized-path contributions are below binary64 significance, and the remaining section properties are normal.

@@ -1191,11 +1191,11 @@
         member.effectiveLengthFactor ?? '',
         member.eulerCriticalLoad === null ? '' : member.eulerCriticalLoad / 1000])
     ];
-    // Keep CSV numeric cells readable without exposing binary floating-point tails.
-    // Sixteen significant digits retain near-double precision for engineering exports.
+    // Use the shortest decimal that round-trips to the original binary64 value.
+    // Fixed 16-digit formatting can silently change valid engineering data.
     const quote = value => {
       const text = typeof value === 'number' && Number.isFinite(value)
-        ? String(Number(value.toPrecision(16))) : String(value);
+        ? (Object.is(value, -0) ? '-0' : String(value)) : String(value);
       return '"' + text.replace(/"/g, '""') + '"';
     };
     return rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';

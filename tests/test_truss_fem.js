@@ -1017,12 +1017,19 @@ test('optional member density produces SI mass estimates and rejects invalid or 
  close(fem.solve(bar).displacements[1].x,1e-5,1e-13);
 });
 
-test('material CSV numeric cells avoid binary floating-point tails and retain sixteen significant digits',()=>{
+test('material CSV numeric cells use shortest round-trip binary64 values',()=>{
  const dense=clone(fem.examples.bar);dense.members[0].density=7850;
  const csv=fem.exportMaterialCSV(dense);
  assert.ok(csv.includes(['"AB"','"A"','"B"','"2"','"0.001"','"0.002"','"200"','"100"','"7850"','"15.7"'].join(',')));
  const precise=clone(fem.examples.bar);precise.nodes[1].x=2/3;
  assert.ok(fem.exportMaterialCSV(precise).includes('"0.6666666666666666"'));
+ const exact=clone(fem.examples.bar);exact.members[0].density=0.10000000000000002;
+ const metric=fem.inspectJSON(JSON.stringify(exact)).memberMetrics[0];
+ const exactRow=fem.exportMaterialCSV(exact).trimEnd().split('\\r\\n')[1].slice(1,-1).split('","');
+ assert.equal(exactRow[8],'0.10000000000000002');
+ assert.equal(Number(exactRow[8]),metric.density);
+ assert.equal(exactRow[9],String(metric.mass));
+ assert.equal(Number(exactRow[9]),metric.mass);
 });
 
 test('optional Euler buckling estimate uses SI units, validates I/K and remains independent of applied load',()=>{

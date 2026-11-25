@@ -1194,8 +1194,14 @@
     // Use the shortest decimal that round-trips to the original binary64 value.
     // Fixed 16-digit formatting can silently change valid engineering data.
     const quote = value => {
-      const text = typeof value === 'number' && Number.isFinite(value)
-        ? (Object.is(value, -0) ? '-0' : String(value)) : String(value);
+      let text;
+      if (typeof value === 'number') {
+        if (!Number.isFinite(value)) throw Error('Material CSV cannot export a non-finite numeric value.');
+        text = Object.is(value, -0) ? '-0' : value.toString();
+        if (!Object.is(Number(text), value)) throw Error('Material CSV numeric value did not round-trip.');
+      } else {
+        text = String(value);
+      }
       return '"' + text.replace(/"/g, '""') + '"';
     };
     return rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';

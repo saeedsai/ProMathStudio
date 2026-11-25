@@ -9,7 +9,7 @@
 
 ## Material schedule CSV numeric round-trip
 
-Finite numeric cells in the material schedule use JavaScript's shortest round-trippable decimal representation. This avoids fixed-significant-digit truncation: for example, density `0.10000000000000002` and its derived mass `0.00020000000000000004` must survive CSV export and numeric re-import without changing their binary64 values. Negative zero is emitted explicitly as `-0`. This guarantees binary64 serialization fidelity, not additional physical accuracy beyond the stored inputs.
+Finite numeric cells in the material schedule use JavaScript's shortest round-trippable decimal representation. Before quoting, the exporter reparses each numeric cell and verifies `Object.is(Number(text), value)`; it refuses non-finite numeric cells rather than emitting `Infinity` or `NaN`. This avoids fixed-significant-digit truncation: density `0.10000000000000002` and its derived mass `0.00020000000000000004` survive export and numeric re-import unchanged. For the 2 m, 0.001 m² bar at 7850 kg/m³, the UI intentionally displays mass rounded to `15.7` kg while the CSV preserves the computed binary64 value `15.700000000000001`. Negative zero is emitted explicitly as `-0`. This guarantees serialization fidelity, not additional physical accuracy beyond the stored inputs.
 
 ## Hollow-rectangle inertia range safety
 

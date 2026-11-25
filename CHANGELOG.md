@@ -1,3 +1,10 @@
+## 2026-11-25 — Guard exact binary64 values in Truss material CSV
+
+- The material CSV serializer now verifies that every finite numeric cell reparses to the identical binary64 value and refuses non-finite numeric cells.
+- Corrected stale Node/Chromium expectations: the bar UI rounds mass to 15.7 kg, while CSV preserves the exact computed value 15.700000000000001 kg for 0.002 m³ × 7850 kg/m³.
+- Added exact parsed-value and volume×density regression assertions. Existing UI display behavior is unchanged.
+- Exact-head Push/PR Quality pending on the new dev candidate; not released.
+
 ## 2026-11-25 — Correct Truss CSV round-trip regression row delimiter
 
 - Corrected the new Node regression to split the exported CSV on actual CRLF characters rather than a double-escaped literal; numeric round-trip assertions are unchanged.

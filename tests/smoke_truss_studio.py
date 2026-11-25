@@ -997,7 +997,11 @@ def main():
         density_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
         density_rows = list(csv.reader(io.StringIO(density_export['body'])))
         assert density_rows[0][8:10] == ['Density (kg/m³)','Member mass (kg)']
-        assert density_rows[1][8:10] == ['7850','15.7']
+        assert density_rows[1][8] == '7850'
+        assert density_rows[1][9] == '15.700000000000001'
+        assert float(density_rows[1][8]) == 7850.0
+        assert float(density_rows[1][9]) == float(density_rows[1][5]) * float(density_rows[1][8])
+        assert repr(float(density_rows[1][9])) == density_rows[1][9]
         density_input.fill('')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(8).inner_text() == '—' and metric_cells.nth(9).inner_text() == '—'

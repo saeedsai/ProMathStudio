@@ -1003,7 +1003,9 @@ test('optional member density produces SI mass estimates and rejects invalid or 
  const legacyMetric=fem.inspectJSON(JSON.stringify(legacy)).memberMetrics[0];
  close(legacyMetric.density,7850);close(legacyMetric.mass,metric.mass);
  const csvRows=fem.exportMaterialCSV(dense).trimEnd().split('\r\n').map(line=>line.slice(1,-1).split('\",\"'));
- assert.equal(csvRows[1][8],'7850');assert.equal(csvRows[1][9],'15.7');
+ assert.equal(csvRows[1][8],String(metric.density));assert.equal(Number(csvRows[1][8]),metric.density);
+ assert.equal(csvRows[1][9],String(metric.mass));assert.equal(Number(csvRows[1][9]),metric.mass);
+ assert.equal(csvRows[1][9],'15.700000000000001');
  const blankRows=fem.exportMaterialCSV(bar).trimEnd().split('\r\n').map(line=>line.slice(1,-1).split('\",\"'));
  assert.equal(blankRows[1][8],'');assert.equal(blankRows[1][9],'');
  const unstable=clone(dense);unstable.nodes[1].fixY=false;
@@ -1020,7 +1022,7 @@ test('optional member density produces SI mass estimates and rejects invalid or 
 test('material CSV numeric cells use shortest round-trip binary64 values',()=>{
  const dense=clone(fem.examples.bar);dense.members[0].density=7850;
  const csv=fem.exportMaterialCSV(dense);
- assert.ok(csv.includes(['"AB"','"A"','"B"','"2"','"0.001"','"0.002"','"200"','"100"','"7850"','"15.7"'].join(',')));
+ assert.ok(csv.includes(['"AB"','"A"','"B"','"2"','"0.001"','"0.002"','"200"','"100"','"7850"','"15.700000000000001"'].join(',')));
  const precise=clone(fem.examples.bar);precise.nodes[1].x=2/3;
  assert.ok(fem.exportMaterialCSV(precise).includes('"0.6666666666666666"'));
  const exact=clone(fem.examples.bar);exact.members[0].density=0.10000000000000002;

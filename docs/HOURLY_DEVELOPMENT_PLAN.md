@@ -1,3 +1,29 @@
+## 2026-11-25 — TRUSS-CSV-EXACT-MASS-ROUNDTRIP-CI-REPAIR
+
+**Starting refs:** dev `1ecc801c09565e220c86266d1f832efa452bdd36`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Truss source/tests/contract, exact branch refs, PR #191/reviews, exact-head Quality, rulesets, main Quality and Pages.
+
+**P0 exact-head CI failure:** Push Quality [#45710918334](https://github.com/saeedsai/ProMathStudio/actions/runs/45710918334) and PR Quality [#45710926373](https://github.com/saeedsai/ProMathStudio/actions/runs/45710926373) both failed on exact SHA `1ecc801c09565e220c86266d1f832efa452bdd36`. The shared job reached Truss browser step 212 and failed at `tests/smoke_truss_studio.py:1000`: the CSV assertion expected `15.7`. All earlier steps 1–211 passed; steps 213–215 were skipped after the failure.
+
+**Root cause:** This was a stale test expectation, not a product calculation defect. The UI formats the member-mass cell to four significant digits and correctly displays `15.7`; the material CSV intentionally preserves the computed binary64 result. For the exported volume `0.002` m³ and density `7850` kg/m³, binary64 multiplication yields `15.700000000000001`, whose shortest decimal round-trips exactly. Expecting `15.7` in CSV contradicted the precision guarantee added in the preceding commit.
+
+**Correction:** The CSV serializer now explicitly checks `Object.is(Number(text), value)` for every finite numeric cell and rejects non-finite numeric cells. The direct Node and Chromium regressions now assert the exact `15.700000000000001` CSV value, parse it back to the same binary64 number, and verify the exported mass equals exported volume times density. The visible UI remains `15.7`; no numerical assertions were weakened.
+
+**Validation:** The previous exact-head logs identify the failure and show all preceding regressions passed. The exact binary64 multiplication was independently checked; full Node/Chromium repository QA must pass on the new exact candidate. Local repository checkout is unavailable in this execution environment, so no local full-suite pass is claimed.
+
+**Release:** PR #191 remains open with zero independent reviews. The branch list contains only dev/main; rulesets are empty and branch-protection read returns HTTP 403. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on that SHA. Historical inventory remains **166 gaps / 95 partial**.
+
+**Status:** CI failure root cause corrected; implemented on dev candidate; new exact-head Push/PR Quality pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Verify the exact-head CSV regression repair.** Acceptance: Push and PR Quality both pass on the same new dev SHA; direct Node checks exact density/mass round-trips; Chromium checks CSV value `15.700000000000001`, parsed equality and volume×density equality at 1280px and 390px; no required steps skipped.
+2. **P0 — Release governance.** Acceptance: eligible independent PR #191 approval, verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion, complete diff review, ordinary PR merge, exact-main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Finish seven-shape Truss section boundaries.** Acceptance: independent exact-binary64 references for area, centroid, Ixx/Iyy, Sx/Sy and rx/ry across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining low-exponent/near-solid cases; conservative underflow rejection; rollback, selected-member isolation, keyboard and 390px tests.
+4. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion, scalar/range `#REF!`, invalid references, blank/reversed/mixed-anchor ranges, quoted sheet names, recalculation, atomic rollback and standalone-bundle parity.
+5. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed imports preserve workspaces, focus, selections and prior results; desktop and 390px browser tests.
+
+---
+
 ## 2026-11-25 — TRUSS-MATERIAL-CSV-ROUNDTRIP-PRECISION
 
 **Starting refs:** dev `b03433d31a9246ba6227af4a2c6386ba552d0a7f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen 2026-10-26 inventory, Truss source/tests/contract, current branch refs, PR #191/reviews, exact-head Quality and main/Pages evidence.

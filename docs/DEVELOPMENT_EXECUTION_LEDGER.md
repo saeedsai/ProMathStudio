@@ -1,3 +1,23 @@
+## 2026-11-25 — TRUSS-CSV-EXACT-MASS-ROUNDTRIP-CI-REPAIR
+
+- Starting dev `1ecc801c09565e220c86266d1f832efa452bdd36`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI and main/Pages evidence.
+- Exact-head Push Quality [#45710918334](https://github.com/saeedsai/ProMathStudio/actions/runs/45710918334) and PR Quality [#45710926373](https://github.com/saeedsai/ProMathStudio/actions/runs/45710926373) both failed on `1ecc801c09565e220c86266d1f832efa452bdd36`. Shared job failed at Truss browser step 212, `tests/smoke_truss_studio.py:1000`, because the CSV assertion expected `15.7`; steps 213–215 were skipped after failure. Steps 1–211 passed.
+- Root cause: the UI deliberately formats mass to `15.7`, but shortest-round-trip CSV output correctly preserves the binary64 product `0.002 * 7850 = 15.700000000000001`. The browser assertion and one Node assertion still expected the old rounded CSV value.
+- Added an explicit production serialization guard: finite numeric cells must reparse to the identical binary64 value under `Object.is`; non-finite numeric cells are rejected. Updated Node and Chromium tests to verify exact CSV text and parsed mass equality to both the source metric and exported volume×density. UI display expectation remains unchanged.
+- Updated Structural Truss contract, this plan, ledger and changelog. Truss is loaded as an adjacent script; root `index.html` bundle is not a consumer of this module and is unchanged.
+- Previous exact-head failure is diagnosed; full exact-head Push/PR Quality must pass on the new atomic dev commit. Local checkout unavailable; no local full-suite pass claimed.
+- PR #191 remains open with zero independent reviews; rulesets empty and main branch-protection read HTTP 403. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 succeeded on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Historical inventory unchanged at **166 gaps / 95 partial**. Status: CI repair implemented on dev candidate; exact-head QA pending; not released.
+
+### NEXT FIVE
+1. **P0 exact-head CI repair:** Push/PR Quality green on the same candidate; Node and Chromium prove `15.700000000000001` round-trips, equals the metric and exported volume×density; 1280px/390px; no skipped required tests.
+2. **P0 release governance:** independent approval, verifiable main protection, full diff review, ordinary PR merge, main Quality, Pages and hosted smoke.
+3. **P1 seven-shape Truss boundaries:** exact-binary64 independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references; low-exponent/near-solid limits; conservative rejection, rollback, selected-member isolation and mobile.
+4. **P1 Data Tables references:** row 6000/column AF, scalar/range #REF!, mixed anchors, quoted sheet names, recalculation, rollback and bundle parity.
+5. **P1 saved-project compatibility:** current/legacy Matrix/Graph/Table round-trips, malformed-import rollback, focus/selection preservation and desktop/390px browser coverage.
+
+---
+
 ## 2026-11-25 — TRUSS-MATERIAL-CSV-REGRESSION-FIXTURE-CORRECTION
 
 - Starting dev `098b58e2c1e8114433fe6109068b30e8c0920f17`; the new exact-head Push/PR runs had started, but review of the committed test source found its CSV row split delimiter was double-escaped.

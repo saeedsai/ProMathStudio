@@ -1,3 +1,23 @@
+## 2026-11-25 — TRUSS-CHANNEL-NEGLIGIBLE-WEB-UNDERFLOW
+
+- Starting dev `371acb56f07df173cfb0aef456e164f5759b231d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected root AGENTS.md, living plan, frozen inventory, unified plan, engineering architecture/Structural catalog, source/tests, PR #191, reviews, branches and current CI/Pages.
+- Starting exact-head Push Quality #45692731137 and PR Quality #45692747831 both passed 218/218 on `371acb56f07df173cfb0aef456e164f5759b231d`; Truss analytical/browser steps 214/215 passed.
+- Added a conservative channel-web underflow exception only when exponent-scaled bounds prove area, first moments, local/offset inertias, Ixy and both normalized-path contributions round to zero; aggregate flange-dominated area, first moments and Ixx/Iyy must remain normal. Non-negligible off-axis webs remain rejected.
+- Added Node and registered Chromium regressions for B=1e40 mm, H=1e-100 mm, tw=Number.MIN_VALUE, tf=2e-101 mm using 200-digit exact-binary64 Decimal references; Chromium covers 1280px and 390px. Existing centered I-section acceptance and non-negligible channel rejection remain.
+- Isolated V8 executed the actual modified production module: finite A, centroid, Ixx/Iyy, Sx/Sy, cX/cY and rx/ry match references within 5e-13; non-negligible web rejected; inputs unchanged and output immutable. Full Node/Playwright await exact-head Actions.
+- Updated Truss contract, plan and changelog. No root index bundle change: Truss FEM is loaded by its companion page as adjacent JS.
+- PR #191 remains open with zero independent reviews; dev/main unprotected, rulesets empty, main protection read HTTP 403. Main Quality #45360386408 and Pages #45360367251 remain successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge or main update.
+- Historical MATLAB inventory remains frozen at **166 gaps / 95 partial**. Status: implemented on dev candidate, QA pending, not released.
+
+### NEXT FIVE
+1. **P0 release governance (blocked):** eligible independent PR #191 approval, verifiable main protection, exact-head checks, complete diff review, ordinary merge, main Quality, Pages and hosted critical-path verification.
+2. **P1 finish seven-shape Truss boundaries:** independent references for A/centroid/Ixx/Iyy/Sx/Sy/rx/ry; remaining low-exponent/near-solid cases; non-negligible underflow rejection; rollback, member isolation, E/density/K preservation and 390px tests.
+3. **P1 Data Tables references:** row 6000/AF, #REF!, mixed anchors, quoted sheet names, atomic rollback, bundle parity.
+4. **P1 saved-project compatibility:** current/legacy Matrix/Graph/Table round-trips and malformed-import rollback/focus preservation.
+5. **P1 numerical ODE:** analytical forward/backward references, convergence, bounded stage-overflow recovery and stale-export invalidation.
+
+---
+
 ## 2026-11-25 — TRUSS-FEM-EXACT-MIXED-SIGN-RESULTANTS
 
 - Starting dev `61e2fb3dc29181e2b5232dbd2477015ef9cc71f9`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.

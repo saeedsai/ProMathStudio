@@ -1,3 +1,10 @@
+## 2026-11-25 — Truss channel safely handles a negligible underflowed web
+
+- A channel web whose area rounds to zero is accepted only when exponent-scaled upper bounds prove its area, first moments, local/offset inertias, Ixy and both normalized-path contributions are below binary64 significance, and the remaining section properties are normal.
+- Non-negligible off-axis underflowed webs remain explicitly rejected; the existing centered I-section web rule is unchanged.
+- Added exact-binary64 Decimal-backed Node and Chromium regressions for a finite flange-dominated channel, including 1280px and 390px browser coverage.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-25 — Truss FEM mixed-sign resultants preserve exact binary64 cancellation
 
 - Added an exact integer accumulator for mixed-sign finite binary64 force and moment terms, with a single nearest/ties-to-even binary64 conversion; same-sign reductions retain the scale-normalized compensated path.

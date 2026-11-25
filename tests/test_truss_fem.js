@@ -1512,6 +1512,39 @@ test('I-section accepts a centered web whose area is below binary64 range when f
 });
 
 
+
+test('channel omits an underflowed web only when every contribution is below binary64 significance',()=>{
+ const dimensions={width:1e40,height:1e-100,webThickness:Number.MIN_VALUE,flangeThickness:2e-101};
+ const original={...dimensions};
+ assert.equal(dimensions.webThickness*dimensions.height,0,
+  'the positive off-axis web area must underflow to zero in binary64');
+ const section=fem.sectionProperties('channel',dimensions);
+ const expected={
+  area:4e-61,centroidX:5e39,centroidY:5e-101,
+  ixx:6.533333333333334e-262,iyy:3.333333333333334e18,
+  sx:1.306666666666667e-161,sy:6.666666666666667e-22,
+  rx:4.041451884327381e-101,ry:2.886751345948129e39
+ };
+ const actual={
+  area:section.area,centroidX:section.centroid.x,centroidY:section.centroid.y,
+  ixx:section.secondMoment,iyy:section.secondMomentPerpendicular,
+  sx:section.sectionModulusX,sy:section.sectionModulusY,
+  rx:section.radiusOfGyrationX,ry:section.radiusOfGyrationY
+ };
+ for(const [key,want] of Object.entries(expected)){
+  const got=actual[key];
+  assert.ok(Number.isFinite(got)&&Math.abs(got/want-1)<=5e-13,
+   key+' '+got+' must match the 200-digit exact-binary64 Decimal reference '+want);
+ }
+ assert.equal(section.extremeFiberDistanceAboutX,5e-101);
+ assert.equal(section.extremeFiberDistanceAboutY,5e39);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ const nonNegligible={width:1e100,height:1e-100,webThickness:Number.MIN_VALUE,flangeThickness:1e-101};
+ assert.throws(()=>fem.sectionProperties('channel',nonNegligible),/Composite section area underflow/,
+  'an underflowed off-axis web with a representable first moment must still be rejected');
+});
+
 test('composite section local inertias avoid intermediate overflow when final properties are finite',()=>{
  // Synthetic floating-range stress cases (dimensions in mm), not physical design examples.
  // The old left-to-right b*h*h*h/12 expression overflows before division although Ixx is finite.

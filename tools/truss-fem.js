@@ -506,6 +506,7 @@
       boundsHeight = depth;
       // Channel web is on the left and both flanges extend right.
       // The I-section web is centered between equal-width top and bottom flanges.
+      const lengthScale = Math.max(width, depth);
       const pieces = shape === 'channel'
         ? [
             {x:0,y:0,width:webThickness,height:depth},
@@ -519,23 +520,40 @@
           ];
       const pieceMetrics = pieces.map((piece,index) => {
         const pieceArea = finite(piece.width * piece.height, 'Composite section rectangle '+(index+1)+' area (mm²)');
-        // A centered I-section web whose area rounds below binary64 range can be
-        // omitted only when both web dimensions are below 1 mm: its local inertias
-        // then underflow too, and symmetry makes both parallel-axis offsets zero.
+        // A centered I-section web has no parallel-axis contribution. A channel web
+        // is off-axis, so omit it only when exponent-scaled upper bounds prove that
+        // its area, first moments and every local/offset inertia round to zero.
         const negligibleCenteredIWeb = shape === 'i-section' && index === 1 &&
           pieceArea === 0 && piece.width < 1 && piece.height < 1 &&
           piece.x + piece.width/2 === width/2 && piece.y + piece.height/2 === depth/2;
-        if (!(pieceArea > 0) && !negligibleCenteredIWeb) {
+        const negligibleChannelWeb = shape === 'channel' && index === 0 && pieceArea === 0 &&
+          scaleProduct(2,piece.width,piece.height) === 0 &&
+          scaleProduct(2,piece.width,piece.height,width) === 0 &&
+          scaleProduct(2,piece.width,piece.height,depth) === 0 &&
+          scaleProduct(2,piece.width,piece.height,depth,depth) === 0 &&
+          scaleProduct(2,piece.width,piece.height,piece.height,piece.height,1/12) === 0 &&
+          scaleProduct(2,piece.height,piece.width,width,width) === 0 &&
+          scaleProduct(2,piece.height,piece.width,piece.width,piece.width,1/12) === 0 &&
+          scaleProduct(2,piece.width,piece.height,width,depth) === 0 &&
+          scaleProduct(2,piece.width/lengthScale,piece.height/lengthScale) === 0 &&
+          scaleProduct(2,piece.width/width,piece.height/depth) === 0;
+        if (!(pieceArea > 0) && !negligibleCenteredIWeb && !negligibleChannelWeb) {
           throw Error('Composite section area underflow; increase dimensions.');
         }
         return {...piece,area:pieceArea,
           cx:finite(piece.x + piece.width/2, 'Composite section rectangle centroid x (mm)'),
           cy:finite(piece.y + piece.height/2, 'Composite section rectangle centroid y (mm)')};
       });
+      const omittedChannelWeb = shape === 'channel' && pieceMetrics[0].area === 0;
       area = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area,0), 'Composite section area (mm²)');
+      const firstMomentX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0), 'Composite section first moment x (mm³)');
+      const firstMomentY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0), 'Composite section first moment y (mm³)');
+      if (omittedChannelWeb && (area < MIN_NORMAL || firstMomentX < MIN_NORMAL || firstMomentY < MIN_NORMAL)) {
+        throw Error('Composite section area underflow; increase dimensions.');
+      }
       if (!(area > 0)) throw Error('Composite section area underflow; increase dimensions.');
-      centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'Composite section centroid x (mm)');
-      centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'Composite section centroid y (mm)');
+      centroidX = finite(firstMomentX/area, 'Composite section centroid x (mm)');
+      centroidY = finite(firstMomentY/area, 'Composite section centroid y (mm)');
       secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
         const local = rectangleIxx(piece, 'Composite rectangle local Ixx (mm⁴)');
         const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'Composite rectangle Ixx offset (mm⁴)');
@@ -546,10 +564,15 @@
         const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'Composite rectangle Iyy offset (mm⁴)');
         return sum+local+offset;
       },0), 'Composite section Iyy (mm⁴)');
+      // The omitted web bounds are below half an ulp; require normal aggregate
+      // area, first moments and inertias so they cannot change rounded outputs.
+      if (omittedChannelWeb &&
+          (secondMoment < MIN_NORMAL || secondMomentPerpendicular < MIN_NORMAL)) {
+        throw Error('Composite section area underflow; increase dimensions.');
+      }
       // Physical composite inertias can be subnormal even when the section radii are
       // representable. Recompute I/A in coordinates normalized by the largest length,
       // then restore that length once; keep the reported dimensional area and inertias intact.
-      const lengthScale = Math.max(width, depth);
       const normalizedMetrics = pieces.map(piece => {
         const normalizedPiece = {
           x:piece.x/lengthScale, y:piece.y/lengthScale,

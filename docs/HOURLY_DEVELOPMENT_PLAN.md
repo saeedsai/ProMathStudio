@@ -1,3 +1,31 @@
+## 2026-11-25 — TRUSS-CHANNEL-NEGLIGIBLE-WEB-UNDERFLOW
+
+**Starting refs:** dev `371acb56f07df173cfb0aef456e164f5759b231d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, unified implementation plan, engineering architecture and Structural Engineering catalog, Truss source/tests/contract, current refs, PR #191/reviews, exact-head Quality and main/Pages evidence.
+
+**Starting exact-head CI:** Push Quality [#45692731137](https://github.com/saeedsai/ProMathStudio/actions/runs/45692731137) and PR Quality [#45692747831](https://github.com/saeedsai/ProMathStudio/actions/runs/45692747831) both passed all 218/218 steps on exact SHA `371acb56f07df173cfb0aef456e164f5759b231d`, with zero failed/skipped steps. Truss analytical step 214 and desktop/390px browser step 215 passed. No existing exact-head CI failure remained.
+
+**P1 section-property boundary:** A channel's web is off-axis, so a web area that rounds to zero cannot be discarded merely because its area is unrepresentable: its first moments or parallel-axis inertias may remain representable. The helper only had a special case for a centered I-section web and rejected every underflowed channel web, including one whose complete contribution is below binary64 significance while the flange-dominated section remains fully representable.
+
+**Source correction:** Added a conservative, exponent-scaled bound for the channel web. It must prove that web area, both first moments, local and offset Ixx/Iyy, Ixy, and its contributions in both normalized geometry paths round to zero. The remaining section must retain normal aggregate area, first moments and both centroidal inertias. Any non-negligible or ambiguous web still receives the existing explicit underflow rejection. FEM stiffness assembly, solve, section formulas for representable pieces, UI, and standalone root bundle are unchanged; Truss Studio loads this module as an adjacent script.
+
+**Regression:** Added a direct Node reference case and extended the registered Chromium Truss smoke. Synthetic dimensions B=1e40 mm, H=1e-100 mm, tw=Number.MIN_VALUE and tf=2e-101 mm produce a zero binary64 web-area intermediate but finite section properties. Exact-binary64 high-precision references cover area, centroid, Ixx/Iyy, Sx/Sy, cX/cY and rx/ry. A separate off-axis-web case with a representable first moment must still be rejected. Chromium repeats the accepted case at 1280px and 390px; the existing centered I-section-web acceptance and non-negligible channel rejection remain.
+
+**Isolated validation:** The actual modified production module was executed in V8. The previously rejected channel now returns A=4e-61 mm², centroid (5e39, 5e-101) mm, Ixx=6.533333333333334e-262 mm⁴, Iyy=3.3333333333333335e18 mm⁴, Sx=1.306666666666667e-161 mm³, Sy=6.666666666666666e-22 mm³, rx=4.041451884327381e-101 mm and ry=2.8867513459481285e39 mm. The non-negligible web case remains rejected; inputs are unchanged and results/centroid remain frozen. Full repository Node/Chromium suites await exact-head GitHub Actions.
+
+**Release:** PR #191 remains open with zero independent reviews. Branches are exactly dev/main; both report unprotected, repository rulesets are empty, and the connected integration cannot read main protection (HTTP 403). No merge, direct main update, force push or safeguard bypass. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Historical inventory remains **166 gaps / 95 partial**.
+
+**Status:** Implemented on dev candidate; exact-head Push/PR Quality pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Release governance (blocked externally).** Acceptance: eligible independent approval on PR #191; verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion; complete diff review; ordinary dev-to-main PR merge; successful exact-main Quality, Pages deployment and hosted critical-path verification.
+2. **P1 — Finish seven-shape Truss section boundaries (in progress).** Acceptance: independent exact-binary64 references for area, centroid, Ixx/Iyy, Sx/Sy and rx/ry across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining low-exponent/near-solid cases; conservative rejection of non-negligible underflowed pieces; invalid rollback, selected-member isolation, E/density/K preservation, keyboard and 390px browser tests.
+3. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion, scalar/range #REF!, already-invalid references, blank/reversed/mixed-anchor ranges, quoted sheet names/doubled-quote literals, recalculation, atomic rollback and source/standalone bundle parity.
+4. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed imports preserve all workspaces, focus, selection and prior results; desktop/390px browser tests.
+5. **P1 — Numerical ODE verification.** Acceptance: independent analytical forward/backward scalar and coupled references, refinement/convergence, bounded stage-overflow failure/recovery, stale-export invalidation and responsive keyboard/browser tests.
+
+---
+
 ## 2026-11-25 — TRUSS-FEM-EXACT-MIXED-SIGN-RESULTANTS
 
 **Starting refs:** dev `61e2fb3dc29181e2b5232dbd2477015ef9cc71f9`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the unified implementation plan, engineering architecture/toolbox catalog, the frozen 2026-10-26 inventory, the living queue, Truss source/tests/contract, current refs, PR #191, reviews, exact-head Quality and main/Pages evidence.

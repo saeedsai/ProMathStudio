@@ -503,6 +503,33 @@ def main():
                 assert math.isfinite(centered_web[key]) and abs(centered_web[key] / expected - 1) <= 5e-13, (key, centered_web)
             assert centered_web['channelRejected'], centered_web
 
+            # An off-axis channel web may underflow only when its area, first moments,
+            # local/offset inertias and both normalized contributions are all negligible.
+            negligible_channel_web = page.evaluate("""() => {
+                const dimensions = {
+                    width: 1e40, height: 1e-100,
+                    webThickness: Number.MIN_VALUE, flangeThickness: 2e-101
+                };
+                const section = ProMathTrussFEM.sectionProperties('channel', dimensions);
+                return {
+                    webArea: dimensions.webThickness * dimensions.height,
+                    area: section.area, cx: section.centroid.x, cy: section.centroid.y,
+                    ixx: section.secondMoment, iyy: section.secondMomentPerpendicular,
+                    sx: section.sectionModulusX, sy: section.sectionModulusY,
+                    rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY,
+                    cX: section.extremeFiberDistanceAboutX, cY: section.extremeFiberDistanceAboutY
+                };
+            }""")
+            assert negligible_channel_web['webArea'] == 0, negligible_channel_web
+            for key, expected in {
+                'area': 4e-61, 'cx': 5e39, 'cy': 5e-101,
+                'ixx': 6.533333333333334e-262, 'iyy': 3.333333333333334e18,
+                'sx': 1.306666666666667e-161, 'sy': 6.666666666666667e-22,
+                'rx': 4.041451884327381e-101, 'ry': 2.886751345948129e39,
+                'cX': 5e-101, 'cY': 5e39
+            }.items():
+                assert math.isfinite(negligible_channel_web[key]) and abs(negligible_channel_web[key] / expected - 1) <= 5e-13, (key, negligible_channel_web)
+
             # Dimensional Ixy may underflow while the normalized tensor still
             # determines finite principal moments and the principal-axis angle.
             product_underflow = page.evaluate("""() => {

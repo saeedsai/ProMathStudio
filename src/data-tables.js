@@ -449,6 +449,10 @@
   function rewriteSheetNameReferences(oldName,newName){
     const oldKey=String(oldName).toLowerCase(),replacement=sheetQualifier(newName);
     const qualifierPattern=/(?:'((?:[^']|'')+)'|([A-Za-z_][A-Za-z0-9_]*))!/g;
+    const rewrites=[];
+    // Stage every conversion and replacement before touching workbook cells. A
+    // malformed/hostile cell encountered late in another sheet must not leave
+    // earlier formulas renamed while the selected sheet keeps its old name.
     for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
       const raw=String(row[c]);if(!raw.startsWith('='))continue;
       const protectedFormula=protectFormulaStringLiterals(raw);
@@ -456,8 +460,11 @@
         const referenced=quoted===undefined?plain:quoted.replace(/''/g,"'");
         return referenced.toLowerCase()===oldKey?replacement:match;
       });
-      row[c]=protectedFormula.restore(rewritten);
+      const value=protectedFormula.restore(rewritten);
+      if(value!==raw)rewrites.push({row,column:c,value});
     }
+    // Commit only after the complete workbook has been converted successfully.
+    for(const rewrite of rewrites)rewrite.row[rewrite.column]=rewrite.value;
   }
   function shiftReferences(edited,axis,index,delta){
     const isSupportedReference=ref=>{

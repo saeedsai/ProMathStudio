@@ -126,6 +126,50 @@ def main():
         assert staged["recoveredLocal"] == "=A3"
         assert staged["recoveredCrossSheet"] == "=Data!A3"
         assert staged["recoveredRowCount"] == 3
+
+        # Sheet rename must stage every formula rewrite before mutating any sheet.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
+            {id:'sheet-1',name:'Data',columns:['A'],rows:[['10']]},
+            {id:'sheet-2',name:'Refs',columns:['A','B'],rows:[
+                ['=Data!A1','="Data!A1"'],
+                ['=Data!A1','safe']
+            ]}
+        ]})""")
+        page.evaluate("""() => {
+            MathStudio.dataTables.tables[1].rows[1][1] = {
+                toString(){throw Error('formula conversion failed');}
+            };
+        }""")
+        page.once("dialog", lambda dialog: dialog.accept("Renamed Sheet"))
+        page.locator("#dt-rename").click()
+        failed_rename = page.evaluate("""() => ({
+            name: MathStudio.dataTables.tables[0].name,
+            first: MathStudio.dataTables.tables[1].rows[0][0],
+            later: MathStudio.dataTables.tables[1].rows[1][0],
+            literal: MathStudio.dataTables.tables[1].rows[0][1]
+        })""")
+        assert failed_rename == {
+            "name": "Data",
+            "first": "=Data!A1",
+            "later": "=Data!A1",
+            "literal": '="Data!A1"'
+        }
+        page.evaluate("MathStudio.dataTables.tables[1].rows[1][1] = 'safe'")
+        page.once("dialog", lambda dialog: dialog.accept("Renamed Sheet"))
+        page.locator("#dt-rename").click()
+        renamed = page.evaluate("""() => ({
+            name: MathStudio.dataTables.tables[0].name,
+            first: MathStudio.dataTables.tables[1].rows[0][0],
+            later: MathStudio.dataTables.tables[1].rows[1][0],
+            literal: MathStudio.dataTables.tables[1].rows[0][1]
+        })""")
+        assert renamed == {
+            "name": "Renamed Sheet",
+            "first": "='Renamed Sheet'!A1",
+            "later": "='Renamed Sheet'!A1",
+            "literal": '="Data!A1"'
+        }
+
         assert not errors, errors
         browser.close()
     print("PASS row/column range edits, invalid-reference preservation, cross-sheet anchors, conversion-failure atomicity, persistence and browser")

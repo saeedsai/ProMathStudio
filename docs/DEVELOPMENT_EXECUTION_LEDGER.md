@@ -1,3 +1,17 @@
+## 2026-11-25 — DATA-TABLES-SHEET-RENAME-ATOMICITY
+
+Starting refs: dev 6756c32182e4b70fa363900d4eeef05c9dcabd6d, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; the only long-lived branches are dev and main. Re-read root AGENTS.md, this living plan, and the frozen 2026-10-26 feature inventory. The exact starting dev-head Push Quality #45613220803 and PR Quality #45613229309 both completed successfully with 218/218 steps on 6756c32182e4b70fa363900d4eeef05c9dcabd6d; main Quality #45360386408 and Pages deployment #45360367251 remain successful on unchanged main.
+
+Defect: rewriteSheetNameReferences converted and rewrote formulas in place while traversing the workbook. If a later cell conversion threw (for example, a malformed imported/runtime cell with a throwing toString), formulas already visited in earlier rows/sheets remained renamed even though the selected sheet name was never changed. This violated atomic workbook editing.
+
+Fix on dev: collect all changed formula cells and replacement strings first; commit the staged replacements only after every workbook cell has been converted and processed successfully. Preserve existing quoted sheet-name grammar and double-quoted formula-string shielding. The standalone index.html embeds the complete src/data-tables.js source, and both are updated identically.
+
+Regression: extended the registered Chromium tests/smoke_sheet_range_delete.py test. A late throwing cell is placed after two cross-sheet formulas. The rename attempt must leave the sheet name, both earlier formulas and a double-quoted string literal unchanged. After correcting the bad cell, retrying the rename must update both qualified references to the quoted new sheet name while preserving the literal. The smoke is already registered in .github/workflows/quality.yml (step “Spreadsheet structural reference regression”).
+
+Validation: source/bundle parity was verified before editing and the full modular source remains embedded verbatim in the updated standalone bundle. Local repository checkout is absent, so local Python/Chromium execution is unavailable. Exact-head Push and PR Quality are pending for this new commit; the starting head passed 218/218 on both workflows. No assertions were weakened.
+
+Release: PR #191 remains open with no submitted reviews. Both dev and main report protected:false; repository rulesets are empty and the connected integration cannot read branch-protection settings (HTTP 403). No merge or direct main update. Main and Pages remain unchanged. Frozen historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-25 — DATA-TABLES-ROLLBACK-RECOVERY-ASSERTION-CORRECTION
 
 Review of the new browser regression caught an assertion-index issue before treating the run as green: after a successful insertion at row 1, the original formula row correctly moves from index 0 to index 1. Updated the recovery assertion to inspect that moved row. No product logic or test coverage was weakened; exact-head Quality on the corrected dev/PR head is required.

@@ -1,3 +1,10 @@
+## 2026-11-25 — Data Tables sheet renames commit references atomically
+
+- Sheet renaming now stages every workbook-wide formula rewrite before mutating any cell or changing the sheet name; a late cell-conversion failure cannot leave earlier formulas partially renamed.
+- Added a registered Chromium regression for late cross-sheet conversion failure, unchanged workbook state, successful retry, quoted new sheet names and preserved double-quoted formula literals.
+- Updated the modular source and standalone index.html bundle together, plus the Data Tables guide, living plan, execution ledger and changelog.
+- Implemented on dev; exact-head Push/PR Quality required before promotion. Not released.
+
 ## 2026-11-25 — DATA-TABLES-ROLLBACK-RECOVERY-ASSERTION-CORRECTION
 
 Review of the new browser regression caught an assertion-index issue before treating the run as green: after a successful insertion at row 1, the original formula row correctly moves from index 0 to index 1. Updated the recovery assertion to inspect that moved row. No product logic or test coverage was weakened; exact-head Quality on the corrected dev/PR head is required.

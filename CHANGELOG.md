@@ -1,3 +1,8 @@
+## 2026-11-25 — Quality acceptance criteria follow the current workflow
+
+- Removed a fixed 218-step count from the newest living-plan and execution-ledger acceptance criteria; the current exact-head workflow exposes 217 steps.
+- The gate remains unchanged in substance: every required step must pass, with zero failed or skipped required checks. No CI checks were removed or weakened.
+
 ## 2026-11-25 — Truss signed-resultant summation retains subnormal normalized terms
 
 - Extended the separate residual path to every normalized quotient below the smallest normal binary64 value, not only quotients that underflow to zero.

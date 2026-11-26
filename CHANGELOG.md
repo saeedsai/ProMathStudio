@@ -1555,3 +1555,8 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - Data Tables follow-up: synchronized the new accessible action-menu names in `src/numerical-data.js` with the standalone `index.html` after exact-head structural CI exposed a source/bundle parity mismatch. The browser regression remains enabled; no checks were weakened.
 
 - 2026-11-26 (dev, exact-head QA pending): Truss FEM numeric-string parsing now accepts only trimmed decimal/scientific syntax instead of JavaScript radix coercion. Hexadecimal, binary and octal strings reject consistently in model parsing, solve and section dimensions; finite numeric values and ordinary decimal/scientific strings remain compatible. Added Node and Chromium desktop/mobile regressions; no standalone bundle change because Truss FEM is an adjacent script.
+
+
+## 2026-11-26
+
+- Saved Graph project validation: primary and overlay axis selectors now require bounded base-10 integer strings or safe integer numbers. Rejects radix-prefixed, exponent-form, fractional, negative and overlong raw string indices instead of relying on JavaScript `Number()` coercion. Preserves omitted legacy selectors, bounded whitespace/plus decimal strings, dormant 2D Z mappings and project version 2. Added Node structural and Chromium atomic-import rollback regressions; synchronized `src/project-schema.js` into standalone `index.html`. Implemented on dev; exact-head Quality and release pending.

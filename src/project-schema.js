@@ -9,6 +9,15 @@
   const optionalRecord = (value, label) => {
     if (value !== undefined && value !== null && !record(value)) fail(label + ' must be an object.');
   };
+  // Saved axis selectors are column indices, not general JavaScript numeric literals.
+  // Bound raw strings before trimming so whitespace cannot bypass the input limit.
+  const validColumnIndex = (value, columns) => {
+    if (typeof value === 'string') {
+      if (value.length > 16 || !/^\s*\+?\d+\s*$/.test(value)) return false;
+      value = Number(value.trim());
+    }
+    return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 && value < columns;
+  };
   function migrate(data) {
     if (!record(data) || data.format !== 'mathstudio-project' || ![1, 2].includes(data.version))
       fail('unsupported format or version (supported: 1 and 2).');
@@ -71,9 +80,7 @@
       // Validate persisted primary-series selectors before restoreState can silently
       // replace an invalid column with its default. Missing selectors remain legacy-safe.
       const hasMapping = key => Object.prototype.hasOwnProperty.call(set, key);
-      const validIndex = value =>
-        (typeof value === 'number' || (typeof value === 'string' && value.trim() !== '')) &&
-        Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) < set.headers.length;
+      const validIndex = value => validColumnIndex(value, set.headers.length);
       const defaultColumn = (aliases, fallback) => {
         const index = set.headers.findIndex(header => aliases.includes(header.trim().toLowerCase()));
         return index >= 0 ? index : fallback;
@@ -100,9 +107,7 @@
       if (set.extra !== undefined && set.extra !== null) {
         if (!Array.isArray(set.extra) || set.extra.length > 20)
           fail('graph dataset overlays must be a list of at most 20.');
-        const validIndex = (value, columns) =>
-          (typeof value === 'number' || (typeof value === 'string' && value.trim() !== '')) &&
-          Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) < columns;
+        const validIndex = (value, columns) => validColumnIndex(value, columns);
         const numericCell = value => typeof value === 'number' ? Number.isFinite(value) :
           typeof value === 'string' && /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(value.trim()) &&
           Number.isFinite(Number(value));

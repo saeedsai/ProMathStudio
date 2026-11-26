@@ -1,3 +1,19 @@
+## 2026-11-26 — PROJECT-GRAPH-DECIMAL-COLUMN-SELECTORS
+
+Starting dev `f5771fe4f51654fac9671945bac13cdbbe070122`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, project schema/source and standalone bundle, graph project Node/Chromium regressions, project-format contract, PR #191, exact-head Actions and Pages evidence. The frozen historical baseline remains **166 gaps / 95 partial**.
+
+Starting exact-head QA is now verified green: Push Quality [#45874111952](https://github.com/saeedsai/ProMathStudio/actions/runs/45874111952) and PR Quality [#45874123064](https://github.com/saeedsai/ProMathStudio/actions/runs/45874123064) both completed successfully on the exact `f5771fe4f51654fac9671945bac13cdbbe070122` head. The single static/browser job in each run completed all 218 reported steps successfully, including project import/rollback, graph dataset round-trip, and the complete 215-test registered browser/structural sequence.
+
+Implemented a focused saved-project validation correction. Both primary Graph dataset selectors and overlay X/Y/Z selectors previously used JavaScript `Number()` coercion for strings, so malformed index strings such as `0x1`, `0b1`, `0o1` or `1e0` could silently resolve to a different column. A shared validator now accepts numeric safe integers or bounded (maximum 16 raw UTF-16 code units) base-10 integer strings with optional surrounding whitespace/leading plus; it rejects radix/exponent forms, fractional/negative values and overlong strings. Legacy projects with omitted selectors remain header-defaulted; existing decimal string selectors and dormant 2D Z behavior remain supported. No project version change.
+
+Added Node structural cases for primary and overlay selectors (radix, exponent, overlong rejection; bounded decimal compatibility), and Chromium project-import cases proving invalid primary/overlay selectors fail before application and preserve the previously imported project. Updated `docs/PROJECT_FORMAT.md`. Synchronized `src/project-schema.js` byte-for-byte into the `promath-project-schema` script in standalone `index.html`.
+
+Isolated V8 executed the actual modified project-schema source: valid numeric/decimal/whitespace/plus selectors and legacy omission passed; primary and overlay radix/exponent/overlong selectors were rejected with the established mapping diagnostics; valid project input remained unmodified. Pre-edit and post-edit source/bundle parity verified. Native repository Python/Node/Playwright commands are unavailable because this execution workspace has no checkout; fresh exact-head GitHub Actions must certify the committed Node and Chromium tests.
+
+PR #191 remains open/mergeable at the starting head, 73 commits ahead and zero behind, 28 changed files, with no independent submitted reviews. The only branches are dev and main, both report unprotected; repository rulesets are empty and branch-protection GET returns HTTP 403 to the connected integration. No merge is authorized. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are the latest verified successful production runs on 24 November 2026. No new deployment or hosted behavior is claimed.
+
+Status: source, synchronized standalone bundle, Node/Chromium regressions, project-format documentation, plan, ledger and changelog committed atomically on existing dev. New exact-head Push/PR Quality pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-26 — DATA-TABLES-STABLE-MEAN-CI-REPAIR
 
 Starting refs: dev `18e321b450b87e37346edb16091b2f9b840c17f2`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Data Tables source/contract/tests, PR #191, exact-head Actions, branch refs and Pages evidence. The historical baseline remains **166 gaps / 95 partial**.
@@ -8,7 +24,7 @@ Repair: `stableMean()` now first calls the existing compensated `stableSum(value
 
 Validation: reproduced the old 13.999999999999998 result in Node; the new isolated V8 path returns exactly 14 for [16,25,1]. It also returns 1e308 for [1e308,1e308], zero for symmetric cancellation, 5e-324 for the subnormal pair, and 3.3333333333333334e-301 for [1e308,1e-300,-1e308]. The full source is synchronized byte-for-byte into the 1.3 MB standalone index.html. Native repository test execution is unavailable because the local checkout is absent and bounded `git ls-remote` failed with DNS error; fresh exact-head Push/PR Quality must certify the registered structural and Chromium tests.
 
-Status: source, synchronized standalone bundle, focused browser/structural regressions, Data Tables contract, living plan, ledger and changelog are committed together on existing dev. Exact-head QA pending; not released.
+Status: source, synchronized standalone bundle, focused browser/structural regressions, Data Tables contract, living plan, ledger and changelog are committed together on existing dev. Exact-head Push Quality #45874111952 and PR Quality #45874123064 both subsequently passed all 218 job steps on f5771fe; not released.
 
 ## 2026-11-26 — DATA-TABLES-DECIMAL-CELL-CI-REPAIR
 
@@ -24,11 +40,12 @@ Status: CI root cause repaired; source, synchronized bundle, updated regression,
 
 ## Next five features
 
-1. **P0 — Verify Data Tables mean rounding (In QA).** Both exact-head Push and PR Quality green on the same dev SHA with zero failures/skips; Chromium at 390/768/1280px verifies AVERAGE and AVG return exactly 14 for the decimal range 16, 25, blank, 1, while overflowing totals still produce finite means and cancellation/subnormal references remain correct.
+1. **P0 — Verify Graph project decimal column selectors (In QA).** Both exact-head Push and PR Quality green on the same dev SHA with zero failed/skipped steps; Node and Chromium at 1280px/390px accept numeric and bounded decimal integer selectors (including legacy whitespace/plus forms), reject radix/exponent/overlong strings for primary and overlay axes, and preserve the prior project atomically.
 2. **P0 — Release governance for PR #191 (Blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct pushes, force pushes and deletion; review the complete diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
 3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Planned).** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
 4. **P1 — Finish Data Tables structural-reference boundaries (Partial).** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sorting/recalculation, persistent #REF!, transactional rollback and standalone source/bundle parity.
 5. **P1 — Complete seven-shape Truss numerical boundaries (Partial).** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
+
 ---
 
 ## 2026-11-26 — DATA-TABLES-DECIMAL-CELL-COERCION

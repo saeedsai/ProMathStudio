@@ -82,6 +82,14 @@ invalidPrimary(graph=>graph.dataset.z=-1,/graph dataset mapping is invalid/);
 invalidPrimary(graph=>graph.dataset.x='1',/graph dataset mapping is invalid/);
 invalidPrimary(graph=>graph.dataset.z='1',/graph dataset mapping is invalid/);
 invalidPrimary(graph=>graph.dataset.style='dots',/graph dataset style is invalid/);
+for (const selector of ['0x0','0b1','0o2','1e0','0'.repeat(17)]) {
+ invalidPrimary(graph=>graph.dataset.x=selector,/graph dataset mapping is invalid/);
+ invalidOverlay(set=>set.extra[0].mapping.x=selector,/graph dataset overlay mapping/);
+}
+const paddedPrimary=mapped3d();paddedPrimary.graph.dataset.x=' +0 ';paddedPrimary.graph.dataset.y=' 1 ';
+assert.strictEqual(migrate(paddedPrimary).graph.dataset.x,' +0 ','bounded decimal index strings remain compatible');
+const paddedOverlay=withOverlay();paddedOverlay.graph.dataset.extra[0].mapping.x=' +0 ';
+assert.strictEqual(migrate(paddedOverlay).graph.dataset.extra.length,1,'bounded decimal overlay indices remain compatible');
 const legacyMapping=basic();delete legacyMapping.graph.dataset.x;delete legacyMapping.graph.dataset.y;
 delete legacyMapping.graph.dataset.z;delete legacyMapping.graph.dataset.style;
 assert.strictEqual(migrate(legacyMapping).version,2,'legacy datasets without selectors remain supported');

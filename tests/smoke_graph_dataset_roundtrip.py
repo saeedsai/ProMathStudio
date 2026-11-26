@@ -57,6 +57,23 @@ def main():
         assert page.evaluate('window.MathStudio.bridge.export().working') == 'RT1'
         assert page.evaluate('window.MathStudio.bridge.export().graph.dataset') == dataset
 
+        # Axis selectors are bounded base-10 integer indices, not Number()-coercible literals.
+        bad_primary_index = json.loads(json.dumps(first))
+        bad_primary_index['working'] = 'SHOULD_NOT_APPLY'
+        bad_primary_index['graph']['dataset']['x'] = '0x0'
+        upload(page, bad_primary_index)
+        page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
+        assert page.evaluate('window.MathStudio.bridge.export().working') == 'RT1'
+        assert page.evaluate('window.MathStudio.bridge.export().graph.dataset') == dataset
+
+        bad_overlay_index = json.loads(json.dumps(first))
+        bad_overlay_index['working'] = 'SHOULD_NOT_APPLY'
+        bad_overlay_index['graph']['dataset']['extra'][0]['mapping']['x'] = '0x0'
+        upload(page, bad_overlay_index)
+        page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
+        assert page.evaluate('window.MathStudio.bridge.export().working') == 'RT1'
+        assert page.evaluate('window.MathStudio.bridge.export().graph.dataset') == dataset
+
         # Saved overlays must use the same unambiguous header identity rule as primary datasets.
         for names in (['t', 'T'], ['t', ' ']):
             bad_headers = json.loads(json.dumps(first))

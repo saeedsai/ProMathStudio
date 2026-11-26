@@ -312,7 +312,8 @@
           cx:finite(piece.x+piece.width/2, 'L-angle rectangle centroid x (mm)'),
           cy:finite(piece.y+piece.height/2, 'L-angle rectangle centroid y (mm)')};
       });
-      area = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area,0), 'L-angle area (mm²)');
+      // Preserve combined sub-ulp rectangle contributions when their total changes the rounded area.
+      area = finiteSignedSum(pieceMetrics.map(piece=>piece.area), 'L-angle area (mm²)');
       if (!(area > 0)) throw Error('L-angle area underflow; increase dimensions.');
       centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'L-angle centroid x (mm)');
       centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'L-angle centroid y (mm)');
@@ -545,7 +546,8 @@
           cy:finite(piece.y + piece.height/2, 'Composite section rectangle centroid y (mm)')};
       });
       const omittedChannelWeb = shape === 'channel' && pieceMetrics[0].area === 0;
-      area = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area,0), 'Composite section area (mm²)');
+      // Two small flange areas can each be below half an ulp of the web area while their sum is representable.
+      area = finiteSignedSum(pieceMetrics.map(piece=>piece.area), 'Composite section area (mm²)');
       const firstMomentX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0), 'Composite section first moment x (mm³)');
       const firstMomentY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0), 'Composite section first moment y (mm³)');
       if (omittedChannelWeb && (area < MIN_NORMAL || firstMomentX < MIN_NORMAL || firstMomentY < MIN_NORMAL)) {

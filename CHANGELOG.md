@@ -1,3 +1,9 @@
+## 2026-11-26 — Compensated composite-section area totals
+
+- Channel and I-section rectangle-area totals now use the existing scaled compensated accumulator, preserving combined flange contributions when each flange is individually below half an ulp of the dominant web area.
+- Added a direct Node regression proving the naive total rounds to 1.0 mm² while the correctly rounded web-plus-two-flange area is 1.0000000000000002 mm² for both channel and I-section fixtures.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Reject Truss Euler CSV unit underflow
 
 - Exact-head Push/PR CI exposed a stale Euler CSV expectation: the computed binary64 kN value serializes as 493.48022005446785, not the older rounded 493.4802200544678. Updated Node and Chromium regressions to require shortest-round-trip fidelity.

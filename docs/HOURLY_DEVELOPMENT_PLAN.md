@@ -1,3 +1,31 @@
+## 2026-11-26 — TRUSS-COMPOSITE-AREA-COMPENSATED-SUM
+
+Starting refs: dev `e45aa2bb2d00ab7c733a7d3d287d664fbabca300`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, Truss source/tests/contract, current branch refs, PR #191/reviews, exact-head Quality, rulesets and main/Pages evidence.
+
+P0 CI checkpoint: exact-head Push Quality [#45725803164](https://github.com/saeedsai/ProMathStudio/actions/runs/45725803164) and PR Quality [#45725809432](https://github.com/saeedsai/ProMathStudio/actions/runs/45725809432) both passed on `e45aa2bb2d00ab7c733a7d3d287d664fbabca300`. Truss browser step 212, analytical step 214 and editable/mobile step 215 all completed successfully in both workflows; no failed steps. This verifies the prior Euler CSV unit-underflow repair.
+
+New correctness issue: composite section area used ordinary left-to-right addition for three disjoint rectangle areas. With a 1 mm² web and two approximately 6.66e-17 mm² flanges, each flange is individually below half an ulp of 1 mm², so sequential addition loses both; the correctly rounded total is 1.0000000000000002 mm². This occurs for both channel and I-section decompositions even though the total is representable.
+
+Implementation: use the existing shared `finiteSignedSum` scaled compensated accumulator for the L-angle and composite-section rectangle-area totals. No new numerical kernel or dependency was introduced. The channel and I-section formulas, SI model solver, section dimensions, UI and standalone root bundle are unchanged; Truss FEM remains an adjacent-script page.
+
+Regression: appended a direct Node test using exact binary64 inputs. It proves the naive sum returns 1.0, each flange is below half an ulp, and both channel and I-section helpers return exactly 1.0000000000000002 mm² while retaining finite positive inertias, section moduli and radii, immutable inputs and frozen results.
+
+Validation: independent binary64 check with the exact fixture confirms web area 1.0, each flange area 6.661338147750939e-17, naive total 1.0 and compensated correctly rounded total 1.0000000000000002. Full Node/Chromium execution must be established by fresh exact-head Actions; local checkout remains unavailable, so no local repository test pass is claimed.
+
+Release: PR #191 remains open, mergeable and at the previous head before this commit; submitted reviews remain empty. Branches are exactly dev/main. Repository rulesets are empty; main branch-protection read returns HTTP 403 to the integration. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on 24 November. No merge or direct main update. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+Status: composite-area precision fix and direct regression committed to dev; new exact-head Push/PR Quality pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Release governance (blocked on independent human review/admin access).** Acceptance: eligible independent approval of PR #191; verifiable main protection requiring exact-head Quality and preventing direct pushes, force-pushes and deletion; complete diff review; ordinary PR merge; exact-main Quality; Pages deployment and hosted critical-path verification.
+2. **P1 — Finish seven-shape Truss numerical boundaries.** Acceptance: independent references for area, centroid, Ixx/Iyy, Sx/Sy and rx/ry across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining low-exponent/near-solid cases; conservative underflow rejection; invalid rollback, selected-member isolation, keyboard and 390px browser tests.
+3. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion and deletion; scalar/range `#REF!`; already-invalid references; blank/reversed/mixed-anchor ranges; quoted sheet names; recalculation; atomic rollback; source/standalone-bundle parity.
+4. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed-import rollback preserves workspaces, focus, selections and prior results; desktop and 390px browser tests.
+5. **P1 — Numerical ODE verification.** Acceptance: analytical forward/backward scalar and coupled references, refinement/convergence, stage-overflow recovery, bounded attempt exhaustion and stale-export invalidation.
+
+---
+
 ## 2026-11-26 — TRUSS-EULER-CSV-ROUNDTRIP-AND-UNIT-UNDERFLOW
 
 Starting refs: dev 428c38cb9a949383b858910e89793af4ce9d4a56; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, this living plan, the frozen 2026-10-26 inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head Quality, rulesets and main/Pages evidence.

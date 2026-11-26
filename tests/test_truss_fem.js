@@ -2182,3 +2182,27 @@ test('positive optional member mass rejects final underflow while preserving zer
  assert.equal(retained.mass,9.88131291682493e-28,
   'a positive mass remains accepted when only the intermediate volume underflows');
 });
+
+test('channel and I-section areas retain combined sub-ulp flange contributions',()=>{
+ // Synthetic binary64 summation boundary, not a physical engineering design.
+ const dimensions={width:1e154,height:1e154,webThickness:1e-154,flangeThickness:6.661338147750939e-171};
+ const webArea=dimensions.webThickness*dimensions.height;
+ const flangeArea=(dimensions.width-dimensions.webThickness)*dimensions.flangeThickness;
+ assert.equal(webArea,1);
+ assert.ok(flangeArea>0&&flangeArea<Number.EPSILON/2,
+  'each flange area must be individually below half an ulp of the dominant web area');
+ assert.equal(webArea+flangeArea+flangeArea,1,
+  'naive left-to-right addition loses both individually sub-ulp flange contributions');
+ for(const shape of ['channel','i-section']){
+  const original={...dimensions};
+  const section=fem.sectionProperties(shape,dimensions);
+  assert.equal(section.area,1.0000000000000002,
+   shape+' area must be the correctly rounded sum of the web and both flanges');
+  for(const key of ['secondMoment','secondMomentPerpendicular','sectionModulusX','sectionModulusY',
+                    'radiusOfGyrationX','radiusOfGyrationY']){
+   assert.ok(Number.isFinite(section[key])&&section[key]>0,shape+' '+key+' must remain finite and positive');
+  }
+  assert.deepEqual(dimensions,original);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+});

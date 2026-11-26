@@ -1,3 +1,23 @@
+## 2026-11-26 — TRUSS-COMPOSITE-AREA-COMPENSATED-SUM
+
+- Starting refs: dev `e45aa2bb2d00ab7c733a7d3d287d664fbabca300`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI, rulesets and main/Pages evidence.
+- Exact-head CI on the starting dev head passed: Push Quality [#45725803164](https://github.com/saeedsai/ProMathStudio/actions/runs/45725803164) and PR Quality [#45725809432](https://github.com/saeedsai/ProMathStudio/actions/runs/45725809432). Truss steps 212, 214 and 215 passed in both runs.
+- Found a binary64 aggregation defect: channel/I-section rectangle-area reduction could lose two individually sub-half-ulp flange contributions even when their combined sum changes the correctly rounded total from 1.0 to 1.0000000000000002 mm².
+- Reused the existing `finiteSignedSum` scaled compensated accumulator for L-angle and composite-section area totals. Added a direct Node regression for both channel and I-section, proving naive loss and the correctly rounded result; checks finite positive remaining properties, immutable inputs and frozen outputs.
+- Updated Structural Truss numerical contract, living plan, execution ledger and changelog. No root `index.html` bundle change: Truss FEM is loaded as an adjacent script.
+- Independent binary64 fixture calculation passed: web area 1.0; each flange 6.661338147750939e-17; naive sum 1.0; correctly rounded sum 1.0000000000000002. Full Node/Chromium repository execution is pending fresh exact-head Actions; local checkout is unavailable and no local full-suite pass is claimed.
+- PR #191 remains open, mergeable, with no submitted reviews. Only dev/main branches exist; rulesets empty; main branch-protection read HTTP 403. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Historical inventory remains frozen at **166 gaps / 95 partial**. Status: compensated composite-area correction and regression committed to dev; exact-head QA pending; not released.
+
+### NEXT FIVE
+1. P0 release governance: independent eligible PR approval and verifiable main protection; ordinary PR merge only after exact-head checks; verify main Quality, Pages and hosted critical path.
+2. P1 seven-shape Truss boundaries: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references; low-exponent/near-solid cases; conservative rejection, rollback, member isolation and 390px.
+3. P1 Data Tables formula references: row 6000/AF, scalar/range `#REF!`, mixed anchors, quoted names, recalculation, rollback and bundle parity.
+4. P1 saved-project compatibility: current/legacy Matrix/Graph/Table round-trips, malformed-import rollback, focus/selection preservation and desktop/390px coverage.
+5. P1 ODE verification: analytical forward/backward references, convergence, stage-overflow/attempt-budget cases and stale-export invalidation.
+
+---
+
 ## 2026-11-26 — TRUSS-EULER-CSV-ROUNDTRIP-AND-UNIT-UNDERFLOW
 
 - Starting dev 428c38cb9a949383b858910e89793af4ce9d4a56; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, living plan, frozen inventory, Truss source/tests/contract, branches, PR #191/reviews, exact-head CI, rulesets and production evidence.

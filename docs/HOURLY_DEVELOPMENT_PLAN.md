@@ -18,6 +18,9 @@ Release: PR #191 remains open and mergeable; no independent reviews are submitte
 
 Status: implemented and committed on dev; new exact-head Push/PR Quality pending; not released.
 
+
+CI follow-up: the first exact-head Push Quality [#45782122512](https://github.com/saeedsai/ProMathStudio/actions/runs/45782122512) and PR Quality [#45782130950](https://github.com/saeedsai/ProMathStudio/actions/runs/45782130950) both failed at structural step 7 before browser tests. The observed failure was a duplicate `const valid2d` name in the newly extended Node regression, not a production-source assertion. Renamed the new 2D fixture to `dormant2d`; new exact-head workflows must confirm the correction.
+
 ### NEXT FIVE
 
 1. **P0 — Verify this primary Graph mapping fix.** Acceptance: Push and PR Quality green on the same exact dev SHA with zero failed/skipped required steps; Node and Chromium accept legacy/default and valid 2D/3D mappings, reject invalid mode/index/style/duplicate axes, preserve full prior project on rejection and pass 1280px/390px.

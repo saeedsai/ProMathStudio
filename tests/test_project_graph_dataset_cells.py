@@ -83,8 +83,8 @@ invalidPrimary(graph=>graph.dataset.style='dots',/graph dataset style is invalid
 const legacyMapping=basic();delete legacyMapping.graph.dataset.x;delete legacyMapping.graph.dataset.y;
 delete legacyMapping.graph.dataset.z;delete legacyMapping.graph.dataset.style;
 assert.strictEqual(migrate(legacyMapping).version,2,'legacy datasets without selectors remain supported');
-const valid2d=mapped3d();valid2d.graph.mode='2d';valid2d.graph.dataset.z='1';
-assert.strictEqual(migrate(valid2d).graph.dataset.z,'1','2D may retain a dormant Z selector');
+const dormant2d=mapped3d();dormant2d.graph.mode='2d';dormant2d.graph.dataset.z='1';
+assert.strictEqual(migrate(dormant2d).graph.dataset.z,'1','2D may retain a dormant Z selector');
 const invalid3dDefaults=basic();invalid3dDefaults.graph.mode='3d';
 assert.throws(()=>migrate(invalid3dDefaults),/graph dataset mapping is invalid/);
 """

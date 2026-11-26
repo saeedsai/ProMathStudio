@@ -1,3 +1,8 @@
+## 2026-11-26 — Correct Graph mapping regression fixture declaration
+
+- Fixed the exact-head CI failure caused by the new Node regression reusing an existing top-level `const valid2d` identifier; the new 2D fixture is now named `dormant2d`.
+- The production schema and all regression assertions are unchanged. Fresh Push/PR Quality runs are required to verify the fix.
+
 ## 2026-11-26 — Reject invalid primary Graph dataset mappings in saved projects
 
 - Added pre-import validation for saved Graph mode, primary X/Y/Z selectors and plot style. Invalid explicit selectors no longer silently fall back to header-based defaults during restore.

@@ -2206,3 +2206,32 @@ test('channel and I-section areas retain combined sub-ulp flange contributions',
   assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
  }
 });
+
+ 
+test('channel and I-section centroid and inertias retain sub-ulp rectangle contributions',()=>{
+ // Synthetic binary64 boundary fixture, not a physical engineering design.
+ const dimensions={width:2,height:1,webThickness:1,flangeThickness:2e-17};
+ // The naive channel first-moment and Ixx reductions lose two individually small terms.
+ assert.equal(0.5+3e-17+3e-17,0.5);
+ assert.equal(1/12+5e-18+5e-18,1/12);
+ // In the I-section, adding the top-flange offset before the web rounds one ulp too high.
+ const naiveISectionIxx=1.3333333333333336e-51+1e-17+1/12+1e-17;
+ assert.equal(naiveISectionIxx,0.08333333333333336);
+ const expected={
+  channel:{x:0.5000000000000001,y:0.5,ixx:0.08333333333333334,iyy:0.08333333333333337},
+  'i-section':{x:1,y:0.5,ixx:0.08333333333333334,iyy:0.08333333333333336}
+ };
+ for(const [shape,reference] of Object.entries(expected)){
+  const original={...dimensions};
+  const section=fem.sectionProperties(shape,dimensions);
+  assert.equal(section.centroid.x,reference.x,shape+' centroid x must retain the correctly rounded first moment');
+  assert.equal(section.centroid.y,reference.y,shape+' centroid y must retain the correctly rounded first moment');
+  assert.equal(section.secondMoment,reference.ixx,shape+' Ixx must sum local and parallel-axis terms before rounding');
+  assert.equal(section.secondMomentPerpendicular,reference.iyy,shape+' Iyy must sum local and parallel-axis terms before rounding');
+  for(const key of ['sectionModulusX','sectionModulusY','radiusOfGyrationX','radiusOfGyrationY']){
+   assert.ok(Number.isFinite(section[key])&&section[key]>0,shape+' '+key+' must remain finite and positive');
+  }
+  assert.deepEqual(dimensions,original);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+});

@@ -1,3 +1,9 @@
+## 2026-11-26 — Exact composite-section centroid and inertia sums
+
+- Composite channel and I-section area, first moments and local-plus-parallel-axis inertias now sum already-rounded finite binary64 terms exactly when BigInt is available, with the existing scaled compensated compatibility fallback.
+- Added direct Node and Chromium regressions for a sub-ulp channel centroid/Ixx/Iyy case and an order-sensitive I-section Ixx case; browser checks run at 1280px and 390px.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Compensated composite-section area totals
 
 - Channel and I-section rectangle-area totals now use the existing scaled compensated accumulator, preserving combined flange contributions when each flange is individually below half an ulp of the dominant web area.

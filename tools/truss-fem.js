@@ -256,6 +256,13 @@
     };
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
     const MIN_NORMAL = 2.2250738585072014e-308;
+    // Correctly round sums of already-rounded section terms when BigInt is available.
+    // Retain the scaled compensated path as a compatibility fallback.
+    const sectionPropertySum = (values, name) => {
+      const terms = Array.from(values, value => finite(value, name));
+      const exact = exactFiniteBinarySum(terms, name);
+      return exact === null ? finiteSignedSum(terms, name) : exact;
+    };
     // Restore products of extreme geometry scales without overflowing intermediate powers.
     const scaleProduct = (...values) => {
       let sign=1, mantissa=1, exponent=0;
@@ -546,26 +553,24 @@
           cy:finite(piece.y + piece.height/2, 'Composite section rectangle centroid y (mm)')};
       });
       const omittedChannelWeb = shape === 'channel' && pieceMetrics[0].area === 0;
-      // Two small flange areas can each be below half an ulp of the web area while their sum is representable.
-      area = finiteSignedSum(pieceMetrics.map(piece=>piece.area), 'Composite section area (mm²)');
-      const firstMomentX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0), 'Composite section first moment x (mm³)');
-      const firstMomentY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0), 'Composite section first moment y (mm³)');
+      // Sum the rounded rectangle contributions exactly before computing the centroid and inertias.
+      area = sectionPropertySum(pieceMetrics.map(piece=>piece.area), 'Composite section area (mm²)');
+      const firstMomentX = sectionPropertySum(pieceMetrics.map(piece=>piece.area*piece.cx), 'Composite section first moment x (mm³)');
+      const firstMomentY = sectionPropertySum(pieceMetrics.map(piece=>piece.area*piece.cy), 'Composite section first moment y (mm³)');
       if (omittedChannelWeb && (area < MIN_NORMAL || firstMomentX < MIN_NORMAL || firstMomentY < MIN_NORMAL)) {
         throw Error('Composite section area underflow; increase dimensions.');
       }
       if (!(area > 0)) throw Error('Composite section area underflow; increase dimensions.');
       centroidX = finite(firstMomentX/area, 'Composite section centroid x (mm)');
       centroidY = finite(firstMomentY/area, 'Composite section centroid y (mm)');
-      secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = rectangleIxx(piece, 'Composite rectangle local Ixx (mm⁴)');
-        const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'Composite rectangle Ixx offset (mm⁴)');
-        return sum+local+offset;
-      },0), 'Composite section Ixx (mm⁴)');
-      secondMomentPerpendicular = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = rectangleIyy(piece, 'Composite rectangle local Iyy (mm⁴)');
-        const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'Composite rectangle Iyy offset (mm⁴)');
-        return sum+local+offset;
-      },0), 'Composite section Iyy (mm⁴)');
+      secondMoment = sectionPropertySum(pieceMetrics.flatMap(piece => [
+        rectangleIxx(piece, 'Composite rectangle local Ixx (mm⁴)'),
+        finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'Composite rectangle Ixx offset (mm⁴)')
+      ]), 'Composite section Ixx (mm⁴)');
+      secondMomentPerpendicular = sectionPropertySum(pieceMetrics.flatMap(piece => [
+        rectangleIyy(piece, 'Composite rectangle local Iyy (mm⁴)'),
+        finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'Composite rectangle Iyy offset (mm⁴)')
+      ]), 'Composite section Iyy (mm⁴)');
       // The omitted web bounds are below half an ulp; require normal aggregate
       // area, first moments and inertias so they cannot change rounded outputs.
       if (omittedChannelWeb &&

@@ -1,5 +1,12 @@
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
+## Composite-section centroid and inertia summation
+
+Channel and I-section calculations now sum their already-rounded finite binary64 rectangle contributions exactly when BigInt is available, rounding once after the complete sum. This applies to net area, both first moments, and each local-plus-parallel-axis inertia total. The existing scaled compensated sum remains the compatibility fallback when BigInt is unavailable. This avoids both lost sub-ulp contributions and order-dependent one-ulp overestimates; it does not make the underlying rectangle products arbitrary precision.
+
+A synthetic boundary fixture uses B=2 mm, H=1 mm, tw=1 mm and tf=2e-17 mm. For the channel, naive first-moment reduction gives centroid x=0.5 mm instead of the correctly rounded 0.5000000000000001 mm; naive Ixx gives 0.08333333333333333 mm⁴ instead of 0.08333333333333334 mm⁴; naive Iyy gives 0.08333333333333336 mm⁴ instead of 0.08333333333333337 mm⁴. For the symmetric I-section, adding flange terms around the web can overestimate Ixx by one ulp (0.08333333333333336 instead of 0.08333333333333334 mm⁴). Direct Node and Chromium regressions compare against exact sums of the supplied binary64 terms at desktop and 390px viewports. These dimensions are numerical-boundary fixtures, not physical design examples.
+
+
 ## Composite-section area summation
 
 Channel and I-section area totals use the shared scaled compensated accumulator instead of a left-to-right floating-point reduction. This matters when the web area is dominant and each flange area is individually smaller than half an ulp of that web area, but the two flange contributions together cross a rounding boundary. The regression uses a synthetic 1 mm² web and two approximately 6.66e-17 mm² flanges: ordinary sequential addition returns 1.0 mm², while the correctly rounded total is 1.0000000000000002 mm². The same behavior is checked for channels and symmetric I-sections. This is a binary64 summation-boundary test, not a physical design example.

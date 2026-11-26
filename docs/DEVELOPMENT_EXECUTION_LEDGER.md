@@ -1,3 +1,23 @@
+## 2026-11-26 — TRUSS-COMPOSITE-CENTROID-INERTIA-EXACT-SUM
+
+- Starting refs: dev `a46f676d0cb4d99d1eebf089c228d06c9cc3466a`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, unified master plan, engineering architecture/toolbox contracts, frozen inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI, rulesets and main/Pages evidence.
+- Starting exact-head QA passed on `a46f676d`: Push Quality [#45734781219](https://github.com/saeedsai/ProMathStudio/actions/runs/45734781219) and PR Quality [#45734789900](https://github.com/saeedsai/ProMathStudio/actions/runs/45734789900), 218/218 steps each, zero failures/skips.
+- Found a binary64 reduction defect after the previous composite-area fix: first moments and local-plus-parallel-axis inertia terms were still summed left-to-right. Channel fixture B=2, H=1, tw=1, tf=2e-17 loses the two small x-first-moment terms (naive 0.5 vs exact rounded 0.5000000000000001) and both Ixx/Iyy combined contributions. The I-section fixture overestimates Ixx by one ulp due to adding a flange offset before the dominant web inertia.
+- Added a local section-property sum that uses the existing exact integer binary64 accumulator when BigInt is available, with the existing scaled compensated sum as fallback. Composite channel/I-section area, first moments, Ixx and Iyy now round once after summing the already-rounded terms. No change to the FEM solve, section geometry, units or public API.
+- Added a direct Node regression for both shapes and a registered Chromium regression at 1280px and 390px. It checks centroid x/y, Ixx/Iyy, finite positive section moduli/radii, immutable inputs and frozen outputs.
+- Independent Python Fraction oracle confirmed expected rounded results and reproduced all three naive reduction defects. Full local Node/Chromium execution is unavailable because the execution container has no repository checkout; no local full-suite pass claimed.
+- PR #191 remains open/mergeable with zero submitted reviews. Branches exactly dev/main, both unprotected; rulesets empty; branch-protection read HTTP 403. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) passed on 24 November for unchanged main `0d8ac89f`.
+- Historical inventory remains frozen at **166 gaps / 95 partial**. Status: composite centroid/inertia correction and Node/Chromium regressions committed to dev; fresh exact-head QA pending; not released.
+
+### NEXT FIVE
+1. P0 verify this exact-head regression: both Push/PR Quality green on same SHA; Node and Chromium exact channel/I-section centroid and Ixx/Iyy references; desktop/390px; no skipped required checks.
+2. P0 release governance: independent eligible approval, verifiable main protection, full diff review, ordinary PR merge, exact-main Quality, Pages and hosted smoke.
+3. P1 finish seven-shape Truss boundaries: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references for all seven shapes; low-exponent/near-solid/normalized fallback; rejection, rollback, member isolation and mobile.
+4. P1 Data Tables references: row 6000/AF, scalar/range #REF!, invalid references, blank/reversed/mixed anchors, quoted names, recalculation, atomic rollback and bundle parity.
+5. P1 saved-project compatibility: current/legacy Matrix/Graph/Table round-trips; malformed-import rollback; focus/selection preservation; desktop/390px browser coverage.
+
+---
+
 ## 2026-11-26 — TRUSS-COMPOSITE-AREA-COMPENSATED-SUM
 
 - Starting refs: dev `e45aa2bb2d00ab7c733a7d3d287d664fbabca300`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI, rulesets and main/Pages evidence.

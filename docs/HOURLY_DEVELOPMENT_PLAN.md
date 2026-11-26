@@ -1,3 +1,31 @@
+## 2026-11-26 — TRUSS-COMPOSITE-CENTROID-INERTIA-EXACT-SUM
+
+Starting refs: dev `a46f676d0cb4d99d1eebf089c228d06c9cc3466a`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, unified master plan, engineering architecture/toolbox contracts, frozen 2026-10-26 inventory, current Truss source/tests/contract, exact branch refs, PR #191/reviews, exact-head Quality, rulesets and main/Pages evidence.
+
+P0 CI checkpoint: previous exact-head Push Quality [#45734781219](https://github.com/saeedsai/ProMathStudio/actions/runs/45734781219) and PR Quality [#45734789900](https://github.com/saeedsai/ProMathStudio/actions/runs/45734789900) both passed on `a46f676d0cb4d99d1eebf089c228d06c9cc3466a`: 218/218 steps each, zero failures or skipped steps. No existing exact-head CI failure remained at the start of this iteration.
+
+New correctness issue: the composite section helper had already adopted compensated area totals, but still accumulated first moments and local-plus-parallel-axis inertias left-to-right. A synthetic B=2 mm, H=1 mm, tw=1 mm, tf=2e-17 mm channel lost two small first-moment terms, returning centroid x=0.5 mm instead of 0.5000000000000001 mm. Its Ixx and Iyy also rounded to 0.08333333333333333 and 0.08333333333333336 mm⁴ instead of 0.08333333333333334 and 0.08333333333333337 mm⁴. The I-section fixture exposed an order-dependent Ixx overestimate of one ulp.
+
+Implementation: composite channel/I-section area, first moments and both inertia totals now use exact integer accumulation of their already-rounded finite binary64 terms with one nearest/ties-to-even conversion when BigInt is available. The existing scaled compensated path is retained as a compatibility fallback. The member FEM solver, geometry formulas, units and public API are unchanged.
+
+Regression: direct Node coverage proves the naive failure modes and checks exact centroid x/y, Ixx and Iyy for both channel and I-section, finite positive section moduli/radii, immutable input and frozen output. The registered Chromium Truss Studio smoke evaluates the same production module at 1280px and 390px and checks the exact reference values.
+
+Independent validation: a Python Fraction oracle over the exact supplied binary64 piece contributions confirmed the expected rounded values for both shapes and reproduced the naive channel centroid/Ixx losses and I-section Ixx overestimate. The local checkout is absent in this execution environment; no local Node/Chromium repository pass is claimed. Fresh exact-head Push/PR Quality must validate this commit.
+
+Release: PR #191 remains open and mergeable with zero submitted reviews. Branches are exactly dev/main and both report `protected:false`; repository rulesets are empty and main branch-protection read is unavailable (HTTP 403). Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on 24 November on that unchanged main SHA. No merge or direct main update. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+Status: composite centroid/inertia precision fix and Node/Chromium regressions prepared for dev; new exact-head QA pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Verify this exact-head composite-section regression.** Acceptance: Push and PR Quality both green on the same new dev SHA; Node and Chromium confirm channel/I-section centroid and Ixx/Iyy references; browser test passes at 1280px and 390px; no required checks skipped.
+2. **P0 — Release governance (externally blocked).** Acceptance: eligible independent PR #191 approval; verifiable main protection requiring exact-head Quality and preventing direct pushes, force-pushes and deletion; complete diff review; ordinary PR merge; exact-main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Finish seven-shape Truss numerical boundaries.** Acceptance: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining low-exponent/near-solid and normalized-fallback cases; conservative underflow rejection, invalid rollback, selected-member isolation, keyboard and 390px tests.
+4. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion and deletion; scalar/range `#REF!`; already-invalid references; blank/reversed/mixed-anchor ranges; quoted sheet names; recalculation; atomic rollback; source/standalone-bundle parity.
+5. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed-import rollback preserves workspaces, focus, selections and prior results; desktop and 390px browser tests.
+
+---
+
 ## 2026-11-26 — TRUSS-COMPOSITE-AREA-COMPENSATED-SUM
 
 Starting refs: dev `e45aa2bb2d00ab7c733a7d3d287d664fbabca300`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, Truss source/tests/contract, current branch refs, PR #191/reviews, exact-head Quality, rulesets and main/Pages evidence.

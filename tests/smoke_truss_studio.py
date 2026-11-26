@@ -122,6 +122,23 @@ def main():
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.set_content(HTML, wait_until='load')
         assert 'Analysis complete' in page.locator('#status').inner_text()
+        # Composite-section summation must retain correctly rounded binary64 centroids and inertias.
+        for viewport in ({'width': 1280, 'height': 900}, {'width': 390, 'height': 844}):
+            page.set_viewport_size(viewport)
+            precision_sections = page.evaluate("""() => {
+                const dimensions = {width:2,height:1,webThickness:1,flangeThickness:2e-17};
+                const read = shape => {
+                    const section = ProMathTrussFEM.sectionProperties(shape, dimensions);
+                    return {x:section.centroid.x,y:section.centroid.y,
+                            ixx:section.secondMoment,iyy:section.secondMomentPerpendicular};
+                };
+                return {channel:read('channel'),iSection:read('i-section')};
+            }""")
+            assert precision_sections == {
+                'channel': {'x':0.5000000000000001,'y':0.5,'ixx':0.08333333333333334,'iyy':0.08333333333333337},
+                'iSection': {'x':1,'y':0.5,'ixx':0.08333333333333334,'iyy':0.08333333333333336},
+            }, (viewport, precision_sections)
+        page.set_viewport_size({'width': 390, 'height': 844})
         # Preview valid geometry without solving, including a model that is structurally unstable.
         assert page.locator('#preview-summary').get_attribute('aria-live') == 'polite'
         page.locator('#member-material-details > summary').click()

@@ -2,6 +2,7 @@
 
 - Hardened `MathStudio.matrixTools.restoreState()` so nonempty decimal/scientific drafts must convert to finite values with absolute magnitude at most `1e12`, matching project import; blank unfinished cells and the 80-character limit remain supported.
 - Invalid A/B/RHS/weights arrays reject before any grid mutation. Added Chromium coverage for exact ±1e12 boundaries, ±1e999 overflow and ±1e13 out-of-bound values, plus structural standalone source/bundle parity.
+- Corrected the structural regression's inline-script newline marker before exact-head CI; no production behavior or assertions were weakened.
 - Implemented on dev; exact-head Push/PR Quality required; not released.
 
 ## 2026-11-26 — Validate and restore saved Graph datasets before application

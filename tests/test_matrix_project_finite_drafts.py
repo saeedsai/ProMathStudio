@@ -15,9 +15,9 @@ class MatrixProjectFiniteDraftTests(unittest.TestCase):
         self.assertIn("Number.isFinite(Number(value))", source)
         self.assertIn("Math.abs(Number(value)) <= 1e12", source)
         matrix_source = (ROOT / "src/matrix-tools.js").read_text(encoding="utf-8")
-        matrix_marker = '<script id="promath-matrix-tools">\\n'
+        matrix_marker = '<script id="promath-matrix-tools">\n'
         matrix_inline = html.split(matrix_marker, 1)[1].split("</script>", 1)[0]
-        self.assertEqual(matrix_source.rstrip("\\n"), matrix_inline.rstrip("\\n"))
+        self.assertEqual(matrix_source.rstrip("\n"), matrix_inline.rstrip("\n"))
         self.assertIn("Number.isFinite(number)&&Math.abs(number)<=1e12", matrix_source)
 
     @unittest.skipUnless(shutil.which("node"), "Node.js required")

@@ -45,14 +45,14 @@ def main():
         assert page.evaluate('window.MathStudio.dataTables.active.name') == 'Beta'
 
         # A present workbook with no sheets cannot be restored: the workspace always keeps one sheet.
-        for empty_tables in (
-            {'version': 1, 'tables': []},
-            {'version': 1, 'selected': None, 'tables': []},
+        for empty_tables, error_text in (
+            ({'version': 1, 'tables': []}, 'table list must contain at least one sheet'),
+            ({'version': 1, 'selected': None, 'tables': []}, 'selected table does not exist'),
         ):
             empty = dict(base, working='SEL_EMPTY', tables=empty_tables)
             upload(page, empty)
             page.wait_for_function(
-                "document.querySelector('#hub-status').textContent.includes('table list must contain at least one sheet')")
+                f"document.querySelector('#hub-status').textContent.includes({json.dumps(error_text)})")
             assert page.evaluate('window.MathStudio.bridge.export().working') == 'SEL_OK'
             assert page.evaluate('window.MathStudio.dataTables.active.name') == 'Beta'
 

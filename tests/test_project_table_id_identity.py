@@ -37,7 +37,7 @@ for (const version of [1,2]) {
  const nullSelection={...empty,tables:{tables:[],selected:null}};
  assert.throws(()=>migrate(nullSelection),/selected table does not exist/);
  const noSelection={...empty,tables:{tables:[]}};
- assert.strictEqual(migrate(noSelection).tables.tables.length,0);
+ assert.throws(()=>migrate(noSelection),/table list must contain at least one sheet/);
 }
 // Column selectors must be unambiguous across case and whitespace variants.
 for (const version of [1,2]) {
@@ -48,7 +48,7 @@ for (const version of [1,2]) {
  for(const columns of [['A',' a '],['','B'],['   ','B'],['A','A']])
   assert.throws(()=>migrate(makeColumns(columns)),/table contains invalid rows or cells/);
 }
-console.log('PASS unique table id validation and empty workbook selection');
+console.log('PASS unique table id validation and nonempty workbook selection');
 """
         result = subprocess.run(['node','-e',script],cwd=ROOT,capture_output=True,text=True,timeout=20)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)

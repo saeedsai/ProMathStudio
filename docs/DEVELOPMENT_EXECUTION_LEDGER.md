@@ -1,3 +1,10 @@
+## 2026-11-26 — CI repair: preserve saved-table selection diagnostics
+
+- Starting dev `a8f85a99e6721d8021e930f508644505cd85d6ae`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact-head Push [#45817447603](https://github.com/saeedsai/ProMathStudio/actions/runs/45817447603) and PR [#45817456814](https://github.com/saeedsai/ProMathStudio/actions/runs/45817456814) failed at structural step 7: one existing test expected the established stale-selection error but received the new empty-workbook error because validation order changed.
+- Kept the nonempty-workbook guard and moved it after the existing selection-reference check. Stale/null selections retain `selected table does not exist`; a zero-sheet workbook with no selection is rejected before restore.
+- Updated Node selection and table-ID regressions plus Chromium rollback expectations. Both actual registered Node scripts passed in isolated V8; project-schema source/inline `index.html` parity passed. Browser/build checks await fresh exact-head CI; local checkout absent, so no native Playwright pass claimed.
+- PR #191 remains open with zero independent reviews; only dev/main refs, empty rulesets and HTTP 403 branch-protection read. Main Quality #45360386408 and Pages #45360367251 remain successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge/deployment. Frozen inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-26 — Reject empty saved Data Tables workbooks
 
 - Starting dev `33dfba8a55c6aed52a921699a2c2201d8731679d`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected root contract, living plan, frozen inventory, project-format docs, schema, Data Tables restore code, registered tests, PR #191, exact-head CI and Pages. The preceding Graph overlay header candidate has Push/PR Quality in progress on `33dfba8a55c6aed52a921699a2c2201d8731679d`; no failures observed at inspection.

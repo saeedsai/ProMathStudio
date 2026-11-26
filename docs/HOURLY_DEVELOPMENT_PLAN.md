@@ -1,3 +1,25 @@
+## 2026-11-26 — CI REPAIR: preserve saved-table selection diagnostics
+
+Starting refs: dev `a8f85a99e6721d8021e930f508644505cd85d6ae`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen inventory, project-format contract, project schema, Data Tables restore path, table ID/selection Node and Chromium tests, PR #191 and exact-head Quality evidence. Historical inventory remains **166 gaps / 95 partial**.
+
+P0 failure: exact-head Push Quality [#45817447603](https://github.com/saeedsai/ProMathStudio/actions/runs/45817447603) and PR Quality [#45817456814](https://github.com/saeedsai/ProMathStudio/actions/runs/45817456814) both failed at structural/unit step 7. The 605-test run had one failure (one optional mpmath test skipped): `test_project_table_id_identity.TableIdIdentityTests.test_unique_ids_legacy_compatibility_and_bundle`. The new empty-workbook guard ran before the existing selected-ID check, so a workbook with stale/null selection reported the new empty-sheet error instead of the established `selected table does not exist` diagnostic. This was an error-ordering regression, not a reason to remove the empty-workbook guard.
+
+Repair: validate any present selection against the sheet list first, preserving the existing stale/null selection diagnostic. Then reject a zero-sheet workbook only when selection is absent. This still prevents the blank-workspace restore defect while preserving established error semantics.
+
+Regression updates: table-selection Node tests now distinguish stale, null and absent selection; the table-ID identity test now expects no-selection empty workbooks to be rejected; the Chromium test checks both messages and verifies the previous project and active Beta sheet remain unchanged. The source module and inline standalone `index.html` project-schema copy were updated together and checked for parity.
+
+Validation: both actual registered Node scripts (`test_project_table_selection.py` and `test_project_table_id_identity.py`) passed in isolated V8; source/bundle parity passed. The browser rollback test remains for GitHub Chromium CI. Local checkout absent (`git rev-parse --show-toplevel`: exit 128); native Playwright/build checks are not claimed. A new exact-head Push and PR Quality run is required; the failed candidate is not considered green.
+
+Release: PR #191 remains open/mergeable with no independent reviews. Only dev/main refs exist; rulesets are empty and branch-protection reads return HTTP 403. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no release or deployment.
+
+### NEXT FIVE — status, dependencies and acceptance tests
+
+1. **P0 — Verify this CI repair.** Both Push and PR Quality green on the same new dev SHA with zero failures and zero skipped required steps; all 605+ structural/unit tests pass, including stale/null/absent selection cases; Chromium import rollback and 390px table selection pass.
+2. **P0 — Verify Graph overlay header identity candidate.** Exact-head Node and Chromium tests reject duplicate/blank overlay headers for live adds and saved imports without mutation; valid 2D/3D round-trips and 390px layout pass.
+3. **P0 — Release governance for PR #191 (blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+4. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+5. **P1 — Finish Data Tables structural-reference boundaries.** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort/recalculation, persistent `#REF!`, transactional rollback and standalone source/bundle parity.
+
 ## 2026-11-26 — PROJECT-EMPTY-DATA-TABLES-WORKBOOK-REJECTION
 
 Starting refs: dev `33dfba8a55c6aed52a921699a2c2201d8731679d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen 2026-10-26 inventory, unified master plan, project-format contract, project schema, Data Tables restore path, Node/Chromium selection regressions, PR #191 and current CI/Pages evidence. Historical inventory remains **166 gaps / 95 partial**.

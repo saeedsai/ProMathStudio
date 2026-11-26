@@ -1,3 +1,9 @@
+## 2026-11-26 — Preserve saved-table selection diagnostics while rejecting empty workbooks
+
+- Reordered project validation so stale/null selected-sheet references retain the established error, while a zero-sheet workbook with no selection is rejected before restore.
+- Updated Node table-ID/selection and Chromium atomic-import regressions; no assertions or CI gates were removed.
+- Exact-head failure diagnosed and repaired on dev; fresh Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Reject empty saved Data Tables workbooks
 
 - A present saved Data Tables workspace must contain at least one sheet; malformed zero-sheet workbooks are rejected before import instead of leaving the workspace blank.

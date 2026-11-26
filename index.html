@@ -4560,7 +4560,22 @@ self.onmessage=async ({data})=>{
     }
     render();save();
   }
-  const number=v=>{if(v===null||v==='')return 0;const n=Number(v);if(!Number.isFinite(n))throw Error('Not numeric: '+v);return n;};
+  const DECIMAL_CELL_NUMBER=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+  const numericCellValue=v=>{
+    if(typeof v==='number')return Number.isFinite(v)?v:null;
+    if(typeof v!=='string')return null;
+    const text=v.trim();
+    if(!text||!DECIMAL_CELL_NUMBER.test(text))return null;
+    const n=Number(text);
+    return Number.isFinite(n)?n:null;
+  };
+  const number=v=>{
+    if(v===null||v==='')return 0;
+    if(typeof v==='string'&&v.trim()==='')return 0;
+    const n=typeof v==='number'?v:numericCellValue(v);
+    if(n===null||!Number.isFinite(n))throw Error('Not numeric: '+v);
+    return n;
+  };
   // Neumaier accumulation keeps low-order terms when large normalized values cancel.
   function addCompensated(state,value){
     const next=state.sum+value;
@@ -4718,7 +4733,7 @@ self.onmessage=async ({data})=>{
             // value() returns zero for missing coordinates, but an unpopulated spreadsheet cell is blank, not numeric zero.
             if(rr>=target.rows.length||cc>=target.columns.length)continue;
             const v=value(target,rr,cc,stack);
-            if(v!==''&&String(v).trim()!==''&&Number.isFinite(Number(v)))nums.push(Number(v));
+            const v=value(target,rr,cc,stack),numeric=numericCellValue(v);if(numeric!==null)nums.push(numeric);
           }
         } else {const v=compute(arg,t,stack);if(Number.isFinite(Number(v)))nums.push(Number(v));}}
       const upper=fn.toUpperCase();

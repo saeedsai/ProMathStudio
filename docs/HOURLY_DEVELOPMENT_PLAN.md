@@ -1,3 +1,29 @@
+## 2026-11-26 — DATA-TABLES-DECIMAL-CELL-COERCION
+
+Starting refs: dev `1bee639333fd9c35ba58521bf5b7a5a7bb6c1ffb`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, the unified master implementation plan, Data Tables source/contract/tests, PR #191, exact-head Quality and Pages evidence. The frozen historical inventory remains **166 gaps / 95 partial**.
+
+Starting exact-head verification: Push Quality [#45851382365](https://github.com/saeedsai/ProMathStudio/actions/runs/45851382365) and PR Quality [#45851394325](https://github.com/saeedsai/ProMathStudio/actions/runs/45851394325) both completed on `1bee639333fd9c35ba58521bf5b7a5a7bb6c1ffb`, each 218/218 steps with zero failures and zero skipped steps. No failing exact-head CI remained.
+
+Defect: Data Tables used JavaScript `Number()` directly when a cell reference was used as an arithmetic operand and when deciding whether range cells were numeric. This accepted JavaScript-specific radix strings (`0x10`, `0b10`, `0o10`) as numeric values, unlike decimal spreadsheet input, silently interpreting text as 16, 2 and 8.
+
+Implementation: add one shared decimal/scientific cell-number parser. It accepts finite numeric primitives and trimmed decimal/scientific strings, preserves blank-as-zero scalar reference behavior, rejects non-finite results, and treats radix-prefixed strings as text. Direct arithmetic references to such text retain the existing nonnumeric diagnostic; aggregate ranges ignore them as text. SUM/AVERAGE/COUNT/MIN/MAX/MEDIAN share the same range-cell classification. Formula literal parsing, saved cell text and project format remain unchanged.
+
+Regression: registered Chromium coverage verifies direct arithmetic rejection for all three radix forms, aggregate range exclusion and COUNT=0 for radix-only cells, normal decimal/scientific references, blank scalar/range behavior, and aggregate reference values (SUM=42, AVERAGE=14, COUNT=3, MEDIAN=16). Existing extreme binary64 aggregation, cancellation, subnormal, overflow and 390/768/1280px coverage remains. A structural unit regression checks the shared parser is used by scalar and range paths. The standalone `index.html` Data Tables module is synchronized byte-for-byte with `src/data-tables.js`.
+
+Validation: an isolated V8 harness checked decimal/scientific acceptance, whitespace trimming, blank behavior, finite overflow rejection and radix-string exclusion. Full Node/Chromium/build validation is delegated to the exact-head GitHub Actions because the local execution workspace has no repository checkout. No test assertion or CI gate was removed.
+
+Release: PR #191 remains open from dev to main. It has zero independent reviews; only dev and main branches exist, both report unprotected, and the branch-protection endpoint remains inaccessible to the connected integration (HTTP 403). No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are the latest verified successful production runs on unchanged main; no new deployment.
+
+### NEXT FIVE — status, dependencies and acceptance tests
+
+1. **P0 — Verify decimal-only Data Tables cell coercion.** Both Push and PR Quality green on the same new exact dev SHA, all currently required steps with zero failures/skips; Chromium at 390/768/1280px proves radix text is rejected by scalar arithmetic and ignored by ranges while decimal/scientific, blank and extreme-aggregate cases remain correct.
+2. **P0 — Release governance for PR #191 (blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+4. **P1 — Finish Data Tables structural-reference boundaries.** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort/recalculation, persistent `#REF!`, transactional rollback and standalone source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundaries.** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
+
+---
+
 ## 2026-11-26 — TRUSS-RAW-DECIMAL-STRING-LENGTH-BOUND
 
 Starting refs: dev `3519dcf795cdfbc69ef803c89c4c3538459deb86`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Structural Truss numeric contract/source/tests, PR #191, exact-head CI and Pages evidence. The frozen historical inventory remains **166 gaps / 95 partial**.

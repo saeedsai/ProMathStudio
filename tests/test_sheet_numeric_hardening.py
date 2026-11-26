@@ -9,6 +9,16 @@ WORKFLOW = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
 
 
 class SpreadsheetNumericHardeningTests(unittest.TestCase):
+    def test_cell_numeric_coercion_is_decimal_only(self):
+        self.assertIn("const DECIMAL_CELL_NUMBER=", SOURCE)
+        self.assertIn("const numericCellValue=v=>", SOURCE)
+        self.assertIn("numericCellValue(v)", SOURCE)
+        self.assertIn("numeric=numericCellValue(v)", SOURCE)
+        smoke = (ROOT / "tests/smoke_sheet_numeric_hardening.py").read_text(encoding="utf-8")
+        for literal in ("0x10", "0b10", "0o10", "2.5e+1", "MEDIAN(A1:G1)"):
+            self.assertIn(literal, smoke)
+        self.assertIn("python tests/smoke_sheet_numeric_hardening.py", WORKFLOW)
+
     def test_reserved_names_cannot_shadow_builtin_aggregates(self):
         self.assertIn("SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN", SOURCE)
         self.assertIn("test(name)?null:window.MathStudio.customFunctions?.find(name)", SOURCE)

@@ -1,3 +1,14 @@
+## 2026-11-26 — Data Tables decimal-only cell coercion
+
+- Starting dev `1bee639333fd9c35ba58521bf5b7a5a7bb6c1ffb`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen MATLAB inventory, unified master plan, Data Tables source/tests/contract, PR #191 and current CI/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Exact starting candidate Push Quality [#45851382365](https://github.com/saeedsai/ProMathStudio/actions/runs/45851382365) and PR Quality [#45851394325](https://github.com/saeedsai/ProMathStudio/actions/runs/45851394325) both passed 218/218 on `1bee639333fd9c35ba58521bf5b7a5a7bb6c1ffb`, zero failures/skips.
+- Found that direct Data Tables cell arithmetic and aggregate range classification used JavaScript `Number()` coercion, accepting radix-prefixed strings as numeric.
+- Added a shared decimal/scientific numeric-cell parser for scalar references and range aggregates. Hex/binary/octal text is no longer silently coerced; direct arithmetic rejects it and aggregate ranges ignore it as text. Decimal/scientific, blank, finite primitive and existing aggregate behavior remain.
+- Added Chromium regressions for radix rejection, aggregate exclusion, decimal/scientific values, blanks and exact aggregate references; added structural source assertions and updated the Data Tables contract. Modular source and standalone index.html bundle remain byte-for-byte synchronized.
+- Local isolated V8 grammar checks passed; native repository Node/Playwright/build commands are unavailable because the execution workspace has no checkout. New exact-head GitHub Actions are required to certify the full registered suite.
+- PR #191 remains open with zero independent reviews; branch protection reads return HTTP 403 and both long-lived branches report unprotected. Main Quality and Pages remain successful on unchanged main; no release.
+- Status: implementation, browser/structural regressions, contract, plan, ledger and changelog committed atomically to dev; exact-head CI pending; not released.
+
 ## 2026-11-26 — Bound raw Truss decimal numeric-string input
 
 - Starting dev `3519dcf795cdfbc69ef803c89c4c3538459deb86`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, living plan, frozen MATLAB inventory, Structural Truss source/tests/contract, PR #191, exact-head Quality and Pages evidence. The historical baseline remains **166 gaps / 95 partial**.

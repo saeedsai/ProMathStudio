@@ -1,3 +1,9 @@
+## 2026-11-26 — Decimal-only Data Tables cell coercion
+
+- Prevent JavaScript radix-prefixed strings (`0x10`, `0b10`, `0o10`) from being silently treated as decimal spreadsheet numbers in direct cell arithmetic and aggregate ranges.
+- Share one decimal/scientific numeric-cell parser; preserve finite numeric primitives, surrounding whitespace and blank-cell behavior. Aggregate ranges ignore radix strings as text; direct arithmetic references reject them as nonnumeric.
+- Added Chromium and structural regressions while preserving existing extreme-value aggregation tests and standalone source/bundle parity.
+
 ## 2026-11-26 — Bound raw Truss numeric-string input
 
 - Enforce the 256 UTF-16 code-unit limit before trimming, so oversized whitespace padding cannot bypass the FEM decimal/scientific input bound.

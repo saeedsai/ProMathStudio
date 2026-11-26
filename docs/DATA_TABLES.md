@@ -11,7 +11,7 @@ ProMathStudio provides an in-browser spreadsheet-style workbook. Open **Data tab
 
 Each project can hold up to **20 tables**, with up to **6,000 rows** and **32 columns** per table. Switch between tables using their tabs; add, duplicate, rename or delete a sheet. Edit any header or cell. The top filter searches computed values, and sorting can sort by a selected column. The editor renders the first 150 matching rows for performance (all rows are stored, processed and exported).
 
-A plain cell is text or a number. A formula begins with `=`. The column headers appear above the numbered data rows. **Row 1 is the first data row**, so `A1` is the first data cell. Formula examples:
+A plain cell is text or a number. A formula begins with `=`. Referenced cell values accept decimal/scientific numeric text (including surrounding whitespace) only: radix-prefixed strings such as `0x10`, `0b10` and `0o10` remain text instead of being silently coerced by JavaScript `Number()`. Direct arithmetic references to such text are nonnumeric; aggregate ranges ignore it like other text cells. Blank cells still evaluate as zero in a direct scalar reference and are ignored by range aggregates. The column headers appear above the numbered data rows. **Row 1 is the first data row**, so `A1` is the first data cell. Formula examples:
 
 ```
 =A1*B1

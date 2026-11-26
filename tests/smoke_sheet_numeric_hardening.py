@@ -81,6 +81,31 @@ def main():
         # Exercise raw workbook cells so binary64 subnormals and the true maximum
         # finite value reach the aggregate engine without the expression parser's display rounding.
         original_state = page.evaluate("MathStudio.dataTables.exportState()")
+        # Cell references use decimal/scientific syntax only; JS radix prefixes stay text.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({
+          version:1,selected:'sheet-1',tables:[{
+            id:'sheet-1',name:'Data1',columns:['A','B','C','D','E','F','G'],
+            rows:[['0x10','0b10','0o10','16',' 2.5e+1 ',' ','1.']]
+          }]
+        })""")
+        for expression, expected in (
+            ('A1+1','Not numeric: 0x10'),
+            ('B1+1','Not numeric: 0b10'),
+            ('C1+1','Not numeric: 0o10')
+        ):
+            assert failure(expression) == expected
+        assert formula('SUM(A1:C1)') == 0
+        assert formula('COUNT(A1:C1)') == 0
+        assert failure('MEDIAN(A1:C1)') == '#NUM!'
+        assert formula('D1+E1') == 41
+        assert formula('F1') == 0
+        assert formula('G1') == 1
+        assert formula('SUM(A1:G1)') == 42
+        assert formula('AVERAGE(A1:G1)') == 14
+        assert formula('COUNT(A1:G1)') == 3
+        assert formula('MEDIAN(A1:G1)') == 16
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", original_state)
+        assert page.evaluate("MathStudio.dataTables.calculate()") == values
         page.evaluate("""() => MathStudio.dataTables.restoreState({
           version:1,selected:'sheet-1',tables:[{
             id:'sheet-1',name:'Data1',columns:['A'],rows:[

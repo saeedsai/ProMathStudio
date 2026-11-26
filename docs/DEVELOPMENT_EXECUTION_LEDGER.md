@@ -1,3 +1,13 @@
+## 2026-11-26 — Graph dataset project-overlay validation
+
+- Starting dev `a4e6740963ee415520de74be794afc6854ad4d0d`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root contract, living plan, frozen inventory, project-format docs, schema/restore code, registered tests, PR #191, exact-head CI and Pages evidence inspected. Starting Push [#45759070919](https://github.com/saeedsai/ProMathStudio/actions/runs/45759070919) and PR [#45759076570](https://github.com/saeedsai/ProMathStudio/actions/runs/45759076570) both passed 218/218, zero failures/skips.
+- Found a silent saved-project data-loss path: `graph.dataset.extra` overlays were not schema-validated; restore truncated over 20 entries, skipped missing table/mapping and swallowed `addTable()` errors.
+- Added pre-import validation for overlay count/shape, table dimensions and cells, bounded names, distinct X/Y, optional 2D/3D mode, distinct Z in 3D, style and at least one numeric point. Missing/null legacy extra remains supported.
+- Added V8-executed schema regressions for valid 2D/3D, v1 compatibility, immutability, malformed entries, count limit, bad table/cells, invalid axes/mode/Z/style and no numeric points. Added registered Chromium atomic-import regression proving invalid overlay mapping leaves the previous marker and graph dataset unchanged; valid overlay round-trip and mobile checks remain.
+- Updated `src/project-schema.js` and matching inline `index.html` module together; verified parity. Updated static/browser tests, project-format docs, living plan, ledger and changelog in one atomic commit.
+- Isolated V8 positive/negative tests, syntax compilation and bundle parity passed. No local repository checkout; native Python/Playwright/build checks not claimed. Fresh exact-head Push/PR Quality pending.
+- PR #191 remains open with zero independent reviews. Only dev/main branches; both unprotected, rulesets empty, branch-protection read HTTP 403. Main Quality #45360386408 and Pages #45360367251 succeeded 24-Nov on unchanged `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge/deployment. Frozen inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-26 — Data Tables full binary64 formula precision
 
 - Starting dev `3dbd31ab9995ab8292081ff022bd20215b0d78d7`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; root AGENTS, plan, frozen inventory, Data Tables build contract, PR #191 and exact-head CI inspected. Previous Push [#45754742142](https://github.com/saeedsai/ProMathStudio/actions/runs/45754742142) and PR [#45754748222](https://github.com/saeedsai/ProMathStudio/actions/runs/45754748222) both passed 218/218, zero failures/skips.

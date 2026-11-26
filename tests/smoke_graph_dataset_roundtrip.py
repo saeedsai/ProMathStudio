@@ -40,6 +40,15 @@ def main():
         second = page.evaluate('window.MathStudio.bridge.export()')
         assert second['graph']['dataset'] == dataset, (second['graph']['dataset'], dataset)
 
+        # Invalid saved overlays must fail before project application, not be silently dropped.
+        bad_overlay = json.loads(json.dumps(first))
+        bad_overlay['working'] = 'SHOULD_NOT_APPLY'
+        bad_overlay['graph']['dataset']['extra'][0]['mapping']['x'] = 99
+        upload(page, bad_overlay)
+        page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
+        assert page.evaluate('window.MathStudio.bridge.export().working') == 'RT1'
+        assert page.evaluate('window.MathStudio.bridge.export().graph.dataset') == dataset
+
         # A project with mixed primitive JSON cells restores without losing rows or column order.
         mixed = json.loads(json.dumps(first))
         mixed['graph']['dataset'].update({
@@ -65,7 +74,7 @@ def main():
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
         assert not errors, errors
         browser.close()
-    print('PASS graph dataset round-trip identity, mixed cells, atomic rejection, mobile')
+    print('PASS graph dataset round-trip identity, overlay validation/atomic rejection, mixed cells and mobile')
 
 
 if __name__ == '__main__':

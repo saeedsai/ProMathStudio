@@ -33,6 +33,38 @@ for(const cell of [null,true,false,'1',3.25,0]){
  assert.strictEqual(migrate(data).graph.dataset.rows[0][1],cell);
 }
 const v1=basic();v1.version=1;assert.strictEqual(migrate(v1).version,2);
+
+const overlay=()=>({name:'OVERLAY',table:{headers:['t','w'],rows:[['0','2'],['1','4']]},
+ mapping:{x:0,y:1,z:1,mode:'2d',style:'line'}});
+const withOverlay=()=>{const data=basic();data.graph.dataset.extra=[overlay()];return data;};
+const valid2d=withOverlay(),validSnapshot=JSON.stringify(valid2d);
+assert.strictEqual(migrate(valid2d).graph.dataset.extra.length,1);
+assert.strictEqual(JSON.stringify(valid2d),validSnapshot,'overlay validation must not mutate input');
+const valid3d=withOverlay();
+valid3d.graph.dataset.extra[0].table.headers.push('z');
+valid3d.graph.dataset.extra[0].table.rows.forEach(row=>row.push('3'));
+valid3d.graph.dataset.extra[0].mapping={x:0,y:1,z:2,mode:'3d',style:'grid'};
+assert.strictEqual(migrate(valid3d).graph.dataset.extra.length,1);
+const invalidOverlay=(mutate,pattern)=>{const data=withOverlay();mutate(data.graph.dataset);assert.throws(()=>migrate(data),pattern);};
+invalidOverlay(set=>set.extra={},/graph dataset overlays/);
+invalidOverlay(set=>set.extra=Array.from({length:21},overlay),/graph dataset overlays/);
+invalidOverlay(set=>set.extra[0]={table:overlay().table},/graph dataset overlay is invalid/);
+invalidOverlay(set=>set.extra[0].table.headers=['t'],/graph dataset overlay dimensions/);
+invalidOverlay(set=>set.extra[0].table.rows[0][1]={bad:true},/graph dataset overlay has invalid cells/);
+invalidOverlay(set=>set.extra[0].mapping.x=2,/graph dataset overlay mapping/);
+invalidOverlay(set=>set.extra[0].mapping.x=1,/graph dataset overlay mapping/);
+invalidOverlay(set=>set.extra[0].mapping.mode='4d',/graph dataset overlay mapping/);
+invalidOverlay(set=>{
+ set.extra[0].table.headers.push('z');
+ set.extra[0].table.rows.forEach(row=>row.push('3'));
+ set.extra[0].mapping.mode='3d';set.extra[0].mapping.z=1;
+},/graph dataset overlay mapping/);
+invalidOverlay(set=>set.extra[0].mapping.style='bad',/graph dataset overlay mapping/);
+invalidOverlay(set=>set.extra[0].table.rows=[['a','b']],/graph dataset overlay has no numeric points/);
+const legacyOverlay=withOverlay();legacyOverlay.version=1;
+assert.strictEqual(migrate(legacyOverlay).version,2,'legacy v1 graph overlays remain supported');
+const noExtra=basic();noExtra.graph.dataset.extra=null;
+assert.strictEqual(migrate(noExtra).graph.dataset.extra,null,'null legacy overlay list remains tolerated');
 """
         result = subprocess.run(
             ["node", "-e", script], cwd=ROOT,

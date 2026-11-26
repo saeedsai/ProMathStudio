@@ -1,3 +1,33 @@
+## 2026-11-26 — PROJECT-GRAPH-DATASET-OVERLAY-VALIDATION
+
+Starting refs: dev `a4e6740963ee415520de74be794afc6854ad4d0d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen 2026-10-26 inventory, unified master plan, project-format contract, Graph dataset restore implementation, registered tests, PR #191, exact-head CI, branch/ruleset state and main/Pages evidence.
+
+P0 checkpoint: exact-head Push Quality [#45759070919](https://github.com/saeedsai/ProMathStudio/actions/runs/45759070919) and PR Quality [#45759076570](https://github.com/saeedsai/ProMathStudio/actions/runs/45759076570) both passed on `a4e6740963ee415520de74be794afc6854ad4d0d`: 218/218 steps each, zero failures and zero skipped steps. No existing exact-head CI failure remained.
+
+Defect: Graph project export stores additional dataset series in `graph.dataset.extra`. The project schema validated only the primary dataset. During restore, `graphData.restoreState()` silently sliced the list to 20, skipped entries without a table/mapping and swallowed `addTable()` errors. A malformed saved overlay could therefore make project import appear successful while silently losing a plotted series.
+
+Implementation: project migration now validates the optional overlay list before confirmation/application: at most 20 records; bounded names; table header/row/cell dimensions and types; distinct in-range X/Y columns; supported optional 2D/3D mode; distinct in-range Z for 3D; supported points/line/grid styles; and at least one numeric point for selected axes. Missing/null legacy `extra` remains compatible. Invalid overlays are refused rather than silently dropped. No graph rendering algorithm, project version, public API or storage format changed.
+
+Regression: extended the registered Node-backed `tests/test_project_graph_dataset_cells.py` with valid 2D/3D overlays, input immutability, v1 compatibility, malformed shape, 21-overlay limit, invalid table/cells, out-of-range/equal axes, invalid mode/Z/style and no-numeric-point cases. Extended registered Chromium `tests/smoke_graph_dataset_roundtrip.py` to upload a corrupt overlay mapping and assert the prior project marker and complete graph dataset remain unchanged. Valid overlay round-trip and 390px layout checks remain. Updated `docs/PROJECT_FORMAT.md`.
+
+Standalone contract: updated the exact `promath-project-schema` script in `index.html` together with `src/project-schema.js`; the starting and resulting inline module were checked against the modular source.
+
+Isolated validation: executed the actual updated schema module in V8. Valid 2D overlay, legacy v1 overlay migration, invalid X mapping, >20 overlay limit and no-numeric-point rejection passed. Source syntax and source/bundle parity passed. The execution workspace has no repository checkout, so native local unittest/Playwright/build commands were not run; fresh exact-head GitHub Actions must validate the committed browser and structural suites.
+
+Release: PR #191 remains open/mergeable with zero submitted independent reviews. Only dev/main branches exist; both report unprotected, repository rulesets are empty and branch-protection reads return HTTP 403 to the integration. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) last succeeded on 24 November for unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no new deployment. Historical MATLAB inventory remains frozen at **166 gaps / 95 partial**.
+
+Status: implemented and committed on dev; fresh exact-head Push/PR Quality pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Verify this Graph overlay validation commit.** Acceptance: Push and PR Quality green on the same exact dev SHA, zero failed/skipped required checks; Node and Chromium accept valid 2D/3D overlay round-trips, reject malformed/over-limit mappings without mutating prior project, preserve v1 compatibility, and pass 1280px/390px checks.
+2. **P0 — Release governance for PR #191.** Acceptance: eligible independent approval; verifiable main protection requiring exact-head Quality and preventing direct pushes/force/deletion; complete diff review; ordinary dev-to-main PR merge; exact-main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Acceptance: current/legacy v1/v2 drafts, graph functions/curves/datasets/overlays and table formulas/selections round-trip without coercion; malformed import and injected restore failure preserve every prior workspace, focus, selection and result at desktop/390px.
+4. **P1 — Finish Data Tables structural-reference boundary matrix.** Acceptance: row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort, cross-sheet recalculation, persistent `#REF!` and transactional rollback; source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundary audit.** Acceptance: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and responsive browser tests.
+
+---
+
 ## 2026-11-26 — DATA-TABLES-FULL-BINARY64-FORMULA-PRECISION
 
 Starting refs: dev `3dbd31ab9995ab8292081ff022bd20215b0d78d7`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, Data Tables source/build contract, formula-reference tests, PR #191/reviews, exact-head CI, branch/ruleset state and latest main/Pages evidence.

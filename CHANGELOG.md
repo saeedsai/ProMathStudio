@@ -1,3 +1,10 @@
+## 2026-11-26 — Reject malformed Graph dataset overlays in saved projects
+
+- Added pre-import validation for additional graph series: overlay count, table dimensions/cells, X/Y/Z mappings, 2D/3D mode, plot style and at least one numeric point.
+- Invalid overlays now fail project validation instead of being silently truncated or dropped during restore; missing/null legacy overlay lists remain supported.
+- Added Node schema and Chromium atomic-import regressions; synchronized the inline standalone project-schema module and documented the project-format contract.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Preserve full precision in Data Tables formulas
 
 - Formula evaluation now returns the full finite binary64 result instead of rounding intermediate cell values to 13 significant digits.

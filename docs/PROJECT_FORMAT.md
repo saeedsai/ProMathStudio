@@ -61,4 +61,4 @@ Version 1 projects now optionally include `graph.dataset`:
 {"name":"samples.csv","headers":["x","y","z"],"rows":[[0,1,2],[1,2,3]],"x":"0","y":"1","z":"2","style":"points"}
 ```
 
-Graph state remains backward compatible: a missing dataset imports as no plotted data. **Save project** retains imported rows and mappings. See [Data import](DATA_IMPORT.md).
+Graph state remains backward compatible: a missing dataset imports as no plotted data. **Save project** retains imported rows and mappings. The optional `extra` field stores up to 20 additional series; each entry contains a bounded name, a table with 2–32 headers and 1–6,000 rows, and a mapping with distinct X/Y columns plus a valid optional 2D/3D mode, Z column for 3D, and `points`, `line` or `grid` style. Each overlay must contain at least one numeric point for its selected axes. Malformed, over-limit or unrenderable overlays are rejected before import instead of being silently truncated or dropped. Legacy projects that omit `extra` remain supported. See [Data import](DATA_IMPORT.md).

@@ -3158,6 +3158,44 @@ self.onmessage=async ({data})=>{
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
+      if (set.extra !== undefined && set.extra !== null) {
+        if (!Array.isArray(set.extra) || set.extra.length > 20)
+          fail('graph dataset overlays must be a list of at most 20.');
+        const validIndex = (value, columns) =>
+          (typeof value === 'number' || (typeof value === 'string' && value.trim() !== '')) &&
+          Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) < columns;
+        const numericCell = value => typeof value === 'number' ? Number.isFinite(value) :
+          typeof value === 'string' && /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(value.trim()) &&
+          Number.isFinite(Number(value));
+        for (const overlay of set.extra) {
+          if (!record(overlay) || !record(overlay.table) || !record(overlay.mapping))
+            fail('graph dataset overlay is invalid.');
+          if (overlay.name !== undefined && overlay.name !== null)
+            short(overlay.name, 150, 'graph overlay name');
+          const table = overlay.table;
+          if (!Array.isArray(table.headers) || table.headers.length < 2 || table.headers.length > 32 ||
+              !Array.isArray(table.rows) || table.rows.length < 1 || table.rows.length > 6000)
+            fail('graph dataset overlay dimensions exceed limits.');
+          if (table.headers.some(h => typeof h !== 'string' || !h.length || h.length > 100) ||
+              table.rows.some(row => !Array.isArray(row) || row.length !== table.headers.length ||
+                row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
+                  (typeof cell === 'number' && !Number.isFinite(cell)) ||
+                  (typeof cell === 'string' && cell.length > 8000))))
+            fail('graph dataset overlay has invalid cells.');
+          const mapping = overlay.mapping, x = Number(mapping.x), y = Number(mapping.y), mode = mapping.mode;
+          if (!validIndex(mapping.x, table.headers.length) || !validIndex(mapping.y, table.headers.length) || x === y ||
+              (mode !== undefined && mode !== null && mode !== '' && !['2d', '3d'].includes(mode)) ||
+              (mode === '3d' && (!validIndex(mapping.z, table.headers.length) ||
+                Number(mapping.z) === x || Number(mapping.z) === y)) ||
+              (mapping.style !== undefined && mapping.style !== null && mapping.style !== '' &&
+                !['points', 'line', 'grid'].includes(mapping.style)))
+            fail('graph dataset overlay mapping is invalid.');
+          const z = Number(mapping.z);
+          if (!table.rows.some(row => numericCell(row[x]) && numericCell(row[y]) &&
+              (mode !== '3d' || numericCell(row[z]))))
+            fail('graph dataset overlay has no numeric points.');
+        }
+      }
     }
     // Main-graph curve overlays (implicit/parametric/polar definitions). Legacy projects omit
     // the field; present definitions must match the exact shape the exporter writes.

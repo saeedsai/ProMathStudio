@@ -68,14 +68,24 @@ def main():
                             'rectangle', {width:value, height:2}))
                     };
                 });
-                return {validDisplacement, invalid};
+                const oversizedDecimal = '0'.repeat(256) + '1';
+                const oversizedModel = copy(ProMathTrussFEM.examples.bar);
+                oversizedModel.nodes[1].fx = oversizedDecimal;
+                const errorMessage = action => { try { action(); return null; } catch (error) { return error.message; } };
+                const overlong = {
+                    parse: errorMessage(() => ProMathTrussFEM.parseModel(oversizedModel)),
+                    solve: errorMessage(() => ProMathTrussFEM.solve(oversizedModel)),
+                    section: errorMessage(() => ProMathTrussFEM.sectionProperties('rectangle', {width:oversizedDecimal, height:2}))
+                };
+                return {validDisplacement, invalid, overlong};
             }""")
-            assert abs(numeric_string_contract['validDisplacement'] / 1e-5 - 1) <= 1e-13
+            assert abs(numeric_string_contract['validDisplacement'] / 0.01 - 1) <= 1e-13
             assert len(numeric_string_contract['invalid']) == 3
             for item in numeric_string_contract['invalid']:
                 assert item['parse'].endswith('must be a finite number.'), item
                 assert item['solve'].endswith('must be a finite number.'), item
                 assert item['section'].endswith('must be a finite number.'), item
+            assert all(value.endswith('must be a finite number.') for value in numeric_string_contract['overlong'].values()), numeric_string_contract['overlong']
             # Signed resultants must survive overflowing partial sums and retain subnormal residuals.
             resultant_range = page.evaluate("""() => {
                 const copy = model => JSON.parse(JSON.stringify(model));

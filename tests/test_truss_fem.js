@@ -290,7 +290,7 @@ test('numeric strings accept decimal/scientific syntax but reject JavaScript rad
  const valid=clone(fem.examples.bar);
  valid.nodes[1].fx=' 1e3 ';
  valid.members[0].area='1.0e3';
- close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
+ close(fem.solve(valid).displacements[1].x,0.01,1e-13);
  for(const invalid of ['0x10','0b10','0o10']){
   assert.ok(Number.isFinite(Number(invalid)),invalid+' must reproduce JavaScript radix coercion');
   const model=clone(fem.examples.bar);
@@ -303,6 +303,12 @@ test('numeric strings accept decimal/scientific syntax but reject JavaScript rad
   const section=fem.sectionProperties('rectangle',{width:decimal,height:'2'});
   assert.ok(Number.isFinite(section.area)&&section.area>0,decimal+' must remain a valid decimal string');
  }
+ const oversizedDecimal='0'.repeat(256)+'1';
+ const oversizedModel=clone(fem.examples.bar);oversizedModel.nodes[1].fx=oversizedDecimal;
+ assert.equal(Number(oversizedDecimal),1,'fixture must otherwise coerce to a finite Number');
+ assert.throws(()=>fem.parseModel(oversizedModel),/finite number/);
+ assert.throws(()=>fem.solve(oversizedModel),/finite number/);
+ assert.throws(()=>fem.sectionProperties('rectangle',{width:oversizedDecimal,height:2}),/finite number/);
 });
 
 

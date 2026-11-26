@@ -1,3 +1,14 @@
+## 2026-11-26 — Truss decimal numeric-string CI repair and bounded input length
+
+- Starting dev `10f378b36766ffda1681c6646572d477e8b645d1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact-head Push Quality [#45825208844](https://github.com/saeedsai/ProMathStudio/actions/runs/45825208844) and PR Quality [#45825218692](https://github.com/saeedsai/ProMathStudio/actions/runs/45825218692) both failed at step 214 in `node --test tests/test_truss_fem.js`; 101/102 cases passed.
+- Failure root cause: the new decimal/scientific regression supplied `1e3` kN and `1e3` mm² but expected the 1 kN fixture's 1e-5 m displacement. Correct analytical displacement is 0.01 m. The production numeric parser correctly handled the exponent; the test reference was wrong.
+- Corrected the Node and Chromium reference to 0.01 m without weakening radix rejection or valid decimal/scientific coverage.
+- Added a 256-character maximum for trimmed decimal/scientific numeric strings before regex/Number conversion. A 257-character zero-padded string that JavaScript otherwise parses as 1 is rejected with the established finite-number diagnostic. Added Node and Chromium parse/solve/section-property regressions; browser retains 1280px/390px coverage.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`; no root bundle change because Truss FEM is an adjacent script. Frozen MATLAB inventory remains **166 gaps / 95 partial**.
+- Local repository checkout absent; the failing GitHub logs are the authoritative diagnosis. Native local Node/Playwright/build tests not claimed; new exact-head Actions must certify the corrected suite.
+- PR #191 remains open, no independent reviews; only dev/main branches, both unprotected; rulesets empty and protection reads HTTP 403. Main Quality #45360386408 and Pages #45360367251 remain successful on unchanged main; no release.
+- Status: source, Node/browser regressions and docs committed atomically to dev; exact-head CI pending; not released.
+
 ## 2026-11-26 — Truss FEM decimal-only numeric string validation
 
 - Starting dev `f4710a8931fbd2559e33ccbec0314153008fc8b5`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Starting exact-head Push [#45818109248](https://github.com/saeedsai/ProMathStudio/actions/runs/45818109248) and PR [#45818117317](https://github.com/saeedsai/ProMathStudio/actions/runs/45818117317) both succeeded 218/218 with zero failures/skips.

@@ -1,3 +1,10 @@
+## 2026-11-26 — Bound Truss decimal numeric strings and repair scientific-notation regression
+
+- Bound trimmed decimal/scientific FEM numeric strings to 256 characters before regex matching and conversion; overlong values retain the established finite-number diagnostic.
+- Corrected the Node and Chromium scientific-notation reference: 1e3 kN applied to a 1e3 mm², 2 m, 200 GPa bar produces 0.01 m displacement. Radix-prefix rejection and normal decimal/scientific acceptance remain fully tested.
+- Added an otherwise-finite 257-character decimal rejection regression in parse, solve and section-property inputs.
+- Implemented on dev; fresh exact-head Push/PR Quality required; not released.
+
 ## 2026-11-26 — Preserve saved-table selection diagnostics while rejecting empty workbooks
 
 - Reordered project validation so stale/null selected-sheet references retain the established error, while a zero-sheet workbook with no selection is rejected before restore.

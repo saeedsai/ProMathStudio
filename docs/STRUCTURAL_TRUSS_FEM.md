@@ -1,6 +1,6 @@
 ## Numeric string input contract
 
-The FEM model parser and section-property helper accept primitive finite JavaScript numbers or trimmed decimal/scientific strings such as `-12`, `.5`, `1.` and `2.5e-3`. String inputs must use decimal syntax. JavaScript radix forms such as `0x10`, `0b10` and `0o10` are rejected instead of being silently reinterpreted by `Number()`. This keeps JSON/API inputs aligned with the application's decimal numeric fields while preserving ordinary decimal and scientific-notation compatibility. Whitespace around a valid decimal string is ignored; blank strings, separators and non-finite values remain invalid.
+The FEM model parser and section-property helper accept primitive finite JavaScript numbers or trimmed decimal/scientific strings such as `-12`, `.5`, `1.` and `2.5e-3`. String inputs must use decimal syntax. JavaScript radix forms such as `0x10`, `0b10` and `0o10` are rejected instead of being silently reinterpreted by `Number()`. This keeps JSON/API inputs aligned with the application's decimal numeric fields while preserving ordinary decimal and scientific-notation compatibility. Whitespace around a valid decimal string is ignored. After trimming, strings longer than 256 characters are rejected before regular-expression matching or numeric conversion; this bounds imported/pasted input work without sacrificing binary64 precision. Blank strings, separators and non-finite values remain invalid.
 
 ## Hollow-rectangle small-cavity rounding
 

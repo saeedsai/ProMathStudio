@@ -36,10 +36,11 @@
   'use strict';
   const MAX_NODES = 80, MAX_MEMBERS = 240, MAX_IMPORT_BYTES = 1024 * 1024;
   const DECIMAL_NUMBER = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+  const MAX_NUMERIC_STRING_LENGTH = 256;
   const finite = (v, name) => {
     if (typeof v === 'string') {
       v = v.trim();
-      if (!DECIMAL_NUMBER.test(v)) throw Error(name + ' must be a finite number.');
+      if (v.length > MAX_NUMERIC_STRING_LENGTH || !DECIMAL_NUMBER.test(v)) throw Error(name + ' must be a finite number.');
     } else if (v === null || v === undefined || typeof v === 'boolean' || typeof v === 'bigint' ||
                typeof v === 'symbol' || typeof v === 'object' || typeof v === 'function') {
       throw Error(name + ' must be a finite number.');

@@ -1,3 +1,27 @@
+## 2026-11-26 — TRUSS-DECIMAL-INPUT-CI-REPAIR-AND-BOUND
+
+Starting refs: dev `10f378b36766ffda1681c6646572d477e8b645d1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, this living plan, the frozen 2026-10-26 inventory, Structural Truss numeric contract/source/tests, PR #191, exact-head CI, branch refs/rulesets and main/Pages evidence. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+P0 failure: exact-head Push Quality [#45825208844](https://github.com/saeedsai/ProMathStudio/actions/runs/45825208844) and PR Quality [#45825218692](https://github.com/saeedsai/ProMathStudio/actions/runs/45825218692) both failed at step 214, `node --test tests/test_truss_fem.js`. 101/102 tests passed; the new decimal/scientific-notation regression expected displacement 1e-5 m while its fixture set axial load to `1e3` kN and area to `1e3` mm². The correct axial-bar reference is 0.01 m: F=1e6 N, A=1e-3 m², E=2e11 Pa, L=2 m. The production parser correctly interpreted the exponent; the stale expected value was copied from the 1 kN fixture.
+
+Repair: correct the Node and Chromium expected displacement to 0.01 m, retaining the `1e3` scientific-notation input and all radix-rejection assertions. Add a real input-boundary hardening to `finite()`: after trimming, decimal/scientific strings longer than 256 characters reject with the existing finite-number diagnostic before regex matching and `Number()`. A 257-character zero-padded decimal is deliberately chosen because JavaScript otherwise parses it as finite 1; Node and Chromium verify rejection in model parsing, solving and section dimensions. Ordinary decimal/scientific values and primitive finite numbers remain accepted. Truss FEM is an adjacent script; no root bundle change is required.
+
+Regression: registered Node and Chromium tests assert the corrected 0.01 m physical reference, retain decimal/scientific acceptance and hexadecimal/binary/octal rejection, and reject the overlong-but-otherwise-finite decimal in parse/solve/section-property paths. Chromium keeps the existing 1280px/390px loop. No assertion or workflow gate is removed.
+
+Validation: exact failing job logs identify the single incorrect expected value; 101 other Node cases passed. The local execution workspace has no repository checkout, so native local Node/Playwright/build commands cannot be run here. The next exact-head Push and PR Quality workflows must certify the repaired full suite and browser test. This is an atomic source/test/docs update on dev; not released.
+
+Release: PR #191 remains open, head `10f378b36766ffda1681c6646572d477e8b645d1`, base `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; zero submitted reviews. Exactly dev/main branches exist and both report `protected:false`; repository rulesets are empty and branch-protection reads return HTTP 403. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5` (24 November 2026); no new deployment.
+
+### NEXT FIVE — status, dependencies and acceptance tests
+
+1. **P0 — Verify decimal parsing and the repaired CI candidate.** Push and PR Quality both green on the same exact dev SHA, zero failed/skipped steps; Node and Chromium verify 0.01 m for 1e3 kN/1e3 mm², accept decimal/scientific notation, reject radix prefixes and 257-character finite decimal strings in parse/solve/section dimensions at 1280px/390px.
+2. **P0 — Release governance for PR #191 (blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+4. **P1 — Finish Data Tables structural-reference boundaries.** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort/recalculation, persistent `#REF!`, transactional rollback and standalone source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundaries.** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
+
+---
+
 ## 2026-11-26 — TRUSS-STRICT-DECIMAL-NUMERIC-STRINGS
 
 Starting refs: dev `f4710a8931fbd2559e33ccbec0314153008fc8b5`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, Truss FEM numerical contract/source/tests, PR #191, exact-head Quality, branch refs and Pages evidence. The historical inventory remains frozen at **166 gaps / 95 partial**.

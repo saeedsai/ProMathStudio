@@ -1,3 +1,10 @@
+## 2026-11-26 — Matrix standalone trailing-newline CI repair
+
+- Exact-head Push [#45902853307](https://github.com/saeedsai/ProMathStudio/actions/runs/45902853307) and PR [#45902860501](https://github.com/saeedsai/ProMathStudio/actions/runs/45902860501) both failed at structural step 7. The suite ran 607 tests: 24 failures, one skip. Both newly added Matrix finite-draft structural checks passed.
+- Retrieved both job logs. All 24 failures were existing Matrix/engineering source-bundle parity checks: the inline `promath-matrix-tools` block equaled the source bytes but lacked the required final newline (`source + "\\n"`). This was introduced while synchronizing the modified module. Browser smoke and the new direct-restore Chromium regression were skipped after structural failure.
+- Corrected the standalone bundle boundary to append exactly one newline after the inline module. Tightened the new Matrix structural regression from trimmed parity to exact `matrix_inline == matrix_source + "\\n"`, matching the existing repository contract. No production calculation logic or assertions were weakened.
+- Fresh exact-head Push/PR Quality required for the repaired candidate; the previous failed runs remain recorded and are not treated as passing.
+
 ## 2026-11-26 23:00 CET — Matrix direct-restore finite-bound alignment
 
 - Starting dev `3229189ab96c968869ebf40f2e9b0016a94b58b3`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; re-read AGENTS.md, living plan, frozen inventory, project-format docs, Matrix source/schema/tests, PR #191 and current CI/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.

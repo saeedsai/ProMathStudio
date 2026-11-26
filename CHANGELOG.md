@@ -1,3 +1,8 @@
+## 2026-11-26 — Repair Matrix standalone trailing-newline parity
+
+- Exact-head structural CI exposed 24 existing parity failures because the modified inline Matrix module lacked its required final newline. Restored exact `source + "\\n"` bundle parity and strengthened the new regression to assert that contract directly.
+- The new Matrix finite-draft structural cases themselves passed; browser tests were skipped after the structural failure. Fresh exact-head Push/PR Quality is required.
+
 ## 2026-11-26 — Align direct Matrix restore with finite solver bounds
 
 - Hardened `MathStudio.matrixTools.restoreState()` so nonempty decimal/scientific drafts must convert to finite values with absolute magnitude at most `1e12`, matching project import; blank unfinished cells and the 80-character limit remain supported.

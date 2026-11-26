@@ -47,6 +47,36 @@ def main():
             assert abs(results[0] - 10000) < 1e-6 and abs(results[1] - 10000) < 1e-6
             assert results[2] > 0 and results[3] < 1e-10 and results[4] < 1e-10
 
+            # Aggregate preview totals must retain small same-sign member contributions.
+            aggregate_totals = page.evaluate("""() => {
+                const nodes = [
+                    {id:'L0',x:0,y:0,fixX:true,fixY:true},
+                    {id:'L1',x:1e16,y:0,fixX:true,fixY:true}
+                ];
+                const members = [{id:'LONG',a:'L0',b:'L1',E:200,area:1}];
+                for (let i=0;i<20;i++) {
+                    const a='S'+i+'A', b='S'+i+'B', y=10+i*2;
+                    nodes.push({id:a,x:0,y,fixX:true,fixY:true},{id:b,x:1,y,fixX:true,fixY:true});
+                    members.push({id:'M'+i,a,b,E:200,area:1});
+                }
+                const byId = new Map(nodes.map(node => [node.id,node]));
+                const lengths = members.map(member => {
+                    const a=byId.get(member.a), b=byId.get(member.b);
+                    return Math.hypot(b.x-a.x,b.y-a.y);
+                });
+                const preview = ProMathTrussFEM.inspectJSON(JSON.stringify({nodes,members}));
+                return {
+                    totalMemberLength: preview.totalMemberLength,
+                    totalMemberVolume: preview.totalMemberVolume,
+                    naiveLength: lengths.reduce((sum,length) => sum+length,0),
+                    naiveVolume: lengths.reduce((sum,length) => sum+length*1e-6,0)
+                };
+            }""")
+            assert aggregate_totals['totalMemberLength'] == 10000000000000020, aggregate_totals
+            assert aggregate_totals['totalMemberVolume'] == 10000000000.00002, aggregate_totals
+            assert aggregate_totals['naiveLength'] != 10000000000000020, aggregate_totals
+            assert aggregate_totals['naiveVolume'] != 10000000000.00002, aggregate_totals
+
             # Numeric text is decimal/scientific input, not JavaScript Number() radix coercion.
             numeric_string_contract = page.evaluate("""() => {
                 const copy = model => JSON.parse(JSON.stringify(model));

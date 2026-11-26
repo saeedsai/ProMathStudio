@@ -1173,7 +1173,7 @@
       if (!(volume > 0)) throw Error('Member ' + member.id + ' material volume underflow; increase dimensions.');
       return volume;
     });
-    const totalMemberVolume = finite(memberVolumes.reduce((sum, volume) => sum + volume, 0), 'Total member volume (m³)');
+    const totalMemberVolume = finiteSignedSum(memberVolumes, 'Total member volume (m³)');
     const appliedForce = Object.freeze({
       x: finiteSignedSum(normalized.nodes.map(node => node.fx), 'Applied force x (N)'),
       y: finiteSignedSum(normalized.nodes.map(node => node.fy), 'Applied force y (N)')
@@ -1211,7 +1211,7 @@
         return normalized.nodes.length - incident.size;
       })(),
       // Sum member centreline lengths for material estimates; do not silently overflow.
-      totalMemberLength: finite(normalized.members.reduce((sum, m) => sum + m.L, 0), 'Total member length (m)'),
+      totalMemberLength: finiteSignedSum(normalized.members.map(m => m.L), 'Total member length (m)'),
       // Sum physical axial-bar volumes in m³; reject overflow before UI/material estimates.
       totalMemberVolume,
       // Per-member quantities stay in SI and are available even when the structure is unstable.

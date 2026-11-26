@@ -1,3 +1,9 @@
+## 2026-11-26 — Compensated Truss preview aggregate totals
+
+- Replaced naive member-length and SI-volume reductions in the Truss JSON preview with the existing Neumaier compensated sum, preserving low-order contributions from small members in mixed-scale models.
+- Added Node and registered Chromium regressions using one 1e16 m member plus twenty 1 m members; exact aggregate length and volume remain correctly rounded while naive reductions demonstrably lose or distort the contributions.
+- Existing legacy totals and genuine overflow rejection remain covered. Implemented on dev; new exact-head Push/PR Quality required; not released.
+
 ## 2026-11-26 — Data Tables stable-mean exact-rounding repair
 
 - Fixed an exact-head CI regression where AVERAGE over numeric cells 16, 25 and 1 returned 13.999999999999998 due to divide-then-rescale rounding.

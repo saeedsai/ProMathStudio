@@ -1,3 +1,15 @@
+## 2026-11-26 — Truss preview compensated aggregate totals
+
+- Starting dev `9f0ac458ed21847340936c6d343131ef667b9ebc`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, unified master plan, engineering architecture/catalogs, Truss FEM source/tests/contract, PR #191 and current Actions/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Exact-head Push Quality [#45881455146](https://github.com/saeedsai/ProMathStudio/actions/runs/45881455146) and PR Quality [#45881463875](https://github.com/saeedsai/ProMathStudio/actions/runs/45881463875) both passed 218/218 on `9f0ac458ed21847340936c6d343131ef667b9ebc`, zero failures/skips.
+- Found that `inspectJSON()` naively reduced positive member lengths and SI volumes. A 1e16 m member plus twenty 1 m members lost the 20 m contribution; the corresponding 1 mm² volume fixture returned 10000000000.000038 m³ instead of 10000000000.00002 m³.
+- Reused the existing Neumaier `finiteSignedSum()` for both totals. Public API and per-member values are unchanged; true overflow remains rejected.
+- Added a direct Node regression and registered Chromium regression at 1280px/390px; both assert exact expected rounded totals and prove naive reductions differ. Existing legacy, normal and overflow tests remain.
+- Isolated V8 ran the actual modified production source: compensated totals passed; naive reductions reproduced both defects; normal bar preview remained 2 m. Native repository Node/Playwright execution unavailable because no checkout is mounted; exact-head Actions must certify the registered tests.
+- One atomic seven-file source/test/docs/plan/ledger/changelog commit on existing dev, using a guarded non-force ref update. No standalone index.html change is required: Truss FEM is an adjacent script.
+- PR #191 remains open; 74 commits ahead, zero behind, 28 changed files, zero independent reviews. Only dev/main branches exist; both unprotected, rulesets empty, branch-protection read unavailable (403). No merge or direct main update. Main remains unchanged; latest recorded Main Quality and Pages succeeded on 24 November. Not released.
+- Next five acceptance priorities are recorded at the top of `docs/HOURLY_DEVELOPMENT_PLAN.md`. Frozen historical inventory unchanged at 166 gaps / 95 partial.
+
 ## 2026-11-26 — Data Tables stable-mean exact-rounding CI repair
 
 - Starting dev `18e321b450b87e37346edb16091b2f9b840c17f2`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen MATLAB inventory, Data Tables source/contract/tests, PR #191 and current Actions/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.

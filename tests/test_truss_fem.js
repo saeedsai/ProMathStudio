@@ -904,6 +904,32 @@ test('inspectJSON totals SI member volume without solving and rejects overflow',
 });
 
 
+
+test('inspectJSON retains sub-ULP contributions in aggregate member length and volume',()=>{
+ const nodes=[
+  {id:'L0',x:0,y:0,fixX:true,fixY:true},
+  {id:'L1',x:1e16,y:0,fixX:true,fixY:true}
+ ];
+ const members=[{id:'LONG',a:'L0',b:'L1',E:200,area:1}];
+ for(let i=0;i<20;i++){
+  const a='S'+i+'A',b='S'+i+'B',y=10+i*2;
+  nodes.push({id:a,x:0,y,fixX:true,fixY:true},{id:b,x:1,y,fixX:true,fixY:true});
+  members.push({id:'M'+i,a,b,E:200,area:1});
+ }
+ const byId=new Map(nodes.map(node=>[node.id,node]));
+ const lengths=members.map(member=>{
+  const a=byId.get(member.a),b=byId.get(member.b);
+  return Math.hypot(b.x-a.x,b.y-a.y);
+ });
+ const naiveLength=lengths.reduce((sum,length)=>sum+length,0);
+ const naiveVolume=lengths.reduce((sum,length)=>sum+length*1e-6,0);
+ const preview=fem.inspectJSON(JSON.stringify({nodes,members}));
+ assert.notEqual(naiveLength,1e16+20,'fixture must expose lost small member lengths');
+ assert.notEqual(naiveVolume,1e10+20e-6,'fixture must expose distorted small member volumes');
+ assert.equal(preview.totalMemberLength,1e16+20);
+ assert.equal(preview.totalMemberVolume,1e10+20e-6);
+});
+
 test('inspectJSON reports free and constrained translational DOFs without solving',()=>{
  const bar=fem.inspectJSON(fem.exportJSON(fem.examples.bar));
  assert.equal(bar.fixedDofCount,3);assert.equal(bar.freeDofCount,1);

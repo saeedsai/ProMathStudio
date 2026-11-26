@@ -1,3 +1,31 @@
+## 2026-11-26 — TRUSS-PREVIEW-COMPENSATED-AGGREGATES
+
+Starting refs: dev `9f0ac458ed21847340936c6d343131ef667b9ebc`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 MATLAB inventory, unified master plan, engineering architecture/toolbox catalog, Structural Engineering catalog, Truss FEM source/tests/contract, PR #191, exact-head Actions and main Pages evidence. The frozen historical baseline remains **166 gaps / 95 partial**.
+
+Starting exact-head verification: Push Quality [#45881455146](https://github.com/saeedsai/ProMathStudio/actions/runs/45881455146) and PR Quality [#45881463875](https://github.com/saeedsai/ProMathStudio/actions/runs/45881463875) both completed successfully on the exact `9f0ac458ed21847340936c6d343131ef667b9ebc` head. Each had one completed static/browser job with **218/218 steps successful, zero failures and zero skipped steps**. This also certifies the prior Graph saved-project decimal selector regression.
+
+Defect: `inspectJSON()` used ordinary left-to-right reductions for total member centreline length and SI material volume. A 1e16 m member followed by twenty 1 m members returned 1e16 m rather than the correctly rounded 10000000000000020 m. With 1 mm² area on every member, the naive volume reduction returned 10000000000.000038 m³ rather than 10000000000.00002 m³. Small same-sign member contributions were lost or distorted in the preview and material CSV summary.
+
+Implementation: reuse the existing `finiteSignedSum()` Neumaier compensation for both aggregate arrays. Per-member quantities and the public API are unchanged. Final aggregates remain binary64; genuine overflow still raises the existing finite-number diagnostic.
+
+Regression: added a 42-node/21-member numerical boundary fixture to the Node suite and registered Chromium smoke at 1280px and 390px. Both assert exact expected rounded totals and prove the naive sequential reductions differ. Existing normal/legacy totals and overflow-rejection tests remain unchanged.
+
+Isolated V8 executed the actual modified production module: both compensated totals matched 10000000000000020 m and 10000000000.00002 m³; naive reductions reproduced 10000000000000000 m and 10000000000.000038 m³; ordinary bar preview remained 2 m. Native repository `node --test` and Chromium are unavailable because this execution workspace has no checkout; fresh exact-head GitHub Actions must certify the committed Node and browser tests.
+
+PR #191 remains open from dev to main at 74 commits ahead, zero behind, 28 changed files and zero independent submitted reviews. Exactly `dev` and `main` exist; both report `protected:false`, and repository rulesets are empty. The integration cannot read branch protection (HTTP 403). No merge is authorized. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are the latest successful production runs on 24 November 2026. No new deployment is claimed.
+
+Status: Truss preview aggregate correction, Node/Chromium regressions, Structural Truss contract, plan, ledger and changelog committed atomically on existing dev. New exact-head Push/PR Quality pending; implemented on dev, not released. Frozen historical inventory remains 166 gaps / 95 partial.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Verify compensated Truss preview totals (In QA).** Both new exact-head Push and PR Quality complete all required steps with zero failures/skips; Node and Chromium at 1280px/390px return 10000000000000020 m and 10000000000.00002 m³, prove naive reductions differ, and retain existing overflow rejection.
+2. **P0 — Resolve PR #191 release governance (Blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct pushes, force pushes and deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Planned).** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+4. **P1 — Finish Data Tables structural-reference boundaries (Partial).** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sorting/recalculation, persistent `#REF!`, transactional rollback and standalone source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundaries (Partial).** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
+
+---
+
 ## 2026-11-26 — PROJECT-GRAPH-DECIMAL-COLUMN-SELECTORS
 
 Starting dev `f5771fe4f51654fac9671945bac13cdbbe070122`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, project schema/source and standalone bundle, graph project Node/Chromium regressions, project-format contract, PR #191, exact-head Actions and Pages evidence. The frozen historical baseline remains **166 gaps / 95 partial**.

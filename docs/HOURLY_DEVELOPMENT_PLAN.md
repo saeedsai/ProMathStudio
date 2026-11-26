@@ -1,3 +1,27 @@
+## 2026-11-26 — PROJECT-EMPTY-DATA-TABLES-WORKBOOK-REJECTION
+
+Starting refs: dev `33dfba8a55c6aed52a921699a2c2201d8731679d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen 2026-10-26 inventory, unified master plan, project-format contract, project schema, Data Tables restore path, Node/Chromium selection regressions, PR #191 and current CI/Pages evidence. Historical inventory remains **166 gaps / 95 partial**.
+
+P0 checkpoint: Graph overlay header-identity candidate `33dfba8a55c6aed52a921699a2c2201d8731679d` has exact-head Push Quality [#45816775844](https://github.com/saeedsai/ProMathStudio/actions/runs/45816775844) and PR Quality [#45816786075](https://github.com/saeedsai/ProMathStudio/actions/runs/45816786075) in progress; no failures observed at inspection. Continue to require both workflows green on the same SHA. PR #191 remains open/mergeable, 65 commits ahead/0 behind with 24 files and no independent reviews. Only dev/main refs exist; rulesets are empty and branch-protection reads return HTTP 403. No release is authorized.
+
+Defect: the project schema accepted `tables: {tables: []}` when the stale selection was omitted. `dataTables.restoreState()` then set the workbook to an empty list; its renderer has no active sheet and the workspace becomes blank. The product's normal workflow always keeps one sheet (the remove action refuses to delete the last sheet), and normal exports always contain at least one, so this malformed state cannot be a legitimate exported workbook.
+
+Implementation: when a `tables` object is present, migration now requires 1–20 sheets. Projects that omit the whole optional `tables` object remain legacy-compatible; existing valid v1/v2 projects, absent selection compatibility, selected-sheet identity, column order and mixed cell values remain unchanged. No project version or Data Tables runtime behavior changes.
+
+Regression: extend the registered Node table-selection schema test to reject zero-sheet v1/v2 workbooks whether selection is absent, stale or null. Extend the registered Chromium table-selection smoke to import empty-sheet workbooks with and without a selection and assert pre-application rejection preserves the existing `SEL_OK` project and active Beta sheet. Existing valid selection round-trip and 390px checks remain.
+
+Validation: both actual registered Node schema scripts (Graph dataset/overlay and Data Tables selection) execute successfully in isolated V8 against the modified production schema; the modular schema and inline standalone `index.html` script remain synchronized. Local checkout is absent (`git rev-parse --show-toplevel` exit 128), so native Playwright/build checks are not claimed. Chromium tests await exact-head GitHub Actions.
+
+Status: implemented on dev; exact-head Push/PR Quality pending; not released.
+
+### NEXT FIVE — status, dependencies and acceptance tests
+
+1. **P0 — Verify the Graph overlay header identity candidate.** Exact-head Push and PR Quality both green on `33dfba8a55c6aed52a921699a2c2201d8731679d` (or its current exact candidate) with zero failed/skipped steps; duplicate/blank live overlays rejected without mutation, malformed saved overlays rejected atomically, valid 2D/3D round-trips and 390px layout pass.
+2. **P0 — Verify this nonempty-workbook guard.** Both Quality workflows green on the same new dev SHA; Node v1/v2 tests reject empty workbooks with absent/stale/null selection; Chromium proves prior project and active sheet survive rejected imports at desktop/390px.
+3. **P0 — Release governance for PR #191 (blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+4. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+5. **P1 — Finish Data Tables structural-reference boundaries.** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort/recalculation, persistent `#REF!`, transactional rollback and standalone source/bundle parity.
+
 ## 2026-11-26 — GRAPH-OVERLAY-HEADER-IDENTITY-VALIDATION
 
 Starting refs: dev `15d550b9a330f3cdc5bac342daa9956a08e762d0`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified master plan, project-format contract, current Graph dataset/overlay implementation, Node and Chromium regressions, PR #191, exact-head Quality, branch/ruleset and main/Pages evidence. The frozen inventory remains **166 gaps / 95 partial**.

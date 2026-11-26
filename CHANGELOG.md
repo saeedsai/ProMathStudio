@@ -1,3 +1,9 @@
+## 2026-11-26 — Reject empty saved Data Tables workbooks
+
+- A present saved Data Tables workspace must contain at least one sheet; malformed zero-sheet workbooks are rejected before import instead of leaving the workspace blank.
+- Legacy projects that omit the optional tables object remain supported. Added Node v1/v2 and Chromium atomic-import regressions for absent/stale/null selection cases.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Reject ambiguous Graph overlay column headers
 
 - Live Graph overlay imports and saved-project validation now reject blank or duplicate headers after trimming and case-folding, consistent with primary Graph datasets.

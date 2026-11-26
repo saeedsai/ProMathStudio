@@ -211,6 +211,7 @@
     }
     if (data.tables) {
       if (!Array.isArray(data.tables.tables) || data.tables.tables.length > 20) fail('table count exceeds 20.');
+      if (data.tables.tables.length === 0) fail('table list must contain at least one sheet.');
       // A stored selection must name a real table; otherwise restore would silently
       // fall back to another sheet. Exports always write an existing id.
       if (data.tables.selected !== undefined &&

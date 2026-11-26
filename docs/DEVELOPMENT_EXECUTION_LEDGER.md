@@ -1,3 +1,12 @@
+## 2026-11-26 — Reject empty saved Data Tables workbooks
+
+- Starting dev `33dfba8a55c6aed52a921699a2c2201d8731679d`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected root contract, living plan, frozen inventory, project-format docs, schema, Data Tables restore code, registered tests, PR #191, exact-head CI and Pages. The preceding Graph overlay header candidate has Push/PR Quality in progress on `33dfba8a55c6aed52a921699a2c2201d8731679d`; no failures observed at inspection.
+- Found that a present `tables.tables: []` passed schema validation if selection was omitted, then `restoreState()` left the Data Tables workspace with no active sheet. Normal UI behavior always keeps at least one sheet.
+- Project migration now requires 1–20 sheets when a tables object is present; omission of the optional tables object remains legacy-compatible.
+- Updated the standalone `index.html` project-schema script and `src/project-schema.js` together. Added Node v1/v2 regressions for empty workbooks with absent/stale/null selection and Chromium import rollback checks preserving the active Beta sheet. Updated `docs/PROJECT_FORMAT.md`.
+- Isolated V8 execution passed both actual registered Node schema scripts (Graph and Table selection) and source/bundle parity. Local checkout absent (`git rev-parse --show-toplevel`: exit 128); no native Playwright/build pass claimed. New Chromium regression awaits exact-head CI.
+- PR #191 remains open with zero independent reviews; only dev/main refs, empty rulesets and HTTP 403 branch-protection read. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain latest successful production evidence on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge/deployment. Frozen inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-26 — Graph overlay header identity validation
 
 - Starting dev `15d550b9a330f3cdc5bac342daa9956a08e762d0`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read root AGENTS.md, living plan, frozen inventory, unified plan, project-format contract, Graph data/schema, registered Node/Chromium tests, PR #191, exact-head CI and Pages evidence. Push [#45799253611](https://github.com/saeedsai/ProMathStudio/actions/runs/45799253611) and PR [#45799266168](https://github.com/saeedsai/ProMathStudio/actions/runs/45799266168) both passed on the starting exact SHA.

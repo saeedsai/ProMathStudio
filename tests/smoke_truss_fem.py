@@ -46,6 +46,36 @@ def main():
               return [r.reactions[0].ry,r.reactions[1].ry,r.maxDisplacement.magnitude,r.residual,r.energyError]; }''')
             assert abs(results[0] - 10000) < 1e-6 and abs(results[1] - 10000) < 1e-6
             assert results[2] > 0 and results[3] < 1e-10 and results[4] < 1e-10
+
+            # Numeric text is decimal/scientific input, not JavaScript Number() radix coercion.
+            numeric_string_contract = page.evaluate("""() => {
+                const copy = model => JSON.parse(JSON.stringify(model));
+                const valid = copy(ProMathTrussFEM.examples.bar);
+                valid.nodes[1].fx = ' 1e3 ';
+                valid.members[0].area = '1.0e3';
+                const validDisplacement = ProMathTrussFEM.solve(valid).displacements[1].x;
+                const invalid = ['0x10', '0b10', '0o10'].map(value => {
+                    const model = copy(ProMathTrussFEM.examples.bar);
+                    model.nodes[1].fx = value;
+                    const message = action => {
+                        try { action(); return null; } catch (error) { return error.message; }
+                    };
+                    return {
+                        value,
+                        parse: message(() => ProMathTrussFEM.parseModel(model)),
+                        solve: message(() => ProMathTrussFEM.solve(model)),
+                        section: message(() => ProMathTrussFEM.sectionProperties(
+                            'rectangle', {width:value, height:2}))
+                    };
+                });
+                return {validDisplacement, invalid};
+            }""")
+            assert abs(numeric_string_contract['validDisplacement'] / 1e-5 - 1) <= 1e-13
+            assert len(numeric_string_contract['invalid']) == 3
+            for item in numeric_string_contract['invalid']:
+                assert item['parse'].endswith('must be a finite number.'), item
+                assert item['solve'].endswith('must be a finite number.'), item
+                assert item['section'].endswith('must be a finite number.'), item
             # Signed resultants must survive overflowing partial sums and retain subnormal residuals.
             resultant_range = page.evaluate("""() => {
                 const copy = model => JSON.parse(JSON.stringify(model));

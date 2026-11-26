@@ -1,3 +1,29 @@
+## 2026-11-26 — TRUSS-STRICT-DECIMAL-NUMERIC-STRINGS
+
+Starting refs: dev `f4710a8931fbd2559e33ccbec0314153008fc8b5`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 inventory, Truss FEM numerical contract/source/tests, PR #191, exact-head Quality, branch refs and Pages evidence. The historical inventory remains frozen at **166 gaps / 95 partial**.
+
+P0 verification: the starting exact dev head `f4710a8931fbd2559e33ccbec0314153008fc8b5` has both Quality workflows green: Push [#45818109248](https://github.com/saeedsai/ProMathStudio/actions/runs/45818109248) and PR [#45818117317](https://github.com/saeedsai/ProMathStudio/actions/runs/45818117317), each 218/218 steps, zero failures and zero skipped steps. The earlier Graph overlay header-identity validation and saved-table selection-diagnostic repair are therefore verified on dev. No current exact-head CI failure remains.
+
+Defect: the shared Truss FEM `finite()` parser called `Number(v)` directly for nonblank strings. JavaScript therefore accepted radix-prefixed text such as `0x10`, `0b10` and `0o10` as finite numeric values. The user-facing fields and documented numeric contract are decimal/scientific; silently reinterpreting a pasted/imported string as 16, 2 or 8 is ambiguous input coercion.
+
+Implementation: trimmed string inputs must now match a bounded decimal/scientific grammar before conversion. Primitive finite numbers remain accepted; whitespace around valid decimal text remains supported. Decimal forms `+1`, `.5`, `1.`, `1e3` and signed exponents remain valid. Radix prefixes, numeric separators, blank strings and non-finite values reject with the existing finite-number diagnostic. This applies consistently to FEM model values and section dimensions. Truss FEM is an adjacent script; no root `index.html` bundle change is required.
+
+Regression: the registered Node test verifies valid decimal/scientific strings and rejects hexadecimal/binary/octal strings in model parsing, solve and section-property inputs. The registered Chromium test repeats the same cases at 1280px and 390px, checks the prior numeric-string behavior, and confirms the existing finite-number diagnostic. No assertions were removed.
+
+Local execution: `git rev-parse --show-toplevel` returns exit 128 because the workspace is `/` without a repository checkout; Node v22.16.0 and Python 3.13.5 are installed. A focused standalone Node check of the decimal grammar is run separately; native repository `node --test`, Playwright and build checks cannot run without the checkout. The committed exact-head GitHub Actions are authoritative for the actual module and Chromium regressions.
+
+Release: PR #191 remains open/mergeable at head `f4710a8931fbd2559e33ccbec0314153008fc8b5`, 67 commits ahead/0 behind, 27 changed files and zero submitted reviews. Only `dev` and `main` exist; both branch refs report `protected:false`. No eligible independent approval or enforceable main protection is available, so no merge. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no new production deployment.
+
+### NEXT FIVE — status, dependencies and acceptance tests
+
+1. **P0 — Verify strict decimal parsing on the new exact head.** Both Push and PR Quality green on the same SHA, 218+ required steps with zero failures/skips; Node and Chromium accept decimal/scientific strings and reject `0x10`, `0b10`, `0o10` in model parse/solve and section dimensions at 1280px/390px.
+2. **P0 — Release governance for PR #191 (blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; review the full 67+ commit diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+4. **P1 — Finish Data Tables structural-reference boundaries.** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort/recalculation, persistent `#REF!`, transactional rollback and standalone source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundaries.** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
+
+---
+
 ## 2026-11-26 — CI REPAIR: preserve saved-table selection diagnostics
 
 Starting refs: dev `a8f85a99e6721d8021e930f508644505cd85d6ae`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen inventory, project-format contract, project schema, Data Tables restore path, table ID/selection Node and Chromium tests, PR #191 and exact-head Quality evidence. Historical inventory remains **166 gaps / 95 partial**.

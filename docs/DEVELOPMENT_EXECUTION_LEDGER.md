@@ -1,3 +1,13 @@
+## 2026-11-26 — Truss FEM decimal-only numeric string validation
+
+- Starting dev `f4710a8931fbd2559e33ccbec0314153008fc8b5`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Starting exact-head Push [#45818109248](https://github.com/saeedsai/ProMathStudio/actions/runs/45818109248) and PR [#45818117317](https://github.com/saeedsai/ProMathStudio/actions/runs/45818117317) both succeeded 218/218 with zero failures/skips.
+- Found that shared Truss FEM `finite()` used `Number(string)`, silently accepting `0x10`, `0b10` and `0o10` as finite values 16, 2 and 8. This diverged from the UI's decimal/scientific numeric contract.
+- Updated `tools/truss-fem.js` to trim strings and require decimal/scientific syntax before conversion. Primitive finite numbers and ordinary decimal/scientific strings remain accepted; existing error wording is retained. No root bundle change because Truss FEM is an adjacent script.
+- Added a registered Node regression covering valid signed/leading-dot/trailing-dot/exponent strings, radix-prefixed rejection in parse/solve/section dimensions, and a Chromium regression at 1280px/390px. Updated the Structural Truss numerical contract.
+- Local checkout absent (`git rev-parse --show-toplevel`: exit 128); Node v22.16.0 and Python 3.13.5 available. Native repository test/Playwright/build commands cannot run without the checkout; focused helper-level Node validation and exact-head GitHub Actions are used instead.
+- Starting PR #191 open/mergeable, 67 ahead/0 behind, 27 files, zero reviews. Only dev/main refs; both unprotected. Main Quality #45360386408 and Pages #45360367251 successful on unchanged main `0d8ac89f`; no release. Historical inventory remains **166 gaps / 95 partial**.
+- Status: implementation/test/docs candidate on dev; exact-head CI pending; not released.
+
 ## 2026-11-26 — CI repair: preserve saved-table selection diagnostics
 
 - Starting dev `a8f85a99e6721d8021e930f508644505cd85d6ae`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact-head Push [#45817447603](https://github.com/saeedsai/ProMathStudio/actions/runs/45817447603) and PR [#45817456814](https://github.com/saeedsai/ProMathStudio/actions/runs/45817456814) failed at structural step 7: one existing test expected the established stale-selection error but received the new empty-workbook error because validation order changed.

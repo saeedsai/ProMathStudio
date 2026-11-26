@@ -1,3 +1,7 @@
+## Numeric string input contract
+
+The FEM model parser and section-property helper accept primitive finite JavaScript numbers or trimmed decimal/scientific strings such as `-12`, `.5`, `1.` and `2.5e-3`. String inputs must use decimal syntax. JavaScript radix forms such as `0x10`, `0b10` and `0o10` are rejected instead of being silently reinterpreted by `Number()`. This keeps JSON/API inputs aligned with the application's decimal numeric fields while preserving ordinary decimal and scientific-notation compatibility. Whitespace around a valid decimal string is ignored; blank strings, separators and non-finite values remain invalid.
+
 ## Hollow-rectangle small-cavity rounding
 
 When the cavity/outer-area ratio is at most 0.5, net area uses the direct dimensionless difference rather than adding separately rounded complementary wall gaps. Ixx and Iyy use finite outer-minus-inner rectangle contributions through the shared section-property accumulator; if the solid-envelope moment overflows, the existing split-factor path remains available. For larger cavity ratios, the factored wall-gap expressions are retained to preserve thin-wall sections. Small-cavity radii use the stable identity

@@ -286,6 +286,25 @@ test('numeric input rejects whitespace-only values while preserving finite numer
  assert.throws(()=>fem.fromLegacy(legacy),/finite number/);
 });
 
+test('numeric strings accept decimal/scientific syntax but reject JavaScript radix coercion',()=>{
+ const valid=clone(fem.examples.bar);
+ valid.nodes[1].fx=' 1e3 ';
+ valid.members[0].area='1.0e3';
+ close(fem.solve(valid).displacements[1].x,1e-5,1e-13);
+ for(const invalid of ['0x10','0b10','0o10']){
+  assert.ok(Number.isFinite(Number(invalid)),invalid+' must reproduce JavaScript radix coercion');
+  const model=clone(fem.examples.bar);
+  model.nodes[1].fx=invalid;
+  assert.throws(()=>fem.parseModel(model),/finite number/);
+  assert.throws(()=>fem.solve(model),/finite number/);
+  assert.throws(()=>fem.sectionProperties('rectangle',{width:invalid,height:2}),/finite number/);
+ }
+ for(const decimal of ['+1','.5','1.','1e3','1E-3',' 2.5e+2 ']){
+  const section=fem.sectionProperties('rectangle',{width:decimal,height:'2'});
+  assert.ok(Number.isFinite(section.area)&&section.area>0,decimal+' must remain a valid decimal string');
+ }
+});
+
 
 test('truss parser rejects positive properties whose assembled stiffness underflows to zero',()=>{
  const model=clone(fem.examples.bar);

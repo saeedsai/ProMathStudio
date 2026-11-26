@@ -1,3 +1,9 @@
+## 2026-11-26 — Reject Truss Euler CSV unit underflow
+
+- Exact-head Push/PR CI exposed a stale Euler CSV expectation: the computed binary64 kN value serializes as 493.48022005446785, not the older rounded 493.4802200544678. Updated Node and Chromium regressions to require shortest-round-trip fidelity.
+- Hardened material CSV export against a positive finite Euler load in N becoming zero when converted to kN; the exporter now reports an explicit underflow error instead of emitting a misleading zero.
+- Added a direct numerical regression for positive-N/zero-kN conversion. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-25 — Guard exact binary64 values in Truss material CSV
 
 - The material CSV serializer now verifies that every finite numeric cell reparses to the identical binary64 value and refuses non-finite numeric cells.

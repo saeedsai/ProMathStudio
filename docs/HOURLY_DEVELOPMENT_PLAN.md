@@ -1,3 +1,29 @@
+## 2026-11-26 — TRUSS-EULER-CSV-ROUNDTRIP-AND-UNIT-UNDERFLOW
+
+Starting refs: dev 428c38cb9a949383b858910e89793af4ce9d4a56; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, this living plan, the frozen 2026-10-26 inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head Quality, rulesets and main/Pages evidence.
+
+P0 exact-head CI failure: Push Quality #45718310047 (https://github.com/saeedsai/ProMathStudio/actions/runs/45718310047) and PR Quality #45718317908 (https://github.com/saeedsai/ProMathStudio/actions/runs/45718317908) both failed on exact SHA 428c38cb9a949383b858910e89793af4ce9d4a56, at browser step 212 (tests/smoke_truss_studio.py:1051). Steps 1–211 passed; steps 213–215 were skipped. Both logs show the same assertion: the test expected CSV Pcr 493.4802200544678, but the shortest round-trip decimal for the computed binary64 kN value is 493.48022005446785. The UI's rounded display 493.48 remains correct.
+
+Source correction: The material CSV exporter previously divided a positive finite Euler critical load in N by 1000 without checking whether the kN result underflowed to zero. It now rejects a positive load that is not representable in the CSV's declared kN unit instead of silently exporting a false zero.
+
+Regression: Updated the registered Chromium smoke to assert 493.48022005446785 and prove Python parses it back to the same float. Extended the direct Node Euler CSV test to verify exact string/number round-trip. Added a valid, deliberately extreme truss fixture (E=1e-170 GPa, A=1e-155 mm², I=1e-149 mm⁴, K=1, L=2 m) whose positive finite Euler load in N underflows when converted to kN; exportMaterialCSV must now reject it with an explicit diagnostic. This is a numerical-boundary test, not a physical design example.
+
+Validation: CI logs reproduce the stale browser expectation on both Push and PR workflows. The unit-conversion boundary was independently evaluated in binary64: the fixture's Euler load is positive and finite in N, while division by 1000 yields zero. The local repository checkout is unavailable, so full Node/Chromium execution must be established by the new exact-head Actions; no local full-suite pass is claimed.
+
+Release: PR #191 remains open with no submitted reviews. Only dev/main branches exist; both report unprotected, repository rulesets are empty, and the connected integration cannot read main branch protection (HTTP 403). No merge or direct main update. Main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; production is not updated. Historical inventory remains 166 gaps / 95 partial.
+
+Status: Current exact-head CI failure diagnosed; CSV unit-underflow guard and exact Euler CSV regression implemented on dev candidate; fresh Push/PR Quality pending; not released.
+
+### NEXT FIVE
+
+1. P0 — Verify exact-head Truss CSV repair. Acceptance: both Push and PR Quality pass on the same new dev SHA; Node verifies exact Euler kN serialization and rejects positive-N-to-zero-kN conversion; Chromium verifies 493.48022005446785 round-trip at 1280px and 390px; no required checks skipped.
+2. P0 — Release governance. Acceptance: eligible independent PR #191 approval, verifiable main protection requiring exact-head Quality and prohibiting direct pushes/force/deletion, full diff review, ordinary PR merge, exact-main Quality, Pages deployment and hosted critical-path verification.
+3. P1 — Finish seven-shape Truss section boundaries. Acceptance: independent references for A, centroid, Ixx/Iyy, Sx/Sy and rx/ry across all seven shapes; remaining low-exponent/near-solid cases; conservative underflow rejection; rollback, selected-member isolation, keyboard and 390px tests.
+4. P1 — Data Tables formula-reference edge audit. Acceptance: row 6000/column AF insertion/deletion, scalar/range #REF!, invalid references, blank/reversed/mixed-anchor ranges, quoted sheet names, recalculation, atomic rollback and standalone-bundle parity.
+5. P1 — Saved-project compatibility. Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed imports preserve workspaces, focus, selections and prior results; desktop and 390px browser tests.
+
+---
+
 ## 2026-11-25 — TRUSS-CSV-EXACT-MASS-ROUNDTRIP-CI-REPAIR
 
 **Starting refs:** dev `1ecc801c09565e220c86266d1f832efa452bdd36`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Truss source/tests/contract, exact branch refs, PR #191/reviews, exact-head Quality, rulesets, main Quality and Pages.

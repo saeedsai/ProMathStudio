@@ -1,3 +1,23 @@
+## 2026-11-26 — TRUSS-EULER-CSV-ROUNDTRIP-AND-UNIT-UNDERFLOW
+
+- Starting dev 428c38cb9a949383b858910e89793af4ce9d4a56; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, living plan, frozen inventory, Truss source/tests/contract, branches, PR #191/reviews, exact-head CI, rulesets and production evidence.
+- Exact-head Push Quality #45718310047 (https://github.com/saeedsai/ProMathStudio/actions/runs/45718310047) and PR Quality #45718317908 (https://github.com/saeedsai/ProMathStudio/actions/runs/45718317908) both failed at browser step 212, tests/smoke_truss_studio.py:1051; both logs report stale expected CSV Euler load 493.4802200544678 instead of shortest-round-trip 493.48022005446785. Steps 1–211 passed; steps 213–215 skipped.
+- Production issue found while correcting the fixture: a positive finite Euler critical load in N can underflow to zero when exported in kN. Added an explicit rejection in exportMaterialCSV so a positive physical value cannot silently become CSV zero.
+- Added direct Node coverage for exact Euler kN string/number round-trip and for a positive N value whose kN conversion underflows. Updated Chromium expectation and parsed-float round-trip check.
+- Updated Structural Truss CSV contract, living plan, ledger and changelog. No root index.html bundle change: the Truss solver is a companion asset, not an inlined module.
+- Local checkout is absent; no local Node/Chromium pass claimed. Binary64 boundary calculation independently confirms positive finite N load and zero kN conversion. New exact-head Actions must verify full browser and analytical tests.
+- PR #191 remains open with zero reviews. Branches exactly dev/main; both unprotected, rulesets empty, main protection read HTTP 403. No merge or main update. Production remains on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5.
+- Historical inventory remains frozen at 166 gaps / 95 partial. Status: CI defect diagnosed; source guard and regressions implemented on dev candidate; exact-head QA pending; not released.
+
+### NEXT FIVE
+1. P0 exact-head repair: Push/PR Quality green on the same candidate; Node exact Euler kN round-trip and positive-N-to-zero-kN rejection; Chromium 493.48022005446785 round-trip at 1280px/390px; no required skipped checks.
+2. P0 release governance: independent approval, verifiable main protection, full diff review, ordinary PR merge, exact-main Quality, Pages and hosted smoke.
+3. P1 seven-shape Truss boundaries: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references, low-exponent/near-solid cases, underflow rejection, rollback, member isolation and mobile.
+4. P1 Data Tables references: row 6000/AF, scalar/range #REF!, mixed anchors, quoted sheet names, recalculation, rollback and bundle parity.
+5. P1 saved-project compatibility: current/legacy Matrix/Graph/Table round-trips, malformed-import rollback, focus/selection preservation and desktop/390px coverage.
+
+---
+
 ## 2026-11-25 — TRUSS-CSV-EXACT-MASS-ROUNDTRIP-CI-REPAIR
 
 - Starting dev `1ecc801c09565e220c86266d1f832efa452bdd36`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI and main/Pages evidence.

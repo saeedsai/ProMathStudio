@@ -1048,7 +1048,8 @@ def main():
         euler_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
         euler_rows = list(csv.reader(io.StringIO(euler_export['body'])))
         assert euler_rows[0][-3:] == ['Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']
-        assert euler_rows[1][-3:] == ['1000000','1','493.4802200544678']
+        assert euler_rows[1][-3:] == ['1000000','1','493.48022005446785']
+        assert repr(float(euler_rows[1][-1])) == euler_rows[1][-1]
         # Post-solve Euler screening is compression-only: tension and zero demand never divide.
         page.locator('#solve').click()
         result_cells = page.locator('#member-results tr').first.locator('td')

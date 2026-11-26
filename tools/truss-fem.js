@@ -1184,12 +1184,18 @@
     const preview = inspectJSON(exportJSON(model));
     const rows = [
       ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)', 'Elastic modulus (GPa)', 'Axial stiffness EA/L (kN/mm)', 'Density (kg/m³)', 'Member mass (kg)', 'Second moment of area I (mm⁴)', 'Effective length factor K (-)', 'Euler critical load Pcr (kN)'],
-      ...preview.memberMetrics.map(member => [member.id, member.startNodeId, member.endNodeId,
-        member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6,
-        member.density ?? '', member.mass ?? '',
-        member.secondMoment === null ? '' : member.secondMoment * 1e12,
-        member.effectiveLengthFactor ?? '',
-        member.eulerCriticalLoad === null ? '' : member.eulerCriticalLoad / 1000])
+      ...preview.memberMetrics.map(member => {
+        const eulerCriticalLoadKN = member.eulerCriticalLoad === null ? '' : member.eulerCriticalLoad / 1000;
+        if (member.eulerCriticalLoad !== null && member.eulerCriticalLoad > 0 && !(eulerCriticalLoadKN > 0)) {
+          throw Error('Member ' + member.id + ': Euler critical load underflows in kN CSV export.');
+        }
+        return [member.id, member.startNodeId, member.endNodeId,
+          member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6,
+          member.density ?? '', member.mass ?? '',
+          member.secondMoment === null ? '' : member.secondMoment * 1e12,
+          member.effectiveLengthFactor ?? '',
+          eulerCriticalLoadKN];
+      })
     ];
     // Use the shortest decimal that round-trips to the original binary64 value.
     // Fixed 16-digit formatting can silently change valid engineering data.

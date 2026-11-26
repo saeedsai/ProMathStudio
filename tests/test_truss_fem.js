@@ -1059,7 +1059,17 @@ test('optional Euler buckling estimate uses SI units, validates I/K and remains 
  const rows=fem.exportMaterialCSV(pinned).trimEnd().split(String.fromCharCode(13)+String.fromCharCode(10)).map(line=>line.slice(1,-1).split('\",\"'));
  assert.deepEqual(rows[0].slice(-3),['Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']);
  assert.equal(rows[1][10],'1000000');assert.equal(rows[1][11],'1');
- close(Number(rows[1][12]),expected/1000,1e-12);
+ const eulerCriticalLoadKN=metric.eulerCriticalLoad/1000;
+ assert.equal(rows[1][12],String(eulerCriticalLoadKN),'Euler CSV must preserve the shortest round-trip kN value');
+ assert.equal(Number(rows[1][12]),eulerCriticalLoadKN);
+ close(eulerCriticalLoadKN,expected/1000,1e-12);
+ const tinyCSV=clone(bar);
+ tinyCSV.members[0].E=1e-170;tinyCSV.members[0].area=1e-155;
+ tinyCSV.members[0].I=1e-149;tinyCSV.members[0].K=1;
+ const tinyMetric=fem.inspectJSON(JSON.stringify(tinyCSV)).memberMetrics[0];
+ assert.ok(Number.isFinite(tinyMetric.eulerCriticalLoad)&&tinyMetric.eulerCriticalLoad>0);
+ assert.equal(tinyMetric.eulerCriticalLoad/1000,0,'positive N value is not representable in kN');
+ assert.throws(()=>fem.exportMaterialCSV(tinyCSV),/Euler critical load underflows in kN CSV export/);
  for(const invalid of [0,-1,NaN,Infinity,-Infinity,'not-a-number',true,Number.MIN_VALUE]){
   const model=clone(pinned);model.members[0].I=invalid;
   assert.throws(()=>fem.parseModel(model),invalid===0||invalid===-1||invalid===Number.MIN_VALUE?/I must be positive/:/finite number/);

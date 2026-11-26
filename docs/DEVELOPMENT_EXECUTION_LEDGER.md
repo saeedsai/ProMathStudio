@@ -7,7 +7,7 @@
 - Added a direct Node regression and registered Chromium regression at 1280px/390px; both assert exact expected rounded totals and prove naive reductions differ. Existing legacy, normal and overflow tests remain.
 - Isolated V8 ran the actual modified production source: compensated totals passed; naive reductions reproduced both defects; normal bar preview remained 2 m. Native repository Node/Playwright execution unavailable because no checkout is mounted; exact-head Actions must certify the registered tests.
 - One atomic seven-file source/test/docs/plan/ledger/changelog commit on existing dev, using a guarded non-force ref update. No standalone index.html change is required: Truss FEM is an adjacent script.
-- PR #191 remains open; 74 commits ahead, zero behind, 28 changed files, zero independent reviews. Only dev/main branches exist; both unprotected, rulesets empty, branch-protection read unavailable (403). No merge or direct main update. Main remains unchanged; latest recorded Main Quality and Pages succeeded on 24 November. Not released.
+- At run start PR #191 was 74 commits ahead; this implementation advances it to 75 ahead, zero behind, with 28 changed files and zero independent reviews. Only dev/main branches exist; both unprotected, rulesets empty, branch-protection read unavailable (403). No merge or direct main update. Main remains unchanged; latest recorded Main Quality and Pages succeeded on 24 November. Not released.
 - Next five acceptance priorities are recorded at the top of `docs/HOURLY_DEVELOPMENT_PLAN.md`. Frozen historical inventory unchanged at 166 gaps / 95 partial.
 
 ## 2026-11-26 — Data Tables stable-mean exact-rounding CI repair

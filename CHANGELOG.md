@@ -1,3 +1,9 @@
+## 2026-11-26 — Bound raw Truss numeric-string input
+
+- Enforce the 256 UTF-16 code-unit limit before trimming, so oversized whitespace padding cannot bypass the FEM decimal/scientific input bound.
+- Preserve valid padded decimal input at the exact 256-unit boundary; reject 257-unit whitespace- and zero-padded values in model parsing, solving and section-property calculations.
+- Added matching Node and registered Chromium regressions, retaining all prior numeric syntax and engineering reference checks.
+
 ## 2026-11-26 — Bound Truss decimal numeric strings and repair scientific-notation regression
 
 - Bound trimmed decimal/scientific FEM numeric strings to 256 characters before regex matching and conversion; overlong values retain the established finite-number diagnostic.

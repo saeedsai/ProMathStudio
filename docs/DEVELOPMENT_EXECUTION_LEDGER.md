@@ -1,3 +1,15 @@
+## 2026-11-26 — Bound raw Truss decimal numeric-string input
+
+- Starting dev `3519dcf795cdfbc69ef803c89c4c3538459deb86`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, living plan, frozen MATLAB inventory, Structural Truss source/tests/contract, PR #191, exact-head Quality and Pages evidence. The historical baseline remains **166 gaps / 95 partial**.
+- Exact starting candidate Push Quality [#45835692714](https://github.com/saeedsai/ProMathStudio/actions/runs/45835692714) and PR Quality [#45835703912](https://github.com/saeedsai/ProMathStudio/actions/runs/45835703912) both passed 218/218 on `3519dcf795cdfbc69ef803c89c4c3538459deb86`, zero failures/skips.
+- Found that the 256-character numeric input limit was checked only after `trim()`, allowing arbitrarily long whitespace padding around a short decimal to bypass the raw-input bound.
+- Moved the length check before trimming. Inputs up to 256 UTF-16 code units are trimmed and validated as before; longer raw strings reject with the same finite-number diagnostic.
+- Added Node and Chromium regressions for the accepted 256-code-unit boundary (255 spaces + `1`) and rejected 257-code-unit whitespace- and zero-padded values across model parse, solve and section-property APIs. Existing decimal/scientific and radix-prefix tests remain.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`; no root bundle change because Truss FEM is an adjacent script. Frozen inventory unchanged.
+- Local checkout is absent, so native repository Node/Playwright/build commands are not claimed. Isolated execution of the actual modified production module passed the boundary assertions; exact-head Actions must certify the full registered suite.
+- PR #191 remains open with zero independent reviews; only dev/main branches, both unprotected. Main Quality #45360386408 and Pages #45360367251 are the latest successful production evidence on unchanged main; no release.
+- Status: source, Node/Chromium regressions, contract, plan, ledger and changelog committed atomically to dev; exact-head CI pending; not released.
+
 ## 2026-11-26 — Truss decimal numeric-string CI repair and bounded input length
 
 - Starting dev `10f378b36766ffda1681c6646572d477e8b645d1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact-head Push Quality [#45825208844](https://github.com/saeedsai/ProMathStudio/actions/runs/45825208844) and PR Quality [#45825218692](https://github.com/saeedsai/ProMathStudio/actions/runs/45825218692) both failed at step 214 in `node --test tests/test_truss_fem.js`; 101/102 cases passed.

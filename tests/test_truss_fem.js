@@ -303,12 +303,21 @@ test('numeric strings accept decimal/scientific syntax but reject JavaScript rad
   const section=fem.sectionProperties('rectangle',{width:decimal,height:'2'});
   assert.ok(Number.isFinite(section.area)&&section.area>0,decimal+' must remain a valid decimal string');
  }
- const oversizedDecimal='0'.repeat(256)+'1';
- const oversizedModel=clone(fem.examples.bar);oversizedModel.nodes[1].fx=oversizedDecimal;
- assert.equal(Number(oversizedDecimal),1,'fixture must otherwise coerce to a finite Number');
- assert.throws(()=>fem.parseModel(oversizedModel),/finite number/);
- assert.throws(()=>fem.solve(oversizedModel),/finite number/);
- assert.throws(()=>fem.sectionProperties('rectangle',{width:oversizedDecimal,height:2}),/finite number/);
+ const boundaryPaddedDecimal=' '.repeat(255)+'1';
+ const boundaryModel=clone(fem.examples.bar);boundaryModel.nodes[1].fx=boundaryPaddedDecimal;
+ assert.equal(boundaryPaddedDecimal.length,256);
+ assert.equal(Number(boundaryPaddedDecimal),1);
+ assert.doesNotThrow(()=>fem.parseModel(boundaryModel));
+ assert.ok(fem.solve(boundaryModel).displacements[1].x>0);
+ assert.ok(fem.sectionProperties('rectangle',{width:boundaryPaddedDecimal,height:2}).area>0);
+ for(const oversized of ['0'.repeat(256)+'1',' '.repeat(256)+'1']){
+  const oversizedModel=clone(fem.examples.bar);oversizedModel.nodes[1].fx=oversized;
+  assert.equal(oversized.length,257);
+  assert.equal(Number(oversized),1,'fixture must otherwise coerce to a finite Number');
+  assert.throws(()=>fem.parseModel(oversizedModel),/finite number/);
+  assert.throws(()=>fem.solve(oversizedModel),/finite number/);
+  assert.throws(()=>fem.sectionProperties('rectangle',{width:oversized,height:2}),/finite number/);
+ }
 });
 
 

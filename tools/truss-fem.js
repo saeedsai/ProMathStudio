@@ -39,8 +39,9 @@
   const MAX_NUMERIC_STRING_LENGTH = 256;
   const finite = (v, name) => {
     if (typeof v === 'string') {
+      if (v.length > MAX_NUMERIC_STRING_LENGTH) throw Error(name + ' must be a finite number.');
       v = v.trim();
-      if (v.length > MAX_NUMERIC_STRING_LENGTH || !DECIMAL_NUMBER.test(v)) throw Error(name + ' must be a finite number.');
+      if (!DECIMAL_NUMBER.test(v)) throw Error(name + ' must be a finite number.');
     } else if (v === null || v === undefined || typeof v === 'boolean' || typeof v === 'bigint' ||
                typeof v === 'symbol' || typeof v === 'object' || typeof v === 'function') {
       throw Error(name + ' must be a finite number.');

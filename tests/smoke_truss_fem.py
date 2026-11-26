@@ -68,16 +68,27 @@ def main():
                             'rectangle', {width:value, height:2}))
                     };
                 });
-                const oversizedDecimal = '0'.repeat(256) + '1';
-                const oversizedModel = copy(ProMathTrussFEM.examples.bar);
-                oversizedModel.nodes[1].fx = oversizedDecimal;
                 const errorMessage = action => { try { action(); return null; } catch (error) { return error.message; } };
-                const overlong = {
-                    parse: errorMessage(() => ProMathTrussFEM.parseModel(oversizedModel)),
-                    solve: errorMessage(() => ProMathTrussFEM.solve(oversizedModel)),
-                    section: errorMessage(() => ProMathTrussFEM.sectionProperties('rectangle', {width:oversizedDecimal, height:2}))
+                const boundaryPaddedDecimal = ' '.repeat(255) + '1';
+                const boundaryModel = copy(ProMathTrussFEM.examples.bar);
+                boundaryModel.nodes[1].fx = boundaryPaddedDecimal;
+                const boundary = {
+                    parse: errorMessage(() => ProMathTrussFEM.parseModel(boundaryModel)),
+                    displacement: ProMathTrussFEM.solve(boundaryModel).displacements[1].x,
+                    area: ProMathTrussFEM.sectionProperties('rectangle', {width:boundaryPaddedDecimal, height:2}).area
                 };
-                return {validDisplacement, invalid, overlong};
+                const overlong = ['0'.repeat(256) + '1', ' '.repeat(256) + '1'].map(value => {
+                    const model = copy(ProMathTrussFEM.examples.bar);
+                    model.nodes[1].fx = value;
+                    return {
+                        valueLength: value.length,
+                        number: Number(value),
+                        parse: errorMessage(() => ProMathTrussFEM.parseModel(model)),
+                        solve: errorMessage(() => ProMathTrussFEM.solve(model)),
+                        section: errorMessage(() => ProMathTrussFEM.sectionProperties('rectangle', {width:value, height:2}))
+                    };
+                });
+                return {validDisplacement, invalid, boundary, overlong};
             }""")
             assert abs(numeric_string_contract['validDisplacement'] / 0.01 - 1) <= 1e-13
             assert len(numeric_string_contract['invalid']) == 3
@@ -85,7 +96,14 @@ def main():
                 assert item['parse'].endswith('must be a finite number.'), item
                 assert item['solve'].endswith('must be a finite number.'), item
                 assert item['section'].endswith('must be a finite number.'), item
-            assert all(value.endswith('must be a finite number.') for value in numeric_string_contract['overlong'].values()), numeric_string_contract['overlong']
+            assert numeric_string_contract['boundary']['parse'] is None
+            assert numeric_string_contract['boundary']['displacement'] > 0
+            assert numeric_string_contract['boundary']['area'] > 0
+            assert len(numeric_string_contract['overlong']) == 2
+            for item in numeric_string_contract['overlong']:
+                assert item['valueLength'] == 257 and item['number'] == 1, item
+                for key in ('parse', 'solve', 'section'):
+                    assert item[key].endswith('must be a finite number.'), item
             # Signed resultants must survive overflowing partial sums and retain subnormal residuals.
             resultant_range = page.evaluate("""() => {
                 const copy = model => JSON.parse(JSON.stringify(model));

@@ -108,6 +108,14 @@ The helper evaluates these equivalent geometric formulas directly instead of der
 
 A synthetic solid-circle boundary uses (D_o=3\times10^{-81}) mm. Its area is approximately (7.06858\times10^{-162}) mm² and its reported inertia rounds to the smallest positive binary64 value, but (sqrt{I/A}) overstates the geometric radius (7.5\times10^{-82}) mm by about 11.5%. The hollow counterpart with (D_i=1.5\times10^{-81}) mm has the same subnormal inertia and about 15.1% quotient error; the direct formula gives approximately (8.38525\times10^{-82}) mm. These dimensions are numerical representation tests only, not physical design examples.
 
+## Small-cavity hollow-circle rounding
+
+For a concentric hollow circle, let \(q=D_i/D_o\). When \(q\leq0.5\), the area and inertia factors are evaluated directly as \(1-q^2\) and \(1-q^4\). These factors remain at least 0.75 and 0.9375 respectively, so direct subtraction is well-conditioned. For \(q>0.5\), the helper retains the factored radial-gap expressions; this is the thin-wall regime where subtracting nearly equal squares would lose precision.
+
+This split avoids multiplying separately rounded complementary factors for a very small cavity. If the cavity contribution is below half an ulp of the outer-envelope property, the correctly rounded binary64 result is the corresponding solid-circle value.
+
+The regression uses the exact binary64 inputs \(D_o=1\) mm and \(D_i=9.313225746154786\times10^{-14}\) mm. The previous factored area and inertia factors both rounded to \(0.9999999999999999\), lowering area from \(0.7853981633974483\) to \(0.7853981633974482\) mm² and inertia from \(0.04908738521234052\) to \(0.04908738521234051\) mm⁴. The corrected factors round to 1, matching the solid-circle results. Existing thin-wall and extreme-scale annulus regressions remain in place. These are binary64 stress fixtures, not physical design dimensions.
+
 ## L-angle mixed-axis subnormal precision
 
 A high-aspect-ratio L-angle can have one normal centroidal inertia and one subnormal inertia. A single maximum-dimension normalization may preserve the major axis but underflow the independently scaled minor axis. For a subnormal axis, the helper now normalizes width and depth separately and evaluates that axis's section modulus and radius directly from the two-rectangle geometry. The reported dimensional inertia and principal moments retain their binary64 values; only the affected `S` and `r` outputs use the higher-precision normalized geometry.

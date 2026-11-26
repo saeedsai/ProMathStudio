@@ -812,9 +812,20 @@
         // Do not form Do^4 or Di^4: either can overflow while the thin-annulus
         // inertia is still representable. Keep the small factor between Do² terms.
         const innerRatio = finite(innerDiameter / diameter, 'Hollow circle inner/outer diameter ratio');
-        const radialGap = finite((diameter - innerDiameter) / diameter, 'Hollow circle relative radial wall thickness');
-        const areaFactor = finite(radialGap * (1 + innerRatio), 'Hollow circle net area factor');
-        inertiaFactor = finite(areaFactor * (1 + innerRatio * innerRatio), 'Hollow circle inertia factor');
+        const innerRatioSquared = innerRatio * innerRatio;
+        let areaFactor;
+        if (innerRatio <= 0.5) {
+          // A small cavity is safely evaluated by direct dimensionless subtraction:
+          // both factors stay well away from zero, and sub-half-ulp cavities correctly
+          // round to the solid envelope instead of accumulating factorization error.
+          areaFactor = finite(1 - innerRatioSquared, 'Hollow circle net area factor');
+          inertiaFactor = finite(1 - innerRatioSquared * innerRatioSquared, 'Hollow circle inertia factor');
+        } else {
+          // Near-unity ratios are thin walls; retain the factored gap to avoid cancellation.
+          const radialGap = finite((diameter - innerDiameter) / diameter, 'Hollow circle relative radial wall thickness');
+          areaFactor = finite(radialGap * (1 + innerRatio), 'Hollow circle net area factor');
+          inertiaFactor = finite(areaFactor * (1 + innerRatioSquared), 'Hollow circle inertia factor');
+        }
         area = finite((Math.PI / 4) * outerSquare * areaFactor, 'Circle net area (mm²)');
         secondMoment = finite((Math.PI / 64) * outerSquare * inertiaFactor * outerSquare, 'Circle centroidal second moment I (mm⁴)');
         // The annulus identity is I/A = Do²·(1 + (Di/Do)²)/16.

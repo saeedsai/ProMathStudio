@@ -454,6 +454,35 @@ def main():
                 for axis in ('sx', 'sy'):
                     assert abs(thin_circles[shape][axis] / thin_circles[shape]['expectedS'] - 1) <= 5e-13
 
+            # A tiny concentric cavity below half an ulp must round to the solid envelope.
+            # The former product of complementary factors lost one ulp in both A and I.
+            small_cavity_circle = page.evaluate("""() => {
+                const dimensions = {diameter: 1, innerDiameter: 9.313225746154786e-14};
+                const ratio = dimensions.innerDiameter / dimensions.diameter;
+                const previousAreaFactor = ((dimensions.diameter - dimensions.innerDiameter) / dimensions.diameter) * (1 + ratio);
+                const previousInertiaFactor = previousAreaFactor * (1 + ratio * ratio);
+                const outerSquare = dimensions.diameter * dimensions.diameter;
+                const previousArea = (Math.PI / 4) * outerSquare * previousAreaFactor;
+                const previousMoment = (Math.PI / 64) * outerSquare * previousInertiaFactor * outerSquare;
+                const solid = ProMathTrussFEM.sectionProperties('solid-circle', {diameter: dimensions.diameter});
+                const hollow = ProMathTrussFEM.sectionProperties('hollow-circle', dimensions);
+                const keys = ['area', 'secondMoment', 'secondMomentPerpendicular', 'sectionModulusX',
+                    'sectionModulusY', 'radiusOfGyrationX', 'radiusOfGyrationY'];
+                return {
+                    previousAreaFactor, previousInertiaFactor, previousArea, previousMoment,
+                    solidArea: solid.area, solidMoment: solid.secondMoment,
+                    same: keys.every(key => hollow[key] === solid[key]),
+                    centroidSame: JSON.stringify(hollow.centroid) === JSON.stringify(solid.centroid),
+                    dimensionsUnchanged: dimensions.diameter === 1 && dimensions.innerDiameter === 9.313225746154786e-14
+                };
+            }""")
+            assert small_cavity_circle['previousAreaFactor'] == 0.9999999999999999, small_cavity_circle
+            assert small_cavity_circle['previousInertiaFactor'] == 0.9999999999999999, small_cavity_circle
+            assert small_cavity_circle['previousArea'] != small_cavity_circle['solidArea'], small_cavity_circle
+            assert small_cavity_circle['previousMoment'] != small_cavity_circle['solidMoment'], small_cavity_circle
+            assert small_cavity_circle['same'] and small_cavity_circle['centroidSame'], small_cavity_circle
+            assert small_cavity_circle['dimensionsUnchanged'], small_cavity_circle
+
             # A hollow cavity's own area/square may underflow even when every net property is representable.
             # The ratio-based hollow helpers must accept these geometries at desktop and mobile widths.
             unresolved_cavities = page.evaluate("""() => {

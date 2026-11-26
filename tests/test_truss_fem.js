@@ -1824,6 +1824,32 @@ test('thin-walled hollow circle retains area and inertia without subtractive can
 });
 
 
+test('small-cavity hollow circle matches solid-envelope rounding below half an ulp',()=>{
+ const dimensions={diameter:1,innerDiameter:9.313225746154786e-14};
+ const original={...dimensions};
+ const ratio=dimensions.innerDiameter/dimensions.diameter;
+ const previousAreaFactor=((dimensions.diameter-dimensions.innerDiameter)/dimensions.diameter)*(1+ratio);
+ const previousInertiaFactor=previousAreaFactor*(1+ratio*ratio);
+ const outerSquare=dimensions.diameter*dimensions.diameter;
+ const previousArea=(Math.PI/4)*outerSquare*previousAreaFactor;
+ const previousMoment=(Math.PI/64)*outerSquare*previousInertiaFactor*outerSquare;
+ const solid=fem.sectionProperties('solid-circle',{diameter:dimensions.diameter});
+ const hollow=fem.sectionProperties('hollow-circle',dimensions);
+ // Exact-binary64 100-digit reference: q² is about 8.67e-27, far below half an ulp.
+ assert.equal(previousAreaFactor,0.9999999999999999);
+ assert.equal(previousInertiaFactor,0.9999999999999999);
+ assert.notEqual(previousArea,solid.area,'the former factored path must reproduce the one-ulp area loss');
+ assert.notEqual(previousMoment,solid.secondMoment,'the former factored path must reproduce the one-ulp inertia loss');
+ for(const key of ['area','secondMoment','secondMomentPerpendicular','sectionModulusX','sectionModulusY',
+  'radiusOfGyrationX','radiusOfGyrationY']){
+  assert.equal(hollow[key],solid[key],key+' must round to the solid envelope below half an ulp');
+ }
+ assert.deepEqual(hollow.centroid,solid.centroid);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(hollow)&&Object.isFrozen(hollow.centroid));
+});
+
+
 test('extreme thin hollow circle remains representable when both fourth powers overflow',()=>{
  const dimensions={diameter:1e78,innerDiameter:9.999999999999998e77};
  const outerSquare=dimensions.diameter*dimensions.diameter;

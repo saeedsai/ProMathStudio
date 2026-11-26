@@ -2156,3 +2156,16 @@ Local checkout is absent; native local Python, Playwright and build checks were 
 ## 2026-11-26 — CI-FIX-GRAPH-MAPPING-TEST-DECLARATION
 
 The first exact-head Push Quality #45782122512 and PR Quality #45782130950 both failed at structural step 7. Retrieved both job logs: the sole test failure was `test_import_cell_types_and_standalone_parity`, whose inline Node script redeclared `const valid2d` already used by the existing overlay tests. This was a regression-fixture naming collision; the production module itself had passed the isolated V8 mapping cases, and the browser suite was skipped because structural checks stop the workflow. Renamed only the newly added 2D fixture to `dormant2d`; did not weaken assertions or change production code. This correction and the plan/changelog update are committed together on dev. Fresh exact-head Push and PR Quality are pending; main and Pages remain unchanged. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+
+## 2026-11-26 — TRUSS-HOLLOW-CIRCLE-SMALL-CAVITY-ROUNDING
+
+Starting dev 7824a8d343b8da86bc148707a909bc2f8e4754d6; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, the living plan, frozen inventory, Truss contract, exact source/tests, PR and workflow evidence. The historical inventory remains **166 gaps / 95 partial**.
+
+Exact-head starting CI: Push Quality [#45782533305](https://github.com/saeedsai/ProMathStudio/actions/runs/45782533305) and PR Quality [#45782540283](https://github.com/saeedsai/ProMathStudio/actions/runs/45782540283) both green, 218/218 steps, zero failed/skipped. PR #191 open, 63 ahead/0 behind, 24 changed files, zero reviews. Only dev/main branches; unprotected, empty rulesets, branch-protection GET 403. No merge.
+
+Fixed hollow-circle small-cavity rounding. For inner/outer diameter ratio q <= 0.5, area/inertia factors now use 1-q² and 1-q⁴; for q > 0.5 the factored radial-gap path remains for thin-wall precision. Fixture Do=1 mm, Di=9.313225746154786e-14 mm previously returned A=0.7853981633974482 mm² and I=0.04908738521234051 mm⁴; corrected results match solid-circle rounding A=0.7853981633974483 and I=0.04908738521234052. Added Node and Chromium regressions for the old one-ulp reproduction and equality of A, Ixx/Iyy, Sx/Sy and rx/ry with the solid envelope. Existing thin-wall, overflow, subnormal and unresolved-cavity tests retained.
+
+Isolated V8 loaded the actual fetched production module and reproduced the defect before patch; patched candidate passed exact solid-circle equality. The existing extreme thin-wall branch remains unchanged. Node regression source syntax compiled in V8. No local repository checkout; native CLI Node/Playwright not run. New exact-head Push/PR Quality pending. No root bundle change because Truss FEM is an adjacent script.
+
+Main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Latest main Quality #45360386408 and Pages deployment #45360367251 are successful on 24 November; no newer main deployment. No live hosted verification claimed. No branch creation/deletion, force push, direct main update or merge.

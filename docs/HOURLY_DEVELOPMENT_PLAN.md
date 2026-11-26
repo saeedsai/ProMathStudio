@@ -1,3 +1,20 @@
+## 2026-11-26 — TRUSS-HOLLOW-CIRCLE-SMALL-CAVITY-ROUNDING
+
+Starting refs: dev 7824a8d343b8da86bc148707a909bc2f8e4754d6; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, Structural Truss contract, current FEM source, Node/Chromium regressions, exact-head Quality runs, PR #191 and production workflow evidence. The inventory baseline remains **166 gaps / 95 partial**.
+
+P0 CI/release check: current exact-head Push Quality [#45782533305](https://github.com/saeedsai/ProMathStudio/actions/runs/45782533305) and PR Quality [#45782540283](https://github.com/saeedsai/ProMathStudio/actions/runs/45782540283) both completed successfully on 7824a8d343b8da86bc148707a909bc2f8e4754d6, each 218/218 steps with zero failures and zero skipped steps. No failing exact-head CI remained. PR #191 is open, 63 commits ahead/0 behind with 24 changed files and no submitted reviews. Only dev/main branches exist; both report unprotected, rulesets are empty, and branch-protection reads return HTTP 403. No merge is authorized.
+
+Defect: for a small hollow-circle cavity, the prior area factor multiplied (1 - q) by (1 + q) after each factor had already rounded. With q=Di/Do=9.313225746154786e-14, both area and inertia factors became 0.9999999999999999, although q²≈8.67e-27 is far below half an ulp. For Do=1 mm, this produced A=0.7853981633974482 instead of the correctly rounded 0.7853981633974483 mm² and I=0.04908738521234051 instead of 0.04908738521234052 mm⁴.
+
+Implementation: for q≤0.5, compute the well-conditioned factors directly as 1-q² and 1-q⁴; for q>0.5, retain the factored radial-gap expressions to preserve thin-wall precision. The analytic radius identity and public API are unchanged. Truss FEM is loaded as an adjacent script, so no root index.html bundle change is required.
+
+Regression: Node and registered Chromium tests reproduce the former one-ulp values and require area, Ixx/Iyy, Sx/Sy and rx/ry to match the solid-envelope values for a sub-half-ulp cavity. Existing thin-wall, extreme-scale, subnormal and unresolved-cavity tests remain unchanged. Browser coverage executes in the existing desktop and 390px viewport loop.
+
+Validation: loaded the actual fetched production module in isolated V8. Before the patch it reproduced old factors 0.9999999999999999, area 0.7853981633974482 and I 0.04908738521234051 versus solid values 0.7853981633974483 and 0.04908738521234052. The candidate patch passed exact comparisons against the solid-circle result, and the existing extreme thin-wall reference (Do=1e6, Di=999999.9999999) remains on the unchanged factored branch. Node regression source syntax was compiled in V8. Native local Playwright/Node CLI is unavailable because the execution workspace has no repository checkout; fresh exact-head GitHub Actions must certify the committed tests.
+
+Status: source, Node regression, Chromium regression, Structural Truss contract, living plan, execution ledger and changelog committed atomically on dev; exact-head Push/PR Quality pending; not released.
+
+
 ## 2026-11-26 — PROJECT-PRIMARY-GRAPH-DATASET-MAPPING-VALIDATION
 
 Starting refs: dev `3f8eb51cac02f34ac1e1e42ad77fa3e6c9c39040`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, this living plan, the frozen 2026-10-26 inventory, project-format contract, project-schema and graph restore code, registered Node/Chromium tests, PR #191, exact-head CI, branch refs/rulesets and production evidence.
@@ -23,11 +40,11 @@ CI follow-up: the first exact-head Push Quality [#45782122512](https://github.co
 
 ### NEXT FIVE
 
-1. **P0 — Verify this primary Graph mapping fix.** Acceptance: Push and PR Quality green on the same exact dev SHA with zero failed/skipped required steps; Node and Chromium accept legacy/default and valid 2D/3D mappings, reject invalid mode/index/style/duplicate axes, preserve full prior project on rejection and pass 1280px/390px.
-2. **P0 — Release governance for PR #191.** Acceptance: eligible independent approval; verifiable main protection requiring exact-head Quality and preventing direct pushes/force/deletion; complete diff review; ordinary dev-to-main PR merge; exact-main Quality, Pages deployment and hosted critical-path verification.
-3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Acceptance: current/v1 round-trips for Matrix drafts, Graph functions/curves/datasets/overlays and Table formulas/selections; malformed imports and injected restore failures preserve every prior workspace, focus, selections and results at desktop/390px.
-4. **P1 — Finish Data Tables structural-reference boundary matrix.** Acceptance: row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort, cross-sheet recalculation, persistent #REF! and transactional rollback; source/bundle parity.
-5. **P1 — Complete seven-shape Truss numerical boundary audit.** Acceptance: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, selected-member isolation and responsive browser tests.
+1. **P0 — Verify small-cavity hollow-circle rounding.** Acceptance: exact-head Push and PR Quality green on the same dev SHA with zero failed/skipped steps; Node and Chromium reproduce the former one-ulp loss and confirm A, Ixx/Iyy, Sx/Sy and rx/ry match the solid envelope for a sub-half-ulp cavity; existing thin-wall, overflow, subnormal and BigInt-free tests remain green at 1280px/390px.
+2. **P0 — Release governance for PR #191.** Acceptance: eligible independent approval; verifiable main protection requiring exact-head Quality and preventing direct pushes/force/deletion; complete 24-file diff review; ordinary dev-to-main PR merge; exact-main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Complete the seven-shape Truss numerical boundary audit.** Acceptance: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, selected-member isolation and responsive tests.
+4. **P1 — Finish Data Tables structural-reference boundaries.** Acceptance: row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sorting, cross-sheet recalculation, persistent #REF!, transactional rollback and standalone source/bundle parity.
+5. **P1 — Complete saved-project compatibility.** Acceptance: Matrix, Graph and Tables current/legacy round-trips; malformed imports and injected restore failures preserve every prior workspace, focus, selections and results at desktop and 390px.
 
 ---
 

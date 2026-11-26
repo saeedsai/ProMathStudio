@@ -1,3 +1,10 @@
+## 2026-11-26 — Preserve small-cavity hollow-circle binary64 rounding
+
+- For inner/outer diameter ratios up to 0.5, hollow-circle area and inertia factors now use the well-conditioned direct forms 1 - q² and 1 - q⁴; thin-wall ratios retain the factored radial-gap path.
+- Fixes a reproducible one-ulp loss for a cavity below half an ulp of the outer-envelope properties while preserving the existing thin-wall, overflow and subnormal paths.
+- Added Node and registered Chromium regressions proving the previous one-ulp result and requiring area, Ixx/Iyy, Sx/Sy and rx/ry to match the solid-circle envelope.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Correct Graph mapping regression fixture declaration
 
 - Fixed the exact-head CI failure caused by the new Node regression reusing an existing top-level `const valid2d` identifier; the new 2D fixture is now named `dormant2d`.

@@ -257,14 +257,16 @@
   // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
   function sectionProperties(shape, dimensions) {
     // Divide before the final multiplication: b*h^3/12 can be finite even when b*h^3 overflows.
-    const rectangleIxx = (piece, label, factor = 1) => {
+    const rectangleIxxValue = (piece, factor = 1) => {
       const scaledHeight = piece.height * Math.sqrt(factor);
-      return finite(piece.width*piece.height*(scaledHeight/12)*scaledHeight, label);
+      return piece.width*piece.height*(scaledHeight/12)*scaledHeight;
     };
-    const rectangleIyy = (piece, label, factor = 1) => {
+    const rectangleIyyValue = (piece, factor = 1) => {
       const scaledWidth = piece.width * Math.sqrt(factor);
-      return finite(piece.height*piece.width*(scaledWidth/12)*scaledWidth, label);
+      return piece.height*piece.width*(scaledWidth/12)*scaledWidth;
     };
+    const rectangleIxx = (piece, label, factor = 1) => finite(rectangleIxxValue(piece, factor), label);
+    const rectangleIyy = (piece, label, factor = 1) => finite(rectangleIyyValue(piece, factor), label);
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
     const MIN_NORMAL = 2.2250738585072014e-308;
     // Correctly round sums of already-rounded section terms when BigInt is available.
@@ -727,23 +729,56 @@
       const heightRatio = hollow ? innerHeight / depth : 0;
       const widthGap = hollow ? (width - innerWidth) / width : 1;
       const heightGap = hollow ? (depth - innerHeight) / depth : 1;
-      const netAreaFactor = hollow ? widthGap + widthRatio * heightGap : 1;
+      // For a small cavity, direct subtraction is well-conditioned and avoids
+      // rounding complementary wall-gap terms before adding them. Near a thin wall,
+      // retain the factored gap form so the small remaining section is not lost.
+      const cavityAreaRatio = widthRatio * heightRatio;
+      const smallCavity = hollow && cavityAreaRatio <= 0.5;
+      const netAreaFactor = hollow
+        ? smallCavity ? 1 - cavityAreaRatio : widthGap + widthRatio * heightGap
+        : 1;
       area = finite(outerArea * netAreaFactor, 'Rectangle net area (mm²)');
+      const cavityIxxRatio = widthRatio * heightRatio * heightRatio * heightRatio;
       const ixxFactor = hollow
-        ? widthGap + widthRatio * heightGap * (1 + heightRatio + heightRatio * heightRatio)
+        ? smallCavity ? 1 - cavityIxxRatio
+          : widthGap + widthRatio * heightGap * (1 + heightRatio + heightRatio * heightRatio)
         : 1;
-      // Split the dimensionless hollow-section factor between the two depth
-      // factors. This keeps a finite thin-wall Ixx even when the full outer
-      // and inner solid-rectangle fourth-power intermediates would overflow.
-      secondMoment = rectangleIxx({width,height:depth}, 'Rectangle Ixx (mm⁴)', ixxFactor);
+      if (smallCavity && cavityIxxRatio <= 0.5) {
+        const outerIxx = rectangleIxxValue({width,height:depth});
+        const innerIxx = rectangleIxxValue({width:innerWidth,height:innerHeight});
+        secondMoment = Number.isFinite(outerIxx) && Number.isFinite(innerIxx)
+          ? sectionPropertySum([outerIxx,-innerIxx], 'Rectangle Ixx (mm⁴)')
+          : rectangleIxx({width,height:depth}, 'Rectangle Ixx (mm⁴)', ixxFactor);
+      } else {
+        // Split the dimensionless hollow-section factor between the two depth
+        // factors so a finite thin-wall Ixx survives overflowing solid-envelope powers.
+        secondMoment = rectangleIxx({width,height:depth}, 'Rectangle Ixx (mm⁴)', ixxFactor);
+      }
+      const cavityIyyRatio = heightRatio * widthRatio * widthRatio * widthRatio;
       const iyyFactor = hollow
-        ? heightGap + heightRatio * widthGap * (1 + widthRatio + widthRatio * widthRatio)
+        ? smallCavity ? 1 - cavityIyyRatio
+          : heightGap + heightRatio * widthGap * (1 + widthRatio + widthRatio * widthRatio)
         : 1;
-      secondMomentPerpendicular = rectangleIyy({width,height:depth}, 'Rectangle Iyy (mm⁴)', iyyFactor);
-      // Compute rectangular radii from dimensionless geometry rather than rounded I/A.
-      // A representable subnormal inertia can be quantized enough to corrupt sqrt(I/A).
-      analyticRadiusOfGyrationX = finite(depth*Math.sqrt(ixxFactor/netAreaFactor/12), 'Radius of gyration rx (mm)');
-      analyticRadiusOfGyrationY = finite(width*Math.sqrt(iyyFactor/netAreaFactor/12), 'Radius of gyration ry (mm)');
+      if (smallCavity && cavityIyyRatio <= 0.5) {
+        const outerIyy = rectangleIyyValue({width,height:depth});
+        const innerIyy = rectangleIyyValue({width:innerWidth,height:innerHeight});
+        secondMomentPerpendicular = Number.isFinite(outerIyy) && Number.isFinite(innerIyy)
+          ? sectionPropertySum([outerIyy,-innerIyy], 'Rectangle Iyy (mm⁴)')
+          : rectangleIyy({width,height:depth}, 'Rectangle Iyy (mm⁴)', iyyFactor);
+      } else {
+        secondMomentPerpendicular = rectangleIyy({width,height:depth}, 'Rectangle Iyy (mm⁴)', iyyFactor);
+      }
+      // In the small-cavity regime, evaluate (1 - cavity inertia)/(1 - cavity area)
+      // as 1 + cavity area * (1 - innerRatio²)/(1 - cavity area), avoiding two
+      // independently rounded factors near one.
+      const radiusFactorX = smallCavity
+        ? 1 + cavityAreaRatio * heightGap * (1 + heightRatio) / netAreaFactor
+        : ixxFactor / netAreaFactor;
+      const radiusFactorY = smallCavity
+        ? 1 + cavityAreaRatio * widthGap * (1 + widthRatio) / netAreaFactor
+        : iyyFactor / netAreaFactor;
+      analyticRadiusOfGyrationX = finite(depth*Math.sqrt(radiusFactorX/12), 'Radius of gyration rx (mm)');
+      analyticRadiusOfGyrationY = finite(width*Math.sqrt(radiusFactorY/12), 'Radius of gyration ry (mm)');
       // Preserve section-modulus precision only when the corresponding inertia is subnormal.
       // Sx=b*h²*fx/6 and Sy=h*b²*fy/6 avoid dividing a quantized Ixx/Iyy by c.
       if (secondMoment < 2.2250738585072014e-308) {

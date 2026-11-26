@@ -1,3 +1,10 @@
+## 2026-11-26 — Correct hollow-rectangle small-cavity rounding
+
+- Small cavities now use a direct, well-conditioned area difference; Ixx/Iyy use finite outer-minus-inner moment terms when safe, while the factored wall-gap path remains for thin walls and overflow cases.
+- Small-cavity radii use a stable ratio identity to avoid one-ulp errors from independently rounded area/inertia factors.
+- Added Node and registered Chromium regressions for area, Ixx/Iyy, radii, below-half-ulp behavior and BigInt-disabled fallback at desktop/390px.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Preserve Truss section sums without BigInt
 
 - Same-sign finite sums now use Neumaier compensation in original units when the BigInt exact accumulator is unavailable, avoiding an extra scale-normalization rounding in L-angle, channel and I-section properties.

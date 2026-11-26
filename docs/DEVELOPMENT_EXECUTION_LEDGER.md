@@ -1,3 +1,24 @@
+## 2026-11-26 — TRUSS-HOLLOW-RECTANGLE-SMALL-CAVITY-ROUNDING
+
+- Starting refs: dev `af92a0fa0ee8d5f7ba00b8c67fd1f7d5f892fd33`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read root AGENTS.md, unified plan, engineering architecture, structural toolbox contract, frozen inventory, Truss source/tests, PR #191/reviews, CI and main/Pages evidence.
+- Starting exact-head QA passed: Push [#45747330817](https://github.com/saeedsai/ProMathStudio/actions/runs/45747330817) and PR [#45747337294](https://github.com/saeedsai/ProMathStudio/actions/runs/45747337294), each 218/218, zero failures/skips.
+- Reproduced a hollow-rectangle small-cavity rounding defect: B=H=1, bi=1.2e-16, hi=0.5 returned area 1.0 instead of 0.9999999999999999 mm². A second fixture (bi=1.1e-16, hi=0.51) lost one ulp in Iyy (0.08333333333333331 vs 0.08333333333333333 mm⁴).
+- Updated rectangle moment helpers to expose raw finite contributions. For cavity/outer-area ratio <=0.5, net area uses direct dimensionless subtraction; Ixx/Iyy use the existing section-property sum over finite outer-minus-inner terms, with split-factor fallback if the solid-envelope moment overflows. For larger cavity ratios, the factored wall-gap path remains to protect thin walls. Small-cavity radii use a stable ratio identity.
+- Added a Node regression for area, centroid, both inertias, radii, below-half-ulp rounding, the Iyy boundary, immutability/frozen outputs and BigInt-disabled fallback. Added registered Chromium assertions for the same behavior at 1280px and 390px. No root bundle change because Truss FEM is an adjacent script.
+- Independent 160-digit Python Decimal oracle passed. Actual fetched production module plus all 100 Node test bodies executed in isolated V8 with strict assert/test and UTF-8 compatibility shims: 100/100 passed. This is not a native Node process; local Chromium is unavailable. Fresh exact-head GitHub Actions are required for the committed browser regression.
+- PR #191 remains open; no independent reviews. Branches are exactly dev/main, both unprotected; rulesets empty; branch-protection read HTTP 403. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 last succeeded 24 Nov on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Historical inventory remains **166 gaps / 95 partial**.
+- Status: source/test/docs committed to dev; exact-head CI pending; not released.
+
+### NEXT FIVE
+
+1. P0 verify this exact small-cavity candidate: both exact-head Quality workflows green, zero failures/skips; Node and Chromium area/Ixx/Iyy/radius, small/half-ulp and no-BigInt cases at desktop/390px.
+2. P0 independent eligible PR #191 approval, verifiable main protection, full diff review, ordinary merge, main Quality, Pages and hosted verification.
+3. P1 complete seven-shape Truss independent area/centroid/Ixx/Iyy/Sx/Sy/rx/ry references; low-exponent/near-solid/fallback, underflow rejection, rollback, member isolation and mobile.
+4. P1 Data Tables row 6000/AF, scalar/range #REF!, mixed anchors, quoted names, recalculation, rollback and source/bundle parity.
+5. P1 current/legacy Matrix/Graph/Table saved-project round-trips, malformed-import rollback, focus/selection preservation and desktop/390px browser tests.
+
+---
+
 ## 2026-11-26 — TRUSS-BIGINT-FREE-SECTION-SUM-FALLBACK
 
 - Starting dev `5cd44673f7fc9194436934eec3f5fe982aa5daa1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root contract, roadmap, architecture, frozen inventory, Truss implementation/tests, PR #191, reviews, CI and Pages evidence inspected.

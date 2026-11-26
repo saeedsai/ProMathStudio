@@ -2323,3 +2323,35 @@ test('section-property compatibility fallback preserves same-sign contributions 
   assert.equal(iSection.secondMomentPerpendicular,0.08333333333333336);
  }finally{globalThis.BigInt=originalBigInt;}
 });
+
+test('hollow rectangles preserve small-cavity area, inertia and radius rounding',()=>{
+ const dimensions={width:1,height:1,innerWidth:1.2e-16,innerHeight:0.5};
+ const original={...dimensions};
+ const section=fem.sectionProperties('hollow-rectangle',dimensions);
+ assert.equal(section.area,0.9999999999999999,'small cavity area must not round up to the solid envelope');
+ assert.equal(section.centroid.x,0.5);
+ assert.equal(section.centroid.y,0.5);
+ assert.equal(section.secondMoment,0.08333333333333333);
+ assert.equal(section.secondMomentPerpendicular,0.08333333333333333);
+ assert.equal(section.radiusOfGyrationX,0.28867513459481287);
+ assert.equal(section.radiusOfGyrationY,0.28867513459481287);
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ const tinyCavity=fem.sectionProperties('hollow-rectangle',{
+  width:1,height:1,innerWidth:1.2e-16,innerHeight:0.25
+ });
+ assert.equal(tinyCavity.area,1,'a cavity below half an area ulp must still round away');
+ const thinCavity=fem.sectionProperties('hollow-rectangle',{
+  width:1,height:1,innerWidth:1.1e-16,innerHeight:0.51
+ });
+ assert.equal(thinCavity.secondMomentPerpendicular,0.08333333333333333,
+  'small-cavity Iyy must not lose an ulp while combining the wall-gap terms');
+ const originalBigInt=globalThis.BigInt;
+ try {
+  globalThis.BigInt=undefined;
+  const fallback=fem.sectionProperties('hollow-rectangle',dimensions);
+  assert.equal(fallback.area,0.9999999999999999);
+  assert.equal(fallback.secondMoment,0.08333333333333333);
+  assert.equal(fallback.secondMomentPerpendicular,0.08333333333333333);
+ } finally { globalThis.BigInt=originalBigInt; }
+});

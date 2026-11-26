@@ -1,3 +1,31 @@
+## 2026-11-26 — TRUSS-HOLLOW-RECTANGLE-SMALL-CAVITY-ROUNDING
+
+Starting refs: dev `af92a0fa0ee8d5f7ba00b8c67fd1f7d5f892fd33`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, unified master plan, engineering architecture, structural toolbox contract, frozen inventory, Truss source/tests, PR #191/reviews, exact-head CI and latest available main/Pages evidence.
+
+P0 checkpoint: starting exact-head Push Quality [#45747330817](https://github.com/saeedsai/ProMathStudio/actions/runs/45747330817) and PR Quality [#45747337294](https://github.com/saeedsai/ProMathStudio/actions/runs/45747337294) both passed on `af92a0fa0ee8d5f7ba00b8c67fd1f7d5f892fd33`: 218/218 steps, zero failures and zero skipped steps. No starting-head CI blocker remained.
+
+New numerical defect: hollow-rectangle complementary wall-gap addition could overestimate a small cavity's net area. For B=H=1 mm, bi=1.2e-16 mm and hi=0.5 mm, the old path returned 1.0 mm² instead of the correctly rounded 0.9999999999999999 mm². A second small-cavity case returned Iyy=0.08333333333333331 mm⁴ instead of 0.08333333333333333 mm⁴. Independently rounded area/inertia factors also shifted the analytic radius by one ulp.
+
+Implementation: when the cavity/outer-area ratio is at most 0.5, use the well-conditioned direct cavity difference for net area and dimensionless inertia factors. Compute finite outer-minus-inner Ixx/Iyy contributions through the existing section-property accumulator; if the solid-envelope inertia overflows, retain the existing split-factor calculation. Keep the factored wall-gap path for larger cavity ratios/thin walls. Evaluate small-cavity radius ratios with an algebraically equivalent stable identity, avoiding division of two independently rounded factors. BigInt exact accumulation and the compensated compatibility fallback remain in use; public units/API and the FEM solve are unchanged.
+
+Regression: appended a Node case for exact area, centroid, Ixx/Iyy and rx/ry, plus a below-half-ulp cavity, a second Iyy rounding fixture, input immutability/frozen outputs and BigInt-disabled fallback. Registered Chromium coverage checks the same production-module behavior at 1280px and 390px, with BigInt restored in a finally block. Truss FEM is an adjacent script, so no root index.html bundle change is required.
+
+Independent validation: a 160-digit Python Decimal oracle confirms area 0.9999999999999999 mm², Ixx/Iyy 0.08333333333333333 mm⁴ and rx/ry 0.28867513459481287 mm for the main fixture. Isolated V8 execution of the actual production module and all 100 Node test bodies passed using strict assertion/test and UTF-8 compatibility shims; this is not a native Node process or a local Chromium run. The local workspace has no repository checkout; committed browser/structural validation remains dependent on fresh exact-head Actions.
+
+Release: PR #191 remains open/mergeable with no submitted independent reviews. Only dev/main branches exist; both report unprotected, repository rulesets are empty, and branch-protection reads return HTTP 403 to the integration. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) last completed successfully on 24 November for unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; the new dev changes are not deployed. Historical MATLAB inventory remains frozen at **166 gaps / 95 partial**.
+
+Status: implemented and committed on dev; fresh exact-head Push/PR Quality pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Verify this exact small-cavity fix.** Acceptance: Push and PR Quality both green on the same exact dev SHA, 218+ required steps, zero failures/skips; Node and Chromium verify area, Ixx/Iyy and radii, below-half-ulp and BigInt-disabled cases at 1280px/390px.
+2. **P0 — Release governance.** Acceptance: eligible independent PR #191 approval; verifiable main protection requiring exact-head Quality and preventing direct pushes/force/deletion; complete diff review; ordinary PR merge; exact-main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Finish seven-shape Truss numerical boundaries.** Acceptance: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining low-exponent/near-solid and normalized-fallback cases; conservative underflow rejection, invalid rollback, selected-member isolation, keyboard and 390px tests.
+4. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion; scalar/range and pre-existing `#REF!`; blank/reversed/mixed-anchor ranges; quoted sheet names; recalculation; atomic rollback; source/standalone-bundle parity.
+5. **P1 — Saved-project compatibility.** Acceptance: current/legacy Matrix/Graph/Table round-trips; malformed-import rollback preserves workspaces, focus, selections and prior results; desktop and 390px browser tests.
+
+---
+
 ## 2026-11-26 — TRUSS-BIGINT-FREE-SECTION-SUM-FALLBACK
 
 Starting refs: dev `5cd44673f7fc9194436934eec3f5fe982aa5daa1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, unified master plan, engineering architecture/toolbox contracts, frozen 2026-10-26 inventory, Truss source/tests/contract, exact refs, PR #191/reviews, CI and production Pages evidence.

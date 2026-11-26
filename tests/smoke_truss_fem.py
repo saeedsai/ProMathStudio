@@ -1871,6 +1871,43 @@ def main():
             assert page.locator('#status').inner_text() == analyze_rejection_status
             assert page.locator('#status').get_attribute('aria-busy') == 'false'
 
+            # Small hollow-rectangle cavities must use the stable small-cavity path.
+            small_cavity = page.evaluate("""() => {
+                const dimensions = {width: 1, height: 1, innerWidth: 1.2e-16, innerHeight: 0.5};
+                const section = ProMathTrussFEM.sectionProperties('hollow-rectangle', dimensions);
+                const tiny = ProMathTrussFEM.sectionProperties('hollow-rectangle', {
+                    width: 1, height: 1, innerWidth: 1.2e-16, innerHeight: 0.25
+                });
+                const smallIyy = ProMathTrussFEM.sectionProperties('hollow-rectangle', {
+                    width: 1, height: 1, innerWidth: 1.1e-16, innerHeight: 0.51
+                });
+                const originalBigInt = window.BigInt;
+                let fallback;
+                try {
+                    window.BigInt = undefined;
+                    fallback = ProMathTrussFEM.sectionProperties('hollow-rectangle', dimensions);
+                } finally { window.BigInt = originalBigInt; }
+                return {
+                    area: section.area, ixx: section.secondMoment, iyy: section.secondMomentPerpendicular,
+                    rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY,
+                    cx: section.centroid.x, cy: section.centroid.y,
+                    tinyArea: tiny.area, smallIyy: smallIyy.secondMomentPerpendicular,
+                    fallbackArea: fallback.area, fallbackIxx: fallback.secondMoment,
+                    fallbackIyy: fallback.secondMomentPerpendicular
+                };
+            }""")
+            assert small_cavity['area'] == 0.9999999999999999, small_cavity
+            assert small_cavity['ixx'] == 0.08333333333333333, small_cavity
+            assert small_cavity['iyy'] == 0.08333333333333333, small_cavity
+            assert small_cavity['rx'] == 0.28867513459481287, small_cavity
+            assert small_cavity['ry'] == 0.28867513459481287, small_cavity
+            assert small_cavity['cx'] == 0.5 and small_cavity['cy'] == 0.5, small_cavity
+            assert small_cavity['tinyArea'] == 1, small_cavity
+            assert small_cavity['smallIyy'] == 0.08333333333333333, small_cavity
+            assert small_cavity['fallbackArea'] == 0.9999999999999999, small_cavity
+            assert small_cavity['fallbackIxx'] == 0.08333333333333333, small_cavity
+            assert small_cavity['fallbackIyy'] == 0.08333333333333333, small_cavity
+
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
             assert not errors, errors

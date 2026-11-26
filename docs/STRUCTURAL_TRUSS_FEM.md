@@ -1,3 +1,11 @@
+## Hollow-rectangle small-cavity rounding
+
+When the cavity/outer-area ratio is at most 0.5, net area uses the direct dimensionless difference rather than adding separately rounded complementary wall gaps. Ixx and Iyy use finite outer-minus-inner rectangle contributions through the shared section-property accumulator; if the solid-envelope moment overflows, the existing split-factor path remains available. For larger cavity ratios, the factored wall-gap expressions are retained to preserve thin-wall sections. Small-cavity radii use the stable identity
+`(1 - cavity inertia ratio)/(1 - cavity area ratio) = 1 + cavity area ratio × (1 - inner-axis ratio²)/(1 - cavity area ratio)`
+instead of dividing independently rounded factors.
+
+The regression fixture B=H=1 mm, bi=1.2e-16 mm and hi=0.5 mm must return A=0.9999999999999999 mm², Ixx=Iyy=0.08333333333333333 mm⁴, centroid (0.5, 0.5) mm and rx=ry=0.28867513459481287 mm. A second fixture (bi=1.1e-16 mm, hi=0.51 mm) verifies the Iyy rounding boundary. A cavity below half an area ulp still rounds to the solid-envelope area. These are binary64 stress fixtures, not physical design dimensions. Node and registered Chromium tests also exercise the compatibility fallback with BigInt disabled at 1280px and 390px.
+
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
 ## BigInt-free section-property summation fallback

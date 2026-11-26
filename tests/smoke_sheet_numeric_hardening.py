@@ -102,6 +102,8 @@ def main():
         assert formula('G1') == 1
         assert formula('SUM(A1:G1)') == 42
         assert formula('AVERAGE(A1:G1)') == 14
+        assert formula('AVG(A1:G1)') == 14
+        assert formula('AVERAGE(16,25,1)') == 14
         assert formula('COUNT(A1:G1)') == 3
         assert formula('MEDIAN(A1:G1)') == 16
         page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", original_state)

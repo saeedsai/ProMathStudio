@@ -620,6 +620,11 @@
   function stableMean(values){
     const count=values.length;
     if(!count)return 0;
+    // Prefer a compensated total when it is representable. Dividing once
+    // avoids the extra rounding from normalizing each term and scaling back.
+    // If the total overflows, the normalized path can still yield a finite mean.
+    const finiteSum=stableSum(values);
+    if(Number.isFinite(finiteSum))return finiteSum/count;
     let scale=0;
     for(const value of values)scale=Math.max(scale,Math.abs(value));
     if(scale===0)return 0;

@@ -1,3 +1,10 @@
+## 2026-11-26 — Data Tables stable-mean exact-rounding repair
+
+- Fixed an exact-head CI regression where AVERAGE over numeric cells 16, 25 and 1 returned 13.999999999999998 due to divide-then-rescale rounding.
+- Prefer the compensated finite total and divide once; retain normalized compensated fallback when the total overflows but the mean remains finite.
+- Added exact AVERAGE/AVG range and scalar regressions plus a structural guard. Updated Data Tables numerical documentation and synchronized source with standalone index.html.
+- Implemented on dev; fresh exact-head Push/PR Quality required; not released.
+
 ## 2026-11-26 — Data Tables decimal-cell CI repair
 
 - Fixed a duplicate const declaration in range aggregation that prevented the standalone embedded Data Tables script from parsing.

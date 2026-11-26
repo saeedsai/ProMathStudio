@@ -23,6 +23,14 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
         self.assertIn("SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN", SOURCE)
         self.assertIn("test(name)?null:window.MathStudio.customFunctions?.find(name)", SOURCE)
 
+    def test_mean_prefers_finite_compensated_sum_before_scaled_fallback(self):
+        self.assertIn("const finiteSum=stableSum(values);", SOURCE)
+        self.assertIn("if(Number.isFinite(finiteSum))return finiteSum/count;", SOURCE)
+        smoke = (ROOT / "tests/smoke_sheet_numeric_hardening.py").read_text(encoding="utf-8")
+        self.assertIn("AVERAGE(A1:G1)", smoke)
+        self.assertIn("AVG(A1:G1)", smoke)
+        self.assertIn("AVERAGE(16,25,1)", smoke)
+
     def test_overflow_is_an_error_and_average_is_scaled(self):
         self.assertIn("function stableMean(values)", SOURCE)
         self.assertIn("const normalized=value/scale;", SOURCE)

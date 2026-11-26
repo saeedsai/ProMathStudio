@@ -1,3 +1,15 @@
+## 2026-11-26 — Data Tables stable-mean exact-rounding CI repair
+
+- Starting dev `18e321b450b87e37346edb16091b2f9b840c17f2`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen MATLAB inventory, Data Tables source/contract/tests, PR #191 and current Actions/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Exact-head Push Quality [#45865806358](https://github.com/saeedsai/ProMathStudio/actions/runs/45865806358) and PR Quality [#45865816147](https://github.com/saeedsai/ProMathStudio/actions/runs/45865816147) both failed at step 85, `tests/smoke_sheet_numeric_hardening.py:104`: AVERAGE(A1:G1) returned 13.999999999999998 instead of 14. The fixture's numeric range members are 16, 25 and 1; radix-prefixed strings and a blank are excluded.
+- Root cause: `stableMean()` divided each normalized value by the maximum scale and then multiplied the rounded mean back, introducing an avoidable ULP error for a finite total.
+- Fix: prefer the existing compensated `stableSum(values)` and divide once when the total is finite; retain normalized compensated fallback when the total overflows but the mean may be finite. Added exact AVERAGE/AVG range and scalar regression assertions and a structural guard for the fast path.
+- Updated `docs/DATA_TABLES.md`; synchronized the complete `src/data-tables.js` module into standalone `index.html`. Updated living plan and changelog in the same atomic commit.
+- Isolated Node/V8: old path reproduced 13.999999999999998; corrected path returned exactly 14. Extreme-average, cancellation and subnormal references passed. Full browser and repository suite remain pending exact-head GitHub Actions.
+- Bounded local `git ls-remote` failed with exit 128 because github.com could not resolve; GitHub integration was used instead. No sequential per-file commits; one atomic tree/commit and guarded non-force dev ref update.
+- PR #191 remains open. Reviews: zero; rulesets: empty; main/dev protections: not verifiable (403). Main remains unchanged; no release. Latest recorded main Quality and Pages are successful on 24 November 2026. Historical inventory remains 166 gaps / 95 partial.
+- Status: implementation/test/docs committed on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Data Tables decimal-cell CI repair
 
 - Starting dev 8889969b3833aa7286229f44b01d79f627ec2c8b; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Both exact-head Push Quality [#45857829326](https://github.com/saeedsai/ProMathStudio/actions/runs/45857829326) and PR Quality [#45857839151](https://github.com/saeedsai/ProMathStudio/actions/runs/45857839151) failed at structural step 7; 606 tests ran, with two failures and one skipped test.

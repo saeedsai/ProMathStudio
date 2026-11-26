@@ -1,3 +1,15 @@
+## 2026-11-26 — DATA-TABLES-STABLE-MEAN-CI-REPAIR
+
+Starting refs: dev `18e321b450b87e37346edb16091b2f9b840c17f2`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, Data Tables source/contract/tests, PR #191, exact-head Actions, branch refs and Pages evidence. The historical baseline remains **166 gaps / 95 partial**.
+
+P0 exact-head failure: Push Quality [#45865806358](https://github.com/saeedsai/ProMathStudio/actions/runs/45865806358) and PR Quality [#45865816147](https://github.com/saeedsai/ProMathStudio/actions/runs/45865816147) both failed at step 85, `tests/smoke_sheet_numeric_hardening.py:104`, on `assert formula('AVERAGE(A1:G1)') == 14`. The fixture intentionally contains three radix-prefixed text cells, numeric values 16, 25 and 1, and one blank. SUM returned 42 and COUNT returned 3, but `stableMean()` normalized each value by 25, divided the normalized sum by three, and multiplied back, producing 13.999999999999998 instead of the correctly rounded 14.
+
+Repair: `stableMean()` now first calls the existing compensated `stableSum(values)`; when that total is finite it divides once by the count. If the total overflows while the mean may still be finite, it retains the previous normalized compensated fallback, including its residual path. This preserves the extreme-average behavior while removing an avoidable round-trip rounding error. Added exact browser assertions for both AVERAGE and AVG over the range and for direct scalar arguments, plus a structural regression for the finite-sum fast path. Updated the Data Tables numerical contract.
+
+Validation: reproduced the old 13.999999999999998 result in Node; the new isolated V8 path returns exactly 14 for [16,25,1]. It also returns 1e308 for [1e308,1e308], zero for symmetric cancellation, 5e-324 for the subnormal pair, and 3.3333333333333334e-301 for [1e308,1e-300,-1e308]. The full source is synchronized byte-for-byte into the 1.3 MB standalone index.html. Native repository test execution is unavailable because the local checkout is absent and bounded `git ls-remote` failed with DNS error; fresh exact-head Push/PR Quality must certify the registered structural and Chromium tests.
+
+Status: source, synchronized standalone bundle, focused browser/structural regressions, Data Tables contract, living plan, ledger and changelog are committed together on existing dev. Exact-head QA pending; not released.
+
 ## 2026-11-26 — DATA-TABLES-DECIMAL-CELL-CI-REPAIR
 
 Starting refs: dev 8889969b3833aa7286229f44b01d79f627ec2c8b; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, this plan, the frozen 2026-10-26 inventory, Data Tables source/contract/tests, PR #191 and current Actions/Pages evidence. The historical baseline remains **166 gaps / 95 partial**.
@@ -12,12 +24,11 @@ Status: CI root cause repaired; source, synchronized bundle, updated regression,
 
 ## Next five features
 
-1. **P0 — Verify decimal-only Data Tables cell coercion (In QA).** Both Push and PR Quality green on the same new exact dev SHA with zero failed/skipped steps; structural suite passes, Chromium at 390/768/1280px rejects radix strings in scalar arithmetic and excludes them from ranges while preserving decimal/scientific values, blanks, MEDIAN and extreme-aggregate references.
-2. **P0 — Release governance for PR #191 (Blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+1. **P0 — Verify Data Tables mean rounding (In QA).** Both exact-head Push and PR Quality green on the same dev SHA with zero failures/skips; Chromium at 390/768/1280px verifies AVERAGE and AVG return exactly 14 for the decimal range 16, 25, blank, 1, while overflowing totals still produce finite means and cancellation/subnormal references remain correct.
+2. **P0 — Release governance for PR #191 (Blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct pushes, force pushes and deletion; review the complete diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
 3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Planned).** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
-4. **P1 — Finish Data Tables structural-reference boundaries (Partial).** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort/recalculation, persistent #REF!, transactional rollback and standalone source/bundle parity.
+4. **P1 — Finish Data Tables structural-reference boundaries (Partial).** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sorting/recalculation, persistent #REF!, transactional rollback and standalone source/bundle parity.
 5. **P1 — Complete seven-shape Truss numerical boundaries (Partial).** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
-
 ---
 
 ## 2026-11-26 — DATA-TABLES-DECIMAL-CELL-COERCION

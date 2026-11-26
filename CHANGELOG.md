@@ -1,3 +1,10 @@
+## 2026-11-26 — Preserve full precision in Data Tables formulas
+
+- Formula evaluation now returns the full finite binary64 result instead of rounding intermediate cell values to 13 significant digits.
+- Kept the existing compact 13-digit presentation as display-only formatting; dependent formulas, aggregates, graph handoff and computed exports retain the full numeric value.
+- Added Chromium coverage for 1/7, dependent multiplication, SUM/AVERAGE/MEDIAN, aggregate chaining and 390px visibility; strengthened static source/bundle checks.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Correct hollow-rectangle small-cavity rounding
 
 - Small cavities now use a direct, well-conditioned area difference; Ixx/Iyy use finite outer-minus-inner moment terms when safe, while the factored wall-gap path remains for thin walls and overflow cases.

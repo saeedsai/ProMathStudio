@@ -88,5 +88,21 @@ class SpreadsheetReferenceBoundsTests(unittest.TestCase):
         self.assertEqual(HTML[start:end], SOURCE)
 
 
+    def test_formula_results_keep_binary64_precision_and_round_only_the_display(self):
+        self.assertIn("return result;", SOURCE)
+        self.assertNotIn("Number(result.toPrecision(13))", SOURCE)
+        self.assertIn(
+            "const displayCellValue=value=>typeof value==='number'&&Number.isFinite(value)?Number(value.toPrecision(13)):value;",
+            SOURCE,
+        )
+        self.assertIn("input.value=String(displayCellValue(val??''));", SOURCE)
+        for formula in ("=1/7", "=A1*7", "=SUM(A1:A1)", "=AVERAGE(A1:A1)", "=MEDIAN(A1:A1)"):
+            self.assertIn(formula, SMOKE)
+        self.assertIn("precision_values == [1 / 7, 1, 1 / 7, 1 / 7, 1 / 7, 1]", SMOKE)
+        self.assertIn("page.set_viewport_size({\"width\": 390, \"height\": 844})", SMOKE)
+        self.assertIn("python tests/smoke_sheet_references.py", WORKFLOW)
+
+
+
 if __name__ == "__main__":
     unittest.main()

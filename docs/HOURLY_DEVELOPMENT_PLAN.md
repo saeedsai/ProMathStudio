@@ -1,3 +1,31 @@
+## 2026-11-26 — DATA-TABLES-FULL-BINARY64-FORMULA-PRECISION
+
+Starting refs: dev `3dbd31ab9995ab8292081ff022bd20215b0d78d7`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, Data Tables source/build contract, formula-reference tests, PR #191/reviews, exact-head CI, branch/ruleset state and latest main/Pages evidence.
+
+P0 checkpoint: exact-head Push Quality [#45754742142](https://github.com/saeedsai/ProMathStudio/actions/runs/45754742142) and PR Quality [#45754748222](https://github.com/saeedsai/ProMathStudio/actions/runs/45754748222) both passed on `3dbd31ab9995ab8292081ff022bd20215b0d78d7`: 218/218 steps each, zero failures and zero skipped steps. No existing exact-head CI failure remained. PR #191 remains open/mergeable, head `3dbd31ab9995ab8292081ff022bd20215b0d78d7`, base `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`, 59 commits/19 files and zero submitted independent reviews.
+
+Numerical defect: the Data Tables formula evaluator rounded every arithmetic result to 13 significant decimal digits before returning it to the workbook. That was also the value consumed by dependent formulas, aggregates, graph handoff and computed CSV/JSON exports. For example, `=1/7` became 0.1428571428571; a dependent `=A1*7` therefore produced 0.9999999999997 instead of 1. This silently discarded binary64 precision in scientific calculations.
+
+Implementation: formula evaluation now retains the complete finite JavaScript binary64 result. A separate display-only formatter preserves the familiar 13-significant-digit cell-editor presentation. Stored formulas remain unchanged; dependent formulas, aggregates, graph data and computed exports receive the unrounded numeric value. No eval/Function, dependency, formula grammar, storage schema or project format changes.
+
+Regression: extended the registered Chromium spreadsheet-reference smoke with `=1/7`, `=A1*7`, SUM, AVERAGE and MEDIAN single-cell ranges, and `=SUM(A1:A1)*7`. It asserts full-precision numeric outputs, exact dependent result 1, compact visible cell formatting and a 390px responsive visibility check. Extended `tests/test_sheet_reference_bounds.py` to enforce the source behavior, display-only rounding, regression registration and standalone bundle parity. Updated modular `src/data-tables.js` and the matching `index.html` script from the exact same source snapshot; the starting bundle was verified byte-for-byte equal before editing.
+
+Validation: starting source/bundle parity and all replacement anchors were verified through GitHub file reads. A bounded local `git rev-parse --show-toplevel` returned exit 128 because the execution workspace is `/` without a repository checkout. Therefore native local Python/Chromium/build commands were not run. Fresh exact-head Push and PR Quality must execute the structural suite, source/bundle check, static tests and browser regression; results are pending for this new commit.
+
+Release: only `dev` and `main` exist; both report unprotected, repository rulesets are empty and the main branch-protection API returns HTTP 403 to the integration. PR #191 has no independent reviews; no merge is authorized. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) last succeeded on 24 November for unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no newer main run/deployment was found. No hosted verification of this dev change is claimed. Frozen historical MATLAB inventory remains **166 gaps / 95 partial**.
+
+Status: implemented and committed on dev; exact-head QA pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Verify this formula-precision commit.** Acceptance: Push and PR Quality green on the same exact dev SHA, zero failed/skipped required steps; static source/bundle parity passes; Chromium verifies 1/7, dependent multiplication, SUM/AVERAGE/MEDIAN and aggregate chaining, display formatting and 390px visibility.
+2. **P0 — Release governance for PR #191.** Acceptance: eligible independent approval; verifiable main protection requiring exact-head Quality and preventing direct pushes/force/deletion; complete diff review; ordinary dev-to-main PR merge; exact-main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Finish Data Tables formula-reference boundaries.** Acceptance: row 6000/column AF insert/delete, scalar/range and pre-existing `#REF!`, blank/reversed/mixed-anchor ranges, quoted sheet names with escaped apostrophes, sort/recalculation and atomic rollback; source/standalone parity.
+4. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed-import rollback preserves workspaces, focus, selections and previous results; desktop and 390px tests.
+5. **P1 — Complete seven-shape Truss numerical boundaries.** Acceptance: independent area/centroid/Ixx/Iyy/Sx/Sy/rx/ry references for all seven shapes; remaining low-exponent/near-solid/fallback, underflow rejection, invalid rollback, selected-member isolation and responsive tests.
+
+---
+
 ## 2026-11-26 — TRUSS-HOLLOW-RECTANGLE-SMALL-CAVITY-ROUNDING
 
 Starting refs: dev `af92a0fa0ee8d5f7ba00b8c67fd1f7d5f892fd33`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, unified master plan, engineering architecture, structural toolbox contract, frozen inventory, Truss source/tests, PR #191/reviews, exact-head CI and latest available main/Pages evidence.

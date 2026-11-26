@@ -123,6 +123,24 @@ def main():
         page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", saved)
         assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
 
+
+        # Formula cells retain full binary64 precision for dependent formulas and exports.
+        # Only the visible cell editor is rounded to the existing 13-significant-digit style.
+        precision_state = {"version": 1, "selected": "precision", "tables": [
+            {"id": "precision", "name": "Precision", "columns": ["A", "B", "C", "D", "E", "F"],
+             "rows": [[
+                 "=1/7", "=A1*7", "=SUM(A1:A1)", "=AVERAGE(A1:A1)",
+                 "=MEDIAN(A1:A1)", "=SUM(A1:A1)*7"
+             ]]}
+        ]}
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", precision_state)
+        precision_values = page.evaluate("MathStudio.dataTables.calculate()[0]")
+        assert precision_values == [1 / 7, 1, 1 / 7, 1 / 7, 1 / 7, 1]
+        precision_cell = page.locator('#dt-sheet input[data-row="0"][data-col="0"]')
+        assert precision_cell.input_value() == "0.1428571428571"
+        page.set_viewport_size({"width": 390, "height": 844})
+        assert precision_cell.is_visible()
+
         assert not errors, errors
         browser.close()
     print("PASS structural references, cross-sheet, absolute anchors, #REF!, project round-trip and context row index")

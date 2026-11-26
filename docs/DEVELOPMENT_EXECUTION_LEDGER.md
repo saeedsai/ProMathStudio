@@ -1,3 +1,12 @@
+## 2026-11-26 — Data Tables full binary64 formula precision
+
+- Starting dev `3dbd31ab9995ab8292081ff022bd20215b0d78d7`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; root AGENTS, plan, frozen inventory, Data Tables build contract, PR #191 and exact-head CI inspected. Previous Push [#45754742142](https://github.com/saeedsai/ProMathStudio/actions/runs/45754742142) and PR [#45754748222](https://github.com/saeedsai/ProMathStudio/actions/runs/45754748222) both passed 218/218, zero failures/skips.
+- Found that `compute()` rounded every formula result to 13 significant digits before returning it. `=1/7` therefore became 0.1428571428571 and a dependent `=A1*7` returned 0.9999999999997 rather than 1.
+- Changed `src/data-tables.js` to retain full finite binary64 results; added a display-only 13-digit formatter for cell editors. Dependent formulas, aggregates, graph handoff and computed exports now consume the unrounded number. Synchronized the matching `index.html` module from the exact same source snapshot.
+- Added browser regression for division, dependent multiplication, SUM/AVERAGE/MEDIAN, aggregate chaining, compact display and 390px visibility; extended static reference tests to assert precision semantics, registration and source/bundle parity. Updated the living plan and changelog in the same atomic commit.
+- Verified source/bundle byte parity before editing and exact module replacement after editing. Local checkout absent (`git rev-parse --show-toplevel`: exit 128, current directory `/`); no native local Python/Chromium/build run claimed. New exact-head Push/PR Quality pending.
+- PR #191 remains open with zero independent reviews; dev/main unprotected, rulesets empty, branch-protection read HTTP 403. Main Quality #45360386408 and Pages #45360367251 last succeeded on 24-Nov-2026 at `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge or deployment. Historical inventory unchanged at **166 gaps / 95 partial**.
+
 ## 2026-11-26 — TRUSS-HOLLOW-RECTANGLE-SMALL-CAVITY-ROUNDING
 
 - Starting refs: dev `af92a0fa0ee8d5f7ba00b8c67fd1f7d5f892fd33`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read root AGENTS.md, unified plan, engineering architecture, structural toolbox contract, frozen inventory, Truss source/tests, PR #191/reviews, CI and main/Pages evidence.

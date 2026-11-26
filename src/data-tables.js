@@ -797,8 +797,10 @@
     function power(){let v=primary();if(peek()==='^'){at++;v=Math.pow(v,power());}return v;}
     function mult(){let v=power();while(peek()==='*'||peek()==='/'){const op=tokens[at++].type,r=power();v=op==='*'?v*r:v/r;}return v;}
     function addition(){let v=mult();while(peek()==='+'||peek()==='-'){const op=tokens[at++].type,r=mult();v=op==='+'?v+r:v-r;}return v;}
-    const result=addition();if(at!==tokens.length||!Number.isFinite(result))throw Error('#VALUE');return Number(result.toPrecision(13));
+    const result=addition();if(at!==tokens.length||!Number.isFinite(result))throw Error('#VALUE');return result;
   }
+  // Preserve full binary64 results for downstream formulas, exports and graphs; round only the cell editor display.
+  const displayCellValue=value=>typeof value==='number'&&Number.isFinite(value)?Number(value.toPrecision(13)):value;
   const evaluated=t=>t.rows.map((row,r)=>row.map((_,c)=>{try{return value(t,r,c);}catch(e){return e.message.startsWith('#')?e.message:'#ERR';}}));
   function save(){try{localStorage.setItem('mathstudio-tables-v1',JSON.stringify(exportState()));}catch{notify('Browser storage is unavailable or full; export the project JSON to keep this workbook.',true);}}
   function exportState(){return {version:1,selected,tables:deep(tables)};}
@@ -827,7 +829,7 @@
     for(let r=0;r<t.rows.length;r++)if(!q||rows[r].some(v=>String(v).toLowerCase().includes(q)))show.push(r);
     for(const r of show.slice(0,MAX_DISPLAY)){const tr=el('tr');tr.append(el('th',{class:'dt-rownum'},r+1));for(let c=0;c<t.columns.length;c++){
       const td=el('td');const val=rows[r][c],input=el('input',{'aria-label':colLetter(c)+(r+1),'data-row':r,'data-col':c});
-      input.value=String(val??'');if(String(val).startsWith('#'))input.classList.add('dt-error');
+      input.value=String(displayCellValue(val??''));if(String(val).startsWith('#'))input.classList.add('dt-error');
       input.addEventListener('focus',()=>{focusedCell={id:t.id,r,c};input.value=t.rows[r][c];input.select();});
       input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();input.blur();}});
       input.addEventListener('change',()=>{t.rows[r][c]=input.value.slice(0,8000);save();});

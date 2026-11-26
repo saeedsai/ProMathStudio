@@ -1,3 +1,9 @@
+## 2026-11-26 — Data Tables decimal-cell CI repair
+
+- Fixed a duplicate const declaration in range aggregation that prevented the standalone embedded Data Tables script from parsing.
+- Updated the MEDIAN structural regression to verify the shared decimal-only cell parser, blank scalar compatibility and blank range exclusion.
+- Re-synchronized index.html from src/data-tables.js; no test assertions or CI gates were removed. Fresh exact-head Push/PR Quality required; not released.
+
 ## 2026-11-26 — Decimal-only Data Tables cell coercion
 
 - Prevent JavaScript radix-prefixed strings (`0x10`, `0b10`, `0o10`) from being silently treated as decimal spreadsheet numbers in direct cell arithmetic and aggregate ranges.

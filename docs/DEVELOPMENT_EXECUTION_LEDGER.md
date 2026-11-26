@@ -1,3 +1,12 @@
+## 2026-11-26 — Data Tables decimal-cell CI repair
+
+- Starting dev 8889969b3833aa7286229f44b01d79f627ec2c8b; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Both exact-head Push Quality [#45857829326](https://github.com/saeedsai/ProMathStudio/actions/runs/45857829326) and PR Quality [#45857839151](https://github.com/saeedsai/ProMathStudio/actions/runs/45857839151) failed at structural step 7; 606 tests ran, with two failures and one skipped test.
+- Failure 1: the range aggregate edit declared const v twice in the same block, causing Node's inline-script parser to reject the standalone index.html bundle. Failure 2: tests/test_sheet_median.py asserted the removed String(v).trim()!=='' implementation detail after range classification moved to numericCellValue().
+- Fixed the duplicate declaration by classifying the already-read cell value once; synchronized the complete modular source into index.html. Updated the MEDIAN structural regression to assert shared decimal-parser behavior, blank scalar zero and blank range exclusion.
+- Isolated V8 compiled the production module and every executable inline script; source/bundle parity and focused decimal/radix/blank/overflow parser checks passed. Native local repo test commands remain unavailable without a checkout; new exact-head Actions are required.
+- No assertions or workflow gates removed. PR #191 remains open; no independent reviews, rulesets empty and branch-protection read returns HTTP 403. Main unchanged; no release. Historical MATLAB inventory remains 166 gaps / 95 partial.
+- Status: CI repair committed to dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Data Tables decimal-only cell coercion
 
 - Starting dev `1bee639333fd9c35ba58521bf5b7a5a7bb6c1ffb`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen MATLAB inventory, unified master plan, Data Tables source/tests/contract, PR #191 and current CI/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.

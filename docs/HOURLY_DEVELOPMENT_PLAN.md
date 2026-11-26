@@ -1,3 +1,25 @@
+## 2026-11-26 — DATA-TABLES-DECIMAL-CELL-CI-REPAIR
+
+Starting refs: dev 8889969b3833aa7286229f44b01d79f627ec2c8b; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, this plan, the frozen 2026-10-26 inventory, Data Tables source/contract/tests, PR #191 and current Actions/Pages evidence. The historical baseline remains **166 gaps / 95 partial**.
+
+P0 exact-head failure: Push Quality [#45857829326](https://github.com/saeedsai/ProMathStudio/actions/runs/45857829326) and PR Quality [#45857839151](https://github.com/saeedsai/ProMathStudio/actions/runs/45857839151) both failed at structural step 7. The 606-test structural suite reported two failures: (1) test_inline_script_boundaries found a duplicate const v declaration in the embedded Data Tables script; the new range-classifier line re-declared v immediately after its existing declaration. (2) test_sheet_median still asserted the removed String(v).trim()!=='' predicate, although the decimal-only numericCellValue() now classifies blanks as nonnumeric for ranges.
+
+Repair: retain the single existing const v=value(...), then classify it once with numericCellValue(v) and append only non-null numeric values. Apply the exact modular src/data-tables.js source to the embedded index.html script, preserving the standalone bundle contract. Update the MEDIAN structural regression to assert the new shared parser's blank-scalar and blank-range behavior rather than the obsolete implementation detail. The existing inline-script Node syntax test remains enabled and catches duplicate declarations; no test or CI gate is removed.
+
+Validation: actual fetched production source compiles in isolated V8; the same updated inline-script extraction compiled all 46 executable scripts; standalone source is present byte-for-byte in the updated index.html. Focused parser checks passed for radix exclusion, trimmed decimal/scientific acceptance, blank range classification, blank scalar zero, finite primitive acceptance and overflow rejection. Native repository Python/Node/Playwright commands are unavailable because the execution workspace has no checkout; fresh exact-head Push and PR Quality must certify all 606 structural tests and Chromium regressions.
+
+Status: CI root cause repaired; source, synchronized bundle, updated regression, living plan, ledger and changelog are committed together on dev. Exact-head QA pending; not released.
+
+## Next five features
+
+1. **P0 — Verify decimal-only Data Tables cell coercion (In QA).** Both Push and PR Quality green on the same new exact dev SHA with zero failed/skipped steps; structural suite passes, Chromium at 390/768/1280px rejects radix strings in scalar arithmetic and excludes them from ranges while preserving decimal/scientific values, blanks, MEDIAN and extreme-aggregate references.
+2. **P0 — Release governance for PR #191 (Blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Planned).** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+4. **P1 — Finish Data Tables structural-reference boundaries (Partial).** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort/recalculation, persistent #REF!, transactional rollback and standalone source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundaries (Partial).** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
+
+---
+
 ## 2026-11-26 — DATA-TABLES-DECIMAL-CELL-COERCION
 
 Starting refs: dev `1bee639333fd9c35ba58521bf5b7a5a7bb6c1ffb`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, the unified master implementation plan, Data Tables source/contract/tests, PR #191, exact-head Quality and Pages evidence. The frozen historical inventory remains **166 gaps / 95 partial**.

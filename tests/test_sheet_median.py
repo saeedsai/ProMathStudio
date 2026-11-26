@@ -18,7 +18,10 @@ class MedianFormulaTests(unittest.TestCase):
     def test_invalid_reference_bounds_and_blank_handling(self):
         self.assertIn("r0<0||r1<0||r0>=MAX_ROWS||r1>=MAX_ROWS", SOURCE)
         self.assertIn("c0<0||c1<0||c0>=MAX_COLUMNS||c1>=MAX_COLUMNS", SOURCE)
-        self.assertIn("String(v).trim()!==''", SOURCE)
+        self.assertIn("if(typeof v==='string'&&v.trim()==='')return 0;", SOURCE)
+        self.assertIn("if(!text||!DECIMAL_CELL_NUMBER.test(text))return null;", SOURCE)
+        self.assertIn("const numeric=numericCellValue(v);", SOURCE)
+        self.assertIn("if(numeric!==null)nums.push(numeric);", SOURCE)
         self.assertIn("if(rr>=target.rows.length||cc>=target.columns.length)continue;", SOURCE)
     def test_browser_regression_is_mandatory(self):
         self.assertIn('python tests/smoke_sheet_median.py', WORKFLOW)

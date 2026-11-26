@@ -319,22 +319,26 @@
           cx:finite(piece.x+piece.width/2, 'L-angle rectangle centroid x (mm)'),
           cy:finite(piece.y+piece.height/2, 'L-angle rectangle centroid y (mm)')};
       });
-      // Preserve combined sub-ulp rectangle contributions when their total changes the rounded area.
-      area = finiteSignedSum(pieceMetrics.map(piece=>piece.area), 'L-angle area (mm²)');
+      // Sum already-rounded rectangle contributions once; scaled normalization can itself shift a
+      // positive area total by an ulp, while sequential local/offset inertia sums are order-dependent.
+      area = sectionPropertySum(pieceMetrics.map(piece=>piece.area), 'L-angle area (mm²)');
       if (!(area > 0)) throw Error('L-angle area underflow; increase dimensions.');
-      centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'L-angle centroid x (mm)');
-      centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'L-angle centroid y (mm)');
-      secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = rectangleIxx(piece, 'L-angle local Ixx (mm⁴)');
-        const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'L-angle Ixx offset (mm⁴)');
-        return sum+local+offset;
-      },0), 'L-angle Ixx (mm⁴)');
-      secondMomentPerpendicular = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = rectangleIyy(piece, 'L-angle local Iyy (mm⁴)');
-        const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'L-angle Iyy offset (mm⁴)');
-        return sum+local+offset;
-      },0), 'L-angle Iyy (mm⁴)');
-      productOfInertia = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*(piece.cx-centroidX)*(piece.cy-centroidY),0),
+      centroidX = finite(sectionPropertySum(pieceMetrics.map(piece=>piece.area*piece.cx),
+        'L-angle first moment x (mm³)')/area, 'L-angle centroid x (mm)');
+      centroidY = finite(sectionPropertySum(pieceMetrics.map(piece=>piece.area*piece.cy),
+        'L-angle first moment y (mm³)')/area, 'L-angle centroid y (mm)');
+      const ixxTerms = [], iyyTerms = [];
+      for (const piece of pieceMetrics) {
+        const localIxx = rectangleIxx(piece, 'L-angle local Ixx (mm⁴)');
+        const offsetIxx = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'L-angle Ixx offset (mm⁴)');
+        const localIyy = rectangleIyy(piece, 'L-angle local Iyy (mm⁴)');
+        const offsetIyy = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'L-angle Iyy offset (mm⁴)');
+        ixxTerms.push(localIxx,offsetIxx);
+        iyyTerms.push(localIyy,offsetIyy);
+      }
+      secondMoment = sectionPropertySum(ixxTerms, 'L-angle Ixx (mm⁴)');
+      secondMomentPerpendicular = sectionPropertySum(iyyTerms, 'L-angle Iyy (mm⁴)');
+      productOfInertia = sectionPropertySum(pieceMetrics.map(piece=>piece.area*(piece.cx-centroidX)*(piece.cy-centroidY)),
         'L-angle product of inertia Ixy (mm⁴)');
       // A subnormal tensor or an underflowed Ixy can lose orientation information
       // even when the diagonal moments are representable. Re-evaluate the

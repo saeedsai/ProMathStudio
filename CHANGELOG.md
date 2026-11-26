@@ -1,3 +1,9 @@
+## 2026-11-26 — L-angle section-property exact summation
+
+- L-angle area, first moments, Ixx/Iyy and Ixy now use the existing exact binary64 section-property accumulator when BigInt is available, avoiding a one-ulp area error from scale normalization and order-dependent local/parallel-axis inertia sums.
+- Added two direct Node numerical regressions and extended Chromium coverage for both high-aspect-ratio fixtures at 1280px and 390px; existing channel/I-section checks remain.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Exact composite-section centroid and inertia sums
 
 - Composite channel and I-section area, first moments and local-plus-parallel-axis inertias now sum already-rounded finite binary64 terms exactly when BigInt is available, with the existing scaled compensated compatibility fallback.

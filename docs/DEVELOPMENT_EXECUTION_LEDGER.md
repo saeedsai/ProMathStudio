@@ -1,3 +1,23 @@
+## 2026-11-26 — TRUSS-L-ANGLE-EXACT-SECTION-SUMS
+
+- Starting refs: dev `dbd4bd51bbad91e893cd24b2877e1a2065909714`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, unified master plan, engineering architecture and structural toolbox contracts, frozen inventory, Truss source/tests/contract, refs, PR #191/reviews, Quality, rulesets and Pages evidence.
+- Starting exact-head CI passed: Push Quality [#45736435242](https://github.com/saeedsai/ProMathStudio/actions/runs/45736435242) and PR Quality [#45736441164](https://github.com/saeedsai/ProMathStudio/actions/runs/45736441164), both 218/218 with zero failures/skips on `dbd4bd51`.
+- Found L-angle area and inertia rounding defects. The scaled positive-area reducer returned 183.8225183531027 instead of 183.82251835310274 mm² for a synthetic high-aspect-ratio section. Left-to-right local-plus-parallel-axis sums returned Ixx 0.0005630523010274838 instead of 0.0005630523010274837 mm⁴ in one fixture and Iyy 2.94557285397156e-79 instead of 2.9455728539715605e-79 mm⁴ in another.
+- Updated L-angle area, first moments, Ixx/Iyy and Ixy to use the existing exact binary64 section-property sum when BigInt is available, retaining the scaled compensated fallback. No geometry, FEM solver, unit, public API or bundle change.
+- Added direct Node regressions for both fixtures and extended the registered Chromium smoke to assert area/centroid/Ixx/Iyy at 1280px and 390px alongside the prior channel/I-section checks.
+- Independent Python Fraction oracle passed for the exact binary64 terms and both one-ulp failures. Local checkout is absent; no local Node/Chromium suite pass claimed. New exact-head Actions are required.
+- PR #191 remains open/mergeable with zero submitted reviews. Only dev/main branches exist; rulesets empty; main branch-protection read HTTP 403. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) last succeeded on 24 November on unchanged main `0d8ac89f`.
+- Historical inventory remains frozen at **166 gaps / 95 partial**. Status: implemented on dev, exact-head QA pending, not released.
+
+### NEXT FIVE
+1. P0 verify this exact-head L-angle fix: both Push/PR Quality green on the same SHA; Node and Chromium verify both L-angle cases and prior channel/I-section references; desktop/390px; zero skipped required checks.
+2. P0 release governance: independent eligible PR #191 approval, verifiable main protection, full diff review, ordinary PR merge, exact-main Quality, Pages and hosted critical-path verification.
+3. P1 finish seven-shape Truss boundaries: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references; low-exponent/near-solid/normalized fallback; underflow rejection, invalid rollback, member isolation and mobile.
+4. P1 Data Tables formula references: row 6000/AF, scalar/range `#REF!`, invalid references, blank/reversed/mixed anchors, quoted names, recalculation, atomic rollback and bundle parity.
+5. P1 saved-project compatibility: current/legacy Matrix/Graph/Table round-trips; malformed-import rollback; focus/selection preservation; desktop/390px browser coverage.
+
+---
+
 ## 2026-11-26 — TRUSS-COMPOSITE-CENTROID-INERTIA-EXACT-SUM
 
 - Starting refs: dev `a46f676d0cb4d99d1eebf089c228d06c9cc3466a`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, unified master plan, engineering architecture/toolbox contracts, frozen inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI, rulesets and main/Pages evidence.

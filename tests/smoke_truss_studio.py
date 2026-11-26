@@ -122,21 +122,30 @@ def main():
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.set_content(HTML, wait_until='load')
         assert 'Analysis complete' in page.locator('#status').inner_text()
-        # Composite-section summation must retain correctly rounded binary64 centroids and inertias.
+        # Composite-section and L-angle summation must retain correctly rounded binary64 properties.
         for viewport in ({'width': 1280, 'height': 900}, {'width': 390, 'height': 844}):
             page.set_viewport_size(viewport)
             precision_sections = page.evaluate("""() => {
                 const dimensions = {width:2,height:1,webThickness:1,flangeThickness:2e-17};
                 const read = shape => {
                     const section = ProMathTrussFEM.sectionProperties(shape, dimensions);
-                    return {x:section.centroid.x,y:section.centroid.y,
-                            ixx:section.secondMoment,iyy:section.secondMomentPerpendicular};
+                    return {x:section.centroid.x,y:section.centroid.y,ixx:section.secondMoment,iyy:section.secondMomentPerpendicular};
                 };
-                return {channel:read('channel'),iSection:read('i-section')};
+                const readAngle = dimensions => {
+                    const section = ProMathTrussFEM.sectionProperties('l-angle', dimensions);
+                    return {area:section.area,x:section.centroid.x,y:section.centroid.y,ixx:section.secondMoment,iyy:section.secondMomentPerpendicular};
+                };
+                return {
+                    channel:read('channel'),iSection:read('i-section'),
+                    lAngleWide:readAngle({width:8605413.972369973,height:4.292204701476468,thickness:2.136125318978258e-5}),
+                    lAngleThin:readAngle({width:1.1143751945503119e-20,height:4.305111224234166e-16,thickness:2.015788401705846e-21})
+                };
             }""")
             assert precision_sections == {
                 'channel': {'x':0.5000000000000001,'y':0.5,'ixx':0.08333333333333334,'iyy':0.08333333333333337},
                 'iSection': {'x':1,'y':0.5,'ixx':0.08333333333333334,'iyy':0.08333333333333336},
+                'lAngleWide': {'area':183.82251835310274,'x':4302704.840094387,'y':1.1751052746539924e-5,'ixx':0.0005630523010274837,'iyy':1134387503114039.5},
+                'lAngleThin': {'area':8.678377274295314e-37,'x':1.0080123367146022e-21,'y':2.1525099734807228e-16,'ixx':1.3404309505588713e-68,'iyy':2.9455728539715605e-79}
             }, (viewport, precision_sections)
         page.set_viewport_size({'width': 390, 'height': 844})
         # Preview valid geometry without solving, including a model that is structurally unstable.

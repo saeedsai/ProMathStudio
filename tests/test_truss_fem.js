@@ -2235,3 +2235,60 @@ test('channel and I-section centroid and inertias retain sub-ulp rectangle contr
   assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
  }
 });
+
+
+test('L-angle area and inertia sums round their binary64 rectangle contributions once',()=>{
+ const cases=[
+  {dimensions:{width:8605413.972369973,height:4.292204701476468,thickness:2.136125318978258e-5},
+   expected:{area:183.82251835310274,x:4302704.840094387,y:1.1751052746539924e-5,ixx:0.0005630523010274837,iyy:1134387503114039.5},
+   previousArea:183.8225183531027,naiveProperty:'ixx',naiveValue:0.0005630523010274838},
+  {dimensions:{width:1.1143751945503119e-20,height:4.305111224234166e-16,thickness:2.015788401705846e-21},
+   expected:{area:8.678377274295314e-37,x:1.0080123367146022e-21,y:2.1525099734807228e-16,ixx:1.3404309505588713e-68,iyy:2.9455728539715605e-79},
+   naiveProperty:'iyy',naiveValue:2.94557285397156e-79}
+ ];
+ const previousScaledPositiveSum=values=>{
+  const scale=Math.max(0,...values.map(Math.abs));if(scale===0)return 0;
+  let sum=0,correction=0;
+  for(const value of values){const scaled=value/scale,next=sum+scaled;
+   correction+=Math.abs(sum)>=Math.abs(scaled)?(sum-next)+scaled:(scaled-next)+sum;sum=next;}
+  return (sum+correction)*scale;
+ };
+ const naiveMoments=(dimensions,centroid)=>{
+  const {width,height,thickness}=dimensions;
+  const pieces=[
+   {x:0,y:0,width:thickness,height},
+   {x:thickness,y:0,width:width-thickness,height:thickness}
+  ].map(piece=>({...piece,area:piece.width*piece.height,cx:piece.x+piece.width/2,cy:piece.y+piece.height/2}));
+  const ixx=pieces.reduce((sum,piece)=>{
+   const local=piece.width*piece.height*(piece.height/12)*piece.height;
+   const offset=piece.area*(piece.cy-centroid.y)*(piece.cy-centroid.y);return sum+local+offset;
+  },0);
+  const iyy=pieces.reduce((sum,piece)=>{
+   const local=piece.height*piece.width*(piece.width/12)*piece.width;
+   const offset=piece.area*(piece.cx-centroid.x)*(piece.cx-centroid.x);return sum+local+offset;
+  },0);
+  return {ixx,iyy};
+ };
+ for(const item of cases){
+  const original={...item.dimensions},section=fem.sectionProperties('l-angle',item.dimensions);
+  const naive=naiveMoments(item.dimensions,section.centroid);
+  if(item.previousArea!==undefined){
+   const {width,height,thickness}=item.dimensions;
+   const previous=previousScaledPositiveSum([thickness*height,(width-thickness)*thickness]);
+   assert.equal(previous,item.previousArea,'former scaled area reduction reproduces its one-ulp error');
+   assert.notEqual(previous,item.expected.area);
+  }
+  assert.equal(naive[item.naiveProperty],item.naiveValue,'previous left-to-right inertia reduction reproduces its rounding error');
+  assert.notEqual(naive[item.naiveProperty],item.expected[item.naiveProperty]);
+  assert.equal(section.area,item.expected.area,'L-angle area must be correctly rounded');
+  assert.equal(section.centroid.x,item.expected.x,'L-angle centroid x must use the correctly rounded area and first moment');
+  assert.equal(section.centroid.y,item.expected.y,'L-angle centroid y must use the correctly rounded area and first moment');
+  assert.equal(section.secondMoment,item.expected.ixx,'L-angle Ixx must round local and offset terms once');
+  assert.equal(section.secondMomentPerpendicular,item.expected.iyy,'L-angle Iyy must round local and offset terms once');
+  for(const key of ['principalMomentMajor','principalMomentMinor','sectionModulusX','sectionModulusY','radiusOfGyrationX','radiusOfGyrationY'])
+   assert.ok(Number.isFinite(section[key])&&section[key]>0,'L-angle '+key+' must remain finite and positive');
+  assert.ok(Number.isFinite(section.productOfInertia));
+  assert.deepEqual(item.dimensions,original);
+  assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+ }
+});

@@ -1,3 +1,33 @@
+## 2026-11-26 — PROJECT-PRIMARY-GRAPH-DATASET-MAPPING-VALIDATION
+
+Starting refs: dev `3f8eb51cac02f34ac1e1e42ad77fa3e6c9c39040`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, this living plan, the frozen 2026-10-26 inventory, project-format contract, project-schema and graph restore code, registered Node/Chromium tests, PR #191, exact-head CI, branch refs/rulesets and production evidence.
+
+P0 checkpoint: PR Quality [#45773429482](https://github.com/saeedsai/ProMathStudio/actions/runs/45773429482) completed successfully on exact head `3f8eb51cac02f34ac1e1e42ad77fa3e6c9c39040`. Push Quality [#45773425699](https://github.com/saeedsai/ProMathStudio/actions/runs/45773425699) on the same SHA was cancelled (not failed); this is not a complete two-workflow green gate. No failing test was observed in the successful PR run.
+
+Defect: `graphData.restoreState()` silently keeps header-derived defaults when a saved primary dataset contains invalid X/Y/Z selector values, and silently defaults unsupported plot styles. `restoreGraphState()` similarly ignores unsupported graph modes. This can make a project import succeed while changing the selected columns or plot configuration. The existing project schema validated primary dataset cells and additional overlays, but not these primary selectors.
+
+Implementation: validate a present graph mode as 2D/3D; validate each present primary X/Y/Z selector as an in-range integer column index; preserve the same header-alias defaults for legacy projects that omit selectors; require X/Y to differ and all axes to differ for explicit 3D mode; validate an explicit style against points/line/grid. A dormant Z selector may overlap X/Y in 2D. Invalid values are rejected before import confirmation; no graph rendering, project version, file size, public API or storage format changes.
+
+Regression: extend registered Node schema tests with valid 2D/3D mappings, immutable input, invalid mode/index/type/duplicate axes/style, invalid 3D default axes and legacy selector omission. Extend Chromium project-schema smoke to verify invalid mapping rejection preserves the existing project, Matrix drafts and custom functions, and that a valid 3D mapping round-trips exactly. Existing malformed project, v1 migration, 2 MB limit, table/graph cell and injected rollback cases remain.
+
+Standalone contract: the `promath-project-schema` inline script in `index.html` is updated from the same exact source string as `src/project-schema.js`; the pre-edit parity check passed and the new source/bundle equality is asserted before commit.
+
+Validation: direct isolated V8 execution of the actual candidate schema module passes valid 2D/3D and legacy cases, rejects each invalid mapping/style/mode fixture, and does not mutate input. The local execution workspace has no repository checkout, so native local Python/Playwright/build commands were not run. Fresh exact-head Push and PR Quality must execute the registered static and Chromium tests.
+
+Release: PR #191 remains open and mergeable; no independent reviews are submitted. Only `dev` and `main` refs exist; rulesets are empty, and main branch-protection reads return HTTP 403 to the integration. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest production Quality/Pages evidence remains the successful main runs recorded in the preceding ledger entry. Historical MATLAB inventory remains frozen at **166 gaps / 95 partial**.
+
+Status: implemented and committed on dev; new exact-head Push/PR Quality pending; not released.
+
+### NEXT FIVE
+
+1. **P0 — Verify this primary Graph mapping fix.** Acceptance: Push and PR Quality green on the same exact dev SHA with zero failed/skipped required steps; Node and Chromium accept legacy/default and valid 2D/3D mappings, reject invalid mode/index/style/duplicate axes, preserve full prior project on rejection and pass 1280px/390px.
+2. **P0 — Release governance for PR #191.** Acceptance: eligible independent approval; verifiable main protection requiring exact-head Quality and preventing direct pushes/force/deletion; complete diff review; ordinary dev-to-main PR merge; exact-main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Acceptance: current/v1 round-trips for Matrix drafts, Graph functions/curves/datasets/overlays and Table formulas/selections; malformed imports and injected restore failures preserve every prior workspace, focus, selections and results at desktop/390px.
+4. **P1 — Finish Data Tables structural-reference boundary matrix.** Acceptance: row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort, cross-sheet recalculation, persistent #REF! and transactional rollback; source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundary audit.** Acceptance: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, selected-member isolation and responsive browser tests.
+
+---
+
 ## 2026-11-26 — PROJECT-GRAPH-DATASET-OVERLAY-VALIDATION
 
 Starting refs: dev `a4e6740963ee415520de74be794afc6854ad4d0d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen 2026-10-26 inventory, unified master plan, project-format contract, Graph dataset restore implementation, registered tests, PR #191, exact-head CI, branch/ruleset state and main/Pages evidence.

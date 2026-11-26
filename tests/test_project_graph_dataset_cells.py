@@ -65,6 +65,28 @@ const legacyOverlay=withOverlay();legacyOverlay.version=1;
 assert.strictEqual(migrate(legacyOverlay).version,2,'legacy v1 graph overlays remain supported');
 const noExtra=basic();noExtra.graph.dataset.extra=null;
 assert.strictEqual(migrate(noExtra).graph.dataset.extra,null,'null legacy overlay list remains tolerated');
+
+const mapped3d=()=>{const data=basic();data.graph={mode:'3d',dataset:{
+ headers:['time','value','height'],rows:[[0,1,2],[1,2,3]],x:'0',y:'1',z:'2',style:'line'}};return data;};
+const validMapped=mapped3d(),mappedSnapshot=JSON.stringify(validMapped);
+assert.strictEqual(migrate(validMapped).graph.dataset.x,'0');
+assert.strictEqual(migrate(validMapped).graph.dataset.style,'line');
+assert.strictEqual(JSON.stringify(validMapped),mappedSnapshot,'primary mapping validation must not mutate input');
+const invalidPrimary=(mutate,pattern)=>{const data=mapped3d();mutate(data.graph);assert.throws(()=>migrate(data),pattern);};
+invalidPrimary(graph=>graph.mode='4d',/graph mode is invalid/);
+invalidPrimary(graph=>graph.dataset.x='3',/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.y='not-a-column',/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.z=-1,/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.x='1',/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.z='1',/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.style='dots',/graph dataset style is invalid/);
+const legacyMapping=basic();delete legacyMapping.graph.dataset.x;delete legacyMapping.graph.dataset.y;
+delete legacyMapping.graph.dataset.z;delete legacyMapping.graph.dataset.style;
+assert.strictEqual(migrate(legacyMapping).version,2,'legacy datasets without selectors remain supported');
+const valid2d=mapped3d();valid2d.graph.mode='2d';valid2d.graph.dataset.z='1';
+assert.strictEqual(migrate(valid2d).graph.dataset.z,'1','2D may retain a dormant Z selector');
+const invalid3dDefaults=basic();invalid3dDefaults.graph.mode='3d';
+assert.throws(()=>migrate(invalid3dDefaults),/graph dataset mapping is invalid/);
 """
         result = subprocess.run(
             ["node", "-e", script], cwd=ROOT,

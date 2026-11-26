@@ -3141,6 +3141,8 @@ self.onmessage=async ({data})=>{
           (flags.positive===true && flags.negative===true)) fail('solver assumptions are invalid or contradictory.');
     }
     if (data.graph?.functions !== undefined) short(data.graph.functions, 12000, 'graph functions');
+    if (data.graph?.mode !== undefined && !['2d', '3d'].includes(data.graph.mode))
+      fail('graph mode is invalid.');
     if (data.graph?.dataset !== undefined && data.graph.dataset !== null) {
       const set = data.graph.dataset;
       if (!record(set) || !Array.isArray(set.headers) || !Array.isArray(set.rows) ||
@@ -3158,6 +3160,35 @@ self.onmessage=async ({data})=>{
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
+      // Validate persisted primary-series selectors before restoreState can silently
+      // replace an invalid column with its default. Missing selectors remain legacy-safe.
+      const hasMapping = key => Object.prototype.hasOwnProperty.call(set, key);
+      const validIndex = value =>
+        (typeof value === 'number' || (typeof value === 'string' && value.trim() !== '')) &&
+        Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) < set.headers.length;
+      const defaultColumn = (aliases, fallback) => {
+        const index = set.headers.findIndex(header => aliases.includes(header.trim().toLowerCase()));
+        return index >= 0 ? index : fallback;
+      };
+      const axes = {
+        x: defaultColumn(['x', 'time', 't'], 0),
+        y: defaultColumn(['y', 'value', 'measurement'], Math.min(1, set.headers.length - 1)),
+        z: defaultColumn(['z', 'height', 'depth'], Math.min(2, set.headers.length - 1))
+      };
+      if (axes.x === axes.y) axes.y = (axes.x + 1) % set.headers.length;
+      if (set.headers.length >= 3 && [axes.x, axes.y].includes(axes.z))
+        axes.z = set.headers.findIndex((_, index) => ![axes.x, axes.y].includes(index));
+      for (const key of ['x', 'y', 'z']) {
+        if (hasMapping(key)) {
+          if (!validIndex(set[key])) fail('graph dataset mapping is invalid.');
+          axes[key] = Number(set[key]);
+        }
+      }
+      if (axes.x === axes.y ||
+          (data.graph?.mode === '3d' && (axes.x === axes.z || axes.y === axes.z)))
+        fail('graph dataset mapping is invalid.');
+      if (hasMapping('style') && !['points', 'line', 'grid'].includes(set.style))
+        fail('graph dataset style is invalid.');
       if (set.extra !== undefined && set.extra !== null) {
         if (!Array.isArray(set.extra) || set.extra.length > 20)
           fail('graph dataset overlays must be a list of at most 20.');

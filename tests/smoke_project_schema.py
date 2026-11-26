@@ -43,6 +43,8 @@ def main():
             assert current['working'] == migrated['working']
             assert [i['raw'] for i in current['notebook']] == ['x+1']
             assert current['tables'] == migrated['tables']
+            assert current['matrix'] == migrated['matrix'], 'invalid import mutated Matrix drafts'
+            assert current['customFunctions'] == migrated['customFunctions'], 'invalid import mutated custom functions'
             assert current['graph'] == graph_before, 'invalid import mutated graph state'
 
         rejected(dict(legacy, version=99, working='WRONG'))
@@ -73,6 +75,27 @@ def main():
                       ['time', ' '], ['', 'value']):
             rejected(dict(legacy, working='WRONG', graph={
                 'dataset': {'headers': names, 'rows': [[0, 2], [1, 3]]}}))
+        # Primary Graph selectors are persisted too. Invalid explicit selectors or
+        # plot styles must be rejected before any other workspace is changed.
+        def mapped_graph(mode='3d'):
+            return {'mode': mode, 'dataset': {
+                'name': 'mapped.csv', 'headers': ['time', 'value', 'height'],
+                'rows': [[0, 1, 2], [1, 2, 3]],
+                'x': '0', 'y': '1', 'z': '2', 'style': 'line'}}
+        invalid_primary = []
+        bad = mapped_graph(); bad['mode'] = '4d'; invalid_primary.append(bad)
+        bad = mapped_graph(); bad['dataset']['x'] = '3'; invalid_primary.append(bad)
+        bad = mapped_graph(); bad['dataset']['y'] = 'time'; invalid_primary.append(bad)
+        bad = mapped_graph(); bad['dataset']['z'] = -1; invalid_primary.append(bad)
+        bad = mapped_graph(); bad['dataset']['x'] = '1'; invalid_primary.append(bad)
+        bad = mapped_graph(); bad['dataset']['z'] = '1'; invalid_primary.append(bad)
+        bad = mapped_graph(); bad['dataset']['style'] = 'dots'; invalid_primary.append(bad)
+        bad = {'mode': '3d', 'dataset': {
+            'headers': ['time', 'value'], 'rows': [[0, 1], [1, 2]]}}
+        invalid_primary.append(bad)
+        for graph_state in invalid_primary:
+            rejected(dict(legacy, working='WRONG', graph=graph_state))
+
         good_graph = dict(legacy, working='x+1', graph={
             'dataset': {'headers': ['time', 'value'], 'rows': [[0, 2], [1, None]]}})
         upload(page, good_graph)
@@ -81,6 +104,14 @@ def main():
         page.wait_for_function("() => window.MathStudio.bridge.export().graph.dataset?.rows?.length === 2")
         assert page.evaluate("window.MathStudio.bridge.export().graph.dataset.rows[1][1]") is None
         assert page.evaluate("window.MathStudio.bridge.export().graph.dataset.headers") == ['time', 'value']
+        mapped = dict(legacy, working='x+1', graph=mapped_graph())
+        upload(page, mapped)
+        page.wait_for_function("() => { const g=window.MathStudio.bridge.export().graph; return g.mode === '3d' && g.dataset?.rows?.length === 2; }")
+        restored_graph = page.evaluate("window.MathStudio.bridge.export().graph")
+        assert restored_graph['dataset']['x'] == '0'
+        assert restored_graph['dataset']['y'] == '1'
+        assert restored_graph['dataset']['z'] == '2'
+        assert restored_graph['dataset']['style'] == 'line'
 
         # Nonfinite table numeric values are rejected during schema validation.
         # JSON itself cannot encode Infinity, but JSON.parse may receive 1e999,

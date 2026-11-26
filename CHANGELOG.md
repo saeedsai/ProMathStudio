@@ -1,3 +1,10 @@
+## 2026-11-26 — Reject invalid primary Graph dataset mappings in saved projects
+
+- Added pre-import validation for saved Graph mode, primary X/Y/Z selectors and plot style. Invalid explicit selectors no longer silently fall back to header-based defaults during restore.
+- Preserved legacy projects that omit selector/style fields and the dormant 2D Z selector; 3D mappings require distinct axes.
+- Added Node schema and Chromium atomic-import/round-trip regressions, synchronized the standalone project-schema script, and documented the backup contract.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Reject malformed Graph dataset overlays in saved projects
 
 - Added pre-import validation for additional graph series: overlay count, table dimensions/cells, X/Y/Z mappings, 2D/3D mode, plot style and at least one numeric point.

@@ -67,3 +67,8 @@ Graph state remains backward compatible: a missing dataset imports as no plotted
 ## Primary Graph dataset mappings
 
 A saved Graph dataset may omit its legacy `x`, `y`, `z` and `style` selectors; those projects retain the historical header-based defaults. When selectors are present, each axis must be a valid nonnegative safe-integer column index (number or a bounded base-10 integer string with optional surrounding whitespace or leading plus). Radix-prefixed and exponent-form strings, fractional/negative values, and overlong raw strings are rejected. X and Y must differ; a saved 3D graph must also use a distinct Z column. A saved graph mode must be `2d` or `3d`, and an explicit style must be `points`, `line` or `grid`. Invalid saved selectors are rejected before import confirmation rather than silently replaced with default columns. In 2D, the stored Z selector may overlap X or Y because it is dormant until switching to 3D.
+
+
+## Saved Matrix drafts
+
+A present `matrix` object stores the Matrix workspace draft. Its A and B row/column dimensions must each be 2 or 3; A, B, RHS and weights arrays must match those dimensions. Each draft entry is a string of at most 80 characters. An empty string is allowed for an unfinished cell; nonempty values must use decimal/scientific notation, convert to a finite number, and have absolute value no greater than `1e12`. Radix-prefixed values, non-finite exponents and values outside the solver input bound are rejected. Version 1 projects that omit the optional Matrix object remain supported. Both project migration and the directly exposed Matrix restore API enforce the same numeric bounds; direct restore validates the complete draft before changing any grid input.

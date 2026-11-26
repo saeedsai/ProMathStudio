@@ -1,3 +1,31 @@
+## 2026-11-26 23:00 CET — MATRIX-DIRECT-RESTORE-FINITE-BOUND
+
+Starting refs: dev `3229189ab96c968869ebf40f2e9b0016a94b58b3`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the current living plan, frozen 2026-10-26 MATLAB inventory, project-format contract, Matrix schema/restore source, registered Node/Chromium tests, PR #191, exact-head Quality, branch refs and main/Pages evidence. Frozen historical baseline remains **166 gaps / 95 partial**.
+
+Starting exact-head Quality is green: Push [#45897416151](https://github.com/saeedsai/ProMathStudio/actions/runs/45897416151) and PR [#45897425376](https://github.com/saeedsai/ProMathStudio/actions/runs/45897425376) both ran on exact `3229189ab96c968869ebf40f2e9b0016a94b58b3`; each completed its single static/browser job with **218/218 steps successful, zero failures and zero skipped steps**. Branch list contains only dev/main. PR #191 is open/mergeable, 77 commits ahead and zero behind; submitted independent reviews: zero.
+
+Defect: `MathStudio.matrixTools.restoreState()` is directly exposed and can be called without the project bridge. Its draft validator checked decimal/scientific syntax and the 80-character limit, but did not check numeric conversion or the Matrix solver's `1e12` magnitude bound. Thus direct calls accepted `1e999` (which converts to Infinity) and `1e13`, even though project import correctly rejects both in `project-schema.js`. This made the direct restore contract weaker than saved-project migration and could place unusable drafts into the live grids.
+
+Implementation: align the direct restore validator with the project schema. Empty strings remain valid unfinished cells; nonempty strings must match decimal/scientific syntax, convert to a finite number and satisfy `abs(value) <= 1e12`. The 80-character raw bound remains. Validation still completes for all four arrays (A, B, RHS and weights) before any dimensions or inputs are changed.
+
+Regression: extend the real Chromium Matrix project-state smoke to prove exact boundary acceptance at +1e12 and -1e12, then reject +/−1e999 and +/−1e13 independently in A, B, RHS and weights through the directly exposed API. Each rejection must return the established field-specific error and leave the entire prior draft unchanged. Extend the structural test to assert source/standalone parity and the finite/magnitude guard. The project schema and project version are unchanged.
+
+Validation before commit: verified starting `src/matrix-tools.js` is byte-for-byte equal (ignoring trailing newline only) to the `promath-matrix-tools` script in standalone `index.html`. The execution workspace has no repository checkout, so native Node/Playwright/build commands cannot be run locally; the direct Chromium regression is registered for exact-head GitHub Actions. Fresh Push and PR Quality on the new commit remain pending until GitHub reports completion.
+
+Files changed atomically: `src/matrix-tools.js`, standalone `index.html`, `tests/smoke_matrix_project_state.py`, `tests/test_matrix_project_finite_drafts.py`, `docs/PROJECT_FORMAT.md`, this plan, execution ledger and changelog. Main remains unchanged; no release/deployment is claimed. PR #191 still has zero independent reviews; both branches report unprotected, rulesets are empty, and branch-protection read remains unavailable to the integration (HTTP 403). No merge or direct main update. Latest main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) both succeeded on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5` on 24 November 2026; no newer production deployment was identified.
+
+Status: direct Matrix restore bound fix and Node/Chromium regression implemented on dev; exact-head QA pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Verify Matrix direct-restore finite bounds (In QA).** Both new exact-head Push and PR Quality green, zero failures/skips; Chromium at 1280px and 390px accepts blank and exact ±1e12 drafts, rejects ±1e999 and ±1e13 for A/B/RHS/weights, preserves all prior inputs after each failure, and source/bundle parity passes.
+2. **P0 — Resolve PR #191 release governance (Blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct pushes, force pushes and deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Partial).** Current/v1 round-trips preserve Matrix drafts, graph functions/curves/datasets/overlays, table sheets/selection/focus; malformed imports and injected restore failures preserve all prior workspaces at desktop and 390px.
+4. **P1 — Finish Data Tables structural-reference boundaries (Partial).** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sorting/recalculation, persistent #REF!, transactional rollback and standalone source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundaries (Partial).** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
+
+---
+
 ## 2026-11-26 22:02 CET — GRAPH-SAVED-DATASET-PREVALIDATION
 
 Starting refs: dev `f9e8aa80e751e8d71dc27e5de1544b3abf1c7216`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 MATLAB inventory, project-format contract, Graph dataset restore implementation and registered Node/Chromium tests, PR #191, exact-head Quality, branch refs, main Quality and Pages evidence. The frozen historical baseline remains **166 gaps / 95 partial**.

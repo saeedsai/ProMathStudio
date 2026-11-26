@@ -1,3 +1,15 @@
+## 2026-11-26 23:00 CET — Matrix direct-restore finite-bound alignment
+
+- Starting dev `3229189ab96c968869ebf40f2e9b0016a94b58b3`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; re-read AGENTS.md, living plan, frozen inventory, project-format docs, Matrix source/schema/tests, PR #191 and current CI/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Starting exact-head Push [#45897416151](https://github.com/saeedsai/ProMathStudio/actions/runs/45897416151) and PR [#45897425376](https://github.com/saeedsai/ProMathStudio/actions/runs/45897425376) both passed 218/218 on exact `3229189ab96c968869ebf40f2e9b0016a94b58b3`, zero failures/skips.
+- Found direct `MathStudio.matrixTools.restoreState()` accepted decimal/scientific strings that converted to Infinity (`1e999`) or exceeded the solver's `1e12` bound (`1e13`), although project-schema import rejects them.
+- Aligned direct restore with project schema: preserve empty drafts and 80-character limit; nonempty decimal/scientific strings must convert to finite values with absolute magnitude at most `1e12`. All A/B/RHS/weights validate before any DOM mutation.
+- Added Chromium direct-API regression for ±1e999 and ±1e13 in all four arrays, exact ±1e12 acceptance, field-specific diagnostics and full state preservation after every rejection. Extended structural source/bundle parity assertion and documented Matrix draft constraints.
+- Starting Matrix source and standalone inline script parity verified. No local checkout, so native Node/Playwright/build not run; new exact-head GitHub Actions are authoritative and pending.
+- Source, standalone bundle, two regressions, project-format contract, plan, ledger and changelog are one atomic eight-file dev commit. Main unchanged; not released.
+- PR #191 remains open, 77 ahead/0 behind, zero independent reviews. Only dev/main branches; both unprotected, rulesets empty, branch-protection read HTTP 403. No merge/direct main update. Latest main Quality #45360386408 and Pages #45360367251 successful on 24-Nov-2026; no new deployment.
+- Next five acceptance priorities are at the top of the living plan. Frozen inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-26 — Truss preview compensated aggregate totals
 
 - Starting dev `9f0ac458ed21847340936c6d343131ef667b9ebc`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, unified master plan, engineering architecture/catalogs, Truss FEM source/tests/contract, PR #191 and current Actions/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.

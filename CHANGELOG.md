@@ -1,3 +1,9 @@
+## 2026-11-26 — Align direct Matrix restore with finite solver bounds
+
+- Hardened `MathStudio.matrixTools.restoreState()` so nonempty decimal/scientific drafts must convert to finite values with absolute magnitude at most `1e12`, matching project import; blank unfinished cells and the 80-character limit remain supported.
+- Invalid A/B/RHS/weights arrays reject before any grid mutation. Added Chromium coverage for exact ±1e12 boundaries, ±1e999 overflow and ±1e13 out-of-bound values, plus structural standalone source/bundle parity.
+- Implemented on dev; exact-head Push/PR Quality required; not released.
+
 ## 2026-11-26 — Validate and restore saved Graph datasets before application
 
 - Align primary saved Graph dataset validation with the live importer: 2–32 columns, names at most 100 characters, 1–6,000 rows, and at least one finite numeric point for the persisted axes (including Z in 3D).

@@ -1,3 +1,9 @@
+## Compensated global stiffness assembly
+
+The FEM assembler collects every finite member contribution to each global stiffness-matrix coefficient before summing that coefficient with the existing `finiteSignedSum` helper. This avoids sequential `+=` losing several individually sub-ulp parallel-member stiffness terms that together change the rounded coefficient. Same-sign terms use Neumaier compensation in original units; mixed-sign terms use an exact sum of the supplied binary64 terms when BigInt is available and the existing scaled compensated fallback otherwise. The matrix and solve remain IEEE-754 binary64; this is not arbitrary-precision FEM.
+
+A synthetic horizontal-bar boundary fixture uses one member with stiffness (10^{16}) N/m and twenty parallel members with stiffness 1 N/m each. Ordinary sequential addition returns (10^{16}) N/m, while the correctly rounded aggregate is (10^{16}+20) N/m. With a (10^{16}) N axial load, the displacement must agree within (2\times10^{-16}) m with (10^{16}/(10^{16}+20)), rather than the old naive-assembly result of exactly 1 m. The free-DOF residual and strain-energy checks must remain below the existing (10^{-6}) solver tolerance. These extreme stiffnesses are numerical stress fixtures, not physical structural design examples. Node and Chromium regressions exercise the same case at 1280px and 390px.
+
 ## Compensated Truss preview aggregate totals
 
 The JSON preview reports total member centreline length and total SI material volume using the existing Neumaier compensated summation helper. This preserves low-order contributions from small members when they are added to a much larger running total, while still returning ordinary binary64 values and rejecting genuinely overflowing totals. Individual member lengths and volumes remain the already-computed binary64 quantities; this does not increase their precision.

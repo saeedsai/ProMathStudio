@@ -1019,6 +1019,9 @@
   function solve(input) {
     const {nodes, members} = parseModel(input), n = nodes.length, N = n * 2;
     const K = Array.from({length: N}, () => new Float64Array(N));
+    // Assemble each coefficient from its complete set of member contributions. Sequential
+    // += can lose several individually sub-ulp parallel-member terms that together matter.
+    const stiffnessTerms = new Map();
     const F = new Float64Array(N), fixed = new Set();
     nodes.forEach((node, i) => {
       F[2 * i] = node.fx; F[2 * i + 1] = node.fy;
@@ -1027,7 +1030,16 @@
     });
     for (const m of members) {
       const v = [-m.c, -m.s, m.c, m.s], dof = [2*m.a, 2*m.a+1, 2*m.b, 2*m.b+1];
-      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) K[dof[i]][dof[j]] += m.stiffness*v[i]*v[j];
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+        const term = m.stiffness*v[i]*v[j];
+        if (term === 0) continue;
+        const key = dof[i]*N+dof[j], terms = stiffnessTerms.get(key);
+        if (terms) terms.push(term); else stiffnessTerms.set(key,[term]);
+      }
+    }
+    for (const [key, terms] of stiffnessTerms) {
+      const row = Math.floor(key/N), column = key%N;
+      K[row][column] = finiteSignedSum(terms, 'Global stiffness matrix entry (N/m)');
     }
     const free = Array.from({length: N}, (_, i) => i).filter(i => !fixed.has(i));
     if (!free.length) throw Error('At least one displacement DOF must remain free.');

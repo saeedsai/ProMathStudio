@@ -2441,3 +2441,30 @@ test('hollow rectangles preserve small-cavity area, inertia and radius rounding'
   assert.equal(fallback.secondMomentPerpendicular,0.08333333333333333);
  } finally { globalThis.BigInt=originalBigInt; }
 });
+
+test('global stiffness assembly retains combined sub-ulp parallel-member contributions',()=>{
+ const model={
+  nodes:[
+   {id:'A',x:0,y:0,fixX:true,fixY:true,fx:0,fy:0},
+   {id:'B',x:1,y:0,fixX:false,fixY:true,fx:1e13,fy:0}
+  ],
+  members:[
+   {id:'large',a:'A',b:'B',E:1e13,area:1},
+   ...Array.from({length:20},(_,i)=>({id:'small-'+i,a:'A',b:'B',E:1e-6,area:1000}))
+  ]
+ };
+ const original=clone(model);
+ const naiveStiffness=[1e16,...Array(20).fill(1)].reduce((sum,value)=>sum+value,0);
+ assert.equal(naiveStiffness,1e16,'naive sequential assembly loses all twenty 1 N/m members');
+ const expected=1e16/(1e16+20);
+ const result=fem.solve(model);
+ const displacement=result.displacements.find(node=>node.id==='B').x;
+ assert.ok(Math.abs(displacement-expected)<=2e-16,
+  'diagonal-scaled FEM displacement must reflect the compensated 1e16+20 N/m stiffness: '+displacement);
+ assert.ok(displacement<1-1e-15,'the old naive assembly incorrectly returns exactly 1 m');
+ assert.ok(result.residual<1e-6,'free-DOF equilibrium residual remains within the solver contract');
+ assert.ok(result.energyError<1e-6,'strain-energy verification remains within the solver contract');
+ assert.equal(result.members.length,21);
+ assert.deepEqual(model,original,'FEM solve must not mutate the source model');
+});
+

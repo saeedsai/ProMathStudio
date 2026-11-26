@@ -2321,3 +2321,17 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - Isolated V8 checks against actual modified schema passed; source/bundle parity and mapping-order checks passed. Native repository Playwright unavailable without a checkout; new exact-head Actions pending.
 - PR #191 remains open; zero independent reviews, both branches unprotected, rulesets empty, protection endpoint 403. No merge. Main Quality #45360386408 and Pages #45360367251 remain successful on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no new deployment.
 - Status: implemented on dev, QA pending, not released. Frozen inventory remains **166 gaps / 95 partial**.
+
+
+## 2026-11-26 23:59 CET — Truss FEM compensated global stiffness assembly
+
+- Starting dev `d3b24e2734e120ad64e103ec1d2b2d846fc8f02d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan (including its 23:00 entry), frozen MATLAB inventory, unified master plan, engineering architecture, Truss FEM source/tests/contract, PR #191, exact-head Actions and production evidence. Frozen inventory remains **166 gaps / 95 partial**.
+- Exact starting-head Push Quality [#45903222060](https://github.com/saeedsai/ProMathStudio/actions/runs/45903222060) and PR Quality [#45903227965](https://github.com/saeedsai/ProMathStudio/actions/runs/45903227965) both passed on `d3b24e2734e120ad64e103ec1d2b2d846fc8f02d`: 218/218 steps each, zero failures/skips.
+- Found that global stiffness matrix entries used naive sequential `+=` for member contributions. A large member at (10^{16}) N/m followed by twenty parallel 1 N/m members loses every small contribution in binary64, even though their combined +20 changes the rounded coefficient.
+- Changed `tools/truss-fem.js` to collect each finite element contribution per global matrix coefficient and sum the complete set using the existing `finiteSignedSum` helper. Same-sign terms use Neumaier compensation in original units; mixed-sign terms retain the exact binary64 accumulator/compatibility fallback. No model or UI contract changed.
+- Added a direct Node regression to `tests/test_truss_fem.js` and a registered Chromium regression to `tests/smoke_truss_fem.py`. The 21-member horizontal-bar fixture checks the lost naive sum, displacement against (10^{16}/(10^{16}+20)), residual, energy error and member count at 1280px/390px.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`, this ledger, the living plan and CHANGELOG. No root `index.html` change is required: Truss FEM is loaded as an adjacent script. The source/test/docs/records are one atomic multi-file dev commit.
+- Isolated Python binary64 reference arithmetic: naive sum (10^{16}); correctly rounded sum (10^{16}+20); expected displacement 0.999999999999998; diagonal-scaled solve arithmetic 0.9999999999999981; old naive displacement 1.0. This verifies the fixture math, not the actual production module. No repository checkout is mounted, so native Node/Playwright commands were unavailable; new exact-head Actions must run the committed regressions.
+- Release remains blocked: PR #191 open, 80 ahead/0 behind, zero independent reviews; only dev/main branches, empty rulesets and branch-protection GET 403. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production workflows on unchanged main (24-Nov-2026); no new deployment/live verification.
+- Status: implemented on dev, exact-head Push/PR Quality pending, not released. Next five acceptance priorities are at the top of the living plan.
+

@@ -1586,3 +1586,7 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 ## 2026-11-26
 
 - Saved Graph project validation: primary and overlay axis selectors now require bounded base-10 integer strings or safe integer numbers. Rejects radix-prefixed, exponent-form, fractional, negative and overlong raw string indices instead of relying on JavaScript `Number()` coercion. Preserves omitted legacy selectors, bounded whitespace/plus decimal strings, dormant 2D Z mappings and project version 2. Added Node structural and Chromium atomic-import rollback regressions; synchronized `src/project-schema.js` into standalone `index.html`. Implemented on dev; exact-head Quality and release pending.
+
+
+- 2026-11-26 (dev, exact-head QA pending): Truss FEM global stiffness assembly now collects each member's finite contribution per matrix coefficient and uses the existing compensated/exact binary64 accumulator before rounding. This preserves twenty 1 N/m parallel-member contributions alongside a 1e16 N/m member when their combined +20 changes the rounded coefficient. Added direct Node and registered Chromium regressions for displacement, equilibrium residual and energy checks at 1280px/390px; no root bundle change is required because Truss FEM is an adjacent script.
+

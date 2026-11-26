@@ -2025,6 +2025,40 @@ def main():
             assert small_cavity['fallbackIxx'] == 0.08333333333333333, small_cavity
             assert small_cavity['fallbackIyy'] == 0.08333333333333333, small_cavity
 
+            # The global stiffness matrix must retain parallel-member terms that a naive
+            # left-to-right += loses after a dominant member contribution.
+            for width in (1280, 390):
+                page.set_viewport_size({"width": width, "height": 850})
+                stiffness = page.evaluate("""() => {
+                    const model = {
+                        nodes: [
+                            {id:'A',x:0,y:0,fixX:true,fixY:true,fx:0,fy:0},
+                            {id:'B',x:1,y:0,fixX:false,fixY:true,fx:1e13,fy:0}
+                        ],
+                        members: [
+                            {id:'large',a:'A',b:'B',E:1e13,area:1},
+                            ...Array.from({length:20},(_,i) => ({
+                                id:'small-'+i,a:'A',b:'B',E:1e-6,area:1000
+                            }))
+                        ]
+                    };
+                    const naive = [1e16,...Array(20).fill(1)].reduce((sum,value) => sum+value,0);
+                    const result = ProMathTrussFEM.solve(model);
+                    return {
+                        naive,
+                        displacement: result.displacements.find(node => node.id === 'B').x,
+                        residual: result.residual,
+                        energyError: result.energyError,
+                        memberCount: result.members.length
+                    };
+                }""")
+                expected_displacement = 1e16 / (1e16 + 20)
+                assert stiffness["naive"] == 1e16, stiffness
+                assert abs(stiffness["displacement"] - expected_displacement) <= 2e-16, (width, stiffness)
+                assert stiffness["displacement"] < 1 - 1e-15, (width, stiffness)
+                assert stiffness["residual"] < 1e-6 and stiffness["energyError"] < 1e-6, (width, stiffness)
+                assert stiffness["memberCount"] == 21, (width, stiffness)
+
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
             assert not errors, errors

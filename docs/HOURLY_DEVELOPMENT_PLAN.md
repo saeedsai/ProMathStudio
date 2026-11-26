@@ -1,3 +1,31 @@
+## 2026-11-26 23:59 CET — TRUSS-FEM-COMPENSATED-GLOBAL-STIFFNESS-ASSEMBLY
+
+**Starting refs:** dev `d3b24e2734e120ad64e103ec1d2b2d846fc8f02d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the frozen 2026-10-26 MATLAB inventory, this living plan, the unified master plan, engineering architecture, Truss FEM source/tests/contract, PR #191, exact-head Actions and production evidence. The historical inventory remains frozen at **166 gaps / 95 partial**.
+
+**Starting exact-head QA:** Push Quality [#45903222060](https://github.com/saeedsai/ProMathStudio/actions/runs/45903222060) and PR Quality [#45903227965](https://github.com/saeedsai/ProMathStudio/actions/runs/45903227965) both passed on exact starting dev SHA `d3b24e2734e120ad64e103ec1d2b2d846fc8f02d`. Each static/browser job completed **218/218 steps**, zero failures and zero skipped steps. No existing exact-head CI failure remained, so the highest-priority feasible unfinished Truss numerical correctness slice was selected.
+
+**Defect:** Global FEM stiffness coefficients were assembled with sequential `K[i][j] += m.stiffness*v[i]*v[j]`. This can discard several individually sub-ulp parallel-member contributions even when their combined contribution changes the correctly rounded coefficient. A synthetic horizontal-bar fixture has one (10^{16}) N/m member followed by twenty 1 N/m members: naive reduction stays at (10^{16}), while the correctly rounded total is (10^{16}+20). With a (10^{16}) N axial load, the old assembly returns exactly 1 m displacement instead of approximately 0.999999999999998 m.
+
+**Implementation:** Collect finite member contributions by global stiffness-matrix index, then sum each coefficient through the existing `finiteSignedSum` helper. Same-sign terms use original-unit Neumaier compensation; mixed-sign terms use the existing exact binary64 accumulator when available and its scaled compensated fallback otherwise. The matrix and solver remain binary64. No UI, model schema, unit convention, member force, or offline root bundle change is required because Truss FEM is an adjacent script.
+
+**Regression:** Added a direct Node case to `tests/test_truss_fem.js` and a registered Chromium case to `tests/smoke_truss_fem.py`. Both use one (10^{16}) N/m member plus twenty 1 N/m parallel members and a (10^{16}) N load; assert the naive sum loses the small terms, the solved displacement is within (2\times10^{-16}) m of (10^{16}/(10^{16}+20)), the old result of exactly 1 m is not returned, the free-DOF residual and energy error stay below (10^{-6}), and all 21 member results remain present. Chromium executes at 1280px and 390px. Updated the Structural Truss numerical contract.
+
+**Isolated fixture validation:** Python binary64 reference arithmetic confirmed naive sum (10^{16}), `math.fsum` result (1.000000000000002\times10^{16}), expected displacement 0.999999999999998, and the existing diagonal-scaled solve arithmetic yields 0.9999999999999981 (absolute difference (1.11\times10^{-16})). The old naive path returns 1.0 (error (1.998\times10^{-15})). This validates the regression fixture and tolerance, not execution of the repository's production module. The local execution environment has no checkout, so native `node --test` and Playwright cannot run here; exact-head GitHub Actions must certify the committed Node and Chromium tests.
+
+**Release state:** PR #191 remains open/mergeable, 80 commits ahead / 0 behind, 32 changed files, zero independent reviews. Only dev/main branches exist. Both branches report unprotected; rulesets query is empty; main branch-protection GET returns HTTP 403 to the connected integration. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are the latest successful production workflows on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5` (24 November 2026). No newer Pages deployment or live hosted verification is claimed.
+
+**Status:** source, Node/Chromium regressions, Structural Truss contract, plan, ledger and changelog committed atomically on existing dev; new exact-head Push/PR Quality pending; implemented on dev / In QA / not released.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Certify compensated Truss stiffness assembly (In QA).** Both exact-head Push and PR Quality green with zero failures/skips; Node and Chromium at 1280px/390px verify the (10^{16}+20) N/m reference, displacement tolerance, old naive failure, 21 member results, residual and energy checks.
+2. **P0 — Resolve PR #191 release governance (Blocked).** Obtain eligible independent review and verifiable main protection requiring exact-head Quality and forbidding direct/force pushes and deletion; inspect the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Finish seven-shape Truss numerical boundaries (Partial).** Complete low-exponent/underflow and near-solid cases for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle; compare independent area, centroid, Ixx/Iyy, section modulus and radius references; preserve invalid rollback, selected-member isolation, E/density/K, and 390px keyboard behavior.
+4. **P1 — Complete Data Tables structural-reference boundaries (Partial).** Verify row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, doubled formula-string quotes, reversed/blank ranges, sorting/recalculation, persistent `#REF!`, atomic rollback and source/bundle parity.
+5. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Partial).** Current/v1 round-trips preserve drafts, graph datasets/overlays, sheets, selection and focus; malformed imports and injected restore failures preserve all prior workspaces at desktop and 390px.
+
+---
+
 ## 2026-11-26 23:00 CET — MATRIX-DIRECT-RESTORE-FINITE-BOUND
 
 Starting refs: dev `3229189ab96c968869ebf40f2e9b0016a94b58b3`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the current living plan, frozen 2026-10-26 MATLAB inventory, project-format contract, Matrix schema/restore source, registered Node/Chromium tests, PR #191, exact-head Quality, branch refs and main/Pages evidence. Frozen historical baseline remains **166 gaps / 95 partial**.
@@ -16,7 +44,7 @@ Files changed atomically: `src/matrix-tools.js`, standalone `index.html`, `tests
 
 Status: direct Matrix restore bound fix implemented on dev; first exact-head CI exposed and repaired a standalone trailing-newline parity defect; fresh exact-head QA pending; not released. Historical inventory remains **166 gaps / 95 partial**.
 
-## NEXT FIVE — current priorities and acceptance tests
+## Prior NEXT FIVE — 23:00 CET (superseded by 23:59 CET update)
 
 1. **P0 — Verify Matrix direct-restore finite bounds (In QA).** Both new exact-head Push and PR Quality green, zero failures/skips; Chromium at 1280px and 390px accepts blank and exact ±1e12 drafts, rejects ±1e999 and ±1e13 for A/B/RHS/weights, preserves all prior inputs after each failure, and source/bundle parity passes.
 2. **P0 — Resolve PR #191 release governance (Blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct pushes, force pushes and deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.

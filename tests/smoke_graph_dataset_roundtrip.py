@@ -27,6 +27,14 @@ def main():
           const g = MathStudio.graphData;
           g.loadTable({headers: ['t', 'v', 'label'],
                        rows: [['0', '1.5', 'a'], ['1', '', 'b'], ['2', '3e2', 'c']]}, 'MIX', {x: 0, y: 1, z: 2});
+          const before=JSON.stringify(g.exportState());
+          for(const headers of [['t','T'],['t',' ']]){
+            let error='';
+            try{g.addTable({headers,rows:[['0','2']]},'INVALID',{x:0,y:1,mode:'2d'});}
+            catch(e){error=e.message;}
+            if(error!=='Invalid column names.')throw Error('ambiguous overlay headers were accepted: '+headers);
+            if(JSON.stringify(g.exportState())!==before)throw Error('rejected overlay changed the existing graph dataset');
+          }
           g.addTable({headers: ['t', 'w'], rows: [['0', '2'], ['1', '4']]}, 'OVERLAY',
                      {x: 0, y: 1, z: 1, mode: '2d', style: 'line'});
         }""")
@@ -48,6 +56,16 @@ def main():
         page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
         assert page.evaluate('window.MathStudio.bridge.export().working') == 'RT1'
         assert page.evaluate('window.MathStudio.bridge.export().graph.dataset') == dataset
+
+        # Saved overlays must use the same unambiguous header identity rule as primary datasets.
+        for names in (['t', 'T'], ['t', ' ']):
+            bad_headers = json.loads(json.dumps(first))
+            bad_headers['working'] = 'SHOULD_NOT_APPLY'
+            bad_headers['graph']['dataset']['extra'][0]['table']['headers'] = names
+            upload(page, bad_headers)
+            page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
+            assert page.evaluate('window.MathStudio.bridge.export().working') == 'RT1'
+            assert page.evaluate('window.MathStudio.bridge.export().graph.dataset') == dataset
 
         # A project with mixed primitive JSON cells restores without losing rows or column order.
         mixed = json.loads(json.dumps(first))

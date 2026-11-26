@@ -115,11 +115,14 @@
           if (!Array.isArray(table.headers) || table.headers.length < 2 || table.headers.length > 32 ||
               !Array.isArray(table.rows) || table.rows.length < 1 || table.rows.length > 6000)
             fail('graph dataset overlay dimensions exceed limits.');
-          if (table.headers.some(h => typeof h !== 'string' || !h.length || h.length > 100) ||
-              table.rows.some(row => !Array.isArray(row) || row.length !== table.headers.length ||
-                row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
-                  (typeof cell === 'number' && !Number.isFinite(cell)) ||
-                  (typeof cell === 'string' && cell.length > 8000))))
+          const headerIdentities = table.headers.map(h => typeof h === 'string' ? h.trim().toLowerCase() : '');
+          if (table.headers.some(h => typeof h !== 'string' || !h.trim() || h.length > 100) ||
+              new Set(headerIdentities).size !== headerIdentities.length)
+            fail('graph dataset overlay has invalid column names.');
+          if (table.rows.some(row => !Array.isArray(row) || row.length !== table.headers.length ||
+              row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
+                (typeof cell === 'number' && !Number.isFinite(cell)) ||
+                (typeof cell === 'string' && cell.length > 8000))))
             fail('graph dataset overlay has invalid cells.');
           const mapping = overlay.mapping, x = Number(mapping.x), y = Number(mapping.y), mode = mapping.mode;
           if (!validIndex(mapping.x, table.headers.length) || !validIndex(mapping.y, table.headers.length) || x === y ||

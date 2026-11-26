@@ -1,3 +1,9 @@
+## 2026-11-26 — Reject ambiguous Graph overlay column headers
+
+- Live Graph overlay imports and saved-project validation now reject blank or duplicate headers after trimming and case-folding, consistent with primary Graph datasets.
+- Added Node and Chromium regressions for duplicate and whitespace-only names, including preservation of existing Graph data on failed live add/import.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Preserve small-cavity hollow-circle binary64 rounding
 
 - For inner/outer diameter ratios up to 0.5, hollow-circle area and inertia factors now use the well-conditioned direct forms 1 - q² and 1 - q⁴; thin-wall ratios retain the factored radial-gap path.

@@ -1,3 +1,27 @@
+## 2026-11-26 — GRAPH-OVERLAY-HEADER-IDENTITY-VALIDATION
+
+Starting refs: dev `15d550b9a330f3cdc5bac342daa9956a08e762d0`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified master plan, project-format contract, current Graph dataset/overlay implementation, Node and Chromium regressions, PR #191, exact-head Quality, branch/ruleset and main/Pages evidence. The frozen inventory remains **166 gaps / 95 partial**.
+
+P0 checkpoint: exact-head Push Quality [#45799253611](https://github.com/saeedsai/ProMathStudio/actions/runs/45799253611) and PR Quality [#45799266168](https://github.com/saeedsai/ProMathStudio/actions/runs/45799266168) both completed successfully on `15d550b9a330f3cdc5bac342daa9956a08e762d0`; no failing exact-head CI remains. PR #191 is open/mergeable, 64 commits ahead and zero behind, with 24 changed files and no submitted reviews. Only dev/main branches exist. Rulesets are empty; branch-protection reads return HTTP 403 to the connected integration, so no release is authorized.
+
+Defect: Graph overlay tables accepted whitespace-only or duplicate case-insensitive headers. The primary Graph dataset rejects these ambiguous names, but overlay validation did not. The live `graphData.addTable()` path accepted them, and project migration accepted them too, allowing an overlay to be created and saved that could not be identified unambiguously in the Graph column selectors/legend.
+
+Implementation: the inline Graph-data `validateTable()` now requires overlay headers to be nonblank after trimming and unique after trim/case-folding. The versioned project schema applies the same rule before import, so malformed saved overlays are rejected before confirmation rather than silently restored. Valid header spelling/order and index-based mappings remain unchanged. No project version, graph rendering algorithm, public API or data format change.
+
+Regression: Node schema tests reject duplicate `['t','T']` and whitespace-only `['t',' ']` overlay headers. Registered Chromium tests call the live `graphData.addTable()` API with both invalid forms and assert the existing primary dataset remains unchanged; they also import saved projects containing each malformed overlay and assert atomic rejection preserves the prior project marker and graph dataset. Existing valid 2D/3D overlay round-trips, legacy v1 migration, mapping validation and 390px checks remain.
+
+Validation: starting project-schema source and inline script were checked for exact parity. The actual updated schema Node regression and extracted live `validateTable()` function are executed in isolated V8 before publication; browser interactions remain for exact-head Chromium CI. Local `git rev-parse --show-toplevel` returns exit 128 because the execution workspace has no repository checkout, so no native local Playwright/build pass is claimed. One atomic multi-file Git tree/commit and guarded non-force dev ref update are used.
+
+Status: implemented on dev; exact-head Push/PR Quality required; not released.
+
+### NEXT FIVE — status, dependencies and acceptance tests
+
+1. **P0 — Verify this exact-head Graph overlay regression.** Both Push and PR Quality green on the same dev SHA with zero failed/skipped steps; Node and Chromium reject duplicate/blank overlay headers, preserve valid 2D/3D round-trips and prove failed import is atomic at 1280px/390px.
+2. **P0 — Release governance for PR #191 (blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; review the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables.** Current/legacy round-trips preserve drafts, formulas, graph functions/curves/datasets/overlays, selections and focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+4. **P1 — Finish Data Tables structural-reference boundaries.** Row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, formula string literals, reversed/blank ranges, sort/recalculation, persistent `#REF!`, transactional rollback and standalone source/bundle parity.
+5. **P1 — Complete seven-shape Truss numerical boundaries.** Independent area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for all seven shapes; low-exponent/near-solid/BigInt-free fallback, underflow rejection, invalid rollback, member isolation and desktop/mobile browser tests.
+
 ## 2026-11-26 — TRUSS-HOLLOW-CIRCLE-SMALL-CAVITY-ROUNDING
 
 Starting refs: dev 7824a8d343b8da86bc148707a909bc2f8e4754d6; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, Structural Truss contract, current FEM source, Node/Chromium regressions, exact-head Quality runs, PR #191 and production workflow evidence. The inventory baseline remains **166 gaps / 95 partial**.

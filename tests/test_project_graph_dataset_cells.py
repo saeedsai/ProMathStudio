@@ -61,6 +61,8 @@ invalidOverlay(set=>{
 },/graph dataset overlay mapping/);
 invalidOverlay(set=>set.extra[0].mapping.style='bad',/graph dataset overlay mapping/);
 invalidOverlay(set=>set.extra[0].table.rows=[['a','b']],/graph dataset overlay has no numeric points/);
+invalidOverlay(set=>set.extra[0].table.headers=['t','T'],/graph dataset overlay has invalid column names/);
+invalidOverlay(set=>set.extra[0].table.headers=['t',' '],/graph dataset overlay has invalid column names/);
 const legacyOverlay=withOverlay();legacyOverlay.version=1;
 assert.strictEqual(migrate(legacyOverlay).version,2,'legacy v1 graph overlays remain supported');
 const noExtra=basic();noExtra.graph.dataset.extra=null;

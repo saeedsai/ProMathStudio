@@ -1,3 +1,11 @@
+## 2026-11-26 — Validate and restore saved Graph datasets before application
+
+- Align primary saved Graph dataset validation with the live importer: 2–32 columns, names at most 100 characters, 1–6,000 rows, and at least one finite numeric point for the persisted axes (including Z in 3D).
+- Reject empty, one-column, overlong-header and unrenderable datasets before import confirmation instead of failing during restore.
+- Apply saved X/Y/Z selectors before the initial series build, so valid non-default mappings work even when header-derived default columns contain text.
+- Added Chromium atomic-import/round-trip regressions; legacy projects without selectors retain header-derived defaults.
+- Implemented on dev; exact-head Push/PR Quality required; not released.
+
 ## 2026-11-26 — Compensated Truss preview aggregate totals
 
 - Replaced naive member-length and SI-volume reductions in the Truss JSON preview with the existing Neumaier compensated sum, preserving low-order contributions from small members in mixed-scale models.

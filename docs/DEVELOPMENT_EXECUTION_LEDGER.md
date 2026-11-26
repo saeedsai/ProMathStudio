@@ -2289,3 +2289,15 @@ PR #191 remains open/mergeable at the starting head, 73 commits ahead and zero b
 
 Status: source, synchronized standalone bundle, Node/Chromium regressions, project-format documentation, plan, ledger and changelog committed atomically on existing dev. New exact-head Push/PR Quality pending; not released. Historical inventory remains 166 gaps / 95 partial.
 
+
+
+## 2026-11-26 22:02 CET — Graph saved-dataset prevalidation
+
+- Starting dev `f9e8aa80e751e8d71dc27e5de1544b3abf1c7216`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen inventory, project format, Graph restore code, tests, PR #191 and current CI/Pages evidence.
+- Exact starting head Push Quality [#45888996010](https://github.com/saeedsai/ProMathStudio/actions/runs/45888996010) and PR Quality [#45889003503](https://github.com/saeedsai/ProMathStudio/actions/runs/45889003503) both green on `f9e8aa80e751e8d71dc27e5de1544b3abf1c7216`, 218/218 steps each, zero failures/skips.
+- Found primary Graph project validation/runtime mismatch: schema accepted empty/one-column/overlong-header/no-numeric-point datasets which the live importer rejected during restore; saved X/Y/Z mappings were applied only after the first default-series build.
+- Aligned schema to live Graph limits and numeric-point requirements; restore now applies normalized saved axis selectors before `loadTable()` builds the series. Legacy omitted selectors still use defaults.
+- Added Chromium atomic-import/round-trip regressions and updated the mixed-cell fixture and project-format contract. Source and standalone bundle synchronized.
+- Isolated V8 checks against actual modified schema passed; source/bundle parity and mapping-order checks passed. Native repository Playwright unavailable without a checkout; new exact-head Actions pending.
+- PR #191 remains open; zero independent reviews, both branches unprotected, rulesets empty, protection endpoint 403. No merge. Main Quality #45360386408 and Pages #45360367251 remain successful on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no new deployment.
+- Status: implemented on dev, QA pending, not released. Frozen inventory remains **166 gaps / 95 partial**.

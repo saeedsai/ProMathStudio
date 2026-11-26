@@ -42,6 +42,44 @@ def main():
         dataset = first['graph']['dataset']
         assert dataset['headers'] == ['t', 'v', 'label'] and len(dataset['extra']) == 1
 
+        # Primary Graph projects must satisfy the same dimensions and numeric-point
+        # requirements as the live importer, before any workspace is applied.
+        prior_working = first['working']
+        invalid_primary = [
+            (['time', 'value'], [], '2d', '0', '1', '0'),
+            (['time'], [[0]], '2d', '0', '0', '0'),
+            (['t' * 101, 'value'], [[0, 1]], '2d', '0', '1', '0'),
+            (['time', 'value'], [['not-x', 'not-y']], '2d', '0', '1', '0'),
+            (['x', 'y', 'z'], [[0, 1, 'not-z']], '3d', '0', '1', '2'),
+        ]
+        for headers, rows, mode, x, y, z in invalid_primary:
+            bad = json.loads(json.dumps(first))
+            bad['working'] = 'SHOULD_NOT_APPLY'
+            bad['graph']['mode'] = mode
+            bad['graph']['dataset'] = {
+                'name': 'invalid.csv', 'headers': headers, 'rows': rows,
+                'x': x, 'y': y, 'z': z, 'style': 'points', 'extra': []}
+            upload(page, bad)
+            page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
+            current = page.evaluate('window.MathStudio.bridge.export()')
+            assert current['working'] == prior_working
+            assert current['graph']['dataset'] == dataset
+
+        # Saved non-default selectors must be installed before the first series build.
+        mapped = json.loads(json.dumps(first))
+        mapped['working'] = 'RT-MAPPED'
+        mapped['graph']['mode'] = '2d'
+        mapped['graph']['dataset'] = {
+            'name': 'mapped.csv', 'headers': ['label', 'first', 'second'],
+            'rows': [['A', 0, 1], ['B', 1, 2]],
+            'x': '1', 'y': '2', 'z': '0', 'style': 'line', 'extra': []}
+        upload(page, mapped)
+        page.wait_for_function("window.MathStudio.bridge.export().working === 'RT-MAPPED'")
+        mapped_state = page.evaluate('window.MathStudio.graphData.getState()')
+        assert mapped_state['x'] == '1' and mapped_state['y'] == '2', mapped_state
+        assert len(mapped_state['points']) == 2, mapped_state
+        assert mapped_state['points'][0]['x'] == 0 and mapped_state['points'][0]['y'] == 1, mapped_state
+
         # Re-import our own export: dataset (cells as stored, column order, mapping, overlay) must be identical.
         upload(page, dict(first, working='RT1'))
         page.wait_for_function("window.MathStudio.bridge.export().working === 'RT1'")

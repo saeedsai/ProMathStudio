@@ -3155,7 +3155,7 @@ self.onmessage=async ({data})=>{
     if (data.graph?.dataset !== undefined && data.graph.dataset !== null) {
       const set = data.graph.dataset;
       if (!record(set) || !Array.isArray(set.headers) || !Array.isArray(set.rows) ||
-          set.headers.length < 1 || set.headers.length > 32 || set.rows.length > 6000)
+          set.headers.length < 2 || set.headers.length > 32 || set.rows.length < 1 || set.rows.length > 6000)
         fail('graph dataset dimensions exceed limits.');
       // Column selectors require unambiguous names in restored graph datasets.
       if (set.headers.every(h => typeof h === 'string')) {
@@ -3164,11 +3164,15 @@ self.onmessage=async ({data})=>{
         if (new Set(identities).size !== identities.length)
           fail('graph dataset has duplicate column names.');
       }
-      if (set.headers.some(h => typeof h !== 'string' || h.length > 8000) ||
+      if (set.headers.some(h => typeof h !== 'string' || h.length > 100) ||
           set.rows.some(row => !Array.isArray(row) || row.length !== set.headers.length ||
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
+      // Match Graph's live cleanNumber() contract before confirmation.
+      const numericCell = value => typeof value === 'number' ? Number.isFinite(value) :
+        typeof value === 'string' && /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(value.trim()) &&
+        Number.isFinite(Number(value));
       // Validate persisted primary-series selectors before restoreState can silently
       // replace an invalid column with its default. Missing selectors remain legacy-safe.
       const hasMapping = key => Object.prototype.hasOwnProperty.call(set, key);
@@ -3196,13 +3200,14 @@ self.onmessage=async ({data})=>{
         fail('graph dataset mapping is invalid.');
       if (hasMapping('style') && !['points', 'line', 'grid'].includes(set.style))
         fail('graph dataset style is invalid.');
+      if (!set.rows.some(row => numericCell(row[axes.x]) && numericCell(row[axes.y]) &&
+          (data.graph?.mode !== '3d' || numericCell(row[axes.z]))))
+        fail('graph dataset has no numeric points.');
       if (set.extra !== undefined && set.extra !== null) {
         if (!Array.isArray(set.extra) || set.extra.length > 20)
           fail('graph dataset overlays must be a list of at most 20.');
         const validIndex = (value, columns) => validColumnIndex(value, columns);
-        const numericCell = value => typeof value === 'number' ? Number.isFinite(value) :
-          typeof value === 'string' && /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(value.trim()) &&
-          Number.isFinite(Number(value));
+
         for (const overlay of set.extra) {
           if (!record(overlay) || !record(overlay.table) || !record(overlay.mapping))
             fail('graph dataset overlay is invalid.');
@@ -3933,10 +3938,12 @@ self.onmessage=async ({data})=>{
   function restoreState(state){
     if(state===null||state===undefined){clear(false);return;}
     if(!isRecord(state))throw Error('Invalid graph dataset.');
-    loadTable({headers:state.headers,rows:state.rows},state.name);
+    const columns=Array.isArray(state.headers)?state.headers.length:0,mapping={};
     for(const key of ['x','y','z']){
-      const selected=Number(state[key]);if(Number.isInteger(selected)&&selected>=0&&selected<dataset.headers.length)selectors[key].value=String(selected);
+      const selected=Number(state[key]);
+      if(Number.isInteger(selected)&&selected>=0&&selected<columns)mapping[key]=selected;
     }
+    loadTable({headers:state.headers,rows:state.rows},state.name,mapping);
     if(['points','line','grid'].includes(state.style))style.value=state.style;
     extraSeries=[];for(const item of (Array.isArray(state.extra)?state.extra:[]).slice(0,20)){if(!item?.table||!item?.mapping)continue;try{addTable(item.table,item.name,item.mapping);}catch{}}
     makeSeries();

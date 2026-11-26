@@ -22,7 +22,7 @@ const context={window:{MathStudio:{}}};
 vm.runInNewContext(fs.readFileSync('src/project-schema.js','utf8'),context);
 const migrate=context.window.MathStudio.projectSchema.migrate;
 const make=(headers,version=2)=>({format:'mathstudio-project',version,notebook:[],
- graph:{dataset:{headers,rows:[[0,'alpha',true],[1,null,false]]}}});
+ graph:{dataset:{headers,rows:[[0,2,true],[1,'alpha',false]]}}});
 for(const version of [1,2]){
  const valid=make([' Time ','Value','Enabled'],version);
  const original=JSON.stringify(valid);
@@ -30,7 +30,7 @@ for(const version of [1,2]){
  assert.equal(out.version,2);
  assert.equal(JSON.stringify(valid),original,'schema must not mutate input');
  assert.equal(JSON.stringify(out.graph.dataset.headers),JSON.stringify([' Time ','Value','Enabled']));
- assert.equal(JSON.stringify(out.graph.dataset.rows),JSON.stringify([[0,'alpha',true],[1,null,false]]));
+ assert.equal(JSON.stringify(out.graph.dataset.rows),JSON.stringify([[0,2,true],[1,'alpha',false]]));
  for(const headers of [
   [' Time ','time','Enabled'],['Value',' value ','Enabled'],
   [' ', 'Value','Enabled'],['Time','\t','Enabled'],['Time','','Enabled']]){

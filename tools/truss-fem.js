@@ -91,13 +91,24 @@
   // whose normalized quotient underflows in a separately compensated residual.
   function finiteSignedSum(values, name) {
     const terms = Array.from(values, value => finite(value, name));
+    const hasPositive=terms.some(value=>value>0),hasNegative=terms.some(value=>value<0);
+    if (!(hasPositive&&hasNegative)) {
+      // Same-sign terms cannot cancel an overflowing partial sum. Compensate in
+      // original units so restoring a normalized sum does not introduce another rounding.
+      let sum=0,correction=0;
+      for(const term of terms){
+        const next=sum+term;
+        correction+=Math.abs(sum)>=Math.abs(term)
+          ? (sum-next)+term
+          : (term-next)+sum;
+        sum=next;
+      }
+      return finite(sum+correction,name);
+    }
+    const exact=exactFiniteBinarySum(terms,name);
+    if(exact!==null)return exact;
     const scale = Math.max(0, ...terms.map(value => Math.abs(value)));
     if (scale === 0) return 0;
-    const hasPositive=terms.some(value=>value>0),hasNegative=terms.some(value=>value<0);
-    if (hasPositive&&hasNegative) {
-      const exact=exactFiniteBinarySum(terms,name);
-      if (exact!==null) return exact;
-    }
     const normalized = {sum:0, correction:0};
     const residual = {sum:0, correction:0};
     const add = (state, value) => {

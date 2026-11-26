@@ -1,5 +1,11 @@
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
+## BigInt-free section-property summation fallback
+
+The exact binary64 accumulator is used when the browser provides BigInt. When BigInt is unavailable, same-sign finite terms now use Neumaier compensation in their original units instead of normalizing by the largest term and multiplying back. This avoids an unnecessary second rounding during scale restoration and retains small same-sign contributions that can combine to change the rounded section property. Mixed-sign terms keep the existing exact-when-available and normalized compensated-residual fallback. The no-BigInt path is compensated, not exact; all returned values remain binary64, and genuinely non-finite final results are still rejected.
+
+Direct Node and registered Chromium regressions temporarily disable BigInt and verify two L-angle area/centroid/inertia boundary cases, both channel and I-section sub-ulp flange-area totals, and channel/I-section centroid and inertia values. Chromium exercises the fallback at 1280px and 390px. The Truss solver remains an adjacent script, so the standalone root bundle is unchanged.
+
 ## Composite-section centroid and inertia summation
 
 Channel and I-section calculations now sum their already-rounded finite binary64 rectangle contributions exactly when BigInt is available, rounding once after the complete sum. This applies to net area, both first moments, and each local-plus-parallel-axis inertia total. The existing scaled compensated sum remains the compatibility fallback when BigInt is unavailable. This avoids both lost sub-ulp contributions and order-dependent one-ulp overestimates; it does not make the underlying rectangle products arbitrary precision.

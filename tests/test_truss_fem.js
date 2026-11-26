@@ -2292,3 +2292,34 @@ test('L-angle area and inertia sums round their binary64 rectangle contributions
   assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
  }
 });
+
+test('section-property compatibility fallback preserves same-sign contributions without BigInt',()=>{
+ const originalBigInt=globalThis.BigInt;
+ try{
+  globalThis.BigInt=undefined;
+  const first=fem.sectionProperties('l-angle',{width:8605413.972369973,height:4.292204701476468,thickness:2.136125318978258e-5});
+  assert.equal(first.area,183.82251835310274);
+  assert.equal(first.centroid.x,4302704.840094387);
+  assert.equal(first.centroid.y,1.1751052746539924e-5);
+  assert.equal(first.secondMoment,0.0005630523010274837);
+  assert.equal(first.secondMomentPerpendicular,1134387503114039.5);
+  const second=fem.sectionProperties('l-angle',{width:1.1143751945503119e-20,height:4.305111224234166e-16,thickness:2.015788401705846e-21});
+  assert.equal(second.area,8.678377274295314e-37);
+  assert.equal(second.centroid.x,1.0080123367146022e-21);
+  assert.equal(second.centroid.y,2.1525099734807228e-16);
+  assert.equal(second.secondMoment,1.3404309505588713e-68);
+  assert.equal(second.secondMomentPerpendicular,2.9455728539715605e-79);
+  const thinFlanges={width:1e154,height:1e154,webThickness:1e-154,flangeThickness:6.661338147750939e-171};
+  for(const shape of ['channel','i-section']){
+   const section=fem.sectionProperties(shape,thinFlanges);
+   assert.equal(section.area,1.0000000000000002,shape+' must retain both sub-ulp flange areas');
+  }
+  const channel=fem.sectionProperties('channel',{width:2,height:1,webThickness:1,flangeThickness:2e-17});
+  assert.equal(channel.centroid.x,0.5000000000000001);
+  assert.equal(channel.secondMoment,0.08333333333333334);
+  assert.equal(channel.secondMomentPerpendicular,0.08333333333333337);
+  const iSection=fem.sectionProperties('i-section',{width:2,height:1,webThickness:1,flangeThickness:2e-17});
+  assert.equal(iSection.secondMoment,0.08333333333333334);
+  assert.equal(iSection.secondMomentPerpendicular,0.08333333333333336);
+ }finally{globalThis.BigInt=originalBigInt;}
+});

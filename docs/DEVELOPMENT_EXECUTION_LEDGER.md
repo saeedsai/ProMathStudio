@@ -1,3 +1,23 @@
+## 2026-11-26 — TRUSS-BIGINT-FREE-SECTION-SUM-FALLBACK
+
+- Starting dev `5cd44673f7fc9194436934eec3f5fe982aa5daa1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root contract, roadmap, architecture, frozen inventory, Truss implementation/tests, PR #191, reviews, CI and Pages evidence inspected.
+- P0 exact-head CI completed green on starting dev: Push [#45739874083](https://github.com/saeedsai/ProMathStudio/actions/runs/45739874083) and PR [#45739879311](https://github.com/saeedsai/ProMathStudio/actions/runs/45739879311), 218/218 steps each, zero failures/skips. Truss browser, analytical and responsive checks passed.
+- Reproduced a BigInt-unavailable compatibility defect in the scaled compensated same-sign sum: L-angle area 183.8225183531027 vs 183.82251835310274 mm²; channel/I-section sub-ulp flange area 1 vs 1.0000000000000002 mm²; I-section Iyy 0.08333333333333334 vs 0.08333333333333336 mm⁴.
+- Changed same-sign finite sums to use Neumaier compensation in original units; mixed-sign exact/normalized-residual behavior remains. Non-finite final sums still reject.
+- Added Node and Chromium no-BigInt regressions for both L-angle fixtures, channel/I-section area, channel centroid/Ixx/Iyy and I-section Ixx/Iyy. Chromium runs 1280px and 390px. No root bundle change; Truss FEM is adjacent.
+- Isolated V8 execution of the actual production module with BigInt disabled passed all exact binary64 references. No repository checkout exists locally; local Node/Playwright suite not claimed. Exact-head GitHub Actions pending after commit.
+- PR #191 remains open with no independent reviews. Rulesets empty; main branch-protection read HTTP 403. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 last passed on unchanged main `0d8ac89f` on 24 Nov. Historical inventory remains **166 gaps / 95 partial**.
+- Status: candidate source/test/docs prepared for one atomic dev commit; exact-head CI pending; not released.
+
+### Next five features
+1. P0 verify new exact-head Push/PR Quality, no skipped required checks, Node and Chromium no-BigInt fallback cases at 1280px/390px.
+2. P0 independent eligible PR #191 approval, verifiable main protection, full diff review, ordinary PR merge, main Quality, Pages and hosted verification.
+3. P1 finish seven-shape Truss independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references, low-exponent/near-solid/fallback cases, invalid rollback and mobile tests.
+4. P1 Data Tables row 6000/AF insertion/deletion, scalar/range #REF!, mixed anchors, quoted names, blank/reversed ranges, recalculation, rollback and source/bundle parity.
+5. P1 Matrix/Graph/Table current/legacy project round-trips, malformed-import rollback and focus/selection preservation on desktop/390px.
+
+---
+
 ## 2026-11-26 — TRUSS-L-ANGLE-EXACT-SECTION-SUMS
 
 - Starting refs: dev `dbd4bd51bbad91e893cd24b2877e1a2065909714`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, unified master plan, engineering architecture and structural toolbox contracts, frozen inventory, Truss source/tests/contract, refs, PR #191/reviews, Quality, rulesets and Pages evidence.

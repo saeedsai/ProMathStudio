@@ -258,6 +258,61 @@ def main():
             assert content.is_visible(), 'summary should reveal its controlled content region'
             page.locator('#section-helper').wait_for(state='visible')
             page.locator('#section-member').wait_for(state='visible')
+            # Exercise the compatibility path used when BigInt is unavailable.
+            fallback = page.evaluate("""() => {
+                const originalBigInt = window.BigInt;
+                try {
+                    window.BigInt = undefined;
+                    const summary = section => ({
+                        area: section.area, x: section.centroid.x, y: section.centroid.y,
+                        ixx: section.secondMoment, iyy: section.secondMomentPerpendicular
+                    });
+                    return {
+                        angle1: summary(ProMathTrussFEM.sectionProperties('l-angle', {
+                            width: 8605413.972369973, height: 4.292204701476468,
+                            thickness: 2.136125318978258e-5
+                        })),
+                        angle2: summary(ProMathTrussFEM.sectionProperties('l-angle', {
+                            width: 1.1143751945503119e-20, height: 4.305111224234166e-16,
+                            thickness: 2.015788401705846e-21
+                        })),
+                        channelArea: ProMathTrussFEM.sectionProperties('channel', {
+                            width: 1e154, height: 1e154, webThickness: 1e-154,
+                            flangeThickness: 6.661338147750939e-171
+                        }).area,
+                        iArea: ProMathTrussFEM.sectionProperties('i-section', {
+                            width: 1e154, height: 1e154, webThickness: 1e-154,
+                            flangeThickness: 6.661338147750939e-171
+                        }).area,
+                        channel: summary(ProMathTrussFEM.sectionProperties('channel', {
+                            width: 2, height: 1, webThickness: 1, flangeThickness: 2e-17
+                        })),
+                        iSection: summary(ProMathTrussFEM.sectionProperties('i-section', {
+                            width: 2, height: 1, webThickness: 1, flangeThickness: 2e-17
+                        }))
+                    };
+                } finally {
+                    window.BigInt = originalBigInt;
+                }
+            }""")
+            assert fallback['angle1'] == {
+                'area': 183.82251835310274, 'x': 4302704.840094387,
+                'y': 1.1751052746539924e-5, 'ixx': 0.0005630523010274837,
+                'iyy': 1134387503114039.5
+            }, fallback['angle1']
+            assert fallback['angle2'] == {
+                'area': 8.678377274295314e-37, 'x': 1.0080123367146022e-21,
+                'y': 2.1525099734807228e-16, 'ixx': 1.3404309505588713e-68,
+                'iyy': 2.9455728539715605e-79
+            }, fallback['angle2']
+            assert fallback['channelArea'] == 1.0000000000000002
+            assert fallback['iArea'] == 1.0000000000000002
+            assert fallback['channel']['x'] == 0.5000000000000001
+            assert fallback['channel']['ixx'] == 0.08333333333333334
+            assert fallback['channel']['iyy'] == 0.08333333333333337
+            assert fallback['iSection']['ixx'] == 0.08333333333333334
+            assert fallback['iSection']['iyy'] == 0.08333333333333336
+
             # A slender L-angle can have finite Iyy and area while Iyy/area overflows;
             # the square-root-first radius calculation must remain finite in Chromium.
             slender = page.evaluate("""() => {

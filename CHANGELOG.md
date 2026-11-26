@@ -1,3 +1,10 @@
+## 2026-11-26 — Preserve Truss section sums without BigInt
+
+- Same-sign finite sums now use Neumaier compensation in original units when the BigInt exact accumulator is unavailable, avoiding an extra scale-normalization rounding in L-angle, channel and I-section properties.
+- Mixed-sign fallback and BigInt exact accumulation remain unchanged; non-finite final sums still reject.
+- Added Node and registered Chromium regressions that disable BigInt and verify L-angle area/centroid/inertias, sub-ulp channel/I-section flange areas and channel/I-section inertia values at 1280px/390px.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — L-angle section-property exact summation
 
 - L-angle area, first moments, Ixx/Iyy and Ixy now use the existing exact binary64 section-property accumulator when BigInt is available, avoiding a one-ulp area error from scale normalization and order-dependent local/parallel-axis inertia sums.

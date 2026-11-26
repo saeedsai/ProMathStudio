@@ -1,3 +1,31 @@
+## 2026-11-26 — TRUSS-BIGINT-FREE-SECTION-SUM-FALLBACK
+
+Starting refs: dev `5cd44673f7fc9194436934eec3f5fe982aa5daa1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, unified master plan, engineering architecture/toolbox contracts, frozen 2026-10-26 inventory, Truss source/tests/contract, exact refs, PR #191/reviews, CI and production Pages evidence.
+
+P0 CI checkpoint: exact-head Push Quality [#45739874083](https://github.com/saeedsai/ProMathStudio/actions/runs/45739874083) and PR Quality [#45739879311](https://github.com/saeedsai/ProMathStudio/actions/runs/45739879311) both completed successfully on `5cd44673f7fc9194436934eec3f5fe982aa5daa1`: 218/218 steps each, zero failures and zero skipped steps. The three Truss browser/analytical/responsive steps passed in both workflows. This verifies the previous L-angle exact-sum work.
+
+New compatibility defect: with BigInt disabled, `finiteSignedSum` normalized same-sign section terms by the largest magnitude and restored the scale after compensation. That second rounding still lost contributions: a synthetic L-angle area was 183.8225183531027 instead of 183.82251835310274 mm²; the same fallback lost the combined sub-ulp flange areas in channel/I-section totals (1 instead of 1.0000000000000002 mm²); and I-section Iyy was 0.08333333333333334 instead of 0.08333333333333336 mm⁴.
+
+Implementation: same-sign finite terms now use Neumaier compensation directly in original units. Same-sign partial sums cannot overflow and later cancel; if the final sum is unrepresentable, the existing finite-result guard still rejects it. Mixed-sign terms retain the existing exact binary64 accumulator when BigInt is available and normalized compensated/residual fallback when it is not. This is compensated fallback arithmetic, not an arbitrary-precision claim.
+
+Regression: Node coverage temporarily sets `globalThis.BigInt=undefined` in a try/finally and verifies both L-angle cases, channel/I-section flange-area preservation, channel centroid/Ixx/Iyy and I-section Ixx/Iyy. Registered Chromium smoke temporarily disables `window.BigInt` and checks the same production-module cases at 1280px and 390px, restoring BigInt in a finally block. Truss FEM is an adjacent script; no root `index.html` change is required.
+
+Isolated V8 validation: executed the actual fetched production module with BigInt disabled and the candidate same-sign Neumaier fallback. All listed binary64 references passed, including the formerly failing area, centroid and Iyy values. The local workspace has no repository checkout, so no local Node/Playwright repository command is claimed; new exact-head Push/PR Quality must establish the committed Node and Chromium regressions.
+
+Release: PR #191 remains open; the current head is the starting dev SHA until this commit is atomically published. No independent PR reviews are present. Rulesets are empty and branch-protection reads return HTTP 403 to the integration. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on 24 November for that unchanged main SHA. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+Status: implemented on dev once the atomic commit is published; exact-head CI pending; not released.
+
+### Next five features
+
+1. **P0 — Verify this exact BigInt-free fallback candidate.** Acceptance: Push and PR Quality both green on the same exact SHA, 218+ required steps with zero failures/skips; Node and Chromium verify both L-angle fixtures, channel/I-section sub-ulp area and centroid/inertia values; desktop and 390px.
+2. **P0 — Release governance (externally blocked).** Acceptance: eligible independent approval of PR #191; verifiable main protection requiring exact-head Quality and preventing direct pushes, force-pushes and deletion; complete diff review; ordinary PR merge; exact-main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Finish seven-shape Truss numerical boundaries.** Acceptance: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining low-exponent/near-solid and normalized-fallback cases; conservative underflow rejection, invalid rollback, selected-member isolation, keyboard and 390px tests.
+4. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion and deletion; scalar/range `#REF!`; already-invalid references; blank/reversed/mixed-anchor ranges; quoted sheet names; recalculation; atomic rollback; source/standalone-bundle parity.
+5. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix/Graph/Table round-trips; malformed-import rollback preserves workspaces, focus, selections and prior results; desktop and 390px browser tests.
+
+---
+
 ## 2026-11-26 — TRUSS-L-ANGLE-EXACT-SECTION-SUMS
 
 Starting refs: dev `dbd4bd51bbad91e893cd24b2877e1a2065909714`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, unified master plan, engineering architecture and toolbox contracts, frozen inventory, Structural Truss contract/source/tests, exact refs, PR #191/reviews, Quality workflows, rulesets and production evidence.

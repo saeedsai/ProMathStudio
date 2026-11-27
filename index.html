@@ -4626,6 +4626,18 @@ self.onmessage=async ({data})=>{
   // they may be the only contribution left after larger values cancel.
   function stableSum(values){
     if(!values.length)return 0;
+    // Keep original-unit rounding when the compensated partial sum remains finite.
+    // Normalize only when an intermediate or corrected total would overflow.
+    const direct={sum:0,correction:0};let directFinite=true;
+    for(const value of values){
+      if(!Number.isFinite(direct.sum+value)){directFinite=false;break;}
+      addCompensated(direct,value);
+      if(!Number.isFinite(direct.correction)){directFinite=false;break;}
+    }
+    if(directFinite){
+      const total=direct.sum+direct.correction;
+      if(Number.isFinite(total))return total;
+    }
     let scale=0;
     for(const value of values)scale=Math.max(scale,Math.abs(value));
     if(scale===0)return 0;

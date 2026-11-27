@@ -71,6 +71,9 @@ def main():
         assert formula('AVERAGE(1e308,-1e308)') == 0
         assert formula('MEDIAN(1e308,1e308)') == 1e308
         assert formula('SUM(1e308,-1e308)') == 0
+        # Original-unit compensation avoids an extra normalization-rounding ulp.
+        assert formula('SUM(-7.847929071398543,-1.6962314070137264e-8,-9.840664929591078e-138)') == -7.847929088360857
+        assert formula('AVERAGE(-7.847929071398543,-1.6962314070137264e-8,-9.840664929591078e-138)') == -2.6159763627869523
         assert failure('SUM(1e308,1e308)') == '#NUM!'
         nested_overflow = failure('SUM(TWICE(1e308),2)')
         assert nested_overflow == '#VALUE', nested_overflow

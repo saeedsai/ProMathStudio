@@ -41,8 +41,16 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
         self.assertNotIn("String(Number.isFinite(x)?x:0)", SOURCE)
         self.assertIn("catch(error){throw Error(error?.message?.startsWith('#')?error.message:'#VALUE');}", SOURCE)
 
-    def test_sum_uses_scaled_compensated_accumulation(self):
+    def test_sum_uses_original_unit_compensation_with_scaled_overflow_fallback(self):
         self.assertIn("function stableSum(values)", SOURCE)
+        self.assertIn("const direct={sum:0,correction:0};", SOURCE)
+        self.assertIn("if(!Number.isFinite(direct.sum+value))", SOURCE)
+        self.assertIn("if(Number.isFinite(total))return total;", SOURCE)
+        self.assertIn("const normalized=value/scale;", SOURCE)
+        smoke = (ROOT / "tests/smoke_sheet_numeric_hardening.py").read_text(encoding="utf-8")
+        self.assertIn("SUM(-7.847929071398543", smoke)
+        self.assertIn("AVERAGE(-7.847929071398543", smoke)
+        self.assertIn("SUM(1e308,1e308,-1e308)", smoke)
         self.assertIn("if(normalized===0&&value!==0)addCompensated(residual,value);", SOURCE)
         self.assertIn("x=stableSum(nums);", SOURCE)
         self.assertNotIn("x=nums.reduce((a,b)=>a+b,0);", SOURCE)

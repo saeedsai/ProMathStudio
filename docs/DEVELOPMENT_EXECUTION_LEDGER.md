@@ -1,3 +1,15 @@
+## 2026-11-27 04:03 CET — Data Tables original-unit compensated SUM
+
+- Starting dev `280cec1f6479d14dd430501e46df6089ad689012`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; re-read AGENTS, living plan, frozen inventory, unified plan, architecture/catalog, Data Tables source/docs/tests, PR/reviews, exact-head CI and Pages evidence.
+- Exact starting Push Quality [#45925713829](https://github.com/saeedsai/ProMathStudio/actions/runs/45925713829) and PR Quality [#45925719729](https://github.com/saeedsai/ProMathStudio/actions/runs/45925719729) both passed 218/218 steps on the exact starting SHA, zero failures/skips. Data Tables structural, numeric and browser regressions were green.
+- Fixed a one-ULP result shift caused by always normalizing finite SUM terms even when original-unit partial sums remain representable. The exact binary64 fixture sum is -7.847929088360857; the previous normalized path returned -7.847929088360858.
+- SUM now tries original-unit Neumaier compensation first and returns only if all partial sums, correction and final total remain finite. The prior scale-normalized compensated/residual path remains the overflow fallback; true nonfinite final sums still error. AVERAGE/AVG reuse the improved finite SUM path.
+- Updated src/data-tables.js and its embedded index.html script together. Added the exact SUM/AVERAGE browser reference and structural source/parity assertions; existing overflow fallback and subnormal residual tests remain.
+- Isolated V8 reproduction passed old/new sum, exact mean and overflow-fallback cases. Independent Python Fraction.from_float reference confirmed the exact rounded binary64 sum. No local checkout, so native Node/Playwright and scripts/build.py --check were not run; fresh exact-head Actions pending.
+- PR #191 remains open, 87 ahead/0 behind, 32 changed files, zero submitted reviews. Only dev/main branches, both unprotected; rulesets empty; branch-protection GET 403. No merge/direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence on unchanged main (24-Nov-2026); no new deployment. Historical inventory remains **166 gaps / 95 partial**.
+- Status: atomic source/bundle/test/docs/plan/ledger/changelog commit on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 02:54 CET — Hollow-circle cavity transition rounding
 
 - Starting dev b6bfa38f8e80d1ecfad5424094b6df317fd6e237; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS, living plan, frozen inventory, engineering architecture/catalogs, Truss source/tests/contract, PR #191, refs/reviews, exact-head CI and production Quality/Pages.

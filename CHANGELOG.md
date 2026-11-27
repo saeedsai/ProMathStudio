@@ -1,3 +1,10 @@
+## 2026-11-27 — Preserve original-unit compensated Data Tables sums
+
+- Data Tables SUM now uses original-unit Neumaier compensation when all partial sums and corrections remain finite, avoiding a one-ULP shift introduced by unnecessary normalize/rescale arithmetic.
+- Retains the scale-normalized compensated/residual fallback when an intermediate sum overflows, preserving finite cancellation results and subnormal residual terms; genuine non-finite totals still return #NUM!.
+- Added exact binary64 SUM and AVERAGE browser references plus structural source/parity assertions. Updated the standalone index.html module in the same commit.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Correct hollow-circle rounding near the cavity transition
 
 - Select the well-conditioned direct annulus differences by cavity area ratio (r² ≤ 0.5), avoiding a one-ulp area and inertia loss just above an inner/outer diameter ratio of 0.5.

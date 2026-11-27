@@ -769,6 +769,25 @@ test('support reactions retain a small residual between large cancelling member 
  assert.ok(result.energyError<1e-12);
 });
 
+test('energy diagnostics retain small member contributions beside a large member',()=>{
+ const nodes=[],members=[];
+ for(let i=0;i<20;i++){
+  const y=2*i,a='S'+i+'A',b='S'+i+'B';
+  nodes.push({id:a,x:0,y,fixX:true,fixY:true},
+   {id:b,x:1,y,fixY:true,fx:10,fy:0});
+  members.push({id:'S'+i,a,b,E:1,area:50000});
+ }
+ nodes.push({id:'LA',x:0,y:50,fixX:true,fixY:true},
+  {id:'LB',x:1,y:50,fixY:true,fx:1e9,fy:0});
+ members.unshift({id:'LARGE',a:'LA',b:'LB',E:1,area:50000});
+ const result=fem.solve({nodes,members});
+ const naiveEnergy=result.members.reduce((sum,member)=>sum+member.force*member.extension/2,0);
+ assert.equal(naiveEnergy,1e16,'the member-order reduction must reproduce the lost 20 J');
+ assert.equal(result.elasticEnergy,1e16+20);
+ assert.equal(result.energyError,0);
+ assert.equal(result.forceBalance.x,0);
+});
+
 test('mixed-sign resultants retain exact binary64 precision across scale groups',()=>{
  const model=clone(fem.examples.bar);
  const nodes=[

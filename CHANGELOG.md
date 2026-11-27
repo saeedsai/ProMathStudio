@@ -1,3 +1,10 @@
+## 2026-11-27 — Preserve small Truss FEM energy contributions in verification
+
+- Replaced ordinary reductions for external work and elastic strain energy with the shared finite signed accumulator. The energy-balance residual is now computed as one signed sum of the two elastic-energy totals and negative external work, avoiding low-order loss and an unnecessary intermediate (2U) overflow.
+- Added Node and Chromium regressions for one (10^{16}) J bar plus twenty 1 J bars. The previous member-order reduction returned (10^{16}) J; the corrected result is (10^{16}+20) J with zero energy-balance error and zero horizontal force balance. Browser coverage runs at 1280px and 390px.
+- Updated the Structural Truss FEM contract and living development records. The Truss solver is an adjacent script, so no root `index.html` bundle change is required.
+- Implemented on dev; fresh exact-head Push/PR Quality is pending. No merge or production deployment. Historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-27 — Preserve small Truss FEM support reactions under mixed-scale cancellation
 
 - Replaced the order-dependent nodal internal-force row reduction with the shared finiteSignedSum accumulator over the already-rounded K_ij*u_j terms and negative applied load. This preserves a small support reaction bracketed by large opposite member-force contributions; mixed-sign sums use the exact binary64 accumulator when BigInt is available and the existing compensated fallback otherwise.

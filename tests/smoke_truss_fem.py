@@ -77,6 +77,30 @@ def main():
             assert aggregate_totals['naiveLength'] != 10000000000000020, aggregate_totals
             assert aggregate_totals['naiveVolume'] != 10000000000.00002, aggregate_totals
 
+            # Energy diagnostics must retain twenty 1 J bars beside one 1e16 J bar.
+            # Node order sums the small external-work terms first; member order puts the
+            # large strain-energy term first, exposing ordinary reduction loss.
+            energy_accumulation = page.evaluate("""() => {
+                const nodes = [], members = [];
+                for (let i=0;i<20;i++) {
+                    const y=2*i, a='S'+i+'A', b='S'+i+'B';
+                    nodes.push({id:a,x:0,y,fixX:true,fixY:true},
+                        {id:b,x:1,y,fixY:true,fx:10,fy:0});
+                    members.push({id:'S'+i,a,b,E:1,area:50000});
+                }
+                nodes.push({id:'LA',x:0,y:50,fixX:true,fixY:true},
+                    {id:'LB',x:1,y:50,fixY:true,fx:1e9,fy:0});
+                members.unshift({id:'LARGE',a:'LA',b:'LB',E:1,area:50000});
+                const result=ProMathTrussFEM.solve({nodes,members});
+                const naiveEnergy=result.members.reduce((sum,member)=>sum+member.force*member.extension/2,0);
+                return {naiveEnergy,elasticEnergy:result.elasticEnergy,energyError:result.energyError,
+                    forceBalance:result.forceBalance.x};
+            }""");
+            assert energy_accumulation['naiveEnergy'] == 1e16, energy_accumulation
+            assert energy_accumulation['elasticEnergy'] == 1e16 + 20, energy_accumulation
+            assert energy_accumulation['energyError'] == 0, energy_accumulation
+            assert energy_accumulation['forceBalance'] == 0, energy_accumulation
+
             # Numeric text is decimal/scientific input, not JavaScript Number() radix coercion.
             numeric_string_contract = page.evaluate("""() => {
                 const copy = model => JSON.parse(JSON.stringify(model));

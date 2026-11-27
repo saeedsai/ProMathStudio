@@ -1097,9 +1097,12 @@
       x: finiteSignedSum([...nodes.map(node => node.fx), ...reactions.map(reaction => reaction.rx)], 'Force balance x (N)'),
       y: finiteSignedSum([...nodes.map(node => node.fy), ...reactions.map(reaction => reaction.ry)], 'Force balance y (N)')
     };
-    const externalWork = free.reduce((sum, i) => sum + F[i] * u[i], 0);
-    const elasticEnergy = results.reduce((sum, m) => sum + m.force*m.extension/2, 0);
-    const energyError = Math.abs(2*elasticEnergy-externalWork)/Math.max(1, Math.abs(externalWork));
+    const externalWork = finiteSignedSum(free.map(i => F[i] * u[i]), 'External work (J)');
+    const elasticEnergy = finiteSignedSum(results.map(member => member.force * member.extension / 2), 'Elastic strain energy (J)');
+    // Compare 2U with external work as one signed sum so the verification itself
+    // does not lose low-order terms or overflow before cancellation.
+    const energyResidual = finiteSignedSum([elasticEnergy, elasticEnergy, -externalWork], 'Energy balance residual (J)');
+    const energyError = Math.abs(energyResidual) / Math.max(1, Math.abs(externalWork));
     if (!Number.isFinite(energyError) || energyError > 1e-6) throw Error('Numerical energy verification failed.');
     const maxDisplacement = displacements.reduce((a,b)=>b.magnitude>a.magnitude?b:a,displacements[0]);
     const maxStress = results.reduce((a,b)=>Math.abs(b.stress)>Math.abs(a.stress)?b:a,results[0]);

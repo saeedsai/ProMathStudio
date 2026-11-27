@@ -1,3 +1,10 @@
+## 2026-11-28 — Correct Truss FEM energy reference and expose signed balance residual
+
+- Exact-head Push/PR Quality on parent 00c2fed failed at Truss analytical step 214 because the energy regression assumed the solver-generated large-member term was exactly 1e16 J; the actual term included binary64 solve-rounding noise, so its naive sum was 10000000000000046. The failure was a brittle test reference, not evidence of a production accumulator defect.
+- Replaced the Node and Chromium fixture with exact powers-of-two: one 2^55 J member plus 32 independent 0.5 J members. The naive member-order sum must remain 2^55 J; compensated energy must be 2^55+16 J, external work 2^56+32 J, and signed energy residual zero.
+- Added the signed `energyResidual` (joules) to the FEM solve result and display it in the Truss Studio verification panel beside the normalized identity error. Added direct API and browser-visible label assertions. No solver tolerance or existing regression gate was weakened.
+- Updated the Structural Truss FEM contract, living plan and execution ledger. Implemented on dev; fresh exact-head Push/PR Quality is pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-27 — Preserve small Truss FEM energy contributions in verification
 
 - Replaced ordinary reductions for external work and elastic strain energy with the shared finite signed accumulator. The energy-balance residual is now computed as one signed sum of the two elastic-energy totals and negative external work, avoiding low-order loss and an unnecessary intermediate (2U) overflow.

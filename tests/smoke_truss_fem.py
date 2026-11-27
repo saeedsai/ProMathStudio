@@ -37,6 +37,7 @@ def main():
             page.set_content(HTML, wait_until='load')
             page.locator('#status').wait_for()
             assert 'Analysis complete' in page.locator('#status').inner_text(), page.locator('#status').inner_text()
+            assert 'Energy balance residual =' in page.locator('#verification').inner_text()
             assert 'mm' in page.locator('#disp-card').inner_text()
             assert page.locator('#plot line').count() >= 6
             assert page.locator('#member-results tr').count() == 3
@@ -77,27 +78,28 @@ def main():
             assert aggregate_totals['naiveLength'] != 10000000000000020, aggregate_totals
             assert aggregate_totals['naiveVolume'] != 10000000000.00002, aggregate_totals
 
-            # Energy diagnostics must retain twenty 1 J bars beside one 1e16 J bar.
-            # Node order sums the small external-work terms first; member order puts the
-            # large strain-energy term first, exposing ordinary reduction loss.
+            # A 2^55 J bar plus thirty-two 0.5 J bars gives an exact 2^55+16 J total.
+            # Each small term is below half an ulp at the large member, so ordinary
+            # member-order addition loses all 16 J while compensated summation retains them.
             energy_accumulation = page.evaluate("""() => {
                 const nodes = [], members = [];
-                for (let i=0;i<20;i++) {
+                for (let i=0;i<32;i++) {
                     const y=2*i, a='S'+i+'A', b='S'+i+'B';
                     nodes.push({id:a,x:0,y,fixX:true,fixY:true},
-                        {id:b,x:1,y,fixY:true,fx:10,fy:0});
-                    members.push({id:'S'+i,a,b,E:1,area:50000});
+                        {id:b,x:1,y,fixY:true,fx:0.256,fy:0});
+                    members.push({id:'S'+i,a,b,E:65.536,area:1});
                 }
-                nodes.push({id:'LA',x:0,y:50,fixX:true,fixY:true},
-                    {id:'LB',x:1,y:50,fixY:true,fx:1e9,fy:0});
-                members.unshift({id:'LARGE',a:'LA',b:'LB',E:1,area:50000});
+                nodes.push({id:'LA',x:0,y:64,fixX:true,fixY:true},
+                    {id:'LB',x:1,y:64,fixY:true,fx:2**36/1000,fy:0});
+                members.unshift({id:'LARGE',a:'LA',b:'LB',E:65.536,area:1});
                 const result=ProMathTrussFEM.solve({nodes,members});
                 const naiveEnergy=result.members.reduce((sum,member)=>sum+member.force*member.extension/2,0);
-                return {naiveEnergy,elasticEnergy:result.elasticEnergy,energyError:result.energyError,
-                    forceBalance:result.forceBalance.x};
+                return {naiveEnergy,elasticEnergy:result.elasticEnergy,energyResidual:result.energyResidual,
+                    energyError:result.energyError,forceBalance:result.forceBalance.x};
             }""");
-            assert energy_accumulation['naiveEnergy'] == 1e16, energy_accumulation
-            assert energy_accumulation['elasticEnergy'] == 1e16 + 20, energy_accumulation
+            assert energy_accumulation['naiveEnergy'] == 2**55, energy_accumulation
+            assert energy_accumulation['elasticEnergy'] == 2**55 + 16, energy_accumulation
+            assert energy_accumulation['energyResidual'] == 0, energy_accumulation
             assert energy_accumulation['energyError'] == 0, energy_accumulation
             assert energy_accumulation['forceBalance'] == 0, energy_accumulation
 

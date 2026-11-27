@@ -448,7 +448,7 @@
       m.eulerLoadRatio===null?'—':fmt(m.eulerLoadRatio),m.eulerAssessment]);
     addResultRows('joint-results',result.displacements,n=>[n.id,fmt(n.x*1000),fmt(n.y*1000),fmt(n.magnitude*1000)]);
     addResultRows('reactions',result.reactions,r=>[r.id,fmt(r.rx/1000),fmt(r.ry/1000)]);
-    $('verification').textContent='Force balance: ΣFx = '+fmt(result.forceBalance.x)+' N, ΣFy = '+fmt(result.forceBalance.y)+' N. Max free DOF residual / load scale = '+result.residual.toExponential(3)+'. Elastic strain energy = '+fmt(result.elasticEnergy)+' J. Normalized energy identity error = '+result.energyError.toExponential(3)+'.';
+    $('verification').textContent='Force balance: ΣFx = '+fmt(result.forceBalance.x)+' N, ΣFy = '+fmt(result.forceBalance.y)+' N. Max free DOF residual / load scale = '+result.residual.toExponential(3)+'. Elastic strain energy = '+fmt(result.elasticEnergy)+' J. Energy balance residual = '+fmt(result.energyResidual)+' J. Normalized energy identity error = '+result.energyError.toExponential(3)+'.';
     draw();status('Analysis complete · '+result.nodes.length+' joints, '+result.members.length+' members.');
   }
   function analyze(successNotice=''){

@@ -771,19 +771,20 @@ test('support reactions retain a small residual between large cancelling member 
 
 test('energy diagnostics retain small member contributions beside a large member',()=>{
  const nodes=[],members=[];
- for(let i=0;i<20;i++){
+ for(let i=0;i<32;i++){
   const y=2*i,a='S'+i+'A',b='S'+i+'B';
   nodes.push({id:a,x:0,y,fixX:true,fixY:true},
-   {id:b,x:1,y,fixY:true,fx:10,fy:0});
-  members.push({id:'S'+i,a,b,E:1,area:50000});
+   {id:b,x:1,y,fixY:true,fx:0.256,fy:0});
+  members.push({id:'S'+i,a,b,E:65.536,area:1});
  }
- nodes.push({id:'LA',x:0,y:50,fixX:true,fixY:true},
-  {id:'LB',x:1,y:50,fixY:true,fx:1e9,fy:0});
- members.unshift({id:'LARGE',a:'LA',b:'LB',E:1,area:50000});
+ nodes.push({id:'LA',x:0,y:64,fixX:true,fixY:true},
+  {id:'LB',x:1,y:64,fixY:true,fx:2**36/1000,fy:0});
+ members.unshift({id:'LARGE',a:'LA',b:'LB',E:65.536,area:1});
  const result=fem.solve({nodes,members});
  const naiveEnergy=result.members.reduce((sum,member)=>sum+member.force*member.extension/2,0);
- assert.equal(naiveEnergy,1e16,'the member-order reduction must reproduce the lost 20 J');
- assert.equal(result.elasticEnergy,1e16+20);
+ assert.equal(naiveEnergy,2**55,'the member-order reduction must lose the thirty-two 0.5 J contributions');
+ assert.equal(result.elasticEnergy,2**55+16,'the compensated total must retain all thirty-two 0.5 J contributions');
+ assert.equal(result.energyResidual,0);
  assert.equal(result.energyError,0);
  assert.equal(result.forceBalance.x,0);
 });

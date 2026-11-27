@@ -1107,7 +1107,7 @@
     const maxDisplacement = displacements.reduce((a,b)=>b.magnitude>a.magnitude?b:a,displacements[0]);
     const maxStress = results.reduce((a,b)=>Math.abs(b.stress)>Math.abs(a.stress)?b:a,results[0]);
     return {id:'structural-truss-fem-2d',nodes,members:results,displacements,reactions,maxDisplacement,maxStress,
-      residual,energyError,elasticEnergy,forceBalance,
+      residual,energyResidual,energyError,elasticEnergy,forceBalance,
       assumptions:'2D pin-connected truss; linear elastic axial bars; small deformation; static loads; supported DOFs fixed at zero. Optional post-solve Euler comparison is an ideal elastic compression-only screen when I/K are supplied; no geometric buckling, imperfections, yielding, code resistance factors or design-code certification.'};
   }
   const examples = {

@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 22:57 CET  
+**Last updated:** 28 November 2026, 00:00 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,14 +15,15 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting `dev` for this checkpoint is `0a3a44a6c00d32eecea40c7169684b5c5e99b0f1`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Compare is **117 ahead / 0 behind**. Exactly two branches exist: `dev` and `main`. This run advances `dev` with one guarded atomic commit; its resulting SHA is verified from the branch ref after the update.
-- Both branches report `protected:false`; repository rulesets are empty. Branch-protection reads return HTTP 403 (Resource not accessible by integration), so enforceable protection is not verified.
-- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, with **zero submitted independent reviews**.
-- Exact-head Push Quality [#46068499461](https://github.com/saeedsai/ProMathStudio/actions/runs/46068499461) and PR Quality [#46068506509](https://github.com/saeedsai/ProMathStudio/actions/runs/46068506509) both passed **218/218** on starting head `0a3a44a6c00d32eecea40c7169684b5c5e99b0f1`, with zero failed or skipped steps. Both run records were verified to reference that exact SHA. This certifies the Truss support-reaction correction; the new energy-accumulation change requires fresh exact-head runs.
-- The browser regression already uses an ephemeral loopback HTTP server for real-origin localStorage checks; this repair opens the custom-function details panel by clicking its visible summary before filling editor controls and asserts the fields are visible. Production validation is also hardened consistently in editor save, direct restore and project preflight: a Python custom function must have exactly one synchronous top-level declaration of its saved name and its ordered positional parameters must match params. Duplicate definitions and async def are rejected because a later definition can replace the callable and an async function returns a coroutine the numeric worker cannot consume.
-- Added Node schema, Chromium editor/import/direct-restore cases, updated the project-format contract, and preserved exact `src/project-schema.js` ↔ embedded `index.html` parity. Isolated V8 checks run before the atomic dev commit; full Python/Chromium/build certification must come from fresh exact-head Actions.
-- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and GitHub Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not released.
-- The local checkout is absent (`git rev-parse --show-toplevel` returns “not a git repository”). The GitHub integration is used for repository access. The `index.html` content endpoint returns an empty body with a blob SHA, so this run deliberately changes only the adjacent `tools/truss-fem.js` script and its tests; no standalone bundle edit is required.
+- Starting `dev` for this checkpoint was `00c2fed11ae0ea86bdcf0308d712173285e1e985`; `main` remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The compare is **118 ahead / 0 behind** and exactly two branches exist: `dev` and `main`. This run creates one guarded, non-force atomic commit on the existing `dev` ref.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) remains the sole `dev`→`main` release PR, open and mergeable, 118 commits ahead, 46 changed files, with **zero submitted independent reviews**.
+- Both branches report `protected:false`; repository rulesets are empty and branch-protection reads return HTTP 403 (Resource not accessible by integration). Enforceable protection is not verified; no merge is authorized.
+- Exact-head Push Quality [#46074943178](https://github.com/saeedsai/ProMathStudio/actions/runs/46074943178) and PR Quality [#46074946696](https://github.com/saeedsai/ProMathStudio/actions/runs/46074946696) both failed on `00c2fed11ae0ea86bdcf0308d712173285e1e985` at Truss FEM analytical step 214. Step 212 passed and step 215 was skipped after the failure. The failing Node suite reported 108/109 tests passing; the sole failure was a brittle energy fixture that expected a sequential sum of one 1e16 J member plus twenty 1 J members to equal exactly 1e16 J. The actual solver-generated large-member term was slightly rounded, so the naive sum was 10000000000000046. The failure occurred at the test's preliminary naive-sum assertion, before its hard-coded compensated-energy expectation; this was a fixture/reference defect, not evidence that the production accumulator failed.
+- This checkpoint replaces that fixture with exact powers-of-two: stiffness 65536 N/m, one 2^36 N / 2^20 m member (2^55 J), and 32 independent 256 N / 1/256 m members (0.5 J each). Ordinary member-order addition must remain 2^55 J; the compensated total must be exactly 2^55+16 J. The external-work total is exactly 2^56+32 J, so the signed energy residual is zero. Node and Chromium tests assert the independent exact reference, force balance and residual.
+- The FEM solve result now also returns signed `energyResidual` in joules, and the Truss Studio verification panel displays it alongside the normalized identity error. This is an additive diagnostic; the underlying binary64 solver and acceptance threshold are unchanged.
+- The Truss FEM solver/UI are adjacent `tools/` scripts and are not embedded `src/` modules; no `index.html` bundle change is required. The local execution container has no checkout (`git rev-parse --show-toplevel` returns “not a git repository”), so repository edits use the connected GitHub integration and full browser/build certification must come from exact-head Actions.
+- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. No newer production deployment is verified; this dev work is not live.
+- The historical 26-Oct inventory remains frozen at **166 gaps / 95 partial**. Do not edit its baseline counts or claim catalog aliases as completed unique features.
 
 ## Operating contract
 
@@ -38,7 +39,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** Truss support-reaction correction is certified by exact-head Push #46068499461 and PR #46068506509 (218/218 each, zero failures/skips) on `0a3a44a6c00d32eecea40c7169684b5c5e99b0f1`. This checkpoint adds compensated energy diagnostics and requires fresh exact-head Quality. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
+**Status:** Exact-head Push #46074943178 and PR #46074946696 failed at Truss analytical step 214 on `00c2fed`; the root cause was a fragile energy-fixture reference, not a production failure. This checkpoint replaces it with exact binary-power inputs and exposes the signed energy residual; fresh exact-head Quality is pending. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -66,11 +67,11 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial; compensated stiffness and section-property boundary fixes are on dev. Exact-head Push/PR Quality passed on `0a3a44a` for the nodal reaction correction. This checkpoint additionally compensates external-work and elastic-energy totals and computes the energy residual as one signed sum; Node and desktop/390px Chromium tests use one 1e16 J bar plus twenty 1 J bars. Fresh exact-head QA for this addition is pending; the complete seven-shape reference matrix and release evidence remain open.  
+**Status:** Partial; compensated stiffness, reaction and energy accumulation plus seven-shape section-property boundary fixes are implemented on dev. Exact-head Push/PR Quality on `00c2fed` exposed one invalid energy-test fixture assumption (solver-rounding noise made its naive sum 10000000000000046 rather than the theoretical 1e16). This checkpoint replaces it with an exact power-of-two reference and returns the signed absolute energy residual in the API and verification panel. Fresh exact-head QA is pending; the complete seven-shape reference matrix and release evidence remain open.  
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.
-- Equilibrium residual, strain energy, displacement and member-force references; a mixed-scale energy fixture must retain 20 J beside 1e16 J and report zero balance error; invalid-input rollback and 390px keyboard/mobile checks.
+- Equilibrium residual, strain energy, displacement and member-force references; an exact power-of-two fixture must retain 16 J from thirty-two 0.5 J bars beside a 2^55 J member, expose a zero signed energy residual, and preserve the normalized error; invalid-input rollback and 390px keyboard/mobile checks.
 
 ### 5. P1 — Harden adaptive RK45 difficult-workload boundaries
 
@@ -174,3 +175,16 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - PR #191 remains the sole dev→main PR, open/mergeable, with zero independent submitted reviews. Both branches report unprotected, rulesets are empty, and branch-protection GET returns HTTP 403. No merge or direct main update.
 - Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. This change is dev-only pending fresh exact-head Quality and release governance.
 - Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## Latest checkpoint — 28 November 2026, 00:00 CET
+
+- Starting refs verified from GitHub: `dev 00c2fed11ae0ea86bdcf0308d712173285e1e985`, `main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 118 ahead / 0 behind; exactly two branches. Root `AGENTS.md`, this plan, frozen 26-Oct inventory, Unified Master Implementation Plan, Engineering Architecture/Toolbox contracts, Structural Truss FEM contract, Quality workflow, PR #191, reviews, exact-head job logs and main/Pages evidence were inspected.
+- Exact-head Push #46074943178 and PR #46074946696 both failed at step 214. The Node Truss suite had 108/109 passing; its sole failure was the energy fixture's preliminary assertion that ordinary summation was exactly 1e16 J. Actual naive output was 10000000000000046 because the solver-generated large member energy itself contained rounding noise. Browser step 212 passed; responsive step 215 was skipped after the analytical failure. No production failure was established by that assertion.
+- Replaced the fragile fixture in Node and Chromium with exact powers-of-two: each member stiffness is 65536 N/m, the large member has force 2^36 N and extension 2^20 m (2^55 J), and 32 small members each have force 256 N and extension 1/256 m (0.5 J). The naive member-order total is exactly 2^55 J; compensated energy must equal 2^55+16 J; external work is 2^56+32 J; signed residual and normalized error are zero.
+- Added signed `energyResidual` to the public solve result and the Truss Studio verification panel. Added direct Node/browser assertions for the new field and visible label; numerical solver behavior and existing acceptance thresholds are unchanged.
+- Updated the Structural Truss FEM contract, NEXT FIVE status/acceptance tests, this execution ledger and changelog. Truss FEM is an adjacent `tools/` script; the standalone root `index.html` bundle is unchanged.
+- Isolated production-source V8 execution checks the exact fixture, naive-vs-compensated totals, zero residual/force balance, API field and UI syntax. Full repository Node, Chromium and build commands remain pending fresh exact-head GitHub Actions because the local checkout is absent.
+- PR #191 remains open/mergeable with zero independent reviews. Branches remain exactly dev/main; both report unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence from 24-Nov-2026 on unchanged main; this change is dev-only, not released.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged.

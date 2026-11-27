@@ -1,3 +1,14 @@
+## 2026-11-27 09:55 CET — Repair exact-head solver-test syntax failure
+
+**Observed exact-head failure:** Push Quality [#45971374793](https://github.com/saeedsai/ProMathStudio/actions/runs/45971374793) and PR Quality [#45971384583](https://github.com/saeedsai/ProMathStudio/actions/runs/45971384583) both ran on `95b15c2ceb4923d6783dfe5b48d05c478520db83` and failed at step 7, Structural tests and embedded Python compile check. The suite reported 614 tests with one import error and one optional skip; the import error was a Python `SyntaxError: unmatched ')'` in the new `tests/test_project_solver_state.py` contract tuple, line 23. The remaining discovered tests reported no failures. Browser steps were correctly skipped after the structural gate failed.
+
+**Correction:** Removed the single extra closing parenthesis in the test tuple. Kept all production validation, enum/boundary assertions, browser rollback assertions and CI gates unchanged. This is a test syntax correction, not a relaxation of coverage.
+
+**Next validation:** Re-run Python structural discovery and the exact-head Push/PR Quality workflows. If step 7 passes, verify the new solver browser round-trip/rejection regression and the remaining full 218-step suite. The candidate remains on dev only; no release merge.
+
+**NEXT FIVE priorities remain:** (1) P0 safe PR #191 release after full exact-head green checks, independent approval and verifiable main protection; (2) P1 saved-project compatibility across solver, Matrix, Graph, Curve fit and Data Tables with v1/v2 rollback and 390px tests; (3) P1 Data Tables numerical/reference/XLSX integrity; (4) P1 seven-shape Truss independent numerical boundaries; (5) P1 RK45 overflow, near-ULP time-grid and stale-export hardening.
+
+---
 ## 2026-11-27 09:55 CET — Validate saved symbolic-solver controls before restore
 
 **Starting refs:** dev `d8034f7392f8bcdf86d84b92664389ee78c7ab81`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the unified master plan, frozen 26-Oct inventory, current saved-project plan, project schema/export/restore code, project-format documentation, browser and Node regression files, PR #191, exact-head Actions and main Quality/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.

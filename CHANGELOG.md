@@ -1,3 +1,8 @@
+## 2026-11-27 — Repair saved-solver regression test syntax
+
+- Corrected a single unmatched closing parenthesis in the new solver-state structural test after both exact-head Quality workflows failed at step 7 during Python test discovery.
+- Kept the new source validation and all regression assertions intact; rerun exact-head Push/PR Quality before certification.
+
 ## 2026-11-27 — Validate saved symbolic-solver controls before restore
 
 - Project migration now checks the saved Equation operation, engine and limit-direction selectors against the actual workspace options.

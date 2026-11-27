@@ -20,7 +20,7 @@ class ProjectSolverStateTests(unittest.TestCase):
                 "solver engine is invalid.",
                 "solver limit direction is invalid.",
                 "short(solver.variable, 24",
-                "short(solver.limitPoint, 80")):
+                "short(solver.limitPoint, 80)"):
             self.assertIn(contract, source)
 
     @unittest.skipUnless(shutil.which("node"), "Node.js required")

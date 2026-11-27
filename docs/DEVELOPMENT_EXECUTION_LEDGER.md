@@ -1,3 +1,11 @@
+## 2026-11-27 09:55 CET — EXACT-HEAD CI FAILURE AND TEST SYNTAX REPAIR
+
+- Candidate `95b15c2ceb4923d6783dfe5b48d05c478520db83` failed both Push Quality #45971374793 and PR Quality #45971384583 at step 7.
+- Exact log: 614 discovered tests; one import error, one optional skip. The import error was `SyntaxError: unmatched ')'` at line 23 of the new `tests/test_project_solver_state.py` contract tuple. No other test failure was reported; browser steps were skipped after structural gate failure.
+- Corrected only the extra closing parenthesis. No production code, numerical assertions, regression assertions or CI gates were weakened.
+- Next exact-head Push/PR Quality must verify Python discovery, source/bundle parity, all 144 valid solver selector combinations, invalid enum/type/bound rejection, and the Chromium valid round-trip plus transactional state preservation.
+- PR #191 remains open; no merge or direct main update. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
 ## 2026-11-27 09:55 CET — VALIDATE SAVED SYMBOLIC-SOLVER CONTROLS
 
 - Starting dev `d8034f7392f8bcdf86d84b92664389ee78c7ab81`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only dev/main branches exist; compare main...dev = 97 ahead / 0 behind.

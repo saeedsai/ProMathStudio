@@ -1728,3 +1728,11 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - Corrected the RK45 result-panel warning. The collision counter includes repeated fractional-stage timestamps and stages rounded onto either endpoint; the previous message incorrectly said every collision was “rounded to current t”.
 - Added a registered Chromium UI regression that runs the forward 20-ULP case near 1e12 and checks the new wording while rejecting the obsolete wording. Numerical integration, step selection, error estimates and export behavior are unchanged.
 - Synchronized `src/ode-tools.js` with the embedded standalone `index.html` module. Implemented on dev; exact-head Push/PR Quality and release are pending.
+
+
+## 2026-11-27 — Repair RK45 warning regression and singular/plural diagnostics
+
+- Exact-head Push [#46014476843](https://github.com/saeedsai/ProMathStudio/actions/runs/46014476843) and PR [#46014485667](https://github.com/saeedsai/ProMathStudio/actions/runs/46014485667) both exposed a stale browser assertion at step 181: the stage-resolution test still expected the obsolete “stage times rounded to current t” warning after the broader repeated/endpoint-collapsed wording was introduced.
+- Updated RK45 result formatting to use “1 accepted step had” or “N accepted steps had” according to the actual collision count. Numerical integration and diagnostics counters are unchanged.
+- Updated forward/backward single-collision Chromium assertions and the 20-ULP two-collision Chromium assertion. The tests reject the obsolete wording and incorrect singular/plural forms; no assertions or workflow gates were weakened.
+- Updated numerical-method documentation, living plan and execution ledger. Modular source and standalone index.html are committed together after exact parity verification. Fresh exact-head Push/PR Quality is required; this is implemented on dev, not released.

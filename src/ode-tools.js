@@ -301,8 +301,9 @@ function run(){
    (last.resolutionLimitedAttempts?', time-resolution-limited attempts '+last.resolutionLimitedAttempts:'')+
    (last.quantumLimitedAcceptedSteps?', warning: '+last.quantumLimitedAcceptedSteps+
     ' accepted time steps advanced by only one representable time increment; rescale time and verify convergence':'')+
-   (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+
-    ' accepted steps had repeated or endpoint-collapsed RK45 stage times; rescale time for reliable accuracy':'')+
+   (last.stageTimeCollisionAcceptedSteps?', warning: '+last.stageTimeCollisionAcceptedSteps+' accepted '+
+    (last.stageTimeCollisionAcceptedSteps===1?'step had':'steps had')+
+    ' repeated or endpoint-collapsed RK45 stage times; rescale time for reliable accuracy':'')+
    (last.rejectionWarning?', warning: '+last.rejectionWarning:''):
    'Δt='+last.h.toPrecision(8)+(last.type==='ode-rk4-system'||last.type==='ode-rk4'?(last.convergence?
     '; RK4 step-doubling |x_N − x_2N|∞ '+last.convergence.endpointDifference.toPrecision(5)+

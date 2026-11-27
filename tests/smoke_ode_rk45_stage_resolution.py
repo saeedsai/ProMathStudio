@@ -26,7 +26,7 @@ def main():
         page.locator("#ode-initial").fill("0")
         page.locator("#ode-run").click()
         output = page.locator("#ode-output").inner_text()
-        assert "stage times rounded to current t" in output, output
+        assert "1 accepted step had repeated or endpoint-collapsed RK45 stage times" in output, output
         assert "rescale time" in output, output
         result = page.evaluate('''() => MathStudio.odeTools.solveAdaptive({
             expression:'1',t0:1e12-1/8192,t1:1e12,y0:0
@@ -51,7 +51,7 @@ def main():
         page.locator("#ode-start").fill("1000000000000")
         page.locator("#ode-end").fill("999999999999.9999")
         page.locator("#ode-run").click()
-        assert "stage times rounded to current t" in page.locator("#ode-output").inner_text()
+        assert "1 accepted step had repeated or endpoint-collapsed RK45 stage times" in page.locator("#ode-output").inner_text()
         assert page.locator('#ode-to-table').is_enabled()
         backward = page.evaluate("""() => MathStudio.odeTools.solveAdaptive({
             expression:'1',t0:1e12,t1:1e12-1/8192,y0:0

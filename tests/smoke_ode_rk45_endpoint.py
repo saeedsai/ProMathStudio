@@ -138,7 +138,9 @@ def main():
         page.locator("#ode-initial").fill("0")
         page.locator("#ode-run").click()
         collision_output = page.locator("#ode-output").inner_text()
-        assert "repeated or endpoint-collapsed RK45 stage times" in collision_output, collision_output
+        assert "2 accepted steps had repeated or endpoint-collapsed RK45 stage times" in collision_output, collision_output
+        assert "2 accepted step had repeated or endpoint-collapsed RK45 stage times" not in collision_output
+        assert "rounded to current t" not in collision_output
         assert "rounded to current t" not in collision_output, collision_output
 
         page.locator('[data-workspace="editor"]').click()

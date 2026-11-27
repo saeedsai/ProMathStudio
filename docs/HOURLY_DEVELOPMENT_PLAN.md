@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 14:58 CET  
+**Last updated:** 27 November 2026, 16:03 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,10 +15,10 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Current `dev`: `b6c535854313b41406be355b4d06d633d003285b`; `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare: **107 ahead / 0 behind**.
-- Existing PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191): `dev` → `main`, open and mergeable, 107 commits ahead / 0 behind, 44 changed files, zero submitted independent reviews.
+- Current `dev`: `820d5c03c9e8b0e544f427a89cc328c6350ce2c4`; `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare: **108 ahead / 0 behind**.
+- Existing PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191): `dev` → `main`, open and mergeable, 108 commits ahead / 0 behind, 44 changed files, zero submitted independent reviews.
 - Branch inventory: exactly `dev` and `main`; both currently report `protected: false`. Rulesets are empty; branch-protection GET returns HTTP 403 to the connected integration.
-- Exact-head Quality on `b6c535854313b41406be355b4d06d633d003285b`: Push [#46006460898](https://github.com/saeedsai/ProMathStudio/actions/runs/46006460898) and PR [#46006469595](https://github.com/saeedsai/ProMathStudio/actions/runs/46006469595) both completed **218/218 steps, success, zero failures and zero skips**. The RK45 endpoint browser regression and all remaining Quality checks passed on this exact head.
+- Previous-head Quality on `b6c535854313b41406be355b4d06d633d003285b`: Push [#46006460898](https://github.com/saeedsai/ProMathStudio/actions/runs/46006460898) and PR [#46006469595](https://github.com/saeedsai/ProMathStudio/actions/runs/46006469595) both completed **218/218 steps, success, zero failures and zero skips**. New exact-head Quality on `820d5c03c9e8b0e544f427a89cc328c6350ce2c4` failed in both Push [#46014476843](https://github.com/saeedsai/ProMathStudio/actions/runs/46014476843) and PR [#46014485667](https://github.com/saeedsai/ProMathStudio/actions/runs/46014485667) at step 181: `tests/smoke_ode_rk45_stage_resolution.py` still expected the obsolete warning text. The implementation wording is correct; this run updates the stale browser assertion and adds singular/plural checks.
 - The earlier `d4ff4a8` candidate's structural failure was caused by an omitted modular `src/ode-tools.js` blob while the standalone `index.html` module had advanced. Commit `b6c5358` restored exact source/bundle parity; the corrected candidate is now fully green. See the execution ledger for the failure diagnosis and correction.
 - Latest verified production runs remain Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. No newer main deployment or live hosted verification is claimed.
 
@@ -36,7 +36,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** Exact-head Push and PR Quality are green on b6c5358 (218/218 steps each, zero failures/skips). Promotion remains blocked by zero independent reviews and unavailable/unverified enforceable main protection. The d4ff source/bundle assembly failure was corrected and the corrected head is fully certified.  
+**Status:** The prior b6c5358 head is fully green (218/218 Push and PR). Current 820d5c0 exact-head runs both failed at step 181 because the stage-resolution browser test still expected the old warning wording; the result-panel copy is intentionally broader and accurate. This iteration updates the stale assertion and adds singular/plural grammar coverage. Promotion remains blocked by zero independent reviews and unverified main protection.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate head with all required steps completed and zero skips.
 - Complete PR diff and review threads are inspected; an eligible independent reviewer approves.
@@ -72,7 +72,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 5. P1 — Harden adaptive RK45 difficult-workload boundaries
 
-**Status:** Partial; bounded-stage recovery, subnormal-span initialization and repeated-stage diagnostics are implemented on dev. Exact-head Quality is green on b6c5358. This run corrects the result-panel wording: collision counters include repeated fractional timestamps and stages rounded to either endpoint, not only stages rounded to current t. Remaining overflow, attempt-budget and stale-export boundaries stay in the acceptance matrix.  
+**Status:** Partial; bounded-stage recovery, subnormal-span initialization and repeated-stage diagnostics are implemented on dev. The 820d5c0 browser warning-copy change exposed a stale assertion at step 181 in both exact-head workflows. This iteration fixes that test and verifies singular/plural count wording for one and two accepted collision steps. Remaining overflow, attempt-budget and stale-export boundaries stay in the acceptance matrix.  
 **Acceptance tests:**
 - Recoverable stage-overflow retries preserve a finite solution when smaller steps succeed; unrecoverable overflow terminates with a diagnostic.
 - Forward/backward sample times are strictly monotone with no duplicate timestamps at large epochs or near-ULP spacing.
@@ -85,15 +85,14 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 After the five priorities above, continue shared-tool registry and canonical toolbox deduplication, then extend the verified engineering solver catalog without creating duplicate implementations or claiming planned entries as shipped.
 
-## Latest checkpoint
+## Latest checkpoint — 27 November 2026, 16:03 CET
 
-- Verified starting refs: dev `b6c535854313b41406be355b4d06d633d003285b`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; **107 ahead / 0 behind**. PR #191 is open/mergeable, 107 commits ahead, 44 changed files, zero independent reviews. Only dev/main branches exist; both report unprotected, rulesets are empty and branch-protection GET returns 403 to the integration.
-- Exact-head Push Quality [#46006460898](https://github.com/saeedsai/ProMathStudio/actions/runs/46006460898) and PR Quality [#46006469595](https://github.com/saeedsai/ProMathStudio/actions/runs/46006469595) both completed **218/218 steps successfully**, with zero failures and zero skips on `b6c535854313b41406be355b4d06d633d003285b`. This includes the RK45 endpoint Chromium regression and all remaining browser, structural and numerical checks.
-- The d4ff candidate's 20 structural failures were caused by source/bundle mismatch: the standalone ODE module advanced while `src/ode-tools.js` remained old. The corrective b6c5358 commit restored exact parity; both exact-head workflows are now fully green.
-- Code review found a remaining user-facing diagnostic mismatch: `stageTimeCollisionAcceptedSteps` includes duplicate fractional-stage timestamps and stages rounded onto either endpoint, but the result panel said all such stages were “rounded to current t”. This iteration changes the message to “repeated or endpoint-collapsed RK45 stage times”, adds a registered Chromium UI assertion using the forward 20-ULP case near 1e12, and updates the numerical-method contract.
-- The source change is synchronized into the standalone `index.html` module. The browser regression verifies that the accepted 20-ULP run displays the accurate wording and no longer displays the misleading “rounded to current t” phrase. Exact-head CI for this new commit is pending; the b6c5358 green runs do not certify the new commit.
-- PR #191 remains blocked by zero independent reviews and no verified enforceable main protection. Both refs report unprotected and rulesets are empty; no merge or direct main update.
-- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest successful production runs on 24-Nov-2026 at unchanged main. No new deployment or hosted verification.
-- Status: RK45 collision warning copy and Chromium regression implemented on dev; new exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
-- Next five: (1) safe PR #191 review/protection/release; (2) saved-project compatibility and stage-by-stage rollback; (3) Data Tables numerical/XLSX integrity; (4) seven-shape Truss FEM reference/boundary matrix; (5) RK45 difficult-workload boundaries and stale-export protection.
-
+- Verified refs: dev `820d5c03c9e8b0e544f427a89cc328c6350ce2c4`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare **108 ahead / 0 behind**. Exactly two branches exist: dev and main; both report `protected:false`; repository rulesets are empty.
+- Re-read root `AGENTS.md`, this plan, frozen 26-Oct inventory, Unified Master Implementation Plan, RK45 source and registered browser regressions. Historical baseline remains **166 gaps / 95 partial**.
+- P0 exact-head failure: Push Quality [#46014476843](https://github.com/saeedsai/ProMathStudio/actions/runs/46014476843) and PR Quality [#46014485667](https://github.com/saeedsai/ProMathStudio/actions/runs/46014485667) both failed at step 181, `RK45 stage-time precision warning, recovery and mobile regression`. The failing assertion in `tests/smoke_ode_rk45_stage_resolution.py` expected obsolete text `stage times rounded to current t`; actual output correctly says `repeated or endpoint-collapsed RK45 stage times`. Other RK45 endpoint/diagnostic browser steps passed.
+- The previous exact-head `b6c5358` was green in both Push and PR Quality (218/218, zero failures/skips). This does not certify `820d5c0`.
+- Correction on dev: pluralize the UI warning as `1 accepted step had` versus `2 accepted steps had`; update the stale forward/backward browser assertions and assert the 20-ULP case uses the plural form. Source and standalone `index.html` are updated together; docs, this plan, ledger and changelog record the change. No solver numerics, collision counts, CI gates or test scope are weakened.
+- Release PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) remains open/mergeable, 108 commits ahead / 0 behind, 44 changed files, zero independent reviews. No branch protection/rulesets are verifiably enabled; no merge or direct main update.
+- Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Latest known successful production Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are from 24-Nov-2026; no newer main deployment/live verification is claimed.
+- Status: warning grammar and stale test repair implemented on dev; fresh exact-head Push/PR Quality required. Native local Python/Playwright/build remain unavailable because the execution container has no checkout; isolated V8 and source/bundle parity checks are performed for this commit.
+- NEXT FIVE remain: (1) safe PR #191 review/protection/release; (2) saved-project compatibility and stage-by-stage rollback; (3) Data Tables numerical/XLSX integrity; (4) seven-shape Truss FEM reference/boundary matrix; (5) RK45 difficult-workload boundaries and stale-export protection.

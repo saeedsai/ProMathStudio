@@ -1,3 +1,8 @@
+## 2026-11-27 — Fix nested PRODUCT structural regression setup order
+
+- Corrected the new structural regression to load `tests/smoke_data_tables.py` before asserting its nested signed-zero browser case. Retained all assertions.
+- This fixes an `UnboundLocalError` in the exact-head structural gate; fresh Push/PR Quality pending. No production behavior changed.
+
 ## 2026-11-27 — Preserve negative zero through nested PRODUCT formulas
 
 - Fixed Data Tables aggregate composition losing the sign of a negative-zero PRODUCT result: JavaScript `String(-0)` emits `"0"`; the evaluator now emits an explicit `-0` scalar token.

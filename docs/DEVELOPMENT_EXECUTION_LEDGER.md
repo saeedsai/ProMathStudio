@@ -1,3 +1,10 @@
+## 2026-11-27 07:10 CET — FIX SIGNED-ZERO STRUCTURAL TEST SETUP ORDER
+
+- Starting dev `b3e2b6bcac151703292f705dead06fd5e1ff74b5`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Exact-head PR Quality #45950676415 failed at step 7. Structural unittest discovery ran 611 tests with one error and one optional mpmath skip. The error was `UnboundLocalError`: the new nested PRODUCT browser assertion used local `smoke` before its assignment in `test_product_uses_exponent_scaled_binary64_multiplication`.
+- Moved the assertion below the existing read of `tests/smoke_data_tables.py`. Retained both the source serialization assertion and nested browser fixture; no tests or production behavior were weakened.
+- New exact-head Push/PR Quality is required. No local repository checkout; static ordering inspection only. Previous exact-head browser failure root cause (String(-0) serialization) is fixed in parent `b3e2b6b` but not yet certified.
+- PR #191 remains open with zero independent reviews; no merge/direct main update. Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Quality/Pages #45360386408/#45360367251 are 24-Nov-2026 evidence only. Historical inventory **166 gaps / 95 partial** unchanged; not released.
 ## 2026-11-27 07:02 CET — PRESERVE SIGNED ZERO THROUGH NESTED PRODUCT
 
 - Starting dev `3a1532d280d4089c72cf7b737ffd125dd24c64c7`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only `dev` and `main` refs exist.

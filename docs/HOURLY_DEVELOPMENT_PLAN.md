@@ -1,3 +1,24 @@
+## 2026-11-27 07:10 CET — FIX SIGNED-ZERO STRUCTURAL TEST SETUP ORDER
+
+**Starting refs:** dev `b3e2b6bcac151703292f705dead06fd5e1ff74b5`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected the exact-head structural failure and the current Data Tables regression files. Historical inventory remains **166 gaps / 95 partial**.
+
+**Observed exact-head failure:** PR Quality [#45950676415](https://github.com/saeedsai/ProMathStudio/actions/runs/45950676415) failed at step 7, **Structural tests and embedded Python compile check**. The suite ran 611 tests with one error and one optional mpmath skip. The new assertion for the nested PRODUCT browser fixture referenced local variable `smoke` before the test method assigned it; the production source/bundle parity checks and other numerical tests passed.
+
+**Correction:** Moved the browser-source assertion below the existing `smoke_data_tables.py` read in `test_product_uses_exponent_scaled_binary64_multiplication`. The signed-zero serialization assertion and nested formula assertion remain; no assertion was removed and no production code changed.
+
+**Validation:** Failure location and Python `UnboundLocalError` confirmed from the exact-head Actions log. Static order check confirms `smoke` is assigned before the assertion. A fresh exact-head Push/PR Quality pair is required; this candidate is not yet certified.
+
+**Release:** PR #191 remains open with zero independent reviews; no merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality and Pages are still 24-Nov-2026 evidence only. Not released.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Certify and release safely (Blocked by governance).** Fresh exact-head Push/PR Quality must pass every required check; obtain eligible independent review and verifiable main protection, inspect the complete diff, merge only through ordinary PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Finish Data Tables numeric/formula and structural-reference integrity (In QA / Partial).** Direct/nested PRODUCT signed zero, range/scalar/nested operations, exponent scaling, zero/empty/overflow/underflow; 132,000-value MIN/MAX; SUM/AVERAGE cancellation and subnormal references; A1:AF6000 insert/delete, mixed anchors, quoted names, reversed/blank ranges, sorting, rollback and source/bundle parity.
+3. **P1 — Finish seven-shape Truss numerical boundaries (Partial / In QA).** Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle; thin-wall, cavity-transition, sub-ULP, composite cancellation, invalid rollback and 390px keyboard coverage.
+4. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Partial).** Current/v1 round-trips preserve drafts, datasets/overlays, sheets, selection and focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+5. **P1 — Harden adaptive RK45 stage-overflow and near-ULP time grids (Partial).** Bounded recoverable-stage retries; forward/backward monotone sample times, duplicate-time prevention, collision diagnostics, underflow, exhaustion, stale-export protection and responsive browser tests.
+
+---
 ## 2026-11-27 07:02 CET — PRESERVE SIGNED ZERO THROUGH NESTED PRODUCT
 
 **Starting refs:** dev `3a1532d280d4089c72cf7b737ffd125dd24c64c7`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the current execution queue, frozen 26-Oct inventory, Data Tables formula contract/source/tests, PR #191 and exact-head Quality evidence. Historical inventory remains **166 gaps / 95 partial**.

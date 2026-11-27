@@ -3133,6 +3133,20 @@ self.onmessage=async ({data})=>{
       }
     }
     for (const key of ['calculator', 'solver', 'graph', 'tables', 'fit']) optionalRecord(data[key], key);
+    // Curve-fit preferences are UI state, but malformed values can silently clear or corrupt
+    // the saved selection during restore. Validate the exported select values before any workspace mutates.
+    if (data.fit) {
+      const models = new Set(['none', 'linear', 'poly', 'exp', 'log', 'power', 'gaussian']);
+      const degrees = new Set(['2', '3', '4', '5', '6']);
+      if (data.fit.model !== undefined && data.fit.model !== null && data.fit.model !== '' &&
+          (typeof data.fit.model !== 'string' || !models.has(data.fit.model)))
+        fail('saved curve-fit model is invalid.');
+      if (data.fit.degree !== undefined && data.fit.degree !== null && data.fit.degree !== '' &&
+          (typeof data.fit.degree !== 'string' || !degrees.has(data.fit.degree)))
+        fail('saved curve-fit degree is invalid.');
+      if (data.fit.lastEquation !== undefined && data.fit.lastEquation !== null)
+        short(data.fit.lastEquation, 2000, 'saved curve-fit equation');
+    }
     if (data.calculator?.history !== undefined) {
       if (!Array.isArray(data.calculator.history) || data.calculator.history.length > 40) fail('calculator history exceeds 40 entries.');
       for (const item of data.calculator.history) {
@@ -5213,7 +5227,18 @@ $('fit-export').addEventListener('click',()=>{
  const link=document.createElement('a');link.href=url;link.download='ProMathStudio_fit_residuals.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 $('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent='Fit removed; data table unchanged.';});
-studio.curveFit={analyze,fitTable,get last(){return currentFit;},get active(){return !!currentFit;},exportState:()=>({model:$('fit-model').value,degree:$('fit-degree').value,lastEquation}),restoreState:s=>{if(!s)return;$('fit-model').value=s.model||'none';$('fit-degree').value=s.degree||'2';$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';lastEquation=String(s.lastEquation||'').slice(0,2000);}};
+studio.curveFit={analyze,fitTable,get last(){return currentFit;},get active(){return !!currentFit;},exportState:()=>({model:$('fit-model').value,degree:$('fit-degree').value,lastEquation}),restoreState:s=>{
+ if(!s)return;
+ if(typeof s!=='object'||Array.isArray(s))throw Error('Invalid saved curve-fit state.');
+ const models=['none','linear','poly','exp','log','power','gaussian'],degrees=['2','3','4','5','6'];
+ if(s.model!==undefined&&s.model!==null&&s.model!==''&&(typeof s.model!=='string'||!models.includes(s.model)))throw Error('Invalid saved curve-fit model.');
+ if(s.degree!==undefined&&s.degree!==null&&s.degree!==''&&(typeof s.degree!=='string'||!degrees.includes(s.degree)))throw Error('Invalid saved curve-fit degree.');
+ const equation=s.lastEquation??'';
+ if(typeof equation!=='string'||equation.length>2000)throw Error('Invalid saved curve-fit equation.');
+ const model=s.model||'none',degree=s.degree||'2';
+ $('fit-model').value=model;$('fit-degree').value=degree;
+ $('fit-degree-wrap').hidden=$('fit-model').value!=='poly';lastEquation=equation;
+}};
 // Floating/sliding library and contextual help. Keep underlying semantic form controls intact.
 const css=document.createElement('style');css.textContent=`
   .shell{display:block!important}.shell main{max-width:1360px;margin:auto;padding-top:72px}

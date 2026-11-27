@@ -1,3 +1,26 @@
+## 2026-11-27 07:58 CET — VALIDATE SAVED CURVE-FIT PROJECT STATE
+
+**Starting refs:** dev `dcc1e03c4ad90e4011f6cd39211797e67d6a326e`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected the root contract, frozen 26-Oct inventory, unified master plan, current project schema/standalone bundle, project import/rollback smoke, PR #191 and exact-head Quality evidence. Historical baseline remains **166 gaps / 95 partial**.
+
+**Prior exact-head QA:** Push Quality [#45950895139](https://github.com/saeedsai/ProMathStudio/actions/runs/45950895139) and PR Quality [#45950900876](https://github.com/saeedsai/ProMathStudio/actions/runs/45950900876) both completed all 218 steps successfully with zero failed or skipped steps on `dcc1e03c4ad90e4011f6cd39211797e67d6a326e`.
+
+**Implemented on dev:** Project migration previously checked only that optional `fit` was an object. The exported Curve fitting state has a concrete contract: model `none|linear|poly|exp|log|power|gaussian`, degree string `2`–`6`, and `lastEquation` up to 2,000 characters. Malformed enums/types could be accepted and then silently cleared by the UI restore. The schema now rejects invalid present values before any workspace mutation while retaining missing/null/empty legacy defaults. The direct Curve fitting restore API validates all fields before changing either selector.
+
+**Regression:** Added a Node structural/behavior test for all 35 model/degree combinations, invalid model/degree types, overlong/wrong-type equations, v1/v2 migration, legacy defaults, null fit and input immutability. Extended the registered Chromium project import test to verify valid fit preference round-trip, direct restore atomic rejection, malformed project rejection and preservation of the prior fit state. Updated the project-format contract and synchronized the embedded project schema in `index.html` exactly with `src/project-schema.js`.
+
+**Local validation:** The source/schema logic was checked in an isolated V8 harness against all valid model/degree pairs and invalid type/length boundaries. The full repository Node/Chromium/build suites are not locally available because this runtime has no Git checkout; exact-head Push and PR Quality are pending for the new commit.
+
+**Release:** PR #191 remains open, mergeable, 94 commits ahead and zero behind at the starting head, with zero submitted independent reviews. Branch listing shows only `dev` and `main`, both unprotected; repository rulesets are empty. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on 24-Nov-2026; no newer main deployment was found. Not released.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Safe PR #191 release (Blocked by governance).** Require green exact-head Push/PR Quality, eligible independent approval and verifiable enforceable main protection; inspect the full dev→main diff, merge only through ordinary PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Complete saved-project compatibility (In QA / Partial).** Verify Curve fitting model/degree/lastEquation validation, direct restore atomicity, v1/v2 round-trips, Matrix drafts, Graph primary/overlay datasets and Data Tables sheets/selection; malformed imports and injected restore failures must preserve every workspace at desktop and 390px.
+3. **P1 — Finish Data Tables numeric/formula and structural-reference integrity (Implemented on dev / QA green at prior head).** Re-run PRODUCT signed-zero/nested/exponent-scaling cases, 132,000-value MIN/MAX, SUM/AVERAGE cancellation/subnormal references, A1:AF6000 insert/delete, mixed anchors, quoted names, reversed/blank ranges, sorting, XLSX integrity, rollback and source/bundle parity at the new exact head.
+4. **P1 — Finish seven-shape Truss numerical boundaries (Partial).** Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle; thin-wall, cavity-transition, sub-ULP, composite cancellation, invalid rollback and 390px keyboard coverage.
+5. **P1 — Harden adaptive RK45 stage-overflow and near-ULP time grids (Partial).** Bounded recoverable-stage retries; forward/backward monotone sample times, duplicate-time prevention, collision diagnostics, underflow, exhaustion, stale-export protection and responsive browser tests.
+
+---
 ## 2026-11-27 07:10 CET — FIX SIGNED-ZERO STRUCTURAL TEST SETUP ORDER
 
 **Starting refs:** dev `b3e2b6bcac151703292f705dead06fd5e1ff74b5`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected the exact-head structural failure and the current Data Tables regression files. Historical inventory remains **166 gaps / 95 partial**.

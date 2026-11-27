@@ -41,6 +41,20 @@
       }
     }
     for (const key of ['calculator', 'solver', 'graph', 'tables', 'fit']) optionalRecord(data[key], key);
+    // Curve-fit preferences are UI state, but malformed values can silently clear or corrupt
+    // the saved selection during restore. Validate the exported select values before any workspace mutates.
+    if (data.fit) {
+      const models = new Set(['none', 'linear', 'poly', 'exp', 'log', 'power', 'gaussian']);
+      const degrees = new Set(['2', '3', '4', '5', '6']);
+      if (data.fit.model !== undefined && data.fit.model !== null && data.fit.model !== '' &&
+          (typeof data.fit.model !== 'string' || !models.has(data.fit.model)))
+        fail('saved curve-fit model is invalid.');
+      if (data.fit.degree !== undefined && data.fit.degree !== null && data.fit.degree !== '' &&
+          (typeof data.fit.degree !== 'string' || !degrees.has(data.fit.degree)))
+        fail('saved curve-fit degree is invalid.');
+      if (data.fit.lastEquation !== undefined && data.fit.lastEquation !== null)
+        short(data.fit.lastEquation, 2000, 'saved curve-fit equation');
+    }
     if (data.calculator?.history !== undefined) {
       if (!Array.isArray(data.calculator.history) || data.calculator.history.length > 40) fail('calculator history exceeds 40 entries.');
       for (const item of data.calculator.history) {

@@ -1,3 +1,15 @@
+## 2026-11-27 07:58 CET — VALIDATE SAVED CURVE-FIT PROJECT STATE
+
+- Starting dev `dcc1e03c4ad90e4011f6cd39211797e67d6a326e`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root AGENTS, unified master plan, frozen inventory, project format/schema, standalone bundle and project import/rollback tests inspected.
+- Prior exact-head Push #45950895139 and PR #45950900876 passed all 218 steps with zero failures/skips.
+- Added strict saved Curve fitting state validation: allowed model enum, degree string 2–6, bounded lastEquation (2,000 chars), and legacy missing/null/empty defaults. The direct restore API validates all fields before mutating selectors.
+- Added Node regression for 35 valid model/degree combinations, invalid types/enums/length, v1/v2 migration and input immutability; extended Chromium project import/rollback regression for valid fit round-trip, direct restore atomicity and malformed project preservation.
+- Updated `src/project-schema.js`, its exact embedded `index.html` copy, project-format documentation, tests, living plan, ledger and changelog in one atomic Git tree/commit.
+- Isolated V8 boundary harness passed; full local repository/build/browser commands unavailable because the execution container has no Git checkout. New exact-head Push/PR Quality pending.
+- PR #191 remains open with zero independent reviews; only dev/main refs exist, both unprotected, rulesets empty. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 last verified successful 24-Nov-2026; no newer main deployment found.
+- Historical baseline remains **166 gaps / 95 partial**; not released. Candidate SHA is the atomic commit created by this entry and is reported in the run checkpoint.
+
+---
 ## 2026-11-27 07:10 CET — FIX SIGNED-ZERO STRUCTURAL TEST SETUP ORDER
 
 - Starting dev `b3e2b6bcac151703292f705dead06fd5e1ff74b5`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.

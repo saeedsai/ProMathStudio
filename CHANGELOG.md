@@ -1,3 +1,10 @@
+## 2026-11-27 — Validate saved Curve fitting state in project backups
+
+- Project migration now validates optional Curve fitting preferences: supported model enum, degree strings 2–6 and a 2,000-character `lastEquation` bound. Missing/null/empty legacy selectors retain their defaults; malformed values are rejected before other workspaces mutate.
+- The directly exposed Curve fitting restore API now validates the complete state before changing selectors, preventing partial UI changes on invalid input.
+- Added Node coverage for all model/degree combinations, malformed types/enums/lengths, v1/v2 migration and immutability; extended the Chromium project-import smoke for valid round-trip, direct restore atomicity, invalid-import rejection and state preservation.
+- Synchronized `src/project-schema.js` with the embedded `index.html` module and documented the saved-state contract. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Fix nested PRODUCT structural regression setup order
 
 - Corrected the new structural regression to load `tests/smoke_data_tables.py` before asserting its nested signed-zero browser case. Retained all assertions.

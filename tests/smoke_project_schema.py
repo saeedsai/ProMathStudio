@@ -25,6 +25,22 @@ def main():
         page.set_content((ROOT / 'index.html').read_text(encoding='utf-8'), wait_until='load')
         original = page.evaluate('window.MathStudio.bridge.export()')
         assert original['version'] == 2
+        fit_guard = page.evaluate("""() => {
+          const fit = window.MathStudio.curveFit, before = fit.exportState();
+          const invalid = [
+            {model:'unknown',degree:'2',lastEquation:''},
+            {model:'poly',degree:'7',lastEquation:''},
+            {model:'poly',degree:'4',lastEquation:[]},
+            {model:'poly',degree:'4',lastEquation:'x'.repeat(2001)},
+            []
+          ];
+          const errors = invalid.map(value => {
+            try { fit.restoreState(value); return null; } catch (error) { return error.message; }
+          });
+          return {before,after:fit.exportState(),errors};
+        }""")
+        assert fit_guard['before'] == fit_guard['after'], fit_guard
+        assert all(fit_guard['errors']), fit_guard
         legacy = dict(original, version=1, working='x+1', origin='editor',
                       notebook=[{'raw': 'x+1'}])
         upload(page, legacy)
@@ -33,9 +49,18 @@ def main():
         assert migrated['version'] == 2
         assert [item['raw'] for item in migrated['notebook']] == ['x+1']
         assert migrated['tables'] == original['tables'], 'legacy table data changed'
+        valid_fit = dict(legacy, fit={'model': 'poly', 'degree': '4', 'lastEquation': 'y = 1 + 2*x'})
+        upload(page, valid_fit)
+        page.wait_for_function("""() => {
+          const fit = window.MathStudio.bridge.export().fit;
+          return fit?.model === 'poly' && fit.degree === '4' && fit.lastEquation === 'y = 1 + 2*x';
+        }""")
+        migrated = page.evaluate('window.MathStudio.bridge.export()')
+        assert migrated['fit'] == valid_fit['fit']
 
         def rejected(candidate):
             graph_before = page.evaluate('window.MathStudio.bridge.export().graph')
+            fit_before = page.evaluate('window.MathStudio.bridge.export().fit')
             page.locator('#hub-status').evaluate("el => el.textContent = ''")
             upload(page, candidate)
             page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
@@ -46,9 +71,19 @@ def main():
             assert current['matrix'] == migrated['matrix'], 'invalid import mutated Matrix drafts'
             assert current['customFunctions'] == migrated['customFunctions'], 'invalid import mutated custom functions'
             assert current['graph'] == graph_before, 'invalid import mutated graph state'
+            assert current['fit'] == fit_before, 'invalid import mutated curve-fit state'
 
         rejected(dict(legacy, version=99, working='WRONG'))
         rejected(dict(legacy, working='WRONG', notebook=[{'raw': 42}]))
+        for invalid_fit in (
+                {'model': 'unknown', 'degree': '2', 'lastEquation': ''},
+                {'model': 'poly', 'degree': '7', 'lastEquation': ''},
+                {'model': 'poly', 'degree': '4', 'lastEquation': 'x' * 2001},
+                {'model': 3, 'degree': '2', 'lastEquation': ''},
+                {'model': 'poly', 'degree': 4, 'lastEquation': ''},
+                {'model': 'poly', 'degree': '4', 'lastEquation': []},
+                []):
+            rejected(dict(legacy, working='WRONG', fit=invalid_fit))
         bad_tables = {'version': 1, 'selected': 'sheet-1', 'tables': [
             {'id': 'sheet-1', 'name': 'Data1', 'columns': ['A', 'B'], 'rows': [['1']]}]}
         rejected(dict(legacy, working='WRONG', tables=bad_tables))

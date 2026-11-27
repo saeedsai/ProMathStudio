@@ -27,6 +27,8 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
         self.assertIn("function stableProduct(values)", SOURCE)
         self.assertIn("x=stableProduct(nums);", SOURCE)
         self.assertIn("Object.is(value,-0)", SOURCE)
+        self.assertIn("Object.is(x,-0)?'-0':String(x)", SOURCE)
+        self.assertIn("Object.is(MathStudio.dataTables.calculate()[1][11],-0)", smoke)
         self.assertIn("Multiply numeric cells with scale-safe binary64 arithmetic.", SOURCE)
         smoke = (ROOT / "tests/smoke_data_tables.py").read_text(encoding="utf-8")
         for formula in (
@@ -35,6 +37,7 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
             "=PRODUCT(1e308,1e308,1e-308,1e-308)",
             "=PRODUCT(1e308,1e308)", "=PRODUCT(0,1e308,1e308)",
             "=PRODUCT(A3:A3)", "=PRODUCT(-0,2)",
+            "=PRODUCT(PRODUCT(-0,2),3)",
         ):
             self.assertIn(formula, smoke)
         self.assertIn("python tests/smoke_data_tables.py", WORKFLOW)

@@ -1,3 +1,26 @@
+## 2026-11-27 07:02 CET — PRESERVE SIGNED ZERO THROUGH NESTED PRODUCT
+
+**Starting refs:** dev `3a1532d280d4089c72cf7b737ffd125dd24c64c7`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the current execution queue, frozen 26-Oct inventory, Data Tables formula contract/source/tests, PR #191 and exact-head Quality evidence. Historical inventory remains **166 gaps / 95 partial**.
+
+**P0 exact-head CI diagnosis:** Push Quality [#45944466612](https://github.com/saeedsai/ProMathStudio/actions/runs/45944466612) and PR Quality [#45944475430](https://github.com/saeedsai/ProMathStudio/actions/runs/45944475430) both failed at step 64, **Spreadsheet and chart regression**. The structural gate passed all 611 tests (one optional mpmath test skipped). The browser failure was the existing signed-zero assertion for `=PRODUCT(-0,2)`: the multiplication kernel correctly returned negative zero, but aggregate composition serialized it with `String(-0)`, which is `"0"`, losing the sign before the expression parser received the result.
+
+**Root-cause correction:** Aggregate scalar serialization now emits the literal token `-0` when `Object.is(x,-0)`; all other values retain the existing `String(x)` path. The expression parser already handles unary minus and preserves negative zero. No numeric algorithm, limits, or assertions were weakened.
+
+**Regression:** Extended the existing registered Chromium Data Tables smoke with `=PRODUCT(PRODUCT(-0,2),3)` and a second `Object.is(...,-0)` assertion. The direct PRODUCT signed-zero assertion remains. Extended the numeric structural test to require the signed-zero serialization guard, nested formula and browser assertion. Updated `src/data-tables.js` and the embedded module in `index.html` in exact byte-for-byte parity.
+
+**Local validation:** An isolated Node reproduction confirmed the old token `String(-0)` becomes `"0"` and parses as positive zero; the explicit `-0` token reparses as negative zero. Full repository unittest/Playwright/build checks are delegated to fresh exact-head Push and PR Quality because this execution workspace has no mounted repository checkout.
+
+**Release:** PR #191 remains open; no independent reviews were submitted and main protections/rulesets are not verifiable through the available integration. No merge or direct main update. Latest verified main Quality and Pages remain from 24-Nov-2026; this fix is not released.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Certify and release safely (Blocked by governance).** Both fresh exact-head Push/PR Quality runs must pass every required check with zero failed or skipped required tests; obtain an eligible independent review and verifiable main protection, inspect the complete PR diff, merge only through ordinary PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Finish Data Tables numeric/formula and structural-reference integrity (In QA / Partial).** Verify direct and nested PRODUCT signed zero, range/scalar/nested operations, exponent scaling, zero/empty/overflow/underflow; 132,000-value MIN/MAX; SUM/AVERAGE cancellation and subnormal references; A1:AF6000 insert/delete, mixed anchors, quoted names, reversed/blank ranges, sorting, rollback and source/bundle parity.
+3. **P1 — Finish seven-shape Truss numerical boundaries (Partial / In QA).** Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle; preserve thin-wall, cavity-transition, sub-ULP and composite cancellation cases plus invalid rollback and 390px keyboard coverage.
+4. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Partial).** Current/v1 round-trips preserve drafts, datasets/overlays, sheets, selection and focus; malformed imports and injected restore failures preserve all prior workspaces on desktop and 390px.
+5. **P1 — Harden adaptive RK45 stage-overflow and near-ULP time grids (Partial).** Bounded retries only for recoverable finite-stage overflow; forward/backward monotone sample times, duplicate-time prevention, collision diagnostics, underflow, exhaustion, stale-export protection and responsive browser tests.
+
+---
 ## 2026-11-27 06:08 CET — REPAIR PRODUCT STRUCTURAL ASSERTION
 
 **Starting refs:** dev `3fbaa76ca7c40da31e2d87f53ccfed74f0aa0d0d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected the new exact-head Push/PR Quality jobs and fetched the failing structural-test log before changing anything.

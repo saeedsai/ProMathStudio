@@ -843,7 +843,8 @@
       if(!Number.isFinite(x))throw Error('#NUM!');
       // Emit a scalar token, not '(scalar)': parenthesized intermediate values
       // would prevent the next innermost-first pass from matching outer calls.
-      return String(x);
+      // String(-0) becomes "0"; keep the sign explicit for nested aggregate evaluation.
+      return Object.is(x,-0)?'-0':String(x);
         });
       }
       if(!changed)break;

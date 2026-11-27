@@ -1,3 +1,13 @@
+## 2026-11-27 07:02 CET — PRESERVE SIGNED ZERO THROUGH NESTED PRODUCT
+
+- Starting dev `3a1532d280d4089c72cf7b737ffd125dd24c64c7`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only `dev` and `main` refs exist.
+- Exact-head Push #45944466612 and PR #45944475430 both failed at step 64 (Spreadsheet and chart regression). Their structural step passed 611 tests with one optional mpmath skip. The browser failure was `Object.is(calculate()[1][2],-0)` for `PRODUCT(-0,2)`.
+- Root cause: `stableProduct` returned negative zero correctly, but aggregate replacement used `String(x)`; JavaScript serializes -0 as `"0"`, converting it to positive zero before the parser's next pass.
+- Fix: preserve `-0` as a literal scalar token with `Object.is(x,-0)?'-0':String(x)`. The parser's existing unary-minus path preserves the sign. No weakened assertions or arithmetic changes.
+- Added a nested PRODUCT browser fixture `PRODUCT(PRODUCT(-0,2),3)` and explicit signed-zero assertion; retained direct signed-zero coverage. Added structural assertions for the serializer guard, nested formula and browser regression.
+- Updated `src/data-tables.js` and its embedded `index.html` module byte-for-byte together; updated Data Tables contract, living plan, ledger and changelog in the same atomic commit.
+- Isolated Node reproduction passed: old serialization loses the sign; explicit `-0` token preserves it. Full unittest/Playwright/build remain pending fresh exact-head Push/PR Quality.
+- PR #191 remains open with zero independent reviews; no merge/direct main update. Latest verified Main Quality #45360386408 and Pages #45360367251 are 24-Nov-2026 evidence only. Historical inventory remains **166 gaps / 95 partial**; not released.
 ## 2026-11-27 06:08 CET — REPAIR PRODUCT STRUCTURAL ASSERTION
 
 - Exact-head Push #45944225354 and PR #45944230523 both failed at step 7. The structural unittest suite ran 611 tests with one failure and one skip; the only failure was the MEDIAN contract's stale exact aggregate regex, which did not include the new PRODUCT built-in.

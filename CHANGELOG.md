@@ -1,3 +1,9 @@
+## 2026-11-27 — Preserve negative zero through nested PRODUCT formulas
+
+- Fixed Data Tables aggregate composition losing the sign of a negative-zero PRODUCT result: JavaScript `String(-0)` emits `"0"`; the evaluator now emits an explicit `-0` scalar token.
+- Added a nested PRODUCT Chromium regression while retaining the direct signed-zero assertion, plus structural guards for the serialization behavior.
+- Updated modular and standalone Data Tables source together. Implemented on dev; fresh exact-head Quality pending; not released.
+
 ## 2026-11-27 — Update MEDIAN structural guard for PRODUCT
 
 - Fixed the exact-head structural CI regression: the MEDIAN test expected the pre-PRODUCT aggregate regex. It now includes PRODUCT and explicitly checks the Formula-library entry and aggregate dispatch.

@@ -12,7 +12,9 @@ class MedianFormulaTests(unittest.TestCase):
         self.assertIn(SOURCE, HTML)
     def test_library_and_aggregate_dispatch(self):
         self.assertIn("sample:'=MEDIAN(A1:A5)'", SOURCE)
-        self.assertIn("(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)", SOURCE)
+        self.assertIn("(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN|PRODUCT)", SOURCE)
+        self.assertIn("sample:'=PRODUCT(A1:A5)'", SOURCE)
+        self.assertIn("upper==='PRODUCT'", SOURCE)
         self.assertIn("if(upper==='MEDIAN')", SOURCE)
         self.assertIn("if(!nums.length)throw Error('#NUM!')", SOURCE)
     def test_invalid_reference_bounds_and_blank_handling(self):

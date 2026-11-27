@@ -1,3 +1,9 @@
+## 2026-11-27 — Update MEDIAN structural guard for PRODUCT
+
+- Fixed the exact-head structural CI regression: the MEDIAN test expected the pre-PRODUCT aggregate regex. It now includes PRODUCT and explicitly checks the Formula-library entry and aggregate dispatch.
+- Existing MEDIAN and PRODUCT coverage is retained; no production behavior or numerical assertions were weakened.
+- New Push/PR exact-head Quality pending; not released.
+
 ## 2026-11-27 — Add scale-safe PRODUCT to Data Tables formulas
 
 - Added first-class `PRODUCT(range)` and scalar/nested PRODUCT formulas to the Data Tables evaluator and Formula library.

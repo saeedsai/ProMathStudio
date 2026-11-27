@@ -1,3 +1,27 @@
+## 2026-11-27 06:08 CET — REPAIR PRODUCT STRUCTURAL ASSERTION
+
+**Starting refs:** dev `3fbaa76ca7c40da31e2d87f53ccfed74f0aa0d0d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected the new exact-head Push/PR Quality jobs and fetched the failing structural-test log before changing anything.
+
+**Observed exact-head failure:** Push Quality [#45944225354](https://github.com/saeedsai/ProMathStudio/actions/runs/45944225354) and PR Quality [#45944230523](https://github.com/saeedsai/ProMathStudio/actions/runs/45944230523) both failed at step 7, **Structural tests and embedded Python compile check**. The unittest suite ran 611 tests and reported one failure, one skipped test. The sole failure was `test_sheet_median.MedianFormulaTests.test_library_and_aggregate_dispatch`: it asserted the old exact aggregate regex `(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)` and therefore rejected the newly added PRODUCT function. No production/browser test ran after this early gate.
+
+**Root cause repair:** Updated the stale structural expectation to include PRODUCT and added explicit assertions that PRODUCT appears in the Formula library and aggregate dispatch. This preserves the existing MEDIAN assertions and strengthens coverage; no production code or numerical assertions were weakened.
+
+**Commit scope:** one atomic four-file follow-up updates `tests/test_sheet_median.py`, this plan, the execution ledger and changelog. The preceding implementation commit `3fbaa76` already contains source, standalone bundle, browser regression and numeric structural regression together.
+
+**Validation:** CI log confirms the only failure and exact assertion location. Static patch checks confirm the updated expected pattern and PRODUCT library/dispatch assertions. No local repository checkout is available, so the 611-test unittest suite cannot be rerun locally. The new exact-head Push/PR Quality workflows must pass the full 218-step job before the candidate is certified.
+
+**Release:** PR #191 remains open with zero submitted reviews; dev/main both report unprotected and no enforceable ruleset is available to the integration. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality and Pages are still #45360386408 and #45360367251 from 24-Nov-2026. Historical baseline remains **166 gaps / 95 partial**.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Resolve PR #191 release governance (Blocked).** Obtain eligible independent review and verifiable main protection requiring exact-head Quality and forbidding direct/force pushes and deletion; inspect the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Certify Data Tables numeric, structural-reference, XLSX and formula integrity (In QA / Partial).** Exact-head Push/PR Quality must pass PRODUCT range/scalar/nested, large-small exponent scaling, zero/empty/overflow/negative-zero cases; 132,000-value MIN/MAX; original-unit SUM/AVERAGE, overflow cancellation, subnormal and true-overflow references; A1:AF6000 insert/delete, mixed anchors, quoted names, reversed/blank ranges, sorting and atomic rollback; stored/DEFLATE XLSX round-trip, local-header CRC/size mismatch rejection, central CRC/expanded-size/path rejection, transactional workbook preservation and exact source/bundle parity.
+3. **P1 — Finish seven-shape Truss numerical boundaries (Partial / In QA).** Retain hollow-circle cavity-transition, near-unity thin-wall, sub-half-ulp and composite cancellation/underflow cases; complete independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle, including invalid rollback and 390px keyboard behavior.
+4. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Partial).** Current/v1 round-trips preserve drafts, graph datasets/overlays, sheets, selection and focus; malformed imports and injected restore failures preserve all prior workspaces at desktop and 390px.
+5. **P1 — Harden adaptive RK45 stage-overflow and near-ULP time-grid behavior (Partial).** Retry only recoverable finite-stage overflow within the attempt budget; verify forward/backward monotone sample times, no duplicate samples, stage-collision diagnostics, underflow, exhaustion, stale exports and responsive browser behavior.
+
+---
+
 ## 2026-11-27 06:00 CET — DATA-TABLES-SCALE-SAFE-PRODUCT
 
 **Starting refs:** dev `665eaa173830804787cd2f04a0a8d48f4fddc1c1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the 26-Oct frozen inventory and current living plan; inspected PR #191, the two branch refs, Data Tables formula engine, built-in library, docs, existing browser/structural tests, source/bundle mapping, exact-head Actions and main deployment evidence. Historical baseline remains **166 gaps / 95 partial**.

@@ -1,3 +1,12 @@
+## 2026-11-27 06:08 CET — REPAIR PRODUCT STRUCTURAL ASSERTION
+
+- Exact-head Push #45944225354 and PR #45944230523 both failed at step 7. The structural unittest suite ran 611 tests with one failure and one skip; the only failure was the MEDIAN contract's stale exact aggregate regex, which did not include the new PRODUCT built-in.
+- Updated `tests/test_sheet_median.py` to include PRODUCT and assert its Formula-library entry and aggregate dispatch. Existing MEDIAN checks remain. No production change and no weakened assertion.
+- Four-file atomic follow-up: test, living plan, ledger and changelog. Product implementation/source/bundle/browser test remain in parent `3fbaa76`.
+- CI logs were inspected and root cause identified. No local checkout, so repository unittest/Playwright/build commands cannot be run here; new exact-head workflows are pending.
+- PR #191 remains open with zero reviews; branches unprotected and no protection write operation available. No merge/direct main update.
+- Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality/Pages #45360386408 / #45360367251 (24-Nov-2026). Frozen inventory **166 gaps / 95 partial** unchanged.
+
 ## 2026-11-27 06:00 CET — DATA-TABLES-SCALE-SAFE-PRODUCT
 
 - Starting refs: dev `665eaa173830804787cd2f04a0a8d48f4fddc1c1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; inspected AGENTS, living plan, frozen inventory, source/tests, PR #191, branch refs, CI and production check-runs. Historical baseline **166 gaps / 95 partial** unchanged.

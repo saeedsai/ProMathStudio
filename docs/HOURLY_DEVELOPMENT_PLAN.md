@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 19:19 CET  
+**Last updated:** 27 November 2026, 20:01 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,10 +15,10 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting `dev` is `229fd711759b565f01bc68b4ef2535e618dbe15e`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Compare is **113 ahead / 0 behind**. Exactly two branches exist: `dev` and `main`.
+- Starting `dev` is `1013d618bf925c9e005b98716b453feeab9aacb2`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Compare is **114 ahead / 0 behind**. Exactly two branches exist: `dev` and `main`.
 - Both branches report `protected:false`; repository rulesets are empty. Branch-protection reads return HTTP 403 (Resource not accessible by integration), so enforceable protection is not verified.
 - PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, with **zero submitted independent reviews**.
-- Exact-head Push Quality [#46048195719](https://github.com/saeedsai/ProMathStudio/actions/runs/46048195719) and PR Quality [#46048204133](https://github.com/saeedsai/ProMathStudio/actions/runs/46048204133) both failed at browser step 50, Project migration and rollback. The log pinpoints tests/smoke_project_schema.py line 98: #cf-name resolves but is not visible because its native custom-function details disclosure is closed. Earlier browser checks and structural tests passed. This is a missing UI interaction in the test, not a production editor failure.
+- Exact-head Push Quality [#46050272626](https://github.com/saeedsai/ProMathStudio/actions/runs/46050272626) and PR Quality [#46050278029](https://github.com/saeedsai/ProMathStudio/actions/runs/46050278029) both failed at step 85, `tests/smoke_sheet_numeric_hardening.py`. The trace shows `MathStudio.customFunctions.restore()` correctly rejects `SUM` as reserved, but the browser fixture tries to seed `SUM`, `COUNT`, `MEDIAN` and `IF` as custom functions before checking built-in priority. This fixture predates atomic reserved-name validation. The same inspection found a real consistency gap: editor/restore/project-schema reserved-name lists omitted Data Tables built-ins `AVERAGE`, `AVG`, `COUNT`, `MEDIAN` and `PRODUCT`, so some names were accepted by project import even though the Data Tables evaluator always resolves them as built-ins. This run expands all three guards and changes the browser fixture to assert case-insensitive reserved-name rejection and state preservation before testing the built-ins normally.
 - The browser regression already uses an ephemeral loopback HTTP server for real-origin localStorage checks; this repair opens the custom-function details panel by clicking its visible summary before filling editor controls and asserts the fields are visible. Production validation is also hardened consistently in editor save, direct restore and project preflight: a Python custom function must have exactly one synchronous top-level declaration of its saved name and its ordered positional parameters must match params. Duplicate definitions and async def are rejected because a later definition can replace the callable and an async function returns a coroutine the numeric worker cannot consume.
 - Added Node schema, Chromium editor/import/direct-restore cases, updated the project-format contract, and preserved exact `src/project-schema.js` ↔ embedded `index.html` parity. Isolated V8 checks run before the atomic dev commit; full Python/Chromium/build certification must come from fresh exact-head Actions.
 - Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and GitHub Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not released.
@@ -38,7 +38,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** Exact-head Push #46048195719 and PR #46048204133 both failed at browser step 50 because the test filled #cf-name while its native details panel was closed. This run opens the panel through its summary, adds a visible-control assertion, and rejects duplicate/async Python definitions consistently across editor, direct restore and project preflight. Fresh exact-head Quality is pending. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
+**Status:** The current exact-head Push #46050272626 and PR #46050278029 failed at step 85 because the numeric-hardening browser fixture attempted to restore reserved built-in names. The fixture is being corrected without dropping built-in-priority assertions; the missing Data Tables built-ins are being added to editor, direct-restore and project-schema guards. Fresh exact-head Quality is required. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -50,7 +50,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 **Status:** Partial. Equation/Solver, Matrix, Graph datasets/overlays, Curve fit, Data Tables and Engineering selectors have focused validation. Custom-function preflight and direct restore reject reserved built-ins, blank formulas, mismatched positional signatures, duplicate top-level definitions and async functions before mutating state. The browser test now opens the editor through its actual disclosure control. Full restore-stage failure matrix and 390px mobile round-trip remain open.  
 **Acceptance tests:**
 - v1→v2 migration and v2 round-trips preserve notebook, calculator, Equation/Solver controls, assumptions, Matrix drafts, Graph primary/overlay datasets, Curve fit, Data Tables workbook/selection, Engineering filters and custom functions.
-- Custom names `sin`, `cos`, `tan`, `sqrt`, `min`, `max`, `log`, `exp`, `abs`, `sum`, `if` and `pow` reject in any casing; formula expressions must be nonblank; Python source must declare the matching function name and exact ordered positional parameter list. Valid legacy formula entries and valid Python source remain compatible.
+- Custom names `sin`, `cos`, `tan`, `sqrt`, `min`, `max`, `log`, `exp`, `abs`, `sum`, `if`, `pow`, `average`, `avg`, `count`, `median` and `product` reject in any casing; formula expressions must be nonblank; Python source must declare the matching function name and exact ordered positional parameter list. Valid legacy formula entries and valid Python source remain compatible.
 - Invalid custom functions reject before confirmation and preserve all current workspace state; Python source is not executed during import. Direct restore calls reject malformed/reserved/duplicate lists atomically and preserve both active functions and localStorage.
 - Inject failure after each restore stage and verify rollback; desktop and 390px mobile imports have no console errors and exact source/bundle parity.
 
@@ -120,3 +120,15 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - PR #191 remains open at the same dev head, 113 commits ahead of main, with zero independent submitted reviews. Both branches report unprotected, rulesets are empty and branch-protection GET returns 403. No merge or direct main update.
 - Latest verified main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) both succeeded on 24-Nov-2026 at unchanged main. This dev work is not released.
 - Historical inventory remains 166 gaps / 95 partial, unchanged.
+
+
+## Latest checkpoint — 27 November 2026, 20:01 CET
+
+- Starting refs verified from GitHub: dev `1013d618bf925c9e005b98716b453feeab9aacb2`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 114 ahead / 0 behind. Exactly two branches exist. Root AGENTS.md, this plan, frozen 26-Oct inventory, Unified Master Implementation Plan, Data Tables and project-format contracts, PR #191, exact-head workflows, reviews, rulesets and main/Pages evidence were inspected.
+- Exact-head Push Quality [#46050272626](https://github.com/saeedsai/ProMathStudio/actions/runs/46050272626) and PR Quality [#46050278029](https://github.com/saeedsai/ProMathStudio/actions/runs/46050278029) both failed at step 85, `tests/smoke_sheet_numeric_hardening.py`. The browser fixture attempted to restore reserved `SUM`, `COUNT`, `MEDIAN` and `IF` names as custom functions; the atomic restore API correctly rejected the list. The fixture was stale after reserved-name hardening.
+- A related production consistency gap was found: `AVERAGE`, `AVG`, `COUNT`, `MEDIAN` and `PRODUCT` were missing from the editor, direct-restore and project-schema reserved sets even though Data Tables resolves them as built-ins. The source and embedded standalone bundle now reserve all spreadsheet built-ins case-insensitively.
+- The numeric-hardening browser regression now seeds only valid custom functions, verifies all 17 reserved names reject atomically without changing active functions, and continues to test built-in SUM/COUNT/MEDIAN/IF and custom-function composition. Node schema negatives cover the previously missing built-ins. Project-format and Data Tables docs now state the contract.
+- Isolated V8 schema checks and exact source/embedded project-schema parity were run before the atomic dev commit. Native Python/Playwright/build checks are unavailable because the execution container has no checkout; fresh exact-head Push/PR Quality is the full browser/build gate.
+- PR #191 remains open/mergeable, 114 commits ahead, 46 changed files, zero submitted independent reviews. Branches remain exactly dev/main; both report unprotected, rulesets empty, branch-protection GET 403. No merge or direct main update.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. This change is dev-only pending exact-head CI and release governance.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged.

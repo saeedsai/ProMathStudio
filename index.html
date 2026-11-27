@@ -1429,7 +1429,7 @@ def _ms_system(job_text):
     const status=document.getElementById('cf-message');
     try{const name=document.getElementById('cf-name').value.trim(),params=document.getElementById('cf-params').value.split(',').map(x=>x.trim()),type=document.getElementById('cf-type').value,source=document.getElementById('cf-body').value;
       if(!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)||params.length>6||params.some(p=>!/^[A-Za-z][A-Za-z0-9_]*$/.test(p))||new Set(params).size!==params.length)throw Error('Use a valid name and 1–6 distinct argument names.');
-      if(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow'].includes(name.toLowerCase()))throw Error('This name is reserved.');
+      if(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow','average','avg','count','median','product'].includes(name.toLowerCase()))throw Error('This name is reserved.');
       const expression=normalizeCustom(type,source,name,params);if(type==='formula'){const parsed=evaluate(expression);if(parsed.incomplete)throw Error('Complete the function expression.');}
       const entry={name,params,expression,source,type};const index=customFunctions.findIndex(f=>f.name.toLowerCase()===name.toLowerCase());if(index>=0)customFunctions[index]=entry;else{if(customFunctions.length>=60)throw Error('Maximum 60 custom functions.');customFunctions.push(entry);}
       saveCustom();refreshCustomList();status.textContent='Saved '+name+'. Available under Symbols → Custom functions.';
@@ -1791,7 +1791,7 @@ def _ms_system(job_text):
     restore:items=>{
       if(!Array.isArray(items))throw Error('Custom functions must be a list.');
       if(items.length>60)throw Error('Maximum 60 custom functions.');
-      const identifier=/^[A-Za-z][A-Za-z0-9_]*$/,reserved=new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow']),seen=new Set();
+      const identifier=/^[A-Za-z][A-Za-z0-9_]*$/,reserved=new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow','average','avg','count','median','product']),seen=new Set();
       const next=items.map(item=>{
         if(!item||typeof item.name!=='string'||item.name.length>64||!identifier.test(item.name))
           throw Error('Invalid custom function name.');
@@ -3405,7 +3405,7 @@ self.onmessage=async ({data})=>{
         if (item.source !== undefined) short(item.source, 12000, 'custom function source');
         if (item.type !== undefined && !['formula', 'python'].includes(item.type)) fail('custom function type is invalid.');
         // Match the editor's reserved-name guard and body requirements before import confirmation.
-        const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow']);
+        const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow','average','avg','count','median','product']);
         if (reserved.has(key)) fail('custom function name is reserved.');
         if (item.type === 'python') {
           // Python custom functions must have one synchronous top-level declaration.

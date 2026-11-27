@@ -1,3 +1,12 @@
+## 2026-11-27 — Reserve all Data Tables built-ins in custom functions and repair numeric-hardening browser setup
+
+- Exact-head Push/PR Quality on 1013d61 both failed at step 85 because `tests/smoke_sheet_numeric_hardening.py` tried to seed reserved `SUM`, `COUNT`, `MEDIAN` and `IF` names through the now-atomic custom-function restore API. The browser fixture now seeds only valid custom functions and explicitly verifies all reserved names reject atomically before continuing the existing built-in-priority and numerical checks.
+- Fixed a production inconsistency: `AVERAGE`, `AVG`, `COUNT`, `MEDIAN` and `PRODUCT` were missing from the editor, direct-restore and saved-project reserved-name guards even though the Data Tables evaluator always resolves them as built-ins. All spreadsheet built-ins are now reserved case-insensitively across those three paths.
+- Added Node schema negative cases and browser coverage for 17 reserved names with mixed casing and active-state preservation. Updated project-format and Data Tables documentation; kept the standalone `index.html` project-schema module exactly synchronized with `src/project-schema.js`.
+- Implemented on dev; exact-head Push/PR Quality is pending. No merge or production deployment; historical inventory remains 166 gaps / 95 partial.
+
+
+
 ## 2026-11-27 — Match saved Python custom-function signatures and fix project browser origin
 
 - Python custom functions now require declared ordered positional argument names to exactly match saved `params` in the editor, project-schema preflight and public restore API. Matching multi-argument definitions remain valid; mismatched names/order/count and defaulted arguments are rejected before state mutation.

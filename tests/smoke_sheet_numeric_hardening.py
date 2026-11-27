@@ -19,15 +19,28 @@ def main():
                          wait_until="load")
         page.locator('[data-workspace="data"]').click()
         page.evaluate("""() => {
-          MathStudio.customFunctions.restore([
-            {name:'SUM',params:['x','y'],expression:'99',type:'formula'},
-            {name:'COUNT',params:['x','y'],expression:'99',type:'formula'},
-            {name:'MEDIAN',params:['x','y'],expression:'99',type:'formula'},
-            {name:'IF',params:['a','b','c'],expression:'99',type:'formula'},
+          const validFunctions = [
             {name:'TWICE',params:['x'],expression:'2*x',type:'formula'},
             {name:'IDENTITY',params:['x'],expression:'x',type:'formula'},
             {name:'BROKEN',params:['x'],expression:'x/0',type:'formula'}
-          ]);
+          ];
+          MathStudio.customFunctions.restore(validFunctions);
+          const beforeRestore = JSON.stringify(MathStudio.customFunctions.list());
+          const reservedNames = ['SIN','Cos','TAN','sqrt','MIN','Max','LOG','exp','ABS',
+            'SUM','if','POW','AVERAGE','avg','COUNT','Median','PRODUCT'];
+          for (const name of reservedNames) {
+            let message = '';
+            try {
+              MathStudio.customFunctions.restore([
+                ...MathStudio.customFunctions.list(),
+                {name,params:['x'],expression:'99',type:'formula'}
+              ]);
+            } catch (error) { message = error.message; }
+            if (message !== 'This name is reserved.')
+              throw new Error('Expected reserved-name rejection for ' + name + ', got: ' + message);
+            if (JSON.stringify(MathStudio.customFunctions.list()) !== beforeRestore)
+              throw new Error('Rejected reserved name mutated active custom functions: ' + name);
+          }
           MathStudio.dataTables.restoreState({
             version:1,selected:'sheet-1',tables:[{
               id:'sheet-1',name:'Data1',

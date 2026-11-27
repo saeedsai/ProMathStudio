@@ -268,7 +268,7 @@
         if (item.source !== undefined) short(item.source, 12000, 'custom function source');
         if (item.type !== undefined && !['formula', 'python'].includes(item.type)) fail('custom function type is invalid.');
         // Match the editor's reserved-name guard and body requirements before import confirmation.
-        const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow']);
+        const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow','average','avg','count','median','product']);
         if (reserved.has(key)) fail('custom function name is reserved.');
         if (item.type === 'python') {
           // Python custom functions must have one synchronous top-level declaration.

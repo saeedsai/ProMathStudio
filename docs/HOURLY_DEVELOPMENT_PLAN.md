@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 21:03 CET  
+**Last updated:** 27 November 2026, 21:55 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,14 +15,14 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Current `dev` is `fc92e7735836ff65ab86a25235c41a67a1aac723`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Compare is **115 ahead / 0 behind**. Exactly two branches exist: `dev` and `main`.
+- Starting `dev` for this checkpoint was `d4889c39745e962b3e851f9ebababb4e2efb2505`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Compare was **116 ahead / 0 behind**. Exactly two branches exist: `dev` and `main`. This run advances `dev` with one guarded atomic commit; its resulting SHA is verified from the branch ref after the update and reported with this checkpoint.
 - Both branches report `protected:false`; repository rulesets are empty. Branch-protection reads return HTTP 403 (Resource not accessible by integration), so enforceable protection is not verified.
 - PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, with **zero submitted independent reviews**.
-- Exact-head Push Quality [#46054477944](https://github.com/saeedsai/ProMathStudio/actions/runs/46054477944) and PR Quality [#46054483353](https://github.com/saeedsai/ProMathStudio/actions/runs/46054483353) both passed **218/218** on `fc92e7735836ff65ab86a25235c41a67a1aac723`, with zero failed or skipped steps. This certifies the prior reserved-name consistency correction on the exact starting head; the next source change in this checkpoint will require fresh exact-head runs.
+- Exact-head Push Quality [#46062475250](https://github.com/saeedsai/ProMathStudio/actions/runs/46062475250) and PR Quality [#46062482012](https://github.com/saeedsai/ProMathStudio/actions/runs/46062482012) both passed **218/218** on starting head `d4889c39745e962b3e851f9ebababb4e2efb2505`, with zero failed or skipped steps. This certifies the XLSX data-descriptor change on that head; the new Truss reaction change requires fresh exact-head runs.
 - The browser regression already uses an ephemeral loopback HTTP server for real-origin localStorage checks; this repair opens the custom-function details panel by clicking its visible summary before filling editor controls and asserts the fields are visible. Production validation is also hardened consistently in editor save, direct restore and project preflight: a Python custom function must have exactly one synchronous top-level declaration of its saved name and its ordered positional parameters must match params. Duplicate definitions and async def are rejected because a later definition can replace the callable and an async function returns a coroutine the numeric worker cannot consume.
 - Added Node schema, Chromium editor/import/direct-restore cases, updated the project-format contract, and preserved exact `src/project-schema.js` ↔ embedded `index.html` parity. Isolated V8 checks run before the atomic dev commit; full Python/Chromium/build certification must come from fresh exact-head Actions.
 - Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and GitHub Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not released.
-- The local checkout is absent and a bounded Git attempt fails with `Could not resolve host: github.com`; this run uses the connected GitHub integration and a guarded non-force fast-forward update of the existing `dev` ref.
+- The local checkout is absent (`git rev-parse --show-toplevel` returns “not a git repository”). The GitHub integration is used for repository access. The `index.html` content endpoint returns an empty body with a blob SHA, so this run deliberately changes only the adjacent `tools/truss-fem.js` script and its tests; no standalone bundle edit is required.
 
 ## Operating contract
 
@@ -38,7 +38,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** The reserved-name fixture and editor/restore/project-schema consistency fix are now certified by exact-head Push #46054477944 and PR #46054483353 (218/218 each, zero failures/skips) on `fc92e7735836ff65ab86a25235c41a67a1aac723`. This run adds XLSX data-descriptor integrity checks; fresh exact-head Quality will be required for that new commit. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
+**Status:** XLSX descriptor validation and the preceding reserved-name correction are certified by exact-head Push #46062475250 and PR #46062482012 (218/218 each, zero failures/skips) on `d4889c39745e962b3e851f9ebababb4e2efb2505`. This checkpoint adds a Truss FEM reaction-accumulation correction and requires fresh exact-head Quality. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -56,7 +56,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 3. P1 — Complete Data Tables numerical and file integrity
 
-**Status:** Partial; PRODUCT signed-zero/nesting, 132,000-value MIN/MAX, compensated SUM/AVERAGE and A1:AF6000 reference handling are implemented on dev. This run extends XLSX ZIP integrity to signed/unsigned data descriptors and includes descriptor bytes in overlap checks; fresh browser/build QA remains pending.  
+**Status:** Partial; PRODUCT signed-zero/nesting, 132,000-value MIN/MAX, compensated SUM/AVERAGE and A1:AF6000 reference handling are implemented on dev. XLSX signed/unsigned data-descriptor validation, bit-3 local/central consistency and descriptor overlap bounds passed exact-head Push/PR Quality on `d4889c39745e962b3e851f9ebababb4e2efb2505`. Remaining formula-token, corruption and workbook-integrity boundaries remain open.  
 **Acceptance tests:**
 - PRODUCT direct/nested/range, negative zero, exponent scaling, empty identity, overflow and underflow against binary64 references.
 - MIN/MAX over 132,000 values; SUM/AVERAGE cancellation and subnormal residual references.
@@ -66,7 +66,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial; compensated stiffness and section-property boundary fixes are on dev, but the complete seven-shape reference matrix and release evidence remain open.  
+**Status:** Partial; compensated stiffness and section-property boundary fixes are on dev. This checkpoint adds exact/compensated nodal reaction accumulation for a 1 N residual bracketed by ±1e16 N member-force terms, with Node and desktop/390px Chromium regressions. Fresh exact-head QA is pending; the complete seven-shape reference matrix and release evidence remain open.  
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.
@@ -146,3 +146,17 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - The local checkout is absent (bounded `git rev-parse` returns “not a git repository”). A Python non-seekable ZIP reproduction confirmed Python emits bit-3 local headers with zero local metadata and signed descriptors containing the exact central CRC/sizes. Full production-browser validation must come from fresh exact-head GitHub Actions.
 - Current main remains unchanged; Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are the latest verified successful production runs on 24-Nov-2026. No new dev change is live.
 - Status: XLSX descriptor validation implemented on dev in this checkpoint; fresh Push/PR Quality pending; no merge or deployment. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## Latest checkpoint — 27 November 2026, 21:55 CET
+
+- Verified starting refs: dev d4889c39745e962b3e851f9ebababb4e2efb2505, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare 116 ahead / 0 behind. Exactly two branches exist. Root AGENTS.md, this plan, the frozen 26-Oct inventory, Unified Master Implementation Plan, Engineering Architecture/Toolbox contracts, Structural Truss FEM contract, Quality workflow, PR #191, reviews and current Actions/Pages evidence were inspected.
+- Exact-head Push Quality [#46062475250](https://github.com/saeedsai/ProMathStudio/actions/runs/46062475250) and PR Quality [#46062482012](https://github.com/saeedsai/ProMathStudio/actions/runs/46062482012) both completed successfully 218/218 on starting SHA d4889c39745e962b3e851f9ebababb4e2efb2505, with zero failures/skips. Fresh checks are required for this new commit.
+- Found a support-reaction precision defect in solve(): the nodal resultant used ordinary left-to-right reduction of K[i][j]*u[j] - F[i]. A valid three-bar numerical stress fixture produces reaction terms -1, -1e16 and +1e16 N; the old order loses the -1 N term and reports a 1 N global force-balance residual.
+- Replaced the row reduction with finiteSignedSum over the rounded internal-force terms and negative applied load. This uses the exact mixed-sign binary64 accumulator when available and the existing compensated fallback otherwise. FEM outputs remain binary64.
+- Added a direct Node regression and a registered Chromium regression at 1280px and 390px. They assert the naive reduction is zero, the support reaction is -1 N, global force balance is zero, and free-DOF residual/energy checks remain below 1e-12.
+- Updated the Structural Truss FEM numerical contract, NEXT FIVE plan, execution ledger and changelog. Truss FEM is loaded as an adjacent script; index.html was not changed. Its GitHub content fetch returned an empty body, so no standalone bundle edits were attempted.
+- Local checkout is absent: git rev-parse --show-toplevel returned “not a git repository”. A bounded Node arithmetic reproduction confirmed the fixture stiffness is 1e20 N/m, displacements are 1e-20, +1e-4 and -1e-4 m, and the naive reaction sum loses 1 N. Full repository Node/Chromium checks must run on exact-head GitHub Actions.
+- PR #191 remains open/mergeable; zero independent reviews. Only dev/main branches exist, both report unprotected; rulesets are empty and branch-protection GET returns HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages deployment #45360367251 remain the latest successful production evidence on unchanged main from 24-Nov-2026. This change is dev-only, not released.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged.

@@ -1,3 +1,10 @@
+## 2026-11-27 — Preserve small Truss FEM support reactions under mixed-scale cancellation
+
+- Replaced the order-dependent nodal internal-force row reduction with the shared finiteSignedSum accumulator over the already-rounded K_ij*u_j terms and negative applied load. This preserves a small support reaction bracketed by large opposite member-force contributions; mixed-sign sums use the exact binary64 accumulator when BigInt is available and the existing compensated fallback otherwise.
+- Added Node and Chromium regressions for a synthetic three-bar fixture with 1 N, +1e16 N and -1e16 N loads. The support reaction is -1 N and global force balance is zero; the previous sequential reduction lost the 1 N reaction. Desktop and 390px browser checks also retain free-DOF residual and energy assertions.
+- Updated the Structural Truss FEM contract and living development records. The FEM is an adjacent script, so the standalone root index.html bundle is unchanged.
+- Implemented on dev; exact-head Push/PR Quality for this new commit is pending. No merge or production deployment. Historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-27 — Validate XLSX ZIP data descriptors and record them in overlap bounds
 
 - The offline XLSX importer previously accepted ZIP entries with general-purpose flag bit 3 without validating the trailing data descriptor. It also ended each overlap range at the compressed payload, excluding descriptor bytes.

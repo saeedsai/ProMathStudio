@@ -253,6 +253,37 @@ def main():
             assert resultant_range['naiveForceBalanceNonFinite'] is True
             assert resultant_range['forceBalanceX'] == 0
             assert resultant_range['forceBalanceY'] == 0
+            reaction_precision = page.evaluate("""() => {
+                const model = {
+                    nodes: [
+                        {id:'A',x:0,y:0,fixX:true,fixY:true},
+                        {id:'B',x:1,y:0,fixY:true,fx:0.001},
+                        {id:'C',x:1,y:0,fixY:true,fx:1e13},
+                        {id:'D',x:1,y:0,fixY:true,fx:-1e13}
+                    ],
+                    members: [
+                        {id:'AB',a:'A',b:'B',E:1e14,area:1000},
+                        {id:'AC',a:'A',b:'C',E:1e14,area:1000},
+                        {id:'AD',a:'A',b:'D',E:1e14,area:1000}
+                    ]
+                };
+                const result = ProMathTrussFEM.solve(model);
+                const stiffness = ProMathTrussFEM.parseModel(model).members[0].stiffness;
+                const ux = id => result.displacements.find(node => node.id === id).x;
+                const naiveReaction = ['B','C','D'].reduce((sum,id) => sum-stiffness*ux(id), 0);
+                return {
+                    naiveReaction,
+                    supportReaction: result.reactions.find(reaction => reaction.id === 'A').rx,
+                    forceBalance: result.forceBalance.x,
+                    residual: result.residual,
+                    energyError: result.energyError
+                };
+            }""")
+            assert reaction_precision['naiveReaction'] == 0
+            assert reaction_precision['supportReaction'] == -1
+            assert reaction_precision['forceBalance'] == 0
+            assert reaction_precision['residual'] < 1e-12
+            assert reaction_precision['energyError'] < 1e-12
             # EA/L must remain representable when E*A alone overflows or underflows.
             stiffness_range = page.evaluate("""() => {
                 const parseMember = (length, E, area, density) => ProMathTrussFEM.parseModel({

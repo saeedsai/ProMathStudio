@@ -1067,7 +1067,8 @@
     const ys = linearSolve(scaled, free.map((i, r) => F[i] / diag[r]));
     const u = new Float64Array(N);
     free.forEach((dof, i) => {u[dof] = ys[i] / diag[i];});
-    const r = Array.from({length: N}, (_, i) => K[i].reduce((sum, v, j) => sum + v*u[j], -F[i]));
+    const r = Array.from({length: N}, (_, i) =>
+      finiteSignedSum([...K[i].map((value, j) => value*u[j]), -F[i]], 'Nodal internal force resultant (N)'));
     const loadScale = Math.max(1, ...F.map(Math.abs));
     const residual = Math.max(0, ...free.map(i => Math.abs(r[i]))) / loadScale;
     if (!Number.isFinite(residual) || residual > 1e-6) throw Error('Numerical equilibrium residual too large; check member stiffness contrast or mechanism.');

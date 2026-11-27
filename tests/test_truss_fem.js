@@ -741,6 +741,34 @@ test('solve force-balance diagnostic preserves finite equilibrium after overflow
  assert.deepEqual(result.forceBalance,{x:0,y:0});
 });
 
+
+test('support reactions retain a small residual between large cancelling member forces',()=>{
+ // Synthetic binary64 stress fixture, not a physical design model.
+ const model={
+  nodes:[
+   {id:'A',x:0,y:0,fixX:true,fixY:true},
+   {id:'B',x:1,y:0,fixY:true,fx:0.001},
+   {id:'C',x:1,y:0,fixY:true,fx:1e13},
+   {id:'D',x:1,y:0,fixY:true,fx:-1e13}
+  ],
+  members:[
+   {id:'AB',a:'A',b:'B',E:1e14,area:1000},
+   {id:'AC',a:'A',b:'C',E:1e14,area:1000},
+   {id:'AD',a:'A',b:'D',E:1e14,area:1000}
+  ]
+ };
+ const result=fem.solve(model);
+ const stiffness=fem.parseModel(model).members[0].stiffness;
+ const ux=id=>result.displacements.find(node=>node.id===id).x;
+ const naiveReaction=['B','C','D'].reduce((sum,id)=>sum-stiffness*ux(id),0);
+ assert.equal(stiffness,1e20);
+ assert.equal(naiveReaction,0,'the fixture must reproduce order-dependent cancellation');
+ assert.equal(result.reactions.find(reaction=>reaction.id==='A').rx,-1);
+ assert.equal(result.forceBalance.x,0);
+ assert.ok(result.residual<1e-12);
+ assert.ok(result.energyError<1e-12);
+});
+
 test('mixed-sign resultants retain exact binary64 precision across scale groups',()=>{
  const model=clone(fem.examples.bar);
  const nodes=[

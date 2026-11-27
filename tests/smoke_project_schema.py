@@ -21,7 +21,13 @@ def main():
         page = browser.new_page(viewport={'width': 1280, 'height': 900})
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
-        page.on('dialog', lambda dialog: dialog.accept())
+        dialogs = []
+
+        def accept_dialog(dialog):
+            dialogs.append(dialog.message)
+            dialog.accept()
+
+        page.on('dialog', accept_dialog)
         page.set_content((ROOT / 'index.html').read_text(encoding='utf-8'), wait_until='load')
         original = page.evaluate('window.MathStudio.bridge.export()')
         assert original['version'] == 2
@@ -62,7 +68,17 @@ def main():
         assert migrated['solver']['limitPoint'] == '0'
         assert migrated['solver']['odeInitialCondition'] == 'y(0)=1'
 
+        valid_python_function = [{
+            'name': 'g_2', 'params': ['t'], 'expression': '',
+            'source': 'def g_2(t):\n  return t', 'type': 'python'
+        }]
+        upload(page, dict(legacy, working='x+1', customFunctions=valid_python_function))
+        page.wait_for_function("window.MathStudio.bridge.export().customFunctions[0]?.name === 'g_2'")
+        migrated = page.evaluate('window.MathStudio.bridge.export()')
+        assert migrated['customFunctions'] == valid_python_function
+
         def rejected(candidate):
+            dialog_count = len(dialogs)
             graph_before = page.evaluate('window.MathStudio.bridge.export().graph')
             fit_before = page.evaluate('window.MathStudio.bridge.export().fit')
             solver_before = page.evaluate('window.MathStudio.bridge.export().solver')
@@ -78,6 +94,7 @@ def main():
             assert current['graph'] == graph_before, 'invalid import mutated graph state'
             assert current['fit'] == fit_before, 'invalid import mutated curve-fit state'
             assert current['solver'] == solver_before, 'invalid import mutated solver controls'
+            assert len(dialogs) == dialog_count, 'invalid project must be rejected before confirmation'
 
         rejected(dict(legacy, version=99, working='WRONG'))
         rejected(dict(legacy, working='WRONG', notebook=[{'raw': 42}]))
@@ -99,6 +116,18 @@ def main():
                 dict(valid_solver, variable='x+y'),
                 dict(valid_solver, limitPoint='0' * 81)):
             rejected(dict(legacy, working='WRONG', solver=invalid_solver))
+        invalid_custom_functions = [
+            [{'name': 'sin', 'params': ['x'], 'expression': 'x', 'type': 'formula'}],
+            [{'name': 'SUM', 'params': ['x'], 'expression': 'x', 'type': 'formula'}],
+            [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'formula'}],
+            [{'name': 'f', 'params': ['x'], 'expression': '   ', 'type': 'formula'}],
+            [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python'}],
+            [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python', 'source': ''}],
+            [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python', 'source': 'def other(x):\n  return x'}],
+        ]
+        for functions in invalid_custom_functions:
+            rejected(dict(legacy, working='WRONG', customFunctions=functions))
+
         bad_tables = {'version': 1, 'selected': 'sheet-1', 'tables': [
             {'id': 'sheet-1', 'name': 'Data1', 'columns': ['A', 'B'], 'rows': [['1']]}]}
         rejected(dict(legacy, working='WRONG', tables=bad_tables))

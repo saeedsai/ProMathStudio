@@ -267,6 +267,16 @@
         short(item.expression, 12000, 'custom function expression');
         if (item.source !== undefined) short(item.source, 12000, 'custom function source');
         if (item.type !== undefined && !['formula', 'python'].includes(item.type)) fail('custom function type is invalid.');
+        // Match the editor's reserved-name guard and body requirements before import confirmation.
+        const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow']);
+        if (reserved.has(key)) fail('custom function name is reserved.');
+        if (item.type === 'python') {
+          if (typeof item.source !== 'string' ||
+              !new RegExp('^def\\s+' + item.name + '\\s*\\(', 'm').test(item.source.trim()))
+            fail('custom function Python source is invalid.');
+        } else if (!item.expression.trim()) {
+          fail('custom function expression is empty.');
+        }
       }
     }
     if (data.tables) {

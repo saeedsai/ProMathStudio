@@ -1,3 +1,10 @@
+## 2026-11-27 — Validate custom-function backups against the editor contract
+
+- Project migration now rejects custom function names that shadow the editor's reserved built-ins, case-insensitively.
+- Formula custom functions require a nonblank expression; Python custom functions require source containing a `def` declaration for the saved function name. Python source remains inert during import and runs only when explicitly invoked in the isolated Pyodide worker.
+- Added Node schema negatives and Chromium project-import coverage for valid Python round-trip, malformed entries, pre-confirmation rejection and preservation of the current project. Updated the project-format contract and living NEXT FIVE plan.
+- Synchronized `src/project-schema.js` with the embedded standalone `index.html` module. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Restore RK45 source/bundle parity after exact-head CI failure
 
 - Exact-head structural CI on d4ff4a8 exposed an incomplete Git tree assembly: standalone index.html contained the new RK45 collision diagnostic while src/ode-tools.js retained the previous implementation. Twenty structural/ODE extraction tests failed at step 7; no gates were changed.

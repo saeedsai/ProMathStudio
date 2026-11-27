@@ -81,3 +81,10 @@ A present `matrix` object stores the Matrix workspace draft. Its A and B row/col
 ## Data Tables nested state version
 
 The optional `tables` project object contains a nested Data Tables state. Its explicit `version` must be the supported integer `1`; legacy backups that omit the nested version remain accepted. Unknown, null or wrongly typed explicit versions are rejected before project confirmation, rather than being silently interpreted using the current v1 restore rules. The nested workbook must also contain at least one uniquely identified sheet when a selection is present, and `selected` must reference an existing sheet ID.
+
+
+## Saved symbolic-solver controls
+
+The optional `solver` object stores the Equation workspace expression and selector state. When present, `operation` must be one of `auto`, `expand`, `simplify`, `factor`, `solve`, `system`, `differentiate`, `integrate`, `limit`, `numeric`, `laplace`, `inverse_laplace`, `fourier`, `inverse_fourier`, `ode` or `pde`. The engine must be `auto`, `sympy` or `offline`; the limit direction must be `+-`, `-` or `+`. The saved variable is bounded to 24 characters and the approach point to 80 characters, matching the live input controls. The expression remains bounded to 12,000 characters and optional ODE initial conditions to 160 characters.
+
+Legacy projects may omit individual solver fields, and empty selector strings retain the workspace's existing defaults. Unknown explicit selector values and overlong control values are rejected before confirmation rather than silently becoming an empty selection or a default during restore. Rejection preserves the previously active project state.

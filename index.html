@@ -3101,6 +3101,12 @@ self.onmessage=async ({data})=>{
   const optionalRecord = (value, label) => {
     if (value !== undefined && value !== null && !record(value)) fail(label + ' must be an object.');
   };
+  // Keep saved solver selectors aligned with the actual Equation workspace controls.
+  const solverOperations = new Set(['auto','expand','simplify','factor','solve','system',
+    'differentiate','integrate','limit','numeric','laplace','inverse_laplace','fourier',
+    'inverse_fourier','ode','pde']);
+  const solverEngines = new Set(['auto','sympy','offline']);
+  const solverLimitDirections = new Set(['+-','-','+']);
   // Saved axis selectors are column indices, not general JavaScript numeric literals.
   // Bound raw strings before trimming so whitespace cannot bypass the input limit.
   const validColumnIndex = (value, columns) => {
@@ -3155,8 +3161,29 @@ self.onmessage=async ({data})=>{
         short(item.result, 12000, 'calculator history result');
       }
     }
-    if (data.solver) for (const key of ['expression', 'variable', 'operation', 'engine', 'limitPoint', 'limitDirection'])
-      if (data.solver[key] !== undefined) short(data.solver[key], 12000, 'solver ' + key);
+    if (data.solver) {
+      const solver = data.solver;
+      if (solver.expression !== undefined) short(solver.expression, 12000, 'solver expression');
+      // These bounds mirror the live input maxlength attributes; do not restore
+      // values that the visible controls cannot accept from normal user input.
+      if (solver.variable !== undefined) short(solver.variable, 24, 'solver variable');
+      if (solver.operation !== undefined) {
+        short(solver.operation, 32, 'solver operation');
+        if (solver.operation !== '' && !solverOperations.has(solver.operation))
+          fail('solver operation is invalid.');
+      }
+      if (solver.engine !== undefined) {
+        short(solver.engine, 16, 'solver engine');
+        if (solver.engine !== '' && !solverEngines.has(solver.engine))
+          fail('solver engine is invalid.');
+      }
+      if (solver.limitPoint !== undefined) short(solver.limitPoint, 80, 'solver limit point');
+      if (solver.limitDirection !== undefined) {
+        short(solver.limitDirection, 2, 'solver limit direction');
+        if (solver.limitDirection !== '' && !solverLimitDirections.has(solver.limitDirection))
+          fail('solver limit direction is invalid.');
+      }
+    }
     if (data.solver?.odeInitialCondition !== undefined) short(data.solver.odeInitialCondition, 160, 'ODE initial condition');
     if (data.solver?.assumptions !== undefined) {
       const flags=data.solver.assumptions;

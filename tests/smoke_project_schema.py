@@ -42,9 +42,27 @@ def main():
         migrated = page.evaluate('window.MathStudio.bridge.export()')
         assert migrated['fit'] == valid_fit['fit']
 
+        valid_solver = dict(legacy.get('solver') or {})
+        valid_solver.update({
+            'expression': 'x^2', 'variable': 'x', 'operation': 'limit',
+            'engine': 'sympy', 'limitPoint': '0', 'limitDirection': '-',
+            'odeInitialCondition': 'y(0)=1'
+        })
+        upload(page, dict(legacy, working='x+1', solver=valid_solver))
+        page.wait_for_function("""() => {
+          const solver = window.MathStudio.bridge.export().solver;
+          return solver.operation === 'limit' && solver.engine === 'sympy' &&
+            solver.limitDirection === '-' && solver.variable === 'x' && solver.limitPoint === '0';
+        }""")
+        migrated = page.evaluate('window.MathStudio.bridge.export()')
+        assert migrated['solver']['operation'] == 'limit'
+        assert migrated['solver']['engine'] == 'sympy'
+        assert migrated['solver']['limitDirection'] == '-'
+
         def rejected(candidate):
             graph_before = page.evaluate('window.MathStudio.bridge.export().graph')
             fit_before = page.evaluate('window.MathStudio.bridge.export().fit')
+            solver_before = page.evaluate('window.MathStudio.bridge.export().solver')
             page.locator('#hub-status').evaluate("el => el.textContent = ''")
             upload(page, candidate)
             page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
@@ -56,6 +74,7 @@ def main():
             assert current['customFunctions'] == migrated['customFunctions'], 'invalid import mutated custom functions'
             assert current['graph'] == graph_before, 'invalid import mutated graph state'
             assert current['fit'] == fit_before, 'invalid import mutated curve-fit state'
+            assert current['solver'] == solver_before, 'invalid import mutated solver controls'
 
         rejected(dict(legacy, version=99, working='WRONG'))
         rejected(dict(legacy, working='WRONG', notebook=[{'raw': 42}]))
@@ -68,6 +87,13 @@ def main():
                 {'model': 'poly', 'degree': '4', 'lastEquation': []},
                 []):
             rejected(dict(legacy, working='WRONG', fit=invalid_fit))
+        for invalid_solver in (
+                dict(valid_solver, operation='future-operation'),
+                dict(valid_solver, engine='remote'),
+                dict(valid_solver, limitDirection='left'),
+                dict(valid_solver, variable='x' * 25),
+                dict(valid_solver, limitPoint='0' * 81)):
+            rejected(dict(legacy, working='WRONG', solver=invalid_solver))
         bad_tables = {'version': 1, 'selected': 'sheet-1', 'tables': [
             {'id': 'sheet-1', 'name': 'Data1', 'columns': ['A', 'B'], 'rows': [['1']]}]}
         rejected(dict(legacy, working='WRONG', tables=bad_tables))
@@ -161,6 +187,7 @@ def main():
         page.evaluate("window.MathStudio.curveFit.restoreState=window.__originalFitRestore")
         assert page.evaluate('window.MathStudio.bridge.export().working') == 'x+1'
         assert [i['raw'] for i in page.evaluate('window.MathStudio.bridge.export().notebook')] == ['x+1']
+        assert page.evaluate('window.MathStudio.bridge.export().solver') == migrated['solver']
         assert not errors, errors
         browser.close()
     print('PASS: v1→v2 migration, workbook retention, invalid/future/oversize refusal and transactional rollback')

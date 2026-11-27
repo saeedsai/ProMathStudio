@@ -1,3 +1,10 @@
+## 2026-11-27 — Validate saved symbolic-solver controls before restore
+
+- Project migration now checks the saved Equation operation, engine and limit-direction selectors against the actual workspace options.
+- Tightened saved variable and limit-point lengths to the live 24- and 80-character input limits; missing and empty legacy controls retain their existing defaults.
+- Added Node enum/type/boundary coverage and Chromium valid round-trip plus invalid-import state-preservation regressions. Synchronized the project-schema source and standalone module.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Reject unsupported Data Tables project-state versions
 
 - Project migration now requires an explicit nested Data Tables state version to be exactly numeric version 1; legacy backups that omit the nested version remain compatible.

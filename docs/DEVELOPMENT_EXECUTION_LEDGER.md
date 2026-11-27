@@ -1,3 +1,16 @@
+## 2026-11-27 09:55 CET — VALIDATE SAVED SYMBOLIC-SOLVER CONTROLS
+
+- Starting dev `d8034f7392f8bcdf86d84b92664389ee78c7ab81`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only dev/main branches exist; compare main...dev = 97 ahead / 0 behind.
+- Exact starting-head Push Quality #45963516902 and PR Quality #45963525447 both passed all 218 steps on `d8034f7392f8bcdf86d84b92664389ee78c7ab81`, zero failures/skips. These certify the starting head only; new exact-head workflows are required.
+- Found that project migration accepted arbitrary saved solver operation/engine/direction strings, although the live restore uses HTML select controls and silently falls back to `+-` for invalid limit direction. Variable and limit point were allowed to 12,000 chars despite live input limits of 24 and 80.
+- Added exact operation/engine/direction enumerations and aligned variable/limit-point schema bounds to the live controls. Missing fields and empty legacy selectors retain their existing defaults; invalid explicit values reject before restore.
+- Added Node regression coverage for all valid selector combinations, invalid types/enums, empty/missing legacy fields, 24/25 and 80/81 character boundaries, immutability and source/bundle parity. Extended registered Chromium project smoke for valid limit round-trip, invalid import rejection and previous solver/workspace state preservation.
+- Updated `src/project-schema.js`, its embedded `index.html` module, `tests/test_project_solver_state.py`, `tests/smoke_project_schema.py`, `docs/PROJECT_FORMAT.md`, the living plan and changelog in one atomic dev commit.
+- Isolated V8 execution of actual modified schema and selector boundary cases passed; full local unittest/Playwright/build are unavailable without a repository checkout. Fresh exact-head Push/PR Quality pending.
+- PR #191 remains open; 97 ahead / 0 behind, 37 changed files, zero independent reviews. Only dev/main refs exist; rulesets empty; branch protection not verifiable through integration. No merge/direct main update.
+- Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Main Quality #45360386408 and Pages #45360367251 remain successful 24-Nov-2026 evidence only. No new deployment.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged. Implemented on dev / In QA / not released.
+
 ## 2026-11-27 09:01 CET — REJECT UNSUPPORTED DATA TABLES PROJECT STATE VERSIONS
 
 - Starting dev `b00f18ea10aa3932b78126573ad66b3ddba4e843`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only dev/main branches exist.

@@ -1,3 +1,28 @@
+## 2026-11-27 09:55 CET — Validate saved symbolic-solver controls before restore
+
+**Starting refs:** dev `d8034f7392f8bcdf86d84b92664389ee78c7ab81`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the unified master plan, frozen 26-Oct inventory, current saved-project plan, project schema/export/restore code, project-format documentation, browser and Node regression files, PR #191, exact-head Actions and main Quality/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+
+**Starting exact-head QA:** Push Quality [#45963516902](https://github.com/saeedsai/ProMathStudio/actions/runs/45963516902) and PR Quality [#45963525447](https://github.com/saeedsai/ProMathStudio/actions/runs/45963525447) both completed all 218 steps successfully on `d8034f7392f8bcdf86d84b92664389ee78c7ab81`, with zero failed or skipped steps. No existing exact-head CI failure remained, so the highest-priority feasible saved-project compatibility slice was selected.
+
+**Found gap:** Project migration only checked that saved solver selector fields were strings. The live restore assigns `operation` and `engine` to HTML selects and explicitly replaces an unsupported `limitDirection` with `+-`; an unknown saved value could therefore pass preflight and silently become an empty/default selection. It also accepted a 12,000-character variable and limit point even though the live controls cap them at 24 and 80 characters.
+
+**Correction:** Validate operation against the 16 actual Equation options, engine against `auto|sympy|offline`, and limit direction against `+-|-|+`. Align saved variable and approach-point limits with the actual HTML inputs (24 and 80). Keep expression and ODE initial-condition limits unchanged. Missing fields and empty selector strings retain the existing legacy defaults; explicit unknown or overlong values are rejected before restore.
+
+**Regression:** Added Node coverage for all 16×3×3 valid operation/engine/direction combinations, invalid types/enums, empty and missing legacy controls, 24/25 and 80/81 character boundaries, input immutability and source/bundle parity. Extended the registered Chromium project smoke to round-trip a valid SymPy limit configuration and reject each invalid selector/bound while preserving the previous solver, Graph, Curve-fit, Matrix, Data Tables, notebook and working-equation state. Updated the project-format contract and synchronized the embedded project-schema module.
+
+**Validation:** Actual project-schema source was executed in an isolated V8 sandbox. Full Node/Python/Chromium repository commands are unavailable because the execution environment has no checkout; fresh exact-head GitHub Actions must certify the committed tests. Implemented on dev / In QA, not released.
+
+**Release governance:** PR #191 remains open and mergeable at the starting head, 97 commits ahead / 0 behind, 37 changed files, with zero submitted independent reviews. Only `dev` and `main` exist. Repository rulesets endpoint returned an empty list; branch protection could not be verified through the connected integration. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; [Main Quality #45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and [Pages #45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are successful 24-Nov-2026 runs on that unchanged main SHA; no newer production deployment was verified.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Safe PR #191 release (Blocked by governance).** Require green exact-head Push/PR Quality, eligible independent approval and verifiable enforceable main protection; inspect the full dev→main diff, merge only through ordinary PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Complete saved-project compatibility (In QA / Partial).** Validate solver operation/engine/direction enums and 24/80-character controls; preserve valid solver state and reject malformed imports atomically. Continue Matrix draft, Graph primary/overlay, Curve fitting and Data Tables v1/v2 round-trip, legacy compatibility, injected restore-failure rollback and 390px coverage.
+3. **P1 — Finish Data Tables numeric/formula and structural-reference integrity (Implemented on dev / QA green at prior head).** Re-run PRODUCT signed-zero/nested/exponent-scaling cases, 132,000-value MIN/MAX, SUM/AVERAGE cancellation/subnormal references, A1:AF6000 insert/delete, mixed anchors, quoted names, reversed/blank ranges, sorting, XLSX integrity, rollback and source/bundle parity at the new exact head.
+4. **P1 — Finish seven-shape Truss numerical boundaries (Partial).** Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle; thin-wall, cavity-transition, sub-ULP, composite cancellation, invalid rollback and 390px keyboard coverage.
+5. **P1 — Harden adaptive RK45 stage-overflow and near-ULP time grids (Partial).** Bounded recoverable-stage retries; forward/backward monotone sample times, duplicate-time prevention, collision diagnostics, underflow, exhaustion, stale-export protection and responsive browser tests.
+
+---
 ## 2026-11-27 09:01 CET — REJECT UNSUPPORTED DATA TABLES PROJECT STATE VERSIONS
 
 **Starting refs:** dev `b00f18ea10aa3932b78126573ad66b3ddba4e843`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS, unified master plan, frozen 26-Oct inventory, current project schema, Data Tables restore/export contract, project selection/identity tests, PR #191 and exact-head Quality evidence. Historical baseline remains **166 gaps / 95 partial**.

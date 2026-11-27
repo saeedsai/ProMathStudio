@@ -1,3 +1,11 @@
+## 2026-11-27 — Validate saved solver variable identifiers and repair project rollback regression
+
+- Saved Equation variables now match the live CAS identifier grammar (Unicode letter followed by Unicode letters, ASCII digits or underscores) as well as the existing 24-character limit; empty/missing legacy values retain their default.
+- Added Node identifier syntax/type/boundary coverage and Chromium Unicode solver round-trip plus malformed-variable import rejection.
+- Exact-head CI exposed a stale rollback-test expectation: later valid Graph imports had replaced the earlier SymPy solver state, but the final assertion still compared against the old snapshot. The test now captures the actual pre-failure solver state and verifies transactional rollback against it; earlier solver round-trip assertions remain.
+- Restored the accidentally empty living hourly plan and refreshed the NEXT FIVE queue. Synchronized `src/project-schema.js` with its standalone `index.html` module.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Align saved-solver structural guard
 
 - Corrected the new project-solver structural test to match the production call's third diagnostic-label argument while still requiring the 80-character limit.

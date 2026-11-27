@@ -20,6 +20,7 @@ class ProjectSolverStateTests(unittest.TestCase):
                 "solver engine is invalid.",
                 "solver limit direction is invalid.",
                 "short(solver.variable, 24",
+                "solver variable is invalid.",
                 "short(solver.limitPoint, 80,"):
             self.assertIn(contract, source)
 
@@ -51,6 +52,17 @@ for(const [field,values] of [
  const data=base();data.solver={[field]:value};
  assert.throws(()=>migrate(data),new RegExp('solver '+(field==='limitDirection'?'limit direction':field)));
 }
+for(const variable of ['x','theta_2','θ','θ_1','x'.repeat(24)]) {
+ const data=base();data.solver={variable};assert.equal(migrate(data).solver.variable,variable);
+}
+for(const variable of ['1x','x y','x+y','x.y']) {
+ const data=base();data.solver={variable};
+ assert.throws(()=>migrate(data),/solver variable is invalid/);
+}
+for(const variable of [42,null,[],{}]) {
+ const data=base();data.solver={variable};
+ assert.throws(()=>migrate(data),/solver variable/);
+}
 for(const [field,value] of [['variable','x'.repeat(25)],['limitPoint','0'.repeat(81)]]){
  const data=base();data.solver={[field]:value};
  assert.throws(()=>migrate(data),new RegExp(field==='limitPoint'?'solver limit point':'solver variable'));
@@ -60,7 +72,7 @@ assert.equal(migrate(empty).version,2,'empty selectors retain legacy defaults');
 const legacy=base();legacy.version=1;legacy.solver={};
 assert.equal(migrate(legacy).version,2,'missing selectors retain legacy defaults');
 const noSolver=base();noSolver.version=1;assert.equal(migrate(noSolver).version,2);
-console.log('PASS saved solver selectors: '+count+' valid combinations, invalid enums/types, bounds and legacy defaults');
+console.log('PASS saved solver selectors: '+count+' valid combinations, variable identifiers, invalid enums/types, bounds and legacy defaults');
 """
         result = subprocess.run(["node", "-e", script], cwd=ROOT,
                                 capture_output=True, text=True, timeout=20)

@@ -44,7 +44,7 @@ def main():
 
         valid_solver = dict(legacy.get('solver') or {})
         valid_solver.update({
-            'expression': 'x^2', 'variable': 'x', 'operation': 'limit',
+            'expression': 'θ_1^2', 'variable': 'θ_1', 'operation': 'limit',
             'engine': 'sympy', 'limitPoint': '0', 'limitDirection': '-',
             'odeInitialCondition': 'y(0)=1'
         })
@@ -52,12 +52,15 @@ def main():
         page.wait_for_function("""() => {
           const solver = window.MathStudio.bridge.export().solver;
           return solver.operation === 'limit' && solver.engine === 'sympy' &&
-            solver.limitDirection === '-' && solver.variable === 'x' && solver.limitPoint === '0';
+            solver.limitDirection === '-' && solver.variable === 'θ_1' && solver.limitPoint === '0';
         }""")
         migrated = page.evaluate('window.MathStudio.bridge.export()')
         assert migrated['solver']['operation'] == 'limit'
         assert migrated['solver']['engine'] == 'sympy'
         assert migrated['solver']['limitDirection'] == '-'
+        assert migrated['solver']['variable'] == 'θ_1'
+        assert migrated['solver']['limitPoint'] == '0'
+        assert migrated['solver']['odeInitialCondition'] == 'y(0)=1'
 
         def rejected(candidate):
             graph_before = page.evaluate('window.MathStudio.bridge.export().graph')
@@ -92,6 +95,8 @@ def main():
                 dict(valid_solver, engine='remote'),
                 dict(valid_solver, limitDirection='left'),
                 dict(valid_solver, variable='x' * 25),
+                dict(valid_solver, variable='1x'),
+                dict(valid_solver, variable='x+y'),
                 dict(valid_solver, limitPoint='0' * 81)):
             rejected(dict(legacy, working='WRONG', solver=invalid_solver))
         bad_tables = {'version': 1, 'selected': 'sheet-1', 'tables': [
@@ -173,6 +178,9 @@ def main():
 
         # Simulate a restore-stage failure after notebook mutation. The previous
         # project must be reapplied rather than left half imported.
+        # Capture the state that is actually active after the later valid Graph imports.
+        # The earlier migrated snapshot belongs to the SymPy solver import and is stale here.
+        solver_before_rollback = page.evaluate('window.MathStudio.bridge.export().solver')
         page.evaluate("""() => {
           const fit=window.MathStudio.curveFit;
           window.__originalFitRestore=fit.restoreState;
@@ -187,7 +195,7 @@ def main():
         page.evaluate("window.MathStudio.curveFit.restoreState=window.__originalFitRestore")
         assert page.evaluate('window.MathStudio.bridge.export().working') == 'x+1'
         assert [i['raw'] for i in page.evaluate('window.MathStudio.bridge.export().notebook')] == ['x+1']
-        assert page.evaluate('window.MathStudio.bridge.export().solver') == migrated['solver']
+        assert page.evaluate('window.MathStudio.bridge.export().solver') == solver_before_rollback, 'restore failure rollback changed solver controls'
         assert not errors, errors
         browser.close()
     print('PASS: v1→v2 migration, workbook retention, invalid/future/oversize refusal and transactional rollback')

@@ -74,7 +74,12 @@
       if (solver.expression !== undefined) short(solver.expression, 12000, 'solver expression');
       // These bounds mirror the live input maxlength attributes; do not restore
       // values that the visible controls cannot accept from normal user input.
-      if (solver.variable !== undefined) short(solver.variable, 24, 'solver variable');
+      if (solver.variable !== undefined) {
+        short(solver.variable, 24, 'solver variable');
+        // Match the identifier grammar enforced by the live Equation solver before restoring UI state.
+        if (solver.variable !== '' && !/^\p{L}[\p{L}0-9_]*$/u.test(solver.variable))
+          fail('solver variable is invalid.');
+      }
       if (solver.operation !== undefined) {
         short(solver.operation, 32, 'solver operation');
         if (solver.operation !== '' && !solverOperations.has(solver.operation))

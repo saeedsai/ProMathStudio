@@ -1,3 +1,16 @@
+## 2026-11-27 10:57 CET — FIX PROJECT ROLLBACK CI AND VALIDATE SOLVER IDENTIFIERS
+
+- Starting `dev` `905a864a480646849ef97b60792a0dc99f500306`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; PR #191 compare is 100 ahead / 0 behind. Branch search pagination found only `dev` and `main`.
+- Re-read root `AGENTS.md`, unified master implementation plan, engineering architecture, frozen 26-Oct inventory, project-format/schema contract, current solver tests, PR #191, exact-head Actions and main deployment evidence. Discovered `docs/HOURLY_DEVELOPMENT_PLAN.md` was an empty zero-byte file; restored the living queue and NEXT FIVE with evidence-backed priorities.
+- Exact-head Push Quality [#45972027670](https://github.com/saeedsai/ProMathStudio/actions/runs/45972027670) and PR Quality [#45972038530](https://github.com/saeedsai/ProMathStudio/actions/runs/45972038530) both fail at step 50. The only failing step is `tests/smoke_project_schema.py` line 190: after the earlier SymPy solver import, later valid Graph imports use the legacy fixture and restore its original solver settings; the final injected-rollback assertion incorrectly compares against the earlier, stale `migrated['solver']` snapshot. The test now captures the actual active solver snapshot immediately before the injected restore failure and compares rollback output to that snapshot. Earlier valid solver round-trip assertions remain.
+- Added a real schema improvement: nonempty saved Equation variables must satisfy the exact live CAS identifier grammar (Unicode letter followed by Unicode letters, ASCII digits or underscores), in addition to the existing 24-character bound. Empty/missing legacy variable fields retain the existing default. Added Node valid Unicode/ASCII and invalid syntax/type regressions plus Chromium valid Unicode import and malformed-variable rejection cases.
+- Updated `src/project-schema.js`, its embedded `index.html` script, `tests/test_project_solver_state.py`, `tests/smoke_project_schema.py`, `docs/PROJECT_FORMAT.md`, restored `docs/HOURLY_DEVELOPMENT_PLAN.md`, this ledger and `CHANGELOG.md` in one atomic tree/commit.
+- Local Node regex/boundary harness: run result recorded in this checkpoint; repository checkout is unavailable, so native full Python unittest, Playwright and build commands cannot run in the local container. Fresh exact-head GitHub Actions are the authoritative full regression gate and remain pending until observed green.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are still the latest verified successful production runs, both 24-Nov-2026 at main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no newer Pages run was available from the Actions collection.
+- PR #191 remains open; independent reviews: zero. Branch-protection GET returns 403 to the integration and repository rulesets are empty. No merge or direct main update. Historical inventory remains **166 gaps / 95 partial**, unchanged. New work is implemented on dev, not released.
+
+---
+
 ## 2026-11-27 09:55 CET — EXACT-HEAD SOLVER STRUCTURAL ASSERTION CORRECTION
 
 - Candidate `33d8cc29b9048c3cc5f12e684a64f040b80c72ed` failed both Push Quality #45971688897 and PR Quality #45971696009 at step 7.

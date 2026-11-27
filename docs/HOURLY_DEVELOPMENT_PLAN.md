@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 17:21 CET  
+**Last updated:** 27 November 2026, 17:57 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,13 +15,14 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Before this iteration, `dev` was `c06bf13609304e616aec060c56424af4e0e844bf`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. This atomic change advances the existing `dev` ref; main is unchanged.
-- The prior compare was **109 ahead / 0 behind**. The resulting dev head is the commit containing this checkpoint; its parent is the SHA above. No branch was created.
+- Starting `dev` is `ba8432fac4d100a20173d6fa68b384cd23593720`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. This atomic change advances only the existing `dev` ref; main remains unchanged.
+- Starting compare is **110 ahead / 0 behind**. The resulting dev head is the commit containing this checkpoint, with the SHA recorded by the Git ref and exact-head Actions. No branch was created.
 - Exactly two branches exist: `dev` and `main`; both report `protected:false`. Rulesets are empty. Branch-protection reads return HTTP 403 (Resource not accessible by integration), so enforceable protection is not verified.
-- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) remains the sole `dev`→`main` release PR, open and mergeable, 109 commits ahead / 0 behind before this update, 45 changed files, and zero submitted reviews.
-- Exact prior-head Quality for `c06bf13609304e616aec060c56424af4e0e844bf`: Push [#46023174963](https://github.com/saeedsai/ProMathStudio/actions/runs/46023174963) and PR [#46023187713](https://github.com/saeedsai/ProMathStudio/actions/runs/46023187713) both completed successfully. The single Quality job in each workflow passed; no failed or skipped steps were reported. These results do not certify the new commit.
-- Latest verifiable main evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and GitHub Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The Pages API endpoint was not available through the connected integration this run; no newer Pages deployment or live behavior is claimed.
-- Local checkout is absent and a bounded `git ls-remote` failed with `Could not resolve host: github.com`. Per the repository fallback, this run uses GitHub blobs/tree/commit and a guarded non-force fast-forward update of the existing `dev` ref.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) remains the sole `dev`→`main` release PR, open and mergeable, 110 commits ahead / 0 behind before this update, with zero submitted reviews.
+- Exact-head Push Quality [#46034852119](https://github.com/saeedsai/ProMathStudio/actions/runs/46034852119) and PR Quality [#46034861653](https://github.com/saeedsai/ProMathStudio/actions/runs/46034861653) both failed at registered browser step 50, `Project migration and rollback browser regression`. The log points to the test's stale `migrated['customFunctions']` snapshot after later valid Graph imports had intentionally replaced that state; it did not demonstrate a production import mutation.
+- This run fixes the test to compare every exported state field against a snapshot taken immediately before each rejected import. It also hardens the exposed custom-function restore API: the whole list is validated (reserved names, case-insensitive duplicates, argument grammar/count, type/body/source bounds and matching Python declaration) before any live or localStorage mutation. Direct invalid restores now reject atomically.
+- Latest verified main evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. No newer production deployment or hosted behavior is claimed.
+- Local checkout is absent and a bounded Git attempt failed with `Could not resolve host: github.com`. Per the repository fallback, this run uses GitHub blobs/tree/commit and a guarded non-force fast-forward update of the existing `dev` ref.
 
 ## Operating contract
 
@@ -37,7 +38,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** Prior exact-head c06 Quality is green in both Push and PR. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets. This run adds one more tested dev commit; new exact-head checks are pending.  
+**Status:** The current ba8432 exact-head Push and PR workflows failed at project migration step 50. Logs show a stale test snapshot, not a demonstrated production mutation. This run corrects the test and adds atomic direct-restore validation; fresh exact-head Quality is pending. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -46,11 +47,11 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 2. P1 — Complete saved-project compatibility and rollback
 
-**Status:** Partial. Equation/Solver, Matrix, Graph datasets/overlays, Curve fit, Data Tables and Engineering selectors have focused validation. This iteration tightens custom-function import to match the editor: reserved built-ins reject case-insensitively, formula bodies must be nonblank, and Python entries must contain their named function declaration. Full restore-stage failure matrix and 390px mobile round-trip remain open.  
+**Status:** Partial. Equation/Solver, Matrix, Graph datasets/overlays, Curve fit, Data Tables and Engineering selectors have focused validation. Custom-function project preflight rejects reserved built-ins, blank formulas and mismatched Python declarations. This iteration also makes the exposed restore API validate the complete list before replacing live functions or localStorage. Full restore-stage failure matrix and 390px mobile round-trip remain open.  
 **Acceptance tests:**
 - v1→v2 migration and v2 round-trips preserve notebook, calculator, Equation/Solver controls, assumptions, Matrix drafts, Graph primary/overlay datasets, Curve fit, Data Tables workbook/selection, Engineering filters and custom functions.
 - Custom names `sin`, `cos`, `tan`, `sqrt`, `min`, `max`, `log`, `exp`, `abs`, `sum`, `if` and `pow` reject in any casing; formula expressions must be nonblank; Python source must declare the matching function name. Valid legacy formula entries and valid Python source remain compatible.
-- Invalid custom functions reject before confirmation and preserve all current workspace state; Python source is not executed during import.
+- Invalid custom functions reject before confirmation and preserve all current workspace state; Python source is not executed during import. Direct restore calls reject malformed/reserved/duplicate lists atomically and preserve both active functions and localStorage.
 - Inject failure after each restore stage and verify rollback; desktop and 390px mobile imports have no console errors and exact source/bundle parity.
 
 ### 3. P1 — Complete Data Tables numerical and file integrity

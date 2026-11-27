@@ -1,3 +1,10 @@
+## 2026-11-27 — Make custom-function restore atomic and repair project-import regression
+
+- Exact-head Push/PR Quality on ba8432 failed at the project migration browser smoke's final invalid-table case. The test compared against a stale custom-function snapshot from before later valid Graph imports; the importer had preserved the then-current state. The rejection helper now snapshots and compares every exported workspace field immediately before each rejected import.
+- Hardened the exposed `MathStudio.customFunctions.restore()` API. It validates the complete list, 60-entry limit, reserved names, case-insensitive uniqueness, 1–6 valid distinct parameters, type/body/source bounds and matching Python declaration before replacing live state or localStorage. Invalid direct calls now throw without partial mutation.
+- Added Chromium coverage for invalid direct restore cases and preservation of both the active function list and localStorage. Updated the project-format contract, living plan and execution ledger.
+- Isolated V8 checks passed for valid legacy/Python restore and invalid reserved, duplicate, malformed and over-limit inputs. Fresh exact-head Push/PR Quality remains pending; not released.
+
 ## 2026-11-27 — Validate custom-function backups against the editor contract
 
 - Project migration now rejects custom function names that shadow the editor's reserved built-ins, case-insensitively.

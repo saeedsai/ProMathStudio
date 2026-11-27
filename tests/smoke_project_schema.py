@@ -77,23 +77,46 @@ def main():
         migrated = page.evaluate('window.MathStudio.bridge.export()')
         assert migrated['customFunctions'] == valid_python_function
 
+        # The public restore API is also a state boundary: reject an entire invalid list
+        # before mutating the active functions or their localStorage copy.
+        invalid_restore_cases = [
+            [{'name': 'sin', 'params': ['x'], 'expression': 'x', 'type': 'formula'}],
+            [{'name': 'SUM', 'params': ['x'], 'expression': 'x', 'type': 'formula'}],
+            [{'name': 'f', 'params': ['x', 'x'], 'expression': 'x'}],
+            [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'formula'}],
+            [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python',
+              'source': 'def other(x):\\n  return x'}],
+            [{'name': 'same', 'params': ['x'], 'expression': 'x'},
+             {'name': 'SAME', 'params': ['x'], 'expression': 'x'}],
+            [{'name': 'f', 'params': ['x'], 'expression': 'x'}] * 61,
+            None,
+        ]
+        for functions in invalid_restore_cases:
+            result = page.evaluate("""items => {
+              const before = window.MathStudio.customFunctions.list();
+              const stored = localStorage.getItem('promath-custom-functions-v1');
+              let error = '';
+              try { window.MathStudio.customFunctions.restore(items); }
+              catch (e) { error = e.message; }
+              return {before, after: window.MathStudio.customFunctions.list(), stored,
+                storedAfter: localStorage.getItem('promath-custom-functions-v1'), error};
+            }""", functions)
+            assert result['error'], f'invalid direct restore was accepted: {functions!r}'
+            assert result['after'] == result['before'], 'invalid direct restore mutated custom functions'
+            assert result['storedAfter'] == result['stored'], 'invalid direct restore changed localStorage'
+
         def rejected(candidate):
             dialog_count = len(dialogs)
-            graph_before = page.evaluate('window.MathStudio.bridge.export().graph')
-            fit_before = page.evaluate('window.MathStudio.bridge.export().fit')
-            solver_before = page.evaluate('window.MathStudio.bridge.export().solver')
+            # Valid imports later in this test intentionally replace workspace state.
+            # Compare each refusal with the state immediately before that attempted import.
+            before = page.evaluate('window.MathStudio.bridge.export()')
             page.locator('#hub-status').evaluate("el => el.textContent = ''")
             upload(page, candidate)
             page.wait_for_function("document.querySelector('#hub-status').textContent.startsWith('Import failed:')")
             current = page.evaluate('window.MathStudio.bridge.export()')
-            assert current['working'] == migrated['working']
-            assert [i['raw'] for i in current['notebook']] == ['x+1']
-            assert current['tables'] == migrated['tables']
-            assert current['matrix'] == migrated['matrix'], 'invalid import mutated Matrix drafts'
-            assert current['customFunctions'] == migrated['customFunctions'], 'invalid import mutated custom functions'
-            assert current['graph'] == graph_before, 'invalid import mutated graph state'
-            assert current['fit'] == fit_before, 'invalid import mutated curve-fit state'
-            assert current['solver'] == solver_before, 'invalid import mutated solver controls'
+            for key in ('working', 'origin', 'recent', 'notebook', 'calculator', 'matrix',
+                        'engineering', 'solver', 'graph', 'customFunctions', 'tables', 'fit'):
+                assert current[key] == before[key], f'invalid import mutated {key}'
             assert len(dialogs) == dialog_count, 'invalid project must be rejected before confirmation'
 
         rejected(dict(legacy, version=99, working='WRONG'))

@@ -1773,7 +1773,37 @@ def _ms_system(job_text):
   window.MathStudio.customFunctions={
     list:()=>customFunctions.map(f=>({...f})),
     find:name=>customFunctions.find(f=>f.name.toLowerCase()===String(name).toLowerCase()),
-    restore:items=>{if(!Array.isArray(items))return;customFunctions.splice(0,customFunctions.length,...items.filter(f=>f&&/^[A-Za-z][A-Za-z0-9_]*$/.test(f.name)&&Array.isArray(f.params)&&typeof f.expression==='string').slice(0,60));saveCustom();refreshCustomList();}
+    restore:items=>{
+      if(!Array.isArray(items))throw Error('Custom functions must be a list.');
+      if(items.length>60)throw Error('Maximum 60 custom functions.');
+      const identifier=/^[A-Za-z][A-Za-z0-9_]*$/,reserved=new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow']),seen=new Set();
+      const next=items.map(item=>{
+        if(!item||typeof item.name!=='string'||item.name.length>64||!identifier.test(item.name))
+          throw Error('Invalid custom function name.');
+        const key=item.name.toLowerCase();
+        if(reserved.has(key))throw Error('This name is reserved.');
+        if(seen.has(key))throw Error('Duplicate custom function names.');
+        seen.add(key);
+        if(!Array.isArray(item.params)||item.params.length<1||item.params.length>6||
+            item.params.some(param=>typeof param!=='string'||param.length>64||!identifier.test(param))||
+            new Set(item.params).size!==item.params.length)
+          throw Error('Invalid custom function arguments.');
+        if(typeof item.expression!=='string'||item.expression.length>12000)
+          throw Error('Invalid custom function expression.');
+        if(item.source!==undefined&&(typeof item.source!=='string'||item.source.length>12000))
+          throw Error('Invalid custom function source.');
+        if(item.type!==undefined&&!['formula','python'].includes(item.type))
+          throw Error('Invalid custom function type.');
+        if(item.type==='python'){
+          if(typeof item.source!=='string'||!new RegExp('^def\\s+'+item.name+'\\s*\\(','m').test(item.source.trim()))
+            throw Error('Invalid custom function Python source.');
+        }else if(!item.expression.trim())throw Error('Custom function expression is empty.');
+        return {...item,params:[...item.params]};
+      });
+      // Validate the entire list before replacing live state or localStorage.
+      customFunctions.splice(0,customFunctions.length,...next);
+      saveCustom();refreshCustomList();
+    }
   };
   // Math Studio symbolic kernel: exact rational polynomial algebra, no network/eval.
   const casLimit={degree:30,power:14,digits:70};

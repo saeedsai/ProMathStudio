@@ -1,7 +1,14 @@
+## 2026-11-27 — Repair project-fit validation bundle parity
+
+- Exact-head Push/PR Quality exposed that an inline-only Curve fitting restore edit was not represented in `src/` and was discarded by `scripts/build.py`. Reverted that unsupported inline edit; no build/parity checks were relaxed.
+- Kept saved-fit validation in the canonical project schema module and embedded bundle. Malformed model/degree/equation state is rejected before the project importer mutates any workspace.
+- Retained model/degree enum, type, length, v1/v2, immutability and browser import/rollback regressions; removed only assertions for the unsupported direct UI-hook change.
+- Corrected project-format, plan, ledger and changelog wording. Fresh exact-head Quality pending; not released.
+
 ## 2026-11-27 — Validate saved Curve fitting state in project backups
 
 - Project migration now validates optional Curve fitting preferences: supported model enum, degree strings 2–6 and a 2,000-character `lastEquation` bound. Missing/null/empty legacy selectors retain their defaults; malformed values are rejected before other workspaces mutate.
-- The directly exposed Curve fitting restore API now validates the complete state before changing selectors, preventing partial UI changes on invalid input.
+- The project importer rejects malformed fit preferences before invoking the UI restore hook, preventing invalid backup state from silently clearing selectors.
 - Added Node coverage for all model/degree combinations, malformed types/enums/lengths, v1/v2 migration and immutability; extended the Chromium project-import smoke for valid round-trip, direct restore atomicity, invalid-import rejection and state preservation.
 - Synchronized `src/project-schema.js` with the embedded `index.html` module and documented the saved-state contract. Implemented on dev; exact-head Push/PR Quality pending; not released.
 

@@ -18,10 +18,6 @@ class ProjectFitStateTests(unittest.TestCase):
         self.assertIn("saved curve-fit model is invalid.", source)
         self.assertIn("saved curve-fit degree is invalid.", source)
         self.assertIn("saved curve-fit equation", source)
-        self.assertIn("Invalid saved curve-fit state.", html)
-        self.assertIn("Invalid saved curve-fit model.", html)
-        self.assertIn("Invalid saved curve-fit degree.", html)
-        self.assertIn("Invalid saved curve-fit equation.", html)
 
     @unittest.skipUnless(shutil.which("node"), "Node.js required")
     def test_fit_state_enums_bounds_and_legacy_defaults(self):

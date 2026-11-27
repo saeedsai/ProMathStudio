@@ -5227,18 +5227,7 @@ $('fit-export').addEventListener('click',()=>{
  const link=document.createElement('a');link.href=url;link.download='ProMathStudio_fit_residuals.csv';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 $('fit-clear').addEventListener('click',()=>{if(lastEquation){$('graph-input').value=$('graph-input').value.split('\n').filter(x=>x.trim()!==lastEquation).join('\n');lastEquation='';$('graph-plot').click();}currentFit=null;$('fit-export').disabled=true;$('fit-result').textContent='Fit removed; data table unchanged.';});
-studio.curveFit={analyze,fitTable,get last(){return currentFit;},get active(){return !!currentFit;},exportState:()=>({model:$('fit-model').value,degree:$('fit-degree').value,lastEquation}),restoreState:s=>{
- if(!s)return;
- if(typeof s!=='object'||Array.isArray(s))throw Error('Invalid saved curve-fit state.');
- const models=['none','linear','poly','exp','log','power','gaussian'],degrees=['2','3','4','5','6'];
- if(s.model!==undefined&&s.model!==null&&s.model!==''&&(typeof s.model!=='string'||!models.includes(s.model)))throw Error('Invalid saved curve-fit model.');
- if(s.degree!==undefined&&s.degree!==null&&s.degree!==''&&(typeof s.degree!=='string'||!degrees.includes(s.degree)))throw Error('Invalid saved curve-fit degree.');
- const equation=s.lastEquation??'';
- if(typeof equation!=='string'||equation.length>2000)throw Error('Invalid saved curve-fit equation.');
- const model=s.model||'none',degree=s.degree||'2';
- $('fit-model').value=model;$('fit-degree').value=degree;
- $('fit-degree-wrap').hidden=$('fit-model').value!=='poly';lastEquation=equation;
-}};
+studio.curveFit={analyze,fitTable,get last(){return currentFit;},get active(){return !!currentFit;},exportState:()=>({model:$('fit-model').value,degree:$('fit-degree').value,lastEquation}),restoreState:s=>{if(!s)return;$('fit-model').value=s.model||'none';$('fit-degree').value=s.degree||'2';$('fit-degree-wrap').hidden=$('fit-model').value!=='poly';lastEquation=String(s.lastEquation||'').slice(0,2000);}};
 // Floating/sliding library and contextual help. Keep underlying semantic form controls intact.
 const css=document.createElement('style');css.textContent=`
   .shell{display:block!important}.shell main{max-width:1360px;margin:auto;padding-top:72px}

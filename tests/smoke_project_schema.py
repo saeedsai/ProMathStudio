@@ -25,22 +25,6 @@ def main():
         page.set_content((ROOT / 'index.html').read_text(encoding='utf-8'), wait_until='load')
         original = page.evaluate('window.MathStudio.bridge.export()')
         assert original['version'] == 2
-        fit_guard = page.evaluate("""() => {
-          const fit = window.MathStudio.curveFit, before = fit.exportState();
-          const invalid = [
-            {model:'unknown',degree:'2',lastEquation:''},
-            {model:'poly',degree:'7',lastEquation:''},
-            {model:'poly',degree:'4',lastEquation:[]},
-            {model:'poly',degree:'4',lastEquation:'x'.repeat(2001)},
-            []
-          ];
-          const errors = invalid.map(value => {
-            try { fit.restoreState(value); return null; } catch (error) { return error.message; }
-          });
-          return {before,after:fit.exportState(),errors};
-        }""")
-        assert fit_guard['before'] == fit_guard['after'], fit_guard
-        assert all(fit_guard['errors']), fit_guard
         legacy = dict(original, version=1, working='x+1', origin='editor',
                       notebook=[{'raw': 'x+1'}])
         upload(page, legacy)

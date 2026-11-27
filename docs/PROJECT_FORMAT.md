@@ -71,7 +71,7 @@ A saved Graph dataset may omit its legacy `x`, `y`, `z` and `style` selectors; t
 
 ## Saved curve-fit preferences
 
-The optional `fit` object stores only the Curve fitting panel's selected model, polynomial degree and last generated graph equation. The model must be one of `none`, `linear`, `poly`, `exp`, `log`, `power` or `gaussian`; the degree is the string `2` through `6`; and `lastEquation` is a string of at most 2,000 characters. Missing, null or empty legacy selectors retain the existing defaults (`none` and `2`). Invalid types, unknown selections and overlong equations are rejected before project confirmation, so malformed fit preferences cannot silently clear or replace other workspace state. The directly exposed Curve fitting restore API validates the complete state before changing either selector.
+The optional `fit` object stores only the Curve fitting panel's selected model, polynomial degree and last generated graph equation. The model must be one of `none`, `linear`, `poly`, `exp`, `log`, `power` or `gaussian`; the degree is the string `2` through `6`; and `lastEquation` is a string of at most 2,000 characters. Missing, null or empty legacy selectors retain the existing defaults (`none` and `2`). Invalid types, unknown selections and overlong equations are rejected before project confirmation, so malformed fit preferences cannot silently clear or replace other workspace state. The project importer validates the complete state before calling the Curve fitting UI restore hook.
 
 ## Saved Matrix drafts
 

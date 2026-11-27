@@ -1,3 +1,15 @@
+## 2026-11-27 02:54 CET — Hollow-circle cavity transition rounding
+
+- Starting dev b6bfa38f8e80d1ecfad5424094b6df317fd6e237; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS, living plan, frozen inventory, engineering architecture/catalogs, Truss source/tests/contract, PR #191, refs/reviews, exact-head CI and production Quality/Pages.
+- Starting Push Quality #45920974038 and PR Quality #45920978959 both passed 218/218 steps on the exact starting dev SHA, zero failures/skips; Truss analytical and responsive browser steps passed.
+- Fixed a hollow-circle one-ulp defect near the direct/factored cavity transition. With Do=1 mm and Di=0.5000000000000001 mm, the old complementary-product path returned A=0.589048622548086 and I=0.046019423636569225; correctly rounded values are A=0.5890486225480861 and I=0.04601942363656923.
+- Direct differences now apply while cavity area ratio r²<=0.5, where area/inertia factors remain >=0.5/0.75. Near-unity thin-wall geometry retains the factored radial-gap path.
+- Added Node and registered Chromium regressions for A, Ixx/Iyy, Sx/Sy, rx/ry, centroid, unchanged input and reproduction of the former one-ulp error; browser case runs at 1280px and 390px. Existing thin-wall and sub-half-ulp tests remain.
+- Isolated V8 arithmetic and independent 120-digit Decimal reference passed. No local checkout is mounted, so native full Node/Playwright suites were not run; new exact-head Actions must certify the committed tests.
+- PR #191 remains open, 86 ahead / 0 behind, 32 files, zero submitted reviews. Only dev/main branches, both unprotected; rulesets empty; branch-protection GET 403. No merge/direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain latest verified successful production runs on unchanged main (24-Nov-2026); no new deployment.
+- Status: atomic source/test/docs/plan/ledger/changelog commit on dev; exact-head Push/PR Quality pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-27 — Truss underflow guard compatibility correction
 
 - Follow-up review found `finiteScaled()` also handles optional member I (mm⁴), whose existing `Number.MIN_VALUE` regression requires the established “I must be positive” diagnostic when conversion underflows.

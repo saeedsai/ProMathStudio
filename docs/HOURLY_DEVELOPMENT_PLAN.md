@@ -1,3 +1,32 @@
+## 2026-11-27 02:54 CET — HOLLOW-CIRCLE-WELL-CONDITIONED-CAVITY-ROUNDING
+
+**Starting refs:** dev b6bfa38f8e80d1ecfad5424094b6df317fd6e237; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read root AGENTS.md, the living plan (retrieved through its Git blob because the file exceeds the file-reader content window), frozen 26-Oct inventory, unified architecture/workspace plan, engineering catalog, Structural toolbox catalog, Truss source/tests/contract, PR #191, refs, reviews, exact-head Actions and production Quality/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+
+**Starting exact-head QA:** Push Quality [#45920974038](https://github.com/saeedsai/ProMathStudio/actions/runs/45920974038) and PR Quality [#45920978959](https://github.com/saeedsai/ProMathStudio/actions/runs/45920978959) both completed **218/218 steps** on exact starting SHA b6bfa38f8e80d1ecfad5424094b6df317fd6e237, with zero failures and zero skipped steps. Structural tests, general browser smoke, Truss analytical step 214 and responsive/UI step 215 passed in both. No exact-head CI failure remained.
+
+**Release blocker:** PR #191 is open/mergeable, 86 commits ahead / 0 behind, 32 changed files, and has **zero submitted reviews**. Only dev and main exist; both are unprotected, rulesets are empty, and branch-protection GET returns HTTP 403 (Resource not accessible by integration). No independent reviewer or enforceable protection was verified; no merge or direct main update was attempted.
+
+**Defect:** Hollow-circle section properties used direct annulus differences only when the inner/outer diameter ratio was at most 0.5. At ratio 0.5000000000000001, the cavity occupies only about 25% of the envelope area, so direct subtraction is well-conditioned, but the complementary-product path introduces a one-ulp error: area 0.589048622548086 instead of 0.5890486225480861 mm² and inertia 0.046019423636569225 instead of 0.04601942363656923 mm⁴.
+
+**Implementation:** Select direct differences using the cavity area ratio r² <= 0.5, not r <= 0.5. In this regime the remaining area/inertia factors are at least 0.5/0.75; near-unity thin walls continue to use the factored radial-gap path. Public API, units, solver and saved model formats are unchanged. Truss FEM remains an adjacent script; no standalone index.html update is required.
+
+**Regression:** Added direct Node and registered Chromium tests for outer diameter 1 mm and inner diameter 0.5000000000000001 mm. They require exact rounded area 0.5890486225480861, Ixx/Iyy 0.04601942363656923, Sx/Sy 0.09203884727313846, rx/ry 0.2795084971874737, unchanged inputs and a demonstration that the old factored formula returns the previous one-ulp-low values. Existing thin-wall and sub-half-ulp cases remain. Browser smoke exercises both 1280px and 390px.
+
+**Local validation:** The bounded container probe confirmed no Git checkout (git rev-parse --show-toplevel: not a git repository), so GitHub integration was used without retrying the network path. An isolated V8 arithmetic reproduction passed the old/new boundary comparison and all expected rounded references. Independent 120-digit Decimal arithmetic from the exact binary64 ratio confirmed the direct results. Full repository Node/Playwright tests are not available locally; fresh exact-head Actions must certify the committed regressions.
+
+**Production evidence:** Main remains unchanged at the recorded SHA. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are the latest verified successful production workflows on 24 November 2026. No newer main deployment or live hosted verification is claimed.
+
+**Status:** source, Node/Chromium regressions, Structural Truss contract, plan, ledger and changelog committed together on existing dev; new exact-head Push/PR Quality pending; implemented on dev / In QA / not released.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Resolve PR #191 release governance (Blocked).** Obtain eligible independent review and verifiable main protection requiring exact-head Quality and forbidding direct/force pushes and deletion; inspect the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Finish seven-shape Truss numerical boundaries (In QA / Partial).** Certify the hollow-circle r²=0.25 one-ulp transition fixture on exact-head Push/PR Quality; retain near-unity thin-wall and sub-half-ulp cases; complete independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle, including invalid rollback and 390px keyboard behavior.
+3. **P1 — Complete Data Tables structural-reference boundaries (Partial).** Verify row 6000/column AF insert/delete, mixed absolute/relative anchors, quoted names/apostrophes, doubled formula-string quotes, reversed/blank ranges, sorting/recalculation, persistent #REF!, atomic rollback and source/bundle parity.
+4. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Partial).** Current/v1 round-trips preserve drafts, graph datasets/overlays, sheets, selection and focus; malformed imports and injected restore failures preserve all prior workspaces at desktop and 390px.
+5. **P1 — Harden adaptive RK45 stage-overflow recovery (Planned).** Only reduce the step for recoverable finite-stage overflow; preserve domain-error diagnostics and attempt bounds; add analytic forward/backward, underflow, exhaustion, stale-export and responsive browser tests.
+
+---
 ## 2026-11-27 02:01 CET — TRUSS-LEGACY-SI-UNIT-CONVERSION-UNDERFLOW
 
 **Starting refs:** dev `21f091799fe0f74bec6070908ed68402441e98fc`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the frozen 2026-10-26 inventory, the living plan, unified master plan, engineering architecture/catalog and Structural toolbox catalog, Truss FEM source/tests/contract, PR #191, exact-head Actions, branch refs, main Quality and Pages evidence. The frozen historical baseline remains **166 gaps / 95 partial**.

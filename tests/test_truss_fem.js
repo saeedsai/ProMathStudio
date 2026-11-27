@@ -1907,6 +1907,32 @@ test('thin-walled hollow circle retains area and inertia without subtractive can
 });
 
 
+test('hollow-circle uses direct differences while cavity area remains well-conditioned',()=>{
+ const ratio=0.5000000000000001;
+ const dimensions={diameter:1,innerDiameter:ratio};
+ const original={...dimensions};
+ const previousAreaFactor=(1-ratio)*(1+ratio);
+ const previousInertiaFactor=previousAreaFactor*(1+ratio*ratio);
+ const previousArea=(Math.PI/4)*previousAreaFactor;
+ const previousMoment=(Math.PI/64)*previousInertiaFactor;
+ const section=fem.sectionProperties('hollow-circle',dimensions);
+ assert.ok(ratio*ratio<=0.5,'cavity occupies no more than half of the envelope area');
+ assert.equal(previousArea,0.589048622548086,'former factored area path reproduces its one-ulp loss');
+ assert.equal(previousMoment,0.046019423636569225,'former factored inertia path reproduces its one-ulp loss');
+ assert.equal(section.area,0.5890486225480861,'direct area difference matches the correctly rounded reference');
+ assert.equal(section.secondMoment,0.04601942363656923,'direct inertia difference matches the correctly rounded reference');
+ assert.equal(section.secondMomentPerpendicular,section.secondMoment);
+ assert.equal(section.sectionModulusX,0.09203884727313846);
+ assert.equal(section.sectionModulusY,section.sectionModulusX);
+ assert.equal(section.radiusOfGyrationX,0.2795084971874737);
+ assert.equal(section.radiusOfGyrationY,section.radiusOfGyrationX);
+ assert.notEqual(section.area,previousArea);
+ assert.notEqual(section.secondMoment,previousMoment);
+ assert.deepEqual(section.centroid,{x:0.5,y:0.5});
+ assert.deepEqual(dimensions,original);
+ assert.ok(Object.isFrozen(section)&&Object.isFrozen(section.centroid));
+});
+
 test('small-cavity hollow circle matches solid-envelope rounding below half an ulp',()=>{
  const dimensions={diameter:1,innerDiameter:9.313225746154786e-14};
  const original={...dimensions};

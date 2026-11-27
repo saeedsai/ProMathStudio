@@ -571,6 +571,38 @@ def main():
             assert small_cavity_circle['same'] and small_cavity_circle['centroidSame'], small_cavity_circle
             assert small_cavity_circle['dimensionsUnchanged'], small_cavity_circle
 
+            # A moderate cavity is still well-conditioned for direct 1-r² / 1-r⁴ differences.
+            # The old complementary-product path loses one ulp immediately above r=0.5.
+            transition_cavity_circle = page.evaluate("""() => {
+                const dimensions = {diameter: 1, innerDiameter: 0.5000000000000001};
+                const ratio = dimensions.innerDiameter / dimensions.diameter;
+                const previousAreaFactor = (1 - ratio) * (1 + ratio);
+                const previousInertiaFactor = previousAreaFactor * (1 + ratio * ratio);
+                const previousArea = (Math.PI / 4) * previousAreaFactor;
+                const previousMoment = (Math.PI / 64) * previousInertiaFactor;
+                const section = ProMathTrussFEM.sectionProperties('hollow-circle', dimensions);
+                return {
+                    ratioSquared: ratio * ratio, previousArea, previousMoment,
+                    area: section.area, ixx: section.secondMoment, iyy: section.secondMomentPerpendicular,
+                    sx: section.sectionModulusX, sy: section.sectionModulusY,
+                    rx: section.radiusOfGyrationX, ry: section.radiusOfGyrationY,
+                    centroid: section.centroid,
+                    dimensionsUnchanged: dimensions.diameter === 1 && dimensions.innerDiameter === 0.5000000000000001
+                };
+            }""")
+            assert transition_cavity_circle['ratioSquared'] <= 0.5, transition_cavity_circle
+            assert transition_cavity_circle['previousArea'] == 0.589048622548086, transition_cavity_circle
+            assert transition_cavity_circle['previousMoment'] == 0.046019423636569225, transition_cavity_circle
+            assert transition_cavity_circle['area'] == 0.5890486225480861, transition_cavity_circle
+            assert transition_cavity_circle['ixx'] == 0.04601942363656923, transition_cavity_circle
+            assert transition_cavity_circle['iyy'] == transition_cavity_circle['ixx'], transition_cavity_circle
+            assert transition_cavity_circle['sx'] == 0.09203884727313846, transition_cavity_circle
+            assert transition_cavity_circle['sy'] == transition_cavity_circle['sx'], transition_cavity_circle
+            assert transition_cavity_circle['rx'] == 0.2795084971874737, transition_cavity_circle
+            assert transition_cavity_circle['ry'] == transition_cavity_circle['rx'], transition_cavity_circle
+            assert transition_cavity_circle['centroid'] == {'x': 0.5, 'y': 0.5}, transition_cavity_circle
+            assert transition_cavity_circle['dimensionsUnchanged'], transition_cavity_circle
+
             # A hollow cavity's own area/square may underflow even when every net property is representable.
             # The ratio-based hollow helpers must accept these geometries at desktop and mobile widths.
             unresolved_cavities = page.evaluate("""() => {

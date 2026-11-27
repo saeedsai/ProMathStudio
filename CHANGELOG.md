@@ -1,3 +1,9 @@
+## 2026-11-27 — Correct hollow-circle rounding near the cavity transition
+
+- Select the well-conditioned direct annulus differences by cavity area ratio (r² ≤ 0.5), avoiding a one-ulp area and inertia loss just above an inner/outer diameter ratio of 0.5.
+- Preserve the factored radial-gap path for near-unity thin walls. Added Node and Chromium reference regressions for area, inertia, section modulus, radii, centroid, input immutability and the former one-ulp-low result at desktop and 390px.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Reject legacy Truss SI values lost during unit conversion
 
 - Legacy Truss SI imports now reject nonzero nodal forces (N) or Young's modulus (Pa) when division to current kN/GPa units would round the value to zero. Exact zero remains valid, and ordinary conversions retain the original division arithmetic; other scaled property validation remains unchanged.

@@ -832,10 +832,11 @@
         const innerRatio = finite(innerDiameter / diameter, 'Hollow circle inner/outer diameter ratio');
         const innerRatioSquared = innerRatio * innerRatio;
         let areaFactor;
-        if (innerRatio <= 0.5) {
-          // A small cavity is safely evaluated by direct dimensionless subtraction:
-          // both factors stay well away from zero, and sub-half-ulp cavities correctly
-          // round to the solid envelope instead of accumulating factorization error.
+        if (innerRatioSquared <= 0.5) {
+          // When cavity area is at most half the envelope, the remaining area and
+          // inertia factors are at least 0.5 and 0.75. Direct differences are
+          // well-conditioned here and avoid extra product rounding near the transition.
+          // Only thinner walls need the factored radial-gap form below.
           areaFactor = finite(1 - innerRatioSquared, 'Hollow circle net area factor');
           inertiaFactor = finite(1 - innerRatioSquared * innerRatioSquared, 'Hollow circle inertia factor');
         } else {

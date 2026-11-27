@@ -1,3 +1,9 @@
+## Hollow-circle cavity transition rounding
+
+For a concentric annulus, use direct dimensionless differences 1-r² and 1-r⁴ while the cavity area ratio r² is at most 0.5. In this range the remaining area and inertia factors are bounded below by 0.5 and 0.75, so subtraction is well-conditioned and avoids the extra multiplication rounding of complementary factors. When r² > 0.5, retain the factored radial-gap expression to protect near-unity thin walls.
+
+The boundary fixture uses outer diameter 1 mm and inner diameter 0.5000000000000001 mm (the next binary64 value above 0.5 mm). The previous factored path returns area 0.589048622548086 mm² and inertia 0.046019423636569225 mm⁴; correctly rounded references from the exact binary64 input are 0.5890486225480861 mm² and 0.04601942363656923 mm⁴. Section modulus is 0.09203884727313846 mm³ and both radii of gyration are 0.2795084971874737 mm. Node and Chromium regressions verify these values, unchanged input dimensions, the former one-ulp loss, and preserve the existing near-unity thin-wall and sub-half-ulp cavity cases at 1280px and 390px. This is binary64 numerical-boundary coverage, not a physical design example.
+
 ## Legacy SI-to-current unit conversion underflow
 
 Legacy Truss models express nodal forces in N and Young's modulus in Pa, while the current model uses kN and GPa. Conversion must not silently erase a nonzero binary64 source value when division by 1000 or 1e9 rounds it to zero. `fromLegacy()` now rejects those unrepresentable force/modulus inputs with a field-specific underflow error. Exact zero remains valid, and ordinary legacy values retain the original division operation and results. Other scaled properties retain their existing validation and property-specific diagnostics.

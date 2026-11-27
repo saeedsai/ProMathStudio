@@ -1,3 +1,10 @@
+## 2026-11-27 — Add scale-safe PRODUCT to Data Tables formulas
+
+- Added first-class `PRODUCT(range)` and scalar/nested PRODUCT formulas to the Data Tables evaluator and Formula library.
+- Uses exponent-scaled binary64 multiplication to avoid spurious intermediate overflow/underflow; empty numeric ranges return 1, zero factors produce signed zero, and genuinely non-finite final products return `#NUM!`.
+- Added registered Chromium and structural regressions for mixed numeric/text ranges, scalar and nested arguments, large/small factor recovery, true overflow, zero, empty ranges, negative zero and underflow.
+- Updated `src/data-tables.js` and its embedded `index.html` module byte-for-byte together. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Validate XLSX local-header metadata before import
 
 - XLSX ZIP entries without the data-descriptor flag now require local-header CRC-32 and compressed/uncompressed sizes to match central-directory metadata; bit-3 data-descriptor archives retain the existing payload CRC/size validation.

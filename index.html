@@ -4067,6 +4067,7 @@ self.onmessage=async ({data})=>{
   // The library is a catalog, not an evaluator: insert only, never run code.
   const dataLibrary = [
     {name:'SUM',kind:'Formula',sample:'=SUM(A1:A5)',help:'Sum a numeric cell range.'},
+    {name:'PRODUCT',kind:'Formula',sample:'=PRODUCT(A1:A5)',help:'Multiply numeric cells with scale-safe binary64 arithmetic.'},
     {name:'AVERAGE',kind:'Formula',sample:'=AVERAGE(A1:A5)',help:'Average numeric cells.'},
     {name:'MIN',kind:'Formula',sample:'=MIN(A1:A5)',help:'Smallest numeric value.'},
     {name:'MAX',kind:'Formula',sample:'=MAX(A1:A5)',help:'Largest numeric value.'},
@@ -4651,6 +4652,36 @@ self.onmessage=async ({data})=>{
     const remainder=residual.sum+residual.correction;
     return primary+remainder;
   }
+  // Multiply binary64 factors without overflowing/underflowing intermediate products.
+  // Mantissas stay in [1,2); powers of two are accumulated separately and restored once.
+  function stableProduct(values){
+    if(!values.length)return 1;
+    let sign=1,zero=false,mantissa=1,exponent=0;
+    for(const value of values){
+      if(value===0){if(Object.is(value,-0))sign=-sign;zero=true;continue;}
+      if(value<0)sign=-sign;
+      const absolute=Math.abs(value);
+      let power=Math.floor(Math.log2(absolute));
+      let unit=Math.pow(2,power);
+      if(!Number.isFinite(unit)){power=1023;unit=Math.pow(2,1023);}
+      else if(unit===0){power=-1074;unit=Number.MIN_VALUE;}
+      let part=absolute/unit;
+      if(part>=2){part/=2;power++;}
+      else if(part<1){part*=2;power--;}
+      mantissa*=part;
+      exponent+=power;
+      const adjustment=Math.floor(Math.log2(mantissa));
+      mantissa/=Math.pow(2,adjustment);
+      exponent+=adjustment;
+    }
+    if(zero)return sign*0;
+    if(exponent>1023)return sign*Infinity;
+    if(exponent< -1075)return sign*0;
+    const magnitude=exponent< -1022
+      ? mantissa*Math.pow(2,exponent+1022)*2.2250738585072014e-308
+      : mantissa*Math.pow(2,exponent);
+    return sign*magnitude;
+  }
   // Scale before taking the midpoint to avoid overflow and retain subnormal values.
   function safeMidpoint(a,b){
     const scale=Math.max(Math.abs(a),Math.abs(b));
@@ -4729,13 +4760,13 @@ self.onmessage=async ({data})=>{
     // Custom functions and aggregates may wrap one another. Reduce innermost
     // calls in alternating passes, without eval or eager IF branch evaluation.
     const customPattern=/\b([A-Za-z][A-Za-z0-9_]*)\s*\(([^()]*)\)/g;
-    const aggregatePattern=/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)\s*\(([^()]*)\)/gi;
+    const aggregatePattern=/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN|PRODUCT)\s*\(([^()]*)\)/gi;
     let compositionPasses=0;
     while(true){
       let changed=false;
       expr=String(expr).replace(customPattern,(all,name,body)=>{
         // Built-in spreadsheet functions cannot be shadowed by restored custom names.
-        const fn=/^(?:IF|SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)$/i.test(name)?null:window.MathStudio.customFunctions?.find(name);
+        const fn=/^(?:IF|SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN|PRODUCT)$/i.test(name)?null:window.MathStudio.customFunctions?.find(name);
         if(!fn)return all;
         const args=splitArgs(body);
         if(args.length!==fn.params.length||args.some(arg=>!arg.trim()))throw Error('#ARGS');
@@ -4780,6 +4811,8 @@ self.onmessage=async ({data})=>{
         x=stableSum(nums);
       }else if(upper==='COUNT'){
         x=nums.length;
+      }else if(upper==='PRODUCT'){
+        x=stableProduct(nums);
       }else if(upper==='MIN'||upper==='MAX'){
         // A formula may combine many individually bounded ranges. Avoid spreading
         // their aggregate values into a call that exceeds the JavaScript argument limit.

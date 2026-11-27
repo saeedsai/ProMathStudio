@@ -20,8 +20,24 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
         self.assertIn("python tests/smoke_sheet_numeric_hardening.py", WORKFLOW)
 
     def test_reserved_names_cannot_shadow_builtin_aggregates(self):
-        self.assertIn("SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN", SOURCE)
+        self.assertIn("SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN|PRODUCT", SOURCE)
         self.assertIn("test(name)?null:window.MathStudio.customFunctions?.find(name)", SOURCE)
+
+    def test_product_uses_exponent_scaled_binary64_multiplication(self):
+        self.assertIn("function stableProduct(values)", SOURCE)
+        self.assertIn("x=stableProduct(nums);", SOURCE)
+        self.assertIn("Object.is(value,-0)", SOURCE)
+        self.assertIn("Multiply numeric cells with scale-safe binary64 arithmetic.", SOURCE)
+        smoke = (ROOT / "tests/smoke_data_tables.py").read_text(encoding="utf-8")
+        for formula in (
+            "=PRODUCT(A1:E1)", "=PRODUCT(2,3,4)",
+            "=PRODUCT(SUM(A1:B1),2)",
+            "=PRODUCT(1e308,1e308,1e-308,1e-308)",
+            "=PRODUCT(1e308,1e308)", "=PRODUCT(0,1e308,1e308)",
+            "=PRODUCT(A3:A3)", "=PRODUCT(-0,2)",
+        ):
+            self.assertIn(formula, smoke)
+        self.assertIn("python tests/smoke_data_tables.py", WORKFLOW)
 
     def test_mean_prefers_finite_compensated_sum_before_scaled_fallback(self):
         self.assertIn("const finiteSum=stableSum(values);", SOURCE)

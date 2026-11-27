@@ -1,3 +1,15 @@
+## 2026-11-27 06:00 CET — DATA-TABLES-SCALE-SAFE-PRODUCT
+
+- Starting refs: dev `665eaa173830804787cd2f04a0a8d48f4fddc1c1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; inspected AGENTS, living plan, frozen inventory, source/tests, PR #191, branch refs, CI and production check-runs. Historical baseline **166 gaps / 95 partial** unchanged.
+- Exact starting-head Push #45938426308 and PR #45938430351 both passed 218/218 on `665eaa173830804787cd2f04a0a8d48f4fddc1c1`, zero failures/skips.
+- Added first-class Data Tables `PRODUCT` formula and Formula-library entry. Exponent-scaled mantissa/exponent accumulation avoids spurious intermediate overflow/underflow; empty numeric ranges return 1, zero factors return signed zero, final overflow is caught as `#NUM!`.
+- Updated `src/data-tables.js`, its embedded `index.html` module, existing Chromium smoke, numeric structural unittest, Data Tables contract, living plan, ledger and changelog in one atomic commit.
+- Regression fixtures: `PRODUCT(A1:E1)=-24`; `PRODUCT(2,3,4)=24`; `PRODUCT(SUM(A1:B1),2)=10`; `PRODUCT(1e308,1e308,1e-308,1e-308)=0.9999999999999999`; true overflow `#NUM!`; zero with huge factors = 0; empty range = 1; negative zero and underflow behavior.
+- Local isolated V8 algorithm checks and independent Python exact-rational reference passed. Static parser/reserved-name/docs/source-bundle checks passed. No local repository checkout; native Playwright, unittest and build commands not run. New exact-head CI is pending.
+- PR #191 remains open, 90 ahead / 0 behind, zero reviews. Only dev/main refs exist and both are unprotected; branch-protection write unavailable to the integration. No merge/direct main update.
+- Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality #45360386408 and Pages #45360367251 successful on 24-Nov-2026. No new deployment.
+- Status: PRODUCT implemented on dev / In QA / not released; historical inventory unchanged at 166 gaps / 95 partial.
+
 ## 2026-11-27 04:57 CET — XLSX-LOCAL-HEADER-METADATA-INTEGRITY
 
 **Starting refs:** dev `5134f5f2a128fe99415c7f81d97b8cadb52e0766`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan and frozen 26-Oct inventory, Data Tables source/import/export contracts and tests, standalone build mapping, PR #191, refs/reviews, exact-head Actions and production Quality/Pages. Historical baseline remains **166 gaps / 95 partial**.

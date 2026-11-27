@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 12:22 CET  
+**Last updated:** 27 November 2026, 12:54 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,11 +15,11 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting `dev`: `27971dc78f5bdaf293e643404d8942c11ddb8a68`; this run advances the existing branch with one guarded atomic multi-file commit.
-- `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare before this change: **102 ahead / 0 behind**.
-- Existing PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191): `dev` → `main`, open and mergeable, 102 commits ahead / 0 behind, 38 changed files, zero submitted independent reviews.
+- Starting `dev`: `72e4400dbd05ebacdcc07efdae346bee297f0b75`; this run advances the existing branch with one guarded atomic multi-file commit.
+- `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare before this change: **104 ahead / 0 behind**.
+- Existing PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191): `dev` → `main`, open and mergeable, 104 commits ahead / 0 behind, 40 changed files, zero submitted independent reviews.
 - Branch inventory: exactly `dev` and `main`; both currently report `protected: false`. Rulesets are empty; branch-protection GET returns HTTP 403 to the connected integration.
-- Exact starting-head Quality on `27971dc78f5bdaf293e643404d8942c11ddb8a68`: Push [#45980025915](https://github.com/saeedsai/ProMathStudio/actions/runs/45980025915) and PR [#45980033277](https://github.com/saeedsai/ProMathStudio/actions/runs/45980033277) both completed **218/218 steps, success, zero failures and zero skips**. These certify the starting head only; this commit needs fresh exact-head checks.
+- Exact starting-head Quality on `72e4400dbd05ebacdcc07efdae346bee297f0b75`: Push [#45992199344](https://github.com/saeedsai/ProMathStudio/actions/runs/45992199344) and PR [#45992207118](https://github.com/saeedsai/ProMathStudio/actions/runs/45992207118) both completed **218/218 steps, success, zero failures and zero skips**. These certify the starting head only; this commit needs fresh exact-head checks.
 - The previous exact-head failures on `905a864` (project rollback step 50) and `3139890` (structural delivery-plan heading step 7) were diagnosed and corrected in the current starting head; no current failing check remains.
 - Latest verified production runs remain Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. No newer main deployment or live hosted verification is claimed.
 
@@ -73,10 +73,11 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 5. P1 — Harden adaptive RK45 difficult-workload boundaries
 
-**Status:** Partial; overflow advisories and bounded-stage recovery exist, but near-ULP time-grid and terminal failure paths remain.  
+**Status:** Partial; overflow advisories, bounded-stage recovery and near-ULP diagnostics exist. This run fixes the distinct representable-subnormal-span case where the initial `span/20` split rounded to zero; candidate CI remains pending.  
 **Acceptance tests:**
 - Recoverable stage-overflow retries preserve a finite solution when smaller steps succeed; unrecoverable overflow terminates with a diagnostic.
 - Forward/backward sample times are strictly monotone with no duplicate timestamps at large epochs or near-ULP spacing.
+- When `span/20` underflows to zero but the requested endpoints are distinct, the solver uses one full representable span; smallest- and two-subnormal intervals in both directions preserve the endpoint, report collapsed stages and show the accuracy warning.
 - Underflow, maximum attempts, exhausted retries, endpoint snapping and stale-export protection have direct numerical and browser regressions.
 - Data Tables/Graph exports, keyboard behavior and 390px layout remain correct.
 
@@ -86,8 +87,11 @@ After the five priorities above, continue shared-tool registry and canonical too
 
 ## Latest checkpoint
 
-- This run starts from exact `dev` `27971dc78f5bdaf293e643404d8942c11ddb8a68` and `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; the resulting guarded atomic commit becomes the new `dev` head. The execution ledger and PR comment record the resulting SHA and exact-head workflow links.
-- This run fixes a schema/runtime mismatch: syntactically valid unknown Engineering discipline IDs previously passed project preflight and failed only in `engineeringCatalog.restoreState()` after the import confirmation. The schema now accepts only the nine canonical IDs (or the empty all-disciplines selector), and tests enforce exact catalog/schema ID parity plus rejection before confirmation.
-- Fresh Push and PR Quality for the new exact head are required; do not infer green from the starting SHA.
-- No merge or main update is authorized while independent review and enforceable protection are missing.
-- Historical baseline remains **166 gaps / 95 partial**.
+- Starting `dev`: `72e4400dbd05ebacdcc07efdae346bee297f0b75`; starting `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The branch comparison is 104 ahead / 0 behind. The existing PR #191 is open and mergeable with 104 commits, 40 changed files and zero independent submitted reviews.
+- Exact starting-head Push Quality [#45992199344](https://github.com/saeedsai/ProMathStudio/actions/runs/45992199344) and PR Quality [#45992207118](https://github.com/saeedsai/ProMathStudio/actions/runs/45992207118) both completed all 218 steps successfully, with zero failed or skipped steps. No starting-head CI failure remains to repair.
+- Main and dev are the only branches; both report `protected: false`, and the repository rulesets endpoint returns an empty list. PR #191 remains blocked by missing independent review and enforceable main protection. No merge is authorized.
+- Found an RK45 initial-step defect: for a distinct representable subnormal interval such as `[0, Number.MIN_VALUE]`, `span/20` rounded to zero and the solver returned step underflow before its first attempt. It now falls back to the full representable span only in that case. Existing stage-collision diagnostics remain visible; this is not an accuracy guarantee for a time-varying derivative.
+- Added direct Node regression for smallest- and two-subnormal forward/backward intervals, exact endpoints, monotonicity, attempt counts and collision warnings; extended the registered Chromium endpoint smoke with the same cases. Updated numerical-method documentation. Source and embedded standalone `index.html` module are synchronized.
+- Isolated V8 execution of the actual modified solver kernel reproduced the old failure and passed all four new intervals plus the constant-state check. Candidate exact-head Push/PR Quality must still run; browser certification is pending.
+- Latest main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on 24-Nov-2026 at unchanged main. No newer deployment or live hosted verification is claimed.
+- Historical baseline remains **166 gaps / 95 partial**. No inventory counts were changed.

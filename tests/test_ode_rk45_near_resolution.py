@@ -49,5 +49,42 @@ console.log('PASS RK45 near-resolution original vs rescaled');
         self.assertIn("PASS RK45 near-resolution", result.stdout)
 
 
+    def test_subnormal_spans_use_one_representable_step_with_warning(self):
+        script = r"""
+const fs=require('fs'),assert=require('node:assert/strict');
+const src=fs.readFileSync('src/ode-tools.js','utf8');
+const begin=src.indexOf('function finite('),end=src.indexOf('function solveSystem(');
+assert(begin>=0&&end>begin);
+const solve=new Function('const MAX=1e12;const M={numerical:{evaluate:(e,{y})=>e==="one"?1:e==="y"?y:NaN}};'+
+ src.slice(begin,end)+';return solveAdaptive;')();
+for(const [t0,t1,quantumSteps] of [
+ [0,Number.MIN_VALUE,1],[Number.MIN_VALUE,0,1],
+ [0,2*Number.MIN_VALUE,0],[2*Number.MIN_VALUE,0,0]
+]){
+ const out=solve({expression:'one',t0,t1,y0:0});
+ assert.equal(out.rows.length,2);
+ assert.equal(out.rows[0][0],t0);
+ assert.equal(out.rows[1][0],t1);
+ assert.equal(out.rows[1][1],t1-t0);
+ assert.equal(out.steps,1);
+ assert.equal(out.attempts,1);
+ assert.equal(out.rejected,0);
+ assert.equal(out.attempts,out.steps+out.rejected);
+ assert.equal(out.stageTimeCollisionAttempts,1);
+ assert.equal(out.stageTimeCollisionAcceptedSteps,1);
+ assert.equal(out.quantumLimitedAcceptedSteps,quantumSteps);
+ assert(Math.sign(t1-t0)*(out.rows[1][0]-out.rows[0][0])>0);
+}
+const state=solve({expression:'y',t0:0,t1:Number.MIN_VALUE,y0:1});
+assert.equal(state.rows.at(-1)[1],1);
+assert.equal(state.stageTimeCollisionAcceptedSteps,1);
+console.log('PASS RK45 subnormal initial-step fallback, endpoints and collision warnings');
+"""
+        result = subprocess.run(["node", "-e", script], cwd=ROOT,
+                                capture_output=True, text=True, timeout=25)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("PASS RK45 subnormal", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

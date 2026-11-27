@@ -67,6 +67,25 @@ def main():
             {expression:'1',t0:0,t1:1e-300,y0:0}).rows.at(-1)""")
         assert tiny[0] == 1e-300 and abs(tiny[1] / 1e-300 - 1) < 1e-10, tiny
 
+        # The smallest binary64 subnormal is a distinct endpoint even though span/20 rounds to zero.
+        subnormal = math.ulp(0.0)
+        for t0, t1, quantum_steps in ((0.0, subnormal, 1),
+                                      (subnormal, 0.0, 1),
+                                      (0.0, 2 * subnormal, 0),
+                                      (2 * subnormal, 0.0, 0)):
+            result = page.evaluate("""opts => MathStudio.odeTools.solveAdaptive(opts)""",
+                                   {"expression": "1", "t0": t0, "t1": t1, "y0": 0})
+            assert result["rows"][0][0] == t0
+            assert result["rows"][-1][0] == t1
+            assert result["rows"][-1][1] == t1 - t0, result
+            assert result["steps"] == result["attempts"] == 1 and result["rejected"] == 0
+            assert result["stageTimeCollisionAttempts"] == 1, result
+            assert result["stageTimeCollisionAcceptedSteps"] == 1, result
+            assert result["quantumLimitedAcceptedSteps"] == quantum_steps, result
+            assert all((t1 - t0) * (b[0] - a[0]) > 0
+                       for a, b in zip(result["rows"], result["rows"][1:]))
+
+
         page.locator('[data-workspace="editor"]').click()
         page.locator("#ode-details").evaluate("(el) => el.open = true")
         page.locator("#ode-method").select_option("rk45")
@@ -96,7 +115,7 @@ def main():
         page.set_viewport_size({"width": 390, "height": 844})
         assert not errors, errors
         browser.close()
-    print("PASS: RK45 large-epoch, one-ULP, exact endpoint, stiffness, UI and mobile")
+    print("PASS: RK45 large-epoch, subnormal, one-ULP, exact endpoint, stiffness, UI and mobile")
 
 
 if __name__ == "__main__":

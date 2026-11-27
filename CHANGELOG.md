@@ -1,3 +1,9 @@
+## 2026-11-27 — Preserve representable subnormal RK45 intervals
+
+- Fixed adaptive RK45 initialization when a nonzero, representable subnormal interval is divided into 20 initial steps and `span/20` rounds to zero. The solver now attempts the full requested span as one step in this case instead of reporting underflow before the first attempt.
+- The existing stage-time collision counters and visible accuracy warning remain active; this does not certify intermediate-stage resolution or global accuracy for a time-varying derivative.
+- Added Node and registered Chromium regressions for the smallest and two-smallest subnormal intervals in forward/backward directions, exact endpoints, monotonicity and collision diagnostics. Updated numerical-method documentation and synchronized the standalone `index.html` bundle.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
 ## 2026-11-27 — Match the living plan's required five-feature heading
 
 - Exact-head structural CI found the restored living plan used `NEXT FIVE priorities` but the durable delivery-policy regression also requires the literal `Next five features` heading.

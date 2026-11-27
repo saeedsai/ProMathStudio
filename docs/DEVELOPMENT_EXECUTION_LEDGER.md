@@ -1,3 +1,12 @@
+## 2026-11-27 18:58 CET — CORRECT PROJECT SMOKE ASSERTION SCOPE BEFORE QA
+
+- Follow-up review of candidate `c535d26e968f61ba5b728fe6b6a0eceabf6a97c8` found the newly inserted editor-save assertions were indented one level outside the Playwright `with` block. Corrected them to run while the page/browser are active, and changed the valid two-argument Python fixture to contain a real newline rather than a literal backslash-n.
+- This is a test-fixture correction only; the production signature checks, project-schema parity, loopback HTTP server and direct localStorage assertions are unchanged.
+- The c535 exact-head Push/PR workflows were still running when inspected; they are not treated as certification of the follow-up head. Fresh exact-head workflows will be inspected after this guarded dev update.
+- No merge, main update or release claim.
+
+---
+
 ## 2026-11-27 18:58 CET — FIX PROJECT SMOKE ORIGIN AND MATCH PYTHON FUNCTION SIGNATURES
 
 - Starting refs: `dev` 0f0665b6d300fac4618e2bb71196b29dd3aa4eab; `main` 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare main...dev = 111 ahead / 0 behind. Exactly two branches exist.

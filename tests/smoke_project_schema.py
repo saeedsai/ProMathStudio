@@ -94,25 +94,25 @@ def main():
             migrated = page.evaluate('window.MathStudio.bridge.export()')
             assert migrated['customFunctions'] == valid_python_function
 
-        # The editor rejects a Python def whose ordered arguments differ from saved params.
-        page.locator('#cf-name').fill('bad_signature')
-        page.locator('#cf-params').fill('x')
-        page.locator('#cf-type').select_option('python')
-        page.locator('#cf-body').fill('def bad_signature(y):\\n  return y')
-        page.locator('#cf-save').click()
-        assert 'matching parameters' in page.locator('#cf-message').inner_text().lower()
-        assert not any(item['name'] == 'bad_signature' for item in page.evaluate('window.MathStudio.customFunctions.list()'))
-
-        # Matching multi-argument definitions remain supported.
-        page.locator('#cf-name').fill('pair_sum')
-        page.locator('#cf-params').fill('x,y')
-        page.locator('#cf-type').select_option('python')
-        page.locator('#cf-body').fill('def pair_sum(x, y):\\n  return x + y')
-        page.locator('#cf-save').click()
-        assert 'Saved pair_sum.' in page.locator('#cf-message').inner_text()
-        pair_sum = page.evaluate("window.MathStudio.customFunctions.list().find(item => item.name === 'pair_sum')")
-        assert pair_sum['params'] == ['x', 'y']
-
+            # The editor rejects a Python def whose ordered arguments differ from saved params.
+            page.locator('#cf-name').fill('bad_signature')
+            page.locator('#cf-params').fill('x')
+            page.locator('#cf-type').select_option('python')
+            page.locator('#cf-body').fill('def bad_signature(y):\n  return y')
+            page.locator('#cf-save').click()
+            assert 'matching parameters' in page.locator('#cf-message').inner_text().lower()
+            assert not any(item['name'] == 'bad_signature' for item in page.evaluate('window.MathStudio.customFunctions.list()'))
+    
+            # Matching multi-argument definitions remain supported.
+            page.locator('#cf-name').fill('pair_sum')
+            page.locator('#cf-params').fill('x,y')
+            page.locator('#cf-type').select_option('python')
+            page.locator('#cf-body').fill('def pair_sum(x, y):\n  return x + y')
+            page.locator('#cf-save').click()
+            assert 'Saved pair_sum.' in page.locator('#cf-message').inner_text()
+            pair_sum = page.evaluate("window.MathStudio.customFunctions.list().find(item => item.name === 'pair_sum')")
+            assert pair_sum['params'] == ['x', 'y']
+    
             # The public restore API is also a state boundary: reject an entire invalid list
             # before mutating the active functions or their localStorage copy.
             invalid_restore_cases = [

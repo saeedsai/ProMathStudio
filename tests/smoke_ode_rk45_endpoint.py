@@ -82,8 +82,28 @@ def main():
             assert result["stageTimeCollisionAttempts"] == 1, result
             assert result["stageTimeCollisionAcceptedSteps"] == 1, result
             assert result["quantumLimitedAcceptedSteps"] == quantum_steps, result
-            assert all((t1 - t0) * (b[0] - a[0]) > 0
+            direction = 1 if t1 > t0 else -1
+            assert all(direction * (b[0] - a[0]) > 0
                        for a, b in zip(result["rows"], result["rows"][1:]))
+
+
+        # At a 20-ULP interval near 1e12, a later 5-ULP trial makes c=4/5
+        # and c=8/9 round to the same timestamp; report the repeated fractional stage.
+        ulp = 1 / 8192
+        for direction in (1, -1):
+            t0 = 1e12 - 20 * ulp if direction == 1 else 1e12
+            t1 = 1e12 if direction == 1 else 1e12 - 20 * ulp
+            result = page.evaluate("""opts => MathStudio.odeTools.solveAdaptive(opts)""",
+                                   {"expression": "1", "t0": t0, "t1": t1, "y0": 0})
+            assert result["rows"][0][0] == t0
+            assert result["rows"][-1][0] == t1
+            assert result["attempts"] == result["steps"] == 3 and result["rejected"] == 0
+            assert result["stageTimeCollisionAttempts"] == 2, result
+            assert result["stageTimeCollisionAcceptedSteps"] == 2, result
+            assert result["quantumLimitedAcceptedSteps"] == 1, result
+            assert all(direction * (b[0] - a[0]) > 0
+                       for a, b in zip(result["rows"], result["rows"][1:]))
+
 
 
         page.locator('[data-workspace="editor"]').click()
@@ -115,7 +135,7 @@ def main():
         page.set_viewport_size({"width": 390, "height": 844})
         assert not errors, errors
         browser.close()
-    print("PASS: RK45 large-epoch, subnormal, one-ULP, exact endpoint, stiffness, UI and mobile")
+    print("PASS: RK45 large-epoch, subnormal, repeated-stage, exact endpoint, stiffness, UI and mobile")
 
 
 if __name__ == "__main__":

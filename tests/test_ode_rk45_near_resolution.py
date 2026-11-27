@@ -86,5 +86,38 @@ console.log('PASS RK45 subnormal initial-step fallback, endpoints and collision 
         self.assertIn("PASS RK45 subnormal", result.stdout)
 
 
+
+    def test_repeated_fractional_stage_times_are_reported(self):
+        script = r"""
+const fs=require('fs'),assert=require('node:assert/strict');
+const src=fs.readFileSync('src/ode-tools.js','utf8');
+const begin=src.indexOf('function finite('),end=src.indexOf('function solveSystem(');
+assert(begin>=0&&end>begin);
+const solve=new Function('const MAX=1e12;const M={numerical:{evaluate:(e,{y})=>e==="one"?1:y}};'+
+ src.slice(begin,end)+';return solveAdaptive;')();
+const ulp=1/8192,endpoint=1e12;
+for(const direction of [1,-1]){
+ const t0=direction>0?endpoint-20*ulp:endpoint;
+ const t1=direction>0?endpoint:endpoint-20*ulp;
+ const out=solve({expression:'one',t0,t1,y0:0});
+ assert.equal(out.rows[0][0],t0);
+ assert.equal(out.rows.at(-1)[0],t1);
+ assert.equal(out.attempts,3);
+ assert.equal(out.steps,3);
+ assert.equal(out.rejected,0);
+ assert.equal(out.stageTimeCollisionAttempts,2);
+ assert.equal(out.stageTimeCollisionAcceptedSteps,2);
+ assert.equal(out.quantumLimitedAcceptedSteps,1);
+ for(let i=1;i<out.rows.length;i++)
+  assert(direction*(out.rows[i][0]-out.rows[i-1][0])>0);
+}
+console.log('PASS RK45 repeated fractional stage-time collisions');
+"""
+        result = subprocess.run(["node", "-e", script], cwd=ROOT,
+                                capture_output=True, text=True, timeout=25)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("PASS RK45 repeated fractional", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

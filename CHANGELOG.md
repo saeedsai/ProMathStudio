@@ -1,3 +1,10 @@
+## 2026-11-27 — Detect repeated RK45 fractional-stage timestamps and repair endpoint regression
+
+- Exact-head Push/PR CI on the preceding dev head failed at the RK45 endpoint browser smoke because its monotonicity assertion multiplied two subnormal quantities; that product rounded to zero despite increasing timestamps. The assertion now uses the signed integration direction times the timestamp difference, retaining the strict check without underflow.
+- RK45 now reuses its exact four fractional Dormand–Prince stage timestamps for both derivative evaluation and diagnostics. The collision counter detects repeated fractional stages and stages rounded onto either accepted endpoint; k6/k7 use the already selected endpoint timestamp.
+- Added Node and Chromium forward/backward 20-ULP large-epoch regressions where a 5-ULP trial makes c=4/5 and c=8/9 coincide. Both accepted collision counters must report the repeated-stage attempt. Existing smallest/two-subnormal endpoint and monotonicity coverage is retained.
+- Updated numerical-method docs, living plan, execution ledger and standalone index.html bundle. Isolated V8 checks passed; native Chromium/build checks and fresh exact-head full Quality remain pending. Implemented on dev; not released.
+
 ## 2026-11-27 — Preserve representable subnormal RK45 intervals
 
 - Fixed adaptive RK45 initialization when a nonzero, representable subnormal interval is divided into 20 initial steps and `span/20` rounds to zero. The solver now attempts the full requested span as one step in this case instead of reporting underflow before the first attempt.

@@ -1,8 +1,13 @@
+## 2026-11-27 — Truss underflow guard compatibility correction
+
+- Follow-up review found `finiteScaled()` also handles optional member I (mm⁴), whose existing `Number.MIN_VALUE` regression requires the established “I must be positive” diagnostic when conversion underflows.
+- Scoped the new zero-result check to the new division helper used by legacy Fx/Fy (N→kN) and E (Pa→GPa). Restored `finiteScaled()` behavior for other properties; no existing validation diagnostics or assertions were weakened.
+- Exact-head run for the prior candidate is superseded by this correction. The current dev head must pass fresh Push and PR Quality before the change is certified.
 ## 2026-11-27 02:01 CET — Truss legacy SI conversion underflow guard
 
 - Starting dev `21f091799fe0f74bec6070908ed68402441e98fc`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact starting Push Quality #45915110898 and PR Quality #45915116341 both completed 218/218 steps with zero failures/skips on the exact starting dev SHA.
 - Release remains blocked: PR #191 open/mergeable, zero submitted reviews; only dev/main branches, both unprotected; rulesets empty; branch-protection GET HTTP 403. No merge or direct main update.
-- Fixed a real legacy-adapter loss: nonzero N forces or Pa modulus could divide to zero when converted to kN/GPa. Added finite division underflow rejection and aligned scaled conversion diagnostics; exact zero and normal conversions remain unchanged.
+- Fixed a real legacy-adapter loss: nonzero N forces or Pa modulus could divide to zero when converted to kN/GPa. Added finite division underflow rejection for legacy Fx/Fy/E; kept the existing scaled-conversion helper unchanged so optional I-underflow retains its established property-specific diagnostic.
 - Added direct Node and Chromium regressions for ±Number.MIN_VALUE Fx/Fy, minimum-subnormal E, zero and ordinary legacy conversion. Truss FEM remains an adjacent script; no root index.html synchronization is needed.
 - Local checkout absent; bounded git remote probe failed on github.com DNS. Isolated Node conversion-boundary check passed six assertions; this is not a full production-module test. Exact-head GitHub Actions must certify the committed Node and Chromium regressions.
 - Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production workflows on unchanged main; no new deployment.

@@ -1,6 +1,6 @@
 ## 2026-11-27 — Reject legacy Truss SI values lost during unit conversion
 
-- Legacy Truss SI imports now reject nonzero nodal forces (N) or Young's modulus (Pa) when conversion to current kN/GPa units would round the value to zero. Exact zero remains valid, and ordinary conversions retain the original division arithmetic.
+- Legacy Truss SI imports now reject nonzero nodal forces (N) or Young's modulus (Pa) when division to current kN/GPa units would round the value to zero. Exact zero remains valid, and ordinary conversions retain the original division arithmetic; other scaled property validation remains unchanged.
 - Added Node and Chromium regressions for positive/negative minimum-subnormal Fx/Fy, minimum-subnormal E, zero and normal legacy references. Implemented on dev; exact-head Push/PR Quality pending; not released.
 ## 2026-11-27 — Scale Truss stiffness before subnormal direction-cosine products
 

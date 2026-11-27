@@ -51,10 +51,8 @@
     return n;
   };
   const finiteScaled = (v, name, scale) => {
-    const input = finite(v, name);
-    const result = input * scale;
+    const result = finite(v, name) * scale;
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
-    if (input !== 0 && result === 0) throw Error(name + ' underflows the supported SI range.');
     return result;
   };
   // Preserve the original division rounding while rejecting nonzero SI values that

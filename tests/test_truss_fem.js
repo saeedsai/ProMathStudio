@@ -2468,3 +2468,32 @@ test('global stiffness assembly retains combined sub-ulp parallel-member contrib
  assert.deepEqual(model,original,'FEM solve must not mutate the source model');
 });
 
+test('global stiffness assembly scales before direction-cosine products near the subnormal limit',()=>{
+ const model={
+  nodes:[
+   {id:'A',x:0,y:0,fixX:true,fixY:true,fx:0,fy:0},
+   {id:'B',x:2e-12,y:2e-12,fixX:false,fixY:true,fx:Number.MIN_VALUE,fy:0}
+  ],
+  members:Array.from({length:20},(_,i)=>({id:'S'+i,a:'A',b:'B',E:1e-323,area:1e-15}))
+ };
+ const original=clone(model);
+ const parsed=fem.parseModel(model), member=parsed.members[0];
+ assert.equal(member.stiffness,Number.MIN_VALUE,'the member stiffness must remain the minimum positive subnormal');
+ assert.equal(member.stiffness*member.c*member.c,Number.MIN_VALUE,
+  'left-to-right multiplication double-rounds each subnormal contribution upward');
+ assert.equal(member.stiffness*(member.c*member.c),0,
+  'rounding the direction-cosine product first shows the individual exact product is below half a subnormal ulp');
+ const force=Number.MIN_VALUE*1000;
+ const expectedCoefficient=Number.MIN_VALUE*10;
+ const naiveCoefficient=Number.MIN_VALUE*20;
+ assert.equal(force/expectedCoefficient,100);
+ assert.equal(force/naiveCoefficient,50,'the previous sequential product path doubles the assembled coefficient');
+ const result=fem.solve(model);
+ const displacement=result.displacements.find(node=>node.id==='B').x;
+ assert.equal(displacement,100,'scale-first assembly must retain the correctly rounded sum of twenty subnormal products');
+ assert.equal(result.residual,0);
+ assert.ok(result.energyError<1e-6);
+ assert.equal(result.forceBalance.x,0);
+ assert.equal(result.members.length,20);
+ assert.deepEqual(model,original,'FEM solve must not mutate the source model');
+});

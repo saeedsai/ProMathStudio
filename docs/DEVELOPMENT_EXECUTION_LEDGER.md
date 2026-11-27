@@ -1,3 +1,15 @@
+## 2026-11-27 01:02 CET — Truss subnormal stiffness coefficient scaling
+
+- Starting dev `7c4b94b996c3442eb31d52d5dfa5022b84b37dbb`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact starting Push Quality [#45909519371](https://github.com/saeedsai/ProMathStudio/actions/runs/45909519371) and PR Quality [#45909525124](https://github.com/saeedsai/ProMathStudio/actions/runs/45909525124) both passed 218/218, zero failures/skips.
+- Found subnormal double-rounding in `m.stiffness*v[i]*v[j]`: for k=Number.MIN_VALUE and c=s≈0.7071, left-to-right multiplication rounds each member term up to one minimum subnormal; the single product rounds to zero. Twenty terms should sum to ten minimum subnormals, but the old matrix coefficient was twenty.
+- Changed global stiffness assembly to normalize member stiffness by the largest stiffness per coefficient, multiply by row/column direction cosines, compensate the complete dimensionless sum, and restore the stiffness scale once. Binary64 API and model schema unchanged; Truss FEM remains an adjacent script, so root index.html is unaffected.
+- Added Node and Chromium regressions for twenty diagonal subnormal members. Expected displacement is 100 m; old assembly produces 50 m. Tests assert member stiffness, intermediate rounding contrast, zero force-balance residual, energy check, 20 results and desktop/390px browser behavior.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`, the living plan, this ledger and CHANGELOG in one atomic multi-file commit.
+- Bounded Node reproduction of the existing stiffness quotient and old/new assembly arithmetic passed: k=5e-324, old term=5e-324, single product=0, old coefficient=1e-322, corrected coefficient=5e-323, old displacement=50, corrected displacement=100, residual=0, energy error≈2.016e-321. Independent Python exact-rational `Fraction.from_float` reference confirmed the 20-product sum rounds to 5e-323. These are fixture arithmetic checks, not a local execution of the full repository module.
+- Local checkout is absent; native repository Node/Playwright tests were not run. Exact-head Push/PR Quality is required to certify the registered regressions.
+- PR #191 remains open with zero independent reviews; only dev/main branches, both unprotected; rulesets empty and protection read HTTP 403. No merge. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence on unchanged main; no new deployment.
+- Status: implemented on dev, exact-head CI pending, not released. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-26 — Matrix standalone trailing-newline CI repair
 
 - Exact-head Push [#45902853307](https://github.com/saeedsai/ProMathStudio/actions/runs/45902853307) and PR [#45902860501](https://github.com/saeedsai/ProMathStudio/actions/runs/45902860501) both failed at structural step 7. The suite ran 607 tests: 24 failures, one skip. Both newly added Matrix finite-draft structural checks passed.

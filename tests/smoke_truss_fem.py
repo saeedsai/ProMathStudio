@@ -2059,6 +2059,50 @@ def main():
                 assert stiffness["residual"] < 1e-6 and stiffness["energyError"] < 1e-6, (width, stiffness)
                 assert stiffness["memberCount"] == 21, (width, stiffness)
 
+                # Scale stiffness before direction-cosine products: the unscaled product
+                # double-rounds each minimum-subnormal contribution upward.
+                subnormal_stiffness = page.evaluate("""() => {
+                    const model = {
+                        nodes: [
+                            {id:'A',x:0,y:0,fixX:true,fixY:true,fx:0,fy:0},
+                            {id:'B',x:2e-12,y:2e-12,fixX:false,fixY:true,fx:Number.MIN_VALUE,fy:0}
+                        ],
+                        members: Array.from({length:20},(_,i) => ({
+                            id:'S'+i,a:'A',b:'B',E:1e-323,area:1e-15
+                        }))
+                    };
+                    const parsed = ProMathTrussFEM.parseModel(model);
+                    const member = parsed.members[0];
+                    const result = ProMathTrussFEM.solve(model);
+                    const force = Number.MIN_VALUE*1000;
+                    return {
+                        memberStiffness: member.stiffness,
+                        sequentialTerm: member.stiffness*member.c*member.c,
+                        singleProduct: member.stiffness*(member.c*member.c),
+                        expectedCoefficient: Number.MIN_VALUE*10,
+                        naiveCoefficient: Number.MIN_VALUE*20,
+                        displacement: result.displacements.find(node=>node.id==='B').x,
+                        expectedDisplacement: force/(Number.MIN_VALUE*10),
+                        naiveDisplacement: force/(Number.MIN_VALUE*20),
+                        residual: result.residual,
+                        energyError: result.energyError,
+                        forceBalanceX: result.forceBalance.x,
+                        memberCount: result.members.length
+                    };
+                }""")
+                assert subnormal_stiffness["memberStiffness"] == math.ulp(0.0), subnormal_stiffness
+                assert subnormal_stiffness["sequentialTerm"] == math.ulp(0.0), subnormal_stiffness
+                assert subnormal_stiffness["singleProduct"] == 0, subnormal_stiffness
+                assert subnormal_stiffness["expectedCoefficient"] == math.ulp(0.0)*10, subnormal_stiffness
+                assert subnormal_stiffness["naiveCoefficient"] == math.ulp(0.0)*20, subnormal_stiffness
+                assert subnormal_stiffness["expectedDisplacement"] == 100, subnormal_stiffness
+                assert subnormal_stiffness["naiveDisplacement"] == 50, subnormal_stiffness
+                assert subnormal_stiffness["displacement"] == 100, (width, subnormal_stiffness)
+                assert subnormal_stiffness["residual"] == 0, (width, subnormal_stiffness)
+                assert subnormal_stiffness["energyError"] < 1e-6, (width, subnormal_stiffness)
+                assert subnormal_stiffness["forceBalanceX"] == 0, (width, subnormal_stiffness)
+                assert subnormal_stiffness["memberCount"] == 20, (width, subnormal_stiffness)
+
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
             assert not errors, errors

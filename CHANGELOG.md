@@ -1,3 +1,9 @@
+## 2026-11-27 — Scale Truss stiffness before subnormal direction-cosine products
+
+- Global stiffness assembly now scales member stiffnesses per matrix coefficient before multiplying by row/column direction cosines, then restores the scale after compensated summation. This avoids double-rounding minimum-subnormal member contributions before they can combine.
+- Added Node and Chromium regressions for twenty diagonal members at the minimum positive binary64 stiffness. The exact aggregate rounds to ten minimum subnormals and produces 100 m displacement; the previous sequential product path doubled the coefficient and returned 50 m.
+- Browser checks also require zero force-balance residual, energy verification and all twenty member results at 1280px/390px. FEM remains binary64 and no root bundle update is needed because Truss FEM is an adjacent script. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-26 — Repair Matrix standalone trailing-newline parity
 
 - Exact-head structural CI exposed 24 existing parity failures because the modified inline Matrix module lacked its required final newline. Restored exact `source + "\\n"` bundle parity and strengthened the new regression to assert that contract directly.

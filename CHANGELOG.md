@@ -1,3 +1,10 @@
+## 2026-11-27 — Match saved Python custom-function signatures and fix project browser origin
+
+- Python custom functions now require declared ordered positional argument names to exactly match saved `params` in the editor, project-schema preflight and public restore API. Matching multi-argument definitions remain valid; mismatched names/order/count and defaulted arguments are rejected before state mutation.
+- Added Node and Chromium regressions for valid multi-argument definitions, malformed signatures, direct-restore atomicity and project-import rejection. Python source remains inert during import.
+- Exact-head Push/PR CI on 0f0665 failed at project browser step 50 because `page.set_content()` created an opaque origin and direct `localStorage` access raised SecurityError. The browser test now serves the standalone app from a temporary loopback HTTP origin; localStorage assertions remain enabled.
+- Updated project-format documentation, living plan and execution ledger. Fresh exact-head Quality is pending; this change is implemented on dev and not released.
+
 ## 2026-11-27 — Make custom-function restore atomic and repair project-import regression
 
 - Exact-head Push/PR Quality on ba8432 failed at the project migration browser smoke's final invalid-table case. The test compared against a stale custom-function snapshot from before later valid Graph imports; the importer had preserved the then-current state. The rejection helper now snapshots and compares every exported workspace field immediately before each rejected import.

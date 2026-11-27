@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 17:57 CET  
+**Last updated:** 27 November 2026, 18:58 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,14 +15,14 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting `dev` is `ba8432fac4d100a20173d6fa68b384cd23593720`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. This atomic change advances only the existing `dev` ref; main remains unchanged.
-- Starting compare is **110 ahead / 0 behind**. The resulting dev head is the commit containing this checkpoint, with the SHA recorded by the Git ref and exact-head Actions. No branch was created.
-- Exactly two branches exist: `dev` and `main`; both report `protected:false`. Rulesets are empty. Branch-protection reads return HTTP 403 (Resource not accessible by integration), so enforceable protection is not verified.
-- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) remains the sole `dev`→`main` release PR, open and mergeable, 110 commits ahead / 0 behind before this update, with zero submitted reviews.
-- Exact-head Push Quality [#46034852119](https://github.com/saeedsai/ProMathStudio/actions/runs/46034852119) and PR Quality [#46034861653](https://github.com/saeedsai/ProMathStudio/actions/runs/46034861653) both failed at registered browser step 50, `Project migration and rollback browser regression`. The log points to the test's stale `migrated['customFunctions']` snapshot after later valid Graph imports had intentionally replaced that state; it did not demonstrate a production import mutation.
-- This run fixes the test to compare every exported state field against a snapshot taken immediately before each rejected import. It also hardens the exposed custom-function restore API: the whole list is validated (reserved names, case-insensitive duplicates, argument grammar/count, type/body/source bounds and matching Python declaration) before any live or localStorage mutation. Direct invalid restores now reject atomically.
-- Latest verified main evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. No newer production deployment or hosted behavior is claimed.
-- Local checkout is absent and a bounded Git attempt failed with `Could not resolve host: github.com`. Per the repository fallback, this run uses GitHub blobs/tree/commit and a guarded non-force fast-forward update of the existing `dev` ref.
+- Starting `dev` is `0f0665b6d300fac4618e2bb71196b29dd3aa4eab`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Compare is **111 ahead / 0 behind**. Exactly two branches exist: `dev` and `main`.
+- Both branches report `protected:false`; repository rulesets are empty. Branch-protection reads return HTTP 403 (Resource not accessible by integration), so enforceable protection is not verified.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, with **zero submitted independent reviews**.
+- Exact-head Push Quality [#46038574233](https://github.com/saeedsai/ProMathStudio/actions/runs/46038574233) and PR Quality [#46038582330](https://github.com/saeedsai/ProMathStudio/actions/runs/46038582330) both failed at registered browser step 50, `Project migration and rollback browser regression`. The failing Playwright evaluation reads `localStorage` from a `page.set_content()` document with an opaque `about:blank` origin and raises `SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.` Earlier browser assertions and structural checks passed; this is a test-host origin defect, not evidence of a production import failure.
+- This run serves the existing standalone `index.html` through an ephemeral loopback HTTP server in the browser regression, retaining localStorage persistence assertions on a real same-origin page. It also aligns Python custom-function metadata with the actual declared positional signature: editor save, project preflight and direct restore require the exact ordered parameter list. A definition such as `def f(y)` cannot be stored with `params: ["x"]`; matching multi-argument definitions remain supported.
+- Added Node schema, Chromium editor/import/direct-restore cases, updated the project-format contract, and preserved exact `src/project-schema.js` ↔ embedded `index.html` parity. Isolated V8 checks run before the atomic dev commit; full Python/Chromium/build certification must come from fresh exact-head Actions.
+- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and GitHub Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not released.
+- The local checkout is absent and a bounded Git attempt fails with `Could not resolve host: github.com`; this run uses the connected GitHub integration and a guarded non-force fast-forward update of the existing `dev` ref.
 
 ## Operating contract
 
@@ -38,8 +38,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** The current ba8432 exact-head Push and PR workflows failed at project migration step 50. Logs show a stale test snapshot, not a demonstrated production mutation. This run corrects the test and adds atomic direct-restore validation; fresh exact-head Quality is pending. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
-**Acceptance tests:**
+**Status:** Starting exact-head Push #46038574233 and PR #46038582330 failed at project browser step 50 because the test accessed localStorage from an opaque `about:blank` origin. This run changes the browser fixture to a real loopback HTTP origin and adds exact Python positional-signature validation across editor save, project preflight and direct restore. Fresh exact-head Quality is pending. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
 - Verify main rules require relevant Quality checks, disallow direct pushes and forbid force/deletion; documentation alone is not enforcement.
@@ -50,7 +49,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 **Status:** Partial. Equation/Solver, Matrix, Graph datasets/overlays, Curve fit, Data Tables and Engineering selectors have focused validation. Custom-function project preflight rejects reserved built-ins, blank formulas and mismatched Python declarations. This iteration also makes the exposed restore API validate the complete list before replacing live functions or localStorage. Full restore-stage failure matrix and 390px mobile round-trip remain open.  
 **Acceptance tests:**
 - v1→v2 migration and v2 round-trips preserve notebook, calculator, Equation/Solver controls, assumptions, Matrix drafts, Graph primary/overlay datasets, Curve fit, Data Tables workbook/selection, Engineering filters and custom functions.
-- Custom names `sin`, `cos`, `tan`, `sqrt`, `min`, `max`, `log`, `exp`, `abs`, `sum`, `if` and `pow` reject in any casing; formula expressions must be nonblank; Python source must declare the matching function name. Valid legacy formula entries and valid Python source remain compatible.
+- Custom names `sin`, `cos`, `tan`, `sqrt`, `min`, `max`, `log`, `exp`, `abs`, `sum`, `if` and `pow` reject in any casing; formula expressions must be nonblank; Python source must declare the matching function name and exact ordered positional parameter list. Valid legacy formula entries and valid Python source remain compatible.
 - Invalid custom functions reject before confirmation and preserve all current workspace state; Python source is not executed during import. Direct restore calls reject malformed/reserved/duplicate lists atomically and preserve both active functions and localStorage.
 - Inject failure after each restore stage and verify rollback; desktop and 390px mobile imports have no console errors and exact source/bundle parity.
 
@@ -90,3 +89,13 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - Source and embedded standalone project-schema module are synchronized. The bounded local Git attempt failed due DNS; GitHub integration fallback is used.
 - Main and Pages remain at the last verified successful evidence dated 24-Nov; the new change is not released.
 - Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## Latest checkpoint — 27 November 2026, 18:58 CET
+
+- Starting dev `0f0665b6d300fac4618e2bb71196b29dd3aa4eab`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`, compare 111 ahead / 0 behind; exactly dev/main refs.
+- Exact-head Push #46038574233 and PR #46038582330 both failed only at project browser step 50. The trace is a localStorage SecurityError caused by the opaque origin created by `page.set_content()`; the test now uses an ephemeral loopback HTTP origin.
+- Python custom functions now require their declared ordered positional parameters to equal saved `params` in the editor, project schema and public restore API. Node and Chromium positive/negative cases cover matching multi-argument functions, wrong names/order/count and defaulted arguments.
+- Source/schema, standalone bundle, tests, project-format documentation, plan, full ledger and changelog are committed together on dev. Exact-head Push/PR Quality must complete before certification; no merge or deployment.
+- PR #191 remains open; independent reviews 0, both branches unprotected, rulesets empty, branch-protection read 403. Main Quality and Pages last succeeded on 24-Nov-2026.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.

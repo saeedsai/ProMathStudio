@@ -1,3 +1,17 @@
+## 2026-11-27 18:58 CET — FIX PROJECT SMOKE ORIGIN AND MATCH PYTHON FUNCTION SIGNATURES
+
+- Starting refs: `dev` 0f0665b6d300fac4618e2bb71196b29dd3aa4eab; `main` 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare main...dev = 111 ahead / 0 behind. Exactly two branches exist.
+- Exact-head Push Quality [#46038574233](https://github.com/saeedsai/ProMathStudio/actions/runs/46038574233) and PR Quality [#46038582330](https://github.com/saeedsai/ProMathStudio/actions/runs/46038582330) both failed at step 50. The exact Playwright traceback is `SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.` because the test used `page.set_content()` with an opaque `about:blank` origin while directly asserting localStorage. Earlier browser assertions and structural checks passed; this did not demonstrate a production import-state mutation.
+- Test-host repair: `tests/smoke_project_schema.py` now serves the existing standalone app from a temporary loopback HTTP server and navigates to `http://127.0.0.1:<ephemeral-port>/index.html`. This preserves the direct localStorage-before/after assertions on a real same-origin page rather than removing or weakening them.
+- Production correction: Python custom functions now require declared positional parameter names and order to exactly match saved `params`. Applied to editor `normalizeCustom`, public `MathStudio.customFunctions.restore()`, and `src/project-schema.js` import preflight; embedded project-schema in `index.html` remains exact parity. Matching multi-argument functions remain supported; mismatched, reordered, wrong-count and defaulted signatures reject before function/project state mutation. Python source remains inert during import.
+- Regression additions: Node schema fixtures include valid one-/two-argument functions and mismatched/defaulted signatures. Chromium smoke verifies editor rejection/acceptance, direct-restore atomicity, project-import preflight and localStorage state preservation using the HTTP origin.
+- Isolated V8 validation: actual modified project-schema migration accepts matching signatures and rejects mismatched argument names/count/defaults; extracted production signature helper, editor normalizer and direct-restore API pass positive/negative checks; embedded schema parity and inline-script syntax pass. Full Python/Playwright/build checks are delegated to fresh exact-head GitHub Actions because the local checkout is absent.
+- Release remains blocked: PR #191 open/mergeable, zero independent reviews, both branches report `protected:false`, rulesets empty and branch-protection read HTTP 403. No merge or direct main update.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production runs on 24-Nov-2026; new work is not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
 ## 2026-11-27 12:22 CET — PREVALIDATE ENGINEERING DISCIPLINE IDS
 
 - Starting refs: `dev` 27971dc78f5bdaf293e643404d8942c11ddb8a68; `main` 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare main...dev = 102 ahead / 0 behind. Only `dev` and `main` branches exist; both report `protected: false`.

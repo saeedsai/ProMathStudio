@@ -31,6 +31,7 @@ class CustomFunctionSchemaTests(unittest.TestCase):
     def test_valid_and_legacy(self):
         valid = [{"name": "f", "params": ["x", "y"], "expression": "x*y", "source": "x*y", "type": "formula"},
                  {"name": "g_2", "params": ["t"], "expression": "", "source": "def g_2(t):\n  return t", "type": "python"},
+                 {"name": "g_3", "params": ["t", "u"], "expression": "", "source": "def g_3(t, u):\n  return t+u", "type": "python"},
                  {"name": "h", "params": ["a"], "expression": "a+1"}]
         sixty = [{"name": "f%d" % i, "params": ["x"], "expression": "x"} for i in range(60)]
         cases = [project(v, fn) for v in (1, 2) for fn in ("omit", [], valid, sixty)]
@@ -61,6 +62,9 @@ class CustomFunctionSchemaTests(unittest.TestCase):
             [{"name": "f", "params": ["x"], "expression": "", "type": "python", "source": ""}],
             [{"name": "f", "params": ["x"], "expression": "", "type": "python", "source": "print('not a function')"}],
             [{"name": "f", "params": ["x"], "expression": "", "type": "python", "source": "def other(x):\n  return x"}],
+            [{"name": "f", "params": ["x"], "expression": "", "type": "python", "source": "def f(y):\n  return y"}],
+            [{"name": "f", "params": ["x", "y"], "expression": "", "type": "python", "source": "def f(x):\n  return x"}],
+            [{"name": "f", "params": ["x"], "expression": "", "type": "python", "source": "def f(x=1):\n  return x"}],
             [{"name": "f", "params": ["x"], "expression": "x"}, {"name": "F", "params": ["x"], "expression": "x"}],
             [{"name": "f%d" % i, "params": ["x"], "expression": "x"} for i in range(61)],
             ["f"],

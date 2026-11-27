@@ -1401,9 +1401,21 @@ def _ms_system(job_text):
   customPanel.style.padding='14px';customPanel.innerHTML='<summary style="cursor:pointer;font-weight:700">Custom functions · Formula / Python</summary><p class="small-note">Use named functions in Calculator, Graph and numeric Data Tables formulas. Python mode runs real multi-line Python in a separate Pyodide worker from Calculator, including nested calls in numeric expressions. Initial use downloads Python; only execute code you trust. Formula functions also work in Graph and Data Tables.</p><div class="data-toolbar"><label>Name<input id="cf-name" placeholder="myfunc"></label><label>Arguments<input id="cf-params" value="x" placeholder="x,y"></label><label>Type<select id="cf-type"><option value="formula">Formula</option><option value="python">Python code (Pyodide)</option></select></label></div><textarea id="cf-body" rows="3" style="width:100%" placeholder="sin(x)+x^2"></textarea><div class="data-toolbar"><button type="button" id="cf-save">Save function</button><button type="button" id="cf-delete">Delete named function</button></div><p id="cf-message" role="status"></p><div id="cf-list"></div>';
   document.getElementById('connected-hub').after(customPanel);
   function refreshCustomList(){const el=document.getElementById('cf-list');el.replaceChildren();for(const item of customFunctions){const button=document.createElement('button');button.type='button';button.className='secondary small';button.textContent=item.name+'('+item.params.join(',')+')';button.addEventListener('click',()=>{document.getElementById('cf-name').value=item.name;document.getElementById('cf-params').value=item.params.join(',');document.getElementById('cf-type').value=item.type||'formula';document.getElementById('cf-body').value=item.source||item.expression;});el.append(button);}}
+  function pythonSignatureMatches(source,name,params){
+    if(typeof source!=='string')return false;
+    const match=new RegExp('^def\\s+'+name+'\\s*\\(([^)]*)\\)','m').exec(source.trim());
+    if(!match)return false;
+    const declared=match[1].trim()?match[1].split(',').map(param=>param.trim()):[];
+    return declared.length===params.length&&declared.every((param,index)=>param===params[index]);
+  }
   function normalizeCustom(type,body,name,params){
     if(type==='formula')return body.trim();
-    if(type==='python'){if(body.length>12000)throw Error('Python code exceeds 12,000 characters.');if(!new RegExp('^def\\s+'+name+'\\s*\\(', 'm').test(body.trim()))throw Error('Define def '+name+'('+params.join(', ')+') in your Python code.');return '';}
+    if(type==='python'){
+      if(body.length>12000)throw Error('Python code exceeds 12,000 characters.');
+      if(!pythonSignatureMatches(body,name,params))
+        throw Error('Define def '+name+'('+params.join(', ')+') with matching parameters in your Python code.');
+      return '';
+    }
     const raw=body.trim(),match=/^def\s+([A-Za-z][\w]*)\s*\(([^)]*)\)\s*:\s*(?:\n\s*)?return\s+([^\n]+)\s*$/m.exec(raw);
     let expression=raw;
     if(match){if(match[1]!==name||match[2].replace(/\s+/g,'')!==params.join(','))throw Error('Python def signature must match the function name and arguments.');expression=match[3];}
@@ -1795,8 +1807,8 @@ def _ms_system(job_text):
         if(item.type!==undefined&&!['formula','python'].includes(item.type))
           throw Error('Invalid custom function type.');
         if(item.type==='python'){
-          if(typeof item.source!=='string'||!new RegExp('^def\\s+'+item.name+'\\s*\\(','m').test(item.source.trim()))
-            throw Error('Invalid custom function Python source.');
+          if(!pythonSignatureMatches(item.source,item.name,item.params))
+            throw Error('Invalid custom function Python signature.');
         }else if(!item.expression.trim())throw Error('Custom function expression is empty.');
         return {...item,params:[...item.params]};
       });
@@ -3393,9 +3405,14 @@ self.onmessage=async ({data})=>{
         const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow']);
         if (reserved.has(key)) fail('custom function name is reserved.');
         if (item.type === 'python') {
-          if (typeof item.source !== 'string' ||
-              !new RegExp('^def\\s+' + item.name + '\\s*\\(', 'm').test(item.source.trim()))
-            fail('custom function Python source is invalid.');
+          const signature = typeof item.source === 'string'
+            ? new RegExp('^def\\s+' + item.name + '\\s*\\(([^)]*)\\)', 'm').exec(item.source.trim())
+            : null;
+          const declared = signature && signature[1].trim()
+            ? signature[1].split(',').map(param => param.trim()) : [];
+          if (!signature || declared.length !== item.params.length ||
+              declared.some((param, index) => param !== item.params[index]))
+            fail('custom function Python signature does not match saved arguments.');
         } else if (!item.expression.trim()) {
           fail('custom function expression is empty.');
         }

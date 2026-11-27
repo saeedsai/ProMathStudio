@@ -271,9 +271,14 @@
         const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow']);
         if (reserved.has(key)) fail('custom function name is reserved.');
         if (item.type === 'python') {
-          if (typeof item.source !== 'string' ||
-              !new RegExp('^def\\s+' + item.name + '\\s*\\(', 'm').test(item.source.trim()))
-            fail('custom function Python source is invalid.');
+          const signature = typeof item.source === 'string'
+            ? new RegExp('^def\\s+' + item.name + '\\s*\\(([^)]*)\\)', 'm').exec(item.source.trim())
+            : null;
+          const declared = signature && signature[1].trim()
+            ? signature[1].split(',').map(param => param.trim()) : [];
+          if (!signature || declared.length !== item.params.length ||
+              declared.some((param, index) => param !== item.params[index]))
+            fail('custom function Python signature does not match saved arguments.');
         } else if (!item.expression.trim()) {
           fail('custom function expression is empty.');
         }

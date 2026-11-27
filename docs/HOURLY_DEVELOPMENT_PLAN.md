@@ -1,12 +1,12 @@
-## 2026-11-27 09:55 CET — Repair exact-head solver-test syntax failure
+## 2026-11-27 09:55 CET — Align solver structural assertion with the source call signature
 
-**Observed exact-head failure:** Push Quality [#45971374793](https://github.com/saeedsai/ProMathStudio/actions/runs/45971374793) and PR Quality [#45971384583](https://github.com/saeedsai/ProMathStudio/actions/runs/45971384583) both ran on `95b15c2ceb4923d6783dfe5b48d05c478520db83` and failed at step 7, Structural tests and embedded Python compile check. The suite reported 614 tests with one import error and one optional skip; the import error was a Python `SyntaxError: unmatched ')'` in the new `tests/test_project_solver_state.py` contract tuple, line 23. The remaining discovered tests reported no failures. Browser steps were correctly skipped after the structural gate failed.
+**Observed exact-head failure:** Push Quality [#45971688897](https://github.com/saeedsai/ProMathStudio/actions/runs/45971688897) and PR Quality [#45971696009](https://github.com/saeedsai/ProMathStudio/actions/runs/45971696009) both failed at step 7 on `33d8cc29b9048c3cc5f12e684a64f040b80c72ed`. The Python suite ran 615 tests with one failure and one optional skip. The new Node enum/boundary test passed and the source/standalone parity assertion passed. The sole failure was a structural guard looking for the incomplete substring `short(solver.limitPoint, 80)`; production correctly calls `short(solver.limitPoint, 80, 'solver limit point')`.
 
-**Correction:** Removed the single extra closing parenthesis in the test tuple. Kept all production validation, enum/boundary assertions, browser rollback assertions and CI gates unchanged. This is a test syntax correction, not a relaxation of coverage.
+**Correction:** Updated the structural assertion to match the actual call prefix including the label argument: `short(solver.limitPoint, 80,`. This preserves a strict assertion on the 80-character bound and does not change production code or remove any test coverage.
 
-**Next validation:** Re-run Python structural discovery and the exact-head Push/PR Quality workflows. If step 7 passes, verify the new solver browser round-trip/rejection regression and the remaining full 218-step suite. The candidate remains on dev only; no release merge.
+**Next validation:** Fresh exact-head Push and PR Quality must pass structural discovery, then the Chromium saved-project round-trip/rejection/rollback regression and all remaining Quality steps.
 
-**NEXT FIVE priorities remain:** (1) P0 safe PR #191 release after full exact-head green checks, independent approval and verifiable main protection; (2) P1 saved-project compatibility across solver, Matrix, Graph, Curve fit and Data Tables with v1/v2 rollback and 390px tests; (3) P1 Data Tables numerical/reference/XLSX integrity; (4) P1 seven-shape Truss independent numerical boundaries; (5) P1 RK45 overflow, near-ULP time-grid and stale-export hardening.
+**NEXT FIVE priorities:** (1) P0 ordinary PR #191 release only after exact-head checks, independent approval and verifiable main protection; (2) P1 finish saved-project compatibility across solver, Matrix, Graph, Curve fit and Data Tables, with legacy round-trips, transactional rollback and 390px tests; (3) P1 Data Tables numerical/reference/XLSX integrity; (4) P1 seven-shape Truss independent numerical boundaries; (5) P1 RK45 overflow, near-ULP time-grid and stale-export hardening.
 
 ---
 ## 2026-11-27 09:55 CET — Validate saved symbolic-solver controls before restore

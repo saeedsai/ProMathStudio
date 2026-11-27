@@ -1,7 +1,7 @@
-## 2026-11-27 — Repair saved-solver regression test syntax
+## 2026-11-27 — Align saved-solver structural guard
 
-- Corrected a single unmatched closing parenthesis in the new solver-state structural test after both exact-head Quality workflows failed at step 7 during Python test discovery.
-- Kept the new source validation and all regression assertions intact; rerun exact-head Push/PR Quality before certification.
+- Corrected the new project-solver structural test to match the production call's third diagnostic-label argument while still requiring the 80-character limit.
+- No production code or regression coverage was changed; fresh exact-head Quality reruns are required.
 
 ## 2026-11-27 — Validate saved symbolic-solver controls before restore
 

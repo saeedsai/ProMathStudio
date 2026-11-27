@@ -1,10 +1,10 @@
-## 2026-11-27 09:55 CET — EXACT-HEAD CI FAILURE AND TEST SYNTAX REPAIR
+## 2026-11-27 09:55 CET — EXACT-HEAD SOLVER STRUCTURAL ASSERTION CORRECTION
 
-- Candidate `95b15c2ceb4923d6783dfe5b48d05c478520db83` failed both Push Quality #45971374793 and PR Quality #45971384583 at step 7.
-- Exact log: 614 discovered tests; one import error, one optional skip. The import error was `SyntaxError: unmatched ')'` at line 23 of the new `tests/test_project_solver_state.py` contract tuple. No other test failure was reported; browser steps were skipped after structural gate failure.
-- Corrected only the extra closing parenthesis. No production code, numerical assertions, regression assertions or CI gates were weakened.
-- Next exact-head Push/PR Quality must verify Python discovery, source/bundle parity, all 144 valid solver selector combinations, invalid enum/type/bound rejection, and the Chromium valid round-trip plus transactional state preservation.
-- PR #191 remains open; no merge or direct main update. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+- Candidate `33d8cc29b9048c3cc5f12e684a64f040b80c72ed` failed both Push Quality #45971688897 and PR Quality #45971696009 at step 7.
+- Exact log: 615 tests, one failure and one optional skip. The new Node enum/boundary test and source/standalone parity assertion passed. The sole failure was a too-short expected substring: the test searched for `short(solver.limitPoint, 80)`, while production correctly passes the diagnostic label as a third argument.
+- Corrected the structural assertion to require `short(solver.limitPoint, 80,`, preserving the 80-character bound check. No production code, test cases or CI gates were weakened.
+- Fresh exact-head Push/PR Quality and browser project import rollback checks remain pending.
+- PR #191 remains open; no merge/direct main update. Historical inventory remains **166 gaps / 95 partial**, unchanged.
 
 ## 2026-11-27 09:55 CET — VALIDATE SAVED SYMBOLIC-SOLVER CONTROLS
 

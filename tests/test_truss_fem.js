@@ -1723,12 +1723,12 @@ test('legacy SI conversion rejects nonzero forces and modulus that underflow in 
   for(const value of [Number.MIN_VALUE,-Number.MIN_VALUE]){
    const legacy=clone(template);
    legacy.nodes[2][field]=value;
-   assert.throws(()=>fem.fromLegacy(legacy),/Legacy (Fx|Fy) \\(N\\) underflows the supported SI range\\./);
+   assert.throws(()=>fem.fromLegacy(legacy),/Legacy (Fx|Fy) \(N\) underflows the supported SI range\./);
   }
  }
  const tinyModulus=clone(template);
  tinyModulus.members[0].E=Number.MIN_VALUE;
- assert.throws(()=>fem.fromLegacy(tinyModulus),/Legacy E \\(Pa\\) underflows the supported SI range\\./);
+ assert.throws(()=>fem.fromLegacy(tinyModulus),/Legacy E \(Pa\) underflows the supported SI range\./);
  const zero=clone(template);
  zero.nodes[2].fx=0;zero.nodes[2].fy=0;
  const normalizedZero=fem.fromLegacy(zero);

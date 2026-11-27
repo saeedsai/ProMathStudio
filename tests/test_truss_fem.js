@@ -1717,6 +1717,29 @@ test('legacy TrussStudio.solve retains its original member result shape',()=>{
 });
 
 
+test('legacy SI conversion rejects nonzero forces and modulus that underflow in current units',()=>{
+ const template=globalThis.TrussStudio.example;
+ for(const field of ['fx','fy']){
+  for(const value of [Number.MIN_VALUE,-Number.MIN_VALUE]){
+   const legacy=clone(template);
+   legacy.nodes[2][field]=value;
+   assert.throws(()=>fem.fromLegacy(legacy),/Legacy (Fx|Fy) \\(N\\) underflows the supported SI range\\./);
+  }
+ }
+ const tinyModulus=clone(template);
+ tinyModulus.members[0].E=Number.MIN_VALUE;
+ assert.throws(()=>fem.fromLegacy(tinyModulus),/Legacy E \\(Pa\\) underflows the supported SI range\\./);
+ const zero=clone(template);
+ zero.nodes[2].fx=0;zero.nodes[2].fy=0;
+ const normalizedZero=fem.fromLegacy(zero);
+ assert.equal(normalizedZero.nodes[2].fx,0);
+ assert.equal(normalizedZero.nodes[2].fy,0);
+ const normalized=fem.fromLegacy(template);
+ assert.equal(normalized.nodes[2].fy,-10);
+ assert.equal(normalized.members[0].E,200);
+});
+
+
 test('legacy SI JSON import preserves optional density, second moment and effective-length factor',()=>{
  const legacy=globalThis.TrussStudio.example;
  for(const member of legacy.members){member.density=7850;member.I=1e-6;member.K=1;}

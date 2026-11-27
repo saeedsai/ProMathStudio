@@ -2103,6 +2103,45 @@ def main():
                 assert subnormal_stiffness["forceBalanceX"] == 0, (width, subnormal_stiffness)
                 assert subnormal_stiffness["memberCount"] == 20, (width, subnormal_stiffness)
 
+            # Legacy SI values that become zero in kN/GPa must be rejected, not silently erased.
+            legacy_unit_conversion = page.evaluate("""() => {
+                const copy = () => JSON.parse(JSON.stringify(TrussStudio.example));
+                const forceCases = [];
+                for (const field of ['fx', 'fy']) {
+                    for (const value of [Number.MIN_VALUE, -Number.MIN_VALUE]) {
+                        const model = copy();
+                        model.nodes[2][field] = value;
+                        let message = null;
+                        try { ProMathTrussFEM.fromLegacy(model); } catch (error) { message = error.message; }
+                        forceCases.push({field, value, message});
+                    }
+                }
+                const tinyModulus = copy();
+                tinyModulus.members[0].E = Number.MIN_VALUE;
+                let modulusMessage = null;
+                try { ProMathTrussFEM.fromLegacy(tinyModulus); } catch (error) { modulusMessage = error.message; }
+                const zero = copy();
+                zero.nodes[2].fx = 0;
+                zero.nodes[2].fy = 0;
+                const normalizedZero = ProMathTrussFEM.fromLegacy(zero);
+                const normalized = ProMathTrussFEM.fromLegacy(copy());
+                return {
+                    forceCases,
+                    modulusMessage,
+                    zeroFx: normalizedZero.nodes[2].fx,
+                    zeroFy: normalizedZero.nodes[2].fy,
+                    normalFy: normalized.nodes[2].fy,
+                    normalE: normalized.members[0].E
+                };
+            }""")
+            assert len(legacy_unit_conversion["forceCases"]) == 4, legacy_unit_conversion
+            for case in legacy_unit_conversion["forceCases"]:
+                label = "Fx" if case["field"] == "fx" else "Fy"
+                assert case["message"] == f"Legacy {label} (N) underflows the supported SI range.", case
+            assert legacy_unit_conversion["modulusMessage"] == "Legacy E (Pa) underflows the supported SI range.", legacy_unit_conversion
+            assert legacy_unit_conversion["zeroFx"] == 0 and legacy_unit_conversion["zeroFy"] == 0, legacy_unit_conversion
+            assert legacy_unit_conversion["normalFy"] == -10 and legacy_unit_conversion["normalE"] == 200, legacy_unit_conversion
+
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
             assert not errors, errors

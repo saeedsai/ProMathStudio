@@ -1,3 +1,8 @@
+## Legacy SI-to-current unit conversion underflow
+
+Legacy Truss models express nodal forces in N and Young's modulus in Pa, while the current model uses kN and GPa. Conversion must not silently erase a nonzero binary64 source value when division by 1000 or 1e9 rounds it to zero. `fromLegacy()` now rejects those unrepresentable force/modulus inputs with a field-specific underflow error. Exact zero remains valid, and ordinary legacy values retain the original division operation and results. The same conversion guard reports underflow for other positive scaled properties rather than relying on a later generic positivity check.
+
+Node and Chromium regressions cover positive and negative `Number.MIN_VALUE` forces on both axes, a minimum-subnormal legacy modulus, exact zero, and ordinary `-10000 N → -10 kN` / `200 GPa → 200 GPa` normalization. This is a conversion-integrity guard, not arbitrary precision; the current model still uses binary64 kN/GPa values.
 ## Subnormal global stiffness products
 
 Each global stiffness coefficient is assembled by first dividing member stiffnesses by the largest stiffness contributing to that coefficient, then multiplying the normalized values by their row/column direction cosines, summing with the existing compensated signed reducer, and restoring the stiffness scale once. This avoids double-rounding or losing individual subnormal products before their combined contribution is assembled. The resulting matrix and solver remain IEEE-754 binary64; this is not arbitrary-precision FEM.

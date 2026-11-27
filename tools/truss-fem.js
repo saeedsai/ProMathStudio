@@ -51,8 +51,19 @@
     return n;
   };
   const finiteScaled = (v, name, scale) => {
-    const result = finite(v, name) * scale;
+    const input = finite(v, name);
+    const result = input * scale;
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
+    if (input !== 0 && result === 0) throw Error(name + ' underflows the supported SI range.');
+    return result;
+  };
+  // Preserve the original division rounding while rejecting nonzero SI values that
+  // disappear when converted to the application's coarser engineering units.
+  const finiteDivided = (v, name, divisor) => {
+    const input = finite(v, name);
+    const result = input / divisor;
+    if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
+    if (input !== 0 && result === 0) throw Error(name + ' underflows the supported SI range.');
     return result;
   };
   // Correctly round the exact sum of finite binary64 inputs without an overflowing partial sum.
@@ -1130,10 +1141,11 @@
     if (legacyCount !== model.members.length || model.members.some(m => m.area !== undefined)) {
       throw Error('Mixed legacy SI and current truss member units are not supported.');
     }
-    return {nodes: model.nodes.map(n => ({...n, fx: finite(n.fx ?? 0, 'Legacy Fx (N)') / 1000,
-      fy: finite(n.fy ?? 0, 'Legacy Fy (N)') / 1000})),
+    return {nodes: model.nodes.map(n => ({...n,
+      fx: finiteDivided(n.fx ?? 0, 'Legacy Fx (N)', 1000),
+      fy: finiteDivided(n.fy ?? 0, 'Legacy Fy (N)', 1000)})),
       members: model.members.map(m => ({id: m.id, a: m.a, b: m.b,
-        E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finiteScaled(m.A, 'Legacy area (m²)', 1e6),
+        E: finiteDivided(m.E, 'Legacy E (Pa)', 1e9), area: finiteScaled(m.A, 'Legacy area (m²)', 1e6),
         ...(hasOptionalValue(m.density) ? {density: m.density} : {}),
         ...(hasOptionalValue(m.I) ? {I: finiteScaled(m.I, 'Legacy I (m⁴)', 1e12)} : {}),
         ...(hasOptionalValue(m.K) ? {K: m.K} : {})}))};

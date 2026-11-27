@@ -145,6 +145,20 @@ def main():
         aggregate_values = page.evaluate("MathStudio.dataTables.calculate()")
         page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", aggregate_state)
         assert page.evaluate("MathStudio.dataTables.calculate()") == aggregate_values
+
+        # Each range is within the 6,000-row limit, but a valid formula can
+        # aggregate enough ranges to exceed JavaScript's function argument limit.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({
+          version:1,selected:'sheet-1',tables:[{
+            id:'sheet-1',name:'Data1',columns:['A'],
+            rows:Array.from({length:6000},(_,i)=>[String(i+1)])
+          }]
+        })""")
+        repeated_ranges = ','.join(['A1:A6000'] * 22)
+        assert len(f'MIN({repeated_ranges})') <= 500
+        assert formula(f'MIN({repeated_ranges})') == 1
+        assert formula(f'MAX({repeated_ranges})') == 6000
+
         page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", original_state)
         assert page.evaluate("MathStudio.dataTables.calculate()") == values
         for width in (390, 768, 1280):

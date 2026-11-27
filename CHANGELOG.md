@@ -1,3 +1,9 @@
+## 2026-11-27 — Avoid argument-limit failures in large Data Tables MIN/MAX aggregates
+
+- Replaced `Math.min(...nums)` / `Math.max(...nums)` with an iterative scalar scan. A valid formula containing 22 individually valid 6,000-cell ranges (132,000 values) no longer exceeds JavaScript's function-argument limit.
+- Preserved empty-range behavior and binary64 numeric semantics. Updated the modular Data Tables source and standalone `index.html` module together.
+- Added a registered Chromium regression for 132,000-value MIN/MAX and a structural assertion against argument spreading. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Preserve original-unit compensated Data Tables sums
 
 - Data Tables SUM now uses original-unit Neumaier compensation when all partial sums and corrections remain finite, avoiding a one-ULP shift introduced by unnecessary normalize/rescale arithmetic.

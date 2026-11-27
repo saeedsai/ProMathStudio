@@ -1,3 +1,31 @@
+## 2026-11-27 04:30 CET — DATA-TABLES-LARGE-AGGREGATE-MIN-MAX
+
+**Starting refs:** dev `f2881b9997fbceb939a6932d65c275ca3238192c`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan and frozen 26-Oct inventory, unified master plan, Data Tables contract/source/tests, PR #191, refs/reviews, exact-head Actions and production Quality/Pages. Historical baseline remains **166 gaps / 95 partial**.
+
+**Starting exact-head QA:** Push Quality [#45934318684](https://github.com/saeedsai/ProMathStudio/actions/runs/45934318684) and PR Quality [#45934322552](https://github.com/saeedsai/ProMathStudio/actions/runs/45934322552) were both in progress on exact starting SHA `f2881b9997fbceb939a6932d65c275ca3238192c`; Push had reached the nested aggregate regression (step 83) and PR had reached spreadsheet range deletion (step 80). No failed steps were observed. The preceding exact-head pair [Push #45925713829](https://github.com/saeedsai/ProMathStudio/actions/runs/45925713829) and [PR #45925719729](https://github.com/saeedsai/ProMathStudio/actions/runs/45925719729) had passed 218/218 on `280cec1`, zero failures/skips. No failing exact-head CI was present at selection time.
+
+**Defect:** A valid aggregate formula can contain many individually valid 6,000-cell ranges while remaining under the 500-character expression limit. For example, 22 repetitions of `A1:A6000` produce 132,000 numeric values. `MIN` and `MAX` previously spread the entire values array into `Math.min(...nums)` / `Math.max(...nums)`, exceeding V8's function-argument limit and throwing `RangeError: Maximum call stack size exceeded` instead of returning a numeric result.
+
+**Implementation:** Replaced array argument spreading with a bounded iterative scan using the same scalar `Math.min` / `Math.max` operations. Empty aggregate behavior remains zero; numeric values and binary64 semantics are unchanged. Updated `src/data-tables.js` and its embedded `index.html` module byte-for-byte in the same commit.
+
+**Regression:** The existing Chromium numeric-hardening smoke now restores 6,000 rows and evaluates 22 repeated full-column ranges (132,000 values), requiring `MIN(...)=1` and `MAX(...)=6000` with the formula under 500 characters. The structural unittest forbids the old spread calls and requires the iterative loop. Existing SUM overflow/cancellation, subnormal, median, chart and source/bundle parity tests remain.
+
+**Local validation:** Node reproduced the old spread failure for 132,000 values for both MIN and MAX. The iterative scalar-call implementation returned 1 and 6000; expression length is 202 characters, within the parser limit. Full repository Node/Playwright tests and build checks are not available locally because this execution workspace has no repository checkout; exact-head Actions must certify the committed browser and structural regressions.
+
+**Release blocker:** PR #191 remains open/mergeable, zero independent reviews. Only dev/main branches exist; rulesets are empty and main branch-protection GET returns HTTP 403 to the connected integration. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) both succeeded on 24-Nov-2026. No newer production deployment is claimed.
+
+**Status:** source, standalone bundle, browser/structural regressions, Data Tables contract, living plan, execution ledger and changelog committed atomically on existing dev; new exact-head Push/PR Quality pending; implemented on dev / In QA / not released.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Resolve PR #191 release governance (Blocked).** Obtain eligible independent review and verifiable main protection requiring exact-head Quality and forbidding direct/force pushes and deletion; inspect the full diff, merge only through ordinary dev-to-main PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Certify Data Tables numeric hardening and structural-reference boundaries (In QA / Partial).** Exact-head Push/PR Quality must pass the 132,000-value MIN/MAX regression, exact original-unit SUM/AVERAGE references, overflowing-partial-sum cancellation, subnormal residuals, true-overflow errors, row 6000/column AF insert/delete, mixed anchors, quoted names, reversed/blank ranges, sorting, atomic rollback and standalone source parity.
+3. **P1 — Finish seven-shape Truss numerical boundaries (Partial / In QA).** Retain hollow-circle cavity-transition, near-unity thin-wall and sub-half-ulp cases; complete independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle, including invalid rollback and 390px keyboard behavior.
+4. **P1 — Complete saved-project compatibility across Matrix, Graph and Tables (Partial).** Current/v1 round-trips preserve drafts, graph datasets/overlays, sheets, selection and focus; malformed imports and injected restore failures preserve all prior workspaces at desktop and 390px.
+5. **P1 — Harden adaptive RK45 stage-overflow and near-ULP time-grid behavior (Partial).** Retry only recoverable finite-stage overflow within the attempt budget; verify forward/backward monotone sample times, no duplicate samples, stage-collision diagnostics, underflow, exhaustion, stale exports and responsive browser behavior.
+
+---
+
 ## 2026-11-27 04:03 CET — DATA-TABLES-ORIGINAL-UNIT-COMPENSATED-SUM
 
 **Starting refs:** dev `280cec1f6479d14dd430501e46df6089ad689012`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan and frozen 26-Oct inventory, unified master plan, engineering architecture/catalog, Data Tables contract/source/tests/build mapping, PR #191, refs/reviews, exact-head Actions and production Quality/Pages. The frozen historical baseline remains **166 gaps / 95 partial**.

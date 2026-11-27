@@ -799,10 +799,12 @@
         x=stableSum(nums);
       }else if(upper==='COUNT'){
         x=nums.length;
-      }else if(upper==='MIN'){
-        x=nums.length?Math.min(...nums):0;
-      }else{
-        x=nums.length?Math.max(...nums):0;
+      }else if(upper==='MIN'||upper==='MAX'){
+        // A formula may combine many individually bounded ranges. Avoid spreading
+        // their aggregate values into a call that exceeds the JavaScript argument limit.
+        x=nums.length?nums[0]:0;
+        for(let i=1;i<nums.length;i++)
+          x=upper==='MIN'?Math.min(x,nums[i]):Math.max(x,nums[i]);
       }
       // An overflowing aggregate is an error, never a plausible zero.
       if(!Number.isFinite(x))throw Error('#NUM!');

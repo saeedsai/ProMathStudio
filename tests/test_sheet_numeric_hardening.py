@@ -56,6 +56,16 @@ class SpreadsheetNumericHardeningTests(unittest.TestCase):
         self.assertNotIn("x=nums.reduce((a,b)=>a+b,0);", SOURCE)
         self.assertIn("if(!Number.isFinite(x))throw Error('#NUM!')", SOURCE)
 
+    def test_min_max_iterate_large_aggregates_without_argument_spread(self):
+        self.assertIn("for(let i=1;i<nums.length;i++)", SOURCE)
+        self.assertIn("Math.min(x,nums[i]):Math.max(x,nums[i])", SOURCE)
+        self.assertNotIn("Math.min(...nums)", SOURCE)
+        self.assertNotIn("Math.max(...nums)", SOURCE)
+        smoke = (ROOT / "tests/smoke_sheet_numeric_hardening.py").read_text(encoding="utf-8")
+        self.assertIn("['A1:A6000'] * 22", smoke)
+        self.assertIn("formula(f'MIN({repeated_ranges})') == 1", smoke)
+        self.assertIn("formula(f'MAX({repeated_ranges})') == 6000", smoke)
+
     def test_categorical_charts_use_scaled_totals_and_finite_geometry(self):
         self.assertIn("const total=stableSum(values);", SOURCE)
         self.assertIn("const otherTotal=stableSum(entries.slice(23).map(entry=>entry[1]));", SOURCE)

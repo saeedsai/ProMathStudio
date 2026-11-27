@@ -1721,3 +1721,10 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 ## 2026-11-27 — Saved Engineering filter preflight validation
 
 - Project import now accepts only the empty all-disciplines selector or one of the nine canonical Engineering Toolbox IDs. Previously, an unknown but syntactically valid ID passed schema preflight and failed later in the restore hook. Unknown IDs now reject before confirmation or workspace mutation; omitted/null legacy state and query strings up to 200 characters remain supported. Added exact schema/catalog ID parity, all-nine valid-ID, invalid-ID, query-boundary and Chromium pre-confirmation regressions. Synchronized `src/project-schema.js` with the standalone `index.html` bundle. Implemented on dev; fresh exact-head Quality and release are pending.
+
+
+## 2026-11-27 — Describe RK45 stage-time collisions accurately
+
+- Corrected the RK45 result-panel warning. The collision counter includes repeated fractional-stage timestamps and stages rounded onto either endpoint; the previous message incorrectly said every collision was “rounded to current t”.
+- Added a registered Chromium UI regression that runs the forward 20-ULP case near 1e12 and checks the new wording while rejecting the obsolete wording. Numerical integration, step selection, error estimates and export behavior are unchanged.
+- Synchronized `src/ode-tools.js` with the embedded standalone `index.html` module. Implemented on dev; exact-head Push/PR Quality and release are pending.

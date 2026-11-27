@@ -125,6 +125,22 @@ def main():
         assert times[0] == 1e12 - 0.01 and times[-1] == 1e12, times
         assert all(a < b for a, b in zip(times, times[1:]))
 
+        # The result-panel wording must cover repeated fractional stages and endpoint collisions,
+        # not incorrectly claim that every collision rounded back to the current time.
+        ulp = 1 / 8192
+        collision_start = 1e12 - 20 * ulp
+        page.locator('[data-workspace="editor"]').click()
+        page.locator("#ode-details").evaluate("(el) => el.open = true")
+        page.locator("#ode-method").select_option("rk45")
+        page.locator("#ode-expression").fill("1")
+        page.locator("#ode-start").fill(str(collision_start))
+        page.locator("#ode-end").fill("1000000000000")
+        page.locator("#ode-initial").fill("0")
+        page.locator("#ode-run").click()
+        collision_output = page.locator("#ode-output").inner_text()
+        assert "repeated or endpoint-collapsed RK45 stage times" in collision_output, collision_output
+        assert "rounded to current t" not in collision_output, collision_output
+
         page.locator('[data-workspace="editor"]').click()
         page.locator("#ode-details").evaluate("(el) => el.open = true")
         page.locator("#ode-expression").fill("10000*y")

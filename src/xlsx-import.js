@@ -60,6 +60,9 @@ async function unzip(input){
   if(local+30>offset||u32(view,local)!==0x04034b50)fail('Invalid ZIP local header.');
   const ln=u16(view,local+26),le=u16(view,local+28),start=local+30+ln+le;
   if(u16(view,local+6)!==flags||u16(view,local+8)!==method||start+compressed>offset)fail('ZIP local entry mismatch.');
+  const localCrc=u32(view,local+14),localCompressed=u32(view,local+18),localPlain=u32(view,local+22);
+  if(!(flags&8)&&(localCrc!==crc||localCompressed!==compressed||localPlain!==plain))
+   fail('ZIP local entry metadata mismatch.');
   if(ln!==nl||!bytes.subarray(local+30,local+30+ln).every((b,j)=>b===bytes[p+46+j]))fail('ZIP entry names disagree.');
   ranges.push([local,start+compressed]);
   entries.push({name,method,crc,compressed,plain,start});

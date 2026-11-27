@@ -50,7 +50,7 @@ Use Data Tables → **Import CSV / TSV / JSON**. The importer accepts headed CSV
 
 ### XLSX import and export (bounded offline scope)
 
-**Export XLSX** downloads one or two selected sheets. **Import XLSX** accepts a workbook with one or two sheets, up to 1,000 data rows and 32 columns each. Import replaces the current Data Tables workbook **only after confirmation**. Save your existing project JSON first if you want to retain it. The importer validates ZIP central/local records, CRC-32, expanded sizes (12 MB aggregate, 5 MB per part), duplicate/path-traversal entries, workbook relationships, sheet names, and XML before modifying any table. It accepts stored and DEFLATE-compressed ZIP entries in browsers supporting the native \`DecompressionStream('deflate-raw')\` API; no network service is used. Errors leave the current tables unchanged.
+**Export XLSX** downloads one or two selected sheets. **Import XLSX** accepts a workbook with one or two sheets, up to 1,000 data rows and 32 columns each. Import replaces the current Data Tables workbook **only after confirmation**. Save your existing project JSON first if you want to retain it. The importer validates ZIP central/local records, CRC-32, expanded sizes (12 MB aggregate, 5 MB per part), duplicate/path-traversal entries, workbook relationships, sheet names, and XML before modifying any table. When ZIP data-descriptor flag bit 3 is clear, each local-header CRC-32 and compressed/uncompressed size must also match its central-directory entry; mismatches are rejected. It accepts stored and DEFLATE-compressed ZIP entries in browsers supporting the native \`DecompressionStream('deflate-raw')\` API; no network service is used. Errors leave the current tables unchanged.
 
 The first Excel row contains column headers, so an XLSX formula reference \`A2\` maps to ProMathStudio's data cell \`A1\`; references to the Excel header row are rejected. Numeric/text cells, inline/shared strings, sparse rows, ordinary formulas and quoted sheet references are supported. Import **does not execute** formulas or macros. External workbook links, drawings, pivot tables, complex worksheet relationships, advanced formula types, unsupported XML/ZIP features and workbooks with more than two sheets are rejected rather than silently discarded. Importing a formula does not guarantee that the Data Tables expression evaluator can calculate every Excel function. Excel formatting is not imported.
 
@@ -67,12 +67,11 @@ Repeated-category totals use scale-safe compensated accumulation; finite results
 ## Persistence and privacy
 
 Tabs, raw cell entries, formulas, and source tables are saved to browser localStorage under `mathstudio-tables-v1`, when permitted by the browser. **Save project** includes optional `tables` state in project format version 1; older backups without `tables` continue to open and initialize a default data table. The app runs locally and does not transmit imported data to a server. Be mindful of browser quota and project JSON file-size limits: export smaller datasets if a project backup exceeds the 2 MB importer limit.
-## XLSX export (bounded offline first increment)
+## XLSX export details
 
 Open **Data Tables → Excel XLSX export · offline** and choose one or two sheets. **Download XLSX** creates a standard uncompressed OpenXML ZIP entirely in the browser; no remote service or external dependency is required. The export preserves headers, numeric cells, text (including leading-zero identifiers), blanks and formulas. Data Tables treats the first data row as row 1; XLSX adds a header row, so cell and range references in formulas are shifted by one row while quoted string literals are left unchanged. Excel recalculates formulas on opening the workbook. The exported file is capped at 5 MB, 1,000 data rows and 32 columns per sheet, with Excel-compatible sheet names. Formula syntax supported by Excel can differ from the Data Tables evaluator; verify formulas in Excel before relying on results.
 
-**Not yet implemented:** XLSX import, compressed ZIP/deflate parsing, external workbook compatibility and an end-to-end import/export round-trip. These remain the next P0-XLSX-ROUNDTRIP work item. This increment does not claim full Excel compatibility or transactional import rollback. See `tests/smoke_xlsx_export.py` for ZIP, XML, formula and UI tests.
-
+The bounded offline importer and its accepted ZIP/OpenXML subset are documented in **XLSX import and export (bounded offline scope)** above. Neither import nor export claims full Excel compatibility. See `tests/smoke_xlsx_export.py` and `tests/smoke_xlsx_import.py` for archive, XML, formula, rollback and browser UI regressions.
 
 ### Insertion at the fixed grid edge
 

@@ -1,3 +1,10 @@
+## 2026-11-27 — Validate XLSX local-header metadata before import
+
+- XLSX ZIP entries without the data-descriptor flag now require local-header CRC-32 and compressed/uncompressed sizes to match central-directory metadata; bit-3 data-descriptor archives retain the existing payload CRC/size validation.
+- Added three malformed-archive Chromium regressions and a structural guard. Each mismatch must reject with an XLSX import error and preserve the pre-import workbook.
+- Corrected stale duplicate Data Tables documentation that still described XLSX import and DEFLATE support as unimplemented; clarified the bounded offline import subset.
+- Updated `src/xlsx-import.js` and its standalone `index.html` module byte-for-byte together. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Avoid argument-limit failures in large Data Tables MIN/MAX aggregates
 
 - Replaced `Math.min(...nums)` / `Math.max(...nums)` with an iterative scalar scan. A valid formula containing 22 individually valid 6,000-cell ranges (132,000 values) no longer exceeds JavaScript's function-argument limit.

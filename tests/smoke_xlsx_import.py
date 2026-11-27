@@ -68,7 +68,18 @@ def main():
         central = bomb.find(b'PK\x01\x02')
         assert central > 0
         bomb[central+24:central+28] = (6000000).to_bytes(4, 'little')
-        bad = [corrupted, duplicate, external, header_ref, bytes(bomb), b'not a zip']
+        # Without ZIP data-descriptor flag bit 3, local metadata must match the central directory.
+        local = data.find(bytes((0x50, 0x4b, 0x03, 0x04)))
+        assert local >= 0
+        local_crc = bytearray(data)
+        local_crc[local + 14] ^= 1
+        local_compressed_size = bytearray(data)
+        local_compressed_size[local + 18] ^= 1
+        local_uncompressed_size = bytearray(data)
+        local_uncompressed_size[local + 22] ^= 1
+        bad = [corrupted, duplicate, external, header_ref, bytes(bomb),
+               bytes(local_crc), bytes(local_compressed_size),
+               bytes(local_uncompressed_size), b'not a zip']
         original_state = page.evaluate('JSON.stringify(MathStudio.dataTables.exportState())')
         for archive in bad:
             result = page.evaluate("""async bytes => {

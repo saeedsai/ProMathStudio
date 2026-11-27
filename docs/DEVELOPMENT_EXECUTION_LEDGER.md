@@ -1,3 +1,26 @@
+## 2026-11-27 04:57 CET — XLSX-LOCAL-HEADER-METADATA-INTEGRITY
+
+**Starting refs:** dev `5134f5f2a128fe99415c7f81d97b8cadb52e0766`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan and frozen 26-Oct inventory, Data Tables source/import/export contracts and tests, standalone build mapping, PR #191, refs/reviews, exact-head Actions and production Quality/Pages. Historical baseline remains **166 gaps / 95 partial**.
+
+**Starting exact-head QA:** Push Quality [#45935568707](https://github.com/saeedsai/ProMathStudio/actions/runs/45935568707) and PR Quality [#45935570728](https://github.com/saeedsai/ProMathStudio/actions/runs/45935570728) both completed **218/218 steps** successfully on exact starting SHA `5134f5f2a128fe99415c7f81d97b8cadb52e0766`, zero failures and zero skipped steps. No failing exact-head CI remained.
+
+**Defect:** The bounded offline XLSX importer compared local and central ZIP entry flags, compression method and filename, then verified decompressed size and CRC against the central directory. When general-purpose bit 3 (data descriptor) was clear, it did not verify that the local-header CRC-32 and compressed/uncompressed sizes matched the central-directory metadata. A malformed archive with contradictory local and central records could therefore pass the local-record validation despite violating the ZIP format.
+
+**Implementation:** Added local-header CRC/size comparison for entries without the data-descriptor flag. Valid bit-3 archives remain supported; the central-directory CRC and expanded-size checks still validate payload data. No decompression, OpenXML, table-limit or import-transaction behavior changed.
+
+**Regression:** Extended the already-registered Chromium XLSX import regression with three independent malformed archives: local CRC mismatch, local compressed-size mismatch and local uncompressed-size mismatch while central-directory metadata remains unchanged. Each must return the established `XLSX import:` diagnostic and preserve the complete pre-import workbook. Added a structural unittest guarding the production checks, all three mutations, Quality registration and standalone source parity.
+
+**Documentation:** Removed the obsolete duplicate section that still claimed XLSX import/DEFLATE/round-trip were unimplemented, while the newer bounded-import section already documented the implemented feature. Clarified local-header metadata validation in `docs/DATA_TABLES.md`. The XLSX importer remains a bounded offline subset, not full Excel compatibility.
+
+**Standalone bundle:** Updated `src/xlsx-import.js` and its `promath-xlsx-import` script in `index.html` in the same commit; exact source/body parity was verified before tree creation. No external dependencies or network services added.
+
+**Local validation:** An isolated Python ZIP fixture confirmed the local CRC, compressed-size and uncompressed-size fields occupy the expected header offsets and that each one-byte mutation produces a mismatch while the central directory remains unchanged. No local repository checkout is available, so native repository unittest/Playwright/build commands were not run; new exact-head GitHub Actions must certify the committed regressions.
+
+**Release blocker:** PR #191 remains open/mergeable, 89 commits ahead / 0 behind, 32 changed files, zero independent reviews. Only dev and main exist; both report unprotected, repository rulesets are empty, and branch-protection GET returns HTTP 403 to the connected integration. Repository metadata reports admin permission, but this connector exposes no branch-protection/ruleset write operation; no protection is claimed. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on 24-Nov-2026. No newer production deployment is claimed.
+
+**Status:** source, synchronized standalone bundle, browser/structural regressions, Data Tables contract, living plan, execution ledger and changelog are committed together on existing dev; new exact-head Push/PR Quality pending; implemented on dev / In QA / not released.
+
+
 ## 2026-11-27 04:30 CET — DATA-TABLES-LARGE-AGGREGATE-MIN-MAX
 
 **Starting refs:** dev `f2881b9997fbceb939a6932d65c275ca3238192c`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan and frozen 26-Oct inventory, unified master plan, Data Tables contract/source/tests, PR #191, refs/reviews, exact-head Actions and production Quality/Pages. Historical baseline remains **166 gaps / 95 partial**.

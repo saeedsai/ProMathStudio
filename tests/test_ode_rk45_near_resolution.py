@@ -99,6 +99,8 @@ const ulp=1/8192,endpoint=1e12;
 for(const direction of [1,-1]){
  const t0=direction>0?endpoint-20*ulp:endpoint;
  const t1=direction>0?endpoint:endpoint-20*ulp;
+ const secondStart=t0+direction*ulp,secondH=direction*5*ulp;
+ assert.equal(secondStart+4*secondH/5,secondStart+8*secondH/9);
  const out=solve({expression:'one',t0,t1,y0:0});
  assert.equal(out.rows[0][0],t0);
  assert.equal(out.rows.at(-1)[0],t1);

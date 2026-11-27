@@ -2583,3 +2583,11 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production runs on 24-Nov-2026 at unchanged main. No new deployment or hosted QA.
 - Status: repeated-stage diagnostic and CI assertion repair implemented on dev; exact-head full Quality pending; not released. Next five acceptance priorities remain in docs/HOURLY_DEVELOPMENT_PLAN.md.
 
+
+## 2026-11-27 14:01 CET — Restore RK45 modular-source parity after exact-head structural failure
+
+- Candidate dev d4ff4a8f7e042ac6c8dcbe5c44e6d725238f8d1a failed exact-head Push Quality [#46005872653](https://github.com/saeedsai/ProMathStudio/actions/runs/46005872653) and PR Quality [#46005881496](https://github.com/saeedsai/ProMathStudio/actions/runs/46005881496) at structural step 7. The commit tree updated index.html but accidentally retained the old src/ode-tools.js blob. This caused source/bundle parity failures and dependent ODE test extraction failures (20 structural failures). The workflow/test gates are correct; none are weakened.
+- The source is now restored from the exact embedded promath-ode-tools module already committed in index.html. The Node and Chromium 20-ULP cases explicitly assert that the second 5-ULP trial maps c=4/5 and c=8/9 to the same timestamp in both forward and backward directions before checking the collision counters.
+- Updated the plan, execution ledger and changelog. This corrective commit contains the modular source and both focused regressions together; the standalone bundle remains the same exact module body and is verified before the guarded ref update.
+- Historical inventory remains 166 gaps / 95 partial. PR #191 remains blocked by zero independent reviews and unverified main protection. No merge/direct main update. Fresh exact-head Push/PR Quality is required; not released.
+

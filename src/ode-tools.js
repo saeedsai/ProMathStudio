@@ -123,22 +123,27 @@ function solveAdaptive({expression='y',t0=0,t1=1,y0=1,tolerance=1e-7,maxSteps=10
   if(direction*(nextT-t1)>0)nextT=t1;
   h=nextT-t;
   if(!(direction*h>0))throw progressError('Adaptive step size underflow at current time resolution; rescale time or relax tolerance');
-  // Fractional Dormand–Prince stages may round back to t even when t+h advances.
-  // Keep the numerical result but flag this loss of representable stage times.
-  const stageTimesCollapsed=(t+h/5===t||t+3*h/10===t||
-   t+4*h/5===t||t+8*h/9===t);
+  // Reuse the exact stage times for both evaluation and collision diagnostics.
+  // Count repeated fractional stages and stages rounded onto either endpoint.
+  const stage2Time=t+h/5,stage3Time=t+3*h/10,
+   stage4Time=t+4*h/5,stage5Time=t+8*h/9;
+  const stageTimesCollapsed=(stage2Time===t||stage2Time===nextT||
+   stage3Time===t||stage3Time===nextT||stage3Time===stage2Time||
+   stage4Time===t||stage4Time===nextT||stage4Time===stage2Time||stage4Time===stage3Time||
+   stage5Time===t||stage5Time===nextT||stage5Time===stage2Time||
+   stage5Time===stage3Time||stage5Time===stage4Time);
   if(stageTimesCollapsed)stageTimeCollisionAttempts++;
   attempts++;
   let y5,y4;
   try{
   const k1=f(t,y,'k1');
-  const k2=f(t+h/5,y+h*k1/5,'k2');
-  const k3=f(t+3*h/10,y+h*(3*k1/40+9*k2/40),'k3');
-  const k4=f(t+4*h/5,y+h*(44*k1/45-56*k2/15+32*k3/9),'k4');
-  const k5=f(t+8*h/9,y+h*(19372*k1/6561-25360*k2/2187+64448*k3/6561-212*k4/729),'k5');
-  const k6=f(t+h,y+h*(9017*k1/3168-355*k2/33+46732*k3/5247+49*k4/176-5103*k5/18656),'k6');
+  const k2=f(stage2Time,y+h*k1/5,'k2');
+  const k3=f(stage3Time,y+h*(3*k1/40+9*k2/40),'k3');
+  const k4=f(stage4Time,y+h*(44*k1/45-56*k2/15+32*k3/9),'k4');
+  const k5=f(stage5Time,y+h*(19372*k1/6561-25360*k2/2187+64448*k3/6561-212*k4/729),'k5');
+  const k6=f(nextT,y+h*(9017*k1/3168-355*k2/33+46732*k3/5247+49*k4/176-5103*k5/18656),'k6');
   y5=stageBound(y+h*(35*k1/384+500*k3/1113+125*k4/192-2187*k5/6784+11*k6/84),'State','y5');
-  const k7=f(t+h,y5,'k7');
+  const k7=f(nextT,y5,'k7');
   y4=stageBound(y+h*(5179*k1/57600+7571*k3/16695+393*k4/640-92097*k5/339200+187*k6/2100+k7/40),'State','y4');
   }catch(error){
    // Structured bounds tagging prevents parser/domain messages that happen to

@@ -1,3 +1,9 @@
+## 2026-11-27 — Restore RK45 source/bundle parity after exact-head CI failure
+
+- Exact-head structural CI on d4ff4a8 exposed an incomplete Git tree assembly: standalone index.html contained the new RK45 collision diagnostic while src/ode-tools.js retained the previous implementation. Twenty structural/ODE extraction tests failed at step 7; no gates were changed.
+- Restored src/ode-tools.js from the exact embedded ODE module, retaining the already committed standalone bundle. Strengthened Node and Chromium fixtures to prove the 5-ULP c=4/5 and c=8/9 stage-time equality in both directions.
+- Updated the living plan and full execution ledger. Source/bundle parity and isolated V8 tests are checked before the next guarded dev commit. Fresh exact-head Quality remains pending; not released.
+
 ## 2026-11-27 — Detect repeated RK45 fractional-stage timestamps and repair endpoint regression
 
 - Exact-head Push/PR CI on the preceding dev head failed at the RK45 endpoint browser smoke because its monotonicity assertion multiplied two subnormal quantities; that product rounded to zero despite increasing timestamps. The assertion now uses the signed integration direction times the timestamp difference, retaining the strict check without underflow.

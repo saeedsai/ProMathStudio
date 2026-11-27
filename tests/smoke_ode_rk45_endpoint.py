@@ -93,6 +93,9 @@ def main():
         for direction in (1, -1):
             t0 = 1e12 - 20 * ulp if direction == 1 else 1e12
             t1 = 1e12 if direction == 1 else 1e12 - 20 * ulp
+            second_start = t0 + direction * ulp
+            second_h = direction * 5 * ulp
+            assert second_start + 4 * second_h / 5 == second_start + 8 * second_h / 9
             result = page.evaluate("""opts => MathStudio.odeTools.solveAdaptive(opts)""",
                                    {"expression": "1", "t0": t0, "t1": t1, "y0": 0})
             assert result["rows"][0][0] == t0

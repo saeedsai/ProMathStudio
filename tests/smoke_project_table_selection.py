@@ -36,6 +36,13 @@ def main():
         assert page.evaluate('window.MathStudio.dataTables.active.name') == 'Beta'
         assert exported['selected'] == exported['tables'][1]['id']
 
+        # An explicit unsupported nested Data Tables version must not be interpreted as v1.
+        bad_version = dict(base, working='SEL_BAD_VERSION', tables=dict(tables, version=2))
+        upload(page, bad_version)
+        page.wait_for_function("document.querySelector('#hub-status').textContent.includes('unsupported Data Tables state version')")
+        assert page.evaluate('window.MathStudio.bridge.export().working') == 'SEL_OK'
+        assert page.evaluate('window.MathStudio.dataTables.active.name') == 'Beta'
+
         # A selection naming no table must be refused before any state mutation.
         bad = dict(base, working='SEL_BAD', tables=dict(tables, selected='sheet-9'))
         upload(page, bad)

@@ -1,3 +1,14 @@
+## 2026-11-27 09:01 CET — REJECT UNSUPPORTED DATA TABLES PROJECT STATE VERSIONS
+
+- Starting dev `b00f18ea10aa3932b78126573ad66b3ddba4e843`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only dev/main branches exist.
+- Starting exact-head Push Quality #45957413036 and PR Quality #45957422847 both passed all 218 steps with zero failures/skips. They certify the starting SHA only; fresh exact-head runs are required after this change.
+- Found that project migration validated Data Tables sheet identity, selected sheet, dimensions and cells but ignored nested `tables.version`. The live exporter writes version 1 and restore interprets that schema as v1, so unknown explicit versions were silently treated as current.
+- Added strict explicit nested version 1 validation while preserving legacy projects that omit the nested version. Unknown, null, string and malformed versions now fail before workspace mutation.
+- Added Node regression cases for outer project v1/v2, nested version 1, missing legacy version and invalid 0/2/string/null/object/array values. Added Chromium rejection and state-preservation coverage for nested version 2. Updated PROJECT_FORMAT and synchronized `src/project-schema.js` with its embedded `index.html` module exactly.
+- Isolated V8 migration cases and source/bundle parity passed. Full repository unittest/Chromium/build are pending exact-head GitHub Actions because the execution environment has no checkout.
+- PR #191 remains open; 96 ahead/0 behind at start, zero independent reviews. Both branches report unprotected and branch-protection read returns HTTP 403; no merge/direct main update.
+- Latest verified main Quality/Pages evidence remains from 24-Nov-2026; no new production deployment. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
 ## 2026-11-27 — REPAIR EXACT-HEAD PROJECT BUNDLE PARITY
 
 - Starting dev `efa055330a015512d1af3fbd8170eb65de64b940`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.

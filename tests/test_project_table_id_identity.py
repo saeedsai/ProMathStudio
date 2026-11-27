@@ -19,7 +19,7 @@ assert.strictEqual(html.slice(start+marker.length,html.indexOf('</script>',start
 const window={MathStudio:{}};vm.runInNewContext(source,{window});
 const migrate=window.MathStudio.projectSchema.migrate;
 const make=(ids,version=2)=>({format:'mathstudio-project',version,notebook:[],tables:{
- selected:ids[0],tables:ids.map((id,i)=>({id,name:'Sheet'+i,columns:['A'],rows:[[i]]}))}});
+ version:1,selected:ids[0],tables:ids.map((id,i)=>({id,name:'Sheet'+i,columns:['A'],rows:[[i]]}))}});
 for(const version of [1,2]){
  const valid=make(['sheet-1','sheet-2'],version),snapshot=JSON.stringify(valid);
  assert.strictEqual(migrate(valid).tables.selected,'sheet-1');
@@ -38,6 +38,12 @@ for (const version of [1,2]) {
  assert.throws(()=>migrate(nullSelection),/selected table does not exist/);
  const noSelection={...empty,tables:{tables:[]}};
  assert.throws(()=>migrate(noSelection),/table list must contain at least one sheet/);
+}
+const legacyVersion=make(['sheet-1','sheet-2']);delete legacyVersion.tables.version;
+assert.strictEqual(migrate(legacyVersion).tables.tables.length,2,'legacy Data Tables state without a version remains supported');
+for(const unsupported of [0,2,'1',null,{},[]]){
+ const data=make(['sheet-1','sheet-2']);data.tables.version=unsupported;
+ assert.throws(()=>migrate(data),/unsupported Data Tables state version/);
 }
 // Column selectors must be unambiguous across case and whitespace variants.
 for (const version of [1,2]) {

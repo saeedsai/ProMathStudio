@@ -1,3 +1,10 @@
+## 2026-11-27 — Reject unsupported Data Tables project-state versions
+
+- Project migration now requires an explicit nested Data Tables state version to be exactly numeric version 1; legacy backups that omit the nested version remain compatible.
+- Unsupported, null, string and malformed explicit versions are rejected before workspace restore instead of being silently interpreted as v1.
+- Added Node version-boundary and Chromium atomic-rejection/state-preservation regressions; synchronized `src/project-schema.js` with the standalone `index.html` module and documented the nested project contract.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Repair project-fit validation bundle parity
 
 - Exact-head Push/PR Quality exposed that an inline-only Curve fitting restore edit was not represented in `src/` and was discarded by `scripts/build.py`. Reverted that unsupported inline edit; no build/parity checks were relaxed.

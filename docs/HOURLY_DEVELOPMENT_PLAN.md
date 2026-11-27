@@ -1,3 +1,27 @@
+## 2026-11-27 09:01 CET — REJECT UNSUPPORTED DATA TABLES PROJECT STATE VERSIONS
+
+**Starting refs:** dev `b00f18ea10aa3932b78126573ad66b3ddba4e843`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS, unified master plan, frozen 26-Oct inventory, current project schema, Data Tables restore/export contract, project selection/identity tests, PR #191 and exact-head Quality evidence. Historical baseline remains **166 gaps / 95 partial**.
+
+**Starting exact-head QA:** Push Quality [#45957413036](https://github.com/saeedsai/ProMathStudio/actions/runs/45957413036) and PR Quality [#45957422847](https://github.com/saeedsai/ProMathStudio/actions/runs/45957422847) both completed all 218 steps successfully on `b00f18ea10aa3932b78126573ad66b3ddba4e843`, with zero failed or skipped steps. These checks certify the starting head only, not the new candidate.
+
+**Implemented on dev:** The project schema validated Data Tables sheet IDs, selection, names, columns and cells but did not validate the nested `tables.version`. The current Data Tables exporter writes version 1 and the restore routine interprets the structure using v1 semantics. An explicit unknown/null/string version could therefore be silently treated as v1. The schema now accepts explicit integer version 1 and rejects every other explicit value before any workspace restore. Legacy backups that omit the nested version remain supported.
+
+**Regression:** Extended the existing Node project-table identity test for valid v1, legacy missing-version compatibility and invalid values `0`, `2`, `"1"`, `null`, object and array, for both outer project versions 1 and 2. Extended the registered Chromium saved-selection smoke to import a project with nested version 2 and verify rejection plus preservation of the previously selected Beta sheet and working equation. Updated the saved-project format contract. Synchronized `src/project-schema.js` and the embedded `index.html` module byte-for-byte.
+
+**Validation:** Isolated V8 migration harness and source/bundle parity checks passed. Full repository unittest, Chromium and build commands are not locally available because this runtime has no checkout; fresh exact-head Push and PR Quality must certify the new candidate. Prior starting-head CI is green but is not reused as candidate evidence.
+
+**Release:** PR #191 remains open, 96 commits ahead and zero behind at the starting head, with zero independent reviews. Branch listing contains only dev/main and both report unprotected; branch-protection GET remains HTTP 403 to the connected integration, and no rulesets were present in prior inspection. No merge or direct main update. The latest verified main Quality and Pages runs remain the 24-Nov-2026 evidence; not released.
+
+## NEXT FIVE — current priorities and acceptance tests
+
+1. **P0 — Safe PR #191 release (Blocked by governance).** Require green exact-head Push/PR Quality, eligible independent approval and verifiable enforceable main protection; inspect the full dev→main diff, merge only through ordinary PR, then verify exact-main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Complete saved-project compatibility (In QA / Partial).** Verify nested Data Tables version rejection and legacy omission compatibility, Curve fitting model/degree/equation, v1/v2 project round-trips, Matrix drafts, Graph primary/overlay datasets, table identity/selection, and injected restore-failure rollback across workspaces at desktop and 390px.
+3. **P1 — Finish Data Tables numeric/formula and structural-reference integrity (Implemented on dev / prior head Quality green).** Re-run PRODUCT signed-zero/nested/exponent-scaling cases, 132,000-value MIN/MAX, SUM/AVERAGE cancellation/subnormal references, A1:AF6000 insert/delete, mixed anchors, quoted names, reversed/blank ranges, sorting, XLSX integrity, rollback and source/bundle parity at the new exact head.
+4. **P1 — Finish seven-shape Truss numerical boundaries (Partial).** Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle; thin-wall, cavity-transition, sub-ULP, composite cancellation, invalid rollback and 390px keyboard coverage.
+5. **P1 — Harden adaptive RK45 stage-overflow and near-ULP time grids (Partial).** Bounded recoverable-stage retries; forward/backward monotone sample times, duplicate-time prevention, collision diagnostics, underflow, exhaustion, stale-export protection and responsive browser tests.
+
+---
+
 ## 2026-11-27 — REPAIR EXACT-HEAD PROJECT BUNDLE PARITY
 
 **Starting refs:** dev `efa055330a015512d1af3fbd8170eb65de64b940`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected both exact-head Quality jobs and the failing structural log before editing.

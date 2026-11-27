@@ -76,3 +76,8 @@ The optional `fit` object stores only the Curve fitting panel's selected model, 
 ## Saved Matrix drafts
 
 A present `matrix` object stores the Matrix workspace draft. Its A and B row/column dimensions must each be 2 or 3; A, B, RHS and weights arrays must match those dimensions. Each draft entry is a string of at most 80 characters. An empty string is allowed for an unfinished cell; nonempty values must use decimal/scientific notation, convert to a finite number, and have absolute value no greater than `1e12`. Radix-prefixed values, non-finite exponents and values outside the solver input bound are rejected. Version 1 projects that omit the optional Matrix object remain supported. Both project migration and the directly exposed Matrix restore API enforce the same numeric bounds; direct restore validates the complete draft before changing any grid input.
+
+
+## Data Tables nested state version
+
+The optional `tables` project object contains a nested Data Tables state. Its explicit `version` must be the supported integer `1`; legacy backups that omit the nested version remain accepted. Unknown, null or wrongly typed explicit versions are rejected before project confirmation, rather than being silently interpreted using the current v1 restore rules. The nested workbook must also contain at least one uniquely identified sheet when a selection is present, and `selected` must reference an existing sheet ID.

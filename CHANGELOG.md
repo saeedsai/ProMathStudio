@@ -1,3 +1,11 @@
+## 2026-11-27 — Validate XLSX ZIP data descriptors and record them in overlap bounds
+
+- The offline XLSX importer previously accepted ZIP entries with general-purpose flag bit 3 without validating the trailing data descriptor. It also ended each overlap range at the compressed payload, excluding descriptor bytes.
+- Bit-3 local-header CRC/size fields must now be zero or match the central directory. The importer validates signed descriptors (optional 0x08074b50 signature) and signatureless descriptors against central CRC-32, compressed size and uncompressed size; truncated or mismatched descriptors reject. Descriptor bytes are included in record-overlap detection.
+- Added non-seekable ZIP browser fixtures for valid descriptor import and corrupted descriptor CRC/sizes plus contradictory local metadata. Existing stored/DEFLATE, transactional rollback and mobile checks remain.
+- Synchronized `src/xlsx-import.js` with the standalone `index.html` module; updated the integrity unittest and Data Tables import contract.
+- Starting exact-head Push/PR Quality on fc92e77 passed 218/218 each; fresh full Quality is required for this descriptor change. Implemented on dev; not released. Historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-27 — Reserve all Data Tables built-ins in custom functions and repair numeric-hardening browser setup
 
 - Exact-head Push/PR Quality on 1013d61 both failed at step 85 because `tests/smoke_sheet_numeric_hardening.py` tried to seed reserved `SUM`, `COUNT`, `MEDIAN` and `IF` names through the now-atomic custom-function restore API. The browser fixture now seeds only valid custom functions and explicitly verifies all reserved names reject atomically before continuing the existing built-in-priority and numerical checks.

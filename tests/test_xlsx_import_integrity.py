@@ -10,21 +10,25 @@ WORKFLOW = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
 
 
 class XlsxImportIntegrityTests(unittest.TestCase):
-    def test_local_header_crc_and_sizes_match_central_directory(self):
+    def test_local_headers_and_data_descriptors_match_central_directory(self):
         self.assertIn(
             "const localCrc=u32(view,local+14),localCompressed=u32(view,local+18),localPlain=u32(view,local+22);",
             SOURCE,
         )
-        self.assertIn(
-            "if(!(flags&8)&&(localCrc!==crc||localCompressed!==compressed||localPlain!==plain))",
-            SOURCE,
-        )
+        self.assertIn("(localCrc!==0&&localCrc!==crc)", SOURCE)
+        self.assertIn("ZIP data descriptor mismatch.", SOURCE)
+        self.assertIn("ranges.push([local,rangeEnd]);", SOURCE)
         for mutation in (
             "local_crc[local + 14] ^= 1",
             "local_compressed_size[local + 18] ^= 1",
             "local_uncompressed_size[local + 22] ^= 1",
+            "bad_descriptor_crc[descriptor + 4] ^= 1",
+            "bad_descriptor_compressed[descriptor + 8] ^= 1",
+            "bad_descriptor_plain[descriptor + 12] ^= 1",
+            "bad_stream_local_crc[stream_local + 14] = 1",
         ):
             self.assertIn(mutation, SMOKE)
+        self.assertIn("repack_streaming(data)", SMOKE)
         self.assertIn("python tests/smoke_xlsx_import.py", WORKFLOW)
 
     def test_standalone_import_module_matches_source(self):

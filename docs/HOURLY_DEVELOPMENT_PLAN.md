@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 20:01 CET  
+**Last updated:** 27 November 2026, 21:03 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,10 +15,10 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting `dev` is `1013d618bf925c9e005b98716b453feeab9aacb2`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Compare is **114 ahead / 0 behind**. Exactly two branches exist: `dev` and `main`.
+- Current `dev` is `fc92e7735836ff65ab86a25235c41a67a1aac723`; `main` is `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Compare is **115 ahead / 0 behind**. Exactly two branches exist: `dev` and `main`.
 - Both branches report `protected:false`; repository rulesets are empty. Branch-protection reads return HTTP 403 (Resource not accessible by integration), so enforceable protection is not verified.
 - PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, with **zero submitted independent reviews**.
-- Exact-head Push Quality [#46050272626](https://github.com/saeedsai/ProMathStudio/actions/runs/46050272626) and PR Quality [#46050278029](https://github.com/saeedsai/ProMathStudio/actions/runs/46050278029) both failed at step 85, `tests/smoke_sheet_numeric_hardening.py`. The trace shows `MathStudio.customFunctions.restore()` correctly rejects `SUM` as reserved, but the browser fixture tries to seed `SUM`, `COUNT`, `MEDIAN` and `IF` as custom functions before checking built-in priority. This fixture predates atomic reserved-name validation. The same inspection found a real consistency gap: editor/restore/project-schema reserved-name lists omitted Data Tables built-ins `AVERAGE`, `AVG`, `COUNT`, `MEDIAN` and `PRODUCT`, so some names were accepted by project import even though the Data Tables evaluator always resolves them as built-ins. This run expands all three guards and changes the browser fixture to assert case-insensitive reserved-name rejection and state preservation before testing the built-ins normally.
+- Exact-head Push Quality [#46054477944](https://github.com/saeedsai/ProMathStudio/actions/runs/46054477944) and PR Quality [#46054483353](https://github.com/saeedsai/ProMathStudio/actions/runs/46054483353) both passed **218/218** on `fc92e7735836ff65ab86a25235c41a67a1aac723`, with zero failed or skipped steps. This certifies the prior reserved-name consistency correction on the exact starting head; the next source change in this checkpoint will require fresh exact-head runs.
 - The browser regression already uses an ephemeral loopback HTTP server for real-origin localStorage checks; this repair opens the custom-function details panel by clicking its visible summary before filling editor controls and asserts the fields are visible. Production validation is also hardened consistently in editor save, direct restore and project preflight: a Python custom function must have exactly one synchronous top-level declaration of its saved name and its ordered positional parameters must match params. Duplicate definitions and async def are rejected because a later definition can replace the callable and an async function returns a coroutine the numeric worker cannot consume.
 - Added Node schema, Chromium editor/import/direct-restore cases, updated the project-format contract, and preserved exact `src/project-schema.js` ↔ embedded `index.html` parity. Isolated V8 checks run before the atomic dev commit; full Python/Chromium/build certification must come from fresh exact-head Actions.
 - Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and GitHub Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not released.
@@ -38,7 +38,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** The current exact-head Push #46050272626 and PR #46050278029 failed at step 85 because the numeric-hardening browser fixture attempted to restore reserved built-in names. The fixture is being corrected without dropping built-in-priority assertions; the missing Data Tables built-ins are being added to editor, direct-restore and project-schema guards. Fresh exact-head Quality is required. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
+**Status:** The reserved-name fixture and editor/restore/project-schema consistency fix are now certified by exact-head Push #46054477944 and PR #46054483353 (218/218 each, zero failures/skips) on `fc92e7735836ff65ab86a25235c41a67a1aac723`. This run adds XLSX data-descriptor integrity checks; fresh exact-head Quality will be required for that new commit. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -56,12 +56,12 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 3. P1 — Complete Data Tables numerical and file integrity
 
-**Status:** Partial; PRODUCT signed-zero/nesting, 132,000-value MIN/MAX, compensated SUM/AVERAGE, A1:AF6000 reference handling and XLSX local-header/CRC checks exist on dev; broad release evidence remains pending.  
+**Status:** Partial; PRODUCT signed-zero/nesting, 132,000-value MIN/MAX, compensated SUM/AVERAGE and A1:AF6000 reference handling are implemented on dev. This run extends XLSX ZIP integrity to signed/unsigned data descriptors and includes descriptor bytes in overlap checks; fresh browser/build QA remains pending.  
 **Acceptance tests:**
 - PRODUCT direct/nested/range, negative zero, exponent scaling, empty identity, overflow and underflow against binary64 references.
 - MIN/MAX over 132,000 values; SUM/AVERAGE cancellation and subnormal residual references.
 - A1:AF6000 references, mixed/absolute anchors, quoted names, sort/delete/undo integrity.
-- XLSX ZIP metadata, CRC, size, formula-token boundaries, corrupted archive rejection and preservation of the pre-import workbook.
+- XLSX ZIP metadata, CRC, size, signed/unsigned data descriptors, bit-3 local/central consistency, descriptor truncation/overlap, formula-token boundaries, corrupted archive rejection and preservation of the pre-import workbook.
 - Browser, keyboard, 390px and source/bundle parity regressions pass.
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
@@ -132,3 +132,17 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - PR #191 remains open/mergeable, 114 commits ahead, 46 changed files, zero submitted independent reviews. Branches remain exactly dev/main; both report unprotected, rulesets empty, branch-protection GET 403. No merge or direct main update.
 - Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. This change is dev-only pending exact-head CI and release governance.
 - Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## Latest checkpoint — 27 November 2026, 21:03 CET
+
+- Verified existing refs before editing: dev `fc92e7735836ff65ab86a25235c41a67a1aac723`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 115 ahead / 0 behind; exactly dev/main branches.
+- Re-read root AGENTS.md, the living plan, the complete frozen 26-Oct inventory (166 gaps / 95 partial), Unified Master Implementation Plan, Data Tables/XLSX contract, build script, Quality workflow, PR #191, reviews and current Actions/Pages evidence.
+- Exact-head Push Quality [#46054477944](https://github.com/saeedsai/ProMathStudio/actions/runs/46054477944) and PR Quality [#46054483353](https://github.com/saeedsai/ProMathStudio/actions/runs/46054483353) both passed 218/218 on the starting SHA, with zero failed/skipped steps. PR #191 still has zero submitted independent reviews. Branch-protection read returns HTTP 403; rulesets are empty.
+- Found an XLSX integrity gap: ZIP general-purpose bit 3 permits local-header CRC/sizes to be deferred to a data descriptor, but the importer skipped all descriptor validation and excluded descriptor bytes from overlap bounds. A malformed descriptor could therefore be accepted despite central-directory metadata being authoritative.
+- Updated `src/xlsx-import.js` to accept bit-3 local fields only when zero or equal to central metadata; validate both signed and signatureless 12-byte data descriptors against central CRC/compressed/uncompressed sizes; reject truncated/mismatched descriptors; and include descriptor bytes in local-record overlap detection. Ordinary non-descriptor ZIP behavior is unchanged.
+- Added a non-seekable Python ZIP fixture that emits valid bit-3 descriptors, plus browser negatives for corrupted descriptor CRC/size and contradictory bit-3 local metadata. Existing stored/DEFLATE, corruption, transactional rollback, formula and mobile assertions remain.
+- Synchronized the standalone `index.html` embedded XLSX importer with `src/xlsx-import.js`; updated the XLSX integrity unittest, browser smoke, Data Tables docs, this plan, execution ledger and changelog.
+- The local checkout is absent (bounded `git rev-parse` returns “not a git repository”). A Python non-seekable ZIP reproduction confirmed Python emits bit-3 local headers with zero local metadata and signed descriptors containing the exact central CRC/sizes. Full production-browser validation must come from fresh exact-head GitHub Actions.
+- Current main remains unchanged; Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are the latest verified successful production runs on 24-Nov-2026. No new dev change is live.
+- Status: XLSX descriptor validation implemented on dev in this checkpoint; fresh Push/PR Quality pending; no merge or deployment. Historical inventory remains **166 gaps / 95 partial**, unchanged.

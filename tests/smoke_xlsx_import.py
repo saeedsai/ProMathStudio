@@ -20,6 +20,22 @@ def repack(data, compression=zipfile.ZIP_STORED, transform=None, extra=None):
             target.writestr(name, content)
     return output.getvalue()
 
+class NonSeekableBuffer(io.BytesIO):
+    def seekable(self):
+        return False
+
+    def seek(self, *args, **kwargs):
+        raise io.UnsupportedOperation('streaming ZIP output is not seekable')
+
+def repack_streaming(data, compression=zipfile.ZIP_DEFLATED):
+    with zipfile.ZipFile(io.BytesIO(data)) as original:
+        entries = [(name, original.read(name)) for name in original.namelist()]
+    output = NonSeekableBuffer()
+    with zipfile.ZipFile(output, 'w', compression=compression) as target:
+        for name, content in entries:
+            target.writestr(name, content)
+    return output.getvalue()
+
 def main():
     html = (ROOT / 'index.html').read_text(encoding='utf-8')
     source = (ROOT / 'src/xlsx-import.js').read_text(encoding='utf-8')
@@ -56,6 +72,23 @@ def main():
         assert page.evaluate("""async bytes => (await MathStudio.xlsxImport.parse(
             new Uint8Array(bytes))).length""", list(compressed)) == 2
 
+        # A non-seekable writer emits general-purpose bit 3 and signed data descriptors.
+        streaming = repack_streaming(data)
+        assert page.evaluate("""async bytes => (await MathStudio.xlsxImport.parse(
+            new Uint8Array(bytes))).length""", list(streaming)) == 2
+        descriptor = streaming.find(b'PK' + bytes([7, 8]))
+        stream_local = streaming.find(b'PK' + bytes([3, 4]))
+        assert descriptor >= 0 and stream_local >= 0
+        assert int.from_bytes(streaming[stream_local + 6:stream_local + 8], 'little') & 8
+        bad_descriptor_crc = bytearray(streaming)
+        bad_descriptor_crc[descriptor + 4] ^= 1
+        bad_descriptor_compressed = bytearray(streaming)
+        bad_descriptor_compressed[descriptor + 8] ^= 1
+        bad_descriptor_plain = bytearray(streaming)
+        bad_descriptor_plain[descriptor + 12] ^= 1
+        bad_stream_local_crc = bytearray(streaming)
+        bad_stream_local_crc[stream_local + 14] = 1
+
         corrupted = data.replace(b'north', b'south', 1)
         assert corrupted != data
         duplicate = repack(data, transform=lambda n, c: (
@@ -79,7 +112,9 @@ def main():
         local_uncompressed_size[local + 22] ^= 1
         bad = [corrupted, duplicate, external, header_ref, bytes(bomb),
                bytes(local_crc), bytes(local_compressed_size),
-               bytes(local_uncompressed_size), b'not a zip']
+               bytes(local_uncompressed_size), bytes(bad_descriptor_crc),
+               bytes(bad_descriptor_compressed), bytes(bad_descriptor_plain),
+               bytes(bad_stream_local_crc), b'not a zip']
         original_state = page.evaluate('JSON.stringify(MathStudio.dataTables.exportState())')
         for archive in bad:
             result = page.evaluate("""async bytes => {

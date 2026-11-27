@@ -51,11 +51,17 @@ def main():
         page.wait_for_function("window.MathStudio.bridge.export().working === 'ENG_LEGACY'")
         assert page.locator('#eng-search').input_value() == 'stability'
 
-        # Unknown discipline passes syntax checks but is refused by restore; prior state is rolled back.
+        # Unknown but syntactically valid IDs must fail schema preflight before confirmation.
+        page.evaluate("""() => {
+          window.__projectConfirmCount = 0;
+          const nativeConfirm = window.confirm.bind(window);
+          window.confirm = (...args) => { window.__projectConfirmCount++; return nativeConfirm(...args); };
+        }""")
         bad = dict(exported, working='ENG_BAD', engineering={'discipline': 'nosuchfield', 'query': 'zzz'})
         upload(page, bad)
         page.wait_for_function(
             "document.querySelector('#hub-status').textContent.includes('Engineering filter')")
+        assert page.evaluate('window.__projectConfirmCount') == 0, 'invalid discipline reached import confirmation'
         assert page.evaluate('window.MathStudio.bridge.export().working') == 'ENG_LEGACY'
         assert page.locator('#eng-discipline').input_value() == 'control'
         assert page.locator('#eng-search').input_value() == 'stability'

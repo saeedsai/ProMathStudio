@@ -88,3 +88,9 @@ The optional `tables` project object contains a nested Data Tables state. Its ex
 The optional `solver` object stores the Equation workspace expression and selector state. When present, `operation` must be one of `auto`, `expand`, `simplify`, `factor`, `solve`, `system`, `differentiate`, `integrate`, `limit`, `numeric`, `laplace`, `inverse_laplace`, `fourier`, `inverse_fourier`, `ode` or `pde`. The engine must be `auto`, `sympy` or `offline`; the limit direction must be `+-`, `-` or `+`. The saved variable is bounded to 24 characters and, when nonempty, must match the Equation solver's identifier syntax: a Unicode letter followed by Unicode letters, ASCII digits or underscores. The approach point is bounded to 80 characters, matching the live input controls. The expression remains bounded to 12,000 characters and optional ODE initial conditions to 160 characters.
 
 Legacy projects may omit individual solver fields, and empty selector strings retain the workspace's existing defaults. Unknown explicit selector values and overlong control values are rejected before confirmation rather than silently becoming an empty selection or a default during restore. Rejection preserves the previously active project state.
+
+
+## Saved Engineering Toolbox filter
+
+The optional `engineering` project object stores the selected discipline and search query. `discipline` may be empty (all disciplines) or exactly one current stable ID: `physics`, `mechanical`, `electrical`, `electronics`, `fluids`, `aerospace`, `control`, `gnss` or `signals`. `query` must be a string of at most 200 characters. These IDs are checked against the canonical Engineering catalog by regression tests. Legacy projects that omit the object, or store it as `null`, remain supported. Unknown IDs, malformed types and overlong queries are rejected during schema preflight before the import confirmation prompt or any workspace restoration, rather than failing late and relying on rollback.
+

@@ -1697,3 +1697,8 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 
 - 2026-11-26 (dev, exact-head QA pending): Truss FEM global stiffness assembly now collects each member's finite contribution per matrix coefficient and uses the existing compensated/exact binary64 accumulator before rounding. This preserves twenty 1 N/m parallel-member contributions alongside a 1e16 N/m member when their combined +20 changes the rounded coefficient. Added direct Node and registered Chromium regressions for displacement, equilibrium residual and energy checks at 1280px/390px; no root bundle change is required because Truss FEM is an adjacent script.
 
+
+
+## 2026-11-27 — Saved Engineering filter preflight validation
+
+- Project import now accepts only the empty all-disciplines selector or one of the nine canonical Engineering Toolbox IDs. Previously, an unknown but syntactically valid ID passed schema preflight and failed later in the restore hook. Unknown IDs now reject before confirmation or workspace mutation; omitted/null legacy state and query strings up to 200 characters remain supported. Added exact schema/catalog ID parity, all-nine valid-ID, invalid-ID, query-boundary and Chromium pre-confirmation regressions. Synchronized `src/project-schema.js` with the standalone `index.html` bundle. Implemented on dev; fresh exact-head Quality and release are pending.

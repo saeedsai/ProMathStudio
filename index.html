@@ -3107,6 +3107,9 @@ self.onmessage=async ({data})=>{
     'inverse_fourier','ode','pde']);
   const solverEngines = new Set(['auto','sympy','offline']);
   const solverLimitDirections = new Set(['+-','-','+']);
+  // Must match src/engineering-catalog.js stable discipline IDs; parity is regression-tested.
+  const engineeringDisciplines = new Set(['physics','mechanical','electrical','electronics',
+    'fluids','aerospace','control','gnss','signals']);
   // Saved axis selectors are column indices, not general JavaScript numeric literals.
   // Bound raw strings before trimming so whitespace cannot bypass the input limit.
   const validColumnIndex = (value, columns) => {
@@ -3320,7 +3323,8 @@ self.onmessage=async ({data})=>{
     }
     if (data.engineering !== undefined && data.engineering !== null) {
       const eng = data.engineering;
-      if (!record(eng) || typeof eng.discipline !== 'string' || !/^[a-z-]{0,32}$/.test(eng.discipline) ||
+      if (!record(eng) || typeof eng.discipline !== 'string' ||
+          (eng.discipline !== '' && !engineeringDisciplines.has(eng.discipline)) ||
           typeof eng.query !== 'string' || eng.query.length > 200)
         fail('saved Engineering filter is invalid.');
     }

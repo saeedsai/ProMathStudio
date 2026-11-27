@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 27 November 2026, 10:57 CET  
+**Last updated:** 27 November 2026, 10:58 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -19,8 +19,8 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
 - Existing PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191): `dev` → `main`, open and mergeable, 100 commits ahead / 0 behind, 38 changed files, zero submitted independent reviews.
 - Branch inventory: exactly `dev` and `main`; no additional branch was found after pagination.
-- Current exact-head candidate `905a864` is **failing**, not green: Push Quality [#45972027670](https://github.com/saeedsai/ProMathStudio/actions/runs/45972027670) and PR Quality [#45972038530](https://github.com/saeedsai/ProMathStudio/actions/runs/45972038530) both fail at step 50, Project migration and rollback browser regression.
-- Failure diagnosis: the test compares rollback output to a stale `migrated['solver']` snapshot from an earlier SymPy limit import. Subsequent valid Graph imports use the legacy fixture and intentionally restore its original solver settings. The rollback expectation must snapshot the solver state immediately before the injected restore failure; the earlier valid solver round-trip assertions remain.
+- Pre-fix exact-head `905a864` failed at step 50 in Push [#45972027670](https://github.com/saeedsai/ProMathStudio/actions/runs/45972027670) and PR [#45972038530](https://github.com/saeedsai/ProMathStudio/actions/runs/45972038530). The rollback regression now snapshots the actual solver state immediately before the injected restore failure; earlier valid solver round-trip assertions remain.
+- Candidate `3139890` then failed the structural step 7 in Push [#45979678110](https://github.com/saeedsai/ProMathStudio/actions/runs/45979678110) and PR [#45979686262](https://github.com/saeedsai/ProMathStudio/actions/runs/45979686262). The 615-test suite reported one failure and one optional skip: `test_delivery_policy` requires the exact heading `Next five features`; the restored plan used only `NEXT FIVE priorities`. The plan heading is being aligned without changing feature scope or tests.
 - This run also aligns saved `solver.variable` validation with the live CAS identifier grammar, adding a bounded Unicode identifier contract and negative cases.
 - Branch-protection read returns HTTP 403 to the connected integration; repository rulesets read is empty. Do not merge until required exact-head checks, independent review and enforceable release safeguards are verified.
 - Latest verified production runs remain Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at the unchanged main SHA. No newer main deployment is verified.
@@ -35,11 +35,11 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 6. Merge only through the ordinary `dev`→`main` PR after full exact-head Quality, required review and enforceable protections are verified. Then verify main Quality, Pages deployment and hosted critical paths.
 7. Maintain the historical 166-gap / 95-partial baseline until evidence supports a separately documented re-audit.
 
-## NEXT FIVE priorities
+## Next five features — NEXT FIVE priorities
 
 ### 1. P0 — Repair and certify saved-project rollback / solver validation
 
-**Status:** Implemented on dev in the current atomic checkpoint; exact-head CI pending.  
+**Status:** Implemented on dev; exact-head structural-policy heading correction in progress.  
 **Acceptance tests:**
 - Node schema tests accept 144 valid operation/engine/direction combinations, valid 24-character and Unicode solver identifiers, and empty/missing legacy selectors.
 - Reject invalid operation/engine/direction, non-identifier variables, wrong types, variable length 25, limit-point length 81 and contradictory assumptions.
@@ -88,6 +88,6 @@ After the five priorities above, continue adaptive RK45 hardening: recoverable s
 
 ## Latest checkpoint
 
-- Starting heads and CI failure are recorded above; this run's resulting atomic commit SHA and new exact-head Actions results are reported in the execution ledger/PR progress comment.
+- Current dev candidate before this plan-only correction: `313989083a43ff038a0a27904631d37d6584f3a7`; Push/PR Quality are failing only at structural step 7 because the plan heading did not satisfy the literal delivery-policy contract. Fresh exact-head reruns are required after this correction.
 - Main and Pages remain unchanged; no release is claimed.
 - Historical baseline remains **166 gaps / 95 partial**.

@@ -1,3 +1,9 @@
+## 2026-11-27 — Match the living plan's required five-feature heading
+
+- Exact-head structural CI found the restored living plan used `NEXT FIVE priorities` but the durable delivery-policy regression also requires the literal `Next five features` heading.
+- Aligned the heading while preserving the same five priorities and their acceptance tests. No test or CI gate was changed.
+- Fresh exact-head Push/PR Quality pending; not released.
+
 ## 2026-11-27 — Validate saved solver variable identifiers and repair project rollback regression
 
 - Saved Equation variables now match the live CAS identifier grammar (Unicode letter followed by Unicode letters, ASCII digits or underscores) as well as the existing 24-character limit; empty/missing legacy values retain their default.

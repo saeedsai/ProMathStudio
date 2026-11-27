@@ -1757,3 +1757,10 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - Updated RK45 result formatting to use “1 accepted step had” or “N accepted steps had” according to the actual collision count. Numerical integration and diagnostics counters are unchanged.
 - Updated forward/backward single-collision Chromium assertions and the 20-ULP two-collision Chromium assertion. The tests reject the obsolete wording and incorrect singular/plural forms; no assertions or workflow gates were weakened.
 - Updated numerical-method documentation, living plan and execution ledger. Modular source and standalone index.html are committed together after exact parity verification. Fresh exact-head Push/PR Quality is required; this is implemented on dev, not released.
+
+
+## 2026-11-27 — Reject ambiguous Python custom-function definitions
+
+- Python custom functions now require exactly one synchronous top-level declaration of their saved name. Duplicate top-level definitions and async def declarations reject in the editor, direct restore API and saved-project preflight; this prevents a later definition replacing the validated callable and prevents coroutine results from entering the numeric worker.
+- Added Node schema and Chromium import/direct-restore regressions for duplicate, async-only and sync-plus-async declarations. Updated the project-format contract and synchronized src/project-schema.js with its standalone index.html module.
+- Repaired the exact-head project browser regression: it now opens the native custom-function details panel through its summary and asserts the editor is visible before filling controls. The previous failure was a hidden-control test setup error, not a production UI defect. Full exact-head Push/PR Quality is required; implemented on dev, not released.

@@ -271,11 +271,16 @@
         const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow']);
         if (reserved.has(key)) fail('custom function name is reserved.');
         if (item.type === 'python') {
-          const signature = typeof item.source === 'string'
-            ? new RegExp('^def\\s+' + item.name + '\\s*\\(([^)]*)\\)', 'm').exec(item.source.trim())
-            : null;
-          const declared = signature && signature[1].trim()
-            ? signature[1].split(',').map(param => param.trim()) : [];
+          // Python custom functions must have one synchronous top-level declaration.
+          // Multiple definitions can silently replace the callable after validation;
+          // async definitions return coroutines that the numeric worker cannot consume.
+          const signatures = typeof item.source === 'string'
+            ? Array.from(item.source.trim().matchAll(
+                new RegExp('^(async\\s+)?def\\s+' + item.name + '\\s*\\(([^)]*)\\)', 'gm')))
+            : [];
+          const signature = signatures.length === 1 && !signatures[0][1] ? signatures[0] : null;
+          const declared = signature && signature[2].trim()
+            ? signature[2].split(',').map(param => param.trim()) : [];
           if (!signature || declared.length !== item.params.length ||
               declared.some((param, index) => param !== item.params[index]))
             fail('custom function Python signature does not match saved arguments.');

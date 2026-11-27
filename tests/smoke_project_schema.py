@@ -94,6 +94,9 @@ def main():
             migrated = page.evaluate('window.MathStudio.bridge.export()')
             assert migrated['customFunctions'] == valid_python_function
 
+            # Open the native disclosure before interacting with its hidden editor controls.
+            page.locator('#custom-function-panel > summary').click()
+            assert page.locator('#cf-name').is_visible(), 'custom-function editor did not open'
             # The editor rejects a Python def whose ordered arguments differ from saved params.
             page.locator('#cf-name').fill('bad_signature')
             page.locator('#cf-params').fill('x')
@@ -124,6 +127,10 @@ def main():
                   'source': 'def other(x):\\n  return x'}],
             [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python',
               'source': 'def f(y):\\n  return y'}],
+                [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python',
+                  'source': 'def f(x):\n  return x\ndef f(y):\n  return y'}],
+                [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python',
+                  'source': 'async def f(x):\n  return x'}],
                 [{'name': 'same', 'params': ['x'], 'expression': 'x'},
                  {'name': 'SAME', 'params': ['x'], 'expression': 'x'}],
                 [{'name': 'f', 'params': ['x'], 'expression': 'x'}] * 61,
@@ -186,6 +193,12 @@ def main():
                 [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python', 'source': ''}],
                 [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python', 'source': 'def other(x):\n  return x'}],
             [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python', 'source': 'def f(y):\n  return y'}],
+                [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python',
+                  'source': 'def f(x):\n  return x\ndef f(y):\n  return y'}],
+                [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python',
+                  'source': 'async def f(x):\n  return x'}],
+                [{'name': 'f', 'params': ['x'], 'expression': '', 'type': 'python',
+                  'source': 'def f(x):\n  return x\nasync def f(y):\n  return y'}],
             ]
             for functions in invalid_custom_functions:
                 rejected(dict(legacy, working='WRONG', customFunctions=functions))

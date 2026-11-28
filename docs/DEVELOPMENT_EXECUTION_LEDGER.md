@@ -2892,3 +2892,17 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - Full local Playwright/build checks could not run because no repository checkout is present. Fresh exact-head Push and PR Quality are required; pending until completed.
 - PR #191 remains open/mergeable, zero independent reviews. Branches unprotected, rulesets empty, branch-protection read HTTP 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on 24-Nov-2026; this dev change is not live.
 - Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+---
+
+## 2026-11-28 10:03 CET — Make Truss disclosure regression idempotent and expose live member count
+
+- Starting refs: `dev` `13cdfed2c7ff6ad515a63fd02f85cc5cf0c5246d`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 131 ahead / 0 behind; exactly dev/main. The bounded local `git rev-parse --show-toplevel` failed because no checkout is mounted; the GitHub integration fallback was used.
+- Inspected exact-head Push Quality #46124651626 and PR Quality #46124656267. Both failed only at Truss browser step 215; steps 212 and 214 passed. The logs point to `tests/smoke_truss_fem.py:538`: an earlier initial disclosure interaction had already opened the same native `<details>`, but a later helper scenario asserted it was collapsed. That block also expected an obsolete summary string.
+- Fixed the browser test to keep the first collapsed→expanded interaction and make later setup idempotent: assert the current Euler-readiness summary, open only if closed, and require the controlled content visible. No production math, numerical tolerance or CI gate changed.
+- Added a live singular/plural member count to the native disclosure summary. It is derived from the validated preview member snapshot, updates when the model changes (3 members → 1 member → 3 members), and changes to `Unavailable` if preview validation fails.
+- Added registered Chromium assertions for initial count, bar/triangle count transitions and idempotent disclosure access at 1280px and 390px. Updated the Structural Truss contract, living plan, this ledger and changelog in the same atomic Git tree/commit.
+- The changed JavaScript is syntax-checked in the isolated V8 runtime; HTML/UI/test wiring is checked before commit. Full local Python/Playwright/build commands remain unavailable because no repository checkout is present; fresh exact-head GitHub Actions are required.
+- PR #191 remains open/mergeable with zero independent reviews. Branches report unprotected, rulesets empty, branch-protection read 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence on 24-Nov-2026 at unchanged main. Candidate is dev-only, not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.

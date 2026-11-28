@@ -39,6 +39,7 @@ def main():
             assert 'Analysis complete' in page.locator('#status').inner_text(), page.locator('#status').inner_text()
             initial_preview = page.locator('#preview-summary').inner_text()
             assert 'mass estimate unavailable · 3 members missing density' in initial_preview, initial_preview
+            assert page.locator('#member-material-count').inner_text() == '3 members'
             member_details = page.locator('#member-material-details')
             assert not member_details.evaluate('(details) => details.open')
             member_summary = member_details.locator('summary')
@@ -531,18 +532,17 @@ def main():
                 assert math.isfinite(result['residual']) and math.isfinite(result['energyError'])
             assert 0 < euler_ratio_range['tinyBelow']['utilization'] < 1
             assert euler_ratio_range['tinyAbove']['utilization'] > 1
-            # The section helper is intentionally collapsed with the material breakdown.
-            # Exercise the real disclosure before interacting with its controls at both widths.
+            # The initial collapsed -> expanded interaction was exercised above. Earlier
+            # Euler-readiness checks leave this native disclosure open, so helper setup is idempotent.
             details = page.locator('#member-material-details')
             content = page.locator('#member-material-content')
-            assert not details.evaluate('(node) => node.open'), 'member details should start collapsed'
-            assert not content.is_visible(), 'controlled content should be hidden while collapsed'
             summary = details.locator('summary')
-            assert summary.inner_text().strip() == 'Member materials and section properties'
+            assert 'Euler readiness' in summary.inner_text()
             assert summary.get_attribute('aria-controls') == 'member-material-content'
-            summary.click()
-            assert details.evaluate('(node) => node.open'), 'summary activation should expand member details'
-            assert content.is_visible(), 'summary should reveal its controlled content region'
+            if not details.evaluate('(node) => node.open'):
+                summary.click()
+            assert details.evaluate('(node) => node.open'), 'member details must be open before helper use'
+            assert content.is_visible(), 'expanded disclosure should reveal the controlled content region'
             page.locator('#section-helper').wait_for(state='visible')
             page.locator('#section-member').wait_for(state='visible')
             # Exercise the compatibility path used when BigInt is unavailable.
@@ -1517,12 +1517,14 @@ def main():
             page.locator('#example').select_option('bar')
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#member-results tr').count() == 1
+            assert page.locator('#member-material-count').inner_text() == '1 member'
             assert abs(page.evaluate('ProMathTrussFEM.solve(ProMathTrussFEM.examples.bar).displacements[1].x') - 1e-5) < 1e-12
 
             # Section properties apply atomically to one selected member only.
             page.locator('#example').select_option('triangle')
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#members tr').count() == 3
+            assert page.locator('#member-material-count').inner_text() == '3 members'
             # The first section-helper scenario leaves this disclosure open. Reopening must
             # be idempotent: do not blindly click an already-open native summary and collapse it.
             details = page.locator('#member-material-details')

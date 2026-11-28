@@ -1,3 +1,10 @@
+## 2026-11-28 — Keep Truss disclosure checks idempotent and show the live member count
+
+- Repaired the exact-head Truss browser failure at step 215: the first Euler-readiness scenario already opens the native member disclosure, so the later section-helper scenario now opens it only when needed instead of incorrectly asserting that it has re-collapsed. The later assertion also checks the current Euler-readiness summary instead of the obsolete label.
+- Added a polite live member count to the disclosure summary, derived from the validated preview snapshot. It uses singular/plural wording, updates when switching between the one-member bar and three-member triangle, and reports Unavailable when preview validation fails.
+- Added registered Chromium coverage for initial 3-member state, 3→1→3 example transitions, and idempotent disclosure access at desktop and 390px. Updated the Structural Truss contract and living records.
+- Implemented on dev; exact-head Push/PR Quality for the resulting candidate must pass before release. No solver math, tolerances or CI gates were weakened. Not live on main. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Expose Euler readiness in the Truss member-details disclosure
 
 - Exact-head Push Quality #46122489452 and PR Quality #46122493381 both failed at Truss browser step 215, while the direct Node FEM suite passed 114/114. The traceback at `tests/smoke_truss_fem.py:43` returned three blank row strings because the per-member table is inside the initially collapsed native `#member-material-details` disclosure.

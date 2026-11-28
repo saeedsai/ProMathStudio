@@ -409,6 +409,7 @@
           : `mass estimate unavailable · ${info.unknownDensityMemberCount} ${missingDensityLabel} missing density`;
       $('preview-summary').textContent=`Model overview · ${info.nodeCount} joints · ${info.memberCount} members · ${info.connectedComponentCount} ${components} · ${info.isolatedNodeCount} ${isolated} · total member length ${fmt(info.totalMemberLength,4)} m · axial member volume Σ(L·A) ${fmt(info.totalMemberVolume,4)} m³ · ${massSummary} · bounds ${fmt(bounds.width,4)} × ${fmt(bounds.height,4)} m · applied load ΣFx ${fmt(info.appliedForce.x/divisor,4)} ${unit}, ΣFy ${fmt(info.appliedForce.y/divisor,4)} ${unit} (${info.loadedDofCount} loaded DOFs). Topology is not a stability check.`;
       const eulerReadiness=fem.summarizeEulerInputReadiness(info.memberMetrics);
+      $('member-material-count').textContent=`${eulerReadiness.total} ${eulerReadiness.total===1?'member':'members'}`;
       const eulerReadinessStatus=eulerReadiness.total===0
         ? 'No members are available for Euler screening.'
         : eulerReadiness.complete
@@ -417,6 +418,7 @@
       status(`Preview ready · ${eulerReadinessStatus}`,false);
     } catch(error) {
       $('preview-summary').textContent='Preview unavailable: '+error.message;
+      $('member-material-count').textContent='Unavailable';
       const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:14,class:'empty'}));$('member-metrics').replaceChildren(empty);
       $('plot').replaceChildren(svgNode('text',{x:310,y:190,'text-anchor':'middle'},'Correct model inputs to preview'));
       $('plot').setAttribute('aria-label','Truss preview unavailable because model inputs are invalid.');

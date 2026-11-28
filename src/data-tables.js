@@ -86,6 +86,7 @@
   // The library is a catalog, not an evaluator: insert only, never run code.
   const dataLibrary = [
     {name:'SUM',kind:'Formula',sample:'=SUM(A1:A5)',help:'Sum a numeric cell range.'},
+    {name:'PRODUCT',kind:'Formula',sample:'=PRODUCT(A1:A5)',help:'Multiply numeric cells with scale-safe binary64 arithmetic.'},
     {name:'AVERAGE',kind:'Formula',sample:'=AVERAGE(A1:A5)',help:'Average numeric cells.'},
     {name:'MIN',kind:'Formula',sample:'=MIN(A1:A5)',help:'Smallest numeric value.'},
     {name:'MAX',kind:'Formula',sample:'=MAX(A1:A5)',help:'Largest numeric value.'},
@@ -406,9 +407,11 @@
     const unique=uniqueName(name);const table={id:'sheet-'+(serial++),name:unique,columns:columns.map(String),rows:rows.map(r=>columns.map((_,i)=>r[i]===undefined?'':String(r[i])))};
     validate(table);tables.push(table);selected=table.id;render();save();return table;
   };
-  const uniqueName=(n,excludeId=null)=>{let base=String(n||'Table').replace(/[^a-zA-Z0-9_ ]/g,'_').trim().slice(0,44)||'Table';let title=base,number=2;while(tables.some(t=>t.id!==excludeId&&t.name.toLowerCase()===title.toLowerCase()))title=base+'_'+number++;return title;};
+  const uniqueName=(n,excludeId=null)=>{let base=String(n||'Table').replace(/[^a-zA-Z0-9_ ']/g,'_').trim().replace(/^'+|'+$/g,'').slice(0,44)||'Table';let title=base,number=2;while(tables.some(t=>t.id!==excludeId&&t.name.toLowerCase()===title.toLowerCase()))title=base+'_'+number++;return title;};
   const validate=t=>{if(!t||!Array.isArray(t.columns)||!Array.isArray(t.rows)||!t.columns.length||t.columns.length>MAX_COLUMNS||t.rows.length>MAX_ROWS)throw Error('Table exceeds 32 columns or 6,000 rows.');for(const row of t.rows)if(!Array.isArray(row)||row.length!==t.columns.length)throw Error('Inconsistent data row width.');};
   const getByName=name=>tables.find(t=>t.name.toLowerCase()===String(name).toLowerCase());
+  // Sheet qualifiers use Excel-style doubled apostrophes inside single quotes.
+  const sheetNameFromQualifier=qualifier=>{const raw=String(qualifier||'').replace(/!$/,'');return raw.startsWith("'")&&raw.endsWith("'")?raw.slice(1,-1).replace(/''/g,"'"):raw;};
   const value=(t,r,c,stack=new Set())=>{
     if(!t||r<0||r>=t.rows.length||c<0||c>=t.columns.length)return 0;
     const raw=t.rows[r][c];if(!String(raw).startsWith('='))return raw;
@@ -418,10 +421,10 @@
   };
   // Structural edits preserve the referenced cell identity, including $-anchored
   // addresses. References to a deleted cell become an explicit #REF! error.
-  const referencePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)/g;
+  const referencePattern=/((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)/g;
   // Protect complete aggregate ranges before scalar reference rewriting.
   // Deleting inside a range shrinks its surviving rectangle; an empty range is #REF!.
-  const structuralRangePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
+  const structuralRangePattern=/((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
   // Formula string literals are data, not cell addresses. Preserve doubled-quote escapes
   // and leave an unterminated literal untouched rather than rewriting its contents.
   function protectFormulaStringLiterals(raw){
@@ -443,21 +446,54 @@
     }
     return {text:masked,restore:value=>value.replace(/\uE100(\d+)\uE101/g,(_,index)=>literals[Number(index)])};
   }
+  const sheetQualifier=name=>{const value=String(name);return /^[A-Za-z_][A-Za-z0-9_]*$/.test(value)?value+'!':"'"+value.replace(/'/g,"''")+"'!";};
+  function rewriteSheetNameReferences(oldName,newName){
+    const oldKey=String(oldName).toLowerCase(),replacement=sheetQualifier(newName);
+    const qualifierPattern=/(?:'((?:[^']|'')+)'|([A-Za-z_][A-Za-z0-9_]*))!/g;
+    const rewrites=[];
+    // Stage every conversion and replacement before touching workbook cells. A
+    // malformed/hostile cell encountered late in another sheet must not leave
+    // earlier formulas renamed while the selected sheet keeps its old name.
+    for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
+      const raw=String(row[c]);if(!raw.startsWith('='))continue;
+      const protectedFormula=protectFormulaStringLiterals(raw);
+      const rewritten=protectedFormula.text.replace(qualifierPattern,(match,quoted,plain)=>{
+        const referenced=quoted===undefined?plain:quoted.replace(/''/g,"'");
+        return referenced.toLowerCase()===oldKey?replacement:match;
+      });
+      const value=protectedFormula.restore(rewritten);
+      if(value!==raw)rewrites.push({row,column:c,value});
+    }
+    // Commit only after the complete workbook has been converted successfully.
+    for(const rewrite of rewrites)rewrite.row[rewrite.column]=rewrite.value;
+  }
   function shiftReferences(edited,axis,index,delta){
+    const isSupportedReference=ref=>{
+      const m=/^\$?([A-Za-z]{1,3})\$?([1-9]\d*)$/.exec(ref);
+      return !!m&&colIndex(m[1])<MAX_COLUMNS&&Number(m[2])<=MAX_ROWS;
+    };
     const coord=ref=>{const m=/^(\$?)([A-Za-z]{1,3})(\$?)([1-9]\d*)$/.exec(ref);
       return axis==='row'?Number(m[4])-1:colIndex(m[2]);};
     const at=(ref,pos)=>axis==='row'?ref.replace(/[1-9]\d*$/,String(pos+1))
       :ref.replace(/^(\$?)[A-Za-z]{1,3}(?=\$?[1-9]\d*$)/,(_,anchor)=>anchor+colLetter(pos));
+    const rewrites=[];
     for(const sheet of tables)for(const row of sheet.rows)for(let c=0;c<row.length;c++){
       const raw=String(row[c]);if(!raw.startsWith('='))continue;
       const protectedFormula=protectFormulaStringLiterals(raw),ranges=[];
       let next=protectedFormula.text.replace(structuralRangePattern,(match,prefix,left,right,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
-        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         let mapped=match;
         if(name.toLowerCase()===edited.name.toLowerCase()){
+          // Keep already-invalid grid addresses invalid instead of reviving them after a shift.
+          if(!isSupportedReference(left)||!isSupportedReference(right))return match;
           const a=coord(left),b=coord(right),lo=Math.min(a,b),hi=Math.max(a,b);
-          if(delta>0)mapped=(prefix||'')+at(left,a>=index?a+delta:a)+':'+at(right,b>=index?b+delta:b);
+          if(delta>0){
+             const shiftedLeft=at(left,a>=index?a+delta:a);
+             const shiftedRight=at(right,b>=index?b+delta:b);
+             if(!isSupportedReference(shiftedLeft)||!isSupportedReference(shiftedRight))mapped='#REF!';
+             else mapped=(prefix||'')+shiftedLeft+':'+shiftedRight;
+           }
           else{const lower=lo-(index<lo?1:0),upper=hi-(index<=hi?1:0);
             mapped=upper<lower?'#REF!':(prefix||'')+
               at(left,a<=b?lower:upper)+':'+at(right,a<=b?upper:lower);}
@@ -467,16 +503,21 @@
       next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
         if(offset&&/[A-Za-z0-9_.$]/.test(whole[offset-1]))return match;
         const after=whole[offset+match.length];if(after&&/[A-Za-z0-9_.$]/.test(after))return match;
-        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         if(name.toLowerCase()!==edited.name.toLowerCase())return match;
+        if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;
         const position=axis==='row'?Number(digits)-1:colIndex(letters);
         if(delta<0&&position===index)return '#REF!';
         const moved=position>=index+(delta<0?1:0)?position+delta:position;
         if(moved===position)return match;
+        if(moved<0||moved>=(axis==='row'?MAX_ROWS:MAX_COLUMNS))return '#REF!';
         return (prefix||'')+colAnchor+(axis==='column'?colLetter(moved):letters)+rowAnchor+(axis==='row'?moved+1:digits);
       });
-      row[c]=protectedFormula.restore(next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]));
+      const rewritten=protectedFormula.restore(next.replace(/\uE000(\d+)\uE001/g,(_,i)=>ranges[Number(i)]));
+      if(rewritten!==raw)rewrites.push({row,column:c,value:rewritten});
     }
+    // Commit only after every workbook cell has been converted and rewritten successfully.
+    for(const rewrite of rewrites)rewrite.row[rewrite.column]=rewrite.value;
   }
   // Stable full-row sort preserves referenced cell identities in all sheets.
   // Unsafe noncontiguous ranges abort before any workbook mutation.
@@ -491,19 +532,23 @@
     });
     if(order.every((entry,i)=>entry.i===i))return;
     const newRow=Array(t.rows.length);order.forEach((entry,i)=>{newRow[entry.i]=i;});
-    const rangePattern=/((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
+    const isSupportedReference=ref=>{
+      const m=/^\$?([A-Za-z]{1,3})\$?([1-9]\d*)$/.exec(ref);
+      return !!m&&colIndex(m[1])<MAX_COLUMNS&&Number(m[2])<=MAX_ROWS;
+    };
+    const rangePattern=/((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?[A-Za-z]{1,3}\$?[1-9]\d*):(\$?[A-Za-z]{1,3}\$?[1-9]\d*)/g;
     const rowOf=ref=>Number(/[1-9]\d*$/.exec(ref)[0])-1;
     const rewrite=(raw,sheet)=>{
       if(!String(raw).startsWith('='))return raw;
       const protectedFormula=protectFormulaStringLiterals(raw),ranges=[];
       let next=protectedFormula.text.replace(rangePattern,(match,prefix,left,right,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$'!]/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
-        const target=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        const target=prefix?sheetNameFromQualifier(prefix):sheet.name;
         let mapped=match;
         if(target.toLowerCase()===t.name.toLowerCase()){
+          if(!isSupportedReference(left)||!isSupportedReference(right))return match;
           const lo=Math.min(rowOf(left),rowOf(right)),hi=Math.max(rowOf(left),rowOf(right));
-          if(hi>=newRow.length)throw Error('Cannot sort: formula range '+match+' exceeds the table.');
-          const positions=[];for(let i=lo;i<=hi;i++)positions.push(newRow[i]);
+          const positions=[];for(let i=lo;i<=hi;i++)positions.push(i<newRow.length?newRow[i]:i);
           const lower=Math.min(...positions),upper=Math.max(...positions);
           if(upper-lower+1!==positions.length)throw Error('Cannot sort: formula range '+match+' would split into noncontiguous rows.');
           const forward=rowOf(left)<=rowOf(right);
@@ -514,8 +559,9 @@
       });
       next=next.replace(referencePattern,(match,prefix,colAnchor,letters,rowAnchor,digits,offset,whole)=>{
         if((offset&&/[A-Za-z0-9_.$']/.test(whole[offset-1]))||/[A-Za-z0-9_.$']/.test(whole[offset+match.length]||''))return match;
-        const name=prefix?prefix.slice(0,-1).replace(/^'|'$/g,''):sheet.name;
+        const name=prefix?sheetNameFromQualifier(prefix):sheet.name;
         if(name.toLowerCase()!==t.name.toLowerCase())return match;
+        if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;
         const old=Number(digits)-1;if(old>=newRow.length)return match;
         return (prefix||'')+colAnchor+letters+rowAnchor+(newRow[old]+1);
       });
@@ -530,10 +576,15 @@
     if(!Number.isInteger(index)||index<0||index>size||(delta<0&&index===size))throw Error('Invalid '+axis+' position.');
     if(delta>0&&size>=limit)throw Error('Maximum '+limit+' '+(axis==='row'?'rows':'columns')+'.');
     if(delta<0&&axis==='column'&&size<=1)throw Error('A table needs one column.');
-    if(axis==='row'&&delta>0&&values&&values.length!==t.columns.length)throw Error('Row width mismatch.');
+    if(axis==='row'&&delta>0&&values&&(!Array.isArray(values)||values.length!==t.columns.length))throw Error('Row width mismatch.');
+    // Materialize caller values before the workbook-wide reference rewrite. A conversion
+    // failure must not leave formulas shifted when the row itself was never inserted.
+    const insertedRow=axis==='row'&&delta>0
+      ? (values?values.map(v=>String(v).slice(0,8000)):t.columns.map(()=>''))
+      : null;
     shiftReferences(t,axis,index,delta);
     if(axis==='row'){
-      if(delta>0)t.rows.splice(index,0,values?values.map(v=>String(v).slice(0,8000)):t.columns.map(()=>''));
+      if(delta>0)t.rows.splice(index,0,insertedRow);
       else t.rows.splice(index,1);
     }else{
       if(delta>0){t.columns.splice(index,0,'Column'+(size+1));t.rows.forEach(r=>r.splice(index,0,''));}
@@ -541,7 +592,122 @@
     }
     render();save();
   }
-  const number=v=>{if(v===null||v==='')return 0;const n=Number(v);if(!Number.isFinite(n))throw Error('Not numeric: '+v);return n;};
+  const DECIMAL_CELL_NUMBER=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+  const numericCellValue=v=>{
+    if(typeof v==='number')return Number.isFinite(v)?v:null;
+    if(typeof v!=='string')return null;
+    const text=v.trim();
+    if(!text||!DECIMAL_CELL_NUMBER.test(text))return null;
+    const n=Number(text);
+    return Number.isFinite(n)?n:null;
+  };
+  const number=v=>{
+    if(v===null||v==='')return 0;
+    if(typeof v==='string'&&v.trim()==='')return 0;
+    const n=typeof v==='number'?v:numericCellValue(v);
+    if(n===null||!Number.isFinite(n))throw Error('Not numeric: '+v);
+    return n;
+  };
+  // Neumaier accumulation keeps low-order terms when large normalized values cancel.
+  function addCompensated(state,value){
+    const next=state.sum+value;
+    if(Math.abs(state.sum)>=Math.abs(value))state.correction+=(state.sum-next)+value;
+    else state.correction+=(value-next)+state.sum;
+    state.sum=next;
+  }
+  // Scale finite inputs to [-1,1] before summation so the mean cannot overflow.
+  // Keep terms whose normalized quotient underflows in a separate, unscaled sum:
+  // they may be the only surviving contribution after large positive/negative values cancel.
+  function stableMean(values){
+    const count=values.length;
+    if(!count)return 0;
+    // Prefer a compensated total when it is representable. Dividing once
+    // avoids the extra rounding from normalizing each term and scaling back.
+    // If the total overflows, the normalized path can still yield a finite mean.
+    const finiteSum=stableSum(values);
+    if(Number.isFinite(finiteSum))return finiteSum/count;
+    let scale=0;
+    for(const value of values)scale=Math.max(scale,Math.abs(value));
+    if(scale===0)return 0;
+    const scaled={sum:0,correction:0},residual={sum:0,correction:0};
+    for(const value of values){
+      const normalized=value/scale;
+      if(normalized===0&&value!==0)addCompensated(residual,value);
+      else addCompensated(scaled,normalized);
+    }
+    const normalizedMean=(scaled.sum+scaled.correction)/count;
+    const primary=Math.max(-1,Math.min(1,normalizedMean))*scale;
+    const residualMean=(residual.sum+residual.correction)/count;
+    // A mean is bounded by the largest absolute input; clamp only rounding overshoot.
+    return Math.max(-scale,Math.min(scale,primary+residualMean));
+  }
+  // Scale finite inputs before summing so a finite final result survives
+  // overflowing partial sums. Keep terms whose normalized quotient underflows:
+  // they may be the only contribution left after larger values cancel.
+  function stableSum(values){
+    if(!values.length)return 0;
+    // Keep original-unit rounding when the compensated partial sum remains finite.
+    // Normalize only when an intermediate or corrected total would overflow.
+    const direct={sum:0,correction:0};let directFinite=true;
+    for(const value of values){
+      if(!Number.isFinite(direct.sum+value)){directFinite=false;break;}
+      addCompensated(direct,value);
+      if(!Number.isFinite(direct.correction)){directFinite=false;break;}
+    }
+    if(directFinite){
+      const total=direct.sum+direct.correction;
+      if(Number.isFinite(total))return total;
+    }
+    let scale=0;
+    for(const value of values)scale=Math.max(scale,Math.abs(value));
+    if(scale===0)return 0;
+    const scaled={sum:0,correction:0},residual={sum:0,correction:0};
+    for(const value of values){
+      const normalized=value/scale;
+      if(normalized===0&&value!==0)addCompensated(residual,value);
+      else addCompensated(scaled,normalized);
+    }
+    const primary=(scaled.sum+scaled.correction)*scale;
+    const remainder=residual.sum+residual.correction;
+    return primary+remainder;
+  }
+  // Multiply binary64 factors without overflowing/underflowing intermediate products.
+  // Mantissas stay in [1,2); powers of two are accumulated separately and restored once.
+  function stableProduct(values){
+    if(!values.length)return 1;
+    let sign=1,zero=false,mantissa=1,exponent=0;
+    for(const value of values){
+      if(value===0){if(Object.is(value,-0))sign=-sign;zero=true;continue;}
+      if(value<0)sign=-sign;
+      const absolute=Math.abs(value);
+      let power=Math.floor(Math.log2(absolute));
+      let unit=Math.pow(2,power);
+      if(!Number.isFinite(unit)){power=1023;unit=Math.pow(2,1023);}
+      else if(unit===0){power=-1074;unit=Number.MIN_VALUE;}
+      let part=absolute/unit;
+      if(part>=2){part/=2;power++;}
+      else if(part<1){part*=2;power--;}
+      mantissa*=part;
+      exponent+=power;
+      const adjustment=Math.floor(Math.log2(mantissa));
+      mantissa/=Math.pow(2,adjustment);
+      exponent+=adjustment;
+    }
+    if(zero)return sign*0;
+    if(exponent>1023)return sign*Infinity;
+    if(exponent< -1075)return sign*0;
+    const magnitude=exponent< -1022
+      ? mantissa*Math.pow(2,exponent+1022)*2.2250738585072014e-308
+      : mantissa*Math.pow(2,exponent);
+    return sign*magnitude;
+  }
+  // Scale before taking the midpoint to avoid overflow and retain subnormal values.
+  function safeMidpoint(a,b){
+    const scale=Math.max(Math.abs(a),Math.abs(b));
+    if(scale===0)return 0;
+    const midpoint=((a/scale)+(b/scale))/2*scale;
+    return Math.max(-scale,Math.min(scale,midpoint));
+  }
   const splitArgs=str=>{const out=[];let depth=0,start=0;for(let i=0;i<str.length;i++){if(str[i]==='(')depth++;else if(str[i]===')')depth--;else if(str[i]===','&&depth===0){out.push(str.slice(start,i));start=i+1;}}out.push(str.slice(start));return out;};
   // Find comparisons only at the top level: nested IF conditions may contain
   // their own comparisons, which must not split the outer condition.
@@ -613,13 +779,13 @@
     // Custom functions and aggregates may wrap one another. Reduce innermost
     // calls in alternating passes, without eval or eager IF branch evaluation.
     const customPattern=/\b([A-Za-z][A-Za-z0-9_]*)\s*\(([^()]*)\)/g;
-    const aggregatePattern=/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)\s*\(([^()]*)\)/gi;
+    const aggregatePattern=/\b(SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN|PRODUCT)\s*\(([^()]*)\)/gi;
     let compositionPasses=0;
     while(true){
       let changed=false;
       expr=String(expr).replace(customPattern,(all,name,body)=>{
         // Built-in spreadsheet functions cannot be shadowed by restored custom names.
-        const fn=/^(?:IF|SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN)$/i.test(name)?null:window.MathStudio.customFunctions?.find(name);
+        const fn=/^(?:IF|SUM|AVERAGE|AVG|MIN|MAX|COUNT|MEDIAN|PRODUCT)$/i.test(name)?null:window.MathStudio.customFunctions?.find(name);
         if(!fn)return all;
         const args=splitArgs(body);
         if(args.length!==fn.params.length||args.some(arg=>!arg.trim()))throw Error('#ARGS');
@@ -635,8 +801,8 @@
       if(aggregatePattern.test(expr)){
         changed=true;
         expr=String(expr).replace(aggregatePattern,(all,fn,body)=>{
-      const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
-        if(range){const target=range[1]?getByName(range[1].slice(0,-1).replace(/^'|'$/g,'')):t;
+      const nums=[];for(const arg of splitArgs(body)){const range=/^((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!)?(\$?)([A-Z]+)(\$?)(\d+):(\$?)([A-Z]+)(\$?)(\d+)$/i.exec(arg.trim());
+        if(range){const target=range[1]?getByName(sheetNameFromQualifier(range[1])):t;
           if(!target)throw Error('#SHEET');
           const c0=colIndex(range[3]),r0=+range[5]-1,c1=colIndex(range[7]),r1=+range[9]-1;
           if((Math.abs(c1-c0)+1)*(Math.abs(r1-r0)+1)>6000)throw Error('#RANGE');
@@ -646,7 +812,8 @@
             // value() returns zero for missing coordinates, but an unpopulated spreadsheet cell is blank, not numeric zero.
             if(rr>=target.rows.length||cc>=target.columns.length)continue;
             const v=value(target,rr,cc,stack);
-            if(v!==''&&String(v).trim()!==''&&Number.isFinite(Number(v)))nums.push(Number(v));
+            const numeric=numericCellValue(v);
+            if(numeric!==null)nums.push(numeric);
           }
         } else {const v=compute(arg,t,stack);if(Number.isFinite(Number(v)))nums.push(Number(v));}}
       const upper=fn.toUpperCase();
@@ -654,45 +821,55 @@
       if(upper==='MEDIAN'){
         if(!nums.length)throw Error('#NUM!');
         const ordered=nums.slice().sort((a,b)=>a-b),mid=Math.floor(ordered.length/2);
-        x=ordered.length%2?ordered[mid]:ordered[mid-1]/2+ordered[mid]/2;
+        x=ordered.length%2?ordered[mid]:safeMidpoint(ordered[mid-1],ordered[mid]);
       }else if(upper==='AVERAGE'||upper==='AVG'){
         // Scale finite terms before accumulation so a finite mean cannot
         // overflow merely because its unscaled intermediate sum would.
-        x=nums.length?nums.reduce((a,b)=>a+b/nums.length,0):0;
+        x=nums.length?stableMean(nums):0;
       }else if(upper==='SUM'){
-        x=nums.reduce((a,b)=>a+b,0);
+        x=stableSum(nums);
       }else if(upper==='COUNT'){
         x=nums.length;
-      }else if(upper==='MIN'){
-        x=nums.length?Math.min(...nums):0;
-      }else{
-        x=nums.length?Math.max(...nums):0;
+      }else if(upper==='PRODUCT'){
+        x=stableProduct(nums);
+      }else if(upper==='MIN'||upper==='MAX'){
+        // A formula may combine many individually bounded ranges. Avoid spreading
+        // their aggregate values into a call that exceeds the JavaScript argument limit.
+        x=nums.length?nums[0]:0;
+        for(let i=1;i<nums.length;i++)
+          x=upper==='MIN'?Math.min(x,nums[i]):Math.max(x,nums[i]);
       }
       // An overflowing aggregate is an error, never a plausible zero.
       if(!Number.isFinite(x))throw Error('#NUM!');
       // Emit a scalar token, not '(scalar)': parenthesized intermediate values
       // would prevent the next innermost-first pass from matching outer calls.
-      return String(x);
+      // String(-0) becomes "0"; keep the sign explicit for nested aggregate evaluation.
+      return Object.is(x,-0)?'-0':String(x);
         });
       }
       if(!changed)break;
       if(++compositionPasses>40)throw Error('#LIMIT');
     }
     // Limited token grammar intentionally avoids eval()/Function() and script execution.
-    const src=expr.trim();const rx=/\s*(?:((?:'[^']+'|[A-Za-z_][A-Za-z0-9_]*)!\$?[A-Za-z]+\$?\d+|\$?[A-Za-z]+\$?\d+)|((?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)|([()+\-*/^]))/giy;
+    const src=expr.trim();const rx=/\s*(?:((?:'(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_]*)!\$?[A-Za-z]+\$?\d+|\$?[A-Za-z]+\$?\d+)|((?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)|([()+\-*/^]))/giy;
     const tokens=[];let pos=0;
     while(pos<src.length){rx.lastIndex=pos;const m=rx.exec(src);if(!m||m.index!==pos)throw Error('#FORMULA');tokens.push(m[1]?{type:'cell',v:m[1]}:m[2]?{type:'num',v:Number(m[2])}:{type:m[3]});pos=rx.lastIndex;if(tokens.length>400)throw Error('#LIMIT');}
     let at=0;const peek=()=>tokens[at]?.type;
     function primary(){const tok=tokens[at++];if(!tok)throw Error('#FORMULA');if(tok.type==='num')return tok.v;
-      if(tok.type==='cell'){let target=t,ref=tok.v;const bang=ref.lastIndexOf('!');if(bang>=0){target=getByName(ref.slice(0,bang).replace(/^'|'$/g,''));ref=ref.slice(bang+1);if(!target)throw Error('#SHEET');}
-        const m=/^(\$?)([A-Za-z]+)(\$?)(\d+)$/.exec(ref);if(!m)throw Error('#REF');return number(value(target,Number(m[4])-1,colIndex(m[2]),stack));}
+      if(tok.type==='cell'){let target=t,ref=tok.v;const bang=ref.lastIndexOf('!');if(bang>=0){target=getByName(sheetNameFromQualifier(ref.slice(0,bang)));ref=ref.slice(bang+1);if(!target)throw Error('#SHEET');}
+        const m=/^(\$?)([A-Za-z]+)(\$?)(\d+)$/.exec(ref);if(!m)throw Error('#REF');
+        const row=Number(m[4])-1,column=colIndex(m[2]);
+        if(row<0||row>=MAX_ROWS||column<0||column>=MAX_COLUMNS)throw Error('#REF!');
+        return number(value(target,row,column,stack));}
       if(tok.type==='('){const v=addition();if(peek()!==')')throw Error('#PAREN');at++;return v;}
       if(tok.type==='+'||tok.type==='-'){const v=primary();return tok.type==='-'?-v:v;}throw Error('#FORMULA');}
     function power(){let v=primary();if(peek()==='^'){at++;v=Math.pow(v,power());}return v;}
     function mult(){let v=power();while(peek()==='*'||peek()==='/'){const op=tokens[at++].type,r=power();v=op==='*'?v*r:v/r;}return v;}
     function addition(){let v=mult();while(peek()==='+'||peek()==='-'){const op=tokens[at++].type,r=mult();v=op==='+'?v+r:v-r;}return v;}
-    const result=addition();if(at!==tokens.length||!Number.isFinite(result))throw Error('#VALUE');return Number(result.toPrecision(13));
+    const result=addition();if(at!==tokens.length||!Number.isFinite(result))throw Error('#VALUE');return result;
   }
+  // Preserve full binary64 results for downstream formulas, exports and graphs; round only the cell editor display.
+  const displayCellValue=value=>typeof value==='number'&&Number.isFinite(value)?Number(value.toPrecision(13)):value;
   const evaluated=t=>t.rows.map((row,r)=>row.map((_,c)=>{try{return value(t,r,c);}catch(e){return e.message.startsWith('#')?e.message:'#ERR';}}));
   function save(){try{localStorage.setItem('mathstudio-tables-v1',JSON.stringify(exportState()));}catch{notify('Browser storage is unavailable or full; export the project JSON to keep this workbook.',true);}}
   function exportState(){return {version:1,selected,tables:deep(tables)};}
@@ -721,7 +898,7 @@
     for(let r=0;r<t.rows.length;r++)if(!q||rows[r].some(v=>String(v).toLowerCase().includes(q)))show.push(r);
     for(const r of show.slice(0,MAX_DISPLAY)){const tr=el('tr');tr.append(el('th',{class:'dt-rownum'},r+1));for(let c=0;c<t.columns.length;c++){
       const td=el('td');const val=rows[r][c],input=el('input',{'aria-label':colLetter(c)+(r+1),'data-row':r,'data-col':c});
-      input.value=String(val??'');if(String(val).startsWith('#'))input.classList.add('dt-error');
+      input.value=String(displayCellValue(val??''));if(String(val).startsWith('#'))input.classList.add('dt-error');
       input.addEventListener('focus',()=>{focusedCell={id:t.id,r,c};input.value=t.rows[r][c];input.select();});
       input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();input.blur();}});
       input.addEventListener('change',()=>{t.rows[r][c]=input.value.slice(0,8000);save();});
@@ -732,7 +909,7 @@
   const safeAction=fn=>{try{fn();}catch(error){notify(error.message,true);}};
   $('dt-new').addEventListener('click',()=>safeAction(()=>makeTable('Data'+(tables.length+1),['A','B','C'],[['','',''],['','',''],['','','']])));
   $('dt-copy').addEventListener('click',()=>safeAction(()=>{const t=active();makeTable(t.name+'_copy',t.columns,t.rows);}));
-  $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, underscores):',t.name);if(name===null)return;t.name=uniqueName(name,t.id);save();render();}));
+  $('dt-rename').addEventListener('click',()=>safeAction(()=>{const t=active(),name=prompt('Table name (letters, numbers, spaces, underscores and apostrophes):',t.name);if(name===null)return;const oldName=t.name,newName=uniqueName(name,t.id);if(newName!==oldName)rewriteSheetNameReferences(oldName,newName);t.name=newName;save();render();}));
   $('dt-remove').addEventListener('click',()=>safeAction(()=>{if(tables.length===1)throw Error('Keep at least one table.');if(!confirm('Delete selected table?'))return;tables=tables.filter(t=>t.id!==selected);selected=tables[0].id;render();save();}));
   $('dt-add-row').addEventListener('click',()=>safeAction(()=>structuralEdit('row',active().rows.length,1)));
   $('dt-add-col').addEventListener('click',()=>safeAction(()=>structuralEdit('column',active().columns.length,1)));
@@ -866,21 +1043,56 @@
   }
   $('dt-graph-table').addEventListener('change',chartColumns);
   $('dt-chart-type').addEventListener('change',chartColumns);
-  function drawCategorical(t,kind,xi,yi){const rows=evaluated(t),sums=new Map();for(const row of rows){const key=String(row[xi]??'').trim();const v=Number(row[yi]);if(!key||!Number.isFinite(v))continue;sums.set(key,(sums.get(key)||0)+v);}
-    let entries=[...sums.entries()];if(entries.length>24){entries=entries.slice(0,23).concat([['Other',entries.slice(23).reduce((sum,x)=>sum+x[1],0)]]);}
+  function drawCategorical(t,kind,xi,yi){
+    const rows=evaluated(t),buckets=new Map();
+    for(const row of rows){
+      const key=String(row[xi]??'').trim(),v=Number(row[yi]);
+      if(!key||!Number.isFinite(v))continue;
+      const bucket=buckets.get(key);
+      if(bucket)bucket.push(v);else buckets.set(key,[v]);
+    }
+    let entries=[...buckets.entries()].map(([name,values])=>{
+      const total=stableSum(values);
+      if(!Number.isFinite(total))throw Error('Category "'+name+'" total exceeds finite numeric range.');
+      return [name,total];
+    });
+    if(entries.length>24){
+      const otherTotal=stableSum(entries.slice(23).map(entry=>entry[1]));
+      if(!Number.isFinite(otherTotal))throw Error('Other category total exceeds finite numeric range.');
+      entries=entries.slice(0,23).concat([['Other',otherTotal]]);
+    }
     if(!entries.length)throw Error('Select a numeric values column with nonempty category labels.');
     const canvas=$('dt-chart-canvas'),ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
     ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.fillStyle='#1d2a49';ctx.font='bold 25px Arial';ctx.fillText(t.name+' — '+(kind==='pie'?'Pie':'Bar')+' chart',45,45);
     const colors=Array.from({length:24},(_,i)=>window.MathStudio.graphAppearance?.color(i)||'#536be8');
-    if(kind==='bar'){const margin=90,max=Math.max(0,...entries.map(e=>e[1])),min=Math.min(0,...entries.map(e=>e[1]));const lo=Math.min(0,min),hi=Math.max(1,max),barW=(w-2*margin)/entries.length;
+    if(kind==='bar'){
+      const margin=90,scale=Math.max(0,...entries.map(entry=>Math.abs(entry[1])));
+      const normalized=scale?entries.map(([name,value])=>[name,value/scale]):entries.map(([name])=>[name,0]);
+      let hi=Math.max(0,...normalized.map(entry=>entry[1])),lo=Math.min(0,...normalized.map(entry=>entry[1]));
+      if(hi===lo)hi=1;
+      const span=hi-lo,barW=(w-2*margin)/entries.length;
       ctx.strokeStyle='#90a1c6';ctx.beginPath();ctx.moveTo(margin,100);ctx.lineTo(margin,h-95);ctx.lineTo(w-margin,h-95);ctx.stroke();
-      for(let i=0;i<entries.length;i++){const [name,v]=entries[i],x=margin+i*barW+barW*.13,bw=barW*.74;
-        const y0=100+(hi/(hi-lo))*(h-195),y=100+(hi-v)/(hi-lo)*(h-195);ctx.fillStyle=colors[i%colors.length];ctx.fillRect(x,Math.min(y,y0),bw,Math.max(1,Math.abs(y-y0)));
+      const y0=100+(hi/span)*(h-195);
+      for(let i=0;i<entries.length;i++){
+        const [name,value]=entries[i],normalizedValue=normalized[i][1],x=margin+i*barW+barW*.13,bw=barW*.74;
+        const y=100+(hi-normalizedValue)/span*(h-195);
+        ctx.fillStyle=colors[i%colors.length];ctx.fillRect(x,Math.min(y,y0),bw,Math.max(1,Math.abs(y-y0)));
         ctx.fillStyle='#566783';ctx.font='12px Arial';ctx.save();ctx.translate(x+bw/2,h-84);ctx.rotate(-Math.PI/6);ctx.fillText(name.slice(0,14),-4,0);ctx.restore();
-        ctx.font='bold 12px Arial';ctx.fillText(String(+v.toFixed(4)),x,Math.min(y,y0)-8);}}
-    else{const positive=entries.filter(v=>v[1]>0),sum=positive.reduce((a,b)=>a+b[1],0);if(!sum)throw Error('Pie chart requires positive values.');let angle=-Math.PI/2;
-      for(let i=0;i<positive.length;i++){const [name,v]=positive[i],end=angle+v/sum*Math.PI*2;ctx.beginPath();ctx.moveTo(400,330);ctx.arc(400,330,230,angle,end);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();angle=end;
-        ctx.fillRect(760,115+i*24,13,13);ctx.fillStyle='#2b3d59';ctx.font='15px Arial';ctx.fillText(name.slice(0,30)+' · '+(100*v/sum).toFixed(1)+'%',783,127+i*24);}}
+        ctx.font='bold 12px Arial';ctx.fillText(String(+value.toFixed(4)),x,Math.min(y,y0)-8);
+      }
+    }else{
+      const positive=entries.filter(entry=>entry[1]>0);
+      if(!positive.length)throw Error('Pie chart requires positive values.');
+      const scale=Math.max(...positive.map(entry=>entry[1]));
+      const weights=positive.map(entry=>entry[1]/scale),total=stableSum(weights);
+      if(!(total>0)||!Number.isFinite(total))throw Error('Pie chart values cannot be normalized.');
+      let angle=-Math.PI/2;
+      for(let i=0;i<positive.length;i++){
+        const [name]=positive[i],fraction=weights[i]/total,end=angle+fraction*Math.PI*2;
+        ctx.beginPath();ctx.moveTo(400,330);ctx.arc(400,330,230,angle,end);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();angle=end;
+        ctx.fillRect(760,115+i*24,13,13);ctx.fillStyle='#2b3d59';ctx.font='15px Arial';ctx.fillText(name.slice(0,30)+' · '+(100*fraction).toFixed(1)+'%',783,127+i*24);
+      }
+    }
     chartDiv.hidden=false;document.querySelector('#graph-panel .graph-canvas-wrap').classList.add('workspace-hidden');$('dt-chart-status').textContent=kind+' chart of '+entries.length+' categories from '+t.name+'.';
   }
   function sendToGraph(){const t=tables.find(x=>x.id===$('dt-graph-table').value)||active();if(!t)throw Error('No table selected.');const x=Number($('dt-graph-x').value),y=Number($('dt-graph-y').value),z=Number($('dt-graph-z').value),kind=$('dt-chart-type').value;

@@ -33,6 +33,70 @@ for(const cell of [null,true,false,'1',3.25,0]){
  assert.strictEqual(migrate(data).graph.dataset.rows[0][1],cell);
 }
 const v1=basic();v1.version=1;assert.strictEqual(migrate(v1).version,2);
+
+const overlay=()=>({name:'OVERLAY',table:{headers:['t','w'],rows:[['0','2'],['1','4']]},
+ mapping:{x:0,y:1,z:1,mode:'2d',style:'line'}});
+const withOverlay=()=>{const data=basic();data.graph.dataset.extra=[overlay()];return data;};
+const valid2d=withOverlay(),validSnapshot=JSON.stringify(valid2d);
+assert.strictEqual(migrate(valid2d).graph.dataset.extra.length,1);
+assert.strictEqual(JSON.stringify(valid2d),validSnapshot,'overlay validation must not mutate input');
+const valid3d=withOverlay();
+valid3d.graph.dataset.extra[0].table.headers.push('z');
+valid3d.graph.dataset.extra[0].table.rows.forEach(row=>row.push('3'));
+valid3d.graph.dataset.extra[0].mapping={x:0,y:1,z:2,mode:'3d',style:'grid'};
+assert.strictEqual(migrate(valid3d).graph.dataset.extra.length,1);
+const invalidOverlay=(mutate,pattern)=>{const data=withOverlay();mutate(data.graph.dataset);assert.throws(()=>migrate(data),pattern);};
+invalidOverlay(set=>set.extra={},/graph dataset overlays/);
+invalidOverlay(set=>set.extra=Array.from({length:21},overlay),/graph dataset overlays/);
+invalidOverlay(set=>set.extra[0]={table:overlay().table},/graph dataset overlay is invalid/);
+invalidOverlay(set=>set.extra[0].table.headers=['t'],/graph dataset overlay dimensions/);
+invalidOverlay(set=>set.extra[0].table.rows[0][1]={bad:true},/graph dataset overlay has invalid cells/);
+invalidOverlay(set=>set.extra[0].mapping.x=2,/graph dataset overlay mapping/);
+invalidOverlay(set=>set.extra[0].mapping.x=1,/graph dataset overlay mapping/);
+invalidOverlay(set=>set.extra[0].mapping.mode='4d',/graph dataset overlay mapping/);
+invalidOverlay(set=>{
+ set.extra[0].table.headers.push('z');
+ set.extra[0].table.rows.forEach(row=>row.push('3'));
+ set.extra[0].mapping.mode='3d';set.extra[0].mapping.z=1;
+},/graph dataset overlay mapping/);
+invalidOverlay(set=>set.extra[0].mapping.style='bad',/graph dataset overlay mapping/);
+invalidOverlay(set=>set.extra[0].table.rows=[['a','b']],/graph dataset overlay has no numeric points/);
+invalidOverlay(set=>set.extra[0].table.headers=['t','T'],/graph dataset overlay has invalid column names/);
+invalidOverlay(set=>set.extra[0].table.headers=['t',' '],/graph dataset overlay has invalid column names/);
+const legacyOverlay=withOverlay();legacyOverlay.version=1;
+assert.strictEqual(migrate(legacyOverlay).version,2,'legacy v1 graph overlays remain supported');
+const noExtra=basic();noExtra.graph.dataset.extra=null;
+assert.strictEqual(migrate(noExtra).graph.dataset.extra,null,'null legacy overlay list remains tolerated');
+
+const mapped3d=()=>{const data=basic();data.graph={mode:'3d',dataset:{
+ headers:['time','value','height'],rows:[[0,1,2],[1,2,3]],x:'0',y:'1',z:'2',style:'line'}};return data;};
+const validMapped=mapped3d(),mappedSnapshot=JSON.stringify(validMapped);
+assert.strictEqual(migrate(validMapped).graph.dataset.x,'0');
+assert.strictEqual(migrate(validMapped).graph.dataset.style,'line');
+assert.strictEqual(JSON.stringify(validMapped),mappedSnapshot,'primary mapping validation must not mutate input');
+const invalidPrimary=(mutate,pattern)=>{const data=mapped3d();mutate(data.graph);assert.throws(()=>migrate(data),pattern);};
+invalidPrimary(graph=>graph.mode='4d',/graph mode is invalid/);
+invalidPrimary(graph=>graph.dataset.x='3',/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.y='not-a-column',/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.z=-1,/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.x='1',/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.z='1',/graph dataset mapping is invalid/);
+invalidPrimary(graph=>graph.dataset.style='dots',/graph dataset style is invalid/);
+for (const selector of ['0x0','0b1','0o2','1e0','0'.repeat(17)]) {
+ invalidPrimary(graph=>graph.dataset.x=selector,/graph dataset mapping is invalid/);
+ invalidOverlay(set=>set.extra[0].mapping.x=selector,/graph dataset overlay mapping/);
+}
+const paddedPrimary=mapped3d();paddedPrimary.graph.dataset.x=' +0 ';paddedPrimary.graph.dataset.y=' 1 ';
+assert.strictEqual(migrate(paddedPrimary).graph.dataset.x,' +0 ','bounded decimal index strings remain compatible');
+const paddedOverlay=withOverlay();paddedOverlay.graph.dataset.extra[0].mapping.x=' +0 ';
+assert.strictEqual(migrate(paddedOverlay).graph.dataset.extra.length,1,'bounded decimal overlay indices remain compatible');
+const legacyMapping=basic();delete legacyMapping.graph.dataset.x;delete legacyMapping.graph.dataset.y;
+delete legacyMapping.graph.dataset.z;delete legacyMapping.graph.dataset.style;
+assert.strictEqual(migrate(legacyMapping).version,2,'legacy datasets without selectors remain supported');
+const dormant2d=mapped3d();dormant2d.graph.mode='2d';dormant2d.graph.dataset.z='1';
+assert.strictEqual(migrate(dormant2d).graph.dataset.z,'1','2D may retain a dormant Z selector');
+const invalid3dDefaults=basic();invalid3dDefaults.graph.mode='3d';
+assert.throws(()=>migrate(invalid3dDefaults),/graph dataset mapping is invalid/);
 """
         result = subprocess.run(
             ["node", "-e", script], cwd=ROOT,

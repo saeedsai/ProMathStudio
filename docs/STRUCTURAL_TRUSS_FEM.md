@@ -1,11 +1,86 @@
+## Hollow-circle cavity transition rounding
+
+## Pre-solve Euler input readiness summary
+
+Each member preview distinguishes four input states: `not-supplied` (neither I nor K was entered), `missing-I` (K only), `missing-K` (I only), and `ready` (both positive inputs are valid). The pure `summarizeEulerInputReadiness(memberMetrics)` API returns an immutable total and count for each state plus `complete`; it rejects unknown states rather than silently dropping a member. An empty list is not considered complete.
+
+The pre-solve live status always reports the readiness counts. This includes the all-not-supplied case: it must not claim merely that the model is ready for analysis while omitting that no member can receive the optional Euler screen. A complete input set says that the inputs are ready, not that the structure is stable or safe; buckling assessment remains a separate post-solve ideal elastic compression-only screen with the limitations described above.
+
+Direct Node tests cover all four states, all-missing, all-ready, empty input, immutable output and invalid status rejection. Registered Chromium tests verify all-missing, mixed, all-ready and reset summaries at 1280px and 390px. The companion Truss Studio browser smoke also verifies the 14-column preview schema: `Euler inputs` is column 13 and `Euler Pcr` is column 14 (zero-based indices 12 and 13).
+
+For a concentric annulus, use direct dimensionless differences 1-r² and 1-r⁴ while the cavity area ratio r² is at most 0.5. In this range the remaining area and inertia factors are bounded below by 0.5 and 0.75, so subtraction is well-conditioned and avoids the extra multiplication rounding of complementary factors. When r² > 0.5, retain the factored radial-gap expression to protect near-unity thin walls.
+
+The boundary fixture uses outer diameter 1 mm and inner diameter 0.5000000000000001 mm (the next binary64 value above 0.5 mm). The previous factored path returns area 0.589048622548086 mm² and inertia 0.046019423636569225 mm⁴; correctly rounded references from the exact binary64 input are 0.5890486225480861 mm² and 0.04601942363656923 mm⁴. Section modulus is 0.09203884727313846 mm³ and both radii of gyration are 0.2795084971874737 mm. Node and Chromium regressions verify these values, unchanged input dimensions, the former one-ulp loss, and preserve the existing near-unity thin-wall and sub-half-ulp cavity cases at 1280px and 390px. This is binary64 numerical-boundary coverage, not a physical design example.
+
+## Legacy SI-to-current unit conversion underflow
+
+Legacy Truss models express nodal forces in N and Young's modulus in Pa, while the current model uses kN and GPa. Conversion must not silently erase a nonzero binary64 source value when division by 1000 or 1e9 rounds it to zero. `fromLegacy()` now rejects those unrepresentable force/modulus inputs with a field-specific underflow error. Exact zero remains valid, and ordinary legacy values retain the original division operation and results. Other scaled properties retain their existing validation and property-specific diagnostics.
+
+Node and Chromium regressions cover positive and negative `Number.MIN_VALUE` forces on both axes, a minimum-subnormal legacy modulus, exact zero, and ordinary `-10000 N → -10 kN` / `200 GPa → 200 GPa` normalization. This is a conversion-integrity guard, not arbitrary precision; the current model still uses binary64 kN/GPa values.
+## Subnormal global stiffness products
+
+Each global stiffness coefficient is assembled by first dividing member stiffnesses by the largest stiffness contributing to that coefficient, then multiplying the normalized values by their row/column direction cosines, summing with the existing compensated signed reducer, and restoring the stiffness scale once. This avoids double-rounding or losing individual subnormal products before their combined contribution is assembled. The resulting matrix and solver remain IEEE-754 binary64; this is not arbitrary-precision FEM.
+
+A synthetic two-node model uses twenty identical diagonal members with length approximately 2.82842712474619e-12 m, E=1e-323 GPa and A=1e-15 mm². Each parsed member stiffness is the minimum positive binary64 value, 5e-324 N/m. For c=s=0.7071067811865475, the old left-to-right expression k*c*c rounds each member contribution up to 5e-324 N/m, while the single product k*(c*c) rounds to zero. The exact rational sum of the supplied binary64 stiffness and direction-cosine factors rounds to 10 minimum subnormals (5e-323 N/m); the old path assembles 20 (1e-322 N/m). With an applied load of 1000 minimum subnormals in N, the displacement reference is 100 m rather than the old 50 m. The Node and Chromium regressions also require zero force-balance residual, finite strain-energy verification, and all twenty member results at 1280px and 390px. These are numerical stress fixtures, not physical structural dimensions.
+
+## Compensated global stiffness assembly
+
+The FEM assembler collects every finite member contribution to each global stiffness-matrix coefficient before summing that coefficient with the existing `finiteSignedSum` helper. This avoids sequential `+=` losing several individually sub-ulp parallel-member stiffness terms that together change the rounded coefficient. Same-sign terms use Neumaier compensation in original units; mixed-sign terms use an exact sum of the supplied binary64 terms when BigInt is available and the existing scaled compensated fallback otherwise. The matrix and solve remain IEEE-754 binary64; this is not arbitrary-precision FEM.
+
+A synthetic horizontal-bar boundary fixture uses one member with stiffness (10^{16}) N/m and twenty parallel members with stiffness 1 N/m each. Ordinary sequential addition returns (10^{16}) N/m, while the correctly rounded aggregate is (10^{16}+20) N/m. With a (10^{16}) N axial load, the displacement must agree within (2\times10^{-16}) m with (10^{16}/(10^{16}+20)), rather than the old naive-assembly result of exactly 1 m. The free-DOF residual and strain-energy checks must remain below the existing (10^{-6}) solver tolerance. These extreme stiffnesses are numerical stress fixtures, not physical structural design examples. Node and Chromium regressions exercise the same case at 1280px and 390px.
+
+## Compensated Truss preview aggregate totals
+
+The JSON preview reports total member centreline length and total SI material volume using the existing Neumaier compensated summation helper. This preserves low-order contributions from small members when they are added to a much larger running total, while still returning ordinary binary64 values and rejecting genuinely overflowing totals. Individual member lengths and volumes remain the already-computed binary64 quantities; this does not increase their precision.
+
+A numerical-boundary regression uses one 1e16 m member plus twenty 1 m members, and 1 mm² area for every member. The preview must return a total length of 10000000000000020 m and total volume of 10000000000.00002 m³. Naive sequential reductions lose or distort those small same-sign contributions. These are synthetic floating-point fixtures, not physical structural dimensions. Node and Chromium checks run the case at desktop and 390px mobile widths.
+
+## Numeric string input contract
+
+The FEM model parser and section-property helper accept primitive finite JavaScript numbers or trimmed decimal/scientific strings such as `-12`, `.5`, `1.` and `2.5e-3`. String inputs must use decimal syntax. JavaScript radix forms such as `0x10`, `0b10` and `0o10` are rejected instead of being silently reinterpreted by `Number()`. This keeps JSON/API inputs aligned with the application's decimal numeric fields while preserving ordinary decimal and scientific-notation compatibility. Whitespace around a valid decimal string is ignored. Raw strings longer than 256 UTF-16 code units are rejected before trimming, regular-expression matching or numeric conversion, so whitespace padding is included in the bound. Inputs within the limit are trimmed before decimal validation; a 256-code-unit value with 255 leading spaces and `1` remains valid, while the corresponding 257-code-unit value is rejected. This bounds imported/pasted input work without sacrificing binary64 precision. Blank strings, separators and non-finite values remain invalid.
+
+## Hollow-rectangle small-cavity rounding
+
+When the cavity/outer-area ratio is at most 0.5, net area uses the direct dimensionless difference rather than adding separately rounded complementary wall gaps. Ixx and Iyy use finite outer-minus-inner rectangle contributions through the shared section-property accumulator; if the solid-envelope moment overflows, the existing split-factor path remains available. For larger cavity ratios, the factored wall-gap expressions are retained to preserve thin-wall sections. Small-cavity radii use the stable identity
+`(1 - cavity inertia ratio)/(1 - cavity area ratio) = 1 + cavity area ratio × (1 - inner-axis ratio²)/(1 - cavity area ratio)`
+instead of dividing independently rounded factors.
+
+The regression fixture B=H=1 mm, bi=1.2e-16 mm and hi=0.5 mm must return A=0.9999999999999999 mm², Ixx=Iyy=0.08333333333333333 mm⁴, centroid (0.5, 0.5) mm and rx=ry=0.28867513459481287 mm. A second fixture (bi=1.1e-16 mm, hi=0.51 mm) verifies the Iyy rounding boundary. A cavity below half an area ulp still rounds to the solid-envelope area. These are binary64 stress fixtures, not physical design dimensions. Node and registered Chromium tests also exercise the compatibility fallback with BigInt disabled at 1280px and 390px.
+
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
-**Section-helper behavior on dev:** The accessible section helper remains intentionally inside the initially collapsed “Member materials and section properties” disclosure. The summary's `aria-controls="member-material-content"` references a wrapper containing both the member metrics table and section helper. Browser tests must verify the controlled region starts hidden, activate the summary, and verify the helper and target selector are visible before interaction; later scenarios must open the disclosure conditionally rather than blindly toggling a state left open by an earlier scenario. Applying properties requires one unambiguous member ID and preflights both destination fields before writing area and I. Unsupported axes, duplicate IDs, invalid/overflow geometry and missing fields reject without partial member mutation. The selected-member regression verifies a 40 × 60 mm rectangle gives A=2,400 mm² and Ixx=720,000 mm⁴ while preserving E, density, K and all other members. Any edit to section shape/dimensions, target member, selected axis, or a member's ID/area/I clears the previous application result; a stale “applied” message must never describe a different configuration. Loading a new model also clears the prior result.
+## Visible energy verification summary
+
+After a successful solve, the results panel displays the signed global energy-balance residual in an always-visible `role="status"` summary, while the detailed force/energy verification remains in its collapsible disclosure. The summary exposes `data-analysis-state` (`pending` before the first successful solve, `valid` only after a successful solve, and `stale` whenever the model is invalidated or a solve fails) so integrations can distinguish current results from cleared or not-yet-computed results. It also exposes the shortest-round-trip binary64 values in `data-energy-residual-j` (joules) and `data-energy-error` (dimensionless); negative zero is preserved as `-0`. Both attributes are cleared to empty strings together with the visible summary whenever the model is edited or invalidated, and are repopulated only after a successful solve, so stale diagnostics cannot be mistaken for the current model. The registered Chromium regression compares both attributes against the solver's own binary64 reference, expands the detailed disclosure before inspecting its contents, and verifies edit/reset invalidation at desktop and 390px mobile widths.
+
+## BigInt-free section-property summation fallback
+
+The exact binary64 accumulator is used when the browser provides BigInt. When BigInt is unavailable, same-sign finite terms now use Neumaier compensation in their original units instead of normalizing by the largest term and multiplying back. This avoids an unnecessary second rounding during scale restoration and retains small same-sign contributions that can combine to change the rounded section property. Mixed-sign terms keep the existing exact-when-available and normalized compensated-residual fallback. The no-BigInt path is compensated, not exact; all returned values remain binary64, and genuinely non-finite final results are still rejected.
+
+Direct Node and registered Chromium regressions temporarily disable BigInt and verify two L-angle area/centroid/inertia boundary cases, both channel and I-section sub-ulp flange-area totals, and channel/I-section centroid and inertia values. Chromium exercises the fallback at 1280px and 390px. The Truss solver remains an adjacent script, so the standalone root bundle is unchanged.
+
+## Composite-section centroid and inertia summation
+
+Channel and I-section calculations now sum their already-rounded finite binary64 rectangle contributions exactly when BigInt is available, rounding once after the complete sum. This applies to net area, both first moments, and each local-plus-parallel-axis inertia total. The existing scaled compensated sum remains the compatibility fallback when BigInt is unavailable. This avoids both lost sub-ulp contributions and order-dependent one-ulp overestimates; it does not make the underlying rectangle products arbitrary precision.
+
+A synthetic boundary fixture uses B=2 mm, H=1 mm, tw=1 mm and tf=2e-17 mm. For the channel, naive first-moment reduction gives centroid x=0.5 mm instead of the correctly rounded 0.5000000000000001 mm; naive Ixx gives 0.08333333333333333 mm⁴ instead of 0.08333333333333334 mm⁴; naive Iyy gives 0.08333333333333336 mm⁴ instead of 0.08333333333333337 mm⁴. For the symmetric I-section, adding flange terms around the web can overestimate Ixx by one ulp (0.08333333333333336 instead of 0.08333333333333334 mm⁴). Direct Node and Chromium regressions compare against exact sums of the supplied binary64 terms at desktop and 390px viewports. These dimensions are numerical-boundary fixtures, not physical design examples.
+
+
+## Composite-section area summation
+
+Channel and I-section area totals use the shared scaled compensated accumulator instead of a left-to-right floating-point reduction. This matters when the web area is dominant and each flange area is individually smaller than half an ulp of that web area, but the two flange contributions together cross a rounding boundary. The regression uses a synthetic 1 mm² web and two approximately 6.66e-17 mm² flanges: ordinary sequential addition returns 1.0 mm², while the correctly rounded total is 1.0000000000000002 mm². The same behavior is checked for channels and symmetric I-sections. This is a binary64 summation-boundary test, not a physical design example.
+
+
+**Section-helper behavior on dev:** The accessible section helper remains intentionally inside the initially collapsed “Member materials, section properties and Euler readiness” disclosure. The summary's `aria-controls="member-material-content"` references a wrapper containing both the member metrics table and section helper. Browser tests must verify the controlled region starts hidden, activate the summary, and verify the helper and target selector are visible before interaction; later scenarios must open the disclosure conditionally rather than blindly toggling a state left open by an earlier scenario. Applying properties requires one unambiguous member ID and preflights both destination fields before writing area and I. Unsupported axes, duplicate IDs, invalid/overflow geometry and missing fields reject without partial member mutation. The selected-member regression verifies a 40 × 60 mm rectangle gives A=2,400 mm² and Ixx=720,000 mm⁴ while preserving E, density, K and all other members. Any edit to section shape/dimensions, target member, selected axis, or a member's ID/area/I clears the previous application result; a stale “applied” message must never describe a different configuration. Loading a new model also clears the prior result.
 
 **Import integrity on dev:** The browser snapshots immutable File.size before awaiting arrayBuffer(), validates the actual returned byteLength against the same 1 MiB budget, then strictly decodes UTF-8. A short read and a longer-than-declared read now have distinct diagnostics with exact expected/received counts. Both mismatches are rejected before JSON parsing, even when the differing bytes are only legal trailing whitespace; the active node/member inputs and prior solved results remain unchanged and aria-busy returns to false. Browser regressions cover both directions with actual File objects at 1280px and 390px, plus malformed UTF-8, actual BOM bytes and exact/over-limit boundaries.
 
 **Verification baseline:** The immediately preceding dev head d1c25300184851af0c52c9619571c2878af5c458 passed exact-head Push Quality [#45202567594](https://github.com/saeedsai/ProMathStudio/actions/runs/45202567594) and PR Quality [#45202584053](https://github.com/saeedsai/ProMathStudio/actions/runs/45202584053), each with 218/218 steps successful and zero failures/skips. This new read-direction candidate requires fresh exact-head CI; it is not released.
 
+
+## Material schedule CSV numeric round-trip
+
+Finite numeric cells in the material schedule use JavaScript's shortest round-trippable decimal representation. Before quoting, the exporter reparses each numeric cell and verifies `Object.is(Number(text), value)`; it refuses non-finite numeric cells rather than emitting `Infinity` or `NaN`. This avoids fixed-significant-digit truncation: density `0.10000000000000002` and its derived mass `0.00020000000000000004` survive export and numeric re-import unchanged. For the 2 m, 0.001 m² bar at 7850 kg/m³, the UI intentionally displays mass rounded to `15.7` kg while the CSV preserves the computed binary64 value `15.700000000000001`. Euler critical load is converted from N to kN before serialization; a positive load that underflows to zero during this unit conversion is rejected rather than exported as a misleading zero. For the standard 2 m bar with I=1e6 mm⁴ and K=1, the kN cell is `493.48022005446785`, the shortest decimal that round-trips to the computed binary64 value. Negative zero is emitted explicitly as `-0`. This guarantees serialization fidelity, not additional physical accuracy beyond the stored inputs.
 
 ## Hollow-rectangle inertia range safety
 
@@ -37,9 +112,70 @@ For a solid circle, the centroidal inertia is evaluated as `(π/64)·Do²·Do²`
 
 A synthetic exact-binary64 regression uses `Do=2.45e77 mm`. The old `Do²·Do²` intermediate overflows, while area, Ixx/Iyy, section moduli and radii of gyration remain finite and match 120-digit Decimal references. A 40 mm reference remains unchanged, and the existing tiny-diameter underflow case remains rejected. These extreme dimensions are floating-point boundary tests only, not physically meaningful design examples.
 
+## Rectangular radius-of-gyration precision
+
+Solid and concentric hollow rectangles now calculate their radii directly from the section geometry instead of taking the square root of a rounded binary64 inertia/area quotient:
+
+\[
+r_x=h\sqrt{\frac{f_x}{12f_A}},\qquad
+r_y=b\sqrt{\frac{f_y}{12f_A}}
+\]
+
+For a solid rectangle, all three factors are 1. For a hollow rectangle, with \(r_b=b_i/b\), \(r_h=h_i/h\), \(g_b=(b-b_i)/b\), and \(g_h=(h-h_i)/h\):
+
+\[
+f_A=g_b+r_b g_h,\quad
+f_x=g_b+r_b g_h(1+r_h+r_h^2),\quad
+f_y=g_h+r_h g_b(1+r_b+r_b^2)
+\]
+
+This avoids propagating severe relative error from a subnormal inertia. A synthetic binary64 case with \(b=10^{-6}\) mm and \(h=3.5\times10^{-106}\) mm produces a representable \(I_{xx}=5\times10^{-324}\) mm⁴, but the rounded \(\sqrt{I_{xx}/A}\) is about 17.6% above the geometric radius. The hollow-rectangle counterpart has the same issue. The direct geometric radii retain the analytical reference while the reported inertia remains the correctly rounded binary64 value. These dimensions are floating-point stress tests only, not physical design examples.
+
+## Rectangular section-modulus precision
+
+Solid and concentric hollow rectangles evaluate elastic section moduli directly from their dimensionless geometry factors when the corresponding dimensional inertia is subnormal:
+
+\[
+S_x=\frac{b h^2 f_x}{6},\qquad S_y=\frac{h b^2 f_y}{6}.
+\]
+
+This avoids dividing a coarsely quantized binary64 inertia by an extreme-fibre distance when the resulting section modulus is still normally representable. The reported Ixx/Iyy remain the correctly rounded binary64 values; Sx/Sy retain the precision of the original rectangle geometry. Ordinary, normal-inertia sections keep the existing I/c path. A synthetic exact-binary64 case with B=4.5e-81 mm and H=6e-81 mm, plus its concentric half-width/half-height hollow counterpart, previously produced 2–4% section-modulus errors from I/c. The direct formulas agree with 120-digit Decimal references within 5e-13 relative error. These dimensions are floating-point stress tests only, not physical design examples.
+
+## Circular radius-of-gyration precision
+
+For a solid circle, both centroidal radii are analytically (r_x=r_y=D_o/4). For a concentric hollow circle, with (q=D_i/D_o), cancellation of the common annulus factor gives
+
+\[
+r_x=r_y=\frac{D_o}{4}\sqrt{1+q^2}.
+\]
+
+The helper evaluates these equivalent geometric formulas directly instead of deriving the radius from a rounded binary64 (I/A) quotient. This matters when the reported inertia is a nonzero subnormal: its relative quantization can be large even while the area and exact radius remain representable.
+
+A synthetic solid-circle boundary uses (D_o=3\times10^{-81}) mm. Its area is approximately (7.06858\times10^{-162}) mm² and its reported inertia rounds to the smallest positive binary64 value, but (sqrt{I/A}) overstates the geometric radius (7.5\times10^{-82}) mm by about 11.5%. The hollow counterpart with (D_i=1.5\times10^{-81}) mm has the same subnormal inertia and about 15.1% quotient error; the direct formula gives approximately (8.38525\times10^{-82}) mm. These dimensions are numerical representation tests only, not physical design examples.
+
+## Small-cavity hollow-circle rounding
+
+For a concentric hollow circle, let \(q=D_i/D_o\). When \(q\leq0.5\), the area and inertia factors are evaluated directly as \(1-q^2\) and \(1-q^4\). These factors remain at least 0.75 and 0.9375 respectively, so direct subtraction is well-conditioned. For \(q>0.5\), the helper retains the factored radial-gap expressions; this is the thin-wall regime where subtracting nearly equal squares would lose precision.
+
+This split avoids multiplying separately rounded complementary factors for a very small cavity. If the cavity contribution is below half an ulp of the outer-envelope property, the correctly rounded binary64 result is the corresponding solid-circle value.
+
+The regression uses the exact binary64 inputs \(D_o=1\) mm and \(D_i=9.313225746154786\times10^{-14}\) mm. The previous factored area and inertia factors both rounded to \(0.9999999999999999\), lowering area from \(0.7853981633974483\) to \(0.7853981633974482\) mm² and inertia from \(0.04908738521234052\) to \(0.04908738521234051\) mm⁴. The corrected factors round to 1, matching the solid-circle results. Existing thin-wall and extreme-scale annulus regressions remain in place. These are binary64 stress fixtures, not physical design dimensions.
+
+## L-angle mixed-axis subnormal precision
+
+A high-aspect-ratio L-angle can have one normal centroidal inertia and one subnormal inertia. A single maximum-dimension normalization may preserve the major axis but underflow the independently scaled minor axis. For a subnormal axis, the helper now normalizes width and depth separately and evaluates that axis's section modulus and radius directly from the two-rectangle geometry. The reported dimensional inertia and principal moments retain their binary64 values; only the affected `S` and `r` outputs use the higher-precision normalized geometry.
+
+A synthetic exact-binary64 fixture (`B=1e-60 mm`, `H=1e60 mm`, `t=1e-140 mm`) has normal `Ixx` and subnormal `Iyy` (about `3.335e-321 mm⁴`). Its geometric `Sy` is about `3.333333333333333e-261 mm³` and `ry` about `5.773502691896258e-121 mm`; deriving them from the quantized `Iyy` produces relative errors above `1e-4`. Node and Chromium regressions use 160-digit Decimal references and run at desktop and 390px. These dimensions are floating-point stress fixtures only, not engineering design dimensions.
+
+### Negligible underflowed channel web
+
+A channel web is off the section's vertical centroidal axis, so its area cannot be discarded merely because tw times H rounds to zero: its first moments and parallel-axis terms may still be representable. The helper now accepts an underflowed channel web only when exponent-scaled upper bounds show that its area, both first moments, local and offset Ixx/Iyy, and Ixy all round below binary64 significance. Its area must also vanish in both the common-length and axis-separated normalized geometry paths. The flange-only aggregate area, first moments and both centroidal inertias must remain in the normal binary64 range; otherwise the section is still rejected. The existing centered I-section-web exception remains separate.
+
+A synthetic exact-binary64 fixture (B=1e40 mm, H=1e-100 mm, tw=Number.MIN_VALUE, tf=2e-101 mm) has a positive web area that rounds to zero, while the complete section properties remain representable: A=4e-61 mm², Ixx=6.533333333333334e-262 mm⁴, Iyy approximately 3.333333333333334e18 mm⁴, Sx approximately 1.306666666666667e-161 mm³, Sy approximately 6.666666666666666e-22 mm³, rx approximately 4.041451884327381e-101 mm and ry approximately 2.8867513459481285e39 mm. A second off-axis-web fixture retains a representable first moment and is still rejected. Node and Chromium regressions use 200-digit Decimal references at 1280px and 390px. These dimensions are floating-point stress tests only, not engineering design dimensions.
+
 ## How to use
 
-Open `tools/truss-studio.html` in a browser (requires its adjacent `truss-fem.js` and `truss-fem-ui.js`). Select a reference model or edit **Joints**: unique ID, X/Y in metres, Fix X/ Fix Y, forces Fx/Fy in kN (positive right/up). In **Members**, enter start/end IDs, E in GPa, area in mm² and optional density in kg/m³. The **Section property helper** in the material breakdown calculates area, centroidal Ixx/Iyy, elastic section moduli Sx/Sy, extreme-fibre distances cX/cY and radii of gyration rx/ry for solid/hollow rectangles and circles, plus open channels, I-sections and L-angles. L-angles also report Ixy, principal I1/I2 and the major-principal-axis angle; the selected centroidal/principal moment is applied to one member. Sx = Ixx/cX and Sy = Iyy/cY; rx = sqrt(Ixx/A) and ry = sqrt(Iyy/A). Rectangle Ixx is about the horizontal centroidal axis parallel to width; circle I is about any centroidal diameter. These are geometric properties, not design resistances. Optional Euler estimate inputs are I (second moment of area, mm⁴) and K (dimensionless effective-length factor); provide both to calculate Pcr. Either property may be stored alone without producing an Euler estimate; the geometry/member preview remains available and the status explains when the pair is incomplete. Click Analyze truss. Results show member tension/compression force (kN), stress (MPa), joint displacements (mm), support reactions (kN), residual/energy verification and, when I/K are supplied, a compression-only ideal Euler comparison. Gray dotted members represent the original truss; colored amplified lines represent deformed geometry (green tension, orange compression). Change scale or label visibility, export the model as JSON, results as CSV, diagram as SVG; imported legacy SI JSON is converted explicitly. The import status identifies the file's units for optional density (kg/m³), second moment I (m⁴ in legacy SI or mm⁴ in Studio) and effective-length factor K (dimensionless), in addition to the core force, modulus and area units.
+Open `tools/truss-studio.html` in a browser (requires its adjacent `truss-fem.js` and `truss-fem-ui.js`). Select a reference model or edit **Joints**: unique ID, X/Y in metres, Fix X/ Fix Y, forces Fx/Fy in kN (positive right/up). In **Members**, enter start/end IDs, E in GPa, area in mm² and optional density in kg/m³. The **Section property helper** in the material breakdown calculates area, centroidal Ixx/Iyy, elastic section moduli Sx/Sy, extreme-fibre distances cX/cY and radii of gyration rx/ry for solid/hollow rectangles and circles, plus open channels, I-sections and L-angles. L-angles also report Ixy, principal I1/I2 and the major-principal-axis angle; the selected centroidal/principal moment is applied to one member. Sx = Ixx/cX and Sy = Iyy/cY; rx and ry are the geometric equivalents of sqrt(Ixx/A) and sqrt(Iyy/A), evaluated from shape-specific formulas where a rounded subnormal quotient would lose precision. Rectangle Ixx is about the horizontal centroidal axis parallel to width; circle I is about any centroidal diameter. These are geometric properties, not design resistances. Optional Euler estimate inputs are I (second moment of area, mm⁴) and K (dimensionless effective-length factor); provide both to calculate Pcr. Either property may be stored alone without producing an Euler estimate; the geometry/member preview remains available and the status explains when the pair is incomplete. Click Analyze truss. Results show member tension/compression force (kN), stress (MPa), joint displacements (mm), support reactions (kN), residual/energy verification and, when I/K are supplied, a compression-only ideal Euler comparison. Gray dotted members represent the original truss; colored amplified lines represent deformed geometry (green tension, orange compression). Change scale or label visibility, export the model as JSON, results as CSV, diagram as SVG; imported legacy SI JSON is converted explicitly. The import status identifies the file's units for optional density (kg/m³), second moment I (m⁴ in legacy SI or mm⁴ in Studio) and effective-length factor K (dimensionless), in addition to the core force, modulus and area units.
 
 
 ## Preview metadata contract
@@ -95,7 +231,7 @@ All dimensions must be finite and strictly positive, with web thickness smaller 
 
 ## Optional ideal Euler member estimate
 
-The non-solving material preview can report the ideal elastic critical load `Pcr = π² E I / (K L)²` when both second moment of area `I` and effective-length factor `K` are supplied. Current Studio JSON/UI uses `I` in mm⁴; legacy SI JSON uses `I` in m⁴ and converts it on import. `K` is dimensionless. The reported `Pcr` is in kN. Missing I/K leaves the estimate blank; supplying only one, non-positive/non-finite values, or an unrepresentable result is rejected. After solving, only compressive axial force is compared with `Pcr`; the result reports utilization `Pcomp/Pcr` and load ratio `Pcr/Pcomp`. Tension is not applicable and zero force is reported as no compression demand without division. This remains an ideal elastic screen, not a geometric buckling solver or code-compliant resistance check; it does not include imperfections, residual stress, local/flexural-torsional modes, inelasticity, code resistance factors or post-buckling. It is an educational idealization, not a certified design check; consult a qualified structural engineer.
+The non-solving material preview can report the ideal elastic critical load `Pcr = π² E I / (K L)²` when both second moment of area `I` and effective-length factor `K` are supplied. The numerical evaluation preserves the established direct operation order for ordinary inputs, then uses a binary mantissa/exponent product-quotient fallback if the numerator, `K·L`, or its square overflows or underflows; only a genuinely non-finite or zero final `Pcr` is rejected. Current Studio JSON/UI uses `I` in mm⁴; legacy SI JSON uses `I` in m⁴ and converts it on import. `K` is dimensionless. The reported `Pcr` is in kN. Missing I/K leaves the estimate blank; supplying only one, non-positive/non-finite values, or an unrepresentable final result is rejected. After solving, only compressive axial force is compared with `Pcr`; the result reports utilization `Pcomp/Pcr` and load ratio `Pcr/Pcomp`. Tension is not applicable and zero force is reported as no compression demand without division. This remains an ideal elastic screen, not a geometric buckling solver or code-compliant resistance check; it does not include imperfections, residual stress, local/flexural-torsional modes, inelasticity, code resistance factors or post-buckling. It is an educational idealization, not a certified design check; consult a qualified structural engineer.
 
 ## Compatibility
 
@@ -163,7 +299,7 @@ When legacy SI JSON is converted by §fromLegacy§, optional member properties d
 
 ## Section-helper target identity and disclosure
 
-The section-property helper is inside the native `<details id="member-material-details">` disclosure. It is intentionally collapsed on initial load; a user opens “Per-member material breakdown” to access the material schedule and helper. Browser regressions must activate that summary and assert `#section-helper` is visible before interacting with its controls.
+The section-property helper is inside the native `<details id="member-material-details">` disclosure. It is intentionally collapsed on initial load; a user opens “Member materials, section properties and Euler readiness” to access the material schedule and helper. The summary contains a polite live `#member-material-count` label derived from the validated member snapshot: it displays the correct singular/plural count after model changes and `Unavailable` when preview validation fails. Browser regressions must verify the initial collapsed state, activate the summary once, and assert `#section-helper` is visible before interacting with its controls; later scenarios must reopen it conditionally rather than assuming it has re-collapsed.
 
 Applying section properties requires the selected member ID to match exactly one current member row. No match reports that an existing member must be chosen; duplicate matches report an ambiguous ID and leave all member fields untouched. This prevents a pre-analysis edit that introduces duplicate IDs from silently applying section properties to whichever duplicate happens to appear first. The Chromium regression creates a duplicate ID, checks the exact diagnostic and full model snapshot, restores the unique ID, then verifies normal selected-member application and rollback cases.
 
@@ -236,3 +372,187 @@ The direct Node and Chromium regressions use (D_o=10^{78}) mm and (D_i=9.9999999
 The L-angle inertia tensor is normalized before diagonalization, and its minor principal moment is normally recovered from the normalized determinant divided by the major eigenvalue. At extreme aspect ratios, that normalized determinant (or its subsequent division) can underflow to zero even though the physical minor moment is still a representable positive subnormal. In that case the engine now attempts the unscaled determinant only when it is finite and positive, then divides by the already-computed major principal moment. If the unscaled determinant is also non-finite or non-positive, the existing explicit underflow rejection remains; no value is fabricated.
 
 The regression uses the synthetic floating-range geometry B=1e100 mm, H=1e-139 mm and t=1e-140 mm. A 100-digit Decimal reference from the exact binary64 inputs rounds to I2=8.35e-322 mm⁴. These dimensions exercise numerical representation limits and are not practical engineering design dimensions.
+
+
+### Composite channel and I-section radii at subnormal inertias
+
+A channel or I-section can have a positive representable area and positive subnormal centroidal inertias while the binary64 values of Ixx/A and Iyy/A are too coarsely quantized for accurate radii. The helper therefore recomputes the composite area, centroid and centroidal inertias in coordinates normalized by max(B,H), evaluates the dimensionless radii there, and multiplies by that length scale once. The reported dimensional area and inertias are not replaced by these normalized intermediates. If the normalized calculation itself cannot retain a positive value, the existing general radius path remains the fallback.
+
+The direct Node and Chromium regressions use B=100s, H=80s, tw=10s and tf=8s with s=10^-82.2. Area remains 8.917600620398223×10^-162 mm²; Ixx rounds to 3.5×10^-323 mm⁴, while channel Iyy rounds to 4.4×10^-323 and I-section Iyy to 2×10^-323 mm⁴. Independent high-precision references from the exact binary64 dimensions give rx=2.0220658289055487×10^-81 mm for both shapes, channel ry=2.0060914979751612×10^-81 mm, and I-section ry=1.5424539802421713×10^-81 mm. The former sqrt(I/A) results differ by more than 1% on both axes. These synthetic dimensions exercise floating-point representation limits, not practical engineering design sizes; the physical subnormal inertias themselves remain quantized.
+
+### L-angle subnormal inertia tensor and principal-property recovery
+
+When the L-angle's dimensional centroidal inertias fall below the binary64 normal range, their quantization can corrupt derived properties even though area, principal moments, section moduli and radii remain representable. For example, B=1e-80 mm, H=8e-81 mm and t=1e-81 mm produced more than 1% error in both radii and more than 1 degree of principal-axis error when the engine used the rounded physical Ixx/Iyy/Ixy values directly.
+
+For this subnormal case, the helper recomputes the same two non-overlapping rectangles after dividing all dimensions by max(B,H). It derives normalized area, centroid, Ixx/Iyy/Ixy, principal eigenvalues, extreme-fibre distances, section moduli and radii, then restores physical units in a scale-safe multiplication order. The reported dimensional inertias and product of inertia are rounded only when converted back to mm-based units. Ordinary-scale and extreme-aspect-ratio cases retain the existing calculation path when the normalized recovery cannot safely represent every required result.
+
+The direct Node and Chromium regressions use exact binary64 input dimensions and independent 120-digit Decimal references. The case retains positive subnormal Ixx/Iyy/Ixy and principal moments, while normalized centroid, section moduli, radii and principal-axis angle match within 5e-13 relative error. Chromium exercises the same calculation at 1280px and 390px. These synthetic dimensions are numerical-range tests, not practical structural design dimensions.
+
+
+## Subnormal circular section-modulus precision
+
+For solid and concentric hollow circles, the helper retains the existing I/c section-modulus calculation at ordinary scales. When the dimensional circular inertia is subnormal, it instead evaluates the equivalent identity S = (π/32)·Do³ for a solid circle and S = (π/32)·Do³·(1 − (Di/Do)^4) for an annulus. The annulus multiplier is reused from the factored area/inertia calculation, avoiding direct fourth-power subtraction and division of a quantized subnormal inertia. This fallback applies only when I is below 2.2250738585072014e-308; it does not claim to recover a section modulus that is itself unrepresentable.
+
+The regression uses Do = 3e-81 mm and, for the annulus, Di = 1.5e-81 mm. Both inertias round to the minimum positive binary64 value while exact section moduli remain normal. The former I/c result is over 20% high; direct Node and 1280px/390px browser checks compare corrected values with independent 120-digit Decimal references within 5e-13 relative error. Ordinary 40 mm circle calculations retain the original path.
+
+
+## Subnormal composite section-modulus precision
+
+Channel and I-section section moduli retain the ordinary dimensional I/c calculation while the corresponding physical inertia is normal. When Ixx or Iyy is subnormal, the helper reuses its normalized composite-rectangle inertia and normalized extreme-fibre distance: Sx = L³·IxxNorm/cYNorm and Sy = L³·IyyNorm/cXNorm, where L=max(B,H). The scale factor is multiplied from the normalized ratio outward so the implementation does not first form L³. Each axis switches independently; dimensional area and Ixx/Iyy outputs remain unchanged.
+
+The Node and Chromium regressions use B=100·10^-82.2 mm, H=80·10^-82.2 mm, tw=10·10^-82.2 mm and tf=8·10^-82.2 mm. Both shapes have positive subnormal Ixx/Iyy while section moduli remain representable. Exact-binary64 120-digit Decimal references are Sx=1.444703108127935e-242 mm³ for both shapes; channel Sy=9.048880575086456e-243 mm³ and I-section Sy=6.725157272628184e-243 mm³. The former I/c path differs by 5–24%; corrected results are checked within 5e-13 relative error at desktop and 390px. These synthetic dimensions test floating-point range, not practical structural design.
+
+
+## Axis-separated normalization for extreme composite aspect ratios
+
+The channel and I-section property helper normally normalizes both coordinates by the larger of B and H. For an extreme aspect ratio, that can make the normalized thin-axis inertia underflow even though the dimensional Ixx remains a positive subnormal and the physical radius/section modulus are representable. The common-scale path is retained when its normalized area and both inertias remain in the normal binary64 range. Otherwise the same non-overlapping rectangles are normalized independently by B along x and H along y.
+
+With dimensionless area A*, centroidal inertias Ixx* and Iyy*, and normalized extreme-fibre distances cX* and cY*, the dimensional relationships are A=B·H·A*, Ixx=B·H³·Ixx*, Iyy=B³·H·Iyy*, rx=H·sqrt(Ixx*/A*), ry=B·sqrt(Iyy*/A*), Sx=B·H²·Ixx*/cY*, and Sy=B²·H·Iyy*/cX*. The section-modulus scale products are restored with exponent-scaled multiplication so an intermediate product does not overflow or underflow before a representable result is formed. Reported dimensional area and Ixx/Iyy remain on the existing physical calculation path.
+
+The direct Node and Chromium regressions use B=1e150 mm, H=1e-154 mm, tw=1e-154 mm and tf=4.9e-155 mm for both channel and I-section. Ixx is positive subnormal while Iyy is normal. Independent 120-digit Decimal references from the exact binary64 dimensions give rx=2.9160475533388224e-155 mm, ry=2.8867513459481288e149 mm, Sx=1.6666533333333332e-159 mm³ and Sy=1.6333333333333333e145 mm³. The previous max-dimension normalized path lost the thin-axis inertia and fell back to rounded physical I/A and I/c, producing relative errors above 1e-11. Corrected properties are checked within 5e-13 at desktop and 390px. These synthetic dimensions exercise floating-point limits, not practical structural design.
+
+
+## Hollow-cavity area underflow versus net-property representability
+
+Hollow-section validity depends on positive, strictly contained inner dimensions and representable net section properties. The helper does not need to materialize the cavity's own area or squared diameter merely to validate the geometry: either intermediate can underflow to zero even though the outer/net area, both centroidal inertias, section moduli and radii are finite. Hollow-rectangle and hollow-circle properties therefore continue through their factored dimensionless width/depth or inner/outer ratios. Genuinely unrepresentable net area or inertia is still rejected by the existing final property checks.
+
+The regression uses synthetic binary64 boundary inputs only (not engineering design dimensions):
+
+- Hollow rectangle: outer dimensions 1e100 × 1e-100 mm, inner dimensions 1e-162 × 1e-162 mm. The inner area rounds to zero, while net area is 1 mm², Ixx is approximately 8.333333333333334e-202 mm⁴, Iyy is approximately 8.333333333333332e198 mm⁴, and both section moduli/radii remain finite.
+- Hollow circle: outer diameter 1e-50 mm, inner diameter 1e-200 mm. The inner-diameter square rounds to zero, while annulus area is approximately 7.853981633974483e-101 mm², inertia is approximately 4.908738521234052e-202 mm⁴, and section modulus/radius remain finite.
+
+For both cases, all returned net properties match the corresponding solid envelope at binary64 precision because the cavity contribution is below the representable resolution. Direct Node and Chromium regressions also verify input immutability, frozen results and desktop/390px execution.
+
+
+## Scale-safe axial member stiffness EA/L
+
+The parser normally evaluates axial stiffness as the direct binary64 expression E*A/L. It keeps that path whenever the intermediate product is normal and the final quotient is finite and positive, preserving established ordinary-scale results. If E*A overflows or underflows (or the final quotient is not representable on that path), a positive-binary exponent decomposition evaluates the same product/quotient without materializing the dangerous intermediate. The final value is still required to be finite and strictly positive: genuinely overflowing or underflowing stiffness is rejected with the existing diagnostic.
+
+Two synthetic exact-binary64 cases exercise both sides of the range. With E=1e299 GPa, A=1e308 mm² and L=1e308 m, the old E*A intermediate overflows although EA/L rounds to 9.999999999999999e301 N/m. With E=1e-16 GPa, A=5e-315 mm² and L=2e-12 m, the old intermediate rounds to zero although EA/L rounds to 2.49997217e-316 N/m. Node references use 120-digit Decimal arithmetic on the exact binary64 inputs; the Chromium smoke repeats both cases at 1280px and 390px. These are numerical-range fixtures, not physical design examples.
+
+ 
+## Scale-safe optional member mass from L·A·ρ
+
+When density is supplied, the parser calculates member mass directly from length, cross-sectional area and density. It preserves the ordinary left-to-right product when the intermediate volume and final mass are normal finite values; otherwise it combines binary exponents so an overflowing or underflowing intermediate volume does not discard a representable final mass. Zero density remains a valid zero mass, while a genuinely unrepresentable final mass is rejected.
+
+The Node and desktop/390px Chromium regressions cover a 2e-12 m member with a minimum-subnormal area and 1e308 kg/m³ density (the old volume rounded to zero although mass is 9.88131291682493e-28 kg), and a 1e308 m member with 9.999999999999999e301 m² area and 1e-310 kg/m³ density (the old volume overflowed although mass is 9.999999999999968e299 kg). These are exact-binary64 numerical-range fixtures, not physical design examples.
+
+## Preview and material-export volume range
+
+A positive member can have a representable mass even when its SI geometric volume L·A is smaller than the binary64 range. The FEM parser retains the scale-safe mass calculation, but the pre-solve preview and material-schedule CSV require the volume itself to be representable. They now reject a positive L·A product that rounds to zero with an explicit member-specific underflow diagnostic, rather than displaying or exporting a false zero. Existing overflow rejection is unchanged. This does not alter parseModel, the stiffness calculation or the FEM solve path; it only prevents inspectJSON and exportMaterialCSV from publishing an unrepresentable volume.
+
+
+## Final positive member-mass underflow
+
+A positive density and positive member geometry whose final scale-safe product L·A·ρ rounds to zero is rejected with a member-specific mass-underflow diagnostic rather than being exposed as a valid zero mass. Explicit density zero remains valid and produces zero mass. This is distinct from an intermediate L·A underflow: when a positive final mass remains representable, the exponent-scaled product continues to accept it.
+
+The direct Node and registered Chromium desktop/390px regressions use a 2e-12 m member, E=200 GPa, area=5e-318 mm² (which converts to Number.MIN_VALUE m²), and density=1e-300 kg/m³. Its axial stiffness remains positive (~4.940656458412466e-301 N/m), but its final mass is below binary64 range and must be rejected. The same member with zero density remains valid; with density 1e308 kg/m³ its mass remains 9.88131291682493e-28 kg despite the intermediate volume underflow. These are synthetic floating-point boundary fixtures, not physical design dimensions.
+
+
+## Centered I-section web below the binary64 area range
+
+A positive I-section web may have a web-area product that rounds to zero even though the two flange areas, total section area, both centroidal inertias, section moduli and radii remain representable. The central web is the only composite sub-piece permitted to take this path, and only when its two dimensions are each below 1 mm and its computed center exactly matches the section center. Under those conditions its local rectangle inertias are smaller than its already-underflowed area, and symmetry makes its parallel-axis offsets zero; omitting those unrepresentable contributions does not change any binary64 section property. The total section area and both final inertias still pass the ordinary positive/finite checks. Channel-web and all other composite-piece area underflow continue to be rejected.
+
+The Node and registered Chromium desktop/390px regressions use B=1e100 mm, H=1e-100 mm, tw=Number.MIN_VALUE mm and tf=1e-101 mm. The central web area rounds to zero, while Decimal references from the exact binary64 dimensions give area 0.2 mm², Ixx approximately 4.066666666666667e-202 mm⁴, Iyy approximately 1.666666666666667e198 mm⁴, Sx approximately 8.133333333333334e-102 mm³, Sy approximately 3.333333333333334e98 mm³, rx approximately 4.509249752822894e-101 mm and ry approximately 2.8867513459481287e99 mm. The same geometry remains rejected as a channel because its underflowed web is not centered and must not be silently discarded. These are synthetic binary64 boundary fixtures, not engineering design dimensions.
+
+
+## L-angle principal-axis recovery when dimensional Ixy underflows
+
+A thin flange on an otherwise nearly square L-angle can make the dimensional product of inertia smaller than binary64's minimum subnormal even while area, both centroidal inertias, principal moments, section moduli and radii remain representable. Rejecting solely because the rounded Ixy is zero loses a valid section. When Ixy rounds to zero, the helper now re-evaluates the two-rectangle tensor at unit scale; it restores dimensional properties (allowing the physical Ixy to remain correctly rounded to zero) while calculating the principal-axis angle from the normalized product. Positive-definiteness, principal-moment, section-modulus and radius checks remain in force.
+
+The synthetic exact-binary64 fixture uses B=H=1e-75 mm and t=B·(1−1e-14). Its exact-binary64 Decimal reference has Ixy≈−2.470544411709329e-329 mm⁴, which rounds to zero, while Ixx=Iyy≈8.333333333333331e-302 mm⁴, both principal moments round to the same positive value, and the principal-axis angle is 45°. The section moduli are approximately 1.6666666666666664e-226 mm³ and radii approximately 2.886751345948129e-76 mm. Node and registered Chromium regressions check these values at 1280px and 390px. This is a numerical-range fixture, not an engineering design dimension.
+
+
+
+## L-angle dimensional Ixy signed-zero presentation
+
+When the dimensional product of inertia is smaller than the binary64 range, its returned value is canonicalized to positive zero rather than exposing `-0`. The normalized two-rectangle tensor retains the signed Ixy value and remains authoritative for the principal-axis angle, so this presentation normalization does not discard the orientation information used by the calculation.
+
+
+## Signed force and moment resultant range safety
+
+The Truss JSON preview now evaluates signed applied-force resultants and the signed global-origin moment with scale-normalized Neumaier accumulation. This avoids rejecting a finite physical resultant merely because an early partial sum overflows before later nodal loads cancel it. Terms that underflow only after normalization are accumulated in a separate compensated residual, so a subnormal load is not silently discarded when it lies between two much larger cancelling loads.
+
+For example, the SI sequence (1e308, 1e308, -1e308) has the finite resultant 1e308 even though ordinary left-to-right binary64 addition overflows at the second term. The same rule applies independently to x/y force totals and to the signed moment terms x·Fy and -y·Fx. Each individual moment product must still be representable, and a genuinely non-finite final resultant remains rejected with a finite-number diagnostic. This is compensated binary64 summation, not arbitrary-precision arithmetic.
+
+The Node regression covers horizontal and vertical force cancellation, a minimum-subnormal force between cancelling large loads, moment cancellation, and true final force overflow. The registered Chromium regression repeats these cases at 1280px and 390px. This preview change does not alter the FEM stiffness matrix or displacement solver.
+
+
+## Force-balance diagnostic cancellation safety
+
+The solved-model force-balance diagnostic now combines all applied nodal loads and support reactions in one scale-normalized compensated sum per axis. It no longer reduces external loads and reactions independently before adding the two totals. This matters when both intermediate totals overflow but their combined equilibrium residual is finite.
+
+The regression uses a fully triangulated reference model with one free, unloaded translation and three large restrained horizontal loads. The old separate reductions produce +Infinity and -Infinity, whose sum is NaN; the corrected diagnostic returns exactly zero in both axes. Node and Chromium tests exercise this at desktop and 390px viewports. This changes only the reported force-balance diagnostic; stiffness assembly, displacement solution, reactions and energy verification remain unchanged.
+
+## Subnormal normalized summands in signed resultants
+
+The compensated resultant helper treats every normalized quotient below the smallest normal binary64 value as a residual term, not only quotients that round all the way to zero. A nonzero subnormal quotient is too coarsely quantized to preserve its relative precision when multiplied back by a very large scale. Retaining the original finite term in the residual avoids that precision loss after large positive/negative cancellation.
+
+The additional regression uses a 1e-10 N term between +1e308 N and -1e308 N. The naive normalized quotient is subnormal and the previous compensated-only path returned about 9.999987484955998e-11 N (approximately 1.25 ppm low); the revised residual path returns the expected binary64 1e-10 N. The existing minimum-subnormal residual, horizontal/vertical force, moment cancellation and genuine-overflow tests remain.
+
+
+## Exact mixed-sign binary64 resultants
+
+Mixed-sign applied-force, applied-moment and solved force-balance reductions now accumulate the exact integer representation of the supplied finite binary64 terms, then round once to the nearest binary64 result (ties to even). This avoids precision loss when a normalized Neumaier sum and its original-unit residual nearly cancel: a 79-node preview with +1e308 N, -1e308 N, 35 loads of 2.3 N, 40 loads of -2 N, -0.5 N and +1e-10 N previously returned about 9.99875737761613e-11 N instead of the correctly rounded 9.99937827510621e-11 N. The same reference is checked for the signed origin moment in Node and Chromium at 1280px and 390px. Same-sign reductions retain the scale-normalized compensated path, and browsers without BigInt retain the prior bounded fallback. Inputs and outputs remain binary64; this is exact accumulation of the supplied binary64 values, not arbitrary-precision engineering arithmetic.
+
+
+## L-angle area and inertia summation precision
+
+The L-angle is decomposed into two non-overlapping rectangles. Its positive area terms previously passed through the scaled compensated reducer, which can itself shift a two-term total by one ulp after normalization and rescaling. Its Ixx/Iyy paths also added each rectangle's local and parallel-axis terms left-to-right, making the result order-dependent. The helper now uses the existing exact binary64 accumulator to sum the already-rounded rectangle areas, first moments, local inertias and parallel-axis terms once (nearest/ties-to-even) when BigInt is available; the existing scaled compensated fallback remains for environments without BigInt. Ixy uses the same sum contract for consistency. This does not make the underlying rectangle products arbitrary precision.
+
+Two synthetic binary64 regressions cover distinct failures. For B=8,605,413.972369973 mm, H=4.292204701476468 mm and t=2.136125318978258e-5 mm, the previous scaled area reduction returned 183.8225183531027 mm² instead of 183.82251835310274 mm², shifting the centroid; the previous Ixx reduction returned 0.0005630523010274838 mm⁴ instead of 0.0005630523010274837 mm⁴. For B=1.1143751945503119e-20 mm, H=4.305111224234166e-16 mm and t=2.015788401705846e-21 mm, the previous Iyy reduction returned 2.94557285397156e-79 mm⁴ instead of 2.9455728539715605e-79 mm⁴. Direct Node and Chromium regressions verify area, centroid and both inertias at 1280px and 390px. These extreme dimensions are floating-point stress fixtures only, not physically meaningful design examples.
+
+
+## Compensated nodal reaction accumulation
+
+Each nodal internal-force resultant is now accumulated from the already-rounded binary64 terms K_ij*u_j together with the negative applied load using the shared finiteSignedSum routine. This avoids order-dependent support reactions when a small term is bracketed by large opposite member-force contributions. Mixed-sign terms use the exact binary64 accumulator when BigInt is available; the compatibility path remains compensated. Returned reactions and the global force-balance diagnostic remain ordinary binary64 values; this is not arbitrary-precision FEM.
+
+The regression uses three one-metre horizontal bars with axial stiffness 1e20 N/m and applied loads of 1 N, +1e16 N and -1e16 N. The support reaction is -1 N and the global horizontal force balance is zero. The former sequential row reduction evaluates the member terms -1, -1e16, +1e16 as zero and loses the support reaction. Node and Chromium tests assert the lost naive result, corrected reaction, zero force balance, free-DOF residual and energy check at 1280px and 390px. This is a synthetic floating-point stress fixture, not a physical structural design example.
+
+## Compensated energy-balance diagnostics
+
+The solver accumulates free-DOF external work and member elastic strain energy with the shared finite signed summation helper. It then evaluates the balance residual as one signed sum of the two elastic-energy totals and negative external work. This preserves low-order contributions when a small member is listed after a much larger member and avoids an overflowing intermediate (2U) when the final signed residual is representable. Values remain binary64; the check is a numerical consistency diagnostic, not an energy-accuracy certificate.
+
+A regression fixture uses exact binary powers: each member has stiffness 65536 N/m; one bar carries 2^36 N over 2^20 m (2^55 J), and 32 independent bars each carry 256 N over 1/256 m (0.5 J). Ordinary member-order accumulation remains at 2^55 J because each small term is below half an ulp; the compensated result is exactly 2^55+16 J. External work is 2^56+32 J, so the signed energy residual and normalized error are zero. Node and Chromium tests run the same reference model at desktop and 390px viewports. These are floating-point stress fixtures, not physical structural dimensions.
+
+
+The solve result exposes the signed `energyResidual` in joules, computed from the same rounded binary64 elastic-energy and external-work totals used by the identity check. The Truss Studio verification panel displays this absolute signed residual alongside the normalized error, so users can distinguish the energy scale from the relative consistency measure. Neither value certifies material strength, stability or code compliance.
+
+## Aggregate member-mass preview
+
+The pre-solve `inspectJSON` result reports `knownMemberMassSubtotal` in kg, `unknownDensityMemberCount`, and `totalMemberMass`. A total is present only when every member has an explicit density; an omitted or blank density remains unknown and never silently contributes zero. Explicit density zero is valid known data. When only some densities are known, the UI labels their sum as a subtotal and states how many members still lack density; when none are known it reports that a mass estimate is unavailable. The aggregate uses the shared finite signed accumulator and rejects a genuinely unrepresentable subtotal rather than displaying Infinity. This is a material estimate, not a structural-capacity or safety certification.
+
+
+## Post-solve Euler ratio range handling
+
+The optional compression-only Euler screen must not make an otherwise finite linear-elastic FEM solution fail merely because one displayed ratio is outside binary64 range. For positive compression demand and positive Euler critical load, the solver reports each representable ratio as a finite number. If `Pcomp/Pcr` or `Pcr/Pcomp` overflows or underflows, its numeric field is `null` and the corresponding `eulerUtilizationRange` or `eulerLoadRatioRange` is `overflow` or `underflow`. The other ratio remains available when representable. The assessment compares the original positive demand and critical-load operands directly, so the below/at-or-above classification does not depend on either rounded quotient. Truss Studio displays `> max` or `< min` for a ratio outside binary64 range and keeps the explanatory range detail in the assessment; result CSVs retain the assessment text when a numeric cell is unavailable.
+
+Node and registered Chromium regressions use three synthetic, non-design fixtures. One has a representable utilization but an overflowing `Pcr/Pcomp`; another has a representable load ratio but an overflowing utilization; the third reaches the minimum positive Euler load and forces the reciprocal load ratio to underflow to zero. All must return finite displacements, equilibrium and energy diagnostics, preserve the correct Euler classification, and identify unrepresentable ratios without returning Infinity or rejecting the solve. These fixtures test floating-point reporting limits only; the Euler screen remains an ideal elastic comparison, not a code-compliant buckling resistance or design certification.
+
+
+## Euler screening below the general zero-force threshold
+
+The ordinary member-force classification suppresses forces within ±1e-8 N as numerical zero. That presentation threshold must not suppress a physically meaningful optional Euler comparison when both second moment I and effective-length factor K are supplied. For Euler-enabled members, every strictly negative solved axial force is retained as compression demand and classified as compression for the screen; the comparison uses the unrounded positive demand against Pcr. Members without I/K retain the existing ±1e-8 N display/noise threshold and remain unassessed. This distinction prevents small-scale or low-load models from incorrectly reporting “No compression demand” when a sub-threshold force exceeds a correspondingly small Euler critical load.
+
+Node and registered desktop/390px Chromium regressions use a 2 m bar with E=1 GPa, area=1e-3 mm², I=4e-9 mm⁴ and K=1. A 5e-12 N compressive load is below Pcr≈9.869604401089358e-12 N; a 5e-9 N compressive load is above it. Both are below the general 1e-8 N force threshold. The regressions verify the compression demand, member type, utilization and assessment, plus finite equilibrium/energy diagnostics. A matching model without I/K confirms that the established near-zero classification is unchanged. These are numerical-scale tests, not physical design examples.
+
+
+## Per-member Euler input readiness
+
+The pre-solve member-material table labels the optional ideal Euler estimate inputs independently for every member: `Not supplied` when neither I nor K is present, `Missing I` when only K is supplied, `Missing K` when only I is supplied, and `Ready` when both are supplied and the critical load can be calculated. A missing input is not treated as zero and does not prevent the axial-only FEM solve.. The table is inside a collapsed native disclosure whose visible summary explicitly names Euler readiness and announces the current member count; users open that summary to inspect the per-member rows. The Chromium smoke verifies the initially collapsed state, opens the disclosure through its summary before reading cell contents, and verifies the live count changes from `3 members` to `1 member` and back when switching examples. The machine-readable `inspectJSON().memberMetrics[].eulerInputStatus` values are `not-supplied`, `missing-I`, `missing-K` and `ready`. The table's Euler Pcr remains blank unless both validated inputs produce a representable positive critical load.
+
+Node and registered desktop/390px Chromium regressions cover all four readiness states, confirm incomplete pairs do not produce Pcr, and verify that editing and restoring the model refreshes the per-member labels.
+
+
+## Results CSV numeric fidelity
+
+The results CSV serializes finite numeric cells with JavaScript's shortest round-trippable decimal representation and explicitly writes negative zero as `-0`. This preserves the sign of zero when a very small signed force, stress, strain, displacement or reaction underflows during the export's unit conversion. Null result cells remain blank. A numeric `NaN` or positive/negative `Infinity` aborts the export with a visible error instead of creating a misleading spreadsheet value. This is binary64 serialization fidelity, not extra numerical precision or a change to the FEM solution.
+
+The registered Chromium regression checks the actual results-export path for negative-zero member force/stress/strain, joint displacement and support reaction; it also checks positive zero, the smallest positive subnormal, and rejection of all three non-finite numeric classes. The test runs at 1280px and 390px.
+
+
+## Applied-moment product underflow
+
+The import preview computes the signed global-origin moment from the binary64 coordinate/load pairs x*Fy and -y*Fx. If a nonzero pair multiplies to zero because its individual product is below the binary64 subnormal range, the preview now retains that product in an exact integer accumulator and rounds the combined signed result once. Already-representable products keep their established direct multiplication and compensated summation path; a genuinely non-finite individual product remains rejected. Environments without BigInt use a scale-normalized compensated fallback.
+
+The regression uses 78 nodes with x=1e-162 m and Fy=1e-165 kN (SI 1e-162 N), or the mirrored y*Fx case. Each SI product is approximately 1e-324 N m, so ordinary multiplication returns zero for every term; their combined exact binary64-input sum rounds to 16*Number.MIN_VALUE, approximately 8e-323 N m. Both moment signs and the BigInt-free fallback are checked by the direct Node suite, with positive/negative browser references at 1280px and 390px. This is an import-preview resultant correction; it does not change FEM stiffness, displacements, reactions or the model's physical assumptions.

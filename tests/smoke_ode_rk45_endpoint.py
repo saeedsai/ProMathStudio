@@ -67,6 +67,48 @@ def main():
             {expression:'1',t0:0,t1:1e-300,y0:0}).rows.at(-1)""")
         assert tiny[0] == 1e-300 and abs(tiny[1] / 1e-300 - 1) < 1e-10, tiny
 
+        # The smallest binary64 subnormal is a distinct endpoint even though span/20 rounds to zero.
+        subnormal = math.ulp(0.0)
+        for t0, t1, quantum_steps in ((0.0, subnormal, 1),
+                                      (subnormal, 0.0, 1),
+                                      (0.0, 2 * subnormal, 0),
+                                      (2 * subnormal, 0.0, 0)):
+            result = page.evaluate("""opts => MathStudio.odeTools.solveAdaptive(opts)""",
+                                   {"expression": "1", "t0": t0, "t1": t1, "y0": 0})
+            assert result["rows"][0][0] == t0
+            assert result["rows"][-1][0] == t1
+            assert result["rows"][-1][1] == t1 - t0, result
+            assert result["steps"] == result["attempts"] == 1 and result["rejected"] == 0
+            assert result["stageTimeCollisionAttempts"] == 1, result
+            assert result["stageTimeCollisionAcceptedSteps"] == 1, result
+            assert result["quantumLimitedAcceptedSteps"] == quantum_steps, result
+            direction = 1 if t1 > t0 else -1
+            assert all(direction * (b[0] - a[0]) > 0
+                       for a, b in zip(result["rows"], result["rows"][1:]))
+
+
+        # At a 20-ULP interval near 1e12, a later 5-ULP trial makes c=4/5
+        # and c=8/9 round to the same timestamp; report the repeated fractional stage.
+        ulp = 1 / 8192
+        for direction in (1, -1):
+            t0 = 1e12 - 20 * ulp if direction == 1 else 1e12
+            t1 = 1e12 if direction == 1 else 1e12 - 20 * ulp
+            second_start = t0 + direction * ulp
+            second_h = direction * 5 * ulp
+            assert second_start + 4 * second_h / 5 == second_start + 8 * second_h / 9
+            result = page.evaluate("""opts => MathStudio.odeTools.solveAdaptive(opts)""",
+                                   {"expression": "1", "t0": t0, "t1": t1, "y0": 0})
+            assert result["rows"][0][0] == t0
+            assert result["rows"][-1][0] == t1
+            assert result["attempts"] == result["steps"] == 3 and result["rejected"] == 0
+            assert result["stageTimeCollisionAttempts"] == 2, result
+            assert result["stageTimeCollisionAcceptedSteps"] == 2, result
+            assert result["quantumLimitedAcceptedSteps"] == 1, result
+            assert all(direction * (b[0] - a[0]) > 0
+                       for a, b in zip(result["rows"], result["rows"][1:]))
+
+
+
         page.locator('[data-workspace="editor"]').click()
         page.locator("#ode-details").evaluate("(el) => el.open = true")
         page.locator("#ode-method").select_option("rk45")
@@ -83,6 +125,24 @@ def main():
         assert times[0] == 1e12 - 0.01 and times[-1] == 1e12, times
         assert all(a < b for a, b in zip(times, times[1:]))
 
+        # The result-panel wording must cover repeated fractional stages and endpoint collisions,
+        # not incorrectly claim that every collision rounded back to the current time.
+        ulp = 1 / 8192
+        collision_start = 1e12 - 20 * ulp
+        page.locator('[data-workspace="editor"]').click()
+        page.locator("#ode-details").evaluate("(el) => el.open = true")
+        page.locator("#ode-method").select_option("rk45")
+        page.locator("#ode-expression").fill("1")
+        page.locator("#ode-start").fill(str(collision_start))
+        page.locator("#ode-end").fill("1000000000000")
+        page.locator("#ode-initial").fill("0")
+        page.locator("#ode-run").click()
+        collision_output = page.locator("#ode-output").inner_text()
+        assert "2 accepted steps had repeated or endpoint-collapsed RK45 stage times" in collision_output, collision_output
+        assert "2 accepted step had repeated or endpoint-collapsed RK45 stage times" not in collision_output
+        assert "rounded to current t" not in collision_output
+        assert "rounded to current t" not in collision_output, collision_output
+
         page.locator('[data-workspace="editor"]').click()
         page.locator("#ode-details").evaluate("(el) => el.open = true")
         page.locator("#ode-expression").fill("10000*y")
@@ -96,7 +156,7 @@ def main():
         page.set_viewport_size({"width": 390, "height": 844})
         assert not errors, errors
         browser.close()
-    print("PASS: RK45 large-epoch, one-ULP, exact endpoint, stiffness, UI and mobile")
+    print("PASS: RK45 large-epoch, subnormal, repeated-stage, exact endpoint, stiffness, UI and mobile")
 
 
 if __name__ == "__main__":

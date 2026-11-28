@@ -75,6 +75,28 @@ def main():
         assert page.evaluate("""() => {try{MathStudio.dataTables.sortRows(0,'asc');return false;}
             catch(e){return /noncontiguous/.test(e.message);}}""")
         assert page.evaluate("MathStudio.dataTables.exportState()") == before
+
+        # Sorting must preserve invalid references and valid blank cells inside A1:AF6000.
+        page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',
+            tables:[
+              {id:'sheet-1',name:'Data1',columns:['A'],rows:[['20'],['5'],['10']]},
+              {id:'sheet-2',name:'Other',columns:['A','B','C','D','E','F','G'],rows:[[
+                "=SUM('Data1'!A1:A6000)",
+                "=SUM('Data1'!A6000:A6000)",
+                "='Data1'!AG1",
+                "=SUM('Data1'!AG1:AG1)",
+                "='Data1'!A6001",
+                "=SUM('Data1'!A6001:A6001)",
+                "=SUM('Data1'!$A$3:$A$1)"
+              ]]}
+            ]})""")
+        formulas_before = page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice()")
+        page.evaluate("MathStudio.dataTables.sortRows(0,'asc')")
+        assert page.evaluate("MathStudio.dataTables.active.rows.map(r => r[0])") == ["5","10","20"]
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == formulas_before
+        assert page.evaluate("MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]") == [
+            35, 0, "#REF!", "#REF!", "#REF!", "#REF!", 35
+        ]
         assert not errors,errors
         browser.close()
     print("PASS stable sort, cross-sheet references, ranges, rollback and persistence")

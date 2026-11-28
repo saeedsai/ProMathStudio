@@ -1303,8 +1303,13 @@ function restoreState(state){
  if(!state||typeof state!=='object'||Array.isArray(state)||
     !['rows','cols','bRows','bCols'].every(key=>[2,3].includes(dim(key))))
   throw Error('Invalid saved Matrix dimensions.');
- const numericDraft=value=>typeof value==='string'&&value.length<=80&&
-  (value===''||/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value));
+ const numericDraft=value=>{
+  if(typeof value!=='string'||value.length>80)return false;
+  if(value==='')return true;
+  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value))return false;
+  const number=Number(value);
+  return Number.isFinite(number)&&Math.abs(number)<=1e12;
+ };
  for(const [key,length] of [['a',state.rows*state.cols],['b',state.bRows*state.bCols],
     ['rhs',state.rows],['weights',state.rows]]){
   if(!Array.isArray(state[key])||state[key].length!==length||!state[key].every(numericDraft))

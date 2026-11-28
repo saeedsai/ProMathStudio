@@ -12,6 +12,15 @@
   let importCancelledNotice = false;
   const IMPORT_CANCELLED_STATUS = 'Pending import cancelled because the model was edited.';
   const fmt = (x, digits=5) => Number(x).toPrecision(digits).replace(/(\.\d*?)0+(e|$)/,'$1$2').replace(/\.(e|$)/,'$1');
+  const fmtEulerRange = (value, range) => value !== null ? fmt(value) :
+    range === 'overflow' ? '> max' : range === 'underflow' ? '< min' : '—';
+  const fmtEulerPercent = (value, range) => {
+    if (value === null) return fmtEulerRange(null, range);
+    const percent = value * 100;
+    return Number.isFinite(percent) ? fmt(percent) + '%' : '> max';
+  };
+  // Preserve the exact binary64 diagnostic value, including negative zero, for browser integrations.
+  const roundTripNumber = value => Object.is(value,-0) ? '-0' : String(value);
   const fmtAngle = x => Number(x).toFixed(3);
   // Keep whole-number section properties readable; retain compact precision for fractional values.
   const fmtSectionMoment = value => Number.isSafeInteger(value) ? String(value) : fmt(value,4);
@@ -344,7 +353,7 @@
   function isCurrentImport(request){return request===importRequest&&importPending;}
   function finishCurrentImport(request){if(!isCurrentImport(request))return false;importPending=false;return true;}
   function cancelPendingImport(){if(!importPending)return false;importRequest++;importPending=false;status(IMPORT_CANCELLED_STATUS);return true;}
-  function invalidate(preserveImportRequest=null){if(preserveImportRequest===null||preserveImportRequest!==importRequest||!importPending)cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
+  function invalidate(preserveImportRequest=null){if(preserveImportRequest===null||preserveImportRequest!==importRequest||!importPending)cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('energy-residual-summary').textContent='Energy balance residual: —';$('energy-residual-summary').setAttribute('data-analysis-state','stale');$('energy-residual-summary').setAttribute('data-energy-residual-j','');$('energy-residual-summary').setAttribute('data-energy-error','');$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function dimensionLabel(name,value,attrs){const formatted=fmt(value,4);return svgNode('text',{...attrs,'data-dimension-label':name,role:'text','aria-label':'Section dimension '+name+': '+formatted+' millimetres'},name+'='+formatted+' mm');}
   function appendCompositeSectionDetail(svg,shape,webThickness,flangeThickness){
@@ -387,19 +396,30 @@
       group.append(svgNode('text',{x:15,y:362,'font-size':12},'Pre-solve geometry · not to scale'));
       $('plot').replaceChildren(group);
       $('plot').setAttribute('aria-label',`Pre-solve truss geometry preview with ${info.nodeCount} joints and ${info.memberCount} members. Supports and applied loads are shown. Topology does not certify stability.`);
-      addResultRows('member-metrics',info.memberMetrics,m=>[m.id,m.startNodeId,m.endNodeId,fmt(m.length,4),fmt(m.area*1e6,4),fmt(m.volume,4),fmt(m.elasticModulus/1e9,4),fmt(m.axialStiffness/1e6,4),m.density===null?'—':fmt(m.density,4),m.mass===null?'—':fmt(m.mass,4),m.secondMoment===null?'—':fmtSectionMoment(m.secondMoment*1e12),m.effectiveLengthFactor===null?'—':fmt(m.effectiveLengthFactor,4),m.eulerCriticalLoad===null?'—':fmt(m.eulerCriticalLoad/1000,5)]);
+      addResultRows('member-metrics',info.memberMetrics,m=>[m.id,m.startNodeId,m.endNodeId,fmt(m.length,4),fmt(m.area*1e6,4),fmt(m.volume,4),fmt(m.elasticModulus/1e9,4),fmt(m.axialStiffness/1e6,4),m.density===null?'—':fmt(m.density,4),m.mass===null?'—':fmt(m.mass,4),m.secondMoment===null?'—':fmtSectionMoment(m.secondMoment*1e12),m.effectiveLengthFactor===null?'—':fmt(m.effectiveLengthFactor,4),m.eulerInputStatus==='ready'?'Ready':m.eulerInputStatus==='missing-I'?'Missing I':m.eulerInputStatus==='missing-K'?'Missing K':'Not supplied',m.eulerCriticalLoad===null?'—':fmt(m.eulerCriticalLoad/1000,5)]);
       const unit=info.inputUnits.forces,divisor=unit==='N'?1:1000;
       const components=info.connectedComponentCount===1?'connected component':'connected components';
       const isolated=info.isolatedNodeCount===1?'isolated joint':'isolated joints';
-      $('preview-summary').textContent=`Model overview · ${info.nodeCount} joints · ${info.memberCount} members · ${info.connectedComponentCount} ${components} · ${info.isolatedNodeCount} ${isolated} · total member length ${fmt(info.totalMemberLength,4)} m · axial member volume Σ(L·A) ${fmt(info.totalMemberVolume,4)} m³ · bounds ${fmt(bounds.width,4)} × ${fmt(bounds.height,4)} m · applied load ΣFx ${fmt(info.appliedForce.x/divisor,4)} ${unit}, ΣFy ${fmt(info.appliedForce.y/divisor,4)} ${unit} (${info.loadedDofCount} loaded DOFs). Topology is not a stability check.`;
-      const hasIncompleteEulerInputs=info.memberMetrics.some(metric =>
-        (metric.secondMoment===null)!==(metric.effectiveLengthFactor===null));
-      status(hasIncompleteEulerInputs
-        ? 'Preview ready · Euler estimate requires both I and K.'
-        : 'Preview ready · analyze to check structural stability.',false);
+      const knownDensityMemberCount=info.memberCount-info.unknownDensityMemberCount;
+      const missingDensityLabel=info.unknownDensityMemberCount===1?'member':'members';
+      const massSummary=info.totalMemberMass!==null
+        ? `estimated total mass ${fmt(info.totalMemberMass,4)} kg`
+        : knownDensityMemberCount
+          ? `known mass subtotal ${fmt(info.knownMemberMassSubtotal,4)} kg · ${info.unknownDensityMemberCount} ${missingDensityLabel} missing density`
+          : `mass estimate unavailable · ${info.unknownDensityMemberCount} ${missingDensityLabel} missing density`;
+      $('preview-summary').textContent=`Model overview · ${info.nodeCount} joints · ${info.memberCount} members · ${info.connectedComponentCount} ${components} · ${info.isolatedNodeCount} ${isolated} · total member length ${fmt(info.totalMemberLength,4)} m · axial member volume Σ(L·A) ${fmt(info.totalMemberVolume,4)} m³ · ${massSummary} · bounds ${fmt(bounds.width,4)} × ${fmt(bounds.height,4)} m · applied load ΣFx ${fmt(info.appliedForce.x/divisor,4)} ${unit}, ΣFy ${fmt(info.appliedForce.y/divisor,4)} ${unit} (${info.loadedDofCount} loaded DOFs). Topology is not a stability check.`;
+      const eulerReadiness=fem.summarizeEulerInputReadiness(info.memberMetrics);
+      $('member-material-count').textContent=`${eulerReadiness.total} ${eulerReadiness.total===1?'member':'members'}`;
+      const eulerReadinessStatus=eulerReadiness.total===0
+        ? 'No members are available for Euler screening.'
+        : eulerReadiness.complete
+          ? `Euler inputs complete for all ${eulerReadiness.total} members. Analyze to assess ideal buckling.`
+          : `Euler estimate requires both I and K per member. Ready: ${eulerReadiness.ready}/${eulerReadiness.total} · missing I: ${eulerReadiness.missingI} · missing K: ${eulerReadiness.missingK} · not supplied: ${eulerReadiness.notSupplied}.`;
+      status(`Preview ready · ${eulerReadinessStatus}`,false);
     } catch(error) {
       $('preview-summary').textContent='Preview unavailable: '+error.message;
-      const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:13,class:'empty'}));$('member-metrics').replaceChildren(empty);
+      $('member-material-count').textContent='Unavailable';
+      const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:14,class:'empty'}));$('member-metrics').replaceChildren(empty);
       $('plot').replaceChildren(svgNode('text',{x:310,y:190,'text-anchor':'middle'},'Correct model inputs to preview'));
       $('plot').setAttribute('aria-label','Truss preview unavailable because model inputs are invalid.');
       status('Preview unavailable: '+error.message,true);
@@ -443,12 +463,17 @@
     $('disp-card').textContent=fmt(result.maxDisplacement.magnitude*1000)+' mm · '+result.maxDisplacement.id;
     $('stress-card').textContent=fmt(Math.abs(result.maxStress.stress)/1e6)+' MPa · '+result.maxStress.id;
     $('res-card').textContent=result.residual.toExponential(2);
+    const energySummary=$('energy-residual-summary');
+    energySummary.textContent='Energy balance residual = '+fmt(result.energyResidual)+' J';
+    energySummary.setAttribute('data-analysis-state','valid');
+    energySummary.setAttribute('data-energy-residual-j',roundTripNumber(result.energyResidual));
+    energySummary.setAttribute('data-energy-error',roundTripNumber(result.energyError));
     addResultRows('member-results',result.members,m=>[m.id,fmt(m.force/1000),fmt(m.stress/1e6),m.type,
-      m.eulerUtilization===null?'—':fmt(m.eulerUtilization*100)+'%',
-      m.eulerLoadRatio===null?'—':fmt(m.eulerLoadRatio),m.eulerAssessment]);
+      fmtEulerPercent(m.eulerUtilization,m.eulerUtilizationRange),
+      fmtEulerRange(m.eulerLoadRatio,m.eulerLoadRatioRange),m.eulerAssessment]);
     addResultRows('joint-results',result.displacements,n=>[n.id,fmt(n.x*1000),fmt(n.y*1000),fmt(n.magnitude*1000)]);
     addResultRows('reactions',result.reactions,r=>[r.id,fmt(r.rx/1000),fmt(r.ry/1000)]);
-    $('verification').textContent='Force balance: ΣFx = '+fmt(result.forceBalance.x)+' N, ΣFy = '+fmt(result.forceBalance.y)+' N. Max free DOF residual / load scale = '+result.residual.toExponential(3)+'. Elastic strain energy = '+fmt(result.elasticEnergy)+' J. Normalized energy identity error = '+result.energyError.toExponential(3)+'.';
+    $('verification').textContent='Force balance: ΣFx = '+fmt(result.forceBalance.x)+' N, ΣFy = '+fmt(result.forceBalance.y)+' N. Max free DOF residual / load scale = '+result.residual.toExponential(3)+'. Elastic strain energy = '+fmt(result.elasticEnergy)+' J. Energy balance residual = '+fmt(result.energyResidual)+' J. Normalized energy identity error = '+result.energyError.toExponential(3)+'.';
     draw();status('Analysis complete · '+result.nodes.length+' joints, '+result.members.length+' members.');
   }
   function analyze(successNotice=''){
@@ -470,7 +495,26 @@
     const records=body && !body.endsWith('\r\n') ? body+'\r\n' : body;
     download(name,'\uFEFF'+records,mime||'text/csv;charset=utf-8');
   }
-  function csv(){if(!latest){status('Run analysis before exporting results.',true);return;}const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment'],...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain,m.eulerUtilization===null?'':m.eulerUtilization*100,m.eulerLoadRatio===null?'':m.eulerLoadRatio,m.eulerAssessment]),[],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),[],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];downloadCsv('promath-truss-results.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}
+  const csvCell = value => {
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value)) throw Error('Results CSV numeric values must be finite.');
+      return Object.is(value,-0) ? '-0' : String(value);
+    }
+    return String(value ?? '');
+  };
+  function csv() {
+    if(!latest){status('Run analysis before exporting results.',true);return;}
+    try {
+      const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment'],
+        ...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain,m.eulerUtilization===null?'':m.eulerUtilization*100,m.eulerLoadRatio===null?'':m.eulerLoadRatio,m.eulerAssessment]),
+        [],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),
+        [],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];
+      const content=rows.map(row=>row.map(value=>'"'+csvCell(value).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n';
+      downloadCsv('promath-truss-results.csv',content,'text/csv;charset=utf-8');
+    } catch(error) {
+      status('Results CSV export failed: '+error.message,true);
+    }
+  }
   function materialCsv(){try{downloadCsv('promath-truss-material-schedule.csv',fem.exportMaterialCSV(readModel()),'text/csv;charset=utf-8');status('Validated member material schedule exported.');}catch(error){status('Material schedule export failed: '+error.message,true);}}
   $('section-shape').addEventListener('change',updateSectionShape);
   ['section-width','section-height','section-inner-width','section-inner-height','section-web-thickness','section-flange-thickness','section-angle-thickness','section-diameter','section-inner-diameter'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));

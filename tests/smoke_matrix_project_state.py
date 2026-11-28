@@ -45,6 +45,26 @@ def main():
         assert saved['matrix']['a'][0] == ''
         assert saved['matrix']['a'][-1] == '2.5'
 
+        # The directly exposed restore API must enforce the same finite solver bound
+        # as project-schema migration, and reject before changing any Matrix input.
+        boundary = json.loads(json.dumps(saved['matrix']))
+        boundary['a'][0] = '1e12'
+        boundary['a'][1] = '-1e12'
+        page.evaluate('state => MathStudio.matrixTools.restoreState(state)', boundary)
+        assert page.evaluate('MathStudio.matrixTools.exportState().a.slice(0, 2)') == ['1e12', '-1e12']
+        page.evaluate('state => MathStudio.matrixTools.restoreState(state)', saved['matrix'])
+        before_direct_rejection = page.evaluate('MathStudio.matrixTools.exportState()')
+        for field in ('a', 'b', 'rhs', 'weights'):
+            for invalid_value in ('1e999', '-1e999', '1e13', '-1e13'):
+                invalid = json.loads(json.dumps(saved['matrix']))
+                invalid[field][0] = invalid_value
+                message = page.evaluate("""state => {
+                    try { MathStudio.matrixTools.restoreState(state); return ''; }
+                    catch (error) { return error.message; }
+                }""", invalid)
+                assert message == f'Invalid saved Matrix {field} entries.', (field, invalid_value, message)
+                assert page.evaluate('MathStudio.matrixTools.exportState()') == before_direct_rejection
+
         # Restoring while editing the grid keeps the same cell focused.
         cell = page.locator('#mat-grid [data-row="2"][data-col="1"]')
         cell.focus()

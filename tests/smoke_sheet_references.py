@@ -52,6 +52,95 @@ def main():
         assert page.evaluate("MathStudio.dataTables.active.rows[0].every(v => v==='')") is True
         page.evaluate("MathStudio.dataTables.active.rows[0][0]='=A1'")
         assert page.evaluate("MathStudio.dataTables.calculate()[0][0]") == "#CYCLE"
+
+        # Scalar references must respect the same supported grid as aggregate ranges.
+        bounds_state = {"version": 1, "selected": "bounds", "tables": [
+            {"id": "bounds", "name": "Bounds", "columns": ["A", "B", "C", "D", "E", "F", "G"],
+             "rows": [[
+                 "=A0", "=A6001", "=AG1", "=AF6000", "=AF6000+1",
+                 "=SUM(AG1:AG1)", "=SUM(AF6000:AF6000)"
+             ]]}
+        ]}
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", bounds_state)
+        assert page.evaluate("MathStudio.dataTables.calculate()")[0] == [
+            "#REF!", "#REF!", "#REF!", 0, 1, "#REF!", 0
+        ]
+
+        # Escaped apostrophes in sheet names are doubled inside single-quoted qualifiers.
+        quoted_state = {"version": 1, "selected": "sheet-1", "tables": [
+            {"id": "sheet-1", "name": "Obrien", "columns": ["A"],
+             "rows": [["20"], ["5"], ["10"]]},
+            {"id": "sheet-2", "name": "Summary", "columns": ["A", "B", "C", "D", "E"],
+             "rows": [[
+                 "=Obrien!$A$1+'Obrien'!A2",
+                 "=SUM(Obrien!$A$1:A3)",
+                 "=SUM('Obrien'!A3:$A$1)",
+                 "=Obrien!A3",
+                 '="Obrien!A1"'
+             ]]}
+        ]}
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", quoted_state)
+        page.evaluate("""() => {
+            window.prompt = () => "O'Brien";
+            document.getElementById('dt-rename').click();
+        }""")
+        assert page.evaluate("MathStudio.dataTables.tables[0].name") == "O'Brien"
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == [
+            "='O''Brien'!$A$1+'O''Brien'!A2",
+            "=SUM('O''Brien'!$A$1:A3)",
+            "=SUM('O''Brien'!A3:$A$1)",
+            "='O''Brien'!A3",
+            '="Obrien!A1"'
+        ]
+        summary = "MathStudio.dataTables.calculate(MathStudio.dataTables.tables[1])[0]"
+        assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
+        page.evaluate("MathStudio.dataTables.sortRows(0, 'asc')")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == [
+            "='O''Brien'!$A$3+'O''Brien'!A1",
+            "=SUM('O''Brien'!$A$1:A3)",
+            "=SUM('O''Brien'!A3:$A$1)",
+            "='O''Brien'!A2",
+            '="Obrien!A1"'
+        ]
+        assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
+        page.evaluate("MathStudio.dataTables.insertRow(0)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0].slice(0,4)") == [
+            "='O''Brien'!$A$4+'O''Brien'!A2",
+            "=SUM('O''Brien'!$A$2:A4)",
+            "=SUM('O''Brien'!A4:$A$2)",
+            "='O''Brien'!A3"
+        ]
+        page.evaluate("MathStudio.dataTables.insertColumn(0)")
+        assert page.evaluate("MathStudio.dataTables.tables[1].rows[0]") == [
+            "='O''Brien'!$B$4+'O''Brien'!B2",
+            "=SUM('O''Brien'!$B$2:B4)",
+            "=SUM('O''Brien'!B4:$B$2)",
+            "='O''Brien'!B3",
+            '="Obrien!A1"'
+        ]
+        assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
+        saved = page.evaluate("MathStudio.dataTables.exportState()")
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", saved)
+        assert page.evaluate(summary)[:4] == [25, 35, 35, 10]
+
+
+        # Formula cells retain full binary64 precision for dependent formulas and exports.
+        # Only the visible cell editor is rounded to the existing 13-significant-digit style.
+        precision_state = {"version": 1, "selected": "precision", "tables": [
+            {"id": "precision", "name": "Precision", "columns": ["A", "B", "C", "D", "E", "F"],
+             "rows": [[
+                 "=1/7", "=A1*7", "=SUM(A1:A1)", "=AVERAGE(A1:A1)",
+                 "=MEDIAN(A1:A1)", "=SUM(A1:A1)*7"
+             ]]}
+        ]}
+        page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", precision_state)
+        precision_values = page.evaluate("MathStudio.dataTables.calculate()[0]")
+        assert precision_values == [1 / 7, 1, 1 / 7, 1 / 7, 1 / 7, 1]
+        precision_cell = page.locator('#dt-sheet input[data-row="0"][data-col="0"]')
+        assert precision_cell.input_value() == "0.1428571428571"
+        page.set_viewport_size({"width": 390, "height": 844})
+        assert precision_cell.is_visible()
+
         assert not errors, errors
         browser.close()
     print("PASS structural references, cross-sheet, absolute anchors, #REF!, project round-trip and context row index")

@@ -1,0 +1,108 @@
+"""Regression for scalar spreadsheet references outside the supported grid."""
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = (ROOT / "src/data-tables.js").read_text(encoding="utf-8")
+HTML = (ROOT / "index.html").read_text(encoding="utf-8")
+SMOKE = (ROOT / "tests/smoke_sheet_references.py").read_text(encoding="utf-8")
+WORKFLOW = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+
+
+class SpreadsheetReferenceBoundsTests(unittest.TestCase):
+    def test_scalar_parser_rejects_coordinates_outside_the_workbook_grid(self):
+        self.assertIn("const row=Number(m[4])-1,column=colIndex(m[2]);", SOURCE)
+        self.assertIn(
+            "if(row<0||row>=MAX_ROWS||column<0||column>=MAX_COLUMNS)throw Error('#REF!');",
+            SOURCE,
+        )
+        for formula in ("=A0", "=A6001", "=AG1", "=AF6000", "=SUM(AG1:AG1)", "=SUM(AF6000:AF6000)"):
+            self.assertIn(formula, SMOKE)
+        self.assertIn("python tests/smoke_sheet_references.py", WORKFLOW)
+
+    def test_structural_edits_do_not_revive_out_of_grid_references(self):
+        self.assertIn("const isSupportedReference=ref=>", SOURCE)
+        self.assertIn("if(!isSupportedReference(left)||!isSupportedReference(right))return match;", SOURCE)
+        self.assertIn("if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;", SOURCE)
+        smoke = (ROOT / "tests/smoke_sheet_range_delete.py").read_text(encoding="utf-8")
+        for formula in ("=Data!A6001", "=SUM(Data!A6001:A6001)", "=Data!AG1", "=SUM(Data!AG1:AG1)"):
+            self.assertIn(formula, smoke)
+        self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
+
+    def test_row_insert_materializes_values_before_rewriting_references(self):
+        preflight = SOURCE.index("const insertedRow=axis==='row'&&delta>0")
+        rewrite = SOURCE.index("shiftReferences(t,axis,index,delta);", preflight)
+        self.assertLess(preflight, rewrite)
+        self.assertIn("Array.isArray(values)", SOURCE)
+        smoke = (ROOT / "tests/smoke_sheet_range_delete.py").read_text(encoding="utf-8")
+        self.assertIn("conversion failed", smoke)
+        self.assertIn("JSON.stringify(MathStudio.dataTables.exportState())", smoke)
+        self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
+
+    def test_sort_preserves_invalid_references_and_fixed_blank_grid_rows(self):
+        start = SOURCE.index("function sortRows(column,direction='asc')")
+        end = SOURCE.index("function structuralEdit(", start)
+        sort = SOURCE[start:end]
+        self.assertIn("const isSupportedReference=ref=>", sort)
+        self.assertIn(r"const m=/^\$?([A-Za-z]{1,3})\$?([1-9]\d*)$/.exec(ref);", sort)
+        self.assertIn("if(!isSupportedReference(left)||!isSupportedReference(right))return match;", sort)
+        self.assertIn("positions.push(i<newRow.length?newRow[i]:i)", sort)
+        self.assertIn("if(!isSupportedReference(colAnchor+letters+rowAnchor+digits))return match;", sort)
+        smoke = (ROOT / "tests/smoke_sheet_sort_references.py").read_text(encoding="utf-8")
+        for formula in ("A1:A6000", "A6000:A6000", "AG1:AG1", "A6001:A6001", "$A$3:$A$1"):
+            self.assertIn(formula, smoke)
+        self.assertIn("python tests/smoke_sheet_sort_references.py", WORKFLOW)
+
+    def test_reference_rewrites_are_staged_before_any_workbook_mutation(self):
+        start = SOURCE.index("function shiftReferences(")
+        end = SOURCE.index("// Stable full-row sort", start)
+        shift = SOURCE[start:end]
+        queued = shift.index("rewrites.push({row,column:c,value:rewritten});")
+        committed = shift.index("for(const rewrite of rewrites)rewrite.row[rewrite.column]=rewrite.value;")
+        self.assertLess(queued, committed)
+        smoke = (ROOT / "tests/smoke_sheet_range_delete.py").read_text(encoding="utf-8")
+        for token in ("formula conversion failed", "afterFailure",
+                      "recoveredCrossSheet", "recoveredRowCount"):
+            self.assertIn(token, smoke)
+        self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
+
+    def test_insertions_that_shift_valid_references_past_the_grid_write_ref(self):
+        self.assertIn(
+            "if(!isSupportedReference(shiftedLeft)||!isSupportedReference(shiftedRight))mapped='#REF!';",
+            SOURCE,
+        )
+        self.assertIn(
+            "if(moved<0||moved>=(axis==='row'?MAX_ROWS:MAX_COLUMNS))return '#REF!';",
+            SOURCE,
+        )
+        smoke = (ROOT / "tests/smoke_sheet_range_delete.py").read_text(encoding="utf-8")
+        for formula in ("=Data!A6000", "=SUM(Data!A5999:A6000)",
+                        "=Data!AF1", "=SUM(Data!AE1:AF1)"):
+            self.assertIn(formula, smoke)
+        self.assertIn("page.locator('[data-workspace=\"data\"]').click()", smoke)
+        self.assertIn("python tests/smoke_sheet_range_delete.py", WORKFLOW)
+
+    def test_standalone_bundle_matches_the_modular_source(self):
+        start = HTML.index("/* ProMathStudio Data Tables workspace.")
+        end = HTML.index("</script>", start)
+        self.assertEqual(HTML[start:end], SOURCE)
+
+
+    def test_formula_results_keep_binary64_precision_and_round_only_the_display(self):
+        self.assertIn("return result;", SOURCE)
+        self.assertNotIn("Number(result.toPrecision(13))", SOURCE)
+        self.assertIn(
+            "const displayCellValue=value=>typeof value==='number'&&Number.isFinite(value)?Number(value.toPrecision(13)):value;",
+            SOURCE,
+        )
+        self.assertIn("input.value=String(displayCellValue(val??''));", SOURCE)
+        for formula in ("=1/7", "=A1*7", "=SUM(A1:A1)", "=AVERAGE(A1:A1)", "=MEDIAN(A1:A1)"):
+            self.assertIn(formula, SMOKE)
+        self.assertIn("precision_values == [1 / 7, 1, 1 / 7, 1 / 7, 1 / 7, 1]", SMOKE)
+        self.assertIn("page.set_viewport_size({\"width\": 390, \"height\": 844})", SMOKE)
+        self.assertIn("python tests/smoke_sheet_references.py", WORKFLOW)
+
+
+
+if __name__ == "__main__":
+    unittest.main()

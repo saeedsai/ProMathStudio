@@ -9,6 +9,24 @@
   const optionalRecord = (value, label) => {
     if (value !== undefined && value !== null && !record(value)) fail(label + ' must be an object.');
   };
+  // Keep saved solver selectors aligned with the actual Equation workspace controls.
+  const solverOperations = new Set(['auto','expand','simplify','factor','solve','system',
+    'differentiate','integrate','limit','numeric','laplace','inverse_laplace','fourier',
+    'inverse_fourier','ode','pde']);
+  const solverEngines = new Set(['auto','sympy','offline']);
+  const solverLimitDirections = new Set(['+-','-','+']);
+  // Must match src/engineering-catalog.js stable discipline IDs; parity is regression-tested.
+  const engineeringDisciplines = new Set(['physics','mechanical','electrical','electronics',
+    'fluids','aerospace','control','gnss','signals']);
+  // Saved axis selectors are column indices, not general JavaScript numeric literals.
+  // Bound raw strings before trimming so whitespace cannot bypass the input limit.
+  const validColumnIndex = (value, columns) => {
+    if (typeof value === 'string') {
+      if (value.length > 16 || !/^\s*\+?\d+\s*$/.test(value)) return false;
+      value = Number(value.trim());
+    }
+    return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 && value < columns;
+  };
   function migrate(data) {
     if (!record(data) || data.format !== 'mathstudio-project' || ![1, 2].includes(data.version))
       fail('unsupported format or version (supported: 1 and 2).');
@@ -32,6 +50,20 @@
       }
     }
     for (const key of ['calculator', 'solver', 'graph', 'tables', 'fit']) optionalRecord(data[key], key);
+    // Curve-fit preferences are UI state, but malformed values can silently clear or corrupt
+    // the saved selection during restore. Validate the exported select values before any workspace mutates.
+    if (data.fit) {
+      const models = new Set(['none', 'linear', 'poly', 'exp', 'log', 'power', 'gaussian']);
+      const degrees = new Set(['2', '3', '4', '5', '6']);
+      if (data.fit.model !== undefined && data.fit.model !== null && data.fit.model !== '' &&
+          (typeof data.fit.model !== 'string' || !models.has(data.fit.model)))
+        fail('saved curve-fit model is invalid.');
+      if (data.fit.degree !== undefined && data.fit.degree !== null && data.fit.degree !== '' &&
+          (typeof data.fit.degree !== 'string' || !degrees.has(data.fit.degree)))
+        fail('saved curve-fit degree is invalid.');
+      if (data.fit.lastEquation !== undefined && data.fit.lastEquation !== null)
+        short(data.fit.lastEquation, 2000, 'saved curve-fit equation');
+    }
     if (data.calculator?.history !== undefined) {
       if (!Array.isArray(data.calculator.history) || data.calculator.history.length > 40) fail('calculator history exceeds 40 entries.');
       for (const item of data.calculator.history) {
@@ -40,8 +72,34 @@
         short(item.result, 12000, 'calculator history result');
       }
     }
-    if (data.solver) for (const key of ['expression', 'variable', 'operation', 'engine', 'limitPoint', 'limitDirection'])
-      if (data.solver[key] !== undefined) short(data.solver[key], 12000, 'solver ' + key);
+    if (data.solver) {
+      const solver = data.solver;
+      if (solver.expression !== undefined) short(solver.expression, 12000, 'solver expression');
+      // These bounds mirror the live input maxlength attributes; do not restore
+      // values that the visible controls cannot accept from normal user input.
+      if (solver.variable !== undefined) {
+        short(solver.variable, 24, 'solver variable');
+        // Match the identifier grammar enforced by the live Equation solver before restoring UI state.
+        if (solver.variable !== '' && !/^\p{L}[\p{L}0-9_]*$/u.test(solver.variable))
+          fail('solver variable is invalid.');
+      }
+      if (solver.operation !== undefined) {
+        short(solver.operation, 32, 'solver operation');
+        if (solver.operation !== '' && !solverOperations.has(solver.operation))
+          fail('solver operation is invalid.');
+      }
+      if (solver.engine !== undefined) {
+        short(solver.engine, 16, 'solver engine');
+        if (solver.engine !== '' && !solverEngines.has(solver.engine))
+          fail('solver engine is invalid.');
+      }
+      if (solver.limitPoint !== undefined) short(solver.limitPoint, 80, 'solver limit point');
+      if (solver.limitDirection !== undefined) {
+        short(solver.limitDirection, 2, 'solver limit direction');
+        if (solver.limitDirection !== '' && !solverLimitDirections.has(solver.limitDirection))
+          fail('solver limit direction is invalid.');
+      }
+    }
     if (data.solver?.odeInitialCondition !== undefined) short(data.solver.odeInitialCondition, 160, 'ODE initial condition');
     if (data.solver?.assumptions !== undefined) {
       const flags=data.solver.assumptions;
@@ -49,10 +107,12 @@
           (flags.positive===true && flags.negative===true)) fail('solver assumptions are invalid or contradictory.');
     }
     if (data.graph?.functions !== undefined) short(data.graph.functions, 12000, 'graph functions');
+    if (data.graph?.mode !== undefined && !['2d', '3d'].includes(data.graph.mode))
+      fail('graph mode is invalid.');
     if (data.graph?.dataset !== undefined && data.graph.dataset !== null) {
       const set = data.graph.dataset;
       if (!record(set) || !Array.isArray(set.headers) || !Array.isArray(set.rows) ||
-          set.headers.length < 1 || set.headers.length > 32 || set.rows.length > 6000)
+          set.headers.length < 2 || set.headers.length > 32 || set.rows.length < 1 || set.rows.length > 6000)
         fail('graph dataset dimensions exceed limits.');
       // Column selectors require unambiguous names in restored graph datasets.
       if (set.headers.every(h => typeof h === 'string')) {
@@ -61,11 +121,82 @@
         if (new Set(identities).size !== identities.length)
           fail('graph dataset has duplicate column names.');
       }
-      if (set.headers.some(h => typeof h !== 'string' || h.length > 8000) ||
+      if (set.headers.some(h => typeof h !== 'string' || h.length > 100) ||
           set.rows.some(row => !Array.isArray(row) || row.length !== set.headers.length ||
             row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
               (typeof cell === 'number' && !Number.isFinite(cell)) || String(cell ?? '').length > 8000)))
         fail('graph dataset has invalid cells.');
+      // Match Graph's live cleanNumber() contract before confirmation.
+      const numericCell = value => typeof value === 'number' ? Number.isFinite(value) :
+        typeof value === 'string' && /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(value.trim()) &&
+        Number.isFinite(Number(value));
+      // Validate persisted primary-series selectors before restoreState can silently
+      // replace an invalid column with its default. Missing selectors remain legacy-safe.
+      const hasMapping = key => Object.prototype.hasOwnProperty.call(set, key);
+      const validIndex = value => validColumnIndex(value, set.headers.length);
+      const defaultColumn = (aliases, fallback) => {
+        const index = set.headers.findIndex(header => aliases.includes(header.trim().toLowerCase()));
+        return index >= 0 ? index : fallback;
+      };
+      const axes = {
+        x: defaultColumn(['x', 'time', 't'], 0),
+        y: defaultColumn(['y', 'value', 'measurement'], Math.min(1, set.headers.length - 1)),
+        z: defaultColumn(['z', 'height', 'depth'], Math.min(2, set.headers.length - 1))
+      };
+      if (axes.x === axes.y) axes.y = (axes.x + 1) % set.headers.length;
+      if (set.headers.length >= 3 && [axes.x, axes.y].includes(axes.z))
+        axes.z = set.headers.findIndex((_, index) => ![axes.x, axes.y].includes(index));
+      for (const key of ['x', 'y', 'z']) {
+        if (hasMapping(key)) {
+          if (!validIndex(set[key])) fail('graph dataset mapping is invalid.');
+          axes[key] = Number(set[key]);
+        }
+      }
+      if (axes.x === axes.y ||
+          (data.graph?.mode === '3d' && (axes.x === axes.z || axes.y === axes.z)))
+        fail('graph dataset mapping is invalid.');
+      if (hasMapping('style') && !['points', 'line', 'grid'].includes(set.style))
+        fail('graph dataset style is invalid.');
+      if (!set.rows.some(row => numericCell(row[axes.x]) && numericCell(row[axes.y]) &&
+          (data.graph?.mode !== '3d' || numericCell(row[axes.z]))))
+        fail('graph dataset has no numeric points.');
+      if (set.extra !== undefined && set.extra !== null) {
+        if (!Array.isArray(set.extra) || set.extra.length > 20)
+          fail('graph dataset overlays must be a list of at most 20.');
+        const validIndex = (value, columns) => validColumnIndex(value, columns);
+
+        for (const overlay of set.extra) {
+          if (!record(overlay) || !record(overlay.table) || !record(overlay.mapping))
+            fail('graph dataset overlay is invalid.');
+          if (overlay.name !== undefined && overlay.name !== null)
+            short(overlay.name, 150, 'graph overlay name');
+          const table = overlay.table;
+          if (!Array.isArray(table.headers) || table.headers.length < 2 || table.headers.length > 32 ||
+              !Array.isArray(table.rows) || table.rows.length < 1 || table.rows.length > 6000)
+            fail('graph dataset overlay dimensions exceed limits.');
+          const headerIdentities = table.headers.map(h => typeof h === 'string' ? h.trim().toLowerCase() : '');
+          if (table.headers.some(h => typeof h !== 'string' || !h.trim() || h.length > 100) ||
+              new Set(headerIdentities).size !== headerIdentities.length)
+            fail('graph dataset overlay has invalid column names.');
+          if (table.rows.some(row => !Array.isArray(row) || row.length !== table.headers.length ||
+              row.some(cell => (cell !== null && !['string', 'number', 'boolean'].includes(typeof cell)) ||
+                (typeof cell === 'number' && !Number.isFinite(cell)) ||
+                (typeof cell === 'string' && cell.length > 8000))))
+            fail('graph dataset overlay has invalid cells.');
+          const mapping = overlay.mapping, x = Number(mapping.x), y = Number(mapping.y), mode = mapping.mode;
+          if (!validIndex(mapping.x, table.headers.length) || !validIndex(mapping.y, table.headers.length) || x === y ||
+              (mode !== undefined && mode !== null && mode !== '' && !['2d', '3d'].includes(mode)) ||
+              (mode === '3d' && (!validIndex(mapping.z, table.headers.length) ||
+                Number(mapping.z) === x || Number(mapping.z) === y)) ||
+              (mapping.style !== undefined && mapping.style !== null && mapping.style !== '' &&
+                !['points', 'line', 'grid'].includes(mapping.style)))
+            fail('graph dataset overlay mapping is invalid.');
+          const z = Number(mapping.z);
+          if (!table.rows.some(row => numericCell(row[x]) && numericCell(row[y]) &&
+              (mode !== '3d' || numericCell(row[z]))))
+            fail('graph dataset overlay has no numeric points.');
+        }
+      }
     }
     // Main-graph curve overlays (implicit/parametric/polar definitions). Legacy projects omit
     // the field; present definitions must match the exact shape the exporter writes.
@@ -100,7 +231,8 @@
     }
     if (data.engineering !== undefined && data.engineering !== null) {
       const eng = data.engineering;
-      if (!record(eng) || typeof eng.discipline !== 'string' || !/^[a-z-]{0,32}$/.test(eng.discipline) ||
+      if (!record(eng) || typeof eng.discipline !== 'string' ||
+          (eng.discipline !== '' && !engineeringDisciplines.has(eng.discipline)) ||
           typeof eng.query !== 'string' || eng.query.length > 200)
         fail('saved Engineering filter is invalid.');
     }
@@ -135,9 +267,33 @@
         short(item.expression, 12000, 'custom function expression');
         if (item.source !== undefined) short(item.source, 12000, 'custom function source');
         if (item.type !== undefined && !['formula', 'python'].includes(item.type)) fail('custom function type is invalid.');
+        // Match the editor's reserved-name guard and body requirements before import confirmation.
+        const reserved = new Set(['sin','cos','tan','sqrt','min','max','log','exp','abs','sum','if','pow','average','avg','count','median','product']);
+        if (reserved.has(key)) fail('custom function name is reserved.');
+        if (item.type === 'python') {
+          // Python custom functions must have one synchronous top-level declaration.
+          // Multiple definitions can silently replace the callable after validation;
+          // async definitions return coroutines that the numeric worker cannot consume.
+          const signatures = typeof item.source === 'string'
+            ? Array.from(item.source.trim().matchAll(
+                new RegExp('^(async\\s+)?def\\s+' + item.name + '\\s*\\(([^)]*)\\)', 'gm')))
+            : [];
+          const signature = signatures.length === 1 && !signatures[0][1] ? signatures[0] : null;
+          const declared = signature && signature[2].trim()
+            ? signature[2].split(',').map(param => param.trim()) : [];
+          if (!signature || declared.length !== item.params.length ||
+              declared.some((param, index) => param !== item.params[index]))
+            fail('custom function Python signature does not match saved arguments.');
+        } else if (!item.expression.trim()) {
+          fail('custom function expression is empty.');
+        }
       }
     }
     if (data.tables) {
+      // Versioned Data Tables state is a separate nested schema. Missing version is
+      // retained for legacy backups; an explicit unknown version must not be read as v1.
+      if (data.tables.version !== undefined && data.tables.version !== 1)
+        fail('unsupported Data Tables state version.');
       if (!Array.isArray(data.tables.tables) || data.tables.tables.length > 20) fail('table count exceeds 20.');
       // A stored selection must name a real table; otherwise restore would silently
       // fall back to another sheet. Exports always write an existing id.
@@ -145,6 +301,9 @@
           (typeof data.tables.selected !== 'string' ||
            !data.tables.tables.some(t => record(t) && t.id === data.tables.selected)))
         fail('selected table does not exist.');
+      // The Data Tables workspace always retains at least one sheet; an empty present
+      // workbook would restore to a blank, unusable workspace. Legacy projects may omit it.
+      if (data.tables.tables.length === 0) fail('table list must contain at least one sheet.');
       const names = new Set();
       const ids = new Set();
       for (const table of data.tables.tables) {

@@ -35,8 +35,17 @@
 })(typeof window !== 'undefined' ? window : globalThis, function () {
   'use strict';
   const MAX_NODES = 80, MAX_MEMBERS = 240, MAX_IMPORT_BYTES = 1024 * 1024;
+  const DECIMAL_NUMBER = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+  const MAX_NUMERIC_STRING_LENGTH = 256;
   const finite = (v, name) => {
-    if (v === null || v === undefined || (typeof v === 'string' && !v.trim()) || typeof v === 'boolean' || typeof v === 'bigint' || typeof v === 'symbol' || typeof v === 'object' || typeof v === 'function') throw Error(name + ' must be a finite number.');
+    if (typeof v === 'string') {
+      if (v.length > MAX_NUMERIC_STRING_LENGTH) throw Error(name + ' must be a finite number.');
+      v = v.trim();
+      if (!DECIMAL_NUMBER.test(v)) throw Error(name + ' must be a finite number.');
+    } else if (v === null || v === undefined || typeof v === 'boolean' || typeof v === 'bigint' ||
+               typeof v === 'symbol' || typeof v === 'object' || typeof v === 'function') {
+      throw Error(name + ' must be a finite number.');
+    }
     const n = Number(v);
     if (!Number.isFinite(n)) throw Error(name + ' must be a finite number.');
     return n;
@@ -46,6 +55,264 @@
     if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
     return result;
   };
+  // Preserve the original division rounding while rejecting nonzero SI values that
+  // disappear when converted to the application's coarser engineering units.
+  const finiteDivided = (v, name, divisor) => {
+    const input = finite(v, name);
+    const result = input / divisor;
+    if (!Number.isFinite(result)) throw Error(name + ' exceeds the supported SI range.');
+    if (input !== 0 && result === 0) throw Error(name + ' underflows the supported SI range.');
+    return result;
+  };
+  // Correctly round the exact sum of finite binary64 inputs without an overflowing partial sum.
+  // Each finite double is an integer multiple of 2^-1074; BigInt accumulates that integer exactly.
+  // The final conversion rounds once to nearest, ties-to-even, and still returns a binary64 Number.
+  function exactFiniteBinarySum(terms, name) {
+    if (typeof BigInt !== 'function' || typeof DataView !== 'function') return null;
+    const zero=BigInt(0), one=BigInt(1), shift32=BigInt(32), shift52=BigInt(52), shift63=BigInt(63);
+    const signMask=one<<shift63, exponentMask=BigInt(2047), fractionMask=(one<<shift52)-one;
+    const view=new DataView(new ArrayBuffer(8));
+    let total=zero;
+    for (const term of terms) {
+      view.setFloat64(0,term,false);
+      const bits=(BigInt(view.getUint32(0,false))<<shift32)|BigInt(view.getUint32(4,false));
+      const negative=(bits&signMask)!==zero;
+      const exponent=Number((bits>>shift52)&exponentMask);
+      const fraction=bits&fractionMask;
+      if (exponent===0 && fraction===zero) continue;
+      const significand=exponent===0?fraction:(one<<shift52)|fraction;
+      const shift=exponent===0?0:exponent-1;
+      const magnitude=significand<<BigInt(shift);
+      total+=negative?-magnitude:magnitude;
+    }
+    if (total===zero) return 0;
+    const negative=total<zero;
+    const magnitude=negative?-total:total;
+    const bitLength=magnitude.toString(2).length;
+    let result;
+    if (bitLength<=53) {
+      result=Number(magnitude)*Number.MIN_VALUE;
+    } else {
+      let shift=bitLength-53;
+      let significand=magnitude>>BigInt(shift);
+      const remainder=magnitude-(significand<<BigInt(shift));
+      const halfway=one<<BigInt(shift-1);
+      if (remainder>halfway || (remainder===halfway && (significand&one)!==zero)) significand+=one;
+      if (significand===(one<<BigInt(53))) {significand>>=one;shift++;}
+      const exponent=shift-1074;
+      result=exponent>971?Infinity:Number(significand)*Math.pow(2,exponent);
+    }
+    return finite(negative?-result:result,name);
+  }
+  // Sum signed finite terms without overflowing intermediate partial sums.
+  // Normalize by the largest magnitude, compensate rounding, and retain terms
+  // whose normalized quotient underflows in a separately compensated residual.
+  function finiteSignedSum(values, name) {
+    const terms = Array.from(values, value => finite(value, name));
+    const hasPositive=terms.some(value=>value>0),hasNegative=terms.some(value=>value<0);
+    if (!(hasPositive&&hasNegative)) {
+      // Same-sign terms cannot cancel an overflowing partial sum. Compensate in
+      // original units so restoring a normalized sum does not introduce another rounding.
+      let sum=0,correction=0;
+      for(const term of terms){
+        const next=sum+term;
+        correction+=Math.abs(sum)>=Math.abs(term)
+          ? (sum-next)+term
+          : (term-next)+sum;
+        sum=next;
+      }
+      return finite(sum+correction,name);
+    }
+    const exact=exactFiniteBinarySum(terms,name);
+    if(exact!==null)return exact;
+    const scale = Math.max(0, ...terms.map(value => Math.abs(value)));
+    if (scale === 0) return 0;
+    const normalized = {sum:0, correction:0};
+    const residual = {sum:0, correction:0};
+    const add = (state, value) => {
+      const next = state.sum + value;
+      state.correction += Math.abs(state.sum) >= Math.abs(value)
+        ? (state.sum - next) + value
+        : (value - next) + state.sum;
+      state.sum = next;
+    };
+    for (const term of terms) {
+      const scaled = term / scale;
+      if (Math.abs(scaled) < 2.2250738585072014e-308 && term !== 0) add(residual, term);
+      else add(normalized, scaled);
+    }
+    const restored = (normalized.sum + normalized.correction) * scale;
+    const smallResidual = residual.sum + residual.correction;
+    return finite(restored + smallResidual, name);
+  }
+  // Preserve a representable EA/L when the intermediate E*A overflows or underflows.
+  // Keep the direct expression for ordinary products so established results stay bit-identical.
+  function positiveProductQuotient(a, b, c) {
+    const product = a * b;
+    const direct = product / c;
+    const minNormal = 2.2250738585072014e-308;
+    if (Number.isFinite(product) && product >= minNormal && Number.isFinite(direct) && direct > 0) {
+      return direct;
+    }
+    const binaryParts = value => {
+      let exponent = Math.floor(Math.log2(value));
+      exponent = Math.max(-1074, Math.min(1023, exponent));
+      let mantissa = value / (2 ** exponent);
+      if (mantissa < 1) { mantissa *= 2; exponent--; }
+      else if (mantissa >= 2) { mantissa /= 2; exponent++; }
+      return {mantissa, exponent};
+    };
+    const left = binaryParts(a), right = binaryParts(b), divisor = binaryParts(c);
+    let mantissa = left.mantissa * right.mantissa / divisor.mantissa;
+    let exponent = left.exponent + right.exponent - divisor.exponent;
+    if (mantissa >= 2) { mantissa /= 2; exponent++; }
+    else if (mantissa < 1) { mantissa *= 2; exponent--; }
+    if (exponent > 1023) return Infinity;
+    if (exponent >= -1022) return mantissa * (2 ** exponent);
+    if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
+    return 0;
+  }
+  // Preserve a representable L*A*density result when the intermediate volume overflows or underflows.
+  // Keep the direct left-to-right product when both intermediate and final values are normal.
+  function positiveProduct(a, b, c) {
+    const product = a * b;
+    const direct = product * c;
+    const minNormal = 2.2250738585072014e-308;
+    if (a === 0 || b === 0 || c === 0) return 0;
+    if (Number.isFinite(product) && product >= minNormal &&
+        Number.isFinite(direct) && direct >= minNormal) return direct;
+    const binaryParts = value => {
+      let exponent = Math.floor(Math.log2(value));
+      exponent = Math.max(-1074, Math.min(1023, exponent));
+      let mantissa = value / (2 ** exponent);
+      if (mantissa < 1) { mantissa *= 2; exponent--; }
+      else if (mantissa >= 2) { mantissa /= 2; exponent++; }
+      return {mantissa, exponent};
+    };
+    const factors = [a, b, c].map(binaryParts);
+    let mantissa = 1, exponent = 0;
+    for (const part of factors) {
+      mantissa *= part.mantissa;
+      exponent += part.exponent;
+      if (mantissa >= 2) { mantissa /= 2; exponent++; }
+      else if (mantissa < 1) { mantissa *= 2; exponent--; }
+    }
+    if (exponent > 1023) return Infinity;
+    if (exponent >= -1022) return mantissa * (2 ** exponent);
+    if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
+    return 0;
+  }
+
+  // Sum signed binary64 products without rounding each underflowed product to zero.
+  // Normal products keep the existing direct multiply + compensated-sum behavior.
+  function exactFiniteProductSum(pairs, name) {
+    const terms = Array.from(pairs, pair => {
+      if (!Array.isArray(pair) || pair.length !== 2) throw Error(name + ' terms must be pairs.');
+      return [finite(pair[0], name), finite(pair[1], name)];
+    });
+    if (typeof BigInt !== 'function' || typeof DataView !== 'function') {
+      const leftScale = Math.max(0, ...terms.map(pair => Math.abs(pair[0])));
+      const rightScale = Math.max(0, ...terms.map(pair => Math.abs(pair[1])));
+      if (leftScale === 0 || rightScale === 0) return 0;
+      const normalized = terms.map(([left, right]) => (left / leftScale) * (right / rightScale));
+      const total = finiteSignedSum(normalized, name);
+      if (total === 0) return 0;
+      const magnitude = positiveProduct(Math.abs(total), leftScale, rightScale);
+      return finite(total < 0 ? -magnitude : magnitude, name);
+    }
+    const zero = BigInt(0), one = BigInt(1);
+    const shift32 = BigInt(32), shift52 = BigInt(52), shift63 = BigInt(63);
+    const signMask = one << shift63, exponentMask = BigInt(2047);
+    const fractionMask = (one << shift52) - one;
+    const view = new DataView(new ArrayBuffer(8));
+    const binaryParts = value => {
+      view.setFloat64(0, value, false);
+      const bits = (BigInt(view.getUint32(0, false)) << shift32) |
+        BigInt(view.getUint32(4, false));
+      const negative = (bits & signMask) !== zero;
+      const exponentBits = Number((bits >> shift52) & exponentMask);
+      const fraction = bits & fractionMask;
+      return exponentBits === 0
+        ? {negative, significand:fraction, exponent:-1074}
+        : {negative, significand:(one << shift52) | fraction, exponent:exponentBits - 1075};
+    };
+    let total = zero;
+    for (const [left, right] of terms) {
+      if (left === 0 || right === 0) continue;
+      const a = binaryParts(left), b = binaryParts(right);
+      const shift = a.exponent + b.exponent + 2148;
+      const magnitude = (a.significand * b.significand) << BigInt(shift);
+      total += a.negative !== b.negative ? -magnitude : magnitude;
+    }
+    if (total === zero) return 0;
+    const negative = total < zero;
+    const magnitude = negative ? -total : total;
+    const bitLength = magnitude.toString(2).length;
+    let result;
+    if (bitLength <= 53) {
+      result = Number(magnitude) * Math.pow(2, -2148);
+    } else {
+      let shift = bitLength - 53;
+      let significand = magnitude >> BigInt(shift);
+      const remainder = magnitude - (significand << BigInt(shift));
+      const halfway = one << BigInt(shift - 1);
+      if (remainder > halfway || (remainder === halfway && (significand & one) !== zero)) significand += one;
+      if (significand === (one << BigInt(53))) { significand >>= one; shift++; }
+      const exponent = shift - 2148;
+      if (exponent > 971) result = Infinity;
+      else if (exponent >= -1074) result = Number(significand) * Math.pow(2, exponent);
+      else if (exponent >= -1127) {
+        result = (Number(significand) * Math.pow(2, exponent + 1022)) * 2.2250738585072014e-308;
+      } else result = 0;
+    }
+    return finite(negative ? -result : result, name);
+  }
+  function finiteSignedProductSum(pairs, name) {
+    const products = Array.from(pairs, pair => {
+      if (!Array.isArray(pair) || pair.length !== 2) throw Error(name + ' terms must be pairs.');
+      const left = finite(pair[0], name), right = finite(pair[1], name);
+      const product = left * right;
+      if (!Number.isFinite(product)) throw Error(name + ' must be a finite number.');
+      return {left, right, product, underflowed:left !== 0 && right !== 0 && product === 0};
+    });
+    if (!products.some(term => term.underflowed)) {
+      return finiteSignedSum(products.map(term => term.product), name);
+    }
+    return exactFiniteProductSum(products.map(term =>
+      term.underflowed ? [term.left, term.right] : [term.product, 1]), name);
+  }
+  // Preserve a representable product of positive factors divided by positive factors.
+  // The caller supplies the old direct intermediates so ordinary calculations retain their exact order.
+  function positiveProductQuotientFactors(numerators, denominators, directNumerator, directDenominator) {
+    const minNormal = 2.2250738585072014e-308;
+    const direct = directNumerator / directDenominator;
+    if (Number.isFinite(directNumerator) && directNumerator >= minNormal &&
+        Number.isFinite(directDenominator) && directDenominator >= minNormal &&
+        Number.isFinite(direct) && direct > 0) return direct;
+    const binaryParts = value => {
+      let exponent = Math.floor(Math.log2(value));
+      exponent = Math.max(-1074, Math.min(1023, exponent));
+      let mantissa = value / (2 ** exponent);
+      if (mantissa < 1) { mantissa *= 2; exponent--; }
+      else if (mantissa >= 2) { mantissa /= 2; exponent++; }
+      return {mantissa, exponent};
+    };
+    let mantissa = 1, exponent = 0;
+    const accumulate = (value, direction) => {
+      const part = binaryParts(value);
+      mantissa = direction > 0 ? mantissa * part.mantissa : mantissa / part.mantissa;
+      exponent += direction * part.exponent;
+      const adjustment = Math.floor(Math.log2(mantissa));
+      mantissa /= 2 ** adjustment;
+      exponent += adjustment;
+    };
+    for (const value of numerators) accumulate(value, 1);
+    for (const value of denominators) accumulate(value, -1);
+    if (exponent > 1023) return Infinity;
+    if (exponent >= -1022) return mantissa * (2 ** exponent);
+    if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
+    return 0;
+  }
   // Null and whitespace-only optional properties mean "not supplied"; numeric zero remains present.
   const hasOptionalValue = value => value !== undefined && value !== null &&
     !(typeof value === 'string' && !value.trim());
@@ -87,21 +354,60 @@
   // Composite open sections use non-overlapping rectangles and the parallel-axis theorem.
   function sectionProperties(shape, dimensions) {
     // Divide before the final multiplication: b*h^3/12 can be finite even when b*h^3 overflows.
-    const rectangleIxx = (piece, label, factor = 1) => {
+    const rectangleIxxValue = (piece, factor = 1) => {
       const scaledHeight = piece.height * Math.sqrt(factor);
-      return finite(piece.width*piece.height*(scaledHeight/12)*scaledHeight, label);
+      return piece.width*piece.height*(scaledHeight/12)*scaledHeight;
     };
-    const rectangleIyy = (piece, label, factor = 1) => {
+    const rectangleIyyValue = (piece, factor = 1) => {
       const scaledWidth = piece.width * Math.sqrt(factor);
-      return finite(piece.height*piece.width*(scaledWidth/12)*scaledWidth, label);
+      return piece.height*piece.width*(scaledWidth/12)*scaledWidth;
     };
+    const rectangleIxx = (piece, label, factor = 1) => finite(rectangleIxxValue(piece, factor), label);
+    const rectangleIyy = (piece, label, factor = 1) => finite(rectangleIyyValue(piece, factor), label);
     const rectangular = shape === 'rectangle' || shape === 'hollow-rectangle';
+    const MIN_NORMAL = 2.2250738585072014e-308;
+    // Correctly round sums of already-rounded section terms when BigInt is available.
+    // Retain the scaled compensated path as a compatibility fallback.
+    const sectionPropertySum = (values, name) => {
+      const terms = Array.from(values, value => finite(value, name));
+      const exact = exactFiniteBinarySum(terms, name);
+      return exact === null ? finiteSignedSum(terms, name) : exact;
+    };
+    // Restore products of extreme geometry scales without overflowing intermediate powers.
+    const scaleProduct = (...values) => {
+      let sign=1, mantissa=1, exponent=0;
+      for (const value of values) {
+        if (value === 0) return 0;
+        if (!Number.isFinite(value)) return value;
+        if (value < 0) sign=-sign;
+        const absolute=Math.abs(value);
+        let power=Math.floor(Math.log2(absolute));
+        let unit=Math.pow(2,power);
+        if (!Number.isFinite(unit)) { power=1023; unit=Math.pow(2,1023); }
+        else if (unit === 0) { power=-1074; unit=Number.MIN_VALUE; }
+        let part=absolute/unit;
+        if (part >= 2) { part/=2; power++; }
+        else if (part < 1) { part*=2; power--; }
+        mantissa*=part;
+        exponent+=power;
+        const adjustment=Math.floor(Math.log2(mantissa));
+        mantissa/=Math.pow(2,adjustment);
+        exponent+=adjustment;
+      }
+      if (exponent < -1075) return sign*0;
+      const magnitude=exponent < -1022
+        ? mantissa*Math.pow(2,exponent+1022)*MIN_NORMAL
+        : mantissa*Math.pow(2,exponent);
+      return sign*magnitude;
+    };
     const circular = shape === 'solid-circle' || shape === 'hollow-circle';
     const composite = shape === 'channel' || shape === 'i-section';
     const angle = shape === 'l-angle';
     if (!rectangular && !circular && !composite && !angle) throw Error('Section shape must be rectangle, hollow-rectangle, solid-circle, hollow-circle, channel, i-section or l-angle.');
     if (!dimensions || typeof dimensions !== 'object' || Array.isArray(dimensions)) throw Error('Section dimensions must be an object.');
     let area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis, centroid = null;
+    let analyticRadiusOfGyrationX = null, analyticRadiusOfGyrationY = null;
+    let analyticSectionModulusX = null, analyticSectionModulusY = null;
     let productOfInertia = null, principalMomentMajor = null, principalMomentMinor = null, principalAxisAngleDegrees = null;
     let boundsWidth, boundsHeight, centroidX, centroidY;
     if (angle) {
@@ -123,54 +429,189 @@
           cx:finite(piece.x+piece.width/2, 'L-angle rectangle centroid x (mm)'),
           cy:finite(piece.y+piece.height/2, 'L-angle rectangle centroid y (mm)')};
       });
-      area = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area,0), 'L-angle area (mm²)');
+      // Sum already-rounded rectangle contributions once; scaled normalization can itself shift a
+      // positive area total by an ulp, while sequential local/offset inertia sums are order-dependent.
+      area = sectionPropertySum(pieceMetrics.map(piece=>piece.area), 'L-angle area (mm²)');
       if (!(area > 0)) throw Error('L-angle area underflow; increase dimensions.');
-      centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'L-angle centroid x (mm)');
-      centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'L-angle centroid y (mm)');
-      secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = rectangleIxx(piece, 'L-angle local Ixx (mm⁴)');
-        const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'L-angle Ixx offset (mm⁴)');
-        return sum+local+offset;
-      },0), 'L-angle Ixx (mm⁴)');
-      secondMomentPerpendicular = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = rectangleIyy(piece, 'L-angle local Iyy (mm⁴)');
-        const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'L-angle Iyy offset (mm⁴)');
-        return sum+local+offset;
-      },0), 'L-angle Iyy (mm⁴)');
-      productOfInertia = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*(piece.cx-centroidX)*(piece.cy-centroidY),0),
-        'L-angle product of inertia Ixy (mm⁴)');
-      if (productOfInertia === 0) throw Error('L-angle product of inertia underflow; increase dimensions.');
-      // Normalize the inertia tensor before diagonalizing it. Subtracting the
-      // nearly equal mean and radius loses the minor eigenvalue for slender angles.
-      const momentScale = Math.max(secondMoment,secondMomentPerpendicular,Math.abs(productOfInertia));
-      const scaledIxx = secondMoment/momentScale;
-      const scaledIyy = secondMomentPerpendicular/momentScale;
-      const scaledIxy = productOfInertia/momentScale;
-      const meanMoment = (scaledIxx+scaledIyy)/2;
-      const principalRadius = Math.hypot((scaledIxx-scaledIyy)/2,scaledIxy);
-      const majorNormalized = meanMoment+principalRadius;
-      const determinantNormalized = scaledIxx*scaledIyy-scaledIxy*scaledIxy;
-      if (!(majorNormalized > 0)) {
-        throw Error('L-angle principal second moment underflow; increase dimensions.');
+      centroidX = finite(sectionPropertySum(pieceMetrics.map(piece=>piece.area*piece.cx),
+        'L-angle first moment x (mm³)')/area, 'L-angle centroid x (mm)');
+      centroidY = finite(sectionPropertySum(pieceMetrics.map(piece=>piece.area*piece.cy),
+        'L-angle first moment y (mm³)')/area, 'L-angle centroid y (mm)');
+      const ixxTerms = [], iyyTerms = [];
+      for (const piece of pieceMetrics) {
+        const localIxx = rectangleIxx(piece, 'L-angle local Ixx (mm⁴)');
+        const offsetIxx = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'L-angle Ixx offset (mm⁴)');
+        const localIyy = rectangleIyy(piece, 'L-angle local Iyy (mm⁴)');
+        const offsetIyy = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'L-angle Iyy offset (mm⁴)');
+        ixxTerms.push(localIxx,offsetIxx);
+        iyyTerms.push(localIyy,offsetIyy);
       }
-      principalMomentMajor = finite(momentScale*majorNormalized, 'L-angle major principal moment I1 (mm⁴)');
-      // For a positive-definite 2×2 inertia tensor, λmin = det(I)/λmax.
-      // Usually the normalized determinant is safest; at extreme aspect ratios it
-      // can underflow even when the minor eigenvalue is still representable.
-      let minorMoment = momentScale*(determinantNormalized/majorNormalized);
-      if (!(minorMoment > 0) || !Number.isFinite(minorMoment)) {
-        // Recover only when the unscaled determinant itself remains finite and positive.
-        // Otherwise retain the explicit underflow rejection rather than inventing a value.
-        const determinant = secondMoment*secondMomentPerpendicular-productOfInertia*productOfInertia;
-        if (!(determinant > 0) || !Number.isFinite(determinant)) {
+      secondMoment = sectionPropertySum(ixxTerms, 'L-angle Ixx (mm⁴)');
+      secondMomentPerpendicular = sectionPropertySum(iyyTerms, 'L-angle Iyy (mm⁴)');
+      productOfInertia = sectionPropertySum(pieceMetrics.map(piece=>piece.area*(piece.cx-centroidX)*(piece.cy-centroidY)),
+        'L-angle product of inertia Ixy (mm⁴)');
+      // A subnormal tensor or an underflowed Ixy can lose orientation information
+      // even when the diagonal moments are representable. Re-evaluate the
+      // two-rectangle geometry at unit scale, then restore physical units once.
+      const physicalMomentScale = Math.max(secondMoment,secondMomentPerpendicular,Math.abs(productOfInertia));
+      let normalizedLowExponentResolved = false;
+      if (physicalMomentScale < MIN_NORMAL || productOfInertia === 0) {
+        const lengthScale = Math.max(width,depth);
+        const lengthScaleSquared = lengthScale*lengthScale;
+        if (Number.isFinite(lengthScaleSquared) && lengthScaleSquared >= MIN_NORMAL) {
+          const normalizedWidth = width/lengthScale;
+          const normalizedDepth = depth/lengthScale;
+          const normalizedThickness = thickness/lengthScale;
+          const normalizedPieces = [
+            {x:0,y:0,width:normalizedThickness,height:normalizedDepth},
+            {x:normalizedThickness,y:0,width:normalizedWidth-normalizedThickness,height:normalizedThickness}
+          ];
+          const normalizedMetrics = normalizedPieces.map(piece => {
+            const pieceArea = piece.width*piece.height;
+            return {...piece,area:pieceArea,cx:piece.x+piece.width/2,cy:piece.y+piece.height/2};
+          });
+          const normalizedArea = normalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+          const normalizedCentroidX = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/normalizedArea;
+          const normalizedCentroidY = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/normalizedArea;
+          const normalizedIxx = normalizedMetrics.reduce((sum,piece)=>
+            sum+piece.width*piece.height*piece.height*piece.height/12+
+              piece.area*(piece.cy-normalizedCentroidY)*(piece.cy-normalizedCentroidY),0);
+          const normalizedIyy = normalizedMetrics.reduce((sum,piece)=>
+            sum+piece.height*piece.width*piece.width*piece.width/12+
+              piece.area*(piece.cx-normalizedCentroidX)*(piece.cx-normalizedCentroidX),0);
+          const normalizedIxy = normalizedMetrics.reduce((sum,piece)=>
+            sum+piece.area*(piece.cx-normalizedCentroidX)*(piece.cy-normalizedCentroidY),0);
+          const normalizedMean = (normalizedIxx+normalizedIyy)/2;
+          const normalizedRadius = Math.hypot((normalizedIxx-normalizedIyy)/2,normalizedIxy);
+          const normalizedMajor = normalizedMean+normalizedRadius;
+          const normalizedDeterminant = normalizedIxx*normalizedIyy-normalizedIxy*normalizedIxy;
+          const normalizedMinor = normalizedDeterminant/normalizedMajor;
+          const normalizedExtremeX = Math.max(normalizedCentroidY,normalizedDepth-normalizedCentroidY);
+          const normalizedExtremeY = Math.max(normalizedCentroidX,normalizedWidth-normalizedCentroidX);
+          const candidate = {
+            centroidX:normalizedCentroidX*lengthScale,
+            centroidY:normalizedCentroidY*lengthScale,
+            ixx:(normalizedIxx*lengthScaleSquared)*lengthScaleSquared,
+            iyy:(normalizedIyy*lengthScaleSquared)*lengthScaleSquared,
+            ixy:(normalizedIxy*lengthScaleSquared)*lengthScaleSquared,
+            major:(normalizedMajor*lengthScaleSquared)*lengthScaleSquared,
+            minor:(normalizedMinor*lengthScaleSquared)*lengthScaleSquared,
+            sx:((normalizedIxx/normalizedExtremeX)*lengthScaleSquared)*lengthScale,
+            sy:((normalizedIyy/normalizedExtremeY)*lengthScaleSquared)*lengthScale,
+            rx:lengthScale*Math.sqrt(normalizedIxx/normalizedArea),
+            ry:lengthScale*Math.sqrt(normalizedIyy/normalizedArea),
+            angle:0.5*Math.atan2(-2*normalizedIxy,normalizedIxx-normalizedIyy)*180/Math.PI
+          };
+          if (normalizedArea>0 && normalizedIxx>0 && normalizedIyy>0 &&
+              normalizedDeterminant>0 && normalizedMajor>0 && normalizedMinor>0 &&
+              normalizedExtremeX>0 && normalizedExtremeY>0 &&
+              Object.values(candidate).every(Number.isFinite) &&
+              candidate.ixx>0 && candidate.iyy>0 &&
+              candidate.major>0 && candidate.minor>0 && candidate.sx>0 && candidate.sy>0 &&
+              candidate.rx>0 && candidate.ry>0) {
+            centroidX = candidate.centroidX;
+            centroidY = candidate.centroidY;
+            secondMoment = candidate.ixx;
+            secondMomentPerpendicular = candidate.iyy;
+            // The normalized tensor retains Ixy's sign for the principal-axis angle.
+            // Canonicalize dimensional underflowed zero so UI/export never emits -0.
+            productOfInertia = candidate.ixy === 0 ? 0 : candidate.ixy;
+            principalMomentMajor = candidate.major;
+            principalMomentMinor = candidate.minor;
+            analyticSectionModulusX = candidate.sx;
+            analyticSectionModulusY = candidate.sy;
+            analyticRadiusOfGyrationX = candidate.rx;
+            analyticRadiusOfGyrationY = candidate.ry;
+            principalAxisAngleDegrees = candidate.angle;
+            normalizedLowExponentResolved = true;
+          }
+        }
+      }
+      // If only one L-angle axis is subnormal, max-dimension normalization can
+      // erase that axis. Normalize x and y independently for its geometric S and r.
+      if (!normalizedLowExponentResolved &&
+          (secondMoment < MIN_NORMAL || secondMomentPerpendicular < MIN_NORMAL)) {
+        const axisNormalizedMetrics = pieces.map(piece => {
+          const normalizedPiece = {
+            x:piece.x/width, y:piece.y/depth,
+            width:piece.width/width, height:piece.height/depth
+          };
+          return {...normalizedPiece,
+            area:normalizedPiece.width*normalizedPiece.height,
+            cx:normalizedPiece.x+normalizedPiece.width/2,
+            cy:normalizedPiece.y+normalizedPiece.height/2};
+        });
+        const axisNormalizedArea = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+        if (axisNormalizedArea > 0 && Number.isFinite(axisNormalizedArea)) {
+          const axisNormalizedCentroidX = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/axisNormalizedArea;
+          const axisNormalizedCentroidY = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/axisNormalizedArea;
+          const axisNormalizedIxx = axisNormalizedMetrics.reduce((sum,piece)=>{
+            const dy=piece.cy-axisNormalizedCentroidY;
+            return sum+piece.area*(piece.height*piece.height/12+dy*dy);
+          },0);
+          const axisNormalizedIyy = axisNormalizedMetrics.reduce((sum,piece)=>{
+            const dx=piece.cx-axisNormalizedCentroidX;
+            return sum+piece.area*(piece.width*piece.width/12+dx*dx);
+          },0);
+          const axisExtremeY = Math.max(axisNormalizedCentroidY,1-axisNormalizedCentroidY);
+          const axisExtremeX = Math.max(axisNormalizedCentroidX,1-axisNormalizedCentroidX);
+          if (axisNormalizedIxx > 0 && Number.isFinite(axisNormalizedIxx) &&
+              axisNormalizedIyy > 0 && Number.isFinite(axisNormalizedIyy) &&
+              axisExtremeY > 0 && axisExtremeX > 0) {
+            const normalizedRadius = (moment,dimensionScale) => {
+              const ratio=moment/axisNormalizedArea;
+              const root=Number.isFinite(ratio) && ratio>0
+                ? Math.sqrt(ratio) : Math.sqrt(moment)/Math.sqrt(axisNormalizedArea);
+              return scaleProduct(dimensionScale,root);
+            };
+            if (secondMoment < MIN_NORMAL) {
+              const radius=normalizedRadius(axisNormalizedIxx,depth);
+              const modulus=scaleProduct(width,depth,depth,axisNormalizedIxx,1/axisExtremeY);
+              if (radius>0 && Number.isFinite(radius)) analyticRadiusOfGyrationX=radius;
+              if (modulus>0 && Number.isFinite(modulus)) analyticSectionModulusX=modulus;
+            }
+            if (secondMomentPerpendicular < MIN_NORMAL) {
+              const radius=normalizedRadius(axisNormalizedIyy,width);
+              const modulus=scaleProduct(width,width,depth,axisNormalizedIyy,1/axisExtremeX);
+              if (radius>0 && Number.isFinite(radius)) analyticRadiusOfGyrationY=radius;
+              if (modulus>0 && Number.isFinite(modulus)) analyticSectionModulusY=modulus;
+            }
+          }
+        }
+      }
+      if (!normalizedLowExponentResolved) {
+        // Normalize the inertia tensor before diagonalizing it. Subtracting the
+        // nearly equal mean and radius loses the minor eigenvalue for slender angles.
+        const momentScale = physicalMomentScale;
+        const scaledIxx = secondMoment/momentScale;
+        const scaledIyy = secondMomentPerpendicular/momentScale;
+        const scaledIxy = productOfInertia/momentScale;
+        const meanMoment = (scaledIxx+scaledIyy)/2;
+        const principalRadius = Math.hypot((scaledIxx-scaledIyy)/2,scaledIxy);
+        const majorNormalized = meanMoment+principalRadius;
+        const determinantNormalized = scaledIxx*scaledIyy-scaledIxy*scaledIxy;
+        if (!(majorNormalized > 0)) {
           throw Error('L-angle principal second moment underflow; increase dimensions.');
         }
-        minorMoment = determinant/principalMomentMajor;
+        principalMomentMajor = finite(momentScale*majorNormalized, 'L-angle major principal moment I1 (mm⁴)');
+        // For a positive-definite 2×2 inertia tensor, λmin = det(I)/λmax.
+        // Usually the normalized determinant is safest; at extreme aspect ratios it
+        // can underflow even when the minor eigenvalue is still representable.
+        let minorMoment = momentScale*(determinantNormalized/majorNormalized);
+        if (!(minorMoment > 0) || !Number.isFinite(minorMoment)) {
+          // Recover only when the unscaled determinant itself remains finite and positive.
+          // Otherwise retain the explicit underflow rejection rather than inventing a value.
+          const determinant = secondMoment*secondMomentPerpendicular-productOfInertia*productOfInertia;
+          if (!(determinant > 0) || !Number.isFinite(determinant)) {
+            throw Error('L-angle principal second moment underflow; increase dimensions.');
+          }
+          minorMoment = determinant/principalMomentMajor;
+        }
+        principalMomentMinor = finite(minorMoment, 'L-angle minor principal moment I2 (mm⁴)');
+        if (!(principalMomentMajor > 0) || !(principalMomentMinor > 0)) throw Error('L-angle principal second moment underflow; increase dimensions.');
+        principalAxisAngleDegrees = finite(0.5*Math.atan2(-2*scaledIxy,scaledIxx-scaledIyy)*180/Math.PI,
+          'L-angle principal-axis angle (degrees)');
       }
-      principalMomentMinor = finite(minorMoment, 'L-angle minor principal moment I2 (mm⁴)');
-      if (!(principalMomentMajor > 0) || !(principalMomentMinor > 0)) throw Error('L-angle principal second moment underflow; increase dimensions.');
-      principalAxisAngleDegrees = finite(0.5*Math.atan2(-2*scaledIxy,scaledIxx-scaledIyy)*180/Math.PI,
-        'L-angle principal-axis angle (degrees)');
       centroid = {x:centroidX,y:centroidY};
       axis = 'centroidal horizontal axis (Ixx)';
       perpendicularAxis = 'centroidal vertical axis (Iyy)';
@@ -187,6 +628,7 @@
       boundsHeight = depth;
       // Channel web is on the left and both flanges extend right.
       // The I-section web is centered between equal-width top and bottom flanges.
+      const lengthScale = Math.max(width, depth);
       const pieces = shape === 'channel'
         ? [
             {x:0,y:0,width:webThickness,height:depth},
@@ -200,25 +642,161 @@
           ];
       const pieceMetrics = pieces.map((piece,index) => {
         const pieceArea = finite(piece.width * piece.height, 'Composite section rectangle '+(index+1)+' area (mm²)');
-        if (!(pieceArea > 0)) throw Error('Composite section area underflow; increase dimensions.');
+        // A centered I-section web has no parallel-axis contribution. A channel web
+        // is off-axis, so omit it only when exponent-scaled upper bounds prove that
+        // its area, first moments and every local/offset inertia round to zero.
+        const negligibleCenteredIWeb = shape === 'i-section' && index === 1 &&
+          pieceArea === 0 && piece.width < 1 && piece.height < 1 &&
+          piece.x + piece.width/2 === width/2 && piece.y + piece.height/2 === depth/2;
+        const negligibleChannelWeb = shape === 'channel' && index === 0 && pieceArea === 0 &&
+          scaleProduct(2,piece.width,piece.height) === 0 &&
+          scaleProduct(2,piece.width,piece.height,width) === 0 &&
+          scaleProduct(2,piece.width,piece.height,depth) === 0 &&
+          scaleProduct(2,piece.width,piece.height,depth,depth) === 0 &&
+          scaleProduct(2,piece.width,piece.height,piece.height,piece.height,1/12) === 0 &&
+          scaleProduct(2,piece.height,piece.width,width,width) === 0 &&
+          scaleProduct(2,piece.height,piece.width,piece.width,piece.width,1/12) === 0 &&
+          scaleProduct(2,piece.width,piece.height,width,depth) === 0 &&
+          scaleProduct(2,piece.width/lengthScale,piece.height/lengthScale) === 0 &&
+          scaleProduct(2,piece.width/width,piece.height/depth) === 0;
+        if (!(pieceArea > 0) && !negligibleCenteredIWeb && !negligibleChannelWeb) {
+          throw Error('Composite section area underflow; increase dimensions.');
+        }
         return {...piece,area:pieceArea,
           cx:finite(piece.x + piece.width/2, 'Composite section rectangle centroid x (mm)'),
           cy:finite(piece.y + piece.height/2, 'Composite section rectangle centroid y (mm)')};
       });
-      area = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area,0), 'Composite section area (mm²)');
+      const omittedChannelWeb = shape === 'channel' && pieceMetrics[0].area === 0;
+      // Sum the rounded rectangle contributions exactly before computing the centroid and inertias.
+      area = sectionPropertySum(pieceMetrics.map(piece=>piece.area), 'Composite section area (mm²)');
+      const firstMomentX = sectionPropertySum(pieceMetrics.map(piece=>piece.area*piece.cx), 'Composite section first moment x (mm³)');
+      const firstMomentY = sectionPropertySum(pieceMetrics.map(piece=>piece.area*piece.cy), 'Composite section first moment y (mm³)');
+      if (omittedChannelWeb && (area < MIN_NORMAL || firstMomentX < MIN_NORMAL || firstMomentY < MIN_NORMAL)) {
+        throw Error('Composite section area underflow; increase dimensions.');
+      }
       if (!(area > 0)) throw Error('Composite section area underflow; increase dimensions.');
-      centroidX = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/area, 'Composite section centroid x (mm)');
-      centroidY = finite(pieceMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/area, 'Composite section centroid y (mm)');
-      secondMoment = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = rectangleIxx(piece, 'Composite rectangle local Ixx (mm⁴)');
-        const offset = finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'Composite rectangle Ixx offset (mm⁴)');
-        return sum+local+offset;
-      },0), 'Composite section Ixx (mm⁴)');
-      secondMomentPerpendicular = finite(pieceMetrics.reduce((sum,piece)=>{
-        const local = rectangleIyy(piece, 'Composite rectangle local Iyy (mm⁴)');
-        const offset = finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'Composite rectangle Iyy offset (mm⁴)');
-        return sum+local+offset;
-      },0), 'Composite section Iyy (mm⁴)');
+      centroidX = finite(firstMomentX/area, 'Composite section centroid x (mm)');
+      centroidY = finite(firstMomentY/area, 'Composite section centroid y (mm)');
+      secondMoment = sectionPropertySum(pieceMetrics.flatMap(piece => [
+        rectangleIxx(piece, 'Composite rectangle local Ixx (mm⁴)'),
+        finite(piece.area*(piece.cy-centroidY)*(piece.cy-centroidY), 'Composite rectangle Ixx offset (mm⁴)')
+      ]), 'Composite section Ixx (mm⁴)');
+      secondMomentPerpendicular = sectionPropertySum(pieceMetrics.flatMap(piece => [
+        rectangleIyy(piece, 'Composite rectangle local Iyy (mm⁴)'),
+        finite(piece.area*(piece.cx-centroidX)*(piece.cx-centroidX), 'Composite rectangle Iyy offset (mm⁴)')
+      ]), 'Composite section Iyy (mm⁴)');
+      // The omitted web bounds are below half an ulp; require normal aggregate
+      // area, first moments and inertias so they cannot change rounded outputs.
+      if (omittedChannelWeb &&
+          (secondMoment < MIN_NORMAL || secondMomentPerpendicular < MIN_NORMAL)) {
+        throw Error('Composite section area underflow; increase dimensions.');
+      }
+      // Physical composite inertias can be subnormal even when the section radii are
+      // representable. Recompute I/A in coordinates normalized by the largest length,
+      // then restore that length once; keep the reported dimensional area and inertias intact.
+      const normalizedMetrics = pieces.map(piece => {
+        const normalizedPiece = {
+          x:piece.x/lengthScale, y:piece.y/lengthScale,
+          width:piece.width/lengthScale, height:piece.height/lengthScale
+        };
+        return {...normalizedPiece,
+          area:normalizedPiece.width*normalizedPiece.height,
+          cx:normalizedPiece.x+normalizedPiece.width/2,
+          cy:normalizedPiece.y+normalizedPiece.height/2};
+      });
+      const normalizedArea = normalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+      let commonScaleResolved = false;
+      if (normalizedArea > 0 && Number.isFinite(normalizedArea)) {
+        const normalizedCentroidX = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/normalizedArea;
+        const normalizedCentroidY = normalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/normalizedArea;
+        const normalizedIxx = normalizedMetrics.reduce((sum,piece)=>{
+          const local = rectangleIxx(piece, 'Normalized composite rectangle local Ixx');
+          const offset = piece.area*(piece.cy-normalizedCentroidY)*(piece.cy-normalizedCentroidY);
+          return sum+local+offset;
+        },0);
+        const normalizedIyy = normalizedMetrics.reduce((sum,piece)=>{
+          const local = rectangleIyy(piece, 'Normalized composite rectangle local Iyy');
+          const offset = piece.area*(piece.cx-normalizedCentroidX)*(piece.cx-normalizedCentroidX);
+          return sum+local+offset;
+        },0);
+        commonScaleResolved = normalizedArea >= MIN_NORMAL &&
+          normalizedIxx >= MIN_NORMAL && Number.isFinite(normalizedIxx) &&
+          normalizedIyy >= MIN_NORMAL && Number.isFinite(normalizedIyy);
+        if (normalizedIxx > 0 && Number.isFinite(normalizedIxx)) {
+          analyticRadiusOfGyrationX = finite(lengthScale*Math.sqrt(normalizedIxx/normalizedArea),
+            'Radius of gyration rx (mm)');
+        }
+        if (normalizedIyy > 0 && Number.isFinite(normalizedIyy)) {
+          analyticRadiusOfGyrationY = finite(lengthScale*Math.sqrt(normalizedIyy/normalizedArea),
+            'Radius of gyration ry (mm)');
+        }
+        // A subnormal dimensional inertia is too coarsely quantized for I/c.
+        // Reuse the normalized tensor and extreme-fibre distance, then restore L³.
+        const normalizedBoundsWidth = width/lengthScale;
+        const normalizedBoundsHeight = depth/lengthScale;
+        const normalizedExtremeFiberDistanceAboutX =
+          Math.max(normalizedCentroidY, normalizedBoundsHeight-normalizedCentroidY);
+        const normalizedExtremeFiberDistanceAboutY =
+          Math.max(normalizedCentroidX, normalizedBoundsWidth-normalizedCentroidX);
+        if (secondMoment < 2.2250738585072014e-308 &&
+            normalizedIxx > 0 && normalizedExtremeFiberDistanceAboutX > 0) {
+          const normalizedModulus = normalizedIxx/normalizedExtremeFiberDistanceAboutX;
+          const candidate = lengthScale*(lengthScale*(lengthScale*normalizedModulus));
+          if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusX = candidate;
+        }
+        if (secondMomentPerpendicular < 2.2250738585072014e-308 &&
+            normalizedIyy > 0 && normalizedExtremeFiberDistanceAboutY > 0) {
+          const normalizedModulus = normalizedIyy/normalizedExtremeFiberDistanceAboutY;
+          const candidate = lengthScale*(lengthScale*(lengthScale*normalizedModulus));
+          if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusY = candidate;
+        }
+      }
+      // A single max-dimension scale can underflow one normalized inertia for an
+      // extreme aspect ratio. Normalize each coordinate by its own section
+      // dimension so both axis tensors remain well-scaled before restoring units.
+      if (!commonScaleResolved) {
+        const axisNormalizedMetrics = pieces.map(piece => {
+          const normalizedPiece = {
+            x:piece.x/width, y:piece.y/depth,
+            width:piece.width/width, height:piece.height/depth
+          };
+          return {...normalizedPiece,
+            area:normalizedPiece.width*normalizedPiece.height,
+            cx:normalizedPiece.x+normalizedPiece.width/2,
+            cy:normalizedPiece.y+normalizedPiece.height/2};
+        });
+        const axisNormalizedArea = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area,0);
+        if (axisNormalizedArea > 0 && Number.isFinite(axisNormalizedArea)) {
+          const axisNormalizedCentroidX = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cx,0)/axisNormalizedArea;
+          const axisNormalizedCentroidY = axisNormalizedMetrics.reduce((sum,piece)=>sum+piece.area*piece.cy,0)/axisNormalizedArea;
+          const axisNormalizedIxx = axisNormalizedMetrics.reduce((sum,piece)=>{
+            const dy=piece.cy-axisNormalizedCentroidY;
+            return sum+piece.area*(piece.height*piece.height/12+dy*dy);
+          },0);
+          const axisNormalizedIyy = axisNormalizedMetrics.reduce((sum,piece)=>{
+            const dx=piece.cx-axisNormalizedCentroidX;
+            return sum+piece.area*(piece.width*piece.width/12+dx*dx);
+          },0);
+          const axisExtremeY = Math.max(axisNormalizedCentroidY,1-axisNormalizedCentroidY);
+          const axisExtremeX = Math.max(axisNormalizedCentroidX,1-axisNormalizedCentroidX);
+          if (axisNormalizedIxx > 0 && Number.isFinite(axisNormalizedIxx)) {
+            const radius=depth*Math.sqrt(axisNormalizedIxx/axisNormalizedArea);
+            if (radius > 0 && Number.isFinite(radius)) analyticRadiusOfGyrationX=radius;
+            if (secondMoment < MIN_NORMAL && axisExtremeY > 0) {
+              const candidate=scaleProduct(width,depth,depth,axisNormalizedIxx/axisExtremeY);
+              if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusX=candidate;
+            }
+          }
+          if (axisNormalizedIyy > 0 && Number.isFinite(axisNormalizedIyy)) {
+            const radius=width*Math.sqrt(axisNormalizedIyy/axisNormalizedArea);
+            if (radius > 0 && Number.isFinite(radius)) analyticRadiusOfGyrationY=radius;
+            if (secondMomentPerpendicular < MIN_NORMAL && axisExtremeX > 0) {
+              const candidate=scaleProduct(width,width,depth,axisNormalizedIyy/axisExtremeX);
+              if (candidate > 0 && Number.isFinite(candidate)) analyticSectionModulusY=candidate;
+            }
+          }
+        }
+      }
       centroid = {x:centroidX,y:centroidY};
       axis = 'centroidal horizontal axis (Ixx)';
       perpendicularAxis = 'centroidal vertical axis (Iyy)';
@@ -238,27 +816,74 @@
         throw Error('Hollow rectangle inner width and depth must be positive and smaller than the outer dimensions.');
       }
       const outerArea = finite(width * depth, 'Rectangle outer area (mm²)');
-      const innerArea = hollow ? finite(innerWidth * innerHeight, 'Hollow rectangle inner area (mm²)') : 0;
-      if (hollow && !(innerArea > 0)) throw Error('Hollow rectangle inner area underflow; increase the inner dimensions.');
+      // Do not form innerWidth*innerHeight as a validity check: the cavity area may
+      // underflow even when the net section area and both centroidal inertias remain
+      // representable. Positive, strictly contained dimensions above validate the
+      // geometry; the factored dimensionless ratios below determine its contribution.
       // Factor the outer-minus-inner expressions into dimensionless wall gaps.
       // Direct subtraction loses significant digits when a valid hollow section has very thin walls.
       const widthRatio = hollow ? innerWidth / width : 0;
       const heightRatio = hollow ? innerHeight / depth : 0;
       const widthGap = hollow ? (width - innerWidth) / width : 1;
       const heightGap = hollow ? (depth - innerHeight) / depth : 1;
-      const netAreaFactor = hollow ? widthGap + widthRatio * heightGap : 1;
+      // For a small cavity, direct subtraction is well-conditioned and avoids
+      // rounding complementary wall-gap terms before adding them. Near a thin wall,
+      // retain the factored gap form so the small remaining section is not lost.
+      const cavityAreaRatio = widthRatio * heightRatio;
+      const smallCavity = hollow && cavityAreaRatio <= 0.5;
+      const netAreaFactor = hollow
+        ? smallCavity ? 1 - cavityAreaRatio : widthGap + widthRatio * heightGap
+        : 1;
       area = finite(outerArea * netAreaFactor, 'Rectangle net area (mm²)');
+      const cavityIxxRatio = widthRatio * heightRatio * heightRatio * heightRatio;
       const ixxFactor = hollow
-        ? widthGap + widthRatio * heightGap * (1 + heightRatio + heightRatio * heightRatio)
+        ? smallCavity ? 1 - cavityIxxRatio
+          : widthGap + widthRatio * heightGap * (1 + heightRatio + heightRatio * heightRatio)
         : 1;
-      // Split the dimensionless hollow-section factor between the two depth
-      // factors. This keeps a finite thin-wall Ixx even when the full outer
-      // and inner solid-rectangle fourth-power intermediates would overflow.
-      secondMoment = rectangleIxx({width,height:depth}, 'Rectangle Ixx (mm⁴)', ixxFactor);
+      if (smallCavity && cavityIxxRatio <= 0.5) {
+        const outerIxx = rectangleIxxValue({width,height:depth});
+        const innerIxx = rectangleIxxValue({width:innerWidth,height:innerHeight});
+        secondMoment = Number.isFinite(outerIxx) && Number.isFinite(innerIxx)
+          ? sectionPropertySum([outerIxx,-innerIxx], 'Rectangle Ixx (mm⁴)')
+          : rectangleIxx({width,height:depth}, 'Rectangle Ixx (mm⁴)', ixxFactor);
+      } else {
+        // Split the dimensionless hollow-section factor between the two depth
+        // factors so a finite thin-wall Ixx survives overflowing solid-envelope powers.
+        secondMoment = rectangleIxx({width,height:depth}, 'Rectangle Ixx (mm⁴)', ixxFactor);
+      }
+      const cavityIyyRatio = heightRatio * widthRatio * widthRatio * widthRatio;
       const iyyFactor = hollow
-        ? heightGap + heightRatio * widthGap * (1 + widthRatio + widthRatio * widthRatio)
+        ? smallCavity ? 1 - cavityIyyRatio
+          : heightGap + heightRatio * widthGap * (1 + widthRatio + widthRatio * widthRatio)
         : 1;
-      secondMomentPerpendicular = rectangleIyy({width,height:depth}, 'Rectangle Iyy (mm⁴)', iyyFactor);
+      if (smallCavity && cavityIyyRatio <= 0.5) {
+        const outerIyy = rectangleIyyValue({width,height:depth});
+        const innerIyy = rectangleIyyValue({width:innerWidth,height:innerHeight});
+        secondMomentPerpendicular = Number.isFinite(outerIyy) && Number.isFinite(innerIyy)
+          ? sectionPropertySum([outerIyy,-innerIyy], 'Rectangle Iyy (mm⁴)')
+          : rectangleIyy({width,height:depth}, 'Rectangle Iyy (mm⁴)', iyyFactor);
+      } else {
+        secondMomentPerpendicular = rectangleIyy({width,height:depth}, 'Rectangle Iyy (mm⁴)', iyyFactor);
+      }
+      // In the small-cavity regime, evaluate (1 - cavity inertia)/(1 - cavity area)
+      // as 1 + cavity area * (1 - innerRatio²)/(1 - cavity area), avoiding two
+      // independently rounded factors near one.
+      const radiusFactorX = smallCavity
+        ? 1 + cavityAreaRatio * heightGap * (1 + heightRatio) / netAreaFactor
+        : ixxFactor / netAreaFactor;
+      const radiusFactorY = smallCavity
+        ? 1 + cavityAreaRatio * widthGap * (1 + widthRatio) / netAreaFactor
+        : iyyFactor / netAreaFactor;
+      analyticRadiusOfGyrationX = finite(depth*Math.sqrt(radiusFactorX/12), 'Radius of gyration rx (mm)');
+      analyticRadiusOfGyrationY = finite(width*Math.sqrt(radiusFactorY/12), 'Radius of gyration ry (mm)');
+      // Preserve section-modulus precision only when the corresponding inertia is subnormal.
+      // Sx=b*h²*fx/6 and Sy=h*b²*fy/6 avoid dividing a quantized Ixx/Iyy by c.
+      if (secondMoment < 2.2250738585072014e-308) {
+        analyticSectionModulusX = finite(outerArea * (depth * (ixxFactor / 6)), 'Section modulus Sx (mm³)');
+      }
+      if (secondMomentPerpendicular < 2.2250738585072014e-308) {
+        analyticSectionModulusY = finite(outerArea * (width * (iyyFactor / 6)), 'Section modulus Sy (mm³)');
+      }
       axis = 'centroidal axis parallel to width';
       perpendicularAxis = 'centroidal axis parallel to depth';
     } else {
@@ -270,28 +895,59 @@
       centroidY = diameter/2;
       centroid = {x:centroidX,y:centroidY};
       const hollow = shape === 'hollow-circle';
+      let inertiaFactor = 1;
       const innerDiameter = hollow ? finite(dimensions.innerDiameter, 'Hollow circle inner diameter Di (mm)') : 0;
       if (hollow && (!(innerDiameter > 0) || !(innerDiameter < diameter))) {
         throw Error('Hollow circle inner diameter must be positive and smaller than the outer diameter.');
       }
       const outerSquare = finite(diameter * diameter, 'Circle outer diameter squared (mm²)');
-      const innerSquare = hollow ? finite(innerDiameter * innerDiameter, 'Hollow circle inner diameter squared (mm²)') : 0;
-      if (hollow && !(innerSquare > 0)) throw Error('Hollow circle inner area underflow; increase the inner diameter.');
+      // Avoid squaring the inner diameter solely for validation. Its square may
+      // underflow while the annulus area, inertia and section modulus are finite;
+      // positive containment is validated above and the ratios below are sufficient.
       if (hollow) {
         // Factor the concentric annulus differences to preserve thin-wall precision.
         // Do not form Do^4 or Di^4: either can overflow while the thin-annulus
         // inertia is still representable. Keep the small factor between Do² terms.
         const innerRatio = finite(innerDiameter / diameter, 'Hollow circle inner/outer diameter ratio');
-        const radialGap = finite((diameter - innerDiameter) / diameter, 'Hollow circle relative radial wall thickness');
-        const areaFactor = finite(radialGap * (1 + innerRatio), 'Hollow circle net area factor');
-        const inertiaFactor = finite(areaFactor * (1 + innerRatio * innerRatio), 'Hollow circle inertia factor');
+        const innerRatioSquared = innerRatio * innerRatio;
+        let areaFactor;
+        if (innerRatioSquared <= 0.5) {
+          // When cavity area is at most half the envelope, the remaining area and
+          // inertia factors are at least 0.5 and 0.75. Direct differences are
+          // well-conditioned here and avoid extra product rounding near the transition.
+          // Only thinner walls need the factored radial-gap form below.
+          areaFactor = finite(1 - innerRatioSquared, 'Hollow circle net area factor');
+          inertiaFactor = finite(1 - innerRatioSquared * innerRatioSquared, 'Hollow circle inertia factor');
+        } else {
+          // Near-unity ratios are thin walls; retain the factored gap to avoid cancellation.
+          const radialGap = finite((diameter - innerDiameter) / diameter, 'Hollow circle relative radial wall thickness');
+          areaFactor = finite(radialGap * (1 + innerRatio), 'Hollow circle net area factor');
+          inertiaFactor = finite(areaFactor * (1 + innerRatioSquared), 'Hollow circle inertia factor');
+        }
         area = finite((Math.PI / 4) * outerSquare * areaFactor, 'Circle net area (mm²)');
         secondMoment = finite((Math.PI / 64) * outerSquare * inertiaFactor * outerSquare, 'Circle centroidal second moment I (mm⁴)');
+        // The annulus identity is I/A = Do²·(1 + (Di/Do)²)/16.
+        // Evaluate its radius directly so a subnormal rounded I/A cannot corrupt it.
+        const circularRadius = diameter * (Math.sqrt(1 + innerRatio * innerRatio) / 4);
+        analyticRadiusOfGyrationX = finite(circularRadius, 'Radius of gyration rx (mm)');
+        analyticRadiusOfGyrationY = finite(circularRadius, 'Radius of gyration ry (mm)');
       } else {
         area = finite(Math.PI * outerSquare / 4, 'Circle net area (mm²)');
         // Apply the coefficient before the final square: Do^4 may overflow even
         // when the physical solid-circle inertia (pi/64)*Do^4 is representable.
         secondMoment = finite((Math.PI / 64) * outerSquare * outerSquare, 'Circle centroidal second moment I (mm⁴)');
+        // For a solid circle, I/A = Do²/16; avoid a rounded subnormal quotient.
+        analyticRadiusOfGyrationX = finite(diameter / 4, 'Radius of gyration rx (mm)');
+        analyticRadiusOfGyrationY = finite(diameter / 4, 'Radius of gyration ry (mm)');
+      }
+      // Subnormal inertia values are too coarsely quantized for I/c, even when S remains normal.
+      // The circular identity S = (pi/32)·Do³·(1 - (Di/Do)^4) uses the
+      // same factored annulus term and avoids dividing a rounded subnormal I.
+      if (secondMoment < 2.2250738585072014e-308) {
+        const circularSectionModulus = finite((Math.PI / 32) * outerSquare * diameter * inertiaFactor,
+          'Circular section modulus (mm³)');
+        analyticSectionModulusX = circularSectionModulus;
+        analyticSectionModulusY = circularSectionModulus;
       }
       secondMomentPerpendicular = secondMoment;
       axis = 'centroidal diameter axis';
@@ -303,10 +959,26 @@
     const extremeFiberDistanceAboutX = finite(Math.max(centroidY, boundsHeight-centroidY), 'Extreme-fibre distance about X (mm)');
     const extremeFiberDistanceAboutY = finite(Math.max(centroidX, boundsWidth-centroidX), 'Extreme-fibre distance about Y (mm)');
     if (!(extremeFiberDistanceAboutX > 0) || !(extremeFiberDistanceAboutY > 0)) throw Error('Section extreme-fibre distance underflow.');
-    const sectionModulusX = finite(secondMoment/extremeFiberDistanceAboutX, 'Section modulus Sx (mm³)');
-    const sectionModulusY = finite(secondMomentPerpendicular/extremeFiberDistanceAboutY, 'Section modulus Sy (mm³)');
-    const radiusOfGyrationX = finite(Math.sqrt(secondMoment/area), 'Radius of gyration rx (mm)');
-    const radiusOfGyrationY = finite(Math.sqrt(secondMomentPerpendicular/area), 'Radius of gyration ry (mm)');
+    const sectionModulusX = analyticSectionModulusX === null
+      ? finite(secondMoment/extremeFiberDistanceAboutX, 'Section modulus Sx (mm³)')
+      : finite(analyticSectionModulusX, 'Section modulus Sx (mm³)');
+    const sectionModulusY = analyticSectionModulusY === null
+      ? finite(secondMomentPerpendicular/extremeFiberDistanceAboutY, 'Section modulus Sy (mm³)')
+      : finite(analyticSectionModulusY, 'Section modulus Sy (mm³)');
+    // Use the canonical I/area quotient when representable; it avoids the extra
+    // rounding of two square roots. If the quotient over/underflows, split the
+    // square roots so a representable physical radius is not lost to the ratio.
+    const radiusOfGyration = (moment, label) => {
+      const ratio = moment / area;
+      const value = Number.isFinite(ratio) && ratio > 0
+        ? Math.sqrt(ratio)
+        : Math.sqrt(moment) / Math.sqrt(area);
+      return finite(value, label);
+    };
+    const radiusOfGyrationX = analyticRadiusOfGyrationX === null
+      ? radiusOfGyration(secondMoment, 'Radius of gyration rx (mm)') : analyticRadiusOfGyrationX;
+    const radiusOfGyrationY = analyticRadiusOfGyrationY === null
+      ? radiusOfGyration(secondMomentPerpendicular, 'Radius of gyration ry (mm)') : analyticRadiusOfGyrationY;
     if (!(sectionModulusX > 0) || !(sectionModulusY > 0)) throw Error('Section modulus underflow; increase the section dimensions or wall thickness.');
     if (!(radiusOfGyrationX > 0) || !(radiusOfGyrationY > 0)) throw Error('Radius of gyration underflow; increase the section dimensions.');
     return Object.freeze({shape, area, secondMoment, secondMomentPerpendicular, axis, perpendicularAxis,
@@ -359,14 +1031,21 @@
       const dx = nodes[b].x - nodes[a].x, dy = nodes[b].y - nodes[a].y;
       const L = Math.hypot(dx, dy);
       if (!Number.isFinite(L) || L <= 1e-12) throw Error('Member ' + id + ': zero/invalid length.');
-      const EAbyL = E * A / L;
+      const EAbyL = positiveProductQuotient(E, A, L);
       if (!Number.isFinite(EAbyL)) throw Error('Member ' + id + ': stiffness overflow.');
       if (!(EAbyL > 0)) throw Error('Member ' + id + ': stiffness underflow; increase E or area.');
       // Density is an optional SI quantity shared by Studio and legacy imports.
       // Blank/null means unknown; zero is valid, while negative/non-finite values are not.
       const density = hasOptionalValue(row.density) ? finite(row.density, id + ' density (kg/m³)') : null;
       if (density !== null && density < 0) throw Error('Member ' + id + ': density must be non-negative.');
-      const mass = density === null ? null : finite(finite(L * A, 'Member ' + id + ' material volume (m³)') * density, 'Member ' + id + ' mass (kg)');
+      let mass = null;
+      if (density !== null) {
+        const calculatedMass = positiveProduct(L, A, density);
+        if (density > 0 && !(calculatedMass > 0)) {
+          throw Error('Member ' + id + ': mass underflow; increase dimensions or density.');
+        }
+        mass = finite(calculatedMass, 'Member ' + id + ' mass (kg)');
+      }
       // I and K are independent member properties; the Euler estimate is available only when both are supplied.
       const hasI = hasOptionalValue(row.I);
       const hasK = hasOptionalValue(row.K);
@@ -380,12 +1059,15 @@
         if (!(effectiveLengthFactor > 0)) throw Error('Member ' + id + ': K must be positive.');
       }
       if (hasI && hasK) {
-        const effectiveLength = finite(effectiveLengthFactor * L, id + ' effective buckling length (m)');
-        if (!(effectiveLength > 0)) throw Error('Member ' + id + ': effective buckling length underflow.');
-        const numerator = finite(Math.PI * Math.PI * E * secondMoment, id + ' Euler buckling numerator');
-        const denominator = finite(effectiveLength * effectiveLength, id + ' effective buckling length squared');
-        if (!(denominator > 0)) throw Error('Member ' + id + ': effective buckling length squared underflow.');
-        eulerCriticalLoad = finite(numerator / denominator, id + ' Euler critical load (N)');
+        // Keep the established direct numerator / (K·L)² operation order for ordinary inputs.
+        // If any intermediate loses range, evaluate π²·E·I / (K·L·K·L) by binary exponents.
+        const numerator = Math.PI * Math.PI * E * secondMoment;
+        const effectiveLength = effectiveLengthFactor * L;
+        const denominator = effectiveLength * effectiveLength;
+        eulerCriticalLoad = finite(positiveProductQuotientFactors(
+          [Math.PI,Math.PI,E,secondMoment],
+          [effectiveLengthFactor,L,effectiveLengthFactor,L],
+          numerator,denominator), id + ' Euler critical load (N)');
         if (!(eulerCriticalLoad > 0)) throw Error('Member ' + id + ': Euler critical load underflow; increase I or E, or reduce K·L.');
       }
       return {id, a, b, E, A, L, c: dx / L, s: dy / L, stiffness: EAbyL,
@@ -426,6 +1108,10 @@
   function solve(input) {
     const {nodes, members} = parseModel(input), n = nodes.length, N = n * 2;
     const K = Array.from({length: N}, () => new Float64Array(N));
+    // Normalize stiffness before multiplying by direction cosines. Forming k*c*s
+    // first can double-round a subnormal member contribution before the complete
+    // coefficient is assembled. Restore the physical stiffness scale only once.
+    const stiffnessTerms = new Map();
     const F = new Float64Array(N), fixed = new Set();
     nodes.forEach((node, i) => {
       F[2 * i] = node.fx; F[2 * i + 1] = node.fy;
@@ -434,7 +1120,20 @@
     });
     for (const m of members) {
       const v = [-m.c, -m.s, m.c, m.s], dof = [2*m.a, 2*m.a+1, 2*m.b, 2*m.b+1];
-      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) K[dof[i]][dof[j]] += m.stiffness*v[i]*v[j];
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+        if (v[i] === 0 || v[j] === 0) continue;
+        const key = dof[i]*N+dof[j], terms = stiffnessTerms.get(key);
+        const contribution = {stiffness:m.stiffness,rowDirection:v[i],columnDirection:v[j]};
+        if (terms) terms.push(contribution); else stiffnessTerms.set(key,[contribution]);
+      }
+    }
+    for (const [key, terms] of stiffnessTerms) {
+      const row = Math.floor(key/N), column = key%N;
+      const stiffnessScale = Math.max(...terms.map(term=>term.stiffness));
+      const normalizedTerms = terms.map(term=>
+        (term.stiffness/stiffnessScale)*term.rowDirection*term.columnDirection);
+      const normalizedEntry = finiteSignedSum(normalizedTerms, 'Normalized global stiffness matrix entry');
+      K[row][column] = finite(normalizedEntry*stiffnessScale, 'Global stiffness matrix entry (N/m)');
     }
     const free = Array.from({length: N}, (_, i) => i).filter(i => !fixed.has(i));
     if (!free.length) throw Error('At least one displacement DOF must remain free.');
@@ -447,39 +1146,72 @@
     const ys = linearSolve(scaled, free.map((i, r) => F[i] / diag[r]));
     const u = new Float64Array(N);
     free.forEach((dof, i) => {u[dof] = ys[i] / diag[i];});
-    const r = Array.from({length: N}, (_, i) => K[i].reduce((sum, v, j) => sum + v*u[j], -F[i]));
+    const r = Array.from({length: N}, (_, i) =>
+      finiteSignedSum([...K[i].map((value, j) => value*u[j]), -F[i]], 'Nodal internal force resultant (N)'));
     const loadScale = Math.max(1, ...F.map(Math.abs));
     const residual = Math.max(0, ...free.map(i => Math.abs(r[i]))) / loadScale;
     if (!Number.isFinite(residual) || residual > 1e-6) throw Error('Numerical equilibrium residual too large; check member stiffness contrast or mechanism.');
     const displacements = nodes.map((node, i) => ({id: node.id, x: u[i*2], y: u[i*2+1], magnitude: Math.hypot(u[i*2], u[i*2+1])}));
+    // Optional Euler ratios are diagnostics, not prerequisites for a valid FEM solution.
+    // Keep an unrepresentable positive ratio explicit instead of rejecting otherwise finite results.
+    const positiveRatioResult = (numerator, denominator) => {
+      const value = numerator / denominator;
+      if (value === 0) return {value:null, range:'underflow'};
+      if (!Number.isFinite(value)) return {value:null, range:'overflow'};
+      return {value, range:null};
+    };
     const results = members.map(m => {
       const extension = m.c*(u[2*m.b]-u[2*m.a]) + m.s*(u[2*m.b+1]-u[2*m.a+1]);
       const force = m.stiffness * extension;
-      const compressionDemand = force < -1e-8 ? -force : 0;
+      // With I/K supplied, the Euler screen must see every strictly negative force;
+      // the general zero-force display threshold must not hide a small over-critical load.
+      // Without the optional screen, retain the established noise threshold.
+      const compressionDemand = m.eulerCriticalLoad !== null && force < 0
+        ? -force : force < -1e-8 ? -force : 0;
       // Only compression has an Euler demand. Tension and zero force deliberately avoid division.
-      const eulerUtilization = m.eulerCriticalLoad !== null && compressionDemand > 0
-        ? finite(compressionDemand / m.eulerCriticalLoad, 'Member ' + m.id + ' Euler utilization') : null;
-      const eulerLoadRatio = m.eulerCriticalLoad !== null && compressionDemand > 0
-        ? finite(m.eulerCriticalLoad / compressionDemand, 'Member ' + m.id + ' Euler load ratio') : null;
-      const eulerAssessment = m.eulerCriticalLoad === null ? 'Not assessed (I/K missing)' :
-        compressionDemand > 0 ? (eulerUtilization >= 1 ? 'At/above ideal Euler load' : 'Below ideal Euler load') :
-        force > 1e-8 ? 'Tension — not applicable' : 'No compression demand';
+      const utilization = m.eulerCriticalLoad !== null && compressionDemand > 0
+        ? positiveRatioResult(compressionDemand, m.eulerCriticalLoad) : {value:null, range:null};
+      const loadRatio = m.eulerCriticalLoad !== null && compressionDemand > 0
+        ? positiveRatioResult(m.eulerCriticalLoad, compressionDemand) : {value:null, range:null};
+      const eulerUtilization = utilization.value, eulerUtilizationRange = utilization.range;
+      const eulerLoadRatio = loadRatio.value, eulerLoadRatioRange = loadRatio.range;
+      let eulerAssessment;
+      if (m.eulerCriticalLoad === null) eulerAssessment = 'Not assessed (I/K missing)';
+      else if (compressionDemand > 0) {
+        // Compare the original positive operands, not a possibly overflowed/underflowed quotient.
+        const atOrAbove = compressionDemand >= m.eulerCriticalLoad;
+        const rangeNote = atOrAbove
+          ? (eulerUtilizationRange === 'overflow' ? ' (utilization exceeds binary64 range)' :
+             eulerLoadRatioRange === 'underflow' ? ' (load ratio is below binary64 range)' : '')
+          : (eulerLoadRatioRange === 'overflow' ? ' (load ratio exceeds binary64 range)' :
+             eulerUtilizationRange === 'underflow' ? ' (utilization is below binary64 range)' : '');
+        eulerAssessment = (atOrAbove ? 'At/above' : 'Below') + ' ideal Euler load' + rangeNote;
+      } else eulerAssessment = force > 1e-8 ? 'Tension — not applicable' : 'No compression demand';
       return {id: m.id, a: nodes[m.a].id, b: nodes[m.b].id, length: m.L, extension, force, stress: force/m.A,
-        strain: extension/m.L, type: force > 1e-8 ? 'Tension' : force < -1e-8 ? 'Compression' : 'Zero',
-        compressionDemand,eulerCriticalLoad:m.eulerCriticalLoad,eulerUtilization,eulerLoadRatio,eulerAssessment};
+        strain: extension/m.L, type: compressionDemand > 0 ? 'Compression' :
+          force > 1e-8 ? 'Tension' : force < -1e-8 ? 'Compression' : 'Zero',
+        compressionDemand,eulerCriticalLoad:m.eulerCriticalLoad,eulerUtilization,eulerUtilizationRange,
+        eulerLoadRatio,eulerLoadRatioRange,eulerAssessment};
     });
     const reactions = nodes.map((node, i) => ({id: node.id, rx: node.fixX ? r[2*i] : 0, ry: node.fixY ? r[2*i+1] : 0}))
       .filter(q => nodes.find(n => n.id === q.id).fixX || nodes.find(n => n.id === q.id).fixY);
-    const forceSum = nodes.reduce((a, b) => [a[0]+b.fx, a[1]+b.fy], [0, 0]);
-    const reactionSum = reactions.reduce((a, b) => [a[0]+b.rx, a[1]+b.ry], [0, 0]);
-    const externalWork = free.reduce((sum, i) => sum + F[i] * u[i], 0);
-    const elasticEnergy = results.reduce((sum, m) => sum + m.force*m.extension/2, 0);
-    const energyError = Math.abs(2*elasticEnergy-externalWork)/Math.max(1, Math.abs(externalWork));
+    // Combine external loads and support reactions before summing: separately reducing
+    // either group can overflow even when the final equilibrium residual is finite.
+    const forceBalance = {
+      x: finiteSignedSum([...nodes.map(node => node.fx), ...reactions.map(reaction => reaction.rx)], 'Force balance x (N)'),
+      y: finiteSignedSum([...nodes.map(node => node.fy), ...reactions.map(reaction => reaction.ry)], 'Force balance y (N)')
+    };
+    const externalWork = finiteSignedSum(free.map(i => F[i] * u[i]), 'External work (J)');
+    const elasticEnergy = finiteSignedSum(results.map(member => member.force * member.extension / 2), 'Elastic strain energy (J)');
+    // Compare 2U with external work as one signed sum so the verification itself
+    // does not lose low-order terms or overflow before cancellation.
+    const energyResidual = finiteSignedSum([elasticEnergy, elasticEnergy, -externalWork], 'Energy balance residual (J)');
+    const energyError = Math.abs(energyResidual) / Math.max(1, Math.abs(externalWork));
     if (!Number.isFinite(energyError) || energyError > 1e-6) throw Error('Numerical energy verification failed.');
     const maxDisplacement = displacements.reduce((a,b)=>b.magnitude>a.magnitude?b:a,displacements[0]);
     const maxStress = results.reduce((a,b)=>Math.abs(b.stress)>Math.abs(a.stress)?b:a,results[0]);
     return {id:'structural-truss-fem-2d',nodes,members:results,displacements,reactions,maxDisplacement,maxStress,
-      residual,energyError,elasticEnergy,forceBalance:{x:forceSum[0]+reactionSum[0],y:forceSum[1]+reactionSum[1]},
+      residual,energyResidual,energyError,elasticEnergy,forceBalance,
       assumptions:'2D pin-connected truss; linear elastic axial bars; small deformation; static loads; supported DOFs fixed at zero. Optional post-solve Euler comparison is an ideal elastic compression-only screen when I/K are supplied; no geometric buckling, imperfections, yielding, code resistance factors or design-code certification.'};
   }
   const examples = {
@@ -516,10 +1248,11 @@
     if (legacyCount !== model.members.length || model.members.some(m => m.area !== undefined)) {
       throw Error('Mixed legacy SI and current truss member units are not supported.');
     }
-    return {nodes: model.nodes.map(n => ({...n, fx: finite(n.fx ?? 0, 'Legacy Fx (N)') / 1000,
-      fy: finite(n.fy ?? 0, 'Legacy Fy (N)') / 1000})),
+    return {nodes: model.nodes.map(n => ({...n,
+      fx: finiteDivided(n.fx ?? 0, 'Legacy Fx (N)', 1000),
+      fy: finiteDivided(n.fy ?? 0, 'Legacy Fy (N)', 1000)})),
       members: model.members.map(m => ({id: m.id, a: m.a, b: m.b,
-        E: finite(m.E, 'Legacy E (Pa)') / 1e9, area: finiteScaled(m.A, 'Legacy area (m²)', 1e6),
+        E: finiteDivided(m.E, 'Legacy E (Pa)', 1e9), area: finiteScaled(m.A, 'Legacy area (m²)', 1e6),
         ...(hasOptionalValue(m.density) ? {density: m.density} : {}),
         ...(hasOptionalValue(m.I) ? {I: finiteScaled(m.I, 'Legacy I (m⁴)', 1e12)} : {}),
         ...(hasOptionalValue(m.K) ? {K: m.K} : {})}))};
@@ -569,6 +1302,35 @@
   function inspectJSON(text) {
     const model = importJSON(text);
     const normalized = parseModel(fromLegacy(model));
+    // Positive member geometry must not silently appear as zero when L*A underflows.
+    const memberVolumes = normalized.members.map(member => {
+      const volume = member.L * member.A;
+      if (!Number.isFinite(volume)) throw Error('Total member volume (m³) must be a finite number.');
+      if (!(volume > 0)) throw Error('Member ' + member.id + ' material volume underflow; increase dimensions.');
+      return volume;
+    });
+    const totalMemberVolume = finiteSignedSum(memberVolumes, 'Total member volume (m³)');
+    const knownMemberMasses = normalized.members
+      .filter(member => member.mass !== null)
+      .map(member => member.mass);
+    const unknownDensityMemberCount = normalized.members.length - knownMemberMasses.length;
+    const knownMemberMassSubtotal = knownMemberMasses.length
+      ? finiteSignedSum(knownMemberMasses, 'Known member mass subtotal (kg)')
+      : 0;
+    // Never label a partial subtotal as total mass; explicit zero density is known data.
+    const totalMemberMass = unknownDensityMemberCount === 0 ? knownMemberMassSubtotal : null;
+    const appliedForce = Object.freeze({
+      x: finiteSignedSum(normalized.nodes.map(node => node.fx), 'Applied force x (N)'),
+      y: finiteSignedSum(normalized.nodes.map(node => node.fy), 'Applied force y (N)')
+    });
+    // Keep each moment product finite-checked, then sum signed terms without
+    // overflowing a partial resultant when later nodes cancel it.
+    const appliedMomentTerms = [];
+    for (const node of normalized.nodes) {
+      appliedMomentTerms.push([node.x, node.fy]);
+      appliedMomentTerms.push([-node.y, node.fx]);
+    }
+    const appliedMoment = finiteSignedProductSum(appliedMomentTerms, 'Applied moment (N·m)');
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
       // Topological components include isolated nodes; this is not a stability certificate.
@@ -594,11 +1356,14 @@
         return normalized.nodes.length - incident.size;
       })(),
       // Sum member centreline lengths for material estimates; do not silently overflow.
-      totalMemberLength: finite(normalized.members.reduce((sum, m) => sum + m.L, 0), 'Total member length (m)'),
+      totalMemberLength: finiteSignedSum(normalized.members.map(m => m.L), 'Total member length (m)'),
       // Sum physical axial-bar volumes in m³; reject overflow before UI/material estimates.
-      totalMemberVolume: finite(normalized.members.reduce((sum, m) => sum + finite(m.L * m.A, 'Total member volume (m³)'), 0), 'Total member volume (m³)'),
+      totalMemberVolume,
+      knownMemberMassSubtotal,
+      totalMemberMass,
+      unknownDensityMemberCount,
       // Per-member quantities stay in SI and are available even when the structure is unstable.
-      memberMetrics: Object.freeze(normalized.members.map(member => Object.freeze({
+      memberMetrics: Object.freeze(normalized.members.map((member, index) => Object.freeze({
         id: member.id,
         startNodeId: normalized.nodes[member.a].id,
         endNodeId: normalized.nodes[member.b].id,
@@ -607,11 +1372,14 @@
         elasticModulus: member.E,
         // EA/L is axial stiffness in N/m; the existing validated FEM stiffness is reused.
         axialStiffness: member.stiffness,
-        volume: finite(member.L * member.A, 'Member ' + member.id + ' material volume (m³)'),
+        volume: memberVolumes[index],
         density: member.density,
         mass: member.mass,
         secondMoment: member.secondMoment,
         effectiveLengthFactor: member.effectiveLengthFactor,
+        eulerInputStatus: member.secondMoment === null
+          ? member.effectiveLengthFactor === null ? 'not-supplied' : 'missing-I'
+          : member.effectiveLengthFactor === null ? 'missing-K' : 'ready',
         eulerCriticalLoad: member.eulerCriticalLoad
       }))),
       // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.
@@ -636,32 +1404,53 @@
       restrainedLoadedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(n.fixX && n.fx !== 0) + Number(n.fixY && n.fy !== 0), 0),
       // Nonzero applied loads on unconstrained translations, excluding support reactions.
       freeLoadedDofCount: normalized.nodes.reduce((sum, n) => sum + Number(!n.fixX && n.fx !== 0) + Number(!n.fixY && n.fy !== 0), 0),
-      appliedForce: Object.freeze((() => {
-        const total = normalized.nodes.reduce((sum, n) => ({
-          x: sum.x + n.fx, y: sum.y + n.fy
-        }), {x: 0, y: 0});
-        return {x: finite(total.x, 'Applied force x (N)'), y: finite(total.y, 'Applied force y (N)')};
-      })()),
-      // Signed z-axis moment about the global origin, in SI N·m.
-      appliedMoment: finite(normalized.nodes.reduce((sum, n) => sum + n.x*n.fy - n.y*n.fx, 0), 'Applied moment (N·m)')};
+      appliedForce,
+      appliedMoment};
+  }
+  // Summarize optional Euler input completeness without implying a stability assessment.
+  function summarizeEulerInputReadiness(memberMetrics) {
+    if (!Array.isArray(memberMetrics)) throw Error('Euler member metrics must be an array.');
+    const summary = {total:memberMetrics.length,ready:0,missingI:0,missingK:0,notSupplied:0};
+    memberMetrics.forEach((member,index) => {
+      const state = member && member.eulerInputStatus;
+      if (state === 'ready') summary.ready++;
+      else if (state === 'missing-I') summary.missingI++;
+      else if (state === 'missing-K') summary.missingK++;
+      else if (state === 'not-supplied') summary.notSupplied++;
+      else throw Error('Member metric ' + (index + 1) + ' has invalid Euler input status.');
+    });
+    summary.complete = summary.total > 0 && summary.ready === summary.total;
+    return Object.freeze(summary);
   }
   // Export a validated per-member material schedule in explicit SI units without solving.
   function exportMaterialCSV(model) {
     const preview = inspectJSON(exportJSON(model));
     const rows = [
       ['Member ID', 'Start joint ID', 'End joint ID', 'Centreline length (m)', 'Cross-sectional area (m²)', 'Axial material volume (m³)', 'Elastic modulus (GPa)', 'Axial stiffness EA/L (kN/mm)', 'Density (kg/m³)', 'Member mass (kg)', 'Second moment of area I (mm⁴)', 'Effective length factor K (-)', 'Euler critical load Pcr (kN)'],
-      ...preview.memberMetrics.map(member => [member.id, member.startNodeId, member.endNodeId,
-        member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6,
-        member.density ?? '', member.mass ?? '',
-        member.secondMoment === null ? '' : member.secondMoment * 1e12,
-        member.effectiveLengthFactor ?? '',
-        member.eulerCriticalLoad === null ? '' : member.eulerCriticalLoad / 1000])
+      ...preview.memberMetrics.map(member => {
+        const eulerCriticalLoadKN = member.eulerCriticalLoad === null ? '' : member.eulerCriticalLoad / 1000;
+        if (member.eulerCriticalLoad !== null && member.eulerCriticalLoad > 0 && !(eulerCriticalLoadKN > 0)) {
+          throw Error('Member ' + member.id + ': Euler critical load underflows in kN CSV export.');
+        }
+        return [member.id, member.startNodeId, member.endNodeId,
+          member.length, member.area, member.volume, member.elasticModulus / 1e9, member.axialStiffness / 1e6,
+          member.density ?? '', member.mass ?? '',
+          member.secondMoment === null ? '' : member.secondMoment * 1e12,
+          member.effectiveLengthFactor ?? '',
+          eulerCriticalLoadKN];
+      })
     ];
-    // Keep CSV numeric cells readable without exposing binary floating-point tails.
-    // Sixteen significant digits retain near-double precision for engineering exports.
+    // Use the shortest decimal that round-trips to the original binary64 value.
+    // Fixed 16-digit formatting can silently change valid engineering data.
     const quote = value => {
-      const text = typeof value === 'number' && Number.isFinite(value)
-        ? String(Number(value.toPrecision(16))) : String(value);
+      let text;
+      if (typeof value === 'number') {
+        if (!Number.isFinite(value)) throw Error('Material CSV cannot export a non-finite numeric value.');
+        text = Object.is(value, -0) ? '-0' : value.toString();
+        if (!Object.is(Number(text), value)) throw Error('Material CSV numeric value did not round-trip.');
+      } else {
+        text = String(value);
+      }
       return '"' + text.replace(/"/g, '""') + '"';
     };
     return rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';
@@ -669,5 +1458,5 @@
   function solveJSON(text) {
     return solveDocument(importJSON(text));
   }
-  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, validateImportByteLength, decodeImportBytes, MAX_IMPORT_BYTES, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
+  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, summarizeEulerInputReadiness, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, validateImportByteLength, decodeImportBytes, MAX_IMPORT_BYTES, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
 });

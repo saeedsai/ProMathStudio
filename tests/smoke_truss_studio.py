@@ -122,6 +122,32 @@ def main():
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.set_content(HTML, wait_until='load')
         assert 'Analysis complete' in page.locator('#status').inner_text()
+        # Composite-section and L-angle summation must retain correctly rounded binary64 properties.
+        for viewport in ({'width': 1280, 'height': 900}, {'width': 390, 'height': 844}):
+            page.set_viewport_size(viewport)
+            precision_sections = page.evaluate("""() => {
+                const dimensions = {width:2,height:1,webThickness:1,flangeThickness:2e-17};
+                const read = shape => {
+                    const section = ProMathTrussFEM.sectionProperties(shape, dimensions);
+                    return {x:section.centroid.x,y:section.centroid.y,ixx:section.secondMoment,iyy:section.secondMomentPerpendicular};
+                };
+                const readAngle = dimensions => {
+                    const section = ProMathTrussFEM.sectionProperties('l-angle', dimensions);
+                    return {area:section.area,x:section.centroid.x,y:section.centroid.y,ixx:section.secondMoment,iyy:section.secondMomentPerpendicular};
+                };
+                return {
+                    channel:read('channel'),iSection:read('i-section'),
+                    lAngleWide:readAngle({width:8605413.972369973,height:4.292204701476468,thickness:2.136125318978258e-5}),
+                    lAngleThin:readAngle({width:1.1143751945503119e-20,height:4.305111224234166e-16,thickness:2.015788401705846e-21})
+                };
+            }""")
+            assert precision_sections == {
+                'channel': {'x':0.5000000000000001,'y':0.5,'ixx':0.08333333333333334,'iyy':0.08333333333333337},
+                'iSection': {'x':1,'y':0.5,'ixx':0.08333333333333334,'iyy':0.08333333333333336},
+                'lAngleWide': {'area':183.82251835310274,'x':4302704.840094387,'y':1.1751052746539924e-5,'ixx':0.0005630523010274837,'iyy':1134387503114039.5},
+                'lAngleThin': {'area':8.678377274295314e-37,'x':1.0080123367146022e-21,'y':2.1525099734807228e-16,'ixx':1.3404309505588713e-68,'iyy':2.9455728539715605e-79}
+            }, (viewport, precision_sections)
+        page.set_viewport_size({'width': 390, 'height': 844})
         # Preview valid geometry without solving, including a model that is structurally unstable.
         assert page.locator('#preview-summary').get_attribute('aria-live') == 'polite'
         page.locator('#member-material-details > summary').click()
@@ -160,7 +186,8 @@ def main():
         assert page.locator('#member-metrics tr').nth(0).locator('td').nth(4).inner_text() == '2400'
         assert page.locator('#member-metrics tr').nth(0).locator('td').nth(10).inner_text() == '720000'
         assert 'Preview ready' in page.locator('#status').inner_text()
-        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(12).inner_text() == '—'
+        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(12).inner_text() == 'Missing K'
+        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(13).inner_text() == '—'
         # A solid circle uses its centroidal diameter axis and does not change another member.
         page.locator('#section-member').select_option('AC')
         page.locator('#section-shape').select_option('solid-circle')
@@ -985,9 +1012,9 @@ def main():
         density_input = page.locator('#members tr').first.locator('input[data-field="density"]')
         assert density_input.input_value() == ''
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.count() == 13
+        assert metric_cells.count() == 14
         assert metric_cells.nth(8).inner_text() == '—' and metric_cells.nth(9).inner_text() == '—'
-        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['—','—','—']
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12,13)] == ['—','—','Not supplied','—']
         density_input.fill('7850')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(8).inner_text() == '7850'
@@ -997,7 +1024,11 @@ def main():
         density_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
         density_rows = list(csv.reader(io.StringIO(density_export['body'])))
         assert density_rows[0][8:10] == ['Density (kg/m³)','Member mass (kg)']
-        assert density_rows[1][8:10] == ['7850','15.7']
+        assert density_rows[1][8] == '7850'
+        assert density_rows[1][9] == '15.700000000000001'
+        assert float(density_rows[1][8]) == 7850.0
+        assert float(density_rows[1][9]) == float(density_rows[1][5]) * float(density_rows[1][8])
+        assert repr(float(density_rows[1][9])) == density_rows[1][9]
         density_input.fill('')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(8).inner_text() == '—' and metric_cells.nth(9).inner_text() == '—'
@@ -1008,15 +1039,15 @@ def main():
         assert 'Model overview' in page.locator('#preview-summary').inner_text()
         assert 'Euler estimate requires both I and K' in page.locator('#status').inner_text()
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.count() == 13
-        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['1000000','—','—']
+        assert metric_cells.count() == 14
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12,13)] == ['1000000','—','Missing K','—']
         # K-only is also a valid partial member property; the preview stays available without Pcr.
         i_input.fill('')
         k_input.fill('1')
         assert 'Model overview' in page.locator('#preview-summary').inner_text()
         assert 'Euler estimate requires both I and K' in page.locator('#status').inner_text()
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['—','1','—']
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12,13)] == ['—','1','Missing I','—']
         # Supplying the missing I restores the Euler estimate without invalidating the preview.
         i_input.fill('1000000')
         assert 'Preview ready' in page.locator('#status').inner_text()
@@ -1031,20 +1062,21 @@ def main():
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(10).inner_text() == '1000000'
         assert metric_cells.nth(11).inner_text() == '1'
-        assert metric_cells.nth(12).inner_text() == '493.48'
+        assert metric_cells.nth(13).inner_text() == '493.48'
         # Display precision follows the inverse-square effective-length relationship.
         k_input.fill('2')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.nth(12).inner_text() == '123.37'
+        assert metric_cells.nth(13).inner_text() == '123.37'
         k_input.fill('1')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.nth(12).inner_text() == '493.48'
+        assert metric_cells.nth(13).inner_text() == '493.48'
         export_index = page.evaluate('window.__exports.length')
         page.locator('#export-material-csv').click()
         euler_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
         euler_rows = list(csv.reader(io.StringIO(euler_export['body'])))
         assert euler_rows[0][-3:] == ['Second moment of area I (mm⁴)','Effective length factor K (-)','Euler critical load Pcr (kN)']
-        assert euler_rows[1][-3:] == ['1000000','1','493.4802200544678']
+        assert euler_rows[1][-3:] == ['1000000','1','493.48022005446785']
+        assert repr(float(euler_rows[1][-1])) == euler_rows[1][-1]
         # Post-solve Euler screening is compression-only: tension and zero demand never divide.
         page.locator('#solve').click()
         result_cells = page.locator('#member-results tr').first.locator('td')
@@ -1081,7 +1113,7 @@ def main():
         page.locator('#solve').click()
         k_input.fill('2')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.nth(12).inner_text() == '123.37'
+        assert metric_cells.nth(13).inner_text() == '123.37'
         k_input.fill('0')
         assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
         assert 'K must be positive' in page.locator('#status').inner_text()
@@ -1171,7 +1203,7 @@ def main():
         assert legacy_cells.nth(9).inner_text() == '15.7'
         assert legacy_cells.nth(10).inner_text() == '1000000'
         assert legacy_cells.nth(11).inner_text() == '1'
-        assert legacy_cells.nth(12).inner_text() == '493.48'
+        assert legacy_cells.nth(13).inner_text() == '493.48'
         # A genuine value edit still cancels a pending read; its late bytes cannot replace the edit.
         page.evaluate("""json => {
             const nativeRead = Blob.prototype.arrayBuffer;

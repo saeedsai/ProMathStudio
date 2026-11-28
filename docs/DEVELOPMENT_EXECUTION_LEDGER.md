@@ -1,3 +1,1156 @@
+## 2026-11-28 07:00 CET — RETAIN SUB-THRESHOLD COMPRESSION IN THE OPTIONAL EULER SCREEN
+
+- Starting refs: `dev` `99e5abf364249f8e34ecc68020fa3d65daa02018`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 126 ahead / 0 behind; exactly two branches. Local checkout absent; GitHub integration fallback used.
+- Exact-head Push Quality [#46111417397](https://github.com/saeedsai/ProMathStudio/actions/runs/46111417397) and PR Quality [#46111420400](https://github.com/saeedsai/ProMathStudio/actions/runs/46111420400) passed 218/218 on the starting SHA, zero failures/skips. Truss steps 212, 214 and 215 passed in both.
+- Reproduced a semantic defect in the actual production path: the generic ±1e-8 N force-classification threshold was also suppressing Euler compression demand. A negative force can be smaller than 1e-8 N yet exceed a supplied, still smaller Euler critical load.
+- Updated the solver so Euler-enabled members use every strictly negative solved axial force as compression demand and are classified as compression for that screen. Members without I/K preserve the prior ±1e-8 N noise threshold. No Euler acceptance ratio or solver tolerance was weakened.
+- Added direct Node and registered desktop/390px Chromium regressions. For a 2 m bar with E=1 GPa, area=1e-3 mm², I=4e-9 mm⁴ and K=1, 5e-12 N is below Pcr≈9.869604401089358e-12 N (utilization≈0.5066), while 5e-9 N is above Pcr (utilization≈506.6); both are below the old threshold. A no-I/K case confirms unchanged near-zero classification. Browser checks retain finite equilibrium and energy diagnostics.
+- Updated the Structural Truss FEM contract, NEXT FIVE status, living checkpoint, execution ledger and changelog in the same seven-file atomic dev commit. The standalone Truss scripts do not require root `index.html` changes.
+- Independent Python binary64 calculation reproduced the two reference Pcr/utilization cases. Full local Node/Playwright/build tests were not run because the checkout is absent; fresh exact-head Push/PR Quality is pending for the new commit.
+- PR #191 remains open/mergeable with zero independent reviews. Branches are unprotected, rulesets empty and branch-protection read returns HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026 at unchanged main. Not released. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+## 2026-11-28 06:00 CET — PRESERVE FINITE TRUSS SOLVES WHEN OPTIONAL EULER RATIOS EXCEED BINARY64 RANGE
+
+- Starting refs: `dev` `585fa5b8372cac1367bb3f1611e5e95f436ef681`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 125 ahead / 0 behind; exactly two branches. Local checkout absent; GitHub integration fallback used.
+- Exact-head Push Quality [#46105968818](https://github.com/saeedsai/ProMathStudio/actions/runs/46105968818) and PR Quality [#46105973722](https://github.com/saeedsai/ProMathStudio/actions/runs/46105973722) passed 218/218 on starting SHA, zero failures/skips; Truss steps 212/214/215 passed.
+- Reproduced two real defects with the fetched production FEM source: a finite compression solve was rejected when `Pcr/Pcomp` overflowed, and the reciprocal case was rejected when `Pcomp/Pcr` overflowed. Both models retain finite stiffness, displacement, member force/stress, equilibrium and energy values.
+- Added `eulerUtilizationRange` and `eulerLoadRatioRange` metadata. Representable positive ratios remain numeric; overflow/underflow becomes `null` plus an explicit range status. The assessment compares positive compression demand directly against Euler Pcr, independently of quotient range. UI cells display `> max`/`< min`; the assessment explains which ratio exceeded range.
+- Added Node and registered Chromium regressions for both reciprocal overflow directions and a minimum-subnormal load-ratio underflow case. Tests assert finite solve diagnostics, correct below/at-or-above assessment, and explicit range metadata. Updated the Structural Truss FEM contract, NEXT FIVE status, living plan and changelog in the same atomic candidate commit.
+- Actual production-source V8 reproductions confirmed the pre-fix failure. Post-fix V8 validation, JavaScript syntax checks and the exact browser test harness assertions are checked before commit. Full repository Node, Python/Chromium and build checks remain delegated to fresh exact-head GitHub Actions; pending until they pass.
+- PR #191 remains open/mergeable, zero independent reviews; both branches unprotected, rulesets empty, branch-protection read HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026 at unchanged main. Not released. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+## 2026-11-28 04:57 CET — REPORT COMPLETE OR PARTIAL TRUSS MEMBER MASS IN PRE-SOLVE PREVIEW
+
+- Starting refs: `dev` `a7803049451699f1b0f18829921b92de1f516995`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 124 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46103439003](https://github.com/saeedsai/ProMathStudio/actions/runs/46103439003) and PR Quality [#46103444489](https://github.com/saeedsai/ProMathStudio/actions/runs/46103444489) both passed 218/218 on the starting dev SHA, zero failures/skips. Project import steps 50/105 and Truss steps 212/214/215 passed.
+- The saved-project rollback matrix remains the next higher roadmap item, but its source is embedded in the oversized root `index.html`; the connected file reader returns no content and raw-file retrieval rejects the file. The local execution environment has no checkout. Per AGENTS.md fallback, no embedded module was edited or desynchronized; work continued on retrievable standalone Truss assets.
+- Added `knownMemberMassSubtotal`, `totalMemberMass` and `unknownDensityMemberCount` to the validated Truss `inspectJSON` preview. A total is exposed only when every member has known density; explicit density zero is valid known data. Unknown densities are not silently treated as zero, and an overflowing known subtotal is rejected through the existing finite accumulator.
+- Truss Studio's pre-solve summary now distinguishes a complete estimated total, a partial known-mass subtotal with the missing-density count, and a wholly unavailable estimate.
+- Added direct Node coverage for all-known, partially-known, all-unknown, explicit-zero and overflowing totals. Extended the registered Chromium regression to check the default triangle, a 15.7 kg legacy SI bar and a two-member partial-density import at 1280px and 390px.
+- Updated the Structural Truss FEM contract, living plan, execution ledger and changelog in the same atomic candidate commit. Root `index.html` is unchanged because Truss uses adjacent standalone scripts.
+- Actual production-source V8 validation passed for all five mass states; updated FEM/UI/Node-test JavaScript syntax compilation passed. Full Python/Chromium/build certification requires fresh exact-head GitHub Actions; pending for the candidate. No release claim.
+- PR #191 remains open/mergeable with zero independent reviews. Both branches report unprotected; rulesets empty; branch-protection GET 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026 at unchanged main. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
+## 2026-11-28 04:27 CET — RESET OMITTED SOLVER STATE DURING LEGACY PROJECT IMPORT
+
+- Starting refs: `dev` `161895dd9071999e28183102d46d54ccf4f194d2`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 123 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46096512088](https://github.com/saeedsai/ProMathStudio/actions/runs/46096512088) and PR Quality [#46096516504](https://github.com/saeedsai/ProMathStudio/actions/runs/46096516504) passed 218/218 on the starting SHA, zero failed/skipped steps. Truss browser/analytical/responsive steps 212, 214 and 215 passed.
+- Found a saved-project replacement bug in the standalone import bridge: when a legacy v1/v2 file omitted the optional `solver` object, `applyProject` skipped all Equation controls and `notebookBridge.setEditor`, leaving the previous project's expression, operation, engine, variable, limit, ODE initial condition and assumptions visible after import.
+- Changed `index.html` so absent, null, empty or partial solver state always restores documented defaults (`auto` operation/engine, `x` variable, `0` limit point, `+-` direction, blank expression/ODE condition and all assumptions off). Present valid fields still restore normally; rollback snapshots with full solver state restore their previous values.
+- Extended `tests/smoke_project_atomic_import.py`: seed non-default solver state, verify rollback preserves it after injected failures, verify v1 and v2 imports without a solver object and a v2 empty solver object clear it, and verify valid v2 solver state round-trips. The test is already registered in Quality step 105.
+- Updated `docs/PROJECT_FORMAT.md`, the living plan, this ledger and `CHANGELOG.md`. This project-import bridge is embedded only in the standalone `index.html`; no separate `src/` module exists for it.
+- Isolated V8 execution of the extracted production `applyProject` function passed for absent/empty and valid solver states. Local repository checkout is absent, so full Python/Chromium/build commands were not run; fresh exact-head Push/PR Quality remains required.
+- PR #191 remains open/mergeable, zero independent reviews. Branch protection reads return HTTP 403; rulesets are empty and both branches report unprotected. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on 24-Nov-2026 at unchanged main; this dev commit is not deployed. Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
+## 2026-11-28 02:56 CET — FIX TRUSS RESET REFERENCE REGRESSION AND EXPOSE ANALYSIS VALIDITY
+
+- Starting refs: `dev` `a8e9ef150e13bb3ed6efef84b02cb91257f8456a`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 122 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46090998251](https://github.com/saeedsai/ProMathStudio/actions/runs/46090998251) and PR Quality [#46091004384](https://github.com/saeedsai/ProMathStudio/actions/runs/46091004384) both failed at Truss browser step 215. Steps 212 and 214 passed in both, including the 109/109 Node FEM analytical suite. The exact failure at `tests/smoke_truss_fem.py:2261` compared a final Reset result to a stale triangle reference even though the long browser scenario had selected the bar example; Reset correctly restores the selected example.
+- Fixed the regression by computing the expected energy residual/error from `ProMathTrussFEM.examples[document.querySelector('#example').value]` immediately before the reset scenario. Existing exact binary64 assertions are retained; no numerical tolerance or workflow gate was weakened.
+- Production UI now publishes `data-analysis-state`: `pending` before the first successful solve, `valid` after successful analysis, and `stale` whenever the model is invalidated or a solve fails. Existing `data-energy-residual-j` and `data-energy-error` remain shortest-round-trip binary64 values and clear on invalidation. Chromium verifies state transitions and selected-example reset behavior at 1280px and 390px.
+- Updated `tools/truss-fem-ui.js`, `tools/truss-studio.html`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, the living plan, this ledger and changelog in one atomic Git tree/commit on existing dev. Truss Studio is an adjacent standalone `tools/` page; root `index.html` module parity is not implicated.
+- Local checkout is absent. Full local Python/Node/Playwright/build checks were not run; exact-head Push and PR Quality on the new commit remain pending.
+- PR #191 remains open/mergeable, zero independent reviews. Branch protection read returns HTTP 403; rulesets are empty. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on 24-Nov-2026 at unchanged main. The new implementation is not deployed. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
+## 2026-11-28 01:55 CET — FIX TRUSS BINARY64 BROWSER ASSERTION AND EXPOSE MACHINE-READABLE ENERGY DIAGNOSTICS
+
+- Starting refs: `dev` `865de95d5b4e35a6290c9864cf02d31d08142e63`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 121 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46086282819](https://github.com/saeedsai/ProMathStudio/actions/runs/46086282819) and PR Quality [#46086287164](https://github.com/saeedsai/ProMathStudio/actions/runs/46086287164) both failed at step 215, `tests/smoke_truss_fem.py`. The 109-test Node FEM analytical suite at step 214 passed with 109/109 and zero skips.
+- Exact failure: line 106 compared `energy_accumulation['naiveEnergy']` directly to Python integer `2**55`. The browser returned the JavaScript binary64 value (2^{55}) through JSON using shortest decimal `36028797018963970`; Python parsed the integer-looking token as an arbitrary-precision integer, which differs from Python's exact integer `36028797018963968` even though converting either value to binary64 yields the same `2^55`. The smoke now compares `float(actual)` with `float(reference)` and asserts the next representable ULP remains distinguishable. This repairs the cross-language test contract without relaxing the binary64 numerical assertion.
+- Production UI improvement: added `roundTripNumber()` to preserve shortest-round-trip binary64 strings including negative zero. The visible Truss energy status now publishes `data-energy-residual-j` and `data-energy-error`; invalidation clears both to empty strings, and a successful solve repopulates them.
+- Browser regression compares both attributes with values returned by the solver itself, then edits the model to require both attributes clear and restores the example to require exact republishing. The same flow runs at 1280px and 390px.
+- Updated `tools/truss-fem-ui.js`, `tools/truss-studio.html`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, the living plan, this ledger and changelog in one atomic Git tree/commit on existing dev. Truss Studio uses adjacent standalone `tools/` files; no root `index.html` module synchronization is required.
+- Local checks: V8 syntax parsing of the updated UI and source/HTML/test wiring assertions passed. A Python reproduction confirmed `float(36028797018963970) == float(2**55)` while `float(2**55 + 8) != float(2**55)`. Bounded `git rev-parse --show-toplevel` failed with “not a git repository”; full local Node/Python/Playwright/build checks were not run. Fresh exact-head Actions remain authoritative.
+- New exact-head Push/PR Quality are pending inspection. PR #191 remains open/mergeable with zero independent submitted reviews; branch refs are only dev/main, rulesets are empty, and branch-protection read returns HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 succeeded on 24-Nov-2026 at unchanged main. This dev checkpoint is not deployed. Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
+## 2026-11-28 01:03 CET — MAKE TRUSS ENERGY RESIDUAL VISIBLE AND FIX COLLAPSED-DISCLOSURE BROWSER REGRESSION
+
+- Starting refs: `dev` 989af00d2b697c3d1c5a901626e5fcfcfc144309; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 119 ahead / 0 behind; exactly two branches. Implementation commit [1c2a3f0](https://github.com/saeedsai/ProMathStudio/commit/1c2a3f0674b937c649a6ab367c9f7f7ec9bc2a14) advances dev to 120 ahead / 0 behind.
+- Exact-head Push Quality [#46080743000](https://github.com/saeedsai/ProMathStudio/actions/runs/46080743000) and PR Quality [#46080748080](https://github.com/saeedsai/ProMathStudio/actions/runs/46080748080) both failed at Truss browser step 215. Step 214's Node FEM suite passed 109/109. The exact traceback was `tests/smoke_truss_fem.py:40`, where the test read `#verification` before opening its parent `<details>`; the detail was intentionally hidden, not absent.
+- Added an always-visible `#energy-residual-summary` status paragraph to the Truss results panel with `role="status"` and `aria-live="polite"`. `showResult()` publishes the signed residual after a successful solve; `invalidate()` clears it to an em dash so stale results are not presented for an edited/invalid model. Detailed force/energy diagnostics remain inside the existing disclosure.
+- Updated the registered Chromium regression to assert the visible live summary, verify the detailed element is initially hidden, open the disclosure before reading it, then edit a model input to check stale-summary clearing and restore/reanalyze to check republishing. Existing FEM references, solver thresholds and numerical assertions are unchanged; both 1280px and 390px viewports execute this flow.
+- Updated the Truss Studio numerical/UI contract, living plan, this ledger and changelog. Truss Studio uses adjacent standalone `tools/` files, not the root modular bundle; no `index.html` edit is required.
+- Fresh exact-head Push Quality [#46086152285](https://github.com/saeedsai/ProMathStudio/actions/runs/46086152285) and PR Quality [#46086157690](https://github.com/saeedsai/ProMathStudio/actions/runs/46086157690) are running on the new dev SHA; structural step 7, browser dependency step 8 and general browser step 9 passed at last inspection, with Truss steps pending.
+- Local checkout is absent (`git rev-parse --show-toplevel`: “not a git repository”). Full local Python/Playwright/build commands cannot run. Isolated UI JavaScript syntax, HTML status wiring, test assertion wiring and source-change checks are run before commit; fresh exact-head GitHub Actions remain authoritative for full QA.
+- PR #191 remains open and mergeable, 119 commits ahead / 0 behind, zero independent reviews. Both branches report unprotected; rulesets empty; branch-protection read 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on 24-Nov-2026 at unchanged main; this dev change is not deployed. Historical inventory remains 166 gaps / 95 partial, unchanged.
+
+---
+## 2026-11-27 18:58 CET — CORRECT PROJECT SMOKE ASSERTION SCOPE BEFORE QA
+
+- Follow-up review of candidate `c535d26e968f61ba5b728fe6b6a0eceabf6a97c8` found the newly inserted editor-save assertions were indented one level outside the Playwright `with` block. Corrected them to run while the page/browser are active, and changed the valid two-argument Python fixture to contain a real newline rather than a literal backslash-n.
+- This is a test-fixture correction only; the production signature checks, project-schema parity, loopback HTTP server and direct localStorage assertions are unchanged.
+- The c535 exact-head Push/PR workflows were still running when inspected; they are not treated as certification of the follow-up head. Fresh exact-head workflows will be inspected after this guarded dev update.
+- No merge, main update or release claim.
+
+---
+
+## 2026-11-27 18:58 CET — FIX PROJECT SMOKE ORIGIN AND MATCH PYTHON FUNCTION SIGNATURES
+
+- Starting refs: `dev` 0f0665b6d300fac4618e2bb71196b29dd3aa4eab; `main` 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare main...dev = 111 ahead / 0 behind. Exactly two branches exist.
+- Exact-head Push Quality [#46038574233](https://github.com/saeedsai/ProMathStudio/actions/runs/46038574233) and PR Quality [#46038582330](https://github.com/saeedsai/ProMathStudio/actions/runs/46038582330) both failed at step 50. The exact Playwright traceback is `SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.` because the test used `page.set_content()` with an opaque `about:blank` origin while directly asserting localStorage. Earlier browser assertions and structural checks passed; this did not demonstrate a production import-state mutation.
+- Test-host repair: `tests/smoke_project_schema.py` now serves the existing standalone app from a temporary loopback HTTP server and navigates to `http://127.0.0.1:<ephemeral-port>/index.html`. This preserves the direct localStorage-before/after assertions on a real same-origin page rather than removing or weakening them.
+- Production correction: Python custom functions now require declared positional parameter names and order to exactly match saved `params`. Applied to editor `normalizeCustom`, public `MathStudio.customFunctions.restore()`, and `src/project-schema.js` import preflight; embedded project-schema in `index.html` remains exact parity. Matching multi-argument functions remain supported; mismatched, reordered, wrong-count and defaulted signatures reject before function/project state mutation. Python source remains inert during import.
+- Regression additions: Node schema fixtures include valid one-/two-argument functions and mismatched/defaulted signatures. Chromium smoke verifies editor rejection/acceptance, direct-restore atomicity, project-import preflight and localStorage state preservation using the HTTP origin.
+- Isolated V8 validation: actual modified project-schema migration accepts matching signatures and rejects mismatched argument names/count/defaults; extracted production signature helper, editor normalizer and direct-restore API pass positive/negative checks; embedded schema parity and inline-script syntax pass. Full Python/Playwright/build checks are delegated to fresh exact-head GitHub Actions because the local checkout is absent.
+- Release remains blocked: PR #191 open/mergeable, zero independent reviews, both branches report `protected:false`, rulesets empty and branch-protection read HTTP 403. No merge or direct main update.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production runs on 24-Nov-2026; new work is not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
+## 2026-11-27 12:22 CET — PREVALIDATE ENGINEERING DISCIPLINE IDS
+
+- Starting refs: `dev` 27971dc78f5bdaf293e643404d8942c11ddb8a68; `main` 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare main...dev = 102 ahead / 0 behind. Only `dev` and `main` branches exist; both report `protected: false`.
+- Exact starting-head Push Quality [#45980025915](https://github.com/saeedsai/ProMathStudio/actions/runs/45980025915) and PR Quality [#45980033277](https://github.com/saeedsai/ProMathStudio/actions/runs/45980033277) both completed all 218 steps successfully, with zero failed or skipped steps.
+- Found a preflight/runtime mismatch: project-schema accepted any syntactically valid lowercase/hyphen Engineering discipline, but the canonical catalog exposes only nine IDs. Unknown `nosuchfield` passed preflight, displayed confirmation and failed later in `engineeringCatalog.restoreState()`.
+- Implementation commit: [d4f349a](https://github.com/saeedsai/ProMathStudio/commit/d4f349aedafe617f8f75e4506d941546561c1221). Schema now accepts only empty (all disciplines) or physics, mechanical, electrical, electronics, fluids, aerospace, control, gnss and signals. Legacy omitted/null state and query lengths 0–200 remain compatible.
+- Added Node regression for exact schema/catalog ID parity, all nine valid IDs, unknown IDs, legacy null/omission and 200/201 query boundary. Added Chromium pre-confirmation rejection and state-preservation assertion. Updated project-format docs, living plan and changelog; synchronized project-schema source with standalone `index.html`.
+- Isolated V8 execution of actual schema passed all valid/invalid/legacy/boundary cases; source/bundle parity passed. Bounded local Git check found no checkout and `git ls-remote` failed on DNS; GitHub integration performed the guarded update.
+- Exact-head runs for implementation SHA d4f349a: Push [#45991791597](https://github.com/saeedsai/ProMathStudio/actions/runs/45991791597) and PR [#45991798552](https://github.com/saeedsai/ProMathStudio/actions/runs/45991798552). At inspection both had passed structural step 7, with 7/217 steps completed, zero failures/skips; Engineering project-filter Chromium step and remaining Quality were pending.
+- A documentation assembly error in the first ledger update omitted the prior ledger body. This recovery restores the complete 542,181-character historical ledger from 27971dc78f5bdaf293e643404d8942c11ddb8a68 and prepends this entry; no earlier history is discarded from Git.
+- PR #191 remains open/mergeable, zero independent reviews. Branch-protection read returns HTTP 403; rulesets are empty. No merge or direct main update. Main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; latest main Quality #45360386408 and Pages #45360367251 succeeded on 24-Nov-2026; no newer deployment/live verification.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged. Engineering filter fix is implemented on dev, not released.
+
+---
+
+## 2026-11-27 10:58 CET — ALIGN LIVING PLAN WITH DELIVERY-POLICY CONTRACT
+
+- Candidate dev `313989083a43ff038a0a27904631d37d6584f3a7`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Exact-head Push Quality [#45979678110](https://github.com/saeedsai/ProMathStudio/actions/runs/45979678110) and PR Quality [#45979686262](https://github.com/saeedsai/ProMathStudio/actions/runs/45979686262) both failed at structural step 7. The 615-test suite had one failure and one optional skip; the only failure was `test_delivery_policy.DeliveryPolicyTests.test_durable_agent_contract_and_five_feature_plan`, which requires the literal heading `Next five features` as well as `NEXT FIVE`. The plan contained the latter but not the exact former.
+- Corrected the heading to `Next five features — NEXT FIVE priorities`; retained all five detailed priorities, acceptance tests, historical baseline and release constraints. No test or workflow was changed.
+- The preceding exact-head run's new Node schema cases passed; the only structural failure was the plan-heading policy assertion. Fresh Push/PR exact-head Quality is pending for this documentation correction.
+- PR #191 remains open, 101 commits ahead / 0 behind, zero independent reviews. No merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production runs (24-Nov-2026). Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
+## 2026-11-27 10:57 CET — FIX PROJECT ROLLBACK CI AND VALIDATE SOLVER IDENTIFIERS
+
+- Starting `dev` `905a864a480646849ef97b60792a0dc99f500306`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; PR #191 compare is 100 ahead / 0 behind. Branch search pagination found only `dev` and `main`.
+- Re-read root `AGENTS.md`, unified master implementation plan, engineering architecture, frozen 26-Oct inventory, project-format/schema contract, current solver tests, PR #191, exact-head Actions and main deployment evidence. Discovered `docs/HOURLY_DEVELOPMENT_PLAN.md` was an empty zero-byte file; restored the living queue and NEXT FIVE with evidence-backed priorities.
+- Exact-head Push Quality [#45972027670](https://github.com/saeedsai/ProMathStudio/actions/runs/45972027670) and PR Quality [#45972038530](https://github.com/saeedsai/ProMathStudio/actions/runs/45972038530) both fail at step 50. The only failing step is `tests/smoke_project_schema.py` line 190: after the earlier SymPy solver import, later valid Graph imports use the legacy fixture and restore its original solver settings; the final injected-rollback assertion incorrectly compares against the earlier, stale `migrated['solver']` snapshot. The test now captures the actual active solver snapshot immediately before the injected restore failure and compares rollback output to that snapshot. Earlier valid solver round-trip assertions remain.
+- Added a real schema improvement: nonempty saved Equation variables must satisfy the exact live CAS identifier grammar (Unicode letter followed by Unicode letters, ASCII digits or underscores), in addition to the existing 24-character bound. Empty/missing legacy variable fields retain the existing default. Added Node valid Unicode/ASCII and invalid syntax/type regressions plus Chromium valid Unicode import and malformed-variable rejection cases.
+- Updated `src/project-schema.js`, its embedded `index.html` script, `tests/test_project_solver_state.py`, `tests/smoke_project_schema.py`, `docs/PROJECT_FORMAT.md`, restored `docs/HOURLY_DEVELOPMENT_PLAN.md`, this ledger and `CHANGELOG.md` in one atomic tree/commit.
+- Local Node regex/boundary harness: run result recorded in this checkpoint; repository checkout is unavailable, so native full Python unittest, Playwright and build commands cannot run in the local container. Fresh exact-head GitHub Actions are the authoritative full regression gate and remain pending until observed green.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are still the latest verified successful production runs, both 24-Nov-2026 at main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no newer Pages run was available from the Actions collection.
+- PR #191 remains open; independent reviews: zero. Branch-protection GET returns 403 to the integration and repository rulesets are empty. No merge or direct main update. Historical inventory remains **166 gaps / 95 partial**, unchanged. New work is implemented on dev, not released.
+
+---
+
+## 2026-11-27 09:55 CET — EXACT-HEAD SOLVER STRUCTURAL ASSERTION CORRECTION
+
+- Candidate `33d8cc29b9048c3cc5f12e684a64f040b80c72ed` failed both Push Quality #45971688897 and PR Quality #45971696009 at step 7.
+- Exact log: 615 tests, one failure and one optional skip. The new Node enum/boundary test and source/standalone parity assertion passed. The sole failure was a too-short expected substring: the test searched for `short(solver.limitPoint, 80)`, while production correctly passes the diagnostic label as a third argument.
+- Corrected the structural assertion to require `short(solver.limitPoint, 80,`, preserving the 80-character bound check. No production code, test cases or CI gates were weakened.
+- Fresh exact-head Push/PR Quality and browser project import rollback checks remain pending.
+- PR #191 remains open; no merge/direct main update. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+## 2026-11-27 09:55 CET — VALIDATE SAVED SYMBOLIC-SOLVER CONTROLS
+
+- Starting dev `d8034f7392f8bcdf86d84b92664389ee78c7ab81`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only dev/main branches exist; compare main...dev = 97 ahead / 0 behind.
+- Exact starting-head Push Quality #45963516902 and PR Quality #45963525447 both passed all 218 steps on `d8034f7392f8bcdf86d84b92664389ee78c7ab81`, zero failures/skips. These certify the starting head only; new exact-head workflows are required.
+- Found that project migration accepted arbitrary saved solver operation/engine/direction strings, although the live restore uses HTML select controls and silently falls back to `+-` for invalid limit direction. Variable and limit point were allowed to 12,000 chars despite live input limits of 24 and 80.
+- Added exact operation/engine/direction enumerations and aligned variable/limit-point schema bounds to the live controls. Missing fields and empty legacy selectors retain their existing defaults; invalid explicit values reject before restore.
+- Added Node regression coverage for all valid selector combinations, invalid types/enums, empty/missing legacy fields, 24/25 and 80/81 character boundaries, immutability and source/bundle parity. Extended registered Chromium project smoke for valid limit round-trip, invalid import rejection and previous solver/workspace state preservation.
+- Updated `src/project-schema.js`, its embedded `index.html` module, `tests/test_project_solver_state.py`, `tests/smoke_project_schema.py`, `docs/PROJECT_FORMAT.md`, the living plan and changelog in one atomic dev commit.
+- Isolated V8 execution of actual modified schema and selector boundary cases passed; full local unittest/Playwright/build are unavailable without a repository checkout. Fresh exact-head Push/PR Quality pending.
+- PR #191 remains open; 97 ahead / 0 behind, 37 changed files, zero independent reviews. Only dev/main refs exist; rulesets empty; branch protection not verifiable through integration. No merge/direct main update.
+- Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Main Quality #45360386408 and Pages #45360367251 remain successful 24-Nov-2026 evidence only. No new deployment.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged. Implemented on dev / In QA / not released.
+
+## 2026-11-27 09:01 CET — REJECT UNSUPPORTED DATA TABLES PROJECT STATE VERSIONS
+
+- Starting dev `b00f18ea10aa3932b78126573ad66b3ddba4e843`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only dev/main branches exist.
+- Starting exact-head Push Quality #45957413036 and PR Quality #45957422847 both passed all 218 steps with zero failures/skips. They certify the starting SHA only; fresh exact-head runs are required after this change.
+- Found that project migration validated Data Tables sheet identity, selected sheet, dimensions and cells but ignored nested `tables.version`. The live exporter writes version 1 and restore interprets that schema as v1, so unknown explicit versions were silently treated as current.
+- Added strict explicit nested version 1 validation while preserving legacy projects that omit the nested version. Unknown, null, string and malformed versions now fail before workspace mutation.
+- Added Node regression cases for outer project v1/v2, nested version 1, missing legacy version and invalid 0/2/string/null/object/array values. Added Chromium rejection and state-preservation coverage for nested version 2. Updated PROJECT_FORMAT and synchronized `src/project-schema.js` with its embedded `index.html` module exactly.
+- Isolated V8 migration cases and source/bundle parity passed. Full repository unittest/Chromium/build are pending exact-head GitHub Actions because the execution environment has no checkout.
+- PR #191 remains open; 96 ahead/0 behind at start, zero independent reviews. Both branches report unprotected and branch-protection read returns HTTP 403; no merge/direct main update.
+- Latest verified main Quality/Pages evidence remains from 24-Nov-2026; no new production deployment. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+## 2026-11-27 — REPAIR EXACT-HEAD PROJECT BUNDLE PARITY
+
+- Starting dev `efa055330a015512d1af3fbd8170eb65de64b940`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Exact-head Push #45957036919 and PR #45957044681 both failed at step 7. Structural suite: 613 tests, two failures, one optional skip. `test_bundle_source_parity` found the inline Curve fitting restore hook differed from `scripts/build.py` output.
+- Root cause: I edited a non-modular inline UI hook without adding a synchronized source module; the builder correctly discarded it. Reverted that inline-only change. Retained schema-level fit model/degree/lastEquation validation in `src/project-schema.js` and its exact embedded module; project import rejects malformed fit state before any workspace restore.
+- Removed unsupported direct-hook assertions, retained all 35 model/degree combinations, malformed type/enum/length checks, v1/v2 migration, immutability, browser malformed-import rejection and previous-fit-state preservation. Updated project-format docs and corrected the prior log wording.
+- The previous isolated V8 schema and project-schema source/bundle checks passed. Fresh exact-head Push/PR Quality is pending; browser step 50 not yet run.
+- PR #191 remains open with zero independent reviews; only dev/main refs exist, both unprotected, rulesets empty. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 last verified successful 24-Nov-2026; no newer main deployment found.
+- Historical baseline remains **166 gaps / 95 partial**; not released.
+
+---
+## 2026-11-27 07:58 CET — VALIDATE SAVED CURVE-FIT PROJECT STATE
+
+- Starting dev `dcc1e03c4ad90e4011f6cd39211797e67d6a326e`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root AGENTS, unified master plan, frozen inventory, project format/schema, standalone bundle and project import/rollback tests inspected.
+- Prior exact-head Push #45950895139 and PR #45950900876 passed all 218 steps with zero failures/skips.
+- Added strict saved Curve fitting state validation: allowed model enum, degree string 2–6, bounded lastEquation (2,000 chars), and legacy missing/null/empty defaults. The project schema validates fit state before any workspace restore begins.
+- Added Node regression for 35 valid model/degree combinations, invalid types/enums/length, v1/v2 migration and input immutability; extended Chromium project import/rollback regression for valid fit round-trip, pre-restore rejection and malformed project preservation.
+- Updated `src/project-schema.js`, its exact embedded `index.html` copy, project-format documentation, tests, living plan, ledger and changelog in one atomic Git tree/commit.
+- Isolated V8 boundary harness passed; full local repository/build/browser commands unavailable because the execution container has no Git checkout. New exact-head Push/PR Quality pending.
+- PR #191 remains open with zero independent reviews; only dev/main refs exist, both unprotected, rulesets empty. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 last verified successful 24-Nov-2026; no newer main deployment found.
+- Historical baseline remains **166 gaps / 95 partial**; not released. Candidate SHA is the atomic commit created by this entry and is reported in the run checkpoint.
+
+---
+## 2026-11-27 07:10 CET — FIX SIGNED-ZERO STRUCTURAL TEST SETUP ORDER
+
+- Starting dev `b3e2b6bcac151703292f705dead06fd5e1ff74b5`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Exact-head PR Quality #45950676415 failed at step 7. Structural unittest discovery ran 611 tests with one error and one optional mpmath skip. The error was `UnboundLocalError`: the new nested PRODUCT browser assertion used local `smoke` before its assignment in `test_product_uses_exponent_scaled_binary64_multiplication`.
+- Moved the assertion below the existing read of `tests/smoke_data_tables.py`. Retained both the source serialization assertion and nested browser fixture; no tests or production behavior were weakened.
+- New exact-head Push/PR Quality is required. No local repository checkout; static ordering inspection only. Previous exact-head browser failure root cause (String(-0) serialization) is fixed in parent `b3e2b6b` but not yet certified.
+- PR #191 remains open with zero independent reviews; no merge/direct main update. Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Quality/Pages #45360386408/#45360367251 are 24-Nov-2026 evidence only. Historical inventory **166 gaps / 95 partial** unchanged; not released.
+## 2026-11-27 07:02 CET — PRESERVE SIGNED ZERO THROUGH NESTED PRODUCT
+
+- Starting dev `3a1532d280d4089c72cf7b737ffd125dd24c64c7`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only `dev` and `main` refs exist.
+- Exact-head Push #45944466612 and PR #45944475430 both failed at step 64 (Spreadsheet and chart regression). Their structural step passed 611 tests with one optional mpmath skip. The browser failure was `Object.is(calculate()[1][2],-0)` for `PRODUCT(-0,2)`.
+- Root cause: `stableProduct` returned negative zero correctly, but aggregate replacement used `String(x)`; JavaScript serializes -0 as `"0"`, converting it to positive zero before the parser's next pass.
+- Fix: preserve `-0` as a literal scalar token with `Object.is(x,-0)?'-0':String(x)`. The parser's existing unary-minus path preserves the sign. No weakened assertions or arithmetic changes.
+- Added a nested PRODUCT browser fixture `PRODUCT(PRODUCT(-0,2),3)` and explicit signed-zero assertion; retained direct signed-zero coverage. Added structural assertions for the serializer guard, nested formula and browser regression.
+- Updated `src/data-tables.js` and its embedded `index.html` module byte-for-byte together; updated Data Tables contract, living plan, ledger and changelog in the same atomic commit.
+- Isolated Node reproduction passed: old serialization loses the sign; explicit `-0` token preserves it. Full unittest/Playwright/build remain pending fresh exact-head Push/PR Quality.
+- PR #191 remains open with zero independent reviews; no merge/direct main update. Latest verified Main Quality #45360386408 and Pages #45360367251 are 24-Nov-2026 evidence only. Historical inventory remains **166 gaps / 95 partial**; not released.
+## 2026-11-27 06:08 CET — REPAIR PRODUCT STRUCTURAL ASSERTION
+
+- Exact-head Push #45944225354 and PR #45944230523 both failed at step 7. The structural unittest suite ran 611 tests with one failure and one skip; the only failure was the MEDIAN contract's stale exact aggregate regex, which did not include the new PRODUCT built-in.
+- Updated `tests/test_sheet_median.py` to include PRODUCT and assert its Formula-library entry and aggregate dispatch. Existing MEDIAN checks remain. No production change and no weakened assertion.
+- Four-file atomic follow-up: test, living plan, ledger and changelog. Product implementation/source/bundle/browser test remain in parent `3fbaa76`.
+- CI logs were inspected and root cause identified. No local checkout, so repository unittest/Playwright/build commands cannot be run here; new exact-head workflows are pending.
+- PR #191 remains open with zero reviews; branches unprotected and no protection write operation available. No merge/direct main update.
+- Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality/Pages #45360386408 / #45360367251 (24-Nov-2026). Frozen inventory **166 gaps / 95 partial** unchanged.
+
+## 2026-11-27 06:00 CET — DATA-TABLES-SCALE-SAFE-PRODUCT
+
+- Starting refs: dev `665eaa173830804787cd2f04a0a8d48f4fddc1c1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; inspected AGENTS, living plan, frozen inventory, source/tests, PR #191, branch refs, CI and production check-runs. Historical baseline **166 gaps / 95 partial** unchanged.
+- Exact starting-head Push #45938426308 and PR #45938430351 both passed 218/218 on `665eaa173830804787cd2f04a0a8d48f4fddc1c1`, zero failures/skips.
+- Added first-class Data Tables `PRODUCT` formula and Formula-library entry. Exponent-scaled mantissa/exponent accumulation avoids spurious intermediate overflow/underflow; empty numeric ranges return 1, zero factors return signed zero, final overflow is caught as `#NUM!`.
+- Updated `src/data-tables.js`, its embedded `index.html` module, existing Chromium smoke, numeric structural unittest, Data Tables contract, living plan, ledger and changelog in one atomic commit.
+- Regression fixtures: `PRODUCT(A1:E1)=-24`; `PRODUCT(2,3,4)=24`; `PRODUCT(SUM(A1:B1),2)=10`; `PRODUCT(1e308,1e308,1e-308,1e-308)=0.9999999999999999`; true overflow `#NUM!`; zero with huge factors = 0; empty range = 1; negative zero and underflow behavior.
+- Local isolated V8 algorithm checks and independent Python exact-rational reference passed. Static parser/reserved-name/docs/source-bundle checks passed. No local repository checkout; native Playwright, unittest and build commands not run. New exact-head CI is pending.
+- PR #191 remains open, 90 ahead / 0 behind, zero reviews. Only dev/main refs exist and both are unprotected; branch-protection write unavailable to the integration. No merge/direct main update.
+- Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality #45360386408 and Pages #45360367251 successful on 24-Nov-2026. No new deployment.
+- Status: PRODUCT implemented on dev / In QA / not released; historical inventory unchanged at 166 gaps / 95 partial.
+
+## 2026-11-27 04:57 CET — XLSX-LOCAL-HEADER-METADATA-INTEGRITY
+
+**Starting refs:** dev `5134f5f2a128fe99415c7f81d97b8cadb52e0766`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, the living plan and frozen 26-Oct inventory, Data Tables source/import/export contracts and tests, standalone build mapping, PR #191, refs/reviews, exact-head Actions and production Quality/Pages. Historical baseline remains **166 gaps / 95 partial**.
+
+**Starting exact-head QA:** Push Quality [#45935568707](https://github.com/saeedsai/ProMathStudio/actions/runs/45935568707) and PR Quality [#45935570728](https://github.com/saeedsai/ProMathStudio/actions/runs/45935570728) both completed **218/218 steps** successfully on exact starting SHA `5134f5f2a128fe99415c7f81d97b8cadb52e0766`, zero failures and zero skipped steps. No failing exact-head CI remained.
+
+**Defect:** The bounded offline XLSX importer compared local and central ZIP entry flags, compression method and filename, then verified decompressed size and CRC against the central directory. When general-purpose bit 3 (data descriptor) was clear, it did not verify that the local-header CRC-32 and compressed/uncompressed sizes matched the central-directory metadata. A malformed archive with contradictory local and central records could therefore pass the local-record validation despite violating the ZIP format.
+
+**Implementation:** Added local-header CRC/size comparison for entries without the data-descriptor flag. Valid bit-3 archives remain supported; the central-directory CRC and expanded-size checks still validate payload data. No decompression, OpenXML, table-limit or import-transaction behavior changed.
+
+**Regression:** Extended the already-registered Chromium XLSX import regression with three independent malformed archives: local CRC mismatch, local compressed-size mismatch and local uncompressed-size mismatch while central-directory metadata remains unchanged. Each must return the established `XLSX import:` diagnostic and preserve the complete pre-import workbook. Added a structural unittest guarding the production checks, all three mutations, Quality registration and standalone source parity.
+
+**Documentation:** Removed the obsolete duplicate section that still claimed XLSX import/DEFLATE/round-trip were unimplemented, while the newer bounded-import section already documented the implemented feature. Clarified local-header metadata validation in `docs/DATA_TABLES.md`. The XLSX importer remains a bounded offline subset, not full Excel compatibility.
+
+**Standalone bundle:** Updated `src/xlsx-import.js` and its `promath-xlsx-import` script in `index.html` in the same commit; exact source/body parity was verified before tree creation. No external dependencies or network services added.
+
+**Local validation:** An isolated Python ZIP fixture confirmed the local CRC, compressed-size and uncompressed-size fields occupy the expected header offsets and that each one-byte mutation produces a mismatch while the central directory remains unchanged. No local repository checkout is available, so native repository unittest/Playwright/build commands were not run; new exact-head GitHub Actions must certify the committed regressions.
+
+**Release blocker:** PR #191 remains open/mergeable, 89 commits ahead / 0 behind, 32 changed files, zero independent reviews. Only dev and main exist; both report unprotected, repository rulesets are empty, and branch-protection GET returns HTTP 403 to the connected integration. Repository metadata reports admin permission, but this connector exposes no branch-protection/ruleset write operation; no protection is claimed. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on 24-Nov-2026. No newer production deployment is claimed.
+
+**Status:** source, synchronized standalone bundle, browser/structural regressions, Data Tables contract, living plan, execution ledger and changelog are committed together on existing dev; new exact-head Push/PR Quality pending; implemented on dev / In QA / not released.
+
+
+## 2026-11-27 04:30 CET — DATA-TABLES-LARGE-AGGREGATE-MIN-MAX
+
+**Starting refs:** dev `f2881b9997fbceb939a6932d65c275ca3238192c`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan and frozen 26-Oct inventory, unified master plan, Data Tables contract/source/tests, PR #191, refs/reviews, exact-head Actions and production Quality/Pages. Historical baseline remains **166 gaps / 95 partial**.
+
+**Starting exact-head QA:** Push Quality [#45934318684](https://github.com/saeedsai/ProMathStudio/actions/runs/45934318684) and PR Quality [#45934322552](https://github.com/saeedsai/ProMathStudio/actions/runs/45934322552) were both in progress on exact starting SHA `f2881b9997fbceb939a6932d65c275ca3238192c`; Push had reached the nested aggregate regression (step 83) and PR had reached spreadsheet range deletion (step 80). No failed steps were observed. The preceding exact-head pair [Push #45925713829](https://github.com/saeedsai/ProMathStudio/actions/runs/45925713829) and [PR #45925719729](https://github.com/saeedsai/ProMathStudio/actions/runs/45925719729) had passed 218/218 on `280cec1`, zero failures/skips. No failing exact-head CI was present at selection time.
+
+**Defect:** A valid aggregate formula can contain many individually valid 6,000-cell ranges while remaining under the 500-character expression limit. For example, 22 repetitions of `A1:A6000` produce 132,000 numeric values. `MIN` and `MAX` previously spread the entire values array into `Math.min(...nums)` / `Math.max(...nums)`, exceeding V8's function-argument limit and throwing `RangeError: Maximum call stack size exceeded` instead of returning a numeric result.
+
+**Implementation:** Replaced array argument spreading with a bounded iterative scan using the same scalar `Math.min` / `Math.max` operations. Empty aggregate behavior remains zero; numeric values and binary64 semantics are unchanged. Updated `src/data-tables.js` and its embedded `index.html` module byte-for-byte in the same commit.
+
+**Regression:** The existing Chromium numeric-hardening smoke now restores 6,000 rows and evaluates 22 repeated full-column ranges (132,000 values), requiring `MIN(...)=1` and `MAX(...)=6000` with the formula under 500 characters. The structural unittest forbids the old spread calls and requires the iterative loop. Existing SUM overflow/cancellation, subnormal, median, chart and source/bundle parity tests remain.
+
+**Local validation:** Node reproduced the old spread failure for 132,000 values for both MIN and MAX. The iterative scalar-call implementation returned 1 and 6000; expression length is 202 characters, within the parser limit. Full repository Node/Playwright tests and build checks are not available locally because this execution workspace has no repository checkout; exact-head Actions must certify the committed browser and structural regressions.
+
+**Release blocker:** PR #191 remains open/mergeable, zero independent reviews. Only dev/main branches exist; rulesets are empty and main branch-protection GET returns HTTP 403 to the connected integration. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest verified Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) both succeeded on 24-Nov-2026. No newer production deployment is claimed.
+
+**Status:** source, standalone bundle, browser/structural regressions, Data Tables contract, living plan, execution ledger and changelog committed atomically on existing dev; new exact-head Push/PR Quality pending; implemented on dev / In QA / not released.
+
+## 2026-11-27 04:03 CET — Data Tables original-unit compensated SUM
+
+- Starting dev `280cec1f6479d14dd430501e46df6089ad689012`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; re-read AGENTS, living plan, frozen inventory, unified plan, architecture/catalog, Data Tables source/docs/tests, PR/reviews, exact-head CI and Pages evidence.
+- Exact starting Push Quality [#45925713829](https://github.com/saeedsai/ProMathStudio/actions/runs/45925713829) and PR Quality [#45925719729](https://github.com/saeedsai/ProMathStudio/actions/runs/45925719729) both passed 218/218 steps on the exact starting SHA, zero failures/skips. Data Tables structural, numeric and browser regressions were green.
+- Fixed a one-ULP result shift caused by always normalizing finite SUM terms even when original-unit partial sums remain representable. The exact binary64 fixture sum is -7.847929088360857; the previous normalized path returned -7.847929088360858.
+- SUM now tries original-unit Neumaier compensation first and returns only if all partial sums, correction and final total remain finite. The prior scale-normalized compensated/residual path remains the overflow fallback; true nonfinite final sums still error. AVERAGE/AVG reuse the improved finite SUM path.
+- Updated src/data-tables.js and its embedded index.html script together. Added the exact SUM/AVERAGE browser reference and structural source/parity assertions; existing overflow fallback and subnormal residual tests remain.
+- Isolated V8 reproduction passed old/new sum, exact mean and overflow-fallback cases. Independent Python Fraction.from_float reference confirmed the exact rounded binary64 sum. No local checkout, so native Node/Playwright and scripts/build.py --check were not run; fresh exact-head Actions pending.
+- PR #191 remains open, 87 ahead/0 behind, 32 changed files, zero submitted reviews. Only dev/main branches, both unprotected; rulesets empty; branch-protection GET 403. No merge/direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence on unchanged main (24-Nov-2026); no new deployment. Historical inventory remains **166 gaps / 95 partial**.
+- Status: atomic source/bundle/test/docs/plan/ledger/changelog commit on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 02:54 CET — Hollow-circle cavity transition rounding
+
+- Starting dev b6bfa38f8e80d1ecfad5424094b6df317fd6e237; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS, living plan, frozen inventory, engineering architecture/catalogs, Truss source/tests/contract, PR #191, refs/reviews, exact-head CI and production Quality/Pages.
+- Starting Push Quality #45920974038 and PR Quality #45920978959 both passed 218/218 steps on the exact starting dev SHA, zero failures/skips; Truss analytical and responsive browser steps passed.
+- Fixed a hollow-circle one-ulp defect near the direct/factored cavity transition. With Do=1 mm and Di=0.5000000000000001 mm, the old complementary-product path returned A=0.589048622548086 and I=0.046019423636569225; correctly rounded values are A=0.5890486225480861 and I=0.04601942363656923.
+- Direct differences now apply while cavity area ratio r²<=0.5, where area/inertia factors remain >=0.5/0.75. Near-unity thin-wall geometry retains the factored radial-gap path.
+- Added Node and registered Chromium regressions for A, Ixx/Iyy, Sx/Sy, rx/ry, centroid, unchanged input and reproduction of the former one-ulp error; browser case runs at 1280px and 390px. Existing thin-wall and sub-half-ulp tests remain.
+- Isolated V8 arithmetic and independent 120-digit Decimal reference passed. No local checkout is mounted, so native full Node/Playwright suites were not run; new exact-head Actions must certify the committed tests.
+- PR #191 remains open, 86 ahead / 0 behind, 32 files, zero submitted reviews. Only dev/main branches, both unprotected; rulesets empty; branch-protection GET 403. No merge/direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain latest verified successful production runs on unchanged main (24-Nov-2026); no new deployment.
+- Status: atomic source/test/docs/plan/ledger/changelog commit on dev; exact-head Push/PR Quality pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
+## 2026-11-27 — Truss underflow guard compatibility correction
+
+- Follow-up review found `finiteScaled()` also handles optional member I (mm⁴), whose existing `Number.MIN_VALUE` regression requires the established “I must be positive” diagnostic when conversion underflows.
+- Scoped the new zero-result check to the new division helper used by legacy Fx/Fy (N→kN) and E (Pa→GPa). Restored `finiteScaled()` behavior for other properties; no existing validation diagnostics or assertions were weakened.
+- Exact-head run for the prior candidate is superseded by this correction. The current dev head must pass fresh Push and PR Quality before the change is certified.
+## 2026-11-27 02:01 CET — Truss legacy SI conversion underflow guard
+
+- Starting dev `21f091799fe0f74bec6070908ed68402441e98fc`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact starting Push Quality #45915110898 and PR Quality #45915116341 both completed 218/218 steps with zero failures/skips on the exact starting dev SHA.
+- Release remains blocked: PR #191 open/mergeable, zero submitted reviews; only dev/main branches, both unprotected; rulesets empty; branch-protection GET HTTP 403. No merge or direct main update.
+- Fixed a real legacy-adapter loss: nonzero N forces or Pa modulus could divide to zero when converted to kN/GPa. Added finite division underflow rejection for legacy Fx/Fy/E; kept the existing scaled-conversion helper unchanged so optional I-underflow retains its established property-specific diagnostic.
+- Added direct Node and Chromium regressions for ±Number.MIN_VALUE Fx/Fy, minimum-subnormal E, zero and ordinary legacy conversion. Truss FEM remains an adjacent script; no root index.html synchronization is needed.
+- Local checkout absent; bounded git remote probe failed on github.com DNS. Isolated Node conversion-boundary check passed six assertions; this is not a full production-module test. Exact-head GitHub Actions must certify the committed Node and Chromium regressions.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production workflows on unchanged main; no new deployment.
+- Status: implementation and records committed atomically to dev; exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+## 2026-11-27 01:02 CET — Truss subnormal stiffness coefficient scaling
+
+- Starting dev `7c4b94b996c3442eb31d52d5dfa5022b84b37dbb`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact starting Push Quality [#45909519371](https://github.com/saeedsai/ProMathStudio/actions/runs/45909519371) and PR Quality [#45909525124](https://github.com/saeedsai/ProMathStudio/actions/runs/45909525124) both passed 218/218, zero failures/skips.
+- Found subnormal double-rounding in `m.stiffness*v[i]*v[j]`: for k=Number.MIN_VALUE and c=s≈0.7071, left-to-right multiplication rounds each member term up to one minimum subnormal; the single product rounds to zero. Twenty terms should sum to ten minimum subnormals, but the old matrix coefficient was twenty.
+- Changed global stiffness assembly to normalize member stiffness by the largest stiffness per coefficient, multiply by row/column direction cosines, compensate the complete dimensionless sum, and restore the stiffness scale once. Binary64 API and model schema unchanged; Truss FEM remains an adjacent script, so root index.html is unaffected.
+- Added Node and Chromium regressions for twenty diagonal subnormal members. Expected displacement is 100 m; old assembly produces 50 m. Tests assert member stiffness, intermediate rounding contrast, zero force-balance residual, energy check, 20 results and desktop/390px browser behavior.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`, the living plan, this ledger and CHANGELOG in one atomic multi-file commit.
+- Bounded Node reproduction of the existing stiffness quotient and old/new assembly arithmetic passed: k=5e-324, old term=5e-324, single product=0, old coefficient=1e-322, corrected coefficient=5e-323, old displacement=50, corrected displacement=100, residual=0, energy error≈2.016e-321. Independent Python exact-rational `Fraction.from_float` reference confirmed the 20-product sum rounds to 5e-323. These are fixture arithmetic checks, not a local execution of the full repository module.
+- Local checkout is absent; native repository Node/Playwright tests were not run. Exact-head Push/PR Quality is required to certify the registered regressions.
+- PR #191 remains open with zero independent reviews; only dev/main branches, both unprotected; rulesets empty and protection read HTTP 403. No merge. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence on unchanged main; no new deployment.
+- Status: implemented on dev, exact-head CI pending, not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-26 — Matrix standalone trailing-newline CI repair
+
+- Exact-head Push [#45902853307](https://github.com/saeedsai/ProMathStudio/actions/runs/45902853307) and PR [#45902860501](https://github.com/saeedsai/ProMathStudio/actions/runs/45902860501) both failed at structural step 7. The suite ran 607 tests: 24 failures, one skip. Both newly added Matrix finite-draft structural checks passed.
+- Retrieved both job logs. All 24 failures were existing Matrix/engineering source-bundle parity checks: the inline `promath-matrix-tools` block equaled the source bytes but lacked the required final newline (`source + "\\n"`). This was introduced while synchronizing the modified module. Browser smoke and the new direct-restore Chromium regression were skipped after structural failure.
+- Corrected the standalone bundle boundary to append exactly one newline after the inline module. Tightened the new Matrix structural regression from trimmed parity to exact `matrix_inline == matrix_source + "\\n"`, matching the existing repository contract. No production calculation logic or assertions were weakened.
+- Fresh exact-head Push/PR Quality required for the repaired candidate; the previous failed runs remain recorded and are not treated as passing.
+
+## 2026-11-26 23:00 CET — Matrix direct-restore finite-bound alignment
+
+- Starting dev `3229189ab96c968869ebf40f2e9b0016a94b58b3`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; re-read AGENTS.md, living plan, frozen inventory, project-format docs, Matrix source/schema/tests, PR #191 and current CI/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Starting exact-head Push [#45897416151](https://github.com/saeedsai/ProMathStudio/actions/runs/45897416151) and PR [#45897425376](https://github.com/saeedsai/ProMathStudio/actions/runs/45897425376) both passed 218/218 on exact `3229189ab96c968869ebf40f2e9b0016a94b58b3`, zero failures/skips.
+- Found direct `MathStudio.matrixTools.restoreState()` accepted decimal/scientific strings that converted to Infinity (`1e999`) or exceeded the solver's `1e12` bound (`1e13`), although project-schema import rejects them.
+- Aligned direct restore with project schema: preserve empty drafts and 80-character limit; nonempty decimal/scientific strings must convert to finite values with absolute magnitude at most `1e12`. All A/B/RHS/weights validate before any DOM mutation.
+- Added Chromium direct-API regression for ±1e999 and ±1e13 in all four arrays, exact ±1e12 acceptance, field-specific diagnostics and full state preservation after every rejection. Extended structural source/bundle parity assertion and documented Matrix draft constraints.
+- Before the new CI run, corrected the structural parity test's escaped newline marker so it matches the actual standalone script boundary; production source is unchanged.
+- Starting Matrix source and standalone inline script parity verified. No local checkout, so native Node/Playwright/build not run; new exact-head GitHub Actions are authoritative and pending.
+- Source, standalone bundle, two regressions, project-format contract, plan, ledger and changelog are one atomic eight-file dev commit. Main unchanged; not released.
+- PR #191 remains open, 77 ahead/0 behind, zero independent reviews. Only dev/main branches; both unprotected, rulesets empty, branch-protection read HTTP 403. No merge/direct main update. Latest main Quality #45360386408 and Pages #45360367251 successful on 24-Nov-2026; no new deployment.
+- Next five acceptance priorities are at the top of the living plan. Frozen inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-26 — Truss preview compensated aggregate totals
+
+- Starting dev `9f0ac458ed21847340936c6d343131ef667b9ebc`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, unified master plan, engineering architecture/catalogs, Truss FEM source/tests/contract, PR #191 and current Actions/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Exact-head Push Quality [#45881455146](https://github.com/saeedsai/ProMathStudio/actions/runs/45881455146) and PR Quality [#45881463875](https://github.com/saeedsai/ProMathStudio/actions/runs/45881463875) both passed 218/218 on `9f0ac458ed21847340936c6d343131ef667b9ebc`, zero failures/skips.
+- Found that `inspectJSON()` naively reduced positive member lengths and SI volumes. A 1e16 m member plus twenty 1 m members lost the 20 m contribution; the corresponding 1 mm² volume fixture returned 10000000000.000038 m³ instead of 10000000000.00002 m³.
+- Reused the existing Neumaier `finiteSignedSum()` for both totals. Public API and per-member values are unchanged; true overflow remains rejected.
+- Added a direct Node regression and registered Chromium regression at 1280px/390px; both assert exact expected rounded totals and prove naive reductions differ. Existing legacy, normal and overflow tests remain.
+- Isolated V8 ran the actual modified production source: compensated totals passed; naive reductions reproduced both defects; normal bar preview remained 2 m. Native repository Node/Playwright execution unavailable because no checkout is mounted; exact-head Actions must certify the registered tests.
+- One atomic seven-file source/test/docs/plan/ledger/changelog commit on existing dev, using a guarded non-force ref update. No standalone index.html change is required: Truss FEM is an adjacent script.
+- At run start PR #191 was 74 commits ahead; this implementation advances it to 75 ahead, zero behind, with 28 changed files and zero independent reviews. Only dev/main branches exist; both unprotected, rulesets empty, branch-protection read unavailable (403). No merge or direct main update. Main remains unchanged; latest recorded Main Quality and Pages succeeded on 24 November. Not released.
+- Next five acceptance priorities are recorded at the top of `docs/HOURLY_DEVELOPMENT_PLAN.md`. Frozen historical inventory unchanged at 166 gaps / 95 partial.
+
+## 2026-11-26 — Data Tables stable-mean exact-rounding CI repair
+
+- Starting dev `18e321b450b87e37346edb16091b2f9b840c17f2`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen MATLAB inventory, Data Tables source/contract/tests, PR #191 and current Actions/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Exact-head Push Quality [#45865806358](https://github.com/saeedsai/ProMathStudio/actions/runs/45865806358) and PR Quality [#45865816147](https://github.com/saeedsai/ProMathStudio/actions/runs/45865816147) both failed at step 85, `tests/smoke_sheet_numeric_hardening.py:104`: AVERAGE(A1:G1) returned 13.999999999999998 instead of 14. The fixture's numeric range members are 16, 25 and 1; radix-prefixed strings and a blank are excluded.
+- Root cause: `stableMean()` divided each normalized value by the maximum scale and then multiplied the rounded mean back, introducing an avoidable ULP error for a finite total.
+- Fix: prefer the existing compensated `stableSum(values)` and divide once when the total is finite; retain normalized compensated fallback when the total overflows but the mean may be finite. Added exact AVERAGE/AVG range and scalar regression assertions and a structural guard for the fast path.
+- Updated `docs/DATA_TABLES.md`; synchronized the complete `src/data-tables.js` module into standalone `index.html`. Updated living plan and changelog in the same atomic commit.
+- Isolated Node/V8: old path reproduced 13.999999999999998; corrected path returned exactly 14. Extreme-average, cancellation and subnormal references passed. Full browser and repository suite remain pending exact-head GitHub Actions.
+- Bounded local `git ls-remote` failed with exit 128 because github.com could not resolve; GitHub integration was used instead. No sequential per-file commits; one atomic tree/commit and guarded non-force dev ref update.
+- PR #191 remains open. Reviews: zero; rulesets: empty; main/dev protections: not verifiable (403). Main remains unchanged; no release. Latest recorded main Quality and Pages are successful on 24 November 2026. Historical inventory remains 166 gaps / 95 partial.
+- Status: implementation/test/docs committed on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Data Tables decimal-cell CI repair
+
+- Starting dev 8889969b3833aa7286229f44b01d79f627ec2c8b; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Both exact-head Push Quality [#45857829326](https://github.com/saeedsai/ProMathStudio/actions/runs/45857829326) and PR Quality [#45857839151](https://github.com/saeedsai/ProMathStudio/actions/runs/45857839151) failed at structural step 7; 606 tests ran, with two failures and one skipped test.
+- Failure 1: the range aggregate edit declared const v twice in the same block, causing Node's inline-script parser to reject the standalone index.html bundle. Failure 2: tests/test_sheet_median.py asserted the removed String(v).trim()!=='' implementation detail after range classification moved to numericCellValue().
+- Fixed the duplicate declaration by classifying the already-read cell value once; synchronized the complete modular source into index.html. Updated the MEDIAN structural regression to assert shared decimal-parser behavior, blank scalar zero and blank range exclusion.
+- Isolated V8 compiled the production module and every executable inline script; source/bundle parity and focused decimal/radix/blank/overflow parser checks passed. Native local repo test commands remain unavailable without a checkout; new exact-head Actions are required.
+- No assertions or workflow gates removed. PR #191 remains open; no independent reviews, rulesets empty and branch-protection read returns HTTP 403. Main unchanged; no release. Historical MATLAB inventory remains 166 gaps / 95 partial.
+- Status: CI repair committed to dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Data Tables decimal-only cell coercion
+
+- Starting dev `1bee639333fd9c35ba58521bf5b7a5a7bb6c1ffb`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan, frozen MATLAB inventory, unified master plan, Data Tables source/tests/contract, PR #191 and current CI/Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Exact starting candidate Push Quality [#45851382365](https://github.com/saeedsai/ProMathStudio/actions/runs/45851382365) and PR Quality [#45851394325](https://github.com/saeedsai/ProMathStudio/actions/runs/45851394325) both passed 218/218 on `1bee639333fd9c35ba58521bf5b7a5a7bb6c1ffb`, zero failures/skips.
+- Found that direct Data Tables cell arithmetic and aggregate range classification used JavaScript `Number()` coercion, accepting radix-prefixed strings as numeric.
+- Added a shared decimal/scientific numeric-cell parser for scalar references and range aggregates. Hex/binary/octal text is no longer silently coerced; direct arithmetic rejects it and aggregate ranges ignore it as text. Decimal/scientific, blank, finite primitive and existing aggregate behavior remain.
+- Added Chromium regressions for radix rejection, aggregate exclusion, decimal/scientific values, blanks and exact aggregate references; added structural source assertions and updated the Data Tables contract. Modular source and standalone index.html bundle remain byte-for-byte synchronized.
+- Local isolated V8 grammar checks passed; native repository Node/Playwright/build commands are unavailable because the execution workspace has no checkout. New exact-head GitHub Actions are required to certify the full registered suite.
+- PR #191 remains open with zero independent reviews; branch protection reads return HTTP 403 and both long-lived branches report unprotected. Main Quality and Pages remain successful on unchanged main; no release.
+- Status: implementation, browser/structural regressions, contract, plan, ledger and changelog committed atomically to dev; exact-head CI pending; not released.
+
+## 2026-11-26 — Bound raw Truss decimal numeric-string input
+
+- Starting dev `3519dcf795cdfbc69ef803c89c4c3538459deb86`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, living plan, frozen MATLAB inventory, Structural Truss source/tests/contract, PR #191, exact-head Quality and Pages evidence. The historical baseline remains **166 gaps / 95 partial**.
+- Exact starting candidate Push Quality [#45835692714](https://github.com/saeedsai/ProMathStudio/actions/runs/45835692714) and PR Quality [#45835703912](https://github.com/saeedsai/ProMathStudio/actions/runs/45835703912) both passed 218/218 on `3519dcf795cdfbc69ef803c89c4c3538459deb86`, zero failures/skips.
+- Found that the 256-character numeric input limit was checked only after `trim()`, allowing arbitrarily long whitespace padding around a short decimal to bypass the raw-input bound.
+- Moved the length check before trimming. Inputs up to 256 UTF-16 code units are trimmed and validated as before; longer raw strings reject with the same finite-number diagnostic.
+- Added Node and Chromium regressions for the accepted 256-code-unit boundary (255 spaces + `1`) and rejected 257-code-unit whitespace- and zero-padded values across model parse, solve and section-property APIs. Existing decimal/scientific and radix-prefix tests remain.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`; no root bundle change because Truss FEM is an adjacent script. Frozen inventory unchanged.
+- Local checkout is absent, so native repository Node/Playwright/build commands are not claimed. Isolated execution of the actual modified production module passed the boundary assertions; exact-head Actions must certify the full registered suite.
+- PR #191 remains open with zero independent reviews; only dev/main branches, both unprotected. Main Quality #45360386408 and Pages #45360367251 are the latest successful production evidence on unchanged main; no release.
+- Status: source, Node/Chromium regressions, contract, plan, ledger and changelog committed atomically to dev; exact-head CI pending; not released.
+
+## 2026-11-26 — Truss decimal numeric-string CI repair and bounded input length
+
+- Starting dev `10f378b36766ffda1681c6646572d477e8b645d1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact-head Push Quality [#45825208844](https://github.com/saeedsai/ProMathStudio/actions/runs/45825208844) and PR Quality [#45825218692](https://github.com/saeedsai/ProMathStudio/actions/runs/45825218692) both failed at step 214 in `node --test tests/test_truss_fem.js`; 101/102 cases passed.
+- Failure root cause: the new decimal/scientific regression supplied `1e3` kN and `1e3` mm² but expected the 1 kN fixture's 1e-5 m displacement. Correct analytical displacement is 0.01 m. The production numeric parser correctly handled the exponent; the test reference was wrong.
+- Corrected the Node and Chromium reference to 0.01 m without weakening radix rejection or valid decimal/scientific coverage.
+- Added a 256-character maximum for trimmed decimal/scientific numeric strings before regex/Number conversion. A 257-character zero-padded string that JavaScript otherwise parses as 1 is rejected with the established finite-number diagnostic. Added Node and Chromium parse/solve/section-property regressions; browser retains 1280px/390px coverage.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`; no root bundle change because Truss FEM is an adjacent script. Frozen MATLAB inventory remains **166 gaps / 95 partial**.
+- Local repository checkout absent; the failing GitHub logs are the authoritative diagnosis. Native local Node/Playwright/build tests not claimed; new exact-head Actions must certify the corrected suite.
+- PR #191 remains open, no independent reviews; only dev/main branches, both unprotected; rulesets empty and protection reads HTTP 403. Main Quality #45360386408 and Pages #45360367251 remain successful on unchanged main; no release.
+- Status: source, Node/browser regressions and docs committed atomically to dev; exact-head CI pending; not released.
+
+## 2026-11-26 — Truss FEM decimal-only numeric string validation
+
+- Starting dev `f4710a8931fbd2559e33ccbec0314153008fc8b5`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Starting exact-head Push [#45818109248](https://github.com/saeedsai/ProMathStudio/actions/runs/45818109248) and PR [#45818117317](https://github.com/saeedsai/ProMathStudio/actions/runs/45818117317) both succeeded 218/218 with zero failures/skips.
+- Found that shared Truss FEM `finite()` used `Number(string)`, silently accepting `0x10`, `0b10` and `0o10` as finite values 16, 2 and 8. This diverged from the UI's decimal/scientific numeric contract.
+- Updated `tools/truss-fem.js` to trim strings and require decimal/scientific syntax before conversion. Primitive finite numbers and ordinary decimal/scientific strings remain accepted; existing error wording is retained. No root bundle change because Truss FEM is an adjacent script.
+- Added a registered Node regression covering valid signed/leading-dot/trailing-dot/exponent strings, radix-prefixed rejection in parse/solve/section dimensions, and a Chromium regression at 1280px/390px. Updated the Structural Truss numerical contract.
+- Local checkout absent (`git rev-parse --show-toplevel`: exit 128); Node v22.16.0 and Python 3.13.5 available. Native repository test/Playwright/build commands cannot run without the checkout; focused helper-level Node validation and exact-head GitHub Actions are used instead.
+- Starting PR #191 open/mergeable, 67 ahead/0 behind, 27 files, zero reviews. Only dev/main refs; both unprotected. Main Quality #45360386408 and Pages #45360367251 successful on unchanged main `0d8ac89f`; no release. Historical inventory remains **166 gaps / 95 partial**.
+- Status: implementation/test/docs candidate on dev; exact-head CI pending; not released.
+
+## 2026-11-26 — CI repair: preserve saved-table selection diagnostics
+
+- Starting dev `a8f85a99e6721d8021e930f508644505cd85d6ae`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact-head Push [#45817447603](https://github.com/saeedsai/ProMathStudio/actions/runs/45817447603) and PR [#45817456814](https://github.com/saeedsai/ProMathStudio/actions/runs/45817456814) failed at structural step 7: one existing test expected the established stale-selection error but received the new empty-workbook error because validation order changed.
+- Kept the nonempty-workbook guard and moved it after the existing selection-reference check. Stale/null selections retain `selected table does not exist`; a zero-sheet workbook with no selection is rejected before restore.
+- Updated Node selection and table-ID regressions plus Chromium rollback expectations. Both actual registered Node scripts passed in isolated V8; project-schema source/inline `index.html` parity passed. Browser/build checks await fresh exact-head CI; local checkout absent, so no native Playwright pass claimed.
+- PR #191 remains open with zero independent reviews; only dev/main refs, empty rulesets and HTTP 403 branch-protection read. Main Quality #45360386408 and Pages #45360367251 remain successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge/deployment. Frozen inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-26 — Reject empty saved Data Tables workbooks
+
+- Starting dev `33dfba8a55c6aed52a921699a2c2201d8731679d`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected root contract, living plan, frozen inventory, project-format docs, schema, Data Tables restore code, registered tests, PR #191, exact-head CI and Pages. The preceding Graph overlay header candidate has Push/PR Quality in progress on `33dfba8a55c6aed52a921699a2c2201d8731679d`; no failures observed at inspection.
+- Found that a present `tables.tables: []` passed schema validation if selection was omitted, then `restoreState()` left the Data Tables workspace with no active sheet. Normal UI behavior always keeps at least one sheet.
+- Project migration now requires 1–20 sheets when a tables object is present; omission of the optional tables object remains legacy-compatible.
+- Updated the standalone `index.html` project-schema script and `src/project-schema.js` together. Added Node v1/v2 regressions for empty workbooks with absent/stale/null selection and Chromium import rollback checks preserving the active Beta sheet. Updated `docs/PROJECT_FORMAT.md`.
+- Isolated V8 execution passed both actual registered Node schema scripts (Graph and Table selection) and source/bundle parity. Local checkout absent (`git rev-parse --show-toplevel`: exit 128); no native Playwright/build pass claimed. New Chromium regression awaits exact-head CI.
+- PR #191 remains open with zero independent reviews; only dev/main refs, empty rulesets and HTTP 403 branch-protection read. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain latest successful production evidence on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge/deployment. Frozen inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-26 — Graph overlay header identity validation
+
+- Starting dev `15d550b9a330f3cdc5bac342daa9956a08e762d0`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read root AGENTS.md, living plan, frozen inventory, unified plan, project-format contract, Graph data/schema, registered Node/Chromium tests, PR #191, exact-head CI and Pages evidence. Push [#45799253611](https://github.com/saeedsai/ProMathStudio/actions/runs/45799253611) and PR [#45799266168](https://github.com/saeedsai/ProMathStudio/actions/runs/45799266168) both passed on the starting exact SHA.
+- Found that live Graph overlays and saved-project schema accepted whitespace-only or duplicate case-insensitive column headers, unlike the primary dataset. This allowed ambiguous labels and inconsistent project validation.
+- Updated inline Graph-data validation and `src/project-schema.js` plus its exact inline `index.html` copy to reject blank/duplicate trimmed case-folded overlay headers.
+- Added Node schema regressions and Chromium live-add/import regressions for `['t','T']` and `['t',' ']`; assertions verify rejected live additions leave the prior dataset unchanged and malformed project imports preserve the previous project/Graph dataset. Updated `docs/PROJECT_FORMAT.md`.
+- Isolated V8 runs execute the actual project-schema Node regression and extracted Graph `validateTable()`; browser integration is pending exact-head GitHub Actions. Local checkout absent (`git rev-parse --show-toplevel`: exit 128), so native local Playwright/build checks are not claimed.
+- PR #191 remains open/mergeable with zero independent reviews. Only dev/main branches; rulesets empty and branch-protection reads HTTP 403. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest successful production evidence on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge or deployment. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-26 — Graph dataset project-overlay validation
+
+- Starting dev `a4e6740963ee415520de74be794afc6854ad4d0d`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root contract, living plan, frozen inventory, project-format docs, schema/restore code, registered tests, PR #191, exact-head CI and Pages evidence inspected. Starting Push [#45759070919](https://github.com/saeedsai/ProMathStudio/actions/runs/45759070919) and PR [#45759076570](https://github.com/saeedsai/ProMathStudio/actions/runs/45759076570) both passed 218/218, zero failures/skips.
+- Found a silent saved-project data-loss path: `graph.dataset.extra` overlays were not schema-validated; restore truncated over 20 entries, skipped missing table/mapping and swallowed `addTable()` errors.
+- Added pre-import validation for overlay count/shape, table dimensions and cells, bounded names, distinct X/Y, optional 2D/3D mode, distinct Z in 3D, style and at least one numeric point. Missing/null legacy extra remains supported.
+- Added V8-executed schema regressions for valid 2D/3D, v1 compatibility, immutability, malformed entries, count limit, bad table/cells, invalid axes/mode/Z/style and no numeric points. Added registered Chromium atomic-import regression proving invalid overlay mapping leaves the previous marker and graph dataset unchanged; valid overlay round-trip and mobile checks remain.
+- Updated `src/project-schema.js` and matching inline `index.html` module together; verified parity. Updated static/browser tests, project-format docs, living plan, ledger and changelog in one atomic commit.
+- Isolated V8 positive/negative tests, syntax compilation and bundle parity passed. No local repository checkout; native Python/Playwright/build checks not claimed. Fresh exact-head Push/PR Quality pending.
+- PR #191 remains open with zero independent reviews. Only dev/main branches; both unprotected, rulesets empty, branch-protection read HTTP 403. Main Quality #45360386408 and Pages #45360367251 succeeded 24-Nov on unchanged `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge/deployment. Frozen inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-26 — Data Tables full binary64 formula precision
+
+- Starting dev `3dbd31ab9995ab8292081ff022bd20215b0d78d7`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; root AGENTS, plan, frozen inventory, Data Tables build contract, PR #191 and exact-head CI inspected. Previous Push [#45754742142](https://github.com/saeedsai/ProMathStudio/actions/runs/45754742142) and PR [#45754748222](https://github.com/saeedsai/ProMathStudio/actions/runs/45754748222) both passed 218/218, zero failures/skips.
+- Found that `compute()` rounded every formula result to 13 significant digits before returning it. `=1/7` therefore became 0.1428571428571 and a dependent `=A1*7` returned 0.9999999999997 rather than 1.
+- Changed `src/data-tables.js` to retain full finite binary64 results; added a display-only 13-digit formatter for cell editors. Dependent formulas, aggregates, graph handoff and computed exports now consume the unrounded number. Synchronized the matching `index.html` module from the exact same source snapshot.
+- Added browser regression for division, dependent multiplication, SUM/AVERAGE/MEDIAN, aggregate chaining, compact display and 390px visibility; extended static reference tests to assert precision semantics, registration and source/bundle parity. Updated the living plan and changelog in the same atomic commit.
+- Verified source/bundle byte parity before editing and exact module replacement after editing. Local checkout absent (`git rev-parse --show-toplevel`: exit 128, current directory `/`); no native local Python/Chromium/build run claimed. New exact-head Push/PR Quality pending.
+- PR #191 remains open with zero independent reviews; dev/main unprotected, rulesets empty, branch-protection read HTTP 403. Main Quality #45360386408 and Pages #45360367251 last succeeded on 24-Nov-2026 at `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge or deployment. Historical inventory unchanged at **166 gaps / 95 partial**.
+
+## 2026-11-26 — TRUSS-HOLLOW-RECTANGLE-SMALL-CAVITY-ROUNDING
+
+- Starting refs: dev `af92a0fa0ee8d5f7ba00b8c67fd1f7d5f892fd33`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Read root AGENTS.md, unified plan, engineering architecture, structural toolbox contract, frozen inventory, Truss source/tests, PR #191/reviews, CI and main/Pages evidence.
+- Starting exact-head QA passed: Push [#45747330817](https://github.com/saeedsai/ProMathStudio/actions/runs/45747330817) and PR [#45747337294](https://github.com/saeedsai/ProMathStudio/actions/runs/45747337294), each 218/218, zero failures/skips.
+- Reproduced a hollow-rectangle small-cavity rounding defect: B=H=1, bi=1.2e-16, hi=0.5 returned area 1.0 instead of 0.9999999999999999 mm². A second fixture (bi=1.1e-16, hi=0.51) lost one ulp in Iyy (0.08333333333333331 vs 0.08333333333333333 mm⁴).
+- Updated rectangle moment helpers to expose raw finite contributions. For cavity/outer-area ratio <=0.5, net area uses direct dimensionless subtraction; Ixx/Iyy use the existing section-property sum over finite outer-minus-inner terms, with split-factor fallback if the solid-envelope moment overflows. For larger cavity ratios, the factored wall-gap path remains to protect thin walls. Small-cavity radii use a stable ratio identity.
+- Added a Node regression for area, centroid, both inertias, radii, below-half-ulp rounding, the Iyy boundary, immutability/frozen outputs and BigInt-disabled fallback. Added registered Chromium assertions for the same behavior at 1280px and 390px. No root bundle change because Truss FEM is an adjacent script.
+- Independent 160-digit Python Decimal oracle passed. Actual fetched production module plus all 100 Node test bodies executed in isolated V8 with strict assert/test and UTF-8 compatibility shims: 100/100 passed. This is not a native Node process; local Chromium is unavailable. Fresh exact-head GitHub Actions are required for the committed browser regression.
+- PR #191 remains open; no independent reviews. Branches are exactly dev/main, both unprotected; rulesets empty; branch-protection read HTTP 403. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 last succeeded 24 Nov on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Historical inventory remains **166 gaps / 95 partial**.
+- Status: source/test/docs committed to dev; exact-head CI pending; not released.
+
+### NEXT FIVE
+
+1. P0 verify this exact small-cavity candidate: both exact-head Quality workflows green, zero failures/skips; Node and Chromium area/Ixx/Iyy/radius, small/half-ulp and no-BigInt cases at desktop/390px.
+2. P0 independent eligible PR #191 approval, verifiable main protection, full diff review, ordinary merge, main Quality, Pages and hosted verification.
+3. P1 complete seven-shape Truss independent area/centroid/Ixx/Iyy/Sx/Sy/rx/ry references; low-exponent/near-solid/fallback, underflow rejection, rollback, member isolation and mobile.
+4. P1 Data Tables row 6000/AF, scalar/range #REF!, mixed anchors, quoted names, recalculation, rollback and source/bundle parity.
+5. P1 current/legacy Matrix/Graph/Table saved-project round-trips, malformed-import rollback, focus/selection preservation and desktop/390px browser tests.
+
+---
+
+## 2026-11-26 — TRUSS-BIGINT-FREE-SECTION-SUM-FALLBACK
+
+- Starting dev `5cd44673f7fc9194436934eec3f5fe982aa5daa1`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root contract, roadmap, architecture, frozen inventory, Truss implementation/tests, PR #191, reviews, CI and Pages evidence inspected.
+- P0 exact-head CI completed green on starting dev: Push [#45739874083](https://github.com/saeedsai/ProMathStudio/actions/runs/45739874083) and PR [#45739879311](https://github.com/saeedsai/ProMathStudio/actions/runs/45739879311), 218/218 steps each, zero failures/skips. Truss browser, analytical and responsive checks passed.
+- Reproduced a BigInt-unavailable compatibility defect in the scaled compensated same-sign sum: L-angle area 183.8225183531027 vs 183.82251835310274 mm²; channel/I-section sub-ulp flange area 1 vs 1.0000000000000002 mm²; I-section Iyy 0.08333333333333334 vs 0.08333333333333336 mm⁴.
+- Changed same-sign finite sums to use Neumaier compensation in original units; mixed-sign exact/normalized-residual behavior remains. Non-finite final sums still reject.
+- Added Node and Chromium no-BigInt regressions for both L-angle fixtures, channel/I-section area, channel centroid/Ixx/Iyy and I-section Ixx/Iyy. Chromium runs 1280px and 390px. No root bundle change; Truss FEM is adjacent.
+- Isolated V8 execution of the actual production module with BigInt disabled passed all exact binary64 references. No repository checkout exists locally; local Node/Playwright suite not claimed. Exact-head GitHub Actions pending after commit.
+- PR #191 remains open with no independent reviews. Rulesets empty; main branch-protection read HTTP 403. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 last passed on unchanged main `0d8ac89f` on 24 Nov. Historical inventory remains **166 gaps / 95 partial**.
+- Status: candidate source/test/docs prepared for one atomic dev commit; exact-head CI pending; not released.
+
+### Next five features
+1. P0 verify new exact-head Push/PR Quality, no skipped required checks, Node and Chromium no-BigInt fallback cases at 1280px/390px.
+2. P0 independent eligible PR #191 approval, verifiable main protection, full diff review, ordinary PR merge, main Quality, Pages and hosted verification.
+3. P1 finish seven-shape Truss independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references, low-exponent/near-solid/fallback cases, invalid rollback and mobile tests.
+4. P1 Data Tables row 6000/AF insertion/deletion, scalar/range #REF!, mixed anchors, quoted names, blank/reversed ranges, recalculation, rollback and source/bundle parity.
+5. P1 Matrix/Graph/Table current/legacy project round-trips, malformed-import rollback and focus/selection preservation on desktop/390px.
+
+---
+
+## 2026-11-26 — TRUSS-L-ANGLE-EXACT-SECTION-SUMS
+
+- Starting refs: dev `dbd4bd51bbad91e893cd24b2877e1a2065909714`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, unified master plan, engineering architecture and structural toolbox contracts, frozen inventory, Truss source/tests/contract, refs, PR #191/reviews, Quality, rulesets and Pages evidence.
+- Starting exact-head CI passed: Push Quality [#45736435242](https://github.com/saeedsai/ProMathStudio/actions/runs/45736435242) and PR Quality [#45736441164](https://github.com/saeedsai/ProMathStudio/actions/runs/45736441164), both 218/218 with zero failures/skips on `dbd4bd51`.
+- Found L-angle area and inertia rounding defects. The scaled positive-area reducer returned 183.8225183531027 instead of 183.82251835310274 mm² for a synthetic high-aspect-ratio section. Left-to-right local-plus-parallel-axis sums returned Ixx 0.0005630523010274838 instead of 0.0005630523010274837 mm⁴ in one fixture and Iyy 2.94557285397156e-79 instead of 2.9455728539715605e-79 mm⁴ in another.
+- Updated L-angle area, first moments, Ixx/Iyy and Ixy to use the existing exact binary64 section-property sum when BigInt is available, retaining the scaled compensated fallback. No geometry, FEM solver, unit, public API or bundle change.
+- Added direct Node regressions for both fixtures and extended the registered Chromium smoke to assert area/centroid/Ixx/Iyy at 1280px and 390px alongside the prior channel/I-section checks.
+- Independent Python Fraction oracle passed for the exact binary64 terms and both one-ulp failures. Local checkout is absent; no local Node/Chromium suite pass claimed. New exact-head Actions are required.
+- PR #191 remains open/mergeable with zero submitted reviews. Only dev/main branches exist; rulesets empty; main branch-protection read HTTP 403. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) last succeeded on 24 November on unchanged main `0d8ac89f`.
+- Historical inventory remains frozen at **166 gaps / 95 partial**. Status: implemented on dev, exact-head QA pending, not released.
+
+### NEXT FIVE
+1. P0 verify this exact-head L-angle fix: both Push/PR Quality green on the same SHA; Node and Chromium verify both L-angle cases and prior channel/I-section references; desktop/390px; zero skipped required checks.
+2. P0 release governance: independent eligible PR #191 approval, verifiable main protection, full diff review, ordinary PR merge, exact-main Quality, Pages and hosted critical-path verification.
+3. P1 finish seven-shape Truss boundaries: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references; low-exponent/near-solid/normalized fallback; underflow rejection, invalid rollback, member isolation and mobile.
+4. P1 Data Tables formula references: row 6000/AF, scalar/range `#REF!`, invalid references, blank/reversed/mixed anchors, quoted names, recalculation, atomic rollback and bundle parity.
+5. P1 saved-project compatibility: current/legacy Matrix/Graph/Table round-trips; malformed-import rollback; focus/selection preservation; desktop/390px browser coverage.
+
+---
+
+## 2026-11-26 — TRUSS-COMPOSITE-CENTROID-INERTIA-EXACT-SUM
+
+- Starting refs: dev `a46f676d0cb4d99d1eebf089c228d06c9cc3466a`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, unified master plan, engineering architecture/toolbox contracts, frozen inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI, rulesets and main/Pages evidence.
+- Starting exact-head QA passed on `a46f676d`: Push Quality [#45734781219](https://github.com/saeedsai/ProMathStudio/actions/runs/45734781219) and PR Quality [#45734789900](https://github.com/saeedsai/ProMathStudio/actions/runs/45734789900), 218/218 steps each, zero failures/skips.
+- Found a binary64 reduction defect after the previous composite-area fix: first moments and local-plus-parallel-axis inertia terms were still summed left-to-right. Channel fixture B=2, H=1, tw=1, tf=2e-17 loses the two small x-first-moment terms (naive 0.5 vs exact rounded 0.5000000000000001) and both Ixx/Iyy combined contributions. The I-section fixture overestimates Ixx by one ulp due to adding a flange offset before the dominant web inertia.
+- Added a local section-property sum that uses the existing exact integer binary64 accumulator when BigInt is available, with the existing scaled compensated sum as fallback. Composite channel/I-section area, first moments, Ixx and Iyy now round once after summing the already-rounded terms. No change to the FEM solve, section geometry, units or public API.
+- Added a direct Node regression for both shapes and a registered Chromium regression at 1280px and 390px. It checks centroid x/y, Ixx/Iyy, finite positive section moduli/radii, immutable inputs and frozen outputs.
+- Independent Python Fraction oracle confirmed expected rounded results and reproduced all three naive reduction defects. Full local Node/Chromium execution is unavailable because the execution container has no repository checkout; no local full-suite pass claimed.
+- PR #191 remains open/mergeable with zero submitted reviews. Branches exactly dev/main, both unprotected; rulesets empty; branch-protection read HTTP 403. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) passed on 24 November for unchanged main `0d8ac89f`.
+- Historical inventory remains frozen at **166 gaps / 95 partial**. Status: composite centroid/inertia correction and Node/Chromium regressions committed to dev; fresh exact-head QA pending; not released.
+
+### NEXT FIVE
+1. P0 verify this exact-head regression: both Push/PR Quality green on same SHA; Node and Chromium exact channel/I-section centroid and Ixx/Iyy references; desktop/390px; no skipped required checks.
+2. P0 release governance: independent eligible approval, verifiable main protection, full diff review, ordinary PR merge, exact-main Quality, Pages and hosted smoke.
+3. P1 finish seven-shape Truss boundaries: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references for all seven shapes; low-exponent/near-solid/normalized fallback; rejection, rollback, member isolation and mobile.
+4. P1 Data Tables references: row 6000/AF, scalar/range #REF!, invalid references, blank/reversed/mixed anchors, quoted names, recalculation, atomic rollback and bundle parity.
+5. P1 saved-project compatibility: current/legacy Matrix/Graph/Table round-trips; malformed-import rollback; focus/selection preservation; desktop/390px browser coverage.
+
+---
+
+## 2026-11-26 — TRUSS-COMPOSITE-AREA-COMPENSATED-SUM
+
+- Starting refs: dev `e45aa2bb2d00ab7c733a7d3d287d664fbabca300`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI, rulesets and main/Pages evidence.
+- Exact-head CI on the starting dev head passed: Push Quality [#45725803164](https://github.com/saeedsai/ProMathStudio/actions/runs/45725803164) and PR Quality [#45725809432](https://github.com/saeedsai/ProMathStudio/actions/runs/45725809432). Truss steps 212, 214 and 215 passed in both runs.
+- Found a binary64 aggregation defect: channel/I-section rectangle-area reduction could lose two individually sub-half-ulp flange contributions even when their combined sum changes the correctly rounded total from 1.0 to 1.0000000000000002 mm².
+- Reused the existing `finiteSignedSum` scaled compensated accumulator for L-angle and composite-section area totals. Added a direct Node regression for both channel and I-section, proving naive loss and the correctly rounded result; checks finite positive remaining properties, immutable inputs and frozen outputs.
+- Updated Structural Truss numerical contract, living plan, execution ledger and changelog. No root `index.html` bundle change: Truss FEM is loaded as an adjacent script.
+- Independent binary64 fixture calculation passed: web area 1.0; each flange 6.661338147750939e-17; naive sum 1.0; correctly rounded sum 1.0000000000000002. Full Node/Chromium repository execution is pending fresh exact-head Actions; local checkout is unavailable and no local full-suite pass is claimed.
+- PR #191 remains open, mergeable, with no submitted reviews. Only dev/main branches exist; rulesets empty; main branch-protection read HTTP 403. No merge or direct main update. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Historical inventory remains frozen at **166 gaps / 95 partial**. Status: compensated composite-area correction and regression committed to dev; exact-head QA pending; not released.
+
+### NEXT FIVE
+1. P0 release governance: independent eligible PR approval and verifiable main protection; ordinary PR merge only after exact-head checks; verify main Quality, Pages and hosted critical path.
+2. P1 seven-shape Truss boundaries: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references; low-exponent/near-solid cases; conservative rejection, rollback, member isolation and 390px.
+3. P1 Data Tables formula references: row 6000/AF, scalar/range `#REF!`, mixed anchors, quoted names, recalculation, rollback and bundle parity.
+4. P1 saved-project compatibility: current/legacy Matrix/Graph/Table round-trips, malformed-import rollback, focus/selection preservation and desktop/390px coverage.
+5. P1 ODE verification: analytical forward/backward references, convergence, stage-overflow/attempt-budget cases and stale-export invalidation.
+
+---
+
+## 2026-11-26 — TRUSS-EULER-CSV-ROUNDTRIP-AND-UNIT-UNDERFLOW
+
+- Starting dev 428c38cb9a949383b858910e89793af4ce9d4a56; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, living plan, frozen inventory, Truss source/tests/contract, branches, PR #191/reviews, exact-head CI, rulesets and production evidence.
+- Exact-head Push Quality #45718310047 (https://github.com/saeedsai/ProMathStudio/actions/runs/45718310047) and PR Quality #45718317908 (https://github.com/saeedsai/ProMathStudio/actions/runs/45718317908) both failed at browser step 212, tests/smoke_truss_studio.py:1051; both logs report stale expected CSV Euler load 493.4802200544678 instead of shortest-round-trip 493.48022005446785. Steps 1–211 passed; steps 213–215 skipped.
+- Production issue found while correcting the fixture: a positive finite Euler critical load in N can underflow to zero when exported in kN. Added an explicit rejection in exportMaterialCSV so a positive physical value cannot silently become CSV zero.
+- Added direct Node coverage for exact Euler kN string/number round-trip and for a positive N value whose kN conversion underflows. Updated Chromium expectation and parsed-float round-trip check.
+- Updated Structural Truss CSV contract, living plan, ledger and changelog. No root index.html bundle change: the Truss solver is a companion asset, not an inlined module.
+- Local checkout is absent; no local Node/Chromium pass claimed. Binary64 boundary calculation independently confirms positive finite N load and zero kN conversion. New exact-head Actions must verify full browser and analytical tests.
+- PR #191 remains open with zero reviews. Branches exactly dev/main; both unprotected, rulesets empty, main protection read HTTP 403. No merge or main update. Production remains on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5.
+- Historical inventory remains frozen at 166 gaps / 95 partial. Status: CI defect diagnosed; source guard and regressions implemented on dev candidate; exact-head QA pending; not released.
+
+### NEXT FIVE
+1. P0 exact-head repair: Push/PR Quality green on the same candidate; Node exact Euler kN round-trip and positive-N-to-zero-kN rejection; Chromium 493.48022005446785 round-trip at 1280px/390px; no required skipped checks.
+2. P0 release governance: independent approval, verifiable main protection, full diff review, ordinary PR merge, exact-main Quality, Pages and hosted smoke.
+3. P1 seven-shape Truss boundaries: independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references, low-exponent/near-solid cases, underflow rejection, rollback, member isolation and mobile.
+4. P1 Data Tables references: row 6000/AF, scalar/range #REF!, mixed anchors, quoted sheet names, recalculation, rollback and bundle parity.
+5. P1 saved-project compatibility: current/legacy Matrix/Graph/Table round-trips, malformed-import rollback, focus/selection preservation and desktop/390px coverage.
+
+---
+
+## 2026-11-25 — TRUSS-CSV-EXACT-MASS-ROUNDTRIP-CI-REPAIR
+
+- Starting dev `1ecc801c09565e220c86266d1f832efa452bdd36`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, Truss source/tests/contract, branch refs, PR #191/reviews, exact-head CI and main/Pages evidence.
+- Exact-head Push Quality [#45710918334](https://github.com/saeedsai/ProMathStudio/actions/runs/45710918334) and PR Quality [#45710926373](https://github.com/saeedsai/ProMathStudio/actions/runs/45710926373) both failed on `1ecc801c09565e220c86266d1f832efa452bdd36`. Shared job failed at Truss browser step 212, `tests/smoke_truss_studio.py:1000`, because the CSV assertion expected `15.7`; steps 213–215 were skipped after failure. Steps 1–211 passed.
+- Root cause: the UI deliberately formats mass to `15.7`, but shortest-round-trip CSV output correctly preserves the binary64 product `0.002 * 7850 = 15.700000000000001`. The browser assertion and one Node assertion still expected the old rounded CSV value.
+- Added an explicit production serialization guard: finite numeric cells must reparse to the identical binary64 value under `Object.is`; non-finite numeric cells are rejected. Updated Node and Chromium tests to verify exact CSV text and parsed mass equality to both the source metric and exported volume×density. UI display expectation remains unchanged.
+- Updated Structural Truss contract, this plan, ledger and changelog. Truss is loaded as an adjacent script; root `index.html` bundle is not a consumer of this module and is unchanged.
+- Previous exact-head failure is diagnosed; full exact-head Push/PR Quality must pass on the new atomic dev commit. Local checkout unavailable; no local full-suite pass claimed.
+- PR #191 remains open with zero independent reviews; rulesets empty and main branch-protection read HTTP 403. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 succeeded on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Historical inventory unchanged at **166 gaps / 95 partial**. Status: CI repair implemented on dev candidate; exact-head QA pending; not released.
+
+### NEXT FIVE
+1. **P0 exact-head CI repair:** Push/PR Quality green on the same candidate; Node and Chromium prove `15.700000000000001` round-trips, equals the metric and exported volume×density; 1280px/390px; no skipped required tests.
+2. **P0 release governance:** independent approval, verifiable main protection, full diff review, ordinary PR merge, main Quality, Pages and hosted smoke.
+3. **P1 seven-shape Truss boundaries:** exact-binary64 independent A/centroid/Ixx/Iyy/Sx/Sy/rx/ry references; low-exponent/near-solid limits; conservative rejection, rollback, selected-member isolation and mobile.
+4. **P1 Data Tables references:** row 6000/column AF, scalar/range #REF!, mixed anchors, quoted sheet names, recalculation, rollback and bundle parity.
+5. **P1 saved-project compatibility:** current/legacy Matrix/Graph/Table round-trips, malformed-import rollback, focus/selection preservation and desktop/390px browser coverage.
+
+---
+
+## 2026-11-25 — TRUSS-MATERIAL-CSV-REGRESSION-FIXTURE-CORRECTION
+
+- Starting dev `098b58e2c1e8114433fe6109068b30e8c0920f17`; the new exact-head Push/PR runs had started, but review of the committed test source found its CSV row split delimiter was double-escaped.
+- Corrected the Node regression to split actual CRLF rows; the exact density and derived-mass round-trip assertions are unchanged. This is a test-fixture correction, not a product-code change.
+- Supersede the in-progress checks on `098b58e2c1e8114433fe6109068b30e8c0920f17`; full exact-head Quality must pass on the corrected follow-up commit before the CSV precision change is considered QA-verified.
+- Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; PR #191 remains open, with zero independent reviews. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-25 — TRUSS-MATERIAL-CSV-ROUNDTRIP-PRECISION
+
+- Starting dev `b03433d31a9246ba6227af4a2c6386ba552d0a7f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen MATLAB inventory, Truss source/tests/contract, refs, PR #191/reviews, CI and Pages.
+- Exact starting-head Push Quality #45701255742 and PR Quality #45701267662 both passed all 218 steps, zero failures/skips; Truss Node/browser steps 214/215 passed.
+- Reproduced export precision loss: density 0.10000000000000002 became 0.1; derived mass 0.00020000000000000004 became 0.0002.
+- Changed finite numeric CSV cells to shortest round-trip decimal strings and preserved negative zero explicitly.
+- Added a Node regression that verifies exact numeric re-import for density and derived mass while retaining concise ordinary values and 2/3 formatting. Updated Structural Truss contract, living plan and changelog.
+- Isolated actual-source execution reproduced the old defect; post-change validation and full exact-head CI are pending the new commit's GitHub Actions.
+- PR #191 remains open with zero independent reviews; dev/main unprotected, rulesets empty. No merge or main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Frozen historical inventory unchanged at **166 gaps / 95 partial**. Status: implemented on dev candidate, QA pending, not released.
+
+## 2026-11-25 — TRUSS-CHANNEL-NEGLIGIBLE-WEB-UNDERFLOW
+
+- Starting dev `371acb56f07df173cfb0aef456e164f5759b231d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Inspected root AGENTS.md, living plan, frozen inventory, unified plan, engineering architecture/Structural catalog, source/tests, PR #191, reviews, branches and current CI/Pages.
+- Starting exact-head Push Quality #45692731137 and PR Quality #45692747831 both passed 218/218 on `371acb56f07df173cfb0aef456e164f5759b231d`; Truss analytical/browser steps 214/215 passed.
+- Added a conservative channel-web underflow exception only when exponent-scaled bounds prove area, first moments, local/offset inertias, Ixy and both normalized-path contributions round to zero; aggregate flange-dominated area, first moments and Ixx/Iyy must remain normal. Non-negligible off-axis webs remain rejected.
+- Added Node and registered Chromium regressions for B=1e40 mm, H=1e-100 mm, tw=Number.MIN_VALUE, tf=2e-101 mm using 200-digit exact-binary64 Decimal references; Chromium covers 1280px and 390px. Existing centered I-section acceptance and non-negligible channel rejection remain.
+- Isolated V8 executed the actual modified production module: finite A, centroid, Ixx/Iyy, Sx/Sy, cX/cY and rx/ry match references within 5e-13; non-negligible web rejected; inputs unchanged and output immutable. Full Node/Playwright await exact-head Actions.
+- Updated Truss contract, plan and changelog. No root index bundle change: Truss FEM is loaded by its companion page as adjacent JS.
+- PR #191 remains open with zero independent reviews; dev/main unprotected, rulesets empty, main protection read HTTP 403. Main Quality #45360386408 and Pages #45360367251 remain successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. No merge or main update.
+- Historical MATLAB inventory remains frozen at **166 gaps / 95 partial**. Status: implemented on dev candidate, QA pending, not released.
+
+### NEXT FIVE
+1. **P0 release governance (blocked):** eligible independent PR #191 approval, verifiable main protection, exact-head checks, complete diff review, ordinary merge, main Quality, Pages and hosted critical-path verification.
+2. **P1 finish seven-shape Truss boundaries:** independent references for A/centroid/Ixx/Iyy/Sx/Sy/rx/ry; remaining low-exponent/near-solid cases; non-negligible underflow rejection; rollback, member isolation, E/density/K preservation and 390px tests.
+3. **P1 Data Tables references:** row 6000/AF, #REF!, mixed anchors, quoted sheet names, atomic rollback, bundle parity.
+4. **P1 saved-project compatibility:** current/legacy Matrix/Graph/Table round-trips and malformed-import rollback/focus preservation.
+5. **P1 numerical ODE:** analytical forward/backward references, convergence, bounded stage-overflow recovery and stale-export invalidation.
+
+---
+
+## 2026-11-25 — TRUSS-FEM-EXACT-MIXED-SIGN-RESULTANTS
+
+- Starting dev `61e2fb3dc29181e2b5232dbd2477015ef9cc71f9`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Confirmed starting exact-head Push Quality #45682939079 and PR Quality #45682955688: 218/218 each, zero failures/skips; Truss Node/browser steps 214/215 passed.
+- Reproduced mixed-scale cancellation precision loss in the actual starting module: 79-node applied force `9.99875737761613e-11 N` vs exact binary64 sum `9.99937827510621e-11 N`; origin moment had the opposite-sign error.
+- Added exact BigInt accumulation for mixed-sign finite binary64 terms with one ties-to-even conversion; same-sign reductions retain the scaled compensated path and a BigInt-unavailable compatibility fallback.
+- Added Node and registered Chromium 1280px/390px regressions for exact applied force and signed moment; retained overflow/subnormal/force-balance coverage. Updated Truss numerical contract and changelog.
+- Isolated V8 executed the modified production module: force `9.99937827510621e-11 N`, moment `-9.99937827510621e-11 N·m`; 79-node model validation passed. Full Node/Playwright repository suite pending exact-head Actions.
+- PR #191 remains open with zero independent reviews; branch protection read HTTP 403, rulesets empty, dev/main unprotected. No merge or main update. Main Quality #45360386408 and Pages #45360367251 remain successful on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Historical inventory unchanged at **166 gaps / 95 partial**.
+- Status: implemented on dev candidate; exact-head CI pending; not released.
+
+## 2026-11-25 — TRUSS-FEM-FORCE-BALANCE-CANCELLATION
+
+**Starting refs:** dev `214ada3d75f865223236186357f412cd1480f59f`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Branches inspected: exactly `dev` and `main`. PR #191 remains the sole release PR.
+
+**P0 exact-head CI diagnosis:** Push Quality [#45678476170](https://github.com/saeedsai/ProMathStudio/actions/runs/45678476170) and PR Quality [#45678484660](https://github.com/saeedsai/ProMathStudio/actions/runs/45678484660) both failed on the exact starting SHA. Structural tests and all browser steps through 213 passed; Node step 214 failed in `tests/test_truss_fem.js:683`. The fixture appended node C without `fx:0`, so the naive moment expression evaluated `0 * undefined` as NaN rather than demonstrating the intended overflowing intermediate. Corrected the fixture in Node and Chromium to set the explicit zero horizontal load; the assertion still requires a non-finite naive reduction, now for the intended overflow rather than accidental NaN.
+
+**Additional source defect found while diagnosing:** `solve()` reduced applied nodal forces and support reactions separately, then added those totals. For a finite equilibrium case with applied x loads (1e308, 1e308, -1e308) N and corresponding reactions (-1e308, -1e308, 1e308) N, the two intermediate reductions become +Infinity and -Infinity, producing a NaN forceBalance despite exact net balance zero. Changed the diagnostic to use the existing scale-normalized compensated signed-sum helper over the combined applied-load and reaction terms per axis. The stiffness matrix, displacement solve, reactions and energy calculation are unchanged.
+
+**Regression:** Added a direct Node case and extended the registered Chromium smoke to prove the old separate totals are non-finite while the corrected forceBalance is exactly {x:0,y:0}. Fixed the moment fixture's missing `fx:0` in both Node and browser tests. The Chromium test runs at 1280px and 390px. Updated the Truss FEM guide with the force-balance contract.
+
+**Living-plan recovery:** `docs/HOURLY_DEVELOPMENT_PLAN.md` was empty on starting dev (blob `b659f2c1c4ef963b0e5dd67ff0f7a30f444f55e8`). Restored the complete historical plan from main's non-empty copy (blob `a79b3cccb7efc4ed26a43a8265d135f97a1b55bc`) and prepended this dated entry; prior plan history is retained. Updated the execution ledger and changelog. The frozen 26-Oct inventory remains **166 gaps / 95 partial**.
+
+**Validation:** The actual modified production module was executed in isolated V8. It reproduced the old non-finite separate totals and returned exact forceBalance {x:0,y:0}; the corrected moment fixture produced a non-finite naive reduction while inspectJSON returned 1e308 N·m. The full Node test previously ran in GitHub Actions and exposed the fixture failure (91 passed, 1 failed). Full local Node/Playwright execution is unavailable because this environment has no repository checkout. New exact-head Push/PR Quality must rerun the complete suite, including Node step 214 and Chromium step 215; no pass is claimed yet.
+
+**Release:** PR #191 remains open with zero independent reviews. Main protection read returned HTTP 403 and repository rulesets are empty. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; latest Main Quality #45360386408 and Pages deployment #45360367251 both succeeded on 24-Nov-2026. No merge or main update.
+
+### NEXT FIVE
+
+1. **P0 — Verify exact-head Truss and full Quality.** Acceptance: both Push and PR Quality complete on the new dev SHA; Node step 214 passes the corrected moment fixture and finite force-balance cancellation; Chromium step 215 passes at 1280px/390px; zero failed/skipped required checks.
+2. **P0 — Release governance (blocked).** Acceptance: eligible independent approval on PR #191; enforceable main protection requiring exact-head Quality and forbidding direct push/force/deletion; full diff review; ordinary PR merge; successful main Quality, Pages deployment and hosted critical-path verification.
+3. **P1 — Finish seven-shape Truss numerical boundaries.** Acceptance: independent exact-binary64 Decimal references for area, centroid, Ixx/Iyy, section moduli and radii for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; remaining thin-wall/low-exponent/near-solid cases, rollback, selected-member isolation, E/density/K preservation and desktop/390px tests.
+4. **P1 — Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion, scalar/range #REF!, already-invalid references, blank/reversed/mixed-anchor ranges, quoted sheet names/doubled-quote literals, correct recalculation, transactional rollback and standalone bundle parity.
+5. **P1 — Saved-project and ODE compatibility.** Acceptance: current/legacy Matrix, Graph and Table round-trips; malformed import preserves all workspaces/focus/selection/results; analytical forward/backward ODE references, bounded failure recovery and stale-export invalidation; desktop/390px browser tests.
+
+---
+
+## 2026-11-25 — TRUSS-SIGNED-RESULTANT-SUBNORMAL-QUOTIENT-REPAIR
+
+Follow-up to 30ce57660a82d93c572129ea243ecfe3ded60bdc. An isolated exact-module fixture exposed a 1.25 ppm error when a nonzero normalized quotient was subnormal: +1e308 N, +1e-10 N, -1e308 N returned 9.999987484955998e-11 N. The helper now routes every normalized quotient below the smallest normal binary64 value into its separately compensated original-unit residual, preserving 1e-10 N. Added Node and Chromium regressions while retaining minimum-subnormal residual, x/y force cancellation, moment cancellation and true-overflow checks. Guide, plan, ledger and changelog updated. New exact-head Push/PR Quality pending; no local checkout for full Node/Playwright. Main/Pages unchanged; PR #191 still lacks independent review and verifiable main protection. Frozen inventory remains 166 gaps / 95 partial.
+
+Next five: (1) P0 release governance—independent PR #191 approval, enforceable main protection, ordinary PR merge and post-merge Quality/Pages/hosted verification; (2) P0 exact-head Quality—full exact-head Push and PR Quality with the new subnormal quotient browser test at 1280px/390px, zero failed or skipped required checks; (3) P1 seven-shape Truss Decimal references and boundary rollback; (4) P1 Data Tables row-6000/AF and formula-reference atomicity; (5) P1 saved-project current/legacy Matrix/Graph/Table round-trips and malformed-import rollback. ODE forward/backward IVPs follow.
+
+---
+## 2026-11-25 — TRUSS-SIGNED-RESULTANT-CANCELLATION
+
+Starting dev 243f8801229fe53a87715ce61c0ced521ef0c15a; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Existing exact-head Push Quality #45660525258 and PR Quality #45660549181 both passed 218/218, zero failures/skips. Main Quality #45360386408 passed 218/218; Pages #45360367251 passed build 5/5, status 3/3, deploy 3/3.
+
+Implemented finite signed-resultant accumulation in tools/truss-fem.js: scaled Neumaier summation plus a separately compensated residual for terms that underflow only after normalization. Applied force x/y and global-origin moment now preserve finite results after intermediate overflow/cancellation; individually non-finite moment products and genuinely non-finite final resultants remain rejected.
+
+Regression changes: tests/test_truss_fem.js adds horizontal/vertical force cancellation, a minimum-subnormal force residual, moment cancellation and true overflow. tests/smoke_truss_fem.py repeats the cases in Chromium at 1280px and 390px and checks the old naive reductions would overflow or lose the residual. docs/STRUCTURAL_TRUSS_FEM.md, docs/HOURLY_DEVELOPMENT_PLAN.md and CHANGELOG.md updated. Truss Studio loads adjacent JS assets; root index.html does not embed this module.
+
+Connector V8 executed the actual production module: all finite-resultant fixtures passed; true final overflow was rejected. Node test syntax compiled. No local checkout, so full local Node/Playwright unavailable. New exact-head Push/PR Quality pending; not released. PR #191 has no independent reviews; main protection read returns HTTP 403, rulesets empty. No merge or main update. Historical inventory unchanged at 166 gaps / 95 partial.
+
+Next five: (1) P0 release governance—independent PR #191 approval, verifiable main protection, ordinary PR merge and post-merge Quality/Pages/hosted verification; (2) P0 exact-head signed-resultant Quality—218/218 Push and PR, including 1280px/390px Chromium; (3) P1 seven-shape Truss Decimal audit—area/centroid/inertia/modulus/radius, thin-wall/subnormal/high-scale, rollback and overflow/underflow; (4) P1 Data Tables reference bounds—row 6000/AF, #REF!, mixed anchors, quoted names, atomic rollback; (5) P1 saved-project compatibility—current/legacy Matrix/Graph/Table round-trips and malformed-import rollback. ODE forward/backward IVPs follow.
+
+---
+## 2026-11-25 — DATA-TABLES-CHART-STRUCTURAL-ASSERTION-REPAIR
+
+Starting dev: `445ca63f47b271919de6be4404a8393bc60af98a`; main: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The categorical-chart source/test feature was committed on dev and PR #191 was advanced. Exact-head Push Quality [#45660047059](https://github.com/saeedsai/ProMathStudio/actions/runs/45660047059) and PR Quality [#45660060834](https://github.com/saeedsai/ProMathStudio/actions/runs/45660060834) both failed at structural step 7, before browser tests ran. The Push job executed 604 tests: 603 passed, one existing skip and one failure. The sole failure was a brittle source-string assertion in `tests/test_sheet_numeric_hardening.py`: it expected a standalone `const scale=...`, while the correct production declaration is `const margin=90,scale=...`. The actual scale normalization is present in `src/data-tables.js`; the assertion was too specific about declaration grouping.
+
+Correction: change only the structural assertion to match the existing `scale=Math.max(...)` declaration independent of the preceding `margin` declarator. Keep the actual scale-normalized bar-coordinate implementation, all numerical assertions, browser tests and genuine-overflow rejection unchanged. No test was removed or weakened; the corrected assertion still requires the exact scale calculation to exist.
+
+Isolated validation in the connector runtime: fetched the exact dev source and test, confirmed the old assertion fails to match the production declaration and the corrected assertion matches it. The original source/bundle parity was verified in the implementation commit; this repair changes only the structural test and development records. Full local Python/Chromium execution is unavailable because the execution workspace has no checkout. New exact-head Push and PR Quality must run the complete structural suite and registered Chromium chart cases.
+
+Release: PR #191 remains open; no independent review submissions. Branches remain exactly dev and main. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Do not merge until independent approval, verifiable main protection and exact-head green Quality are satisfied. Historical MATLAB inventory remains **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Verify the categorical-chart CI repair.** Acceptance: exact-head Push and PR Quality both pass structural step 7, then run the registered numeric-hardening Chromium smoke; cancellation category totals, equal huge pie slices, mixed-sign bar geometry and genuine overflow all pass without skipped required checks.
+2. **P0 — Release governance.** Acceptance: eligible independent PR #191 approval; verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; full diff review; ordinary PR merge; successful post-merge main Quality, Pages deployment and hosted critical paths.
+3. **P1 — Finish the seven-shape Truss numerical audit.** Acceptance: exact-binary64 Decimal references for area, centroid, inertia, modulus and radius across rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; thin-wall/subnormal/high-scale cases; genuine overflow/underflow rejection, invalid rollback and selected-member isolation; Node and 1280px/390px Chromium.
+4. **P1 — Complete Data Tables formula-reference edge audit.** Acceptance: row 6000/column AF insertion/deletion, scalar/range `#REF!`, already-invalid references, blank/reversed/mixed-anchor ranges, quoted names and doubled-quote literals; correct recalculation, atomic rollback/recovery and desktop/390px Chromium.
+5. **P1 — Saved-project compatibility.** Acceptance: current and legacy Matrix, Graph and Table round-trips; malformed import preserves every workspace, focus, selection and prior result; desktop/390px Chromium.
+
+ODE forward/backward verification remains queued after these five.
+
+---
+
+## 2026-11-25 — DATA-TABLES-CATEGORICAL-CHART-RANGE-SAFETY
+
+Starting refs: dev `dc0e0380eea5ed51506e3270e036251eb7122cb6`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Root `AGENTS.md`, the living plan and frozen 2026-10-26 inventory were inspected. The only long-lived branches are dev/main; PR #191 is the only open release PR. Exact-head Push Quality #45643183397 and PR Quality #45643192090 both completed successfully on the starting dev SHA, including the previously failing Data Tables disclosure and range-deletion browser tests. Main Quality #45360386408 and Pages deployment #45360367251 succeeded on unchanged main.
+
+Implemented on dev: Data Tables Bar/Pie chart aggregation now uses the existing compensated scale-safe sum for repeated category labels and the grouped Other category. A genuinely unrepresentable category total is rejected with a category-specific diagnostic. Pie proportions are computed from values normalized by the largest positive category, avoiding overflow in the pie total. Bar coordinates use normalized positive/negative values before axis-range subtraction, preventing infinite ranges and NaN canvas geometry for finite data near binary64 limits.
+
+Regression: extended the registered `tests/smoke_sheet_numeric_hardening.py` Chromium test with (1) repeated-category cancellation `1e308 + 1e308 - 1e308 = 1e308`, (2) two equal `1e308` pie categories producing two finite half-circle sweeps, (3) a `+1e308/-1e308` bar chart whose canvas rectangles must all be finite, and (4) true category-total overflow rejection. Added structural source assertions in `tests/test_sheet_numeric_hardening.py`. Updated `docs/DATA_TABLES.md`, this ledger, the living plan and changelog. Verified the modular source is embedded byte-for-byte in standalone `index.html`.
+
+Local validation: isolated numerical/geometry checks are run separately; full local repository/browser suite is unavailable because this execution environment has no repository checkout. New exact-head Push and PR Quality must complete before this candidate is QA-verified.
+
+Release: PR #191 remains open with zero independent reviews; both branches report unprotected and branch-protection reads return HTTP 403 to the connected integration. No merge or direct main update. Main and Pages remain unchanged. Frozen inventory remains **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Release governance (blocked):** independent PR #191 approval, verifiable main protection, exact-head required Quality, ordinary PR merge, then main Quality, Pages and hosted critical-path verification.
+2. **P1 — Seven-shape Truss numerical audit:** thin-wall/subnormal/high-scale exact-binary64 Decimal references across all seven shapes; final overflow/underflow rejection, invalid rollback, selected-member isolation and desktop/390px browser checks.
+3. **P1 — Data Tables formula-reference edge audit:** row 6000/column AF, scalar/range #REF!, already-invalid references, blank/reversed/mixed-anchor ranges, quoted names and literals; atomic rollback/recovery and desktop/390px tests.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed-import rollback preserving workspaces, focus, selection and results.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, convergence, unsupported-class diagnostics, bounded failure recovery and stale-export invalidation.
+
+---
+
+## 2026-11-25 — DATA-TABLES-SCALED-COMPENSATED-SUM
+
+Starting refs: dev `c23d5679a1c7637b27c4b2bc3a2505157e376d3f`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; branches are exactly dev/main and PR #191 is the only open release PR. The previous exact-head candidate passed Push Quality [#45630253317](https://github.com/saeedsai/ProMathStudio/actions/runs/45630253317) and PR Quality [#45630269499](https://github.com/saeedsai/ProMathStudio/actions/runs/45630269499), both 218/218 with zero failures/skips; Spreadsheet range deletion step 80 passed. Current main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) passed 218/218, and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) completed build, status reporting and deployment successfully on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+
+Defect: SUM used left-to-right binary64 addition. `SUM(1e308,1e308,-1e308)` overflowed at an intermediate term and returned #NUM! even though the exact sum of the supplied binary64 values is finite (1e308). A smaller residual such as `SUM(1e308,1e-300,-1e308)` was also silently lost.
+
+Source correction on dev: add a scale-normalized Neumaier accumulator for SUM. It sums normalized finite terms, keeps terms whose division by the scale underflows in a separate compensated residual, then restores the final result. The existing aggregate finite-result guard remains in force, so genuinely unrepresentable sums still return #NUM!. AVERAGE/AVG, MEDIAN, custom-function handling, formula parser and workbook format are unchanged.
+
+Regression: extend `tests/smoke_sheet_numeric_hardening.py` with workbook-cell cases for finite cancellation after an overflowing partial sum, a 1e-300 residual after ±1e308 cancellation, a minimum-subnormal residual after ±Number.MAX_VALUE cancellation, and genuine final overflow. Also test direct `SUM(1e308,1e308,-1e308)`. Add a structural unittest for the stable accumulator and retain the registered Chromium gate and 390/768/1280px layout checks. Update the Data Tables numerical contract, standalone bundle, changelog and living plan.
+
+Validation before commit: isolated V8 execution of the accumulator logic returned 1e308, 1e-300 and 5e-324 for the finite cancellation cases; two Number.MAX_VALUE terms remain non-finite and are converted to #NUM! by the existing aggregate guard. Independent 1000-digit Decimal checks of the exact binary64 inputs confirm the expected rounded results. Full local repository/Playwright execution is unavailable because this execution workspace has no checkout; new exact-head Push and PR Quality must certify the source/bundle, structural and Chromium tests. Candidate remains In QA, not released.
+
+Release: PR #191 remains open with zero independent reviews. Both branches report unprotected; rulesets are empty and branch-protection reads return HTTP 403 to the connected integration. No merge or direct main update. Main and Pages remain unchanged. Frozen historical MATLAB inventory remains **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Release governance (blocked).** Obtain eligible independent approval and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; inspect the complete diff and exact PR head, merge only through the ordinary PR process, then verify main Quality, Pages and hosted critical paths.
+2. **P1 — Finish the seven-shape Truss numerical audit.** Complete thin-wall, subnormal and high-scale independent references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Acceptance: exact-binary64 Decimal references for area/inertia/centroid/modulus/radius, genuine final overflow/underflow rejection, invalid rollback, selected-member isolation and Node plus 1280px/390px Chromium.
+3. **P1 — Complete Data Tables formula-reference edge audit.** Cover row 6000/column AF insertion and deletion, scalar/range #REF! transitions, already-invalid references, blank-grid and reversed/mixed-anchor ranges, quoted sheet names and doubled-quote formula literals. Acceptance: correct cell identity, atomic rollback/recovery, byte-identical standalone source parity and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility.** Round-trip current and legacy Matrix, Graph and Table projects. Acceptance: malformed imports preserve every workspace, selection, focus and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification.** Verify analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics, bounded failure recovery and stale-export invalidation with independent references and desktop/390px browser tests.
+
+---
+
+## 2026-11-25 — DATA-TABLES-MENU-DISCLOSURE-RELATIONSHIP
+
+Starting refs: dev `55d8908906d37ec41e2ea245843f01c25a7f1b79`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; branches were exactly `dev` and `main`, and PR #191 was the only open release PR. Exact-head Push Quality [#45628106794](https://github.com/saeedsai/ProMathStudio/actions/runs/45628106794) and PR Quality [#45628120984](https://github.com/saeedsai/ProMathStudio/actions/runs/45628120984) both failed at the registered **Spreadsheet range deletion regression** (step 80). The job log shows the 602-test structural suite passed (one existing skip), browser steps 1–79 passed, then Playwright timed out at `get_by_role("button", name="Table actions")` in `tests/smoke_sheet_range_delete.py`. The menu is present and the modular source is byte-identical to the standalone bundle; the failure is the role locator's interoperability with the native `summary` disclosure control, not missing source code.
+
+Correction on dev: each native action-menu summary now has a unique `aria-controls` relationship to its content region (`dt-menu-content-table/filter/combine/files/python`), in addition to its accessible label. The registered Chromium test now locates the native first `summary` directly, verifies its `aria-label`, verifies the `aria-controls` target exists, clicks the disclosure, and asserts Rename is visible before exercising the existing failed-rename rollback and recovery checks. No browser assertions are removed or weakened. `src/numerical-data.js` and its embedded standalone `index.html` block are updated in the same commit.
+
+Validation before commit: the complete modular source was found verbatim in the standalone bundle; the exact helper and test blocks matched once; after transformation the new source was again found verbatim and the old embedded source was absent. Full local Node/Playwright execution is unavailable because this execution workspace has no repository checkout. New exact-head Push and PR Quality must pass the structural suite and browser step 80 before this candidate is QA-verified.
+
+Release: PR #191 remains open with no submitted independent reviews. Branch list contains only dev/main and both report `protected:false`; rulesets endpoint returned `[]`, while branch-protection read returned HTTP 403 `Resource not accessible by integration`. No merge or direct main update. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are still successful on unchanged main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Pages build, status reporting and deployment jobs all succeeded. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+### Next five features
+
+1. **P0 — Verify this Data Tables disclosure CI repair.** Acceptance: source/bundle parity passes; exact-head Push and PR Quality both complete with zero failed/skipped required checks; step 80 verifies each summary's accessible label and `aria-controls`, opens Table, exposes Rename, and passes atomic rollback/recovery.
+2. **P0 — Release governance (blocked).** Obtain eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; inspect the complete diff; ordinary PR merge only; then verify main Quality, Pages and hosted critical paths.
+3. **P1 — Complete Data Tables grid-boundary verification.** Cover row 6000/column AF insert/delete, scalar/range `#REF!`, already-invalid reference preservation, blank-grid/reversed/mixed-anchor coverage, byte-identical rollback and desktop/390px Chromium.
+4. **P1 — Finish the seven-shape Truss numerical audit.** Exact-binary64 Decimal references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; thin-wall/subnormal/high-scale cases; final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+5. **P1 — Saved-project compatibility.** Current/legacy Matrix, Graph and Table round-trips; malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+
+ODE forward/backward verification remains queued after these five.
+
+---
+
+## 2026-11-25 — DATA-TABLES-GRID-EDGE-INSERTION-INVALIDATION
+
+Starting dev `0adeea293fb7df0ad27ee4182ea3eb072ed26780`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, the living plan and frozen inventory. The only open PR is #191; branches are exactly dev and main. Exact-head Push #45616991615 and PR #45617002907 failed at the registered Spreadsheet range deletion regression (step 80). The PR job log identifies a Playwright visibility timeout: the sheet-rename case clicked #dt-rename while the Data Tables workspace was hidden. The browser test now reselects the Data Tables workspace and asserts the control is visible before clicking. No assertions were weakened.
+
+Implemented on dev: when a structural insertion shifts a previously valid scalar cell reference or range endpoint outside the supported A1:AF6000 grid, the formula rewrite now writes #REF! instead of retaining an out-of-grid coordinate. Already-invalid references remain unchanged. Added 5999-row/A6000 and 31-column/AF1 scalar/range browser fixtures and a structural unittest. Updated docs/DATA_TABLES.md, the living plan, changelog and this ledger. `src/data-tables.js` and the matching inline block in `index.html` are synchronized byte-for-byte.
+
+Validation: source/bundle parity and JavaScript syntax are checked in the execution tooling; the isolated boundary harness checks A6000→#REF!, A5999:A6000→#REF!, AF1→#REF! and AE1:AF1→#REF!. Full Python/Chromium local execution is unavailable because this execution workspace has no repository checkout. New exact-head Push and PR Quality are required before this candidate is QA-verified.
+
+Release: PR #191 remains open; reviews are empty. Branch-protection reads return HTTP 403 to the connected integration; repository rulesets are empty. Do not merge or update main directly. Main Quality #45360386408 and Pages #45360367251 remain successful on unchanged main. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-25 — DATA-TABLES-SHEET-RENAME-ATOMICITY
+
+Starting refs: dev 6756c32182e4b70fa363900d4eeef05c9dcabd6d, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; the only long-lived branches are dev and main. Re-read root AGENTS.md, this living plan, and the frozen 2026-10-26 feature inventory. The exact starting dev-head Push Quality #45613220803 and PR Quality #45613229309 both completed successfully with 218/218 steps on 6756c32182e4b70fa363900d4eeef05c9dcabd6d; main Quality #45360386408 and Pages deployment #45360367251 remain successful on unchanged main.
+
+Defect: rewriteSheetNameReferences converted and rewrote formulas in place while traversing the workbook. If a later cell conversion threw (for example, a malformed imported/runtime cell with a throwing toString), formulas already visited in earlier rows/sheets remained renamed even though the selected sheet name was never changed. This violated atomic workbook editing.
+
+Fix on dev: collect all changed formula cells and replacement strings first; commit the staged replacements only after every workbook cell has been converted and processed successfully. Preserve existing quoted sheet-name grammar and double-quoted formula-string shielding. The standalone index.html embeds the complete src/data-tables.js source, and both are updated identically.
+
+Regression: extended the registered Chromium tests/smoke_sheet_range_delete.py test. A late throwing cell is placed after two cross-sheet formulas. The rename attempt must leave the sheet name, both earlier formulas and a double-quoted string literal unchanged. After correcting the bad cell, retrying the rename must update both qualified references to the quoted new sheet name while preserving the literal. The smoke is already registered in .github/workflows/quality.yml (step “Spreadsheet range deletion regression”).
+
+Validation: source/bundle parity was verified before editing and the full modular source remains embedded verbatim in the updated standalone bundle. Local repository checkout is absent, so local Python/Chromium execution is unavailable. Exact-head Push and PR Quality are pending for this new commit; the starting head passed 218/218 on both workflows. No assertions were weakened.
+
+Release: PR #191 remains open with no submitted reviews. Both dev and main report protected:false; repository rulesets are empty and the connected integration cannot read branch-protection settings (HTTP 403). No merge or direct main update. Main and Pages remain unchanged. Frozen historical inventory remains 166 gaps / 95 partial.
+
+## 2026-11-25 — DATA-TABLES-ROLLBACK-RECOVERY-ASSERTION-CORRECTION
+
+Review of the new browser regression caught an assertion-index issue before treating the run as green: after a successful insertion at row 1, the original formula row correctly moves from index 0 to index 1. Updated the recovery assertion to inspect that moved row. No product logic or test coverage was weakened; exact-head Quality on the corrected dev/PR head is required.
+
+## 2026-11-25 — DATA-TABLES-STRUCTURAL-REFERENCE-REWRITE-ATOMICITY
+
+Starting refs: dev `1e6f11ad303f1ee0a3d8db0f18dfaf43a8dc89c3`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; release PR #191 remains open. At the last exact-head snapshot, Push Quality #45610081417 and PR Quality #45610093452 were still running on `1e6f11ad303f1ee0a3d8db0f18dfaf43a8dc89c3`. Earlier candidate failures #45603581050/#45603598028 were traced to the L-angle signed-zero regression; the positive-zero correction is in the current candidate and no assertions were weakened.
+
+A second partial-mutation path existed in Data Tables structural edits: `shiftReferences` rewrote formulas in place while traversing every sheet. If a later cell conversion threw, earlier same-sheet or cross-sheet formulas could already have shifted even though the row/column operation never happened. Reference rewrites are now staged in memory and committed only after the full workbook traversal succeeds.
+
+Added a registered Chromium regression that forces a late conversion failure after local and cross-sheet formulas have been visited, asserts byte-identical exported workbook state and unchanged formulas/row count, then removes the bad cell and verifies a successful insert/recovery. Added a structural unittest and documented the transaction contract. `src/data-tables.js` and the inlined Data Tables module in `index.html` are kept byte-identical.
+
+The local repository checkout is absent in this execution workspace, so local Node/Playwright commands could not be run. Source/bundle parity and the intended source/test/doc edits were checked from the retrieved Git blobs. New exact-head Push and PR Quality are required; pending after this commit. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; main Quality and Pages were previously green. PR #191 still has no independent reviews; both branches report unprotected, rulesets are empty, and branch-protection reads return HTTP 403 to the connected integration. Do not merge or update main directly. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+## Next five features
+
+1. **P0 — Release governance (blocked):** obtain an eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push, force-push and deletion; inspect the complete diff and current exact-head checks; merge only through the ordinary PR process; then verify main Quality, Pages and hosted critical paths. Acceptance: independent approval, required protections visible, all required checks green on the exact PR head, ordinary merge, successful post-merge Quality/Pages and hosted smoke.
+2. **P1 — Finish the seven-shape Truss numerical audit (in progress):** complete thin-wall, subnormal and high-scale independent references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Acceptance: exact-binary64 Decimal references, genuine final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+3. **P1 — Complete Data Tables grid-boundary verification (in progress):** row-6000/column-AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; staged rewrite rollback is implemented on dev. Acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation. Acceptance: independent numerical references, failure/recovery and desktop/390px browser tests.
+
+---
+
+## 2026-11-25 — TRUSS-L-ANGLE-SIGNED-ZERO-CI-REPAIR
+
+Starting refs: dev `183c6500a9d7fc04620d08e385051254c60f76a1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; release PR #191 remains open.
+
+Exact-head Push Quality [#45603581050](https://github.com/saeedsai/ProMathStudio/actions/runs/45603581050) and PR Quality [#45603598028](https://github.com/saeedsai/ProMathStudio/actions/runs/45603598028) both failed at step 214, **2D truss FEM analytical references, scaling and mechanism rejection**. The Truss Node suite reported 90/91 passing. The failing L-angle regression expected dimensional Ixy to be zero, but the normalized result restored the correctly signed binary64 underflow value `-0`; the normalized tensor still produced the correct 45° principal-axis angle. This is a signed-zero representation defect, not a loss of principal-axis information.
+
+Fix on dev: canonicalize only a zero-valued restored dimensional Ixy to positive zero. Keep the normalized signed Ixy for the principal-axis calculation. Tighten the Node regression with `Object.is(value, 0)` and the registered Chromium regression with a positive-zero sign check. Update the Truss numerical contract, living plan, execution ledger and changelog. No `index.html` edit is needed because Truss Studio loads the adjacent `tools/truss-fem.js` asset.
+
+Local repository checkout is absent in this execution workspace, so local Node/Playwright commands cannot run here. Fresh exact-head Push and PR Quality must validate the committed candidate; pending until GitHub Actions completes. No test assertions are weakened.
+
+Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; its Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) previously passed 218/218 and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) completed build/status/deploy successfully. PR #191 has no independent reviews; both branches report unprotected, rulesets are empty, and the connected integration receives HTTP 403 for branch-protection reads. Do not merge until eligible approval and verifiable required protections are available. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+## Next five features
+
+1. **P0 — Exact-head Truss CI and release governance:** require the new dev Push and PR Quality to pass every required step on the same exact SHA; obtain eligible independent PR #191 approval and verifiable main protection for required checks/no direct push/force/deletion; inspect the full diff, merge only through the ordinary PR process, then verify main Quality, Pages and hosted critical paths. Acceptance: zero failed/skipped required checks on the candidate and successful post-merge main/Pages verification.
+2. **P1 — Complete the seven-shape Truss numerical audit:** thin-wall, subnormal and high-scale references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Acceptance: exact-binary64 Decimal references, genuine final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insertion/deletion, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges. Acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation. Acceptance: independent numerical references, failure/recovery and desktop/390px browser tests.
+
+---
+
+## 2026-11-25 — CI-DELIVERY-PLAN-HEADING-REPAIR
+
+Exact-head Push Quality #45602917742 and PR Quality #45602928273 on b37084214b0bce42fb2d2af88c45e4fa120dc975 failed only in structural step 7: tests/test_delivery_policy.py requires the literal heading "Next five features" in docs/HOURLY_DEVELOPMENT_PLAN.md. The five priorities were present under uppercase NEXT FIVE, but the exact compatibility heading was missing. Restored the full historical plan from the preceding b9f00f9 version and added the required heading without changing the five priorities or weakening any assertion. Re-run exact-head Push and PR Quality after this documentation repair.
+
+## 2026-11-25 — TRUSS-L-ANGLE-Ixy-UNDERFLOW-CANDIDATE-SYNTAX-CHECKPOINT
+
+The first candidate commit b05ff5ee250cf90ac65342de6d6a17db40b12696 contained a duplicated continuation of the normalized-candidate guard after a multi-line source replacement. A bounded isolated V8 syntax check caught the malformed source before claiming validation. The duplicate lines were removed without changing the numerical condition or weakening the new regression. The preceding source/test commit remains intact; this follow-up is a compile correction. Re-run actual production-module syntax and the new L-angle underflow regression, then require fresh exact-head Push and PR Quality. No release or main update.
+
+## 2026-11-25 — TRUSS-L-ANGLE-DIMENSIONAL-IXY-UNDERFLOW
+
+Starting dev b9f00f9a19f730a249092057b9ada5e410f743ce; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Prior exact-head Push #45592251939 and PR #45592264589 passed 218/218 each on the starting dev SHA; main Quality #45360386408 and Pages #45360367251 succeeded on unchanged main.
+
+Found and reproduced an L-angle false rejection: exact-binary64 Decimal Ixy≈−2.470544411709329e-329 mm⁴ rounds to zero for B=H=1e-75 mm, t=B·(1−1e-14), although area, diagonal inertias, principal moments, moduli and radii remain representable. The old unconditional Ixy===0 rejection prevented normalized principal-axis recovery.
+
+Changed the L-angle path to normalize the two-rectangle tensor when the physical moment scale is subnormal or dimensional Ixy rounds to zero. The dimensional product may remain correctly rounded to zero; normalized Ixy still supplies the principal angle. Positive determinant, principal moments, section moduli and radii checks remain enforced.
+
+Added exact-binary64 Node references and registered 1280px/390px Chromium regression for area, Ixx/Iyy, zero-rounded Ixy, principal moments, 45° axis, Sx/Sy, and rx/ry. Updated the Structural Truss guide, living plan, this ledger and changelog. Truss Studio loads adjacent assets; no root bundle edit is needed.
+
+Isolated V8 before/after check: old module rejected; patched module returned positive finite section properties, zero-rounded dimensional Ixy and 45° principal angle. Full local Node/Chromium unavailable because the execution workspace has no repository checkout. New exact-head Push/PR Quality pending after the source commit. PR #191 has no independent reviews; both branches remain unprotected, rulesets empty, branch-protection read 403 and no protection-write action exposed. No release attempted. Frozen baseline unchanged at 166 gaps / 95 partial.
+
+NEXT FIVE (priority, status, dependencies and acceptance tests):
+1. P0 — Release governance (blocked): obtain eligible independent approval for PR #191 and verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion; inspect the full diff, merge only through the ordinary PR process, then verify new main Quality, Pages and hosted critical paths. The connected integration currently has no branch-protection write action; do not bypass this.
+2. P1 — Finish the seven-shape Truss numerical audit (in progress): thin-wall, subnormal and high-scale references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; exact-binary64 Decimal results, true final overflow/underflow rejection, invalid rollback and selected-member isolation. Acceptance: full Node suite plus 1280px/390px Chromium, with all relevant exact-head Quality steps green.
+3. P1 — Data Tables grid-boundary edits: row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges. Acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. P1 — Saved-project compatibility: current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. P1 — ODE solver verification: analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation. Acceptance: independent numerical references, failure/recovery and desktop/390px browser checks.
+
+## 2026-11-25 — TRUSS-I-SECTION-CENTRED-WEB-AREA-UNDERFLOW
+
+Starting refs: dev 822246d054dd48a79d6183550bd4fe14cede768f, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; branch listing contained exactly dev/main. Existing exact-head Push Quality #45583979277 and PR Quality #45583988176 each passed 218/218, zero failures/skips, on the starting dev SHA. Main Quality #45360386408 and Pages #45360367251 succeeded on main.
+
+Found a false rejection in composite I-section section properties: a positive centered web can have a product area below binary64 range while the two flange-dominated net section properties remain representable. For B=1e100 mm, H=1e-100 mm, tw=Number.MIN_VALUE mm and tf=1e-101 mm, web area rounds to zero but the exact-binary64 Decimal references for area, Ixx/Iyy, Sx/Sy and rx/ry are finite and positive.
+
+Changed only the central I-section web allowance: zero rounded area is accepted for piece index 1 only when both web dimensions are below 1 mm and the calculated web center equals the section center exactly. Its local inertias are then below the binary64 area contribution and its parallel-axis offsets are zero by symmetry. All other composite-piece area underflow, positive total area and positive final inertia checks remain enforced. A channel using the same dimensions remains rejected.
+
+Added direct Node and registered Chromium desktop/390px regressions with 120-digit Decimal references, channel negative control, exact-center assertions, input immutability and frozen-output checks. Updated the Structural Truss guide, hourly plan and changelog in the same atomic source/test/documentation commit. No root index.html change is required because Truss Studio uses adjacent assets.
+
+Local checkout is absent, so full local Node/Playwright commands could not run. Independent Decimal/binary64 reference calculations were checked separately; exact-head GitHub Actions must certify the new candidate. PR #191 remains open with no independent reviews; both branches are unprotected, rulesets empty and main-protection reads return HTTP 403. No release was attempted. Main and Pages remain unchanged. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+NEXT FIVE: (1) new exact-head Push/PR Quality must pass all 218+ checks, especially Truss Node and 1280px/390px smoke; (2) P0 release governance: independent PR #191 approval, verifiable main protection, ordinary merge and post-merge main Quality/Pages/hosted verification; (3) complete seven-shape Truss numerical boundary/invalid rollback and selected-member isolation matrix; (4) Data Tables row-6000/column-AF #REF!, reversed/mixed-anchor and transactional rollback matrix; (5) saved-project Matrix/Graph/Table compatibility and ODE analytical forward/backward convergence, failure/recovery and mobile tests.
+
+## 2026-11-25 — TRUSS-L-ANGLE-MIXED-SCALE-SUBNORMAL-AXIS-PRECISION
+
+**Starting refs:** dev `22d5f45ad533a81b932f3f44cb594cd10a914b88`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exactly `dev` and `main` exist. Re-read root `AGENTS.md`, this plan, the frozen 2026-10-26 inventory, unified implementation plan, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, exact-head Actions and main Pages evidence.
+
+**Starting exact-head QA:** Push Quality [#45572832526](https://github.com/saeedsai/ProMathStudio/actions/runs/45572832526) and PR Quality [#45572838546](https://github.com/saeedsai/ProMathStudio/actions/runs/45572838546) both passed **218/218 steps**, zero failures/skips, on exact SHA `22d5f45ad533a81b932f3f44cb594cd10a914b88`. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Pages build/status/deploy jobs were all successful.
+
+**Defect reproduced:** For an L-angle with `B=1e-60 mm`, `H=1e60 mm`, `t=1e-140 mm`, `Ixx` is normal while `Iyy` is subnormal. The dimensional `Iyy` rounds correctly, but deriving `Sy=Iyy/cX` and `ry=sqrt(Iyy/A)` from that coarse subnormal value loses about `4.83e-4` and `2.41e-4` relative precision. Existing L-angle normalization only activates when the *largest* inertia is subnormal, so it misses a mixed normal/subnormal axis.
+
+**Fix:** Share the existing exponent-scaled product restorer across section-property branches. When either L-angle centroidal inertia is subnormal and the common low-exponent tensor path did not resolve it, normalize x and y by their own section dimensions. Compute the affected axis's dimensionless inertia, extreme-fibre distance, section modulus and radius directly; restore `Sx/Sy` with exponent-scaled products. Preserve the correctly rounded dimensional inertias, principal tensor calculation, ordinary-size operation order and unaffected axis outputs.
+
+**Regression:** Added a direct Node test with 160-digit Decimal references for subnormal `Iyy`, `Sy` and `ry`; it reproduces the old `I/c` and `sqrt(I/A)` errors above `1e-4`, checks immutability and frozen results. Extended the registered Chromium Truss smoke with the same case at 1280px and 390px. Updated the Structural Truss numerical contract. Truss Studio uses adjacent assets, so root `index.html` synchronization is not applicable.
+
+**Validation and limits:** Independent 160-digit Decimal evaluation from exact binary64 inputs and a binary64 operation-order emulation reproduced the old errors. Axis-separated normalized formulas returned `Sy` and `ry` within `2.3e-16` relative error of the Decimal-rounded references. The local execution environment has no repository checkout; full Node/Chromium validation is pending the new exact-head Push/PR Quality. Implemented on dev only; not released.
+
+**Release blocker:** PR #191 remains open/mergeable with zero submitted independent reviews. Both branches report `protected:false`, rulesets are empty, and branch-protection reads return HTTP 403 to the connected integration. No merge, direct main update, force push or safeguard bypass. Main and Pages remain unchanged. Frozen inventory remains **166 gaps / 95 partial**.
+
+**NEXT FIVE (priority, status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion, plus eligible independent PR #191 approval; inspect full diff and exact head/checks, merge only via ordinary PR, then verify new main Quality, Pages and hosted critical paths.
+2. **P1 — Complete seven-shape Truss numerical boundary audit (in progress):** thin-wall, subnormal and high-scale references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; acceptance: exact-binary64 Decimal results, true final overflow/underflow rejection, invalid rollback, selected-member isolation, full Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation; acceptance: independent numerical references, failure/recovery and desktop/390px browser checks.
+
+## 2026-11-25 — TRUSS-POSITIVE-MASS-FINAL-UNDERFLOW-REJECTION
+
+**Starting refs:** dev `ecade0064c0f5c7f9b30153a2122b18086243b68`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; only `dev` and `main` exist. Re-read root `AGENTS.md`, the living plan, frozen 2026-10-26 MATLAB inventory, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, current exact-head CI and main Pages evidence.
+
+**Starting exact-head QA:** Push Quality [#45568510951](https://github.com/saeedsai/ProMathStudio/actions/runs/45568510951) and PR Quality [#45568518956](https://github.com/saeedsai/ProMathStudio/actions/runs/45568518956) both passed **218/218 steps**, zero failures/skips, on exact SHA `ecade0064c0f5c7f9b30153a2122b18086243b68`, including Truss Node and 1280px/390px browser checks. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and GitHub Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+
+**Defect reproduced:** The scale-safe optional mass helper correctly returns a positive finite result when the intermediate member volume L·A underflows but L·A·ρ is representable. However, when the *final positive mass itself* underflows to zero, `parseModel` passed that zero through `finite()` and exposed a false zero-mass value for a positive density. A fixture with L=2e-12 m, E=200 GPa, area=5e-318 mm² (SI area = Number.MIN_VALUE) and density=1e-300 kg/m³ retains a positive stiffness (~4.940656458412466e-301 N/m), while the final mass rounds to zero. These are synthetic binary64 boundary inputs, not engineering design dimensions.
+
+**Fix:** After the existing scale-safe three-factor product, reject a zero result when density is strictly positive, with a member-specific mass-underflow diagnostic. Explicit zero density remains valid and returns zero mass. A representable positive mass after intermediate volume underflow remains accepted, and genuinely overflowing final mass continues to be rejected by the existing finite-number validation. FEM stiffness/assembly, solve equations and material units are unchanged. The standalone Truss Studio loads adjacent assets; root `index.html` synchronization is not applicable.
+
+**Regression:** Added a direct Node case for final positive-mass underflow, zero-density preservation, a finite positive mass at high density, and preview/material-CSV rejection. Extended the already-registered Chromium regression at 1280px and 390px with the same underflow fixture and zero-density assertion. Updated the Structural Truss numerical contract.
+
+**Validation and limits:** An isolated Node v22.16 harness using the production scale-safe product logic confirmed SI area = Number.MIN_VALUE, stiffness remains positive/finite, positive-density final mass rounds to zero, the new guard rejects it, zero density remains zero, and density 1e308 retains mass 9.88131291682493e-28 kg. This execution container has no repository checkout, so full local `node --test tests/test_truss_fem.js` and Playwright execution are unavailable; new exact-head Push/PR Quality must execute the committed regressions. Previous exact-head Quality is green as recorded above. Candidate is implemented on dev / awaiting new exact-head QA, not released.
+
+**Release blocker:** PR #191 remains open and mergeable, with zero submitted independent reviews. Branch listing reports `protected:false` for both refs; the rulesets list is empty; main branch-protection reads return HTTP 403 to this integration. No merge, direct main update, force push or safeguard bypass. Main and Pages remain unchanged. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+**NEXT FIVE (priority, status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion, plus eligible independent PR #191 approval; inspect the complete diff and exact head/checks, merge only through an ordinary PR, then verify new main Quality, Pages and hosted critical paths.
+2. **P1 — Complete seven-shape Truss numerical boundary audit (in progress):** finish thin-wall, subnormal and high-scale section/member-property references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; acceptance: exact-binary64 Decimal references, true final overflow/underflow rejection, invalid rollback, selected-member isolation, full Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed import preserves every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation; acceptance: independent numerical references, failure/recovery tests and desktop/390px browser checks.
+
+## 2026-11-25 — TRUSS-PREVIEW-EXPLICIT-MEMBER-VOLUME-UNDERFLOW
+
+**Starting refs:** dev `a1d4dfbddf93b9fdf8425a0781b9073c0554ef04`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exactly the `dev` and `main` branches exist. Re-read root AGENTS.md, this living plan, the frozen 2026-10-26 inventory, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, current exact-head Actions and main Pages evidence.
+
+**Starting exact-head QA:** Push Quality [#45566781030](https://github.com/saeedsai/ProMathStudio/actions/runs/45566781030) and PR Quality [#45566785854](https://github.com/saeedsai/ProMathStudio/actions/runs/45566785854) were both in progress on exact SHA `a1d4dfbddf93b9fdf8425a0781b9073c0554ef04`, with no failures reported at inspection. Previous exact-head Push/PR Quality [#45559832473](https://github.com/saeedsai/ProMathStudio/actions/runs/45559832473) and [#45559840058](https://github.com/saeedsai/ProMathStudio/actions/runs/45559840058) passed 218/218 on `d7341c7c1867f1ef046872d16d6477624d8f3a07`. Current main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) both succeeded on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+
+**Defect reproduced:** The previous scale-safe mass fix correctly preserves a finite mass when the intermediate SI volume L·A underflows to zero. However, `inspectJSON` used finite-only checks for per-member and total material volume; finite-only accepts zero. The pre-solve UI therefore reported a positive physical volume as 0, and `exportMaterialCSV` inherited the same silent zero through `inspectJSON`. The opposite overflow case was already rejected.
+
+**Fix:** `inspectJSON` now computes each member volume once, rejects a zero-underflow result with a member-specific diagnostic, retains the existing overflow diagnostic, and reuses the validated volumes for both the total and per-member metrics. `parseModel`, scale-safe mass, axial stiffness, `solve` and the FEM equations are unchanged. Because the standalone UI already displays preview errors and blocks material export through this API, no UI or root index.html bundle change is required.
+
+**Regression:** Added a Node test proving the same positive mass remains representable while preview and material CSV reject the underflowed volume; it also verifies the existing huge-volume overflow rejection. Extended the registered Chromium Truss smoke to exercise the underflow diagnostic at both 1280px and 390px while retaining the positive mass assertion. Updated the Structural Truss numerical contract.
+
+**Validation and limits:** The execution container has no checkout (`git rev-parse --show-toplevel` returned `fatal: not a git repository`); no repeated local network retry was made. Full local `node --test tests/test_truss_fem.js` and Playwright smoke are unavailable and are delegated to fresh exact-head Push/PR Quality. The prior Euler candidate's two exact-head workflows were still in progress at the time of this change; this commit triggers fresh checks. Candidate is Implemented on dev / In QA, not released.
+
+**Release blocker:** PR #191 remains open/mergeable with zero submitted independent reviews; head was `a1d4dfbddf93b9fdf8425a0781b9073c0554ef04` before this commit and base is main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Branch listing reports `protected:false` for both refs; rulesets are empty and main branch-protection reads return HTTP 403 to the integration. No merge, direct main update, force push or safeguard bypass. Main and Pages remain unchanged. Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+**NEXT FIVE (priority, status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion, plus eligible independent PR #191 approval; inspect full diff and exact head/checks, ordinary PR merge only, then verify new main Quality, Pages and hosted critical paths.
+2. **P1 — Complete seven-shape Truss numerical boundary audit (in progress):** finish thin-wall, subnormal and high-scale section/member-property references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle; acceptance: exact-binary64 Decimal references, true final overflow/underflow rejection, invalid rollback, selected-member isolation, full Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed import preserves every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation; acceptance: independent numerical references, failure/recovery tests and desktop/390px browser checks.
+
+
+## 2026-11-25 — TRUSS-EULER-CRITICAL-LOAD-SCALE-SAFE-QUOTIENT
+
+Starting dev `d7341c7c1867f1ef046872d16d6477624d8f3a07`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS, living plan, frozen inventory, engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, exact-head CI and Pages. Exact starting Push #45559832473 and PR #45559840058 each passed 218/218, zero failures/skips; main Quality #45360386408 and Pages #45360367251 succeeded on current main.
+
+Found optional Euler Pcr could be rejected when intermediate `π²·E·I`, `K·L` or `(K·L)²` overflowed/underflowed although the exact-binary64 final quotient remained representable. Added an exponent-scaled positive product/quotient fallback while retaining the original direct operation order for ordinary inputs. Node references cover Number.MAX_VALUE I, simultaneous numerator/denominator overflow and underflow, plus genuine final overflow/underflow rejection. Registered Chromium smoke repeats both representable extremes at 1280px and 390px. Updated the Structural Truss contract; no root bundle edit applies to the standalone tool.
+
+Isolated V8 checks matched both Decimal-rounded references within 2.3e-16 relative error and retained the ordinary 493480.22005446785 N result. No local repository checkout exists; full Node/Playwright checks require new exact-head Push/PR Quality. PR #191 remains open with zero independent reviews; main is unprotected, rulesets empty and protection reads HTTP 403. No merge or bypass. Historical inventory remains 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 verifiable main protection + eligible independent PR #191 review, then ordinary PR merge and exact-main Quality/Pages/hosted verification; (2) finish seven-shape Truss numeric boundary matrix with Decimal references, rollback, member isolation and desktop/390px tests; (3) spreadsheet row-6000/column-AF, #REF!, mixed-anchor and atomic rollback cases; (4) Matrix/Graph/Table legacy/current round-trip and malformed-import rollback; (5) analytical forward/backward ODE references, convergence, diagnostics and stale-export recovery.
+
+
+## 2026-11-25 — TRUSS-MEMBER-MASS-SCALE-SAFE-LENGTH-AREA-DENSITY
+
+**Starting refs:** dev `fc93bccac6277d1a086e3ca988e30f7a257f275a`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; the only branches are dev and main. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified implementation/engineering architecture/toolbox contracts, Truss source/tests/guide, PR #191, current exact-head CI, branch metadata and Pages evidence.
+
+**Existing exact-head evidence:** Push Quality [#45550682357](https://github.com/saeedsai/ProMathStudio/actions/runs/45550682357) and PR Quality [#45550689187](https://github.com/saeedsai/ProMathStudio/actions/runs/45550689187) both passed all 218 steps on exact head `fc93bccac6277d1a086e3ca988e30f7a257f275a`, with zero failures/skips; Truss FEM analytical/browser steps 214/215 passed. PR #191 is open/mergeable, head `fc93bccac6277d1a086e3ca988e30f7a257f275a`, base `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`, with zero submitted reviews. Both branches report `protected:false`; rulesets are empty and main branch-protection reads return HTTP 403 to the connected integration. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on current main.
+
+**Defect reproduced from the current parser:** optional member mass was evaluated as `(L*A)*density` after first materializing member volume. For L=2e-12 m, SI A=Number.MIN_VALUE (from 4.940656458412465e-318 mm²) and density=1e308 kg/m³, L*A underflows to zero although the exact-binary64 mass is 9.88131291682493e-28 kg; the parser silently reported zero. For L=1e308 m, SI A=9.999999999999999e301 m² (from 1e308 mm²) and density=1e-310 kg/m³, L*A overflows although the exact-binary64 mass is 9.999999999999968e299 kg; the parser rejected the member.
+
+**Fix:** added a positive three-factor product that keeps the direct path when its intermediate and final products are normal/finite, otherwise decomposes each factor into binary mantissa/exponent and restores only the final mass. Density zero remains zero; the existing finite-result validator continues rejecting genuinely overflowing mass. No mass or material-volume field is silently fabricated.
+
+**Regression:** direct Node tests verify both old intermediate failures, positive finite stiffness and mass, exact-binary64 Decimal references, zero-density behavior and genuine final-mass overflow rejection. The already-registered Truss Chromium smoke repeats both cases at 1280px and 390px. Updated the standalone Truss numerical contract; no root `index.html` bundle change applies because Truss Studio loads adjacent JS assets.
+
+**Validation:** Node 22.16 isolated execution of the same exponent-scaled helper reproduced the old volume underflow/overflow and returned both Decimal-rounded mass references exactly; ordinary product behavior and zero density passed. The execution environment has no repository checkout, so the full `node --test tests/test_truss_fem.js` and Chromium smoke are delegated to fresh exact-head Push/PR Quality. Candidate remains implemented on dev/in QA, not released.
+
+**Release state:** PR #191 remains the ordinary dev-to-main promotion path. No independent approval exists; both refs are unprotected, rulesets are empty and the connected integration cannot read/write branch protection. No merge or safeguard bypass was attempted. Main/Pages remain unchanged. Frozen historical baseline remains **166 gaps / 95 partial**.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain verifiable main protection requiring exact-head Quality, prohibiting direct push/force/deletion, and eligible independent PR #191 approval; inspect full diff and exact PR head/checks, merge only through ordinary PR, then verify new main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Complete Truss numerical boundary audit (in progress):** finish thin-wall/subnormal/high-scale cases for all seven section shapes plus EA/L, L·A·density and optional material metrics; acceptance: exact-binary64 Decimal references, true final overflow/underflow rejection, invalid rollback, selected-member isolation, Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed import preserves every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics, stale-export invalidation; acceptance: independent numerical references, failure/recovery tests and desktop/390px browser checks.
+
+Historical MATLAB inventory remains frozen at **166 gaps / 95 partial**; no baseline count is changed by this bounded correctness fix.
+
+## 2026-11-25 — TRUSS-AXIAL-STIFFNESS-SCALE-SAFE-EA-OVER-L
+
+**Starting refs:** dev 2d74692089a45150608c9d801953282a2d0e03af, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; only the target branches dev and main exist, although both currently report unprotected. Re-read root AGENTS.md, this living queue, the frozen 2026-10-26 inventory, Engineering Architecture/Toolbox contracts, Truss implementation/tests/guide, PR #191 and current exact-head CI/Pages evidence.
+
+**Existing CI/release state:** dev Push Quality [#45544386574](https://github.com/saeedsai/ProMathStudio/actions/runs/45544386574) and PR Quality [#45544393053](https://github.com/saeedsai/ProMathStudio/actions/runs/45544393053) both completed successfully on exact head 2d74692089a45150608c9d801953282a2d0e03af; each job's 218 steps passed with zero failures/skips. PR #191 remains open, mergeable and has zero submitted reviews. Branch listing reports protected:false for both refs, rulesets are empty, and main protection read returns HTTP 403 to the connected integration. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain successful on main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; no new main deployment is claimed.
+
+**Defect reproduced in the actual production module:** the parser calculated axial member stiffness as E*A/L. For E=1e299 GPa, A=1e308 mm², L=1e308 m, the intermediate E*A overflowed although the quotient is a finite ~1e302 N/m. For E=1e-16 GPa, A=5e-315 mm², L=2e-12 m, the intermediate rounded to zero although the quotient is a positive subnormal ~2.49997217e-316 N/m. Both inputs are synthetic binary64 boundary fixtures, not physical design examples.
+
+**Fix:** retain the direct E*A/L path when E*A is normal and the quotient is finite/positive, preserving ordinary bit-level behavior. Otherwise decompose positive operands into binary mantissas/exponents, combine exponents before restoring the result, and handle subnormal output rounding explicitly. Existing parser checks continue rejecting a genuinely overflowing or underflowing final stiffness.
+
+**Regression:** direct Node tests assert both old intermediate failures, compare final stiffness against 120-digit Decimal references from the exact binary64 E/A/L operands, retain true final-overflow and existing final-underflow rejection, and verify ordinary bar stiffness remains exactly 1e8 N/m. The registered standalone Truss Chromium smoke repeats both representable-range cases at 1280px and 390px. No index.html bundle edit is applicable: the standalone Truss Studio loads its own adjacent tools/truss-fem.js asset.
+
+**Validation:** pre-fix actual module rejected both representable cases with stiffness overflow / stiffness underflow. The updated production module is executed in isolated V8 before commit; full Node and Chromium checks are delegated to fresh exact-head Push/PR Quality because this execution runtime has no local checkout. The candidate remains implemented on dev/in QA until both workflows pass; not released.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main protection requiring exact-head Quality, forbidding direct push/force/deletion, plus eligible independent PR #191 approval; inspect full diff, verify exact PR head/checks, merge only through ordinary PR, then verify new main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Complete Truss numerical boundary audit (in progress):** finish remaining thin-wall/subnormal/high-scale cases for all seven section shapes and member EA/L/material metrics; acceptance: independent exact-binary64 Decimal references, true overflow/underflow rejection, invalid rollback, selected-member isolation, Node suite and 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insert/delete, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges; acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; acceptance: malformed import preserves every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics, stale-export invalidation; acceptance: independent numeric references, failure/recovery tests and desktop/390px browser checks.
+
+Historical MATLAB inventory remains frozen at 166 gaps / 95 partial; no baseline count is changed by this bounded numerical fix.
+
+## 2026-11-25 — TRUSS-HOLLOW-CAVITY-AREA-UNDERFLOW-RECOVERY
+
+**Starting refs:** dev `530dc4ac299db7b4ea1017cd68e33047db602543`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; dev was 20 commits ahead and 0 behind. Re-read root AGENTS.md, the living plan, frozen 2026-10-26 inventory, unified engineering plans/catalogs, Truss source/tests/guide, current refs, PR #191, exact-head Quality and main Pages evidence.
+
+**Release evidence:** dev Push Quality [#45523240461](https://github.com/saeedsai/ProMathStudio/actions/runs/45523240461) and PR Quality [#45530344697](https://github.com/saeedsai/ProMathStudio/actions/runs/45530344697) both passed 218/218 on exact head `530dc4ac299db7b4ea1017cd68e33047db602543`. Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) succeeded on main. PR #191 remains open with zero reviews. Only dev/main branches exist; both are unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge or protection bypass was attempted.
+
+**Defect reproduced in the actual production module:** hollow-rectangle dimensions B=1e100, H=1e-100, bi=hi=1e-162 mm and hollow-circle dimensions Do=1e-50, Di=1e-200 mm were rejected because the cavity area / inner-diameter square rounded to zero, even though the ratio-based net area, both inertias, section moduli and radii are finite. These are numerical-range fixtures, not design dimensions.
+
+**Fix:** remove the unnecessary inner-cavity area/square materialization checks. Positive and strictly contained inner dimensions are still validated; the existing factored dimensionless ratios compute net hollow properties, and the final net-area/inertia underflow/overflow checks remain. Ordinary hollow sections are unchanged.
+
+**Regression:** added a direct Node test and the already-registered Chromium smoke at 1280px and 390px. Both compare all net properties against the corresponding solid envelope at binary64 precision, assert the cavity intermediate is zero, require finite positive net properties, and verify input immutability/frozen results. Updated the Structural Truss guide and changelog. The standalone Truss Studio loads adjacent JS assets; root index.html synchronization is not applicable.
+
+**Validation:** the pre-fix actual module reproduced both specific underflow rejections. Independent arithmetic references show rectangle area 1 mm², Ixx ~8.333333333333334e-202 mm⁴, Iyy ~8.333333333333332e198 mm⁴; circle area ~7.853981633974483e-101 mm² and inertia ~4.908738521234052e-202 mm⁴. Modified production-module V8 validation is recorded after commit; full Node/Chromium CI is pending. Local checkout is absent, so no local Playwright or full Node suite is claimed.
+
+**Historical ledger repair:** the dev ledger had been truncated to 7 headings / 14,813 bytes while main retained 131 headings / 340,767 bytes. Restored the complete main historical ledger and preserved all seven unique dev entries before appending this run; the frozen 166-gap/95-partial inventory was not modified.
+
+**NEXT FIVE (status, dependencies and acceptance tests):**
+1. **P0 — Release governance (blocked):** PR #191 exact-head Quality green; obtain eligible independent approval and admin-verifiable main protection requiring exact-head Quality and prohibiting direct push/force/deletion; inspect full diff, merge only through ordinary PR, then verify main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Spreadsheet structural correctness (in progress):** complete row-6000/column-AF insertion/deletion, valid/invalid #REF! transitions, reversed/mixed-anchor and blank-grid ranges, failed-insert and noncontiguous-sort byte-identical rollback; structural plus 1280px/390px Chromium.
+3. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips; malformed import preserves all workspaces, selections and previous results; desktop/390px.
+4. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics, stale-export invalidation and mobile recovery.
+5. **P1 — Seven-shape Truss boundary audit:** extend independent thin-wall/subnormal/high-scale references beyond hollow rectangle/circle; invalid rollback, selected-member isolation, Node Decimal references and desktop/390px browser checks.
+
+Historical inventory remains frozen at **166 gaps / 95 partial**.
+
+
+## 2026-11-25 — Data Tables sort validator regex CI repair
+
+Starting dev `09cfeb6e971b67f390f4390d9f8cd280a1f2f2b2`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact Quality #45522925339 failed structural step 7: Node syntax validation rejected the new sort helper's over-escaped regex (one failure in 600 tests; browser steps skipped after the structural job failed). The failure was read from the exact job log, not inferred.
+
+Corrected the regex to the same single-backslash JavaScript literal used by the existing spreadsheet reference validator. Added a structural assertion for the exact regex spelling. Preserved the range/blank-row behavior and synchronized standalone index.html with src/data-tables.js. The previous starting-head Quality #45515170826 was green 218/218.
+
+Corrected regex cases: A1, $A$1 and AF6000 accepted; AG1, A6001 and A0 rejected. Remote source/bundle parity checked. Local checkout is absent; full local tests unavailable. New exact-head Quality pending; no test weakening or release bypass. Historical inventory unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 release governance: enforceable main protections, independent review, ordinary PR, exact checks and Pages verification. (2) P1 spreadsheet structural correctness: corrected sort CI, row-6000/column-AF boundaries, #REF!, blank/reversed/mixed-anchor ranges, failed-insert and noncontiguous-sort atomicity, desktop/390px. (3) P1 current/legacy Matrix/Graph/Table round-trips and malformed-import rollback. (4) P1 ODE analytical forward/backward references, convergence, unsupported classes, stale exports and mobile recovery. (5) P1 seven-shape Truss thin-wall/subnormal/high-scale references, invalid rollback and desktop/390px.
+
+## 2026-11-25 — Data Tables sort preserves invalid and blank-grid references
+
+Starting dev `a7251d6cf2650b778db8d9abc15fba998ecf021d`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; dev Quality [#45515170826](https://github.com/saeedsai/ProMathStudio/actions/runs/45515170826) passed 218/218 with zero failures/skips. Main Quality #45360386408 passed 218/218; Pages #45360367251 build/status/deploy all succeeded. No open PRs; only dev/main. Rulesets empty; main protection read HTTP 403.
+
+Fixed Data Tables stable sorting at the supported grid boundary. Sort now leaves invalid scalar/range references outside A1:AF6000 unchanged, keeps valid blank cells beyond the materialized table at fixed coordinates, and still rejects a range whose mapped rows become noncontiguous. Added a registered browser regression for full-grid and blank ranges, invalid AG/A6001 references, reversed mixed-anchor ranges and calculated values; added a structural unittest and clarified DATA_TABLES.md. Updated both modular source and standalone index.html in one tree.
+
+Isolated V8 range-mapping checks passed for full-grid, blank-cell, invalid-reference, reversed-anchor and noncontiguous cases. Local Python/Chromium and build checks are unavailable because this execution runtime has no Git checkout; new exact-head Quality is pending. Implemented on dev only, not released. Frozen inventory unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 release governance: enforceable main protection, independent review, ordinary PR, exact checks and Pages verification. (2) P1 spreadsheet structural correctness: row-6000/column-AF edges, #REF!, blank-grid and reversed/mixed-anchor sorting, failed-insert and noncontiguous-sort atomic rollback, desktop/390px. (3) P1 current/legacy Matrix/Graph/Table project round-trips and malformed-import rollback. (4) P1 ODE analytical forward/backward references, convergence, unsupported classes, stale exports and mobile recovery. (5) P1 remaining seven-shape Truss thin-wall/subnormal/high-scale property references and desktop/390px tests.
+
+## 2026-11-25 — Data Tables row-insertion preflight atomicity
+
+Starting dev `58a5f8d008268413080cc2594665fb9277bf2c32`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact starting dev Quality [#45506851043](https://github.com/saeedsai/ProMathStudio/actions/runs/45506851043) passed 218/218 with zero failures/skips. Main Quality #45360386408 and Pages #45360367251 succeeded on current main. No open PRs; only dev/main. Rulesets empty; protection reads HTTP 403.
+
+Fixed a partial-mutation path in Data Tables row insertion: caller cell values are now converted/truncated into a complete row before workbook-wide formula-reference rewriting. A throwing value conversion or invalid row shape therefore cannot shift cross-sheet formulas without inserting the row. Added a Chromium regression asserting the error and exact exported-workbook rollback, plus a structural unittest for preflight ordering. Updated Data Tables guide, living plan and changelog; root standalone bundle remains synchronized with `src/data-tables.js`.
+
+The local runtime has no Git checkout, so local Python/Chromium commands were unavailable. Current dev Quality is green; the new exact-head run is pending. Implemented on dev, not released. Historical inventory remains frozen at 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 release governance: verifiable main protections, independent review, ordinary PR, exact checks and Pages verification. (2) P1 spreadsheet structural correctness: row-6000/column-AF edges, #REF!, reversed ranges, mixed anchors, failed-insert atomicity, rejected-sort rollback and 390px. (3) P1 current/legacy Matrix/Graph/Table project round-trips with malformed-import rollback and focus/mobile checks. (4) P1 ODE forward/backward references, convergence, unsupported classes, stale exports and mobile recovery. (5) P1 remaining seven-shape Truss thin-wall/subnormal/high-scale property references and desktop/390px checks.
+
+## 2026-11-24 — TRUSS-COMPOSITE-AXIS-SEPARATED-SCALE-RECOVERY
+
+Starting dev `540d86ad81b6b92269c2bb4b26a04b767fa289d8`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact starting dev Quality #45487505257 green **218/218**, zero failures/skips; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 16 ahead/0 behind. Both branches unprotected, rulesets empty, protection reads HTTP 403.
+
+Fixed channel/I-section extreme-aspect property loss when max(B,H)-only normalized Ixx underflowed despite representable physical subnormal Ixx, rx and Sx. Added an axis-separated x/B, y/H normalized rectangle tensor fallback only when the common-scale area/inertias fall below normal binary64; dimensional area/inertias and ordinary common-scale paths remain unchanged. Exponent-scaled products restore Sx/Sy without intermediate range loss. Added direct Node and mandatory 1280px/390px Chromium exact-binary64/120-digit Decimal regressions for B=1e150, H=1e-154, tw=1e-154, tf=4.9e-155; old rx/Sx errors >1e-11 are reproduced and corrected rx/ry/Sx/Sy match within 5e-13. Input immutability/frozen outputs and ordinary I/c parity covered. Actual modified production module passed isolated V8 checks within 2.3e-16; full Node/Chromium awaits new exact-head Quality. Updated Structural Truss guide, living plan and changelog. Implemented on dev, not released. Historical baseline unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority, status and acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main protection requiring exact-head Quality and forbidding direct push/force/deletion, plus eligible independent approval; then use one ordinary dev→main PR and verify PR checks, main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Finish seven-shape Truss property audit (in progress):** complete remaining thin-wall/subnormal/high-scale references across rectangle, hollow rectangle, circles, channel, I-section and L-angle; verify area, centroid, inertias, principal properties, Sx/Sy and rx/ry, invalid rollback, selected-member isolation and 1280px/390px Chromium.
+3. **P1 — Spreadsheet grid-edge structural references:** row 6000/column AF insertion/deletion and #REF! recovery, reversed ranges, mixed anchors, rejected-sort byte-for-byte rollback and desktop/390px checks.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed imports preserve all workspaces, selections and prior results at desktop/390px.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, unsupported-class diagnostics, tolerance/step convergence, stale-export invalidation and desktop/390px recovery.
+
+## 2026-11-24 — TRUSS-COMPOSITE-SUBNORMAL-SECTION-MODULUS
+
+Starting dev `de0ccc300fd81ceb72dfaecbd55aef1a46780f78`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact dev Quality #45477244278 green **218/218**, zero failures/skips; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 15 ahead/0 behind. Both refs unprotected, rulesets empty, protection reads HTTP 403.
+
+Fixed channel/I-section Sx/Sy precision when dimensional Ixx/Iyy are subnormal. Reuse normalized composite inertias and normalized extreme-fibre distances to evaluate L³·I/c without dividing quantized physical inertias. Old errors: Sx -5.15% for both, channel Sy +23.90%, I-section Sy -6.85%. Added Node and registered Chromium 1280px/390px exact-binary64/120-digit Decimal regressions, immutability and frozen-output checks. Updated Truss guide, living plan and changelog. Independent Decimal and isolated V8 normalized calculations matched references within 5e-16; full Node/Chromium run awaits exact-head GitHub Quality because no local checkout is available. Implemented on dev, not released. Historical baseline unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE:** (1) P0 release governance: verifiable main protections, eligible independent review, ordinary PR, exact checks and Pages verification. (2) P1 finish seven-shape Truss thin-wall/subnormal/high-scale audit with independent references, invalid rollback, selected-member isolation and desktop/390px tests. (3) P1 spreadsheet row-6000/column-AF grid-edge insert/delete, #REF! recovery, mixed anchors, reversed ranges and atomic rollback. (4) P1 current/legacy Matrix/Graph/Table round-trips with malformed-import rollback and focus/mobile checks. (5) P1 ODE analytical forward/backward references, convergence, unsupported classes, stale exports and mobile recovery.
+
+## 2026-11-24 — TRUSS-CIRCULAR-SUBNORMAL-SECTION-MODULUS
+
+Starting dev b433c0db406e72a74488fd2c20fd4d473af81b29, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; exact starting dev Quality #45467047779 green 218/218; main Quality #45360386408 and Pages #45360367251 successful. No open PRs; only dev/main; dev 14 ahead/0 behind. Both refs unprotected, rulesets empty, protection read HTTP 403.
+
+Fixed solid/hollow circle Sx/Sy when I is subnormal: use (π/32)·Do³·inertiaFactor with the existing factored annulus term only below the normal-inertia threshold. Old I/c overestimated the solid and hollow references by 24.3% and 32.5%; corrected production-module results match independent 120-digit Decimal values. Ordinary 40 mm circle path unchanged. Added Node and registered Chromium 1280px/390px regressions; source, tests, Structural Truss guide, living plan and changelog updated atomically. Actual modified module passed isolated V8 checks for subnormal cases, ordinary circle parity, immutability and invalid annulus rejection. New exact-head Quality pending; no local full Node/Chromium suite. Implemented on dev, not released. Historical inventory unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE:**
+1. P0 release governance — required main protections, independent review, ordinary PR, exact-head checks and Pages verification.
+2. P1 seven-shape Truss boundary audit — independent thin-wall/subnormal/high-scale references, invalid rollback and desktop/390px.
+3. P1 spreadsheet grid edges — row 6000/column AF, #REF!, mixed anchors, reversed ranges, atomic rollback.
+4. P1 saved-project compatibility — current/legacy Matrix/Graph/Table round-trip and malformed-import rollback.
+5. P1 ODE verification — analytical forward/backward IVPs, convergence, unsupported classes and mobile recovery.
+
+## 2026-11-24 — TRUSS-RECTANGULAR-SUBNORMAL-SECTION-MODULUS
+
+Starting dev `9f07a13caa491175a466cd32e8484039e6d6a4e0`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; exact starting dev Quality #45457066031 green 218/218; main Quality #45360386408 green; Pages #45360367251 successful. No open PRs; only dev/main; dev 13 ahead/0 behind. Both branches unprotected, rulesets empty, protection read HTTP 403; integration exposes no protection-write action.
+
+Fixed solid/hollow rectangle Sx/Sy precision when Ixx/Iyy are subnormal but section moduli are representable. Use existing dimensionless factors directly only on affected subnormal-inertia axes rather than dividing rounded I/c; normal-inertia paths remain unchanged. Added Node and registered Chromium 1280px/390px regressions with exact-binary64/120-digit Decimal references, old-error reproduction, and immutability checks. Updated Structural Truss guide, hourly plan and changelog. Isolated actual-source V8 checks passed for both new cases and ordinary 40×60 mm rectangle. Full local Node/Chromium unavailable without checkout; new exact-head Quality pending. Implemented on dev, not released. Historical inventory unchanged at 166 gaps / 95 partial.
+
+**NEXT FIVE (priority, status, acceptance tests):**
+1. **P0 — Release governance (blocked):** obtain admin-verifiable main protection requiring Quality, prohibiting direct pushes/force/deletion, and eligible independent review; then use one ordinary dev→main PR, verify exact-head PR checks, merge normally, and confirm new main SHA, main Quality, Pages deployment and hosted critical paths.
+2. **P1 — Finish the seven-shape Truss property-boundary audit:** for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle, verify area, centroid, Ixx/Iyy/Ixy, principal moments/axis, Sx/Sy and rx/ry against independent high-precision thin-wall/subnormal/high-scale references; invalid/unrepresentable geometry must reject without member mutation; Chromium must pass at 1280px/390px.
+3. **P1 — Spreadsheet grid-edge structural references:** insert at row 6000/column AF and delete/recover #REF!, cover reversed ranges and mixed absolute anchors, and assert byte-for-byte workbook rollback after invalid/noncontiguous sort at desktop/390px.
+4. **P1 — Saved-project compatibility:** current/legacy Matrix, Graph and Table round-trips; malformed-import rollback must preserve every workspace, selection and prior result; verify desktop/390px browser behavior.
+5. **P1 — ODE solver verification:** analytical forward/backward IVP references, unsupported-class diagnostics, tolerance/step convergence, stale-export invalidation and desktop/390px error recovery.
+
+
+
+---
+
 ## 2026-11-24 — TRUSS-SOLID-CIRCLE-FOURTH-POWER-RANGE-SAFETY
 
 - Starting refs: dev `7f05e2a35d8fd15f34b6d83e0653a3b528e78c2d`, main `70fc483cb1cec3d2372d37484e4a8ef7942343da`. Read root AGENTS.md, living plan, frozen MATLAB inventory, Structural Truss source/tests/contract, PR #189/reviews, refs, Actions and Pages.
@@ -1432,3 +2585,354 @@ Release state at start: PR #189 open/mergeable, head matched dev, base matched m
 
 **NEXT FIVE:** (1) both exact-head Quality workflows green on the new SHA, including the extreme annulus Node/browser regression, 59 FEM Node tests, Truss 212/214/215 and spreadsheet 78–80; (2) finish seven-shape numeric boundary/invalid rollback and selected-member isolation matrix; (3) spreadsheet mixed/absolute references, quoted sheet names, reversed ranges and transactional sort/delete; (4) one approved source-backed Engineering Toolbox tool with canonical ID, shared solver/units/plots and mobile tests; (5) independent PR #189 review plus authorized main protection, then ordinary PR promotion and exact-main Quality/Pages/hosted verification.
 
+
+
+## 2026-11-25 — DATA-TABLES-ACTION-MENU-ACCESSIBLE-NAMES
+
+Starting dev `6f88300e4283888926060fac9863eabda1fd9934`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Exact-head Push Quality #45624216921 and PR Quality #45624229313 both failed at step 80, Spreadsheet range deletion regression. Both job logs show the same Playwright assertion failure at line 166: `#dt-rename` was hidden. Root cause: the first Data Tables toolbar is moved into the collapsed native Table action menu by `simplifyTable()`; reselecting the workspace alone cannot reveal Rename.
+
+Updated the inline standalone `index.html` menu helper to set an explicit accessible name on every native summary (`<name> actions`). Updated the registered Chromium test to open the Table menu through `get_by_role("button", name="Table actions")` before asserting Rename visibility and testing sheet-rename failure/recovery. This fixes the actual hidden-menu assumption and adds accessible names for all five action menus. No workbook logic or assertions were weakened. The helper is also maintained in `src/numerical-data.js`. The first candidate changed only the standalone bundle; exact-head structural CI correctly rejected that source/bundle mismatch. This follow-up synchronizes both representations and retains the browser regression.
+
+The local execution workspace has no repository checkout, so full local Python/Playwright tests were not run. Exact-head GitHub Push and PR Quality are pending for the new commit. Main remains unchanged; PR #191 stays open. Branches remain exactly dev/main; both are unprotected, rulesets are empty and branch-protection reads return HTTP 403. Do not merge or update main directly. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-25 — DATA-TABLES-MENU-SOURCE-BUNDLE-PARITY
+
+The accessible-menu candidate `f241b89e864a801be1f352aa6417c3a78c3214c9` updated the standalone `index.html` and registered smoke but omitted the corresponding `src/numerical-data.js` helper. Exact-head Push #45627424546 and PR #45627436102 failed at structural step 7 with 15 parity assertions across 602 tests (one pre-existing skip). The log showed the source helper lacked the `aria-label` present in the embedded bundle. The browser regression was skipped because the structural step failed first.
+
+Follow-up: synchronize the same accessible-name change in `src/numerical-data.js` and the already-updated standalone script; retain the test that opens the Table disclosure by accessible role/name. No assertions were weakened. The local workspace has no checkout, so full local Python/Playwright is unavailable; new exact-head Push/PR Quality must complete. Main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`, main Quality #45360386408 and Pages #45360367251 remain unchanged/successful. PR #191 remains open; no independent reviews, no branch protection/rulesets, and no merge authorized. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-26 — PROJECT-PRIMARY-GRAPH-DATASET-MAPPING-VALIDATION
+
+Starting dev `3f8eb51cac02f34ac1e1e42ad77fa3e6c9c39040`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. PR #191 remained open/mergeable with no submitted independent reviews. Exact PR Quality #45773429482 succeeded on the starting dev head; exact Push Quality #45773425699 was cancelled, not failed. Only dev/main branches were present. Repository rulesets were empty; branch-protection read returned HTTP 403 to the integration.
+
+Fixed a saved-project data-loss issue: invalid primary Graph mode, X/Y/Z selector or plot style values were previously ignored by restore code and replaced by current defaults. Added schema preflight validation while preserving legacy projects without selector fields, header-derived defaults, and dormant 2D Z overlap. Explicit 3D axes must be distinct. No graph rendering or project-version change.
+
+Committed source, matching standalone `index.html` script, Node schema regression, Chromium atomic-import/round-trip regression, project-format documentation, plan, ledger and changelog in one atomic dev commit. Pre-edit source/bundle parity was verified; candidate parity and isolated V8 checks passed. V8 cases cover valid 2D/3D and legacy projects, invalid graph mode, invalid/out-of-range axes, duplicate axes, invalid style, invalid 3D defaults, and input immutability.
+
+Local checkout is absent; native local Python, Playwright and build checks were not run. Fresh exact-head Push and PR Quality are pending. Main is unchanged; no release or hosted verification of this change. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+**NEXT FIVE:** (1) exact-head Push+PR Quality green on the same SHA; Node/Chromium validate legacy/default and valid 2D/3D selectors, reject malformed mappings and preserve prior project on rollback; (2) eligible independent PR #191 approval and verifiable main protection, then ordinary PR merge and exact-main Quality/Pages/hosted checks; (3) complete Matrix/Graph/Table v1/current round-trips and focus/selection rollback; (4) Data Tables structural-reference boundary matrix through row 6000/column AF, quoted names and atomic rollback; (5) seven-shape Truss reference/boundary audit including low exponent, near-solid, fallback and responsive checks.
+
+
+## 2026-11-26 — CI-FIX-GRAPH-MAPPING-TEST-DECLARATION
+
+The first exact-head Push Quality #45782122512 and PR Quality #45782130950 both failed at structural step 7. Retrieved both job logs: the sole test failure was `test_import_cell_types_and_standalone_parity`, whose inline Node script redeclared `const valid2d` already used by the existing overlay tests. This was a regression-fixture naming collision; the production module itself had passed the isolated V8 mapping cases, and the browser suite was skipped because structural checks stop the workflow. Renamed only the newly added 2D fixture to `dormant2d`; did not weaken assertions or change production code. This correction and the plan/changelog update are committed together on dev. Fresh exact-head Push and PR Quality are pending; main and Pages remain unchanged. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+
+## 2026-11-26 — TRUSS-HOLLOW-CIRCLE-SMALL-CAVITY-ROUNDING
+
+Starting dev 7824a8d343b8da86bc148707a909bc2f8e4754d6; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Re-read AGENTS.md, the living plan, frozen inventory, Truss contract, exact source/tests, PR and workflow evidence. The historical inventory remains **166 gaps / 95 partial**.
+
+Exact-head starting CI: Push Quality [#45782533305](https://github.com/saeedsai/ProMathStudio/actions/runs/45782533305) and PR Quality [#45782540283](https://github.com/saeedsai/ProMathStudio/actions/runs/45782540283) both green, 218/218 steps, zero failed/skipped. PR #191 open, 63 ahead/0 behind, 24 changed files, zero reviews. Only dev/main branches; unprotected, empty rulesets, branch-protection GET 403. No merge.
+
+Fixed hollow-circle small-cavity rounding. For inner/outer diameter ratio q <= 0.5, area/inertia factors now use 1-q² and 1-q⁴; for q > 0.5 the factored radial-gap path remains for thin-wall precision. Fixture Do=1 mm, Di=9.313225746154786e-14 mm previously returned A=0.7853981633974482 mm² and I=0.04908738521234051 mm⁴; corrected results match solid-circle rounding A=0.7853981633974483 and I=0.04908738521234052. Added Node and Chromium regressions for the old one-ulp reproduction and equality of A, Ixx/Iyy, Sx/Sy and rx/ry with the solid envelope. Existing thin-wall, overflow, subnormal and unresolved-cavity tests retained.
+
+Isolated V8 loaded the actual fetched production module and reproduced the defect before patch; patched candidate passed exact solid-circle equality. The existing extreme thin-wall branch remains unchanged. Node regression source syntax compiled in V8. No local repository checkout; native CLI Node/Playwright not run. New exact-head Push/PR Quality pending. No root bundle change because Truss FEM is an adjacent script.
+
+Main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. Latest main Quality #45360386408 and Pages deployment #45360367251 are successful on 24 November; no newer main deployment. No live hosted verification claimed. No branch creation/deletion, force push, direct main update or merge.
+
+
+## 2026-11-26 — PROJECT-GRAPH-DECIMAL-COLUMN-SELECTORS
+
+Starting dev `f5771fe4f51654fac9671945bac13cdbbe070122`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root `AGENTS.md`, this living plan, the frozen 2026-10-26 inventory, project schema/source and standalone bundle, graph project Node/Chromium regressions, project-format contract, PR #191, exact-head Actions and Pages evidence. The frozen historical baseline remains **166 gaps / 95 partial**.
+
+Starting exact-head QA is now verified green: Push Quality [#45874111952](https://github.com/saeedsai/ProMathStudio/actions/runs/45874111952) and PR Quality [#45874123064](https://github.com/saeedsai/ProMathStudio/actions/runs/45874123064) both completed successfully on the exact `f5771fe4f51654fac9671945bac13cdbbe070122` head. The single static/browser job in each run completed all 218 reported steps successfully, including project import/rollback, graph dataset round-trip, and the complete 215-test registered browser/structural sequence.
+
+Implemented a focused saved-project validation correction. Both primary Graph dataset selectors and overlay X/Y/Z selectors previously used JavaScript `Number()` coercion for strings, so malformed index strings such as `0x1`, `0b1`, `0o1` or `1e0` could silently resolve to a different column. A shared validator now accepts numeric safe integers or bounded (maximum 16 raw UTF-16 code units) base-10 integer strings with optional surrounding whitespace/leading plus; it rejects radix/exponent forms, fractional/negative values and overlong strings. Legacy projects with omitted selectors remain header-defaulted; existing decimal string selectors and dormant 2D Z behavior remain supported. No project version change.
+
+Added Node structural cases for primary and overlay selectors (radix, exponent, overlong rejection; bounded decimal compatibility), and Chromium project-import cases proving invalid primary/overlay selectors fail before application and preserve the previously imported project. Updated `docs/PROJECT_FORMAT.md`. Synchronized `src/project-schema.js` byte-for-byte into the `promath-project-schema` script in standalone `index.html`.
+
+Isolated V8 executed the actual modified project-schema source: valid numeric/decimal/whitespace/plus selectors and legacy omission passed; primary and overlay radix/exponent/overlong selectors were rejected with the established mapping diagnostics; valid project input remained unmodified. Pre-edit and post-edit source/bundle parity verified. Native repository Python/Node/Playwright commands are unavailable because this execution workspace has no checkout; fresh exact-head GitHub Actions must certify the committed Node and Chromium tests.
+
+PR #191 remains open/mergeable at the starting head, 73 commits ahead and zero behind, 28 changed files, with no independent submitted reviews. The only branches are dev and main, both report unprotected; repository rulesets are empty and branch-protection GET returns HTTP 403 to the connected integration. No merge is authorized. Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages deployment [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) are the latest verified successful production runs on 24 November 2026. No new deployment or hosted behavior is claimed.
+
+Status: source, synchronized standalone bundle, Node/Chromium regressions, project-format documentation, plan, ledger and changelog committed atomically on existing dev. New exact-head Push/PR Quality pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
+
+
+## 2026-11-26 22:02 CET — Graph saved-dataset prevalidation
+
+- Starting dev `f9e8aa80e751e8d71dc27e5de1544b3abf1c7216`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read AGENTS.md, living plan, frozen inventory, project format, Graph restore code, tests, PR #191 and current CI/Pages evidence.
+- Exact starting head Push Quality [#45888996010](https://github.com/saeedsai/ProMathStudio/actions/runs/45888996010) and PR Quality [#45889003503](https://github.com/saeedsai/ProMathStudio/actions/runs/45889003503) both green on `f9e8aa80e751e8d71dc27e5de1544b3abf1c7216`, 218/218 steps each, zero failures/skips.
+- Found primary Graph project validation/runtime mismatch: schema accepted empty/one-column/overlong-header/no-numeric-point datasets which the live importer rejected during restore; saved X/Y/Z mappings were applied only after the first default-series build.
+- Aligned schema to live Graph limits and numeric-point requirements; restore now applies normalized saved axis selectors before `loadTable()` builds the series. Legacy omitted selectors still use defaults.
+- Added Chromium atomic-import/round-trip regressions and updated the mixed-cell fixture and project-format contract. Source and standalone bundle synchronized.
+- Isolated V8 checks against actual modified schema passed; source/bundle parity and mapping-order checks passed. Native repository Playwright unavailable without a checkout; new exact-head Actions pending.
+- PR #191 remains open; zero independent reviews, both branches unprotected, rulesets empty, protection endpoint 403. No merge. Main Quality #45360386408 and Pages #45360367251 remain successful on main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; no new deployment.
+- Status: implemented on dev, QA pending, not released. Frozen inventory remains **166 gaps / 95 partial**.
+
+
+## 2026-11-26 23:59 CET — Truss FEM compensated global stiffness assembly
+
+- Starting dev `d3b24e2734e120ad64e103ec1d2b2d846fc8f02d`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Re-read root AGENTS.md, living plan (including its 23:00 entry), frozen MATLAB inventory, unified master plan, engineering architecture, Truss FEM source/tests/contract, PR #191, exact-head Actions and production evidence. Frozen inventory remains **166 gaps / 95 partial**.
+- Exact starting-head Push Quality [#45903222060](https://github.com/saeedsai/ProMathStudio/actions/runs/45903222060) and PR Quality [#45903227965](https://github.com/saeedsai/ProMathStudio/actions/runs/45903227965) both passed on `d3b24e2734e120ad64e103ec1d2b2d846fc8f02d`: 218/218 steps each, zero failures/skips.
+- Found that global stiffness matrix entries used naive sequential `+=` for member contributions. A large member at (10^{16}) N/m followed by twenty parallel 1 N/m members loses every small contribution in binary64, even though their combined +20 changes the rounded coefficient.
+- Changed `tools/truss-fem.js` to collect each finite element contribution per global matrix coefficient and sum the complete set using the existing `finiteSignedSum` helper. Same-sign terms use Neumaier compensation in original units; mixed-sign terms retain the exact binary64 accumulator/compatibility fallback. No model or UI contract changed.
+- Added a direct Node regression to `tests/test_truss_fem.js` and a registered Chromium regression to `tests/smoke_truss_fem.py`. The 21-member horizontal-bar fixture checks the lost naive sum, displacement against (10^{16}/(10^{16}+20)), residual, energy error and member count at 1280px/390px.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`, this ledger, the living plan and CHANGELOG. No root `index.html` change is required: Truss FEM is loaded as an adjacent script. The source/test/docs/records are one atomic multi-file dev commit.
+- Isolated Python binary64 reference arithmetic: naive sum (10^{16}); correctly rounded sum (10^{16}+20); expected displacement 0.999999999999998; diagonal-scaled solve arithmetic 0.9999999999999981; old naive displacement 1.0. This verifies the fixture math, not the actual production module. No repository checkout is mounted, so native Node/Playwright commands were unavailable; new exact-head Actions must run the committed regressions.
+- Release remains blocked: PR #191 open, 80 ahead/0 behind, zero independent reviews; only dev/main branches, empty rulesets and branch-protection GET 403. No merge/direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production workflows on unchanged main (24-Nov-2026); no new deployment/live verification.
+- Status: implemented on dev, exact-head Push/PR Quality pending, not released. Next five acceptance priorities are at the top of the living plan.
+
+
+## 2026-11-27 12:54 CET — RK45 representable subnormal-span initialization
+
+- Starting dev `72e4400dbd05ebacdcc07efdae346bee297f0b75`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 104 ahead / 0 behind. Re-read root AGENTS.md, living plan, frozen 26-Oct inventory, unified master plan, RK45 source/tests/documentation, exact-head Actions, PR #191/reviews, branch refs/rulesets and main Pages evidence. Historical baseline remains **166 gaps / 95 partial**.
+- Exact starting-head Push Quality [#45992199344](https://github.com/saeedsai/ProMathStudio/actions/runs/45992199344) and PR Quality [#45992207118](https://github.com/saeedsai/ProMathStudio/actions/runs/45992207118) both completed **218/218 steps successfully**, with zero failures and zero skips. No existing exact-head CI failure remains.
+- Found a real RK45 initialization defect: when a distinct representable subnormal interval was divided by 20, `span/20` could round to signed zero. The adaptive loop then reported step underflow before attempting an interval that had distinct endpoints. Initialize with the full span only when the initial division is zero. Existing stage-time collision counters/warnings remain, so the one-step fallback does not claim resolved intermediate stages or certified accuracy.
+- Added Node coverage for the smallest and two-smallest subnormal intervals in both directions, exact endpoint/state increments, strict monotonicity, work counters and accepted-stage collision diagnostics. Extended the registered Chromium endpoint smoke with the same four cases. Updated `docs/NUMERICAL_AND_PYTHON.md`; synchronized `src/ode-tools.js` with the embedded standalone `index.html` module.
+- Isolated V8 executed the actual modified RK45 kernel: reproduced the old smallest-subnormal failure before the change; after the change all four forward/backward cases passed with one accepted step, exact endpoint, no rejected attempts and the expected collision/quantum counters. A `y'=y` state check remained finite. Source/bundle parity was checked. Native repository commands are unavailable because the execution container has no Git checkout; Chromium and full CI certification are pending the new exact-head GitHub Actions.
+- PR #191 remains open/mergeable, 104 ahead / 0 behind, 40 changed files, zero independent reviews. Both branches report unprotected; rulesets are empty. No merge or direct main update.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest successful production runs on 24-Nov-2026; no newer main deployment/live verification.
+- Status: RK45 subnormal initialization fix implemented on dev candidate; exact-head Push/PR Quality pending; not released. Next five priorities and acceptance tests are maintained at the top of the living plan.
+
+## 2026-11-27 14:01 CET — Repair RK45 endpoint CI and detect repeated fractional-stage timestamps
+
+- Starting refs: dev 33312475c844d31e45ea531a2ea5b5c460ec2e9a; main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare 105 ahead / 0 behind. Re-read root AGENTS.md, living plan, frozen 26-Oct inventory, Unified Master Implementation Plan, RK45 source/tests/numerical-method contract, PR #191, exact-head Actions, branch refs/rulesets and main Quality/Pages evidence. Historical inventory remains 166 gaps / 95 partial.
+- Prior exact-head Push Quality [#45996382595](https://github.com/saeedsai/ProMathStudio/actions/runs/45996382595) and PR Quality [#45996390506](https://github.com/saeedsai/ProMathStudio/actions/runs/45996390506) both failed at step 177, RK45 large-epoch endpoint precision and underflow browser regression. The Python assertion multiplied the tiny interval by the tiny adjacent timestamp difference; for a subnormal interval the product underflowed to zero even though the row timestamps were strictly monotone. Steps 1–176 passed; steps 178–215 were skipped after the failure. The actual solver returned the requested endpoints; the failing assertion was not a demonstrated production failure.
+- Corrected the browser assertion to multiply the signed direction (+1 or -1) by each timestamp difference. This preserves the strict monotonicity assertion without multiplying two subnormal quantities.
+- Found and fixed a production diagnostic omission in src/ode-tools.js: RK45 counted fractional stage times rounded to the current time, but did not count duplicate timestamps between fractional stages or a fractional stage rounded to the next accepted endpoint. The four exact fractional stage times are now calculated once, reused by derivative evaluation and checked for collisions against both endpoints and preceding fractional stages. Endpoint derivative stages use the selected nextT directly. This changes diagnostics, not step selection or error estimates.
+- Added a Node regression and registered Chromium case for 20-ULP intervals near 1e12, forward and backward. The second 5-ULP trial makes the c=4/5 and c=8/9 stage timestamps identical; each direction must report exactly two accepted collision attempts, one quantum-limited step, three accepted steps, no rejection and a strictly monotone exact-endpoint grid.
+- Updated src/ode-tools.js, its standalone index.html module, tests/test_ode_rk45_near_resolution.py, tests/smoke_ode_rk45_endpoint.py, docs/NUMERICAL_AND_PYTHON.md, the living plan, this ledger and CHANGELOG.md. The ODE script body in index.html matches the modular source exactly. All eight paths are in one atomic dev commit.
+- Isolated V8 ran the actual modified solver source. Smallest and two-smallest subnormal spans passed forward/backward; 20-ULP large-epoch spans passed forward/backward with exactly two accepted stage-collision attempts and one quantum-limited step. Exact endpoints, strictly monotone timestamps and attempt/accept/reject counters passed. This is not a substitute for Chromium.
+- The repository checkout is unavailable in the execution container. Native Python unittest, Playwright Chromium and python scripts/build.py --check were not run locally. Fresh exact-head Push/PR Quality and the browser regression remain pending after this commit; do not infer green from the preceding commit.
+- PR #191 remains open/mergeable at start, 105 ahead / 0 behind, 44 changed files, zero independent reviews. Only dev/main branches exist; both report protected false, rulesets are empty, branch-protection GET is HTTP 403 to the integration. No merge or direct main update.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production runs on 24-Nov-2026 at unchanged main. No new deployment or hosted QA.
+- Status: repeated-stage diagnostic and CI assertion repair implemented on dev; exact-head full Quality pending; not released. Next five acceptance priorities remain in docs/HOURLY_DEVELOPMENT_PLAN.md.
+
+
+## 2026-11-27 14:01 CET — Restore RK45 modular-source parity after exact-head structural failure
+
+- Candidate dev d4ff4a8f7e042ac6c8dcbe5c44e6d725238f8d1a failed exact-head Push Quality [#46005872653](https://github.com/saeedsai/ProMathStudio/actions/runs/46005872653) and PR Quality [#46005881496](https://github.com/saeedsai/ProMathStudio/actions/runs/46005881496) at structural step 7. The commit tree updated index.html but accidentally retained the old src/ode-tools.js blob. This caused source/bundle parity failures and dependent ODE test extraction failures (20 structural failures). The workflow/test gates are correct; none are weakened.
+- The source is now restored from the exact embedded promath-ode-tools module already committed in index.html. The Node and Chromium 20-ULP cases explicitly assert that the second 5-ULP trial maps c=4/5 and c=8/9 to the same timestamp in both forward and backward directions before checking the collision counters.
+- Updated the plan, execution ledger and changelog. This corrective commit contains the modular source and both focused regressions together; the standalone bundle remains the same exact module body and is verified before the guarded ref update.
+- Historical inventory remains 166 gaps / 95 partial. PR #191 remains blocked by zero independent reviews and unverified main protection. No merge/direct main update. Fresh exact-head Push/PR Quality is required; not released.
+
+
+
+## 2026-11-27 14:58 CET — Correct RK45 stage-collision warning wording
+
+- Starting refs: dev `b6c535854313b41406be355b4d06d633d003285b`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare **107 ahead / 0 behind**. Re-read root AGENTS.md, the living plan, frozen 26-Oct inventory, Unified Master Implementation Plan, RK45 source/tests/numerical-method contract, PR #191/reviews, branch refs/rulesets and exact-head Push/PR Actions.
+- Exact-head Push Quality [#46006460898](https://github.com/saeedsai/ProMathStudio/actions/runs/46006460898) and PR Quality [#46006469595](https://github.com/saeedsai/ProMathStudio/actions/runs/46006469595) both completed **218/218 steps successfully**, zero failures and zero skips on `b6c535854313b41406be355b4d06d633d003285b`. The previously pending RK45 endpoint Chromium regression passed on that exact head. No existing exact-head CI failure remains.
+- Review of `src/ode-tools.js` found a user-facing diagnostics mismatch: the collision detector reports repeated fractional-stage timestamps and stages rounded to either the current or next endpoint, while the result panel claimed all accepted collision steps had stages “rounded to current t”. That statement was too narrow and could mislead users about the reported counter.
+- Changed the warning to “accepted steps had repeated or endpoint-collapsed RK45 stage times; rescale time for reliable accuracy”. This is a wording correction only; solver step selection, error estimates, collision counters and export data are unchanged.
+- Extended the registered Chromium regression `tests/smoke_ode_rk45_endpoint.py`: run the forward 20-ULP case near 1e12 through the actual ODE UI and assert the accurate warning appears while the old “rounded to current t” wording does not. Existing direct Node/Chromium numerical collision assertions remain intact.
+- Updated `docs/NUMERICAL_AND_PYTHON.md`, the living plan, this ledger and CHANGELOG. Updated both `src/ode-tools.js` and the embedded `promath-ode-tools` module in standalone `index.html`; exact source/bundle parity was checked before the atomic commit.
+- Isolated checks: exact ODE source/bundle parity; unique warning replacement and browser-test insertion anchors; JavaScript module syntax parse; direct V8 execution of the production RK45 kernel for the 20-ULP case confirms two accepted stage-collision steps and the exact endpoint. Native repository Python/Playwright/build commands remain unavailable because the execution container has no checkout; the new registered Chromium assertion requires fresh exact-head GitHub Actions.
+- PR #191 remains open/mergeable, 107 ahead / 0 behind, 44 changed files, zero independent reviews. Only dev/main branches exist; both report unprotected, rulesets are empty, and branch-protection GET is HTTP 403 to the integration. No merge or direct main update.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest successful production workflows on unchanged main from 24-Nov-2026; no new deployment/live verification.
+- Status: RK45 result-panel collision wording correction and browser regression committed on dev; exact-head Push/PR Quality for this change pending; not released. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+
+## 2026-11-27 16:03 CET — Repair exact-head RK45 warning regression and pluralize diagnostics
+
+- Starting refs: dev `820d5c03c9e8b0e544f427a89cc328c6350ce2c4`; main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare **108 ahead / 0 behind**. Read root AGENTS.md, living plan, frozen 26-Oct inventory, RK45 source, browser tests, PR #191, reviews, branch refs/rulesets and current Actions.
+- Exact-head Push Quality [#46014476843](https://github.com/saeedsai/ProMathStudio/actions/runs/46014476843) and PR Quality [#46014485667](https://github.com/saeedsai/ProMathStudio/actions/runs/46014485667) both failed at step 181 (`RK45 stage-time precision warning, recovery and mobile regression`). Logs identify `tests/smoke_ode_rk45_stage_resolution.py:29`: its expected phrase `stage times rounded to current t` was stale after the prior user-facing correction to `repeated or endpoint-collapsed RK45 stage times`. The failure is in the test expectation, not the solver.
+- Other RK45 browser checks in the same job, including endpoint/subnormal/repeated-stage coverage and diagnostic/stale-export coverage, passed before the failing step. Both Push and PR fail at the same stale assertion.
+- Production correction: result-panel diagnostics now say `1 accepted step had` for one accepted collision step and `N accepted steps had` for plural counts. The warning still describes repeated or endpoint-collapsed RK45 stage times; numerical integration, counters, step selection and exports are unchanged.
+- Regression correction: `tests/smoke_ode_rk45_stage_resolution.py` now requires the singular phrase in forward and backward one-collision cases. `tests/smoke_ode_rk45_endpoint.py` now requires the plural phrase in the 20-ULP/two-collision UI case and rejects singular/plural mismatch and the obsolete wording. Assertions remain strict.
+- Updated `docs/NUMERICAL_AND_PYTHON.md`, the living plan and CHANGELOG. Updated modular `src/ode-tools.js` and embedded standalone `index.html` in the same tree; parity is checked before commit.
+- Exact-head CI evidence: current failing runs are Push #46014476843 and PR #46014485667 on `820d5c0`; previous parent `b6c5358` passed both workflows 218/218 with zero failures/skips. Fresh exact-head Actions are required after this correction.
+- PR #191 remains open/mergeable, 108 ahead / 0 behind, 44 changed files, zero independent reviews. Branch list is exactly dev/main and both are unprotected; rulesets are empty. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence from 24-Nov-2026. No new deployment/live verification. Historical inventory remains **166 gaps / 95 partial**.
+
+
+## 2026-11-27 17:21 CET — Align saved custom-function project validation with the editor
+
+- Re-inspected both branch refs, root AGENTS.md, the living plan, frozen 26-Oct inventory, PR #191, exact-head Push/PR Quality and latest verifiable Pages evidence. Parent dev was `c06bf13609304e616aec060c56424af4e0e844bf`; main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`.
+- Prior exact-head Quality on parent c06 passed in both Push [#46023174963](https://github.com/saeedsai/ProMathStudio/actions/runs/46023174963) and PR [#46023187713](https://github.com/saeedsai/ProMathStudio/actions/runs/46023187713). Branch-protection GET remains HTTP 403; both branches are unprotected and rulesets are empty. PR #191 has zero independent reviews; no merge attempted.
+- Found a saved-project validation gap: the custom-function editor rejects reserved built-in names, requires a complete nonblank Formula body, and requires Python source to declare the named function. Project migration previously accepted all three malformed forms, so the importer could confirm and restore broken/shadowing functions.
+- Updated `src/project-schema.js` and the matching embedded `index.html` module to reject reserved names case-insensitively, blank Formula expressions and Python source without a matching `def name(...)` declaration. Valid Python source is still stored without execution during import; legacy entries with omitted type remain formula-compatible.
+- Extended `tests/test_project_custom_functions_schema.py` with reserved-name, empty-body, missing/empty-source and wrong-function-name negatives; extended `tests/smoke_project_schema.py` with a valid Python round-trip, invalid import state-preservation and no-confirmation assertions. Updated `docs/PROJECT_FORMAT.md`.
+- Isolated V8 validation and source/bundle parity passed before commit. Native Python/Playwright/build commands remain unavailable because there is no local checkout and `git ls-remote` failed with DNS resolution; exact-head GitHub Actions are the full QA gate.
+- Updated this plan, changelog and ledger. This commit is on dev only; exact-head Push/PR Quality and any Pages promotion remain pending. Historical audit remains **166 gaps / 95 partial**.
+
+
+## 2026-11-27 17:57 CET — Repair project-import regression and harden custom-function restore
+
+- Starting refs: dev `ba8432fac4d100a20173d6fa68b384cd23593720`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 110 ahead / 0 behind. Re-read root AGENTS.md, living plan, frozen 26-Oct inventory, Unified Master Implementation Plan, project-format contract, PR #191, exact-head CI logs, branches/rulesets and main Quality/Pages evidence. Historical inventory remains 166 gaps / 95 partial.
+- Exact-head Push [#46034852119](https://github.com/saeedsai/ProMathStudio/actions/runs/46034852119) and PR [#46034861653](https://github.com/saeedsai/ProMathStudio/actions/runs/46034861653) both failed only at browser step 50, `tests/smoke_project_schema.py`. The failure occurred at the final nonfinite-table rejection: the test compared custom functions against an earlier `migrated` snapshot containing Python function `g_2`, even though two later valid Graph imports built from the legacy fixture had correctly replaced custom functions with an empty list. The rejected import preserved the current empty list; the expected snapshot was stale. The application schema correctly rejects nonfinite table cells before restore.
+- Corrected `rejected(candidate)` to snapshot the complete exported project immediately before each rejected import and compare working/origin, recent, notebook, calculator, matrix, engineering, solver, graph, custom functions, tables and fit. This tests actual transactional non-mutation without depending on an earlier valid import.
+- Found a separate defense-in-depth gap in the public `MathStudio.customFunctions.restore()` API: it silently filtered basic shapes but could accept reserved names, case-insensitive duplicates, malformed argument lists, blank formulas or mismatched Python declarations when called directly outside the project importer. It now validates the entire list and 60-entry limit before mutating live state or localStorage, and throws on invalid input. Valid legacy formula and Python entries remain supported.
+- Added browser regressions for direct restore rejection (reserved built-ins, duplicate names, duplicate arguments, blank formula, mismatched Python declaration, over-limit list and non-list input), and verifies active functions plus localStorage remain unchanged. Updated `docs/PROJECT_FORMAT.md`, the living plan, this ledger and changelog.
+- Isolated V8 checks compile the new restore object and exercise valid legacy/Python entries plus all invalid cases; invalid calls leave the live list and save callback untouched. Project-schema source/embedded module parity remains unchanged and verified by the existing structural test. Full Playwright/Chromium and Python unittest execution remains delegated to exact-head Actions because the local checkout is absent.
+- All changed paths are committed together in one Git tree/commit on the existing dev branch; the guarded non-force fast-forward uses expected parent `ba8432fac4d100a20173d6fa68b384cd23593720`. Fresh exact-head Push/PR Quality is required; the earlier failed runs are not treated as validation of the new commit.
+- PR #191 remains open/mergeable; starting compare 110 ahead / 0 behind, zero submitted reviews. Exactly dev/main branches exist, both unprotected; rulesets are empty and branch-protection GET is HTTP 403 to the integration. No merge or direct main update.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. No new deployment or hosted QA is claimed.
+- Status: custom-function restore hardening and project-import regression repair implemented on dev; exact-head full Quality pending; not released. Next five acceptance priorities remain in the living plan.
+
+
+## 2026-11-27 19:19 CET — Repair project editor browser setup and reject ambiguous Python declarations
+
+- Starting refs: dev 229fd711759b565f01bc68b4ef2535e618dbe15e, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare 113 ahead / 0 behind. Exactly dev/main branches exist. Root AGENTS.md, living plan, frozen 26-Oct inventory, Unified Master Implementation Plan, project format, PR #191, exact-head CI logs, rulesets and main/Pages evidence were inspected.
+- Exact-head Push [#46048195719](https://github.com/saeedsai/ProMathStudio/actions/runs/46048195719) and PR [#46048204133](https://github.com/saeedsai/ProMathStudio/actions/runs/46048204133) both failed at browser step 50. tests/smoke_project_schema.py line 98 tried to fill #cf-name, which exists but is hidden because #custom-function-panel is a closed native details element. The test never opened its summary; tests/smoke_python_compose.py already demonstrates the panel's required open state. The application editor is not missing the control.
+- Corrected the browser regression to click #custom-function-panel > summary and assert #cf-name is visible before interacting. This preserves a real user-visible disclosure interaction and all subsequent assertions.
+- Found a Python custom-function signature-validation edge case: a source containing a matching first def followed by a second top-level definition of the same name passed the previous first-match regex even though Python binds the later function at runtime. async def also passed a superficially matching signature although it returns a coroutine, not a numeric result. Updated the editor/direct-restore helper and src/project-schema.js preflight to require exactly one synchronous top-level declaration for the saved name with the exact ordered positional parameter list.
+- Added Node schema and Chromium project-import/direct-restore regressions for duplicate definitions, async-only definitions and sync-plus-async redefinition. Updated docs/PROJECT_FORMAT.md; synchronized the project-schema module into standalone index.html. The frozen audit remains untouched.
+- Isolated V8 validation exercises valid single and multi-argument definitions plus duplicate/async rejection. Source/embedded-module parity and test ordering are checked. Local Python/Playwright/build are unavailable without a checkout; fresh exact-head Push and PR Quality are the required full QA gate.
+- Updated the living plan, this ledger and changelog in the same atomic commit. The guarded dev ref update is non-force and uses the exact inspected parent SHA.
+- PR #191 remains open; independent reviews 0, both branches unprotected, rulesets empty, branch-protection GET 403. No merge or main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence from 24-Nov-2026.
+- Status: browser CI root cause repaired in the test; duplicate/async custom-function validation implemented on dev; exact-head full Quality pending; not released. Historical inventory remains 166 gaps / 95 partial, unchanged.
+
+
+## 2026-11-27 20:01 CET — Align custom-function reservations with Data Tables built-ins and repair exact-head CI
+
+- Starting refs: dev `1013d618bf925c9e005b98716b453feeab9aacb2`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 114 ahead / 0 behind. Exactly dev/main branches exist. Re-read root AGENTS.md, living plan, frozen 26-Oct inventory, Unified Master Implementation Plan, Data Tables and project-format contracts, PR #191, reviews, exact-head CI logs, rulesets and main/Pages evidence.
+- Exact-head Push [#46050272626](https://github.com/saeedsai/ProMathStudio/actions/runs/46050272626) and PR [#46050278029](https://github.com/saeedsai/ProMathStudio/actions/runs/46050278029) both failed at step 85, `tests/smoke_sheet_numeric_hardening.py`. The trace shows `MathStudio.customFunctions.restore()` correctly rejects `SUM` as reserved, while the browser fixture tries to seed `SUM`, `COUNT`, `MEDIAN` and `IF` as custom functions. The test fixture was stale after the direct restore API began validating reserved names; the remaining aggregate/browser checks did not execute after this exception.
+- The same inspection exposed a production contract mismatch: the Data Tables evaluator resolves `SUM`, `AVERAGE`/`AVG`, `MIN`/`MAX`, `COUNT`, `MEDIAN`, `PRODUCT` and `IF` as built-ins, but the editor, direct restore and project-schema reserved lists omitted `AVERAGE`, `AVG`, `COUNT`, `MEDIAN` and `PRODUCT`. Such names could be accepted as custom functions and then never invoked by the spreadsheet evaluator.
+- Expanded all three production guards (editor save, public direct restore and project-schema import preflight) with the missing names, case-insensitively. Kept the existing general math reserved names. Synchronized the standalone `index.html` embedded project-schema module exactly with `src/project-schema.js`.
+- Reworked `tests/smoke_sheet_numeric_hardening.py` to seed only valid custom functions, then attempt all 17 reserved names with mixed casing and assert each is rejected without changing the active list. Existing built-in-priority, finite aggregate, subnormal, overflow, custom composition, chart and mobile assertions remain. Added Node project-schema negative cases for AVERAGE, AVG, COUNT, MEDIAN and PRODUCT.
+- Updated `docs/PROJECT_FORMAT.md` and `docs/DATA_TABLES.md` to specify the unified reserved-name contract. Refreshed the living plan's current refs, CI diagnosis and NEXT FIVE acceptance criteria; appended this execution record and changelog entry. Frozen audit file remains untouched at **166 gaps / 95 partial**.
+- Isolated V8 project-schema checks (valid ordinary custom function accepted; all reserved names rejected) and exact embedded source parity pass before commit. Local `git rev-parse --show-toplevel` confirms no checkout (exit 128, not a repository); native Python/Playwright/build commands cannot run locally. Fresh exact-head GitHub Actions must certify the browser and build changes.
+- This is one atomic multi-file dev commit using Git blobs/tree/commit and a guarded non-force fast-forward update with expected parent `1013d618bf925c9e005b98716b453feeab9aacb2`. Exact new-head Push/PR Quality, step 85 and full suite remain pending at checkpoint.
+- PR #191 remains open/mergeable, 114 commits ahead, 46 changed files, zero independent reviews. Both branches report unprotected, rulesets empty and branch-protection GET 403. No merge/direct main update.
+- Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) remain the latest verified successful production evidence from 24-Nov-2026; no newer deployment/live verification. New change is not released.
+
+
+## 2026-11-27 21:03 CET — Validate XLSX ZIP data descriptors
+
+- Starting refs verified from GitHub: dev `fc92e7735836ff65ab86a25235c41a67a1aac723`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 115 ahead / 0 behind. Exactly two branches exist. Root AGENTS.md, living plan, full frozen inventory, Unified Master Implementation Plan, Data Tables/XLSX contract, build script, Quality workflow, PR #191, review submissions, current exact-head CI and main/Pages evidence were inspected.
+- Exact-head Push Quality [#46054477944](https://github.com/saeedsai/ProMathStudio/actions/runs/46054477944) and PR Quality [#46054483353](https://github.com/saeedsai/ProMathStudio/actions/runs/46054483353) both passed 218/218 on starting head fc92e7735836ff65ab86a25235c41a67a1aac723, zero failures/skips. The PR workflow job completed all 218 steps successfully. This confirms the previous reserved-name correction; it does not certify the new XLSX descriptor change.
+- XLSX importer review found that ZIP flag bit 3 bypassed all local-header CRC/size checks and the parser did not validate the trailing data descriptor. The overlap range ended at compressed data, so descriptor bytes were not included in local-record overlap validation.
+- Production importer now requires bit-3 local metadata to be zero or equal to the central-directory CRC/compressed/uncompressed sizes. It validates both optional-signature and signatureless data descriptors against the central-directory values, rejects truncated/mismatched descriptors, and includes the descriptor bytes in the overlap range. ZIP entries without bit 3 retain exact local/central metadata matching.
+- Added a Python non-seekable ZIP writer fixture (which emits bit-3 headers and signed descriptors), valid streaming-import browser coverage, negative mutations for descriptor CRC/compressed/uncompressed sizes and contradictory local CRC, and structural assertions. Existing stored/DEFLATE import, corruption, state rollback, formula and 390px mobile checks remain.
+- Updated `src/xlsx-import.js`, synchronized the matching `index.html` script body, extended `tests/test_xlsx_import_integrity.py` and `tests/smoke_xlsx_import.py`, and updated `docs/DATA_TABLES.md`, the living plan, this ledger and changelog.
+- Local checkout is absent: `git rev-parse --show-toplevel` returns “not a git repository”. Python 3.13 non-seekable ZIP reproduction passed: bit-3 local flags are set, local CRC/sizes are zero, and signed descriptors contain the central CRC and sizes. Full production Chromium/build QA is pending fresh exact-head Push and PR Quality.
+- PR #191 remains the sole dev→main PR; submitted independent reviews remain zero. Both branch-protection state and rulesets do not satisfy the release contract (rulesets empty; branch-protection API returns 403). No merge or main update.
+- Main Quality #45360386408 and Pages deployment #45360367251 remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. The XLSX fix is not live.
+- Status: implemented on dev in this checkpoint; fresh exact-head full Quality pending; not released. Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## 2026-11-27 21:55 CET — Compensate Truss FEM nodal reaction accumulation
+
+- Starting refs verified from GitHub: dev `d4889c39745e962b3e851f9ebababb4e2efb2505`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 116 ahead / 0 behind. Exactly two branches exist. Read root AGENTS.md, living plan, frozen historical inventory, Unified Master Implementation Plan, Engineering Architecture/Toolbox contracts, Structural Truss FEM contract, Quality workflow, PR #191, review submissions, exact-head CI and main/Pages evidence.
+- Starting-head Push Quality [#46062475250](https://github.com/saeedsai/ProMathStudio/actions/runs/46062475250) and PR Quality [#46062482012](https://github.com/saeedsai/ProMathStudio/actions/runs/46062482012) both passed 218/218 on `d4889c39745e962b3e851f9ebababb4e2efb2505`, zero failed/skipped steps. These runs certify the parent only; new exact-head runs are required for this correction.
+- Found a reproducible order-dependent support reaction loss. For three parallel horizontal bars with stiffness (10^{20}) N/m and applied forces 1 N, (+10^{16}) N and (-10^{16}) N, the member-force terms at the common support are -1, (-10^{16}), (+10^{16}) N. Ordinary left-to-right reduction returns zero instead of -1 N, so the global force-balance diagnostic incorrectly reports 1 N.
+- Updated `tools/truss-fem.js` to accumulate each nodal resultant with `finiteSignedSum` over the already-rounded (K_{ij}u_j) products and negative applied load. Mixed-sign values use the exact binary64 accumulator when BigInt is available; the existing compensated fallback remains. No solver precision claim beyond binary64 is made.
+- Added a direct Node regression in `tests/test_truss_fem.js` and a registered Chromium regression in `tests/smoke_truss_fem.py` (both existing Quality gates). The browser fixture runs in the existing 1280px and 390px passes. Assertions cover the old naive loss, exact -1 N support reaction, zero global force balance, free-DOF residual and energy error.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`, `docs/HOURLY_DEVELOPMENT_PLAN.md`, this ledger and `CHANGELOG.md`. Truss FEM is an adjacent script; no root `index.html` bundle change is required.
+- Local checkout is absent (`git rev-parse --show-toplevel`: not a git repository). A bounded Node reproduction confirmed (k=10^{20}) N/m, displacements (10^{-20}, 10^{-4}, -10^{-4}) m, naive reaction 0 and exact reference -1 N. Full repository Node/Chromium/build QA is pending fresh exact-head GitHub Actions.
+- One atomic seven-file Git tree/commit was created with parent `d4889c39745e962b3e851f9ebababb4e2efb2505`; the existing dev ref was advanced only by a guarded non-force fast-forward using expected parent `d4889c39745e962b3e851f9ebababb4e2efb2505`. The resulting commit SHA was verified from the updated dev ref after creation.
+- PR #191 remains the sole dev→main PR, open/mergeable, with zero independent submitted reviews. Both branches remain unprotected, rulesets are empty, and branch-protection reads return HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages deployment #45360367251 remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. The new Truss correction is implemented on dev, not released.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+## 2026-11-27 22:57 CET — Compensate Truss FEM energy diagnostics
+
+- Starting refs verified from GitHub: dev `0a3a44a6c00d32eecea40c7169684b5c5e99b0f1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 117 ahead / 0 behind; exactly dev/main branches. Read root AGENTS.md, living plan, frozen historical inventory, Unified Master Implementation Plan, Structural Truss FEM contract, Quality workflow, PR #191, review submissions, exact-head Actions and main/Pages evidence.
+- Starting-head Push Quality [#46068499461](https://github.com/saeedsai/ProMathStudio/actions/runs/46068499461) and PR Quality [#46068506509](https://github.com/saeedsai/ProMathStudio/actions/runs/46068506509) both passed 218/218 on `0a3a44a6c00d32eecea40c7169684b5c5e99b0f1`, zero failed/skipped steps. Both run metadata records were checked for the exact head SHA.
+- Found ordinary summation in Truss FEM external-work and elastic-energy diagnostics. A synthetic fixture with one 1e16 J member and twenty 1 J members reproduced loss of all 20 J in the member-order sum. The previous relative energy check could still pass because the discrepancy was small relative to the large total.
+- Replaced external work and elastic strain energy reductions with `finiteSignedSum`; the energy residual now uses one signed sum of `[U,U,-W]` rather than forming `2*U` and subtracting separately. This preserves mixed-sign work contributions and low-order member energy while retaining binary64 outputs and existing residual/energy acceptance thresholds.
+- Added a Node regression in `tests/test_truss_fem.js` and Chromium regression in `tests/smoke_truss_fem.py` at 1280px and 390px. They assert the old naive reduction is exactly 1e16 J, corrected energy is 1e16+20 J, energy-balance error is zero and horizontal force balance is zero.
+- Updated `docs/STRUCTURAL_TRUSS_FEM.md`, the living NEXT FIVE plan and `CHANGELOG.md`. Truss FEM is an adjacent `tools/` script, not one of the embedded `src/` modules; no `index.html` edit is required.
+- Local checkout is absent. A bounded Node arithmetic reproduction passed for k=5e7 N/m, large-bar energy 1e16 J, small-bar energy 1 J, naive result 1e16 J and compensated result 1e16+20 J. Full repository Node/Chromium/build QA is pending fresh exact-head Push and PR Quality.
+- One atomic multi-file Git tree/commit is created with parent `0a3a44a6c00d32eecea40c7169684b5c5e99b0f1`; dev is updated only by guarded non-force fast-forward with the expected previous SHA. The resulting SHA is verified from the updated ref after commit.
+- PR #191 remains open/mergeable with zero independent reviews. Branches remain exactly dev/main; both report unprotected, rulesets are empty and branch-protection GET returns HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages deployment #45360367251 remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. This correction is implemented on dev, not released.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## 2026-11-28 00:00 CET — Repair Truss energy fixture and expose signed energy residual
+
+- Starting refs: dev `00c2fed11ae0ea86bdcf0308d712173285e1e985`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 118 ahead / 0 behind; exactly dev/main branches. Re-read root AGENTS.md, living plan, frozen inventory, Unified Master Implementation Plan, Engineering Architecture/Toolbox contracts, Structural Truss FEM specification, Quality workflow, PR #191, review submissions, exact-head Actions and production evidence.
+- Exact-head Push [#46074943178](https://github.com/saeedsai/ProMathStudio/actions/runs/46074943178) and PR [#46074946696](https://github.com/saeedsai/ProMathStudio/actions/runs/46074946696) both failed at Truss analytical step 214. The Node suite passed 108/109 tests; the only failure was the new energy fixture's assertion that the naive sum must equal exactly 1e16 J. The solver-generated large-member energy included a small rounding offset, making the naive result 10000000000000046. The failure occurred before the test's production-energy assertion. Step 212 passed and responsive step 215 was skipped after step 214 failed.
+- Replaced the fragile theoretical fixture with exact binary powers: E=65.536 GPa, A=1 mm² gives exactly 65536 N/m. The large bar carries 2^36 N over 2^20 m (2^55 J); 32 small bars each carry 256 N over 1/256 m (0.5 J). The naive member-order reduction is exactly 2^55 J, while compensated energy is exactly 2^55+16 J. External work is 2^56+32 J; energy residual and normalized error are exactly zero. Node and Chromium regressions retain these assertions at 1280px and 390px.
+- The solve result now exposes signed `energyResidual` in joules; the Truss Studio verification panel displays the absolute signed residual next to the normalized energy identity error. Added API and visible-label regression assertions. No solver threshold or existing numerical assertion was weakened.
+- Updated `tools/truss-fem.js`, `tools/truss-fem-ui.js`, `tests/test_truss_fem.js`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, the living plan, this ledger and changelog in one atomic Git tree/commit.
+- Truss FEM is an adjacent `tools/` script, not an embedded `src/` module; root `index.html` remains unchanged. Local checkout is absent, so full repository Python/Playwright/build commands cannot run here; isolated V8 execution of the actual fetched production source and syntax compilation of the updated UI are performed before commit. Fresh exact-head Push/PR Quality must certify the full suite.
+- PR #191 remains open/mergeable with zero independent reviews. Branch protections are not verified (both branches report unprotected; rulesets empty; branch-protection API 403). No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. This change is dev-only, not live. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## 2026-11-28 08:00 CET — Per-member Euler input readiness
+
+- Starting dev `b2756547873bfe585098254d6fbdf1bc471b384f`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`, 127 ahead / 0 behind, exactly two branches. No local checkout; used bounded GitHub integration fallback.
+- Verified starting exact-head Push/PR Quality [#46115026179](https://github.com/saeedsai/ProMathStudio/actions/runs/46115026179) and [#46115029609](https://github.com/saeedsai/ProMathStudio/actions/runs/46115029609): 218/218 each, zero failures/skips; Truss 212/214/215 passed. New candidate requires fresh checks.
+- Added `eulerInputStatus` values `not-supplied`, `missing-I`, `missing-K`, `ready` to pre-solve member metrics and visible per-row labels. Pcr remains blank unless both I and K are valid.
+- Added direct Node and registered Chromium regressions for all states, Pcr availability, table structure and edit/reset refresh at 1280px/390px.
+- Updated source, standalone Truss HTML/UI, tests, Structural Truss contract, plan, ledger and changelog. Root bundle unaffected; Truss is adjacent standalone assets.
+- Isolated V8 production-source execution, UI/Node syntax and structural wiring passed. Full local Node/Playwright/build checks unavailable without checkout; fresh exact-head Actions pending.
+- Atomic commit parent `b2756547873bfe585098254d6fbdf1bc471b384f`; dev update guarded non-force with expected previous SHA.
+- PR #191 open/mergeable; zero reviews; branches unprotected, rulesets empty, protection read 403. No merge/direct main update.
+- Main Quality/Pages latest verified success on 24-Nov-2026; dev change not released. Historical inventory 166/95 unchanged.
+
+
+## 2026-11-28 08:28 CET — Report complete Truss Euler input readiness in the live preview
+
+- Starting dev `a5721e3b87f640dfe87ff74020892a7124045a67`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare main...dev 128 ahead / 0 behind; exactly two branches. Re-read AGENTS, living plan, frozen inventory, engineering architecture/catalog, Truss contract/source/tests, PR #191, reviews, refs, rulesets, exact-head Actions and main/Pages evidence. Local checkout absent; bounded GitHub integration fallback used.
+- Exact-head Push Quality #46120933444 and PR Quality #46120935574 on `a5721e3` were still running at 08:28 CET (191/217 and 151/217 completed respectively; zero failures/skips observed; steps 212/214/215 pending). No existing failed exact-head step was available to repair.
+- Found a readiness-status bug: the previous UI detected only XOR (I missing vs K missing), so all members with neither I nor K were not warned and the live status implied the model was simply ready for analysis. Mixed states also lacked actionable counts.
+- Added immutable `summarizeEulerInputReadiness` to the canonical FEM API. It counts total/ready/missing-I/missing-K/not-supplied, marks complete only for a non-empty all-ready list, and rejects malformed input/state. The pre-solve live status now reports exact counts for all-missing and mixed models, an all-ready message, and an explicit empty case.
+- Direct Node regression covers four states, empty list, immutable result and invalid inputs. Registered Chromium smoke checks mixed 1/3-ready with one missing I and one missing K, all-ready 3/3, and after reset 0/3-ready at 1280px and 390px.
+- Updated `tools/truss-fem.js`, `tools/truss-fem-ui.js`, `tests/test_truss_fem.js`, `tests/smoke_truss_fem.py`, Structural Truss contract, living plan and changelog in one atomic Git tree/commit. Truss remains adjacent standalone assets; root `index.html` is unaffected.
+- Isolated V8 syntax and pure readiness-summary assertions passed. Full local Node/Playwright/build suite not run because `git rev-parse --show-toplevel` returned `fatal: not a git repository`; exact-head GitHub Actions required.
+- PR #191 remains open/mergeable, zero independent reviews. Branches unprotected, rulesets empty, branch-protection read 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026. Candidate is dev-only, not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## 2026-11-28 08:28 CET — Repair companion Truss Studio smoke after Euler readiness column shift
+
+- Inspected exact-head failures on parent a5721e3b87f640dfe87ff74020892a7124045a67: Push Quality #46120933444 and PR Quality #46120935574 both failed only at Truss step 212. The traceback was tests/smoke_truss_studio.py:189, which expected Pcr in cell index 12 after the new Euler-input readiness column was inserted at index 12. Other assertions still expected 13 cells and used index 12 for Pcr.
+- Corrected the companion browser regression to expect 14 columns, assert the readiness label at index 12 (Not supplied, Missing I, or Missing K) and read Euler Pcr at index 13. Updated all affected Pcr assertions, default/partial input tuples, and density/material-table counts. No production calculation or CI gate was weakened.
+- Preserved the existing status-message substring Euler estimate requires both I and K while appending the new ready/missing counts, so earlier browser assertions remain compatible. The new Truss FEM smoke checks the same wording and still verifies mixed/all-ready/all-missing states.
+- Parent c5243d44af44cd952a73d15dce972e65006ed29c Push #46122160709 and PR #46122164141 were still early at step 8; they predate this repair. Fresh exact-head workflows for the follow-up commit are required.
+- Updated the Truss UI wording, both Truss browser smoke suites, Structural Truss contract, living plan, ledger and changelog in one atomic Git tree/commit. V8 syntax and pure summary logic checks were previously passed on the parent; the corrected candidate still needs full CI/browser certification.
+- PR #191 remains open; zero independent reviews; branches unprotected, rulesets empty, branch-protection read 403. No merge or direct main update. Main Quality/Pages remain the latest successful evidence on 24-Nov-2026. Historical inventory 166 gaps / 95 partial, unchanged.
+
+
+---
+
+## 2026-11-28 09:02 CET — OPEN THE TRUSS MEMBER-READINESS DISCLOSURE BEFORE BROWSER ASSERTIONS
+
+- Starting refs: `dev` `75dfce6f2bbd1aec5d79441e32fe24477debc02b`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 130 ahead / 0 behind; exactly dev/main branches. Local `git rev-parse --show-toplevel` returned `fatal: not a git repository`; connected GitHub integration used.
+- Exact-head Push Quality [#46122489452](https://github.com/saeedsai/ProMathStudio/actions/runs/46122489452) and PR Quality [#46122493381](https://github.com/saeedsai/ProMathStudio/actions/runs/46122493381) both failed only at step 215. The Node Truss FEM suite passed 114/114. Both browser logs show `tests/smoke_truss_fem.py:43` failing with `AssertionError: ['', '', '']`.
+- Root cause: `#member-metrics` is correctly nested inside the initially collapsed native `#member-material-details` disclosure. Playwright's `all_inner_texts()` returned blank strings because the test queried hidden rows before opening the disclosure; the production table and live Euler readiness status were populated.
+- Changed the visible disclosure summary to “Member materials, section properties and Euler readiness”. The registered browser smoke now asserts the disclosure is initially closed, checks the visible summary, opens it through the native `summary` element, confirms `details.open`, and only then checks the three `Not supplied` rows. This preserves the intended collapsed layout and exercises the real user interaction.
+- Updated `tools/truss-studio.html`, `tests/smoke_truss_fem.py`, the Structural Truss contract, living plan, this ledger and changelog in one atomic dev commit. No FEM calculations or tolerances changed; no workflow steps were skipped or weakened.
+- Full local Playwright/build checks could not run because no repository checkout is present. Fresh exact-head Push and PR Quality are required; pending until completed.
+- PR #191 remains open/mergeable, zero independent reviews. Branches unprotected, rulesets empty, branch-protection read HTTP 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on 24-Nov-2026; this dev change is not live.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+---
+
+## 2026-11-28 10:03 CET — Make Truss disclosure regression idempotent and expose live member count
+
+- Starting refs: `dev` `13cdfed2c7ff6ad515a63fd02f85cc5cf0c5246d`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 131 ahead / 0 behind; exactly dev/main. The bounded local `git rev-parse --show-toplevel` failed because no checkout is mounted; the GitHub integration fallback was used.
+- Inspected exact-head Push Quality #46124651626 and PR Quality #46124656267. Both failed only at Truss browser step 215; steps 212 and 214 passed. The logs point to `tests/smoke_truss_fem.py:538`: an earlier initial disclosure interaction had already opened the same native `<details>`, but a later helper scenario asserted it was collapsed. That block also expected an obsolete summary string.
+- Fixed the browser test to keep the first collapsed→expanded interaction and make later setup idempotent: assert the current Euler-readiness summary, open only if closed, and require the controlled content visible. No production math, numerical tolerance or CI gate changed.
+- Added a live singular/plural member count to the native disclosure summary. It is derived from the validated preview member snapshot, updates when the model changes (3 members → 1 member → 3 members), and changes to `Unavailable` if preview validation fails.
+- Added registered Chromium assertions for initial count, bar/triangle count transitions and idempotent disclosure access at 1280px and 390px. Updated the Structural Truss contract, living plan, this ledger and changelog in the same atomic Git tree/commit.
+- The changed JavaScript is syntax-checked in the isolated V8 runtime; HTML/UI/test wiring is checked before commit. Full local Python/Playwright/build commands remain unavailable because no repository checkout is present; fresh exact-head GitHub Actions are required.
+- PR #191 remains open/mergeable with zero independent reviews. Branches report unprotected, rulesets empty, branch-protection read 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence on 24-Nov-2026 at unchanged main. Candidate is dev-only, not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+---
+
+## 2026-11-28 11:02 CET — Preserve signed zero and reject non-finite Truss results CSV values
+
+- Starting refs: `dev` `63af531f475ab43a0f0cd3765771069cc96b0a24`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 132 ahead / 0 behind; exactly dev/main branches. A bounded local `git rev-parse --show-toplevel` returned `fatal: not a git repository`; connected GitHub integration fallback used.
+- Exact-head Push Quality [#46129931747](https://github.com/saeedsai/ProMathStudio/actions/runs/46129931747) and PR Quality [#46129935428](https://github.com/saeedsai/ProMathStudio/actions/runs/46129935428) both passed **218/218** on the starting dev SHA, zero failures/skips. Truss steps 212, 214 and 215 passed in both.
+- PR #191 is open/mergeable at the starting dev head, 132 commits and 49 changed files; independent reviews 0. Both branches report unprotected, rulesets empty, branch-protection GET 403. No merge or direct main update.
+- The results CSV used `String(value)` for every cell; JavaScript converts `-0` to `0`, losing the sign when a tiny signed result rounds to zero during unit conversion.
+- Added `csvCell`: finite numbers use shortest round-trip text, `-0` remains `-0`, +0 remains `0`, null/undefined remain blank, and numeric NaN/±Infinity reject. Wrapped the results export so invalid numeric data produces a visible error and no download.
+- Added registered Chromium assertions for formatter boundaries and the actual results CSV path using a synthetic result snapshot. The test checks signed-zero member force/stress/strain, joint displacement and support reaction, plus non-finite rejection with zero created downloads. It runs in the existing desktop/390px Truss browser loop.
+- Updated `tools/truss-fem-ui.js`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, this plan, this ledger and `CHANGELOG.md` in one atomic Git tree/commit on existing dev. No root bundle change is required because Truss uses adjacent standalone assets.
+- Isolated V8 syntax compilation of the modified UI and direct formatter checks cover -0, +0, Number.MIN_VALUE, NaN and ±Infinity. Full local Python/Playwright/build commands were not run because no checkout is mounted; new exact-head Push/PR Quality must certify the browser regression.
+- Main Quality #45360386408 and Pages deployment #45360367251 remain the latest verified successful production evidence on 24-Nov-2026 at unchanged main. The new change is dev-only, not live. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+---
+
+## 2026-11-28 11:59 CET — Preserve applied moments when individual coordinate×load products underflow
+
+- Starting refs: dev de9fc2513cc87273f4df70f669e21499f92c8220, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare 133 ahead / 0 behind; exactly dev/main branches. No local checkout is mounted; connected GitHub integration fallback used.
+- Exact-head Push Quality #46134287329 and PR Quality #46134292496 both passed 218/218 on the starting SHA, zero failures/skips; Truss steps 212, 214 and 215 passed.
+- Reproduced a preview-resultant loss: 78 nodes each contribute an exact product from 1e-162 m × 1e-162 N, but every individual binary64 multiplication rounds to zero. The exact combined product sum rounds to 8e-323 N m. The mirrored -y*Fx case should retain the negative value; the old implementation returned zero for both.
+- Added exactFiniteProductSum and finiteSignedProductSum for the preview's applied moment. Ordinary representable products retain the old direct product plus compensated sum. Underflowed nonzero products are accumulated as exact binary64 significand/exponent integers with one nearest-even rounding; the no-BigInt path uses scale-normalized compensated products. Individual product overflow still rejects.
+- Added a direct Node regression for both signs and the BigInt-free fallback, plus registered Chromium checks in the 1280px/390px Truss smoke. The tests assert the naive result is zero and the preview reports +/-16 minimum subnormal values while the aggregate forces remain finite.
+- Isolated V8 execution of the actual modified production FEM module passed: positive result 8e-323, negative result -8e-323, BigInt-free fallback 8e-323, naive results both zero. The source change is confined to adjacent standalone Truss assets; no root bundle parity change is required.
+- Local Node/Playwright/build commands remain unavailable because there is no checkout. Fresh exact-head Push and PR Quality are pending for the new commit; the starting SHA's 218/218 runs do not certify it.
+- PR #191 remains open/mergeable; zero independent reviews, both branches unprotected, rulesets empty and branch-protection GET 403. No merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on 24-Nov-2026 at unchanged main; this dev work is not live.
+- Historical inventory remains 166 gaps / 95 partial, unchanged.

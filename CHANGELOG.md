@@ -1,3 +1,728 @@
+## 2026-11-28 — Preserve signed zero in Truss results CSV and reject non-finite cells
+
+- Fixed a results-export fidelity issue: JavaScript's `String(-0)` emits `0`, losing the sign when a tiny signed force, stress, strain, displacement or reaction rounds to zero during unit conversion.
+- Results CSV numeric cells now use shortest round-trip binary64 text, preserve negative zero as `-0`, keep null/undefined cells blank, and reject numeric NaN/±Infinity with a visible export error instead of downloading misleading values.
+- Added registered Chromium coverage for positive/negative zero, the smallest positive subnormal, all three non-finite classes, actual member/displacement/reaction CSV rows and no-download behavior after rejection at desktop and 390px.
+- Implemented on dev; fresh exact-head Push/PR Quality is required. No solver math, tolerances or CI gates changed. Not live on main. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Keep Truss disclosure checks idempotent and show the live member count
+
+- Repaired the exact-head Truss browser failure at step 215: the first Euler-readiness scenario already opens the native member disclosure, so the later section-helper scenario now opens it only when needed instead of incorrectly asserting that it has re-collapsed. The later assertion also checks the current Euler-readiness summary instead of the obsolete label.
+- Added a polite live member count to the disclosure summary, derived from the validated preview snapshot. It uses singular/plural wording, updates when switching between the one-member bar and three-member triangle, and reports Unavailable when preview validation fails.
+- Added registered Chromium coverage for initial 3-member state, 3→1→3 example transitions, and idempotent disclosure access at desktop and 390px. Updated the Structural Truss contract and living records.
+- Implemented on dev; exact-head Push/PR Quality for the resulting candidate must pass before release. No solver math, tolerances or CI gates were weakened. Not live on main. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Expose Euler readiness in the Truss member-details disclosure
+
+- Exact-head Push Quality #46122489452 and PR Quality #46122493381 both failed at Truss browser step 215, while the direct Node FEM suite passed 114/114. The traceback at `tests/smoke_truss_fem.py:43` returned three blank row strings because the per-member table is inside the initially collapsed native `#member-material-details` disclosure.
+- Improved the visible summary to “Member materials, section properties and Euler readiness”. The Chromium regression now verifies the disclosure starts closed, checks the summary text, opens it through the native summary interaction, confirms the expanded state, then asserts all three initial `Not supplied` readiness rows. The test now covers the intended user interaction instead of reading hidden content.
+- Updated the Structural Truss FEM contract and living development records. No FEM algorithm, numerical tolerance or CI gate changed. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Repair Truss Studio browser assertions for the Euler readiness column
+
+- Exact-head Push/PR Quality on a5721e3 both failed at Truss step 212 because the companion tests/smoke_truss_studio.py still expected the old 13-column table and read Euler Pcr from zero-based index 12. The new readiness column correctly occupies index 12, shifting Pcr to index 13.
+- Updated every affected companion smoke assertion: 14 columns, per-member Not supplied/Missing I/Missing K labels at index 12, and Pcr at index 13 across default, partial, solved and legacy-import scenarios. Kept the prior singular readiness-message substring while retaining the new counts. No test gates or numerical tolerances were weakened.
+- Implemented on dev; new exact-head Push/PR Quality pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
+## 2026-11-28 — Report complete, partial and missing Euler inputs in the Truss preview
+
+- Fixed a pre-solve messaging gap: models with no I/K inputs previously received a generic “analyze to check structural stability” status, because the warning only detected one-sided inputs. The preview now reports ready/total, missing-I, missing-K and not-supplied counts; a complete set explicitly says inputs are ready but buckling assessment still requires analysis.
+- Added immutable `summarizeEulerInputReadiness` to the Truss FEM API. It validates all four states, treats an empty list as incomplete, and rejects malformed statuses rather than silently omitting members.
+- Direct Node and registered Chromium regressions cover all-missing, mixed, all-ready, empty and invalid states, plus edit/reset refresh at 1280px and 390px. Updated the Structural Truss FEM contract and living records. Implemented on dev; exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Preserve sub-threshold compression in the optional Euler screen
+
+- Fixed an optional Truss buckling-screen defect: the generic ±1e-8 N near-zero classification threshold was also suppressing compression demand. When member I and K are supplied, every strictly negative solved axial force now participates in Euler screening and is classified as compression for that screen. Members without I/K retain the established noise threshold.
+- Added Node and registered Chromium regressions for a 5e-12 N load below Pcr≈9.869604401089358e-12 N and a 5e-9 N load above Pcr; both are below the former 1e-8 N threshold. A no-I/K case confirms unchanged near-zero behavior. Browser checks include finite equilibrium/energy diagnostics at 1280px and 390px.
+- Updated the Structural Truss FEM contract and living development records. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Keep finite Truss FEM solutions when optional Euler ratios exceed binary64 range
+
+- Fixed a post-solve reporting defect: an otherwise finite compressed-bar FEM solution was rejected if either optional Euler utilization or reciprocal load ratio overflowed binary64. Each representable ratio remains numeric; an unrepresentable positive ratio is `null` with an explicit `overflow`/`underflow` range field. The below/at-or-above assessment compares the original compression demand and Euler critical load directly.
+- Truss Studio displays `> max`/`< min` for an out-of-range ratio and retains the explanatory assessment. No Infinity/NaN is exposed and no solver acceptance tolerance changed.
+- Added direct Node and registered Chromium regressions for reciprocal overflow and minimum-subnormal underflow, including finite equilibrium/energy diagnostics and the correct Euler assessment. Updated the Structural Truss FEM contract, living plan and execution ledger. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+## 2026-11-28 — Report complete or partial Truss member mass in the pre-solve preview
+
+- The Truss `inspectJSON` preview now returns a known-density mass subtotal, a complete total only when every member density is supplied, and an explicit count of members with unknown density. Explicit density zero remains known data; missing density is never silently treated as zero. A genuinely overflowing aggregate subtotal is rejected.
+- The pre-solve UI labels a complete estimated total, a partial subtotal with the missing-density count, or an unavailable estimate when no member density is known.
+- Added Node and registered Chromium regressions for all-known, partial, all-unknown, explicit-zero and overflowing totals. Browser coverage verifies the default triangle and 15.7 kg legacy SI import at desktop and 390px.
+- Updated the Structural Truss FEM contract, living plan and execution ledger. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Reset omitted solver state when importing legacy projects
+
+- Fixed project replacement semantics for legacy v1/v2 backups that omit the optional `solver` object (or contain an empty/partial object). Previously the Equation workspace retained the preceding project's expression and selector/assumption values. Import now clears the expression and restores the documented defaults: Auto operation/engine, variable `x`, limit point `0`, two-sided direction, blank ODE initial condition and all assumptions off.
+- Extended the registered atomic project-import browser regression with non-default prior solver state, v1/v2 missing-solver imports, an empty v2 solver object, valid v2 solver round-trip and rollback preservation.
+- Updated Project Format documentation and living development records. Implemented on dev; exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Fix Truss selected-example reset regression and expose analysis validity
+
+- Exact-head Push Quality #46090998251 and PR Quality #46091004384 failed at Truss browser step 215 after the scenario selected the `bar` example but compared the final Reset result against a `triangle` reference captured at page initialization. Reset correctly restores the currently selected example. The browser regression now computes its expected energy residual/error from the selected example immediately before reset; no numerical assertions were weakened.
+- Truss Studio's energy summary now exposes `data-analysis-state`: `pending` before first successful analysis, `valid` after a successful solve, and `stale` after model invalidation or failed analysis. Existing shortest-round-trip energy residual/error attributes continue to clear and republish with the result.
+- Chromium checks verify valid → stale → valid state transitions, exact selected-example reset behavior, and diagnostic values at 1280px and 390px.
+- Updated the Structural Truss contract, living plan and execution ledger. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Fix Truss browser binary64 comparison and publish machine-readable energy diagnostics
+
+- Exact-head Push Quality #46086282819 and PR Quality #46086287164 both failed at Truss browser step 215; the 109/109 Node FEM suite passed. The Python smoke compared a Playwright JSON-decoded integer token for JavaScript (2^{55}) directly to Python's arbitrary-precision integer (2^{55}). The shortest decimal representation returned by the browser was `36028797018963970`, which rounds back to the correct binary64 `2^{55}`. The regression now converts both values to binary64 before exact comparison and verifies a one-ULP difference remains detectable.
+- Truss Studio's always-visible energy summary now exposes shortest-round-trip `data-energy-residual-j` and `data-energy-error` attributes. Negative zero is preserved; both attributes clear on model invalidation and repopulate only after successful analysis.
+- Chromium coverage compares both attributes with the solver's own reference, verifies edit/reset clearing and recomputation, and continues at 1280px and 390px. Existing FEM tolerances and numerical assertions are unchanged.
+- Updated the Structural Truss FEM contract, living plan, execution ledger and changelog. Truss Studio uses adjacent standalone `tools/` assets; root `index.html` remains unchanged. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
+## 2026-11-28 — Surface Truss FEM energy residual and repair collapsed-details browser assertion
+
+- Exact-head Push/PR Quality on `989af00d2b697c3d1c5a901626e5fcfcfc144309` failed at Truss browser step 215. The 109/109 Node FEM analytical tests passed. The browser test attempted to read `#verification` while its parent `<details>` disclosure was still collapsed; the production detail had been populated correctly.
+- Added an always-visible, polite live status summary of the signed energy-balance residual to Truss Studio. Successful analysis updates it; model edits and invalidation clear it to prevent stale verification from appearing current. Detailed force/energy verification remains collapsible.
+- Updated Chromium smoke to assert the visible summary, explicitly open the details disclosure before inspecting its content, and verify edit/reset invalidation and recomputation at 1280px and 390px.
+- Updated the Structural Truss FEM UI contract and living development records. These are adjacent standalone `tools/` assets, so no root `index.html` bundle edit is required. Implementation commit: [1c2a3f0](https://github.com/saeedsai/ProMathStudio/commit/1c2a3f0674b937c649a6ab367c9f7f7ec9bc2a14). Fresh exact-head Push #46086152285 and PR #46086157690 are running; not released. Historical inventory remains 166 gaps / 95 partial.
+
+## 2026-11-28 — Correct Truss FEM energy reference and expose signed balance residual
+
+- Exact-head Push/PR Quality on parent 00c2fed failed at Truss analytical step 214 because the energy regression assumed the solver-generated large-member term was exactly 1e16 J; the actual term included binary64 solve-rounding noise, so its naive sum was 10000000000000046. The failure was a brittle test reference, not evidence of a production accumulator defect.
+- Replaced the Node and Chromium fixture with exact powers-of-two: one 2^55 J member plus 32 independent 0.5 J members. The naive member-order sum must remain 2^55 J; compensated energy must be 2^55+16 J, external work 2^56+32 J, and signed energy residual zero.
+- Added the signed `energyResidual` (joules) to the FEM solve result and display it in the Truss Studio verification panel beside the normalized identity error. Added direct API and browser-visible label assertions. No solver tolerance or existing regression gate was weakened.
+- Updated the Structural Truss FEM contract, living plan and execution ledger. Implemented on dev; fresh exact-head Push/PR Quality is pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
+## 2026-11-27 — Preserve small Truss FEM energy contributions in verification
+
+- Replaced ordinary reductions for external work and elastic strain energy with the shared finite signed accumulator. The energy-balance residual is now computed as one signed sum of the two elastic-energy totals and negative external work, avoiding low-order loss and an unnecessary intermediate (2U) overflow.
+- Added Node and Chromium regressions for one (10^{16}) J bar plus twenty 1 J bars. The previous member-order reduction returned (10^{16}) J; the corrected result is (10^{16}+20) J with zero energy-balance error and zero horizontal force balance. Browser coverage runs at 1280px and 390px.
+- Updated the Structural Truss FEM contract and living development records. The Truss solver is an adjacent script, so no root `index.html` bundle change is required.
+- Implemented on dev; fresh exact-head Push/PR Quality is pending. No merge or production deployment. Historical inventory remains 166 gaps / 95 partial.
+
+## 2026-11-27 — Preserve small Truss FEM support reactions under mixed-scale cancellation
+
+- Replaced the order-dependent nodal internal-force row reduction with the shared finiteSignedSum accumulator over the already-rounded K_ij*u_j terms and negative applied load. This preserves a small support reaction bracketed by large opposite member-force contributions; mixed-sign sums use the exact binary64 accumulator when BigInt is available and the existing compensated fallback otherwise.
+- Added Node and Chromium regressions for a synthetic three-bar fixture with 1 N, +1e16 N and -1e16 N loads. The support reaction is -1 N and global force balance is zero; the previous sequential reduction lost the 1 N reaction. Desktop and 390px browser checks also retain free-DOF residual and energy assertions.
+- Updated the Structural Truss FEM contract and living development records. The FEM is an adjacent script, so the standalone root index.html bundle is unchanged.
+- Implemented on dev; exact-head Push/PR Quality for this new commit is pending. No merge or production deployment. Historical inventory remains 166 gaps / 95 partial.
+
+## 2026-11-27 — Validate XLSX ZIP data descriptors and record them in overlap bounds
+
+- The offline XLSX importer previously accepted ZIP entries with general-purpose flag bit 3 without validating the trailing data descriptor. It also ended each overlap range at the compressed payload, excluding descriptor bytes.
+- Bit-3 local-header CRC/size fields must now be zero or match the central directory. The importer validates signed descriptors (optional 0x08074b50 signature) and signatureless descriptors against central CRC-32, compressed size and uncompressed size; truncated or mismatched descriptors reject. Descriptor bytes are included in record-overlap detection.
+- Added non-seekable ZIP browser fixtures for valid descriptor import and corrupted descriptor CRC/sizes plus contradictory local metadata. Existing stored/DEFLATE, transactional rollback and mobile checks remain.
+- Synchronized `src/xlsx-import.js` with the standalone `index.html` module; updated the integrity unittest and Data Tables import contract.
+- Starting exact-head Push/PR Quality on fc92e77 passed 218/218 each; fresh full Quality is required for this descriptor change. Implemented on dev; not released. Historical inventory remains 166 gaps / 95 partial.
+
+## 2026-11-27 — Reserve all Data Tables built-ins in custom functions and repair numeric-hardening browser setup
+
+- Exact-head Push/PR Quality on 1013d61 both failed at step 85 because `tests/smoke_sheet_numeric_hardening.py` tried to seed reserved `SUM`, `COUNT`, `MEDIAN` and `IF` names through the now-atomic custom-function restore API. The browser fixture now seeds only valid custom functions and explicitly verifies all reserved names reject atomically before continuing the existing built-in-priority and numerical checks.
+- Fixed a production inconsistency: `AVERAGE`, `AVG`, `COUNT`, `MEDIAN` and `PRODUCT` were missing from the editor, direct-restore and saved-project reserved-name guards even though the Data Tables evaluator always resolves them as built-ins. All spreadsheet built-ins are now reserved case-insensitively across those three paths.
+- Added Node schema negative cases and browser coverage for 17 reserved names with mixed casing and active-state preservation. Updated project-format and Data Tables documentation; kept the standalone `index.html` project-schema module exactly synchronized with `src/project-schema.js`.
+- Implemented on dev; exact-head Push/PR Quality is pending. No merge or production deployment; historical inventory remains 166 gaps / 95 partial.
+
+
+
+## 2026-11-27 — Match saved Python custom-function signatures and fix project browser origin
+
+- Python custom functions now require declared ordered positional argument names to exactly match saved `params` in the editor, project-schema preflight and public restore API. Matching multi-argument definitions remain valid; mismatched names/order/count and defaulted arguments are rejected before state mutation.
+- Added Node and Chromium regressions for valid multi-argument definitions, malformed signatures, direct-restore atomicity and project-import rejection. Python source remains inert during import.
+- Exact-head Push/PR CI on 0f0665 failed at project browser step 50 because `page.set_content()` created an opaque origin and direct `localStorage` access raised SecurityError. The browser test now serves the standalone app from a temporary loopback HTTP origin; localStorage assertions remain enabled. A follow-up source review corrected the inserted editor assertion indentation and the valid multi-argument Python fixture newline before new-head QA.
+- Updated project-format documentation, living plan and execution ledger. Fresh exact-head Quality is pending; this change is implemented on dev and not released.
+
+## 2026-11-27 — Make custom-function restore atomic and repair project-import regression
+
+- Exact-head Push/PR Quality on ba8432 failed at the project migration browser smoke's final invalid-table case. The test compared against a stale custom-function snapshot from before later valid Graph imports; the importer had preserved the then-current state. The rejection helper now snapshots and compares every exported workspace field immediately before each rejected import.
+- Hardened the exposed `MathStudio.customFunctions.restore()` API. It validates the complete list, 60-entry limit, reserved names, case-insensitive uniqueness, 1–6 valid distinct parameters, type/body/source bounds and matching Python declaration before replacing live state or localStorage. Invalid direct calls now throw without partial mutation.
+- Added Chromium coverage for invalid direct restore cases and preservation of both the active function list and localStorage. Updated the project-format contract, living plan and execution ledger.
+- Isolated V8 checks passed for valid legacy/Python restore and invalid reserved, duplicate, malformed and over-limit inputs. Fresh exact-head Push/PR Quality remains pending; not released.
+
+## 2026-11-27 — Validate custom-function backups against the editor contract
+
+- Project migration now rejects custom function names that shadow the editor's reserved built-ins, case-insensitively.
+- Formula custom functions require a nonblank expression; Python custom functions require source containing a `def` declaration for the saved function name. Python source remains inert during import and runs only when explicitly invoked in the isolated Pyodide worker.
+- Added Node schema negatives and Chromium project-import coverage for valid Python round-trip, malformed entries, pre-confirmation rejection and preservation of the current project. Updated the project-format contract and living NEXT FIVE plan.
+- Synchronized `src/project-schema.js` with the embedded standalone `index.html` module. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Restore RK45 source/bundle parity after exact-head CI failure
+
+- Exact-head structural CI on d4ff4a8 exposed an incomplete Git tree assembly: standalone index.html contained the new RK45 collision diagnostic while src/ode-tools.js retained the previous implementation. Twenty structural/ODE extraction tests failed at step 7; no gates were changed.
+- Restored src/ode-tools.js from the exact embedded ODE module, retaining the already committed standalone bundle. Strengthened Node and Chromium fixtures to prove the 5-ULP c=4/5 and c=8/9 stage-time equality in both directions.
+- Updated the living plan and full execution ledger. Source/bundle parity and isolated V8 tests are checked before the next guarded dev commit. Fresh exact-head Quality remains pending; not released.
+
+## 2026-11-27 — Detect repeated RK45 fractional-stage timestamps and repair endpoint regression
+
+- Exact-head Push/PR CI on the preceding dev head failed at the RK45 endpoint browser smoke because its monotonicity assertion multiplied two subnormal quantities; that product rounded to zero despite increasing timestamps. The assertion now uses the signed integration direction times the timestamp difference, retaining the strict check without underflow.
+- RK45 now reuses its exact four fractional Dormand–Prince stage timestamps for both derivative evaluation and diagnostics. The collision counter detects repeated fractional stages and stages rounded onto either accepted endpoint; k6/k7 use the already selected endpoint timestamp.
+- Added Node and Chromium forward/backward 20-ULP large-epoch regressions where a 5-ULP trial makes c=4/5 and c=8/9 coincide. Both accepted collision counters must report the repeated-stage attempt. Existing smallest/two-subnormal endpoint and monotonicity coverage is retained.
+- Updated numerical-method docs, living plan, execution ledger and standalone index.html bundle. Isolated V8 checks passed; native Chromium/build checks and fresh exact-head full Quality remain pending. Implemented on dev; not released.
+
+## 2026-11-27 — Preserve representable subnormal RK45 intervals
+
+- Fixed adaptive RK45 initialization when a nonzero, representable subnormal interval is divided into 20 initial steps and `span/20` rounds to zero. The solver now attempts the full requested span as one step in this case instead of reporting underflow before the first attempt.
+- The existing stage-time collision counters and visible accuracy warning remain active; this does not certify intermediate-stage resolution or global accuracy for a time-varying derivative.
+- Added Node and registered Chromium regressions for the smallest and two-smallest subnormal intervals in forward/backward directions, exact endpoints, monotonicity and collision diagnostics. Updated numerical-method documentation and synchronized the standalone `index.html` bundle.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+## 2026-11-27 — Match the living plan's required five-feature heading
+
+- Exact-head structural CI found the restored living plan used `NEXT FIVE priorities` but the durable delivery-policy regression also requires the literal `Next five features` heading.
+- Aligned the heading while preserving the same five priorities and their acceptance tests. No test or CI gate was changed.
+- Fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Validate saved solver variable identifiers and repair project rollback regression
+
+- Saved Equation variables now match the live CAS identifier grammar (Unicode letter followed by Unicode letters, ASCII digits or underscores) as well as the existing 24-character limit; empty/missing legacy values retain their default.
+- Added Node identifier syntax/type/boundary coverage and Chromium Unicode solver round-trip plus malformed-variable import rejection.
+- Exact-head CI exposed a stale rollback-test expectation: later valid Graph imports had replaced the earlier SymPy solver state, but the final assertion still compared against the old snapshot. The test now captures the actual pre-failure solver state and verifies transactional rollback against it; earlier solver round-trip assertions remain.
+- Restored the accidentally empty living hourly plan and refreshed the NEXT FIVE queue. Synchronized `src/project-schema.js` with its standalone `index.html` module.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Align saved-solver structural guard
+
+- Corrected the new project-solver structural test to match the production call's third diagnostic-label argument while still requiring the 80-character limit.
+- No production code or regression coverage was changed; fresh exact-head Quality reruns are required.
+
+## 2026-11-27 — Validate saved symbolic-solver controls before restore
+
+- Project migration now checks the saved Equation operation, engine and limit-direction selectors against the actual workspace options.
+- Tightened saved variable and limit-point lengths to the live 24- and 80-character input limits; missing and empty legacy controls retain their existing defaults.
+- Added Node enum/type/boundary coverage and Chromium valid round-trip plus invalid-import state-preservation regressions. Synchronized the project-schema source and standalone module.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Reject unsupported Data Tables project-state versions
+
+- Project migration now requires an explicit nested Data Tables state version to be exactly numeric version 1; legacy backups that omit the nested version remain compatible.
+- Unsupported, null, string and malformed explicit versions are rejected before workspace restore instead of being silently interpreted as v1.
+- Added Node version-boundary and Chromium atomic-rejection/state-preservation regressions; synchronized `src/project-schema.js` with the standalone `index.html` module and documented the nested project contract.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Repair project-fit validation bundle parity
+
+- Exact-head Push/PR Quality exposed that an inline-only Curve fitting restore edit was not represented in `src/` and was discarded by `scripts/build.py`. Reverted that unsupported inline edit; no build/parity checks were relaxed.
+- Kept saved-fit validation in the canonical project schema module and embedded bundle. Malformed model/degree/equation state is rejected before the project importer mutates any workspace.
+- Retained model/degree enum, type, length, v1/v2, immutability and browser import/rollback regressions; removed only assertions for the unsupported direct UI-hook change.
+- Corrected project-format, plan, ledger and changelog wording. Fresh exact-head Quality pending; not released.
+
+## 2026-11-27 — Validate saved Curve fitting state in project backups
+
+- Project migration now validates optional Curve fitting preferences: supported model enum, degree strings 2–6 and a 2,000-character `lastEquation` bound. Missing/null/empty legacy selectors retain their defaults; malformed values are rejected before other workspaces mutate.
+- The project importer rejects malformed fit preferences before invoking the UI restore hook, preventing invalid backup state from silently clearing selectors.
+- Added Node coverage for all model/degree combinations, malformed types/enums/lengths, v1/v2 migration and immutability; extended the Chromium project-import smoke for valid round-trip, direct restore atomicity, invalid-import rejection and state preservation.
+- Synchronized `src/project-schema.js` with the embedded `index.html` module and documented the saved-state contract. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Fix nested PRODUCT structural regression setup order
+
+- Corrected the new structural regression to load `tests/smoke_data_tables.py` before asserting its nested signed-zero browser case. Retained all assertions.
+- This fixes an `UnboundLocalError` in the exact-head structural gate; fresh Push/PR Quality pending. No production behavior changed.
+
+## 2026-11-27 — Preserve negative zero through nested PRODUCT formulas
+
+- Fixed Data Tables aggregate composition losing the sign of a negative-zero PRODUCT result: JavaScript `String(-0)` emits `"0"`; the evaluator now emits an explicit `-0` scalar token.
+- Added a nested PRODUCT Chromium regression while retaining the direct signed-zero assertion, plus structural guards for the serialization behavior.
+- Updated modular and standalone Data Tables source together. Implemented on dev; fresh exact-head Quality pending; not released.
+
+## 2026-11-27 — Update MEDIAN structural guard for PRODUCT
+
+- Fixed the exact-head structural CI regression: the MEDIAN test expected the pre-PRODUCT aggregate regex. It now includes PRODUCT and explicitly checks the Formula-library entry and aggregate dispatch.
+- Existing MEDIAN and PRODUCT coverage is retained; no production behavior or numerical assertions were weakened.
+- New Push/PR exact-head Quality pending; not released.
+
+## 2026-11-27 — Add scale-safe PRODUCT to Data Tables formulas
+
+- Added first-class `PRODUCT(range)` and scalar/nested PRODUCT formulas to the Data Tables evaluator and Formula library.
+- Uses exponent-scaled binary64 multiplication to avoid spurious intermediate overflow/underflow; empty numeric ranges return 1, zero factors produce signed zero, and genuinely non-finite final products return `#NUM!`.
+- Added registered Chromium and structural regressions for mixed numeric/text ranges, scalar and nested arguments, large/small factor recovery, true overflow, zero, empty ranges, negative zero and underflow.
+- Updated `src/data-tables.js` and its embedded `index.html` module byte-for-byte together. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Validate XLSX local-header metadata before import
+
+- XLSX ZIP entries without the data-descriptor flag now require local-header CRC-32 and compressed/uncompressed sizes to match central-directory metadata; bit-3 data-descriptor archives retain the existing payload CRC/size validation.
+- Added three malformed-archive Chromium regressions and a structural guard. Each mismatch must reject with an XLSX import error and preserve the pre-import workbook.
+- Corrected stale duplicate Data Tables documentation that still described XLSX import and DEFLATE support as unimplemented; clarified the bounded offline import subset.
+- Updated `src/xlsx-import.js` and its standalone `index.html` module byte-for-byte together. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Avoid argument-limit failures in large Data Tables MIN/MAX aggregates
+
+- Replaced `Math.min(...nums)` / `Math.max(...nums)` with an iterative scalar scan. A valid formula containing 22 individually valid 6,000-cell ranges (132,000 values) no longer exceeds JavaScript's function-argument limit.
+- Preserved empty-range behavior and binary64 numeric semantics. Updated the modular Data Tables source and standalone `index.html` module together.
+- Added a registered Chromium regression for 132,000-value MIN/MAX and a structural assertion against argument spreading. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Preserve original-unit compensated Data Tables sums
+
+- Data Tables SUM now uses original-unit Neumaier compensation when all partial sums and corrections remain finite, avoiding a one-ULP shift introduced by unnecessary normalize/rescale arithmetic.
+- Retains the scale-normalized compensated/residual fallback when an intermediate sum overflows, preserving finite cancellation results and subnormal residual terms; genuine non-finite totals still return #NUM!.
+- Added exact binary64 SUM and AVERAGE browser references plus structural source/parity assertions. Updated the standalone index.html module in the same commit.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Correct hollow-circle rounding near the cavity transition
+
+- Select the well-conditioned direct annulus differences by cavity area ratio (r² ≤ 0.5), avoiding a one-ulp area and inertia loss just above an inner/outer diameter ratio of 0.5.
+- Preserve the factored radial-gap path for near-unity thin walls. Added Node and Chromium reference regressions for area, inertia, section modulus, radii, centroid, input immutability and the former one-ulp-low result at desktop and 390px.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-27 — Reject legacy Truss SI values lost during unit conversion
+
+- Legacy Truss SI imports now reject nonzero nodal forces (N) or Young's modulus (Pa) when division to current kN/GPa units would round the value to zero. Exact zero remains valid, and ordinary conversions retain the original division arithmetic; other scaled property validation remains unchanged.
+- Added Node and Chromium regressions for positive/negative minimum-subnormal Fx/Fy, minimum-subnormal E, zero and normal legacy references. Implemented on dev; exact-head Push/PR Quality pending; not released.
+## 2026-11-27 — Scale Truss stiffness before subnormal direction-cosine products
+
+- Global stiffness assembly now scales member stiffnesses per matrix coefficient before multiplying by row/column direction cosines, then restores the scale after compensated summation. This avoids double-rounding minimum-subnormal member contributions before they can combine.
+- Added Node and Chromium regressions for twenty diagonal members at the minimum positive binary64 stiffness. The exact aggregate rounds to ten minimum subnormals and produces 100 m displacement; the previous sequential product path doubled the coefficient and returned 50 m.
+- Browser checks also require zero force-balance residual, energy verification and all twenty member results at 1280px/390px. FEM remains binary64 and no root bundle update is needed because Truss FEM is an adjacent script. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Repair Matrix standalone trailing-newline parity
+
+- Exact-head structural CI exposed 24 existing parity failures because the modified inline Matrix module lacked its required final newline. Restored exact `source + "\\n"` bundle parity and strengthened the new regression to assert that contract directly.
+- The new Matrix finite-draft structural cases themselves passed; browser tests were skipped after the structural failure. Fresh exact-head Push/PR Quality is required.
+
+## 2026-11-26 — Align direct Matrix restore with finite solver bounds
+
+- Hardened `MathStudio.matrixTools.restoreState()` so nonempty decimal/scientific drafts must convert to finite values with absolute magnitude at most `1e12`, matching project import; blank unfinished cells and the 80-character limit remain supported.
+- Invalid A/B/RHS/weights arrays reject before any grid mutation. Added Chromium coverage for exact ±1e12 boundaries, ±1e999 overflow and ±1e13 out-of-bound values, plus structural standalone source/bundle parity.
+- Corrected the structural regression's inline-script newline marker before exact-head CI; no production behavior or assertions were weakened.
+- Implemented on dev; exact-head Push/PR Quality required; not released.
+
+## 2026-11-26 — Validate and restore saved Graph datasets before application
+
+- Align primary saved Graph dataset validation with the live importer: 2–32 columns, names at most 100 characters, 1–6,000 rows, and at least one finite numeric point for the persisted axes (including Z in 3D).
+- Reject empty, one-column, overlong-header and unrenderable datasets before import confirmation instead of failing during restore.
+- Apply saved X/Y/Z selectors before the initial series build, so valid non-default mappings work even when header-derived default columns contain text.
+- Added Chromium atomic-import/round-trip regressions; legacy projects without selectors retain header-derived defaults.
+- Implemented on dev; exact-head Push/PR Quality required; not released.
+
+## 2026-11-26 — Compensated Truss preview aggregate totals
+
+- Replaced naive member-length and SI-volume reductions in the Truss JSON preview with the existing Neumaier compensated sum, preserving low-order contributions from small members in mixed-scale models.
+- Added Node and registered Chromium regressions using one 1e16 m member plus twenty 1 m members; exact aggregate length and volume remain correctly rounded while naive reductions demonstrably lose or distort the contributions.
+- Existing legacy totals and genuine overflow rejection remain covered. Implemented on dev; new exact-head Push/PR Quality required; not released.
+
+## 2026-11-26 — Data Tables stable-mean exact-rounding repair
+
+- Fixed an exact-head CI regression where AVERAGE over numeric cells 16, 25 and 1 returned 13.999999999999998 due to divide-then-rescale rounding.
+- Prefer the compensated finite total and divide once; retain normalized compensated fallback when the total overflows but the mean remains finite.
+- Added exact AVERAGE/AVG range and scalar regressions plus a structural guard. Updated Data Tables numerical documentation and synchronized source with standalone index.html.
+- Implemented on dev; fresh exact-head Push/PR Quality required; not released.
+
+## 2026-11-26 — Data Tables decimal-cell CI repair
+
+- Fixed a duplicate const declaration in range aggregation that prevented the standalone embedded Data Tables script from parsing.
+- Updated the MEDIAN structural regression to verify the shared decimal-only cell parser, blank scalar compatibility and blank range exclusion.
+- Re-synchronized index.html from src/data-tables.js; no test assertions or CI gates were removed. Fresh exact-head Push/PR Quality required; not released.
+
+## 2026-11-26 — Decimal-only Data Tables cell coercion
+
+- Prevent JavaScript radix-prefixed strings (`0x10`, `0b10`, `0o10`) from being silently treated as decimal spreadsheet numbers in direct cell arithmetic and aggregate ranges.
+- Share one decimal/scientific numeric-cell parser; preserve finite numeric primitives, surrounding whitespace and blank-cell behavior. Aggregate ranges ignore radix strings as text; direct arithmetic references reject them as nonnumeric.
+- Added Chromium and structural regressions while preserving existing extreme-value aggregation tests and standalone source/bundle parity.
+
+## 2026-11-26 — Bound raw Truss numeric-string input
+
+- Enforce the 256 UTF-16 code-unit limit before trimming, so oversized whitespace padding cannot bypass the FEM decimal/scientific input bound.
+- Preserve valid padded decimal input at the exact 256-unit boundary; reject 257-unit whitespace- and zero-padded values in model parsing, solving and section-property calculations.
+- Added matching Node and registered Chromium regressions, retaining all prior numeric syntax and engineering reference checks.
+
+## 2026-11-26 — Bound Truss decimal numeric strings and repair scientific-notation regression
+
+- Bound trimmed decimal/scientific FEM numeric strings to 256 characters before regex matching and conversion; overlong values retain the established finite-number diagnostic.
+- Corrected the Node and Chromium scientific-notation reference: 1e3 kN applied to a 1e3 mm², 2 m, 200 GPa bar produces 0.01 m displacement. Radix-prefix rejection and normal decimal/scientific acceptance remain fully tested.
+- Added an otherwise-finite 257-character decimal rejection regression in parse, solve and section-property inputs.
+- Implemented on dev; fresh exact-head Push/PR Quality required; not released.
+
+## 2026-11-26 — Preserve saved-table selection diagnostics while rejecting empty workbooks
+
+- Reordered project validation so stale/null selected-sheet references retain the established error, while a zero-sheet workbook with no selection is rejected before restore.
+- Updated Node table-ID/selection and Chromium atomic-import regressions; no assertions or CI gates were removed.
+- Exact-head failure diagnosed and repaired on dev; fresh Push/PR Quality pending; not released.
+
+## 2026-11-26 — Reject empty saved Data Tables workbooks
+
+- A present saved Data Tables workspace must contain at least one sheet; malformed zero-sheet workbooks are rejected before import instead of leaving the workspace blank.
+- Legacy projects that omit the optional tables object remain supported. Added Node v1/v2 and Chromium atomic-import regressions for absent/stale/null selection cases.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Reject ambiguous Graph overlay column headers
+
+- Live Graph overlay imports and saved-project validation now reject blank or duplicate headers after trimming and case-folding, consistent with primary Graph datasets.
+- Added Node and Chromium regressions for duplicate and whitespace-only names, including preservation of existing Graph data on failed live add/import.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Preserve small-cavity hollow-circle binary64 rounding
+
+- For inner/outer diameter ratios up to 0.5, hollow-circle area and inertia factors now use the well-conditioned direct forms 1 - q² and 1 - q⁴; thin-wall ratios retain the factored radial-gap path.
+- Fixes a reproducible one-ulp loss for a cavity below half an ulp of the outer-envelope properties while preserving the existing thin-wall, overflow and subnormal paths.
+- Added Node and registered Chromium regressions proving the previous one-ulp result and requiring area, Ixx/Iyy, Sx/Sy and rx/ry to match the solid-circle envelope.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Correct Graph mapping regression fixture declaration
+
+- Fixed the exact-head CI failure caused by the new Node regression reusing an existing top-level `const valid2d` identifier; the new 2D fixture is now named `dormant2d`.
+- The production schema and all regression assertions are unchanged. Fresh Push/PR Quality runs are required to verify the fix.
+
+## 2026-11-26 — Reject invalid primary Graph dataset mappings in saved projects
+
+- Added pre-import validation for saved Graph mode, primary X/Y/Z selectors and plot style. Invalid explicit selectors no longer silently fall back to header-based defaults during restore.
+- Preserved legacy projects that omit selector/style fields and the dormant 2D Z selector; 3D mappings require distinct axes.
+- Added Node schema and Chromium atomic-import/round-trip regressions, synchronized the standalone project-schema script, and documented the backup contract.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Reject malformed Graph dataset overlays in saved projects
+
+- Added pre-import validation for additional graph series: overlay count, table dimensions/cells, X/Y/Z mappings, 2D/3D mode, plot style and at least one numeric point.
+- Invalid overlays now fail project validation instead of being silently truncated or dropped during restore; missing/null legacy overlay lists remain supported.
+- Added Node schema and Chromium atomic-import regressions; synchronized the inline standalone project-schema module and documented the project-format contract.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Preserve full precision in Data Tables formulas
+
+- Formula evaluation now returns the full finite binary64 result instead of rounding intermediate cell values to 13 significant digits.
+- Kept the existing compact 13-digit presentation as display-only formatting; dependent formulas, aggregates, graph handoff and computed exports retain the full numeric value.
+- Added Chromium coverage for 1/7, dependent multiplication, SUM/AVERAGE/MEDIAN, aggregate chaining and 390px visibility; strengthened static source/bundle checks.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Correct hollow-rectangle small-cavity rounding
+
+- Small cavities now use a direct, well-conditioned area difference; Ixx/Iyy use finite outer-minus-inner moment terms when safe, while the factored wall-gap path remains for thin walls and overflow cases.
+- Small-cavity radii use a stable ratio identity to avoid one-ulp errors from independently rounded area/inertia factors.
+- Added Node and registered Chromium regressions for area, Ixx/Iyy, radii, below-half-ulp behavior and BigInt-disabled fallback at desktop/390px.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Preserve Truss section sums without BigInt
+
+- Same-sign finite sums now use Neumaier compensation in original units when the BigInt exact accumulator is unavailable, avoiding an extra scale-normalization rounding in L-angle, channel and I-section properties.
+- Mixed-sign fallback and BigInt exact accumulation remain unchanged; non-finite final sums still reject.
+- Added Node and registered Chromium regressions that disable BigInt and verify L-angle area/centroid/inertias, sub-ulp channel/I-section flange areas and channel/I-section inertia values at 1280px/390px.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — L-angle section-property exact summation
+
+- L-angle area, first moments, Ixx/Iyy and Ixy now use the existing exact binary64 section-property accumulator when BigInt is available, avoiding a one-ulp area error from scale normalization and order-dependent local/parallel-axis inertia sums.
+- Added two direct Node numerical regressions and extended Chromium coverage for both high-aspect-ratio fixtures at 1280px and 390px; existing channel/I-section checks remain.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Exact composite-section centroid and inertia sums
+
+- Composite channel and I-section area, first moments and local-plus-parallel-axis inertias now sum already-rounded finite binary64 terms exactly when BigInt is available, with the existing scaled compensated compatibility fallback.
+- Added direct Node and Chromium regressions for a sub-ulp channel centroid/Ixx/Iyy case and an order-sensitive I-section Ixx case; browser checks run at 1280px and 390px.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Compensated composite-section area totals
+
+- Channel and I-section rectangle-area totals now use the existing scaled compensated accumulator, preserving combined flange contributions when each flange is individually below half an ulp of the dominant web area.
+- Added a direct Node regression proving the naive total rounds to 1.0 mm² while the correctly rounded web-plus-two-flange area is 1.0000000000000002 mm² for both channel and I-section fixtures.
+- Implemented on dev; fresh exact-head Push/PR Quality pending; not released.
+
+## 2026-11-26 — Reject Truss Euler CSV unit underflow
+
+- Exact-head Push/PR CI exposed a stale Euler CSV expectation: the computed binary64 kN value serializes as 493.48022005446785, not the older rounded 493.4802200544678. Updated Node and Chromium regressions to require shortest-round-trip fidelity.
+- Hardened material CSV export against a positive finite Euler load in N becoming zero when converted to kN; the exporter now reports an explicit underflow error instead of emitting a misleading zero.
+- Added a direct numerical regression for positive-N/zero-kN conversion. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-25 — Guard exact binary64 values in Truss material CSV
+
+- The material CSV serializer now verifies that every finite numeric cell reparses to the identical binary64 value and refuses non-finite numeric cells.
+- Corrected stale Node/Chromium expectations: the bar UI rounds mass to 15.7 kg, while CSV preserves the exact computed value 15.700000000000001 kg for 0.002 m³ × 7850 kg/m³.
+- Added exact parsed-value and volume×density regression assertions. Existing UI display behavior is unchanged.
+- Exact-head Push/PR Quality pending on the new dev candidate; not released.
+
+## 2026-11-25 — Correct Truss CSV round-trip regression row delimiter
+
+- Corrected the new Node regression to split the exported CSV on actual CRLF characters rather than a double-escaped literal; numeric round-trip assertions are unchanged.
+- Exact-head Push/PR Quality must pass on the corrected follow-up commit; not released.
+
+## 2026-11-25 — Truss material CSV preserves exact binary64 numeric values
+
+- Replaced fixed 16-significant-digit rounding with shortest round-trippable decimal output for finite numeric cells; negative zero is emitted as `-0`.
+- Added a regression for density `0.10000000000000002` and derived mass `0.00020000000000000004`, both previously rounded to different numeric values.
+- Updated the Structural Truss numerical/export contract. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-25 — Truss channel safely handles a negligible underflowed web
+
+- A channel web whose area rounds to zero is accepted only when exponent-scaled upper bounds prove its area, first moments, local/offset inertias, Ixy and both normalized-path contributions are below binary64 significance, and the remaining section properties are normal.
+- Non-negligible off-axis underflowed webs remain explicitly rejected; the existing centered I-section web rule is unchanged.
+- Added exact-binary64 Decimal-backed Node and Chromium regressions for a finite flange-dominated channel, including 1280px and 390px browser coverage.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-25 — Truss FEM mixed-sign resultants preserve exact binary64 cancellation
+
+- Added an exact integer accumulator for mixed-sign finite binary64 force and moment terms, with a single nearest/ties-to-even binary64 conversion; same-sign reductions retain the scale-normalized compensated path.
+- Fixed a reproducible 79-node cross-scale cancellation error: applied force now returns `9.99937827510621e-11 N` instead of `9.99875737761613e-11 N`, with the corresponding signed origin moment corrected.
+- Added direct Node and registered Chromium desktop/390px regressions; existing huge cancellation, subnormal residual, true-overflow and solved force-balance coverage remains.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-25 — Truss FEM force-balance diagnostics preserve finite cancellation
+
+- Combined applied nodal loads and support reactions before compensated summation, preventing separate overflowing totals from producing a NaN force-balance diagnostic when the true equilibrium residual is finite.
+- Added Node and registered Chromium regressions with +1e308, +1e308, -1e308 N applied loads and corresponding reactions; the previous separate totals were +Infinity/-Infinity while the corrected balance is exactly zero.
+- Corrected the signed-moment test fixture to explicitly initialize the appended node's zero Fx, so its naive overflow assertion proves the intended overflow rather than accidental NaN.
+- Restored the empty dev living plan from the complete main-branch historical plan, preserving the prior history and adding the current dated entry and next five.
+- Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-25 — Quality acceptance criteria follow the current workflow
+
+- Removed a fixed 218-step count from the newest living-plan and execution-ledger acceptance criteria; the current exact-head workflow exposes 217 steps.
+- The gate remains unchanged in substance: every required step must pass, with zero failed or skipped required checks. No CI checks were removed or weakened.
+
+## 2026-11-25 — Truss signed-resultant summation retains subnormal normalized terms
+
+- Extended the separate residual path to every normalized quotient below the smallest normal binary64 value, not only quotients that underflow to zero.
+- Added a regression for a 1e-10 N term between +1e308 N and -1e308 N; the previous path lost about 1.25 ppm due to subnormal quotient quantization.
+- Preserved minimum-subnormal residual, x/y force and moment cancellation, and genuine final-overflow rejection coverage. Exact-head Quality pending; not released.
+
+## 2026-11-25 — Truss preview preserves finite signed resultants after cancellation
+
+- Replaced naive applied-force and global-origin moment reductions with scale-normalized Neumaier accumulation, retaining terms that underflow only after normalization in a separately compensated residual.
+- Finite x/y force totals and signed moment resultants no longer fail solely because an overflowing intermediate partial sum is later cancelled; individually non-finite moment products and genuinely non-finite final resultants remain rejected.
+- Added Node and registered Chromium regressions for horizontal/vertical cancellation, a minimum-subnormal residual between large cancelling loads, moment cancellation and true final overflow at 1280px/390px.
+- No FEM stiffness/displacement solver or root bundle change; Truss Studio uses adjacent JS assets. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-25 — Data Tables chart regression assertion matches combined declaration
+
+- Repaired a brittle structural assertion that expected `const scale=...` as a standalone declaration even though production correctly declares `const margin=90,scale=...` in one statement.
+- The assertion still requires the exact scale-normalization expression; no source behavior or numerical/browser coverage was weakened.
+- Exact-head Push and PR Quality must rerun the structural suite and registered Chromium chart regressions. Not released.
+
+## 2026-11-25 — Data Tables categorical charts avoid numeric overflow
+
+- Replaced naive repeated-category addition with scale-normalized compensated accumulation, including the grouped Other category; genuinely unrepresentable category totals now produce an explicit error.
+- Normalized positive pie weights before computing percentages and normalized mixed-sign bar values before axis mapping, preventing infinite totals/ranges and non-finite canvas coordinates for finite binary64 inputs.
+- Added registered Chromium regressions for large-value category cancellation, finite equal pie slices, finite mixed-sign bar rectangles and true category overflow; added structural source assertions.
+- Synchronized `src/data-tables.js` with the embedded standalone `index.html`. Implemented on dev; exact-head Push/PR Quality pending; not released.
+
+## 2026-11-25 — Data Tables SUM preserves finite results after cancellation
+
+- Replaced naive left-to-right SUM accumulation with scale-normalized compensated summation, retaining terms whose normalized quotient underflows so they survive cancellation of much larger values.
+- Preserved the existing #NUM! behavior when the final sum is genuinely non-finite.
+- Added Chromium regressions for finite cancellation after an overflowing partial sum, 1e-300 and minimum-subnormal residuals, and true final overflow; added structural source assertions.
+- Synchronized `src/data-tables.js` with the embedded standalone `index.html`. Implemented on dev; exact-head Quality pending; not released.
+
+## 2026-11-25 — Data Tables action menus expose explicit disclosure relationships
+
+- Added unique content-region IDs and `aria-controls` links to the five native Table, Filter, Combine, Files and Python disclosure summaries while retaining their accessible names.
+- Corrected the registered Chromium regression to exercise the native summary control directly, assert its accessible name/control target, and verify Rename visibility before atomic rollback/recovery.
+- Synchronized `src/numerical-data.js` with the embedded standalone `index.html`. Exact-head Push/PR Quality is required; not released.
+
+## 2026-11-25 — Data Tables insertion at the grid edge invalidates shifted references
+
+- Structural insertion now rewrites previously valid scalar references and ranges to explicit `#REF!` when a shifted coordinate would leave A1:AF6000; already-invalid references remain unchanged.
+- Added row-6000 and column-AF scalar/range Chromium regressions and structural source assertions.
+- Repaired the sheet-rename regression setup by explicitly activating the Data Tables workspace before clicking Rename; the visibility assertion prevents a hidden-control timeout.
+- Updated modular source and standalone `index.html` together. Implemented on dev; exact-head Quality pending. Not released.
+
+## 2026-11-25 — Data Tables sheet renames commit references atomically
+
+- Sheet renaming now stages every workbook-wide formula rewrite before mutating any cell or changing the sheet name; a late cell-conversion failure cannot leave earlier formulas partially renamed.
+- Added a registered Chromium regression for late cross-sheet conversion failure, unchanged workbook state, successful retry, quoted new sheet names and preserved double-quoted formula literals.
+- Updated the modular source and standalone index.html bundle together, plus the Data Tables guide, living plan, execution ledger and changelog.
+- Implemented on dev; exact-head Push/PR Quality required before promotion. Not released.
+
+## 2026-11-25 — DATA-TABLES-ROLLBACK-RECOVERY-ASSERTION-CORRECTION
+
+Review of the new browser regression caught an assertion-index issue before treating the run as green: after a successful insertion at row 1, the original formula row correctly moves from index 0 to index 1. Updated the recovery assertion to inspect that moved row. No product logic or test coverage was weakened; exact-head Quality on the corrected dev/PR head is required.
+
+## 2026-11-25 — Data Tables structural reference rewrites commit atomically
+
+- Structural formula rewrites are staged across every workbook sheet and committed only after all cell conversions and rewrites succeed.
+- Added a Chromium regression for a late conversion failure after local and cross-sheet references have been visited; it verifies unchanged workbook export, unchanged formulas/row count, and successful recovery after the bad cell is corrected.
+- Added a structural unittest and clarified the Data Tables guide. Synchronized `src/data-tables.js` with the standalone `index.html` bundle.
+- Implemented on dev; exact-head Push/PR Quality pending. Not released.
+
+## 2026-11-25 — TRUSS-L-ANGLE-SIGNED-ZERO-CI-REPAIR
+
+Starting refs: dev `183c6500a9d7fc04620d08e385051254c60f76a1`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; release PR #191 remains open.
+
+Exact-head Push Quality [#45603581050](https://github.com/saeedsai/ProMathStudio/actions/runs/45603581050) and PR Quality [#45603598028](https://github.com/saeedsai/ProMathStudio/actions/runs/45603598028) both failed at step 214, **2D truss FEM analytical references, scaling and mechanism rejection**. The Truss Node suite reported 90/91 passing. The failing L-angle regression expected dimensional Ixy to be zero, but the normalized result restored the correctly signed binary64 underflow value `-0`; the normalized tensor still produced the correct 45° principal-axis angle. This is a signed-zero representation defect, not a loss of principal-axis information.
+
+Fix on dev: canonicalize only a zero-valued restored dimensional Ixy to positive zero. Keep the normalized signed Ixy for the principal-axis calculation. Tighten the Node regression with `Object.is(value, 0)` and the registered Chromium regression with a positive-zero sign check. Update the Truss numerical contract, living plan, execution ledger and changelog. No `index.html` edit is needed because Truss Studio loads the adjacent `tools/truss-fem.js` asset.
+
+Local repository checkout is absent in this execution workspace, so local Node/Playwright commands cannot run here. Fresh exact-head Push and PR Quality must validate the committed candidate; pending until GitHub Actions completes. No test assertions are weakened.
+
+Main remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; its Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) previously passed 218/218 and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251) completed build/status/deploy successfully. PR #191 has no independent reviews; both branches report unprotected, rulesets are empty, and the connected integration receives HTTP 403 for branch-protection reads. Do not merge until eligible approval and verifiable required protections are available. Frozen historical inventory remains **166 gaps / 95 partial**.
+
+## Next five features
+
+1. **P0 — Exact-head Truss CI and release governance:** require the new dev Push and PR Quality to pass every required step on the same exact SHA; obtain eligible independent PR #191 approval and verifiable main protection for required checks/no direct push/force/deletion; inspect the full diff, merge only through the ordinary PR process, then verify main Quality, Pages and hosted critical paths. Acceptance: zero failed/skipped required checks on the candidate and successful post-merge main/Pages verification.
+2. **P1 — Complete the seven-shape Truss numerical audit:** thin-wall, subnormal and high-scale references for rectangle, hollow rectangle, solid/hollow circle, channel, I-section and L-angle. Acceptance: exact-binary64 Decimal references, genuine final overflow/underflow rejection, invalid rollback and selected-member isolation in Node plus 1280px/390px Chromium.
+3. **P1 — Data Tables grid-boundary edits:** row 6000/column AF insertion/deletion, valid-to-invalid #REF! transitions, blank-grid and reversed/mixed-anchor ranges. Acceptance: unchanged out-of-grid references, correct recalculation, byte-identical rejected-operation rollback and desktop/390px Chromium.
+4. **P1 — Saved-project compatibility:** current and legacy Matrix/Graph/Table round-trips. Acceptance: malformed imports preserve every workspace, selection and prior result; desktop/390px browser tests.
+5. **P1 — ODE solver verification:** analytical forward/backward IVPs, tolerance/step convergence, unsupported-class diagnostics and stale-export invalidation. Acceptance: independent numerical references, failure/recovery and desktop/390px browser tests.
+
+---
+
+## 2026-11-25 — CI-DELIVERY-PLAN-HEADING-REPAIR
+
+Exact-head Push Quality #45602917742 and PR Quality #45602928273 on b37084214b0bce42fb2d2af88c45e4fa120dc975 failed only in structural step 7: tests/test_delivery_policy.py requires the literal heading "Next five features" in docs/HOURLY_DEVELOPMENT_PLAN.md. The five priorities were present under uppercase NEXT FIVE, but the exact compatibility heading was missing. Restored the full historical plan from the preceding b9f00f9 version and added the required heading without changing the five priorities or weakening any assertion. Re-run exact-head Push and PR Quality after this documentation repair.
+
+## 2026-11-25 — TRUSS-L-ANGLE-Ixy-UNDERFLOW-CANDIDATE-SYNTAX-CHECKPOINT
+
+The first candidate commit b05ff5ee250cf90ac65342de6d6a17db40b12696 contained a duplicated continuation of the normalized-candidate guard after a multi-line source replacement. A bounded isolated V8 syntax check caught the malformed source before claiming validation. The duplicate lines were removed without changing the numerical condition or weakening the new regression. The preceding source/test commit remains intact; this follow-up is a compile correction. Re-run actual production-module syntax and the new L-angle underflow regression, then require fresh exact-head Push and PR Quality. No release or main update.
+
+## 2026-11-25 — L-angle retains principal-axis results when dimensional Ixy underflows (dev; exact-head QA pending)
+
+- L-angle section properties no longer reject solely because the dimensional product of inertia rounds below binary64 range while area, diagonal inertias and principal properties remain representable.
+- The existing normalized two-rectangle tensor path now also runs for zero-rounded dimensional Ixy; it retains normalized orientation while the exported dimensional product correctly remains zero. Positive determinant/principal-property guards remain.
+- Added exact-binary64 Decimal-reference Node coverage and registered 1280px/390px Chromium coverage for the 45° principal axis, principal moments, moduli and radii.
+- Updated the Structural Truss guide, hourly plan and execution ledger. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — I-section accepts a centered web whose area is below binary64 range (dev; exact-head QA pending)
+
+- The I-section helper now permits only its exactly centered central web to have a zero rounded area when both web dimensions are below 1 mm; its local inertias and parallel-axis contributions are then also below binary64 range.
+- All other composite-piece area-underflow rejection and final positive total-area/inertia checks remain unchanged; the same underflowed web is still rejected for a channel.
+- Added exact-binary64 Decimal-reference Node and registered 1280px/390px Chromium regressions for area, Ixx/Iyy, Sx/Sy and rx/ry, plus a channel negative control.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — L-angle mixed-axis subnormal precision (dev; exact-head QA pending)
+
+- L-angle section-property evaluation now uses independent width/depth normalization when only one centroidal inertia is subnormal, preserving geometric section modulus and radius precision for that axis.
+- Added exact-binary64 Decimal-reference Node coverage and registered 1280px/390px Chromium coverage; ordinary sections and reported dimensional inertia remain unchanged.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — Truss rejects positive final member mass that underflows to zero (dev; exact-head QA pending)
+
+- A positive density/geometry combination can no longer be reported as zero mass when the final L·A·ρ product itself underflows; the diagnostic identifies the member.
+- Explicit zero density remains valid, representable mass after intermediate volume underflow remains supported, and genuine final overflow remains rejected.
+- Added Node and registered 1280px/390px Chromium regressions for final underflow, zero density and retained representable mass. No FEM equations or standalone UI bundle changes.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — Truss preview rejects an unrepresentable positive member volume instead of reporting zero (dev; exact-head QA pending)
+
+- Pre-solve inspection now rejects positive L·A products that underflow to zero, while preserving the independently representable scale-safe mass; existing volume overflow rejection remains.
+- Reuses each validated member volume for total and per-member preview metrics, preventing divergent checks.
+- Added Node and registered 1280px/390px Chromium regressions for preview and material-CSV rejection; FEM parsing, stiffness, mass and solve paths are unchanged.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — Truss Euler critical load preserves representable results across intermediate range limits (dev; exact-head QA pending)
+
+- Optional Pcr now retains the existing direct calculation for ordinary values and falls back to binary-exponent product/quotient evaluation when π²·E·I, K·L or (K·L)² overflows/underflows.
+- Added Node Decimal-reference cases for simultaneous overflow and underflow, a finite result with Number.MAX_VALUE I, and genuine final overflow/underflow rejection; the registered 1280px/390px Chromium smoke exercises both representable extremes.
+- Updated the Structural Truss numerical contract. Implemented on dev only; not released pending fresh exact-head Push/PR Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — Truss member mass preserves representable L·A·density across volume range limits (dev; exact-head QA pending)
+
+- Optional mass calculation now uses a scale-safe three-factor product when intermediate member volume L·A overflows or underflows, while retaining ordinary left-to-right arithmetic for normal finite values.
+- Added Node and registered 1280px/390px Chromium regressions for a zero-underflow volume with finite 9.88131291682493e-28 kg mass and an overflowing volume with finite 9.999999999999968e299 kg mass; zero density and genuinely overflowing final mass remain covered.
+- Updated the Truss numerical contract. Implemented on dev only; not released pending fresh exact-head Push/PR Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — Truss axial stiffness retains representable EA/L across intermediate range limits (dev; exact-head QA pending)
+
+- Preserve the ordinary direct E*A/L path while using binary exponent scaling when the intermediate product overflows/underflows or the quotient is otherwise lost.
+- Added Node Decimal-reference regressions for a finite ~1e302 N/m quotient with an overflowing product and a positive ~2.5e-316 N/m quotient with a zero product; true final overflow/underflow and ordinary bit-level behavior remain guarded.
+- Extended the registered standalone Truss Chromium smoke at 1280px/390px and documented the numerical contract. Implemented on dev only; not released pending exact-head Push/PR Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — Hollow section cavity underflow no longer rejects representable net properties (dev; exact-head QA pending)
+
+- Hollow rectangle and hollow circle helpers no longer require the cavity area / inner-diameter square to be representable when the positive contained geometry and all net section properties are representable.
+- Added direct Node and registered Chromium regressions at 1280px/390px for zero-underflow cavity intermediates, finite positive net properties, solid-envelope binary64 parity, input immutability and frozen results.
+- Updated the Structural Truss guide and restored the full historical execution ledger on dev (all main history plus seven unique dev entries). The frozen MATLAB inventory remains 166 gaps / 95 partial. Not released pending exact-head Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — Repair over-escaped Data Tables sort validator after exact-head CI failure
+
+- Exact Quality #45522925339 exposed an invalid regex in the new sort guard during Node inline-script syntax validation (step 7). Corrected the literal to match the existing single-backslash reference validator.
+- Added a structural regression asserting the exact regex spelling; preserved the invalid-reference/blank-grid sort behavior and the existing browser regression.
+- Synchronized src/data-tables.js and index.html. This corrective dev commit awaits a fresh exact-head Quality run; no tests were weakened and no release bypass occurred.
+
+## 2026-11-25 — Data Tables sorting preserves invalid and blank-grid references (dev; exact-head QA pending)
+
+- Stable row sorting now leaves references outside the supported A1:AF6000 grid unchanged and invalid, while valid blank rows beyond the current materialized table retain fixed coordinates in range-contiguity checks.
+- Added a registered Chromium regression for full-grid/blank ranges, invalid AG/A6001 references, reversed mixed-anchor ranges and calculated values; existing noncontiguous-range rollback remains covered.
+- Added structural coverage and clarified Data Tables documentation. Updated src/data-tables.js and the standalone index.html module together. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
+## 2026-11-25 — Data Tables row insertion preflights cell conversion (dev; exact-head QA pending)
+
+- Row insertion now validates and materializes supplied cell strings before workbook-wide formula rewrites, preventing a thrown conversion from shifting cross-sheet references without inserting a row.
+- Added a registered Chromium rollback regression and a structural unittest; the browser asserts identical exported workbook state, formula and row count after failure.
+- Updated the Data Tables guide, living plan and execution ledger. The standalone Data Tables module in `index.html` remains synchronized with `src/data-tables.js`. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
+## 2026-11-24 — Composite section properties retain accuracy at extreme aspect ratios (dev; exact-head QA pending)
+
+- Channel and I-section now fall back from max-dimension normalization to independent x/B and y/H coordinate scales when a normalized area/inertia loses normal binary64 range; physical area/inertias and ordinary paths remain unchanged.
+- Added Node and 1280px/390px Chromium regressions for a 1e304 aspect ratio, reproducing >1e-11 thin-axis rx/Sx error and checking exact-binary64 120-digit Decimal rx/ry/Sx/Sy references within 5e-13.
+- Updated the Structural Truss guide, living development plan and execution ledger. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
+## 2026-11-24 — Composite section moduli preserve subnormal-inertia precision (dev; exact-head QA pending)
+
+- Channel and I-section Sx/Sy now reuse normalized inertia and normalized extreme-fibre geometry when the corresponding physical Ixx/Iyy is subnormal; ordinary I/c behavior and dimensional area/inertias remain unchanged.
+- Added direct Node and registered 1280px/390px Chromium regressions with exact-binary64 120-digit Decimal references; former I/c errors of 5–24% are reproduced and corrected results are checked within 5e-13 relative error.
+- Updated the Structural Truss guide, living plan and execution ledger. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
+## 2026-11-24 — Circular section moduli avoid subnormal-inertia quantization (dev; exact-head QA pending)
+
+- Solid and concentric hollow circle Sx/Sy now use the factored analytic (π/32)·Do³·inertiaFactor only when dimensional inertia is subnormal; ordinary sections retain I/c.
+- Added direct Node and registered 1280px/390px Chromium regressions for exact-binary64 thin solid/annular circles. The old I/c path reproduced >20% error; corrected values match independent 120-digit Decimal references within 5e-13 relative error.
+- Updated the Structural Truss guide, hourly plan and execution ledger. Implemented on dev; not released pending exact-head Quality and reviewed promotion.
+## 2026-11-24 — Truss rectangular section moduli avoid subnormal-inertia precision loss (dev; exact-head QA pending)
+
+- Solid and concentric hollow rectangle Sx/Sy now use dimensionless geometry factors only when the corresponding Ixx/Iyy is subnormal, avoiding 2–4% errors from dividing rounded inertia by extreme-fibre distance while preserving the ordinary I/c path.
+- Added direct Node and 1280px/390px Chromium regressions with independent 120-digit Decimal references; prior I/c errors are reproduced and corrected values match within 5e-13 relative error.
+- Updated the Structural Truss guide, living development plan and execution ledger. Implemented on dev; not released pending exact-head Quality and ordinary reviewed promotion.
+
+## 2026-11-24 — L-angle subnormal inertia and principal-property precision (dev; exact-head QA pending)
+
+- L-angle sections whose physical inertia tensor is subnormal now recompute the same two rectangles at normalized length scale before restoring Ixx/Iyy/Ixy, principal moments/axis, section moduli and radii. Ordinary and extreme-aspect fallback paths are retained.
+- Added exact-binary64/120-digit Decimal Node and 1280px/390px Chromium regressions; the prior path reproduced >1% radius and >1° principal-axis errors.
+- Updated the Structural Truss guide, hourly plan and execution ledger. Implemented on dev; not released until exact-head Quality and ordinary reviewed release gates pass.
+
+## 2026-11-24 — Composite section radii avoid subnormal I/A quantization (dev; exact-head QA pending)
+
+- Channel and I-section radii now recompute the composite area, centroid and inertias at a normalized length scale, then restore the scale once. Existing dimensional area and Ixx/Iyy outputs are unchanged.
+- Added Node and 1280px/390px Chromium regressions proving subnormal physical inertias previously distorted both radii by more than 1%, with independent high-precision references and input immutability checks.
+- Updated the Structural Truss guide, living plan and execution ledger. Implemented on dev; not released until exact-head Quality and ordinary reviewed release gates pass.
+
+## 2026-11-24 — Truss circular radii avoid subnormal-inertia precision loss (dev; exact-head QA pending)
+
+- Solid-circle radii now use Do/4; concentric hollow-circle radii use (Do/4)·sqrt(1+(Di/Do)^2), avoiding large relative error from a rounded subnormal I/A quotient.
+- Added direct Node and 1280px/390px Chromium regressions for solid and hollow circles; both reproduce the old >10% radius error while retaining a positive subnormal inertia.
+- Updated the Structural Truss guide, living plan and execution ledger. Implemented on dev; not released.
+
+## 2026-11-24 — Truss rectangular radii avoid subnormal-inertia precision loss (dev; exact-head QA pending)
+
+- Solid and concentric hollow rectangle radii of gyration now use dimensionless geometry factors instead of the rounded binary64 I/A quotient. This preserves accurate rx/ry when a representable Ixx is subnormal.
+- Added Node and 1280px/390px Chromium regressions for solid and hollow rectangles; the tests demonstrate the prior >10% radius error and verify independent geometric references.
+- Updated the Truss FEM guide, hourly plan and execution ledger. Implemented on dev; not released.
+
+## 2026-11-24 — Spreadsheet structural edits preserve invalid grid references (dev; exact-head QA pending)
+
+- Row/column deletion no longer shifts an already out-of-grid scalar or aggregate reference into a valid cell (for example, A6001 stays #REF! after deleting row 1, and AG1 stays #REF! after deleting column A).
+- Added cross-sheet Chromium regressions with valid-reference controls and structural assertions; retained the existing registered range-deletion smoke and source/standalone-bundle parity check.
+- Updated the Data Tables guide, living plan and execution ledger. Implemented on dev; not released.
+
+## 2026-11-24 — Spreadsheet scalar references enforce grid bounds (dev; exact-head QA pending)
+
+- Scalar references outside the supported `A1:AF6000` grid now return `#REF!` instead of silently reading as zero; valid empty cells inside the grid remain blank.
+- Added Chromium coverage for row 0, row 6001, column AG, the maximum valid AF6000 coordinate, aggregate-range consistency and arithmetic on an empty in-grid cell.
+- Added structural coverage for the bounds guard and exact source/standalone-bundle parity. Updated the Data Tables guide, plan and execution ledger.
+- Candidate is on dev only; exact-head Quality is required before promotion. Not released.
+
+**Follow-up fixture check:** the protected formula literal intentionally remains ="Obrien!A1" after rename, sort and row/column insertion; corrected both post-sort/post-column expected rows to match the unchanged literal. No behavior assertion was removed.
+
+## 2026-11-24 — Spreadsheet rename keeps qualified formulas valid (dev; exact-head QA pending)
+
+- Renaming a sheet now rewrites matching qualified scalar and aggregate-range references across the workbook; both quoted and unquoted old names are recognized case-insensitively.
+- New names that require quoting are emitted with doubled embedded apostrophes. Double-quoted formula string literals are protected from rewriting.
+- Expanded the registered Chromium smoke to verify rename, scalar/range calculations, sorting, structural edits, and literal preservation. Fixed its invalid JavaScript slice expression (rows[0][:4] to rows[0].slice(0,4)) without weakening assertions.
+- Synchronized src/data-tables.js with its inline standalone index.html module and updated the Data Tables guide, plan and execution ledger. Full exact-head Quality is required; not released.
+
+## 2026-11-24 — Spreadsheet sheet names with escaped apostrophes (dev; exact-head QA pending)
+
+- Table rename now preserves internal apostrophes; formulas refer to those names using doubled apostrophes inside single quotes, e.g. `='O''Brien'!A1` and `=SUM('O''Brien'!A1:A3)`.
+- Applied the same qualifier grammar/decoder to scalar cells, aggregate ranges, structural row/column edits and sorting. Mixed anchors, reversed cross-sheet ranges and quoted formula literals are covered.
+- Extended the registered Chromium spreadsheet-reference smoke and added structural/source-bundle parity coverage. Updated the Data Tables guide and synchronized modular source with standalone `index.html`.
+- Implemented on dev only; exact-head full Quality and the ordinary protected, independently reviewed PR gate are still required before release.
+
+## 2026-11-24 — Spreadsheet aggregate structural-test recovery (dev; exact-head QA pending)
+
+- Updated the numeric-hardening structural test to match the new scaled compensated AVERAGE/AVG and safe MEDIAN midpoint implementation rather than asserting the retired expression.
+- Added direct structural checks for underflow-residual preservation, scaled midpoint dispatch and the retained finite-result error guard. Exact source/bundle parity and browser-gate assertions remain mandatory.
+- Root cause of Quality #45382903210 step 7 failure was a stale test expectation; production code was not weakened. Fresh exact-head Quality required.
+
+## 2026-11-24 — Spreadsheet subnormal and cancellation-safe aggregates (dev; exact-head QA pending)
+
+- AVERAGE/AVG now use scaled compensated accumulation and preserve separately accumulated terms whose normalized quotient underflows; small residuals survive cancellation of large positive/negative values.
+- Even-count MEDIAN now uses a scaled midpoint, preserving minimum/adjacent subnormal values without overflowing large same-sign inputs.
+- Added browser regressions for raw workbook subnormal ranges, maximum-finite average, cancellation residuals, negative/adjacent subnormal medians and workbook round-trip.
+- Updated the modular Data Tables source and synchronized inline standalone bundle, plus the Data Tables guide and hourly execution records. Not released until exact-head Quality and the normal protected, independently reviewed PR gate pass.
+
+## 2026-11-24 — Truss radius precision and exact-head CI recovery (dev; QA pending)
+
+- Use `sqrt(I/A)` when the quotient is finite and positive, with the previous split-square-root calculation as overflow/underflow fallback. The 40 mm solid-circle reference now returns 10 mm exactly without losing the extreme L-angle range case.
+- Added a focused Node regression for both the finite quotient and overflowing L-angle quotient/fallback path.
+- Diagnosed exact-head Quality #45361913324: step 214 failed on a one-ULP strict reference discrepancy (`9.999999999999998` vs `10`). New candidate requires full exact-head Quality; not released.
+
+## 2026-11-24 — Truss L-angle radius-of-gyration overflow safety (dev; exact-head QA pending)
+
+- Radius of gyration now evaluates `sqrt(I)/sqrt(A)`, avoiding an overflowing `I/A` intermediate when the final radius is finite.
+- Added a 120-digit Decimal-backed Node regression and Chromium desktop/390px coverage for a slender L-angle (`B=1e200 mm`, `H=1e100 mm`, `t=1e-293 mm`); the former code reproduced a finite-range rejection.
+- Other section properties and the explicit positive/finite result guards remain. Not released until exact-head Quality and the normal reviewed PR gate pass.
+
 ## 2026-11-24 — Truss solid-circle high-range inertia safety (dev; exact-head QA pending)
 
 - Solid-circle inertia now applies π/64 before the final multiplication of the diameter-squared terms, avoiding an unnecessary overflowing Do⁴ intermediate when the final moment is finite.
@@ -1109,3 +1834,60 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - 2026-11-22 (dev, exact-head QA pending): Made Truss Studio SVG downloads self-describing and accessible with a native title/description, image role and aria-labelledby references while preserving the viewBox and solved plot. Chromium regression now parses the generated SVG Blob and checks XML validity, namespace, dimensions, accessible-name references, background and solved geometry.
 
 - 2026-11-23 (dev, exact-head QA pending): Stabilized hollow-circle section properties for thin annulus walls using factored diameter-gap expressions instead of cancellation-prone squared/fourth-power subtraction. Added independent high-precision Node references and real Chromium preview/application regression at 1280px and 390px, including selected-member isolation and E/density/K preservation.
+
+
+## 2026-11-25
+
+- Data Tables: added explicit accessible names to the five native action-menu triggers (Table, Filter, Combine, Files, Python). Corrected the registered sheet-rename browser regression to open the collapsed Table actions menu through its accessible role/name before exercising rollback and recovery. No workbook calculation or persistence behavior changed; exact-head Quality pending.
+
+- Data Tables follow-up: synchronized the new accessible action-menu names in `src/numerical-data.js` with the standalone `index.html` after exact-head structural CI exposed a source/bundle parity mismatch. The browser regression remains enabled; no checks were weakened.
+
+- 2026-11-26 (dev, exact-head QA pending): Truss FEM numeric-string parsing now accepts only trimmed decimal/scientific syntax instead of JavaScript radix coercion. Hexadecimal, binary and octal strings reject consistently in model parsing, solve and section dimensions; finite numeric values and ordinary decimal/scientific strings remain compatible. Added Node and Chromium desktop/mobile regressions; no standalone bundle change because Truss FEM is an adjacent script.
+
+
+## 2026-11-26
+
+- Saved Graph project validation: primary and overlay axis selectors now require bounded base-10 integer strings or safe integer numbers. Rejects radix-prefixed, exponent-form, fractional, negative and overlong raw string indices instead of relying on JavaScript `Number()` coercion. Preserves omitted legacy selectors, bounded whitespace/plus decimal strings, dormant 2D Z mappings and project version 2. Added Node structural and Chromium atomic-import rollback regressions; synchronized `src/project-schema.js` into standalone `index.html`. Implemented on dev; exact-head Quality and release pending.
+
+
+- 2026-11-26 (dev, exact-head QA pending): Truss FEM global stiffness assembly now collects each member's finite contribution per matrix coefficient and uses the existing compensated/exact binary64 accumulator before rounding. This preserves twenty 1 N/m parallel-member contributions alongside a 1e16 N/m member when their combined +20 changes the rounded coefficient. Added direct Node and registered Chromium regressions for displacement, equilibrium residual and energy checks at 1280px/390px; no root bundle change is required because Truss FEM is an adjacent script.
+
+
+
+## 2026-11-27 — Saved Engineering filter preflight validation
+
+- Project import now accepts only the empty all-disciplines selector or one of the nine canonical Engineering Toolbox IDs. Previously, an unknown but syntactically valid ID passed schema preflight and failed later in the restore hook. Unknown IDs now reject before confirmation or workspace mutation; omitted/null legacy state and query strings up to 200 characters remain supported. Added exact schema/catalog ID parity, all-nine valid-ID, invalid-ID, query-boundary and Chromium pre-confirmation regressions. Synchronized `src/project-schema.js` with the standalone `index.html` bundle. Implemented on dev; fresh exact-head Quality and release are pending.
+
+
+## 2026-11-27 — Describe RK45 stage-time collisions accurately
+
+- Corrected the RK45 result-panel warning. The collision counter includes repeated fractional-stage timestamps and stages rounded onto either endpoint; the previous message incorrectly said every collision was “rounded to current t”.
+- Added a registered Chromium UI regression that runs the forward 20-ULP case near 1e12 and checks the new wording while rejecting the obsolete wording. Numerical integration, step selection, error estimates and export behavior are unchanged.
+- Synchronized `src/ode-tools.js` with the embedded standalone `index.html` module. Implemented on dev; exact-head Push/PR Quality and release are pending.
+
+
+## 2026-11-27 — Repair RK45 warning regression and singular/plural diagnostics
+
+- Exact-head Push [#46014476843](https://github.com/saeedsai/ProMathStudio/actions/runs/46014476843) and PR [#46014485667](https://github.com/saeedsai/ProMathStudio/actions/runs/46014485667) both exposed a stale browser assertion at step 181: the stage-resolution test still expected the obsolete “stage times rounded to current t” warning after the broader repeated/endpoint-collapsed wording was introduced.
+- Updated RK45 result formatting to use “1 accepted step had” or “N accepted steps had” according to the actual collision count. Numerical integration and diagnostics counters are unchanged.
+- Updated forward/backward single-collision Chromium assertions and the 20-ULP two-collision Chromium assertion. The tests reject the obsolete wording and incorrect singular/plural forms; no assertions or workflow gates were weakened.
+- Updated numerical-method documentation, living plan and execution ledger. Modular source and standalone index.html are committed together after exact parity verification. Fresh exact-head Push/PR Quality is required; this is implemented on dev, not released.
+
+
+## 2026-11-27 — Reject ambiguous Python custom-function definitions
+
+- Python custom functions now require exactly one synchronous top-level declaration of their saved name. Duplicate top-level definitions and async def declarations reject in the editor, direct restore API and saved-project preflight; this prevents a later definition replacing the validated callable and prevents coroutine results from entering the numeric worker.
+- Added Node schema and Chromium import/direct-restore regressions for duplicate, async-only and sync-plus-async declarations. Updated the project-format contract and synchronized src/project-schema.js with its standalone index.html module.
+- Repaired the exact-head project browser regression: it now opens the native custom-function details panel through its summary and asserts the editor is visible before filling controls. The previous failure was a hidden-control test setup error, not a production UI defect. Full exact-head Push/PR Quality is required; implemented on dev, not released.
+
+
+## 2026-11-28 — Per-member Euler input readiness
+
+- Truss Studio now shows each member as Not supplied, Missing I, Missing K or Ready for its optional ideal Euler estimate. `inspectJSON().memberMetrics[].eulerInputStatus` exposes the same stable states. Missing I/K is never treated as zero and does not affect the axial-only FEM solve.
+- Added direct Node and registered Chromium coverage for all states, Pcr availability, 14-column table integrity and edit/reset refresh at desktop/390px. Implemented on dev; exact-head Quality/release pending.
+
+
+## 2026-11-28 — Preserve applied moments when individual products underflow
+
+- Truss JSON preview now retains a representable signed applied-moment resultant when nonzero coordinate×load products individually underflow to zero. The exact binary64 product accumulator rounds the combined sum once; ordinary representable products retain their established path, and the BigInt-free fallback uses scale-normalized compensated accumulation. Non-finite individual products still reject.
+- Added direct Node and registered Chromium regressions for positive and negative 78-term subnormal moment sums; Node also exercises the BigInt-free fallback. The naive per-node products return zero while the preview correctly returns +/-16 minimum binary64 subnormals. Implemented on dev; fresh exact-head Push/PR Quality and release are pending.

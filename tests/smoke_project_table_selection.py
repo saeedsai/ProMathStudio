@@ -36,6 +36,13 @@ def main():
         assert page.evaluate('window.MathStudio.dataTables.active.name') == 'Beta'
         assert exported['selected'] == exported['tables'][1]['id']
 
+        # An explicit unsupported nested Data Tables version must not be interpreted as v1.
+        bad_version = dict(base, working='SEL_BAD_VERSION', tables=dict(tables, version=2))
+        upload(page, bad_version)
+        page.wait_for_function("document.querySelector('#hub-status').textContent.includes('unsupported Data Tables state version')")
+        assert page.evaluate('window.MathStudio.bridge.export().working') == 'SEL_OK'
+        assert page.evaluate('window.MathStudio.dataTables.active.name') == 'Beta'
+
         # A selection naming no table must be refused before any state mutation.
         bad = dict(base, working='SEL_BAD', tables=dict(tables, selected='sheet-9'))
         upload(page, bad)
@@ -43,6 +50,18 @@ def main():
             "document.querySelector('#hub-status').textContent.includes('selected table does not exist')")
         assert page.evaluate('window.MathStudio.bridge.export().working') == 'SEL_OK'
         assert page.evaluate('window.MathStudio.dataTables.active.name') == 'Beta'
+
+        # A present workbook with no sheets cannot be restored: the workspace always keeps one sheet.
+        for empty_tables, error_text in (
+            ({'version': 1, 'tables': []}, 'table list must contain at least one sheet'),
+            ({'version': 1, 'selected': None, 'tables': []}, 'selected table does not exist'),
+        ):
+            empty = dict(base, working='SEL_EMPTY', tables=empty_tables)
+            upload(page, empty)
+            page.wait_for_function(
+                f"document.querySelector('#hub-status').textContent.includes({json.dumps(error_text)})")
+            assert page.evaluate('window.MathStudio.bridge.export().working') == 'SEL_OK'
+            assert page.evaluate('window.MathStudio.dataTables.active.name') == 'Beta'
 
         page.set_viewport_size({'width': 390, 'height': 844})
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')

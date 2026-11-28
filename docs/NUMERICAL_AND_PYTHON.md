@@ -46,6 +46,18 @@ At very large absolute times, RK45 can advance the endpoint by one representable
 
 Example: dy/dt=1 over [1e12 − 1/8192, 1e12] (or the reverse interval) has a known signed endpoint increment and produces the warning. Ordinary forward/backward dy/dt=y examples have no stage collisions. Numerical reference, failure recovery and 390px UI are covered by `tests/test_ode_rk45_stage_resolution.py` and `tests/smoke_ode_rk45_stage_resolution.py`.
 
+### RK45 subnormal initial-step underflow (2026-11-27)
+
+A nonzero interval can be representable even when dividing it into the usual 20 initial RK45 steps rounds the initial step to zero. For example, the smallest positive binary64 subnormal interval from 0 to `Number.MIN_VALUE` previously failed before the solver made an attempt. The solver now falls back to one full-span step only when that initial division is zero, preserving the exact requested endpoint in both directions.
+
+The fractional Dormand–Prince stage times necessarily collapse on such a tiny interval. The existing stage-collision counters and visible warning therefore remain active; this fallback is **not** an accuracy guarantee for a time-varying derivative. Rescale time when reliable intermediate-stage resolution matters. For `dy/dt=1`, the signed endpoint increment is exactly representable. The smallest- and two-subnormal forward/backward cases are covered by `tests/test_ode_rk45_near_resolution.py` and the registered Chromium `tests/smoke_ode_rk45_endpoint.py`.
+
+### RK45 repeated fractional-stage time diagnostics (2026-11-27)
+
+The collapsed-stage diagnostic now detects any repeated timestamp among the four fractional Dormand–Prince stages, as well as a fractional stage rounded onto the current or next accepted endpoint. Previously it detected only stages rounded back to the current time, so two distinct stage coefficients could silently evaluate at the same representable timestamp without being reported.
+
+For example, near absolute time 1e12, a five-ULP trial can round the c=4/5 and c=8/9 stage times to the same binary64 value even though neither equals the trial endpoint. This is counted in the stageTimeCollisionAttempts and, when accepted, stageTimeCollisionAcceptedSteps fields. The result panel calls these “repeated or endpoint-collapsed RK45 stage times”; it does not incorrectly imply that every collision rounded back to the current time. The diagnostic does not alter the step or claim additional accuracy; rescale time when distinct intermediate-stage resolution is required. Forward and backward 20-ULP reference cases are covered by tests/test_ode_rk45_near_resolution.py and the registered Chromium tests/smoke_ode_rk45_endpoint.py.
+
 ### RK45 rejected-step and time-resolution diagnostics (2026-10-30)
 
 Adaptive scalar RK45 reports accepted-step magnitude range and maximum accepted embedded local-error/tolerance ratio. It now also reports **maximum rejected local-error ratio** and **smallest rejected |Δt|** when any trial is rejected, plus the count of trials promoted to the next representable time when floating-point rounding would otherwise leave time unchanged. Attempt-budget failures include rejection diagnostics and the time-resolution-limited count, helping distinguish a too-strict tolerance from a time-resolution bottleneck. The reported error ratio is an embedded **local** estimate, not a bound on global error, stiffness certification or proof that the ODE is smooth.
@@ -56,7 +68,7 @@ Example: `dy/dt=-30*y`, `t0=0`, `t1=1`, `y0=1`, tolerance `1e-9` has reference `
 
 In the same **First-order ODE initial-value problem** panel, choose **Adaptive RK45**. Enter the derivative, initial/final time (forward or backward), initial value, tolerance (1e-12 to 1e-2), and maximum integration attempts (4–10,000). The Dormand–Prince embedded Runge–Kutta 5(4) method accepts or rejects candidate steps based on a scaled local error estimate. It reports accepted/rejected counts, the **minimum and maximum accepted absolute time-step sizes** and the **maximum accepted local-error ratio** (embedded error divided by the solver's scaled tolerance). This ratio is bounded by 1 for accepted steps and is **not** a certified global error bound.
 
-Example: dy/dt=y, t0=0, t1=1, y0=1, tolerance 1e-10 approximates e. For backward integration, use t0=1, t1=0, y0=e to approximate 1. The accepted-step range helps show adaptation; it is not a convergence proof. Both Data Tables and Graphs handoffs work with the nonuniform, signed-direction output. Invalid derivatives, invalid tolerances, non-finite values, attempt exhaustion and time-resolution underflow produce explicit errors and disable stale exports.
+Example: dy/dt=y, t0=0, t1=1, y0=1, tolerance 1e-10 approximates e. For backward integration, use t0=1, t1=0, y0=e to approximate 1. The accepted-step range helps show adaptation; it is not a convergence proof. Both Data Tables and Graphs handoffs work with the nonuniform, signed-direction output. Invalid derivatives, invalid tolerances, non-finite values, attempt exhaustion and intervals that cannot advance at the current time resolution produce explicit errors and disable stale exports. A representable subnormal interval whose initial 20-way split underflows to zero is attempted as one full-span step with a stage-collision warning, not an accuracy guarantee.
 
 **Scope:** real scalar forward/backward nonstiff IVPs only; no stiff ODE guarantee, event handling, coupled adaptive systems or globally certified accuracy. RK4 remains the default. See `tests/test_ode_rk45_step_quality.py` and `tests/smoke_ode_rk45_step_quality.py`.
 
@@ -197,7 +209,7 @@ In **Graphs → Control Theory → State equilibrium → Two-state transient res
 
 **RK45 overflow classification (dev QA pending):** Adaptive RK45 retries bounded intermediate state/finite-derivative overflow by reducing the step, but does not retry nonfinite derivatives, untagged parser/domain errors, or failures at the initial k1 stage. Diagnostics identify the last bounded stage and include it in attempt-limit failures. This is not a stiff solver and does not guarantee global accuracy.
 
-**RK45 near-machine-resolution grid (dev QA pending):** The adaptive scalar RK45 solver checks each accepted timestamp advances in the requested direction. It counts accepted steps progressing by only one representable floating-point time increment and warns users to rescale the time variable and check convergence. This complements stage-time collision reporting; neither diagnostic is a certified global error bound.
+**RK45 near-machine-resolution grid (dev QA pending):** The adaptive scalar RK45 solver checks each accepted timestamp advances in the requested direction. It counts accepted steps progressing by only one representable floating-point time increment and warns users to rescale the time variable and check convergence. This complements stage-time collision reporting; neither diagnostic is a certified global error bound. The result panel separately counts accepted steps with repeated or endpoint-collapsed fractional stages and uses singular/plural wording that matches the count; this remains a resolution warning, not an accuracy certificate.
 
 
 ## Fixed-step RK4 floating-point time resolution (development QA pending)

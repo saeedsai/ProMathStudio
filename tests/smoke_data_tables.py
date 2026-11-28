@@ -15,6 +15,22 @@ def main():
   assert page.locator('#dt-sheet tbody tr:first-child th.dt-rownum').inner_text()=='1'
   assert page.evaluate('MathStudio.dataTables.calculate()[0][2]')==6
   assert page.evaluate('MathStudio.dataTables.formula("SUM(A1:A3)+IF(A1>2,5,0)","Data1")')==11
+  product_state = {"version":1,"selected":"product","tables":[
+   {"id":"product","name":"Product","columns":["A","B","C","D","E","F","G","H","I","J","K","L"],"rows":[
+    ["2","3","-4","","notes","=PRODUCT(A1:E1)","=PRODUCT(2,3,4)","=PRODUCT(SUM(A1:B1),2)","=PRODUCT(1e308,1e308,1e-308,1e-308)","=PRODUCT(1e308,1e308)","=PRODUCT(0,1e308,1e308)",""],
+    ["","=PRODUCT(A3:A3)","=PRODUCT(-0,2)","=PRODUCT(1e-308,1e-308)","","","","","","","","=PRODUCT(PRODUCT(-0,2),3)"]
+   ]}
+  ]}
+  page.evaluate("(state) => MathStudio.dataTables.restoreState(state)", product_state)
+  product_values = page.evaluate("MathStudio.dataTables.calculate()[0]")
+  assert product_values[5:11] == [-24,24,10,0.9999999999999999,"#NUM!",0]
+  assert page.evaluate("MathStudio.dataTables.calculate()[1][1]") == 1
+  assert page.evaluate("Object.is(MathStudio.dataTables.calculate()[1][2],-0)") is True
+  assert page.evaluate("Object.is(MathStudio.dataTables.calculate()[1][11],-0)") is True
+  assert page.evaluate("MathStudio.dataTables.calculate()[1][3]") == 0
+  page.evaluate("""() => MathStudio.dataTables.restoreState({version:1,selected:'sheet-1',tables:[
+   {id:'sheet-1',name:'Data1',columns:['x','y','z'],rows:[['3','2','=A1*B1'],['1','1','1'],['2','4','8']]}
+  ]})""")
   page.evaluate("""() => {MathStudio.dataTables.active.rows[0][2]='=C1';}""")
   assert page.evaluate('MathStudio.dataTables.calculate()[0][2]')=='#CYCLE'
   page.locator('#dt-import').set_input_files({'name':'orders.csv','mimeType':'text/csv','buffer':b'id,sku,amount\n1,A,10\n2,B,25\n3,C,15\n'})

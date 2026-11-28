@@ -3757,12 +3757,22 @@ self.onmessage=async ({data})=>{
     engine.advanced.restoreGraphState(data.graph||{});
     window.MathStudio.dataTables?.restoreState(data.tables||null);
     window.MathStudio.curveFit?.restoreState(data.fit||null);
-    if(data.solver){$('cas-operation').value=data.solver.operation||'auto';$('cas-engine').value=data.solver.engine||'auto';$('cas-variable').value=data.solver.variable||'x';$('cas-limit-point').value=data.solver.limitPoint||'0';$('cas-ode-ic').value=data.solver.odeInitialCondition||'';$('cas-limit-direction').value=['+-','+','-'].includes(data.solver.limitDirection)?data.solver.limitDirection:'+-';for(const k of ['real','positive','negative','integer'])$('cas-assume-'+k).checked=data.solver.assumptions?.[k]===true;$('cas-operation').dispatchEvent(new Event('change'));}
+    // Missing legacy solver state is a fresh default, never a leak from the prior project.
+    const solver=data.solver||{};
+    $('cas-operation').value=solver.operation||'auto';
+    $('cas-engine').value=solver.engine||'auto';
+    $('cas-variable').value=solver.variable||'x';
+    $('cas-limit-point').value=solver.limitPoint||'0';
+    $('cas-ode-ic').value=solver.odeInitialCondition||'';
+    $('cas-limit-direction').value=['+-','+','-'].includes(solver.limitDirection)?solver.limitDirection:'+-';
+    for(const k of ['real','positive','negative','integer'])
+      $('cas-assume-'+k).checked=solver.assumptions?.[k]===true;
+    $('cas-operation').dispatchEvent(new Event('change'));
     state.recent=Array.isArray(data.recent)?data.recent.filter(r=>r&&typeof r.raw==='string').slice(0,14):[];
     state.calculator=engine.advanced.getCalculator();state.solver=null;
     if(typeof data.working==='string'&&data.working.trim())current(data.working,data.origin||'project');
     else {state.active='';state.origin='editor';ui.input.value='';renderPreview();rebuildSources();store();}
-    if(typeof data.solver?.expression==='string')engine.notebookBridge.setEditor(data.solver.expression);
+    engine.notebookBridge.setEditor(typeof solver.expression==='string'?solver.expression:'');
   }
   $('hub-project-file').addEventListener('change',async e=>{
     const file=e.target.files?.[0];if(!file)return;

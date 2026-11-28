@@ -1,3 +1,17 @@
+## 2026-11-28 04:27 CET — RESET OMITTED SOLVER STATE DURING LEGACY PROJECT IMPORT
+
+- Starting refs: `dev` `161895dd9071999e28183102d46d54ccf4f194d2`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 123 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46096512088](https://github.com/saeedsai/ProMathStudio/actions/runs/46096512088) and PR Quality [#46096516504](https://github.com/saeedsai/ProMathStudio/actions/runs/46096516504) passed 218/218 on the starting SHA, zero failed/skipped steps. Truss browser/analytical/responsive steps 212, 214 and 215 passed.
+- Found a saved-project replacement bug in the standalone import bridge: when a legacy v1/v2 file omitted the optional `solver` object, `applyProject` skipped all Equation controls and `notebookBridge.setEditor`, leaving the previous project's expression, operation, engine, variable, limit, ODE initial condition and assumptions visible after import.
+- Changed `index.html` so absent, null, empty or partial solver state always restores documented defaults (`auto` operation/engine, `x` variable, `0` limit point, `+-` direction, blank expression/ODE condition and all assumptions off). Present valid fields still restore normally; rollback snapshots with full solver state restore their previous values.
+- Extended `tests/smoke_project_atomic_import.py`: seed non-default solver state, verify rollback preserves it after injected failures, verify v1 and v2 imports without a solver object and a v2 empty solver object clear it, and verify valid v2 solver state round-trips. The test is already registered in Quality step 105.
+- Updated `docs/PROJECT_FORMAT.md`, the living plan, this ledger and `CHANGELOG.md`. This project-import bridge is embedded only in the standalone `index.html`; no separate `src/` module exists for it.
+- Isolated V8 execution of the extracted production `applyProject` function passed for absent/empty and valid solver states. Local repository checkout is absent, so full Python/Chromium/build commands were not run; fresh exact-head Push/PR Quality remains required.
+- PR #191 remains open/mergeable, zero independent reviews. Branch protection reads return HTTP 403; rulesets are empty and both branches report unprotected. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on 24-Nov-2026 at unchanged main; this dev commit is not deployed. Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
 ## 2026-11-28 02:56 CET — FIX TRUSS RESET REFERENCE REGRESSION AND EXPOSE ANALYSIS VALIDITY
 
 - Starting refs: `dev` `a8e9ef150e13bb3ed6efef84b02cb91257f8456a`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 122 ahead / 0 behind; exactly two branches.

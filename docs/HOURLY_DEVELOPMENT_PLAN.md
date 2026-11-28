@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 02:56 CET  
+**Last updated:** 28 November 2026, 04:27 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,13 +15,13 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting `dev` head for this iteration: `a8e9ef150e13bb3ed6efef84b02cb91257f8456a`; `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Verified compare: **122 ahead / 0 behind**. The only branch refs are `dev` and `main`.
-- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, 122 commits, 48 changed files, with **zero submitted independent reviews**.
+- Starting `dev` head for this iteration: `161895dd9071999e28183102d46d54ccf4f194d2`; `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Verified compare: **123 ahead / 0 behind**. Exactly two branch refs exist: `dev` and `main`.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, 123 commits, 48 changed files, with **zero submitted independent reviews**.
 - Both branches report `protected:false`; repository rulesets are empty and branch-protection reads return HTTP 403 (Resource not accessible by integration). Enforceable protection is not verified; no merge is authorized.
-- Exact-head Push Quality [#46090998251](https://github.com/saeedsai/ProMathStudio/actions/runs/46090998251) and PR Quality [#46091004384](https://github.com/saeedsai/ProMathStudio/actions/runs/46091004384) both failed on exact SHA `a8e9ef150e13bb3ed6efef84b02cb91257f8456a` at Truss browser step 215. Steps 212 and 214 passed in both; step 214 completed the 109/109 Node FEM analytical suite. The exact traceback is `tests/smoke_truss_fem.py:2261`: after a long browser scenario switches the example selector to `bar`, the test clicks Reset (which correctly restores the selected example) but compares against the `triangle` energy reference captured at page initialization. This is a stale test reference, not a production solver/UI failure.
-- This checkpoint fixes the regression by recomputing the reference from the currently selected example immediately before the final reset. It also makes result validity explicit with `data-analysis-state`: `pending` before first solve, `valid` after successful analysis, and `stale` after model invalidation or failed solve. The existing shortest-round-trip energy residual/error attributes remain unchanged. Chromium checks all three states and exact selected-example reset behavior at 1280px and 390px.
-- The local execution container has no Git checkout (`git rev-parse --show-toplevel` returns “not a git repository”), so this bounded iteration uses the connected GitHub integration. Full Python/Node/Chromium/build certification must come from fresh exact-head Actions; no full local suite is claimed.
-- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. No newer production deployment is verified; this dev work is not live.
+- Exact-head Push Quality [#46096512088](https://github.com/saeedsai/ProMathStudio/actions/runs/46096512088) and PR Quality [#46096516504](https://github.com/saeedsai/ProMathStudio/actions/runs/46096516504) both **passed all 218/218 steps** on `161895dd9071999e28183102d46d54ccf4f194d2`, with zero failed and zero skipped steps. Truss steps 212, 214 and 215 all passed. The previous Truss selected-example reset regression is resolved at this exact head.
+- This iteration fixes a separate saved-project compatibility defect: importing a legacy v1/v2 project with no `solver` object (or an empty/partial object) previously left the previous project's Equation expression, operation, engine, variable, limit and assumption controls in place. Import now resets missing solver state to documented Equation defaults and clears the old expression. Regression coverage verifies v1, v2, empty solver objects, valid v2 round-trip and preservation of non-default solver state after injected rollback failures.
+- The local execution container has no Git checkout (`git rev-parse --show-toplevel` returns “not a git repository”), so this bounded iteration uses the connected GitHub integration. Full local Python/Node/Chromium/build certification is unavailable; fresh exact-head Push and PR Quality must certify this new commit.
+- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not live.
 - The historical 26-Oct inventory remains frozen at **166 gaps / 95 partial**. Do not edit its baseline counts or claim catalog aliases as completed unique features.
 
 ## Operating contract
@@ -38,7 +38,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** Exact-head Push #46090998251 and PR #46091004384 failed at Truss browser step 215 on `a8e9ef1`; steps 212 and 214 passed, including 109/109 Node FEM tests. The browser failure is a stale expected fixture: the scenario selected `bar`, while the final Reset correctly restored `bar` and the test still compared with its initial `triangle` reference. This checkpoint makes the reference follow the selected example and adds an explicit `pending`/`valid`/`stale` result-state contract. Fresh exact-head Quality remains pending. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
+**Status:** The prior Truss selected-example reset failure is resolved. Exact-head Push #46096512088 and PR #46096516504 both passed **218/218** on `161895dd9071999e28183102d46d54ccf4f194d2`, zero failures/skips, including Truss steps 212, 214 and 215. The P0 blocker is now governance only: PR #191 has zero independent reviews; both branches report unprotected, rulesets are empty, and branch-protection reads return HTTP 403. No merge is authorized until an eligible independent approval and enforceable main protection are verified.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -47,11 +47,12 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 2. P1 — Complete saved-project compatibility and rollback
 
-**Status:** Partial. Equation/Solver, Matrix, Graph datasets/overlays, Curve fit, Data Tables and Engineering selectors have focused validation. Custom-function preflight and direct restore reject reserved built-ins, blank formulas, mismatched positional signatures, duplicate top-level definitions and async functions before mutating state. The browser test now opens the editor through its actual disclosure control. Full restore-stage failure matrix and 390px mobile round-trip remain open.  
+**Status:** Partial. Equation/Solver, Matrix, Graph datasets/overlays, Curve fit, Data Tables and Engineering selectors have focused validation. Custom-function preflight and direct restore reject reserved built-ins, blank formulas, mismatched positional signatures, duplicate top-level definitions and async functions before mutating state. Legacy v1/v2 imports now clear an omitted or empty solver object to Equation defaults instead of leaking the previous project's expression/selectors; valid v2 solver state and rollback preservation are covered. Full restore-stage failure matrix and 390px mobile round-trip remain open.  
 **Acceptance tests:**
 - v1→v2 migration and v2 round-trips preserve notebook, calculator, Equation/Solver controls, assumptions, Matrix drafts, Graph primary/overlay datasets, Curve fit, Data Tables workbook/selection, Engineering filters and custom functions.
 - Custom names `sin`, `cos`, `tan`, `sqrt`, `min`, `max`, `log`, `exp`, `abs`, `sum`, `if`, `pow`, `average`, `avg`, `count`, `median` and `product` reject in any casing; formula expressions must be nonblank; Python source must declare the matching function name and exact ordered positional parameter list. Valid legacy formula entries and valid Python source remain compatible.
 - Invalid custom functions reject before confirmation and preserve all current workspace state; Python source is not executed during import. Direct restore calls reject malformed/reserved/duplicate lists atomically and preserve both active functions and localStorage.
+- An omitted/empty solver object in both v1 and v2 imports clears a previously non-default Equation expression, selectors and assumptions to defaults; valid v2 solver settings round-trip, and failed imports restore the prior non-default solver state.
 - Inject failure after each restore stage and verify rollback; desktop and 390px mobile imports have no console errors and exact source/bundle parity.
 
 ### 3. P1 — Complete Data Tables numerical and file integrity
@@ -82,6 +83,15 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - Smallest and two-subnormal intervals preserve exact endpoints, report collapsed stages and show the accuracy warning.
 - At 1e12, 20-ULP forward/backward cases detect repeated c=4/5 and c=8/9 stage timestamps without changing the endpoint grid.
 - Underflow, maximum attempts, exhausted retries, endpoint snapping and stale-export protection have direct numerical and browser regressions.
+
+## Latest checkpoint — 28 November 2026, 04:27 CET
+
+- Starting refs: `dev` `161895dd9071999e28183102d46d54ccf4f194d2`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare main...dev = 123 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46096512088](https://github.com/saeedsai/ProMathStudio/actions/runs/46096512088) and PR Quality [#46096516504](https://github.com/saeedsai/ProMathStudio/actions/runs/46096516504) passed 218/218, zero failures/skips. Truss steps 212/214/215 passed. PR #191 remains open; independent reviews 0, branches unprotected, rulesets empty, branch-protection read 403.
+- Fixed legacy project imports that omitted the optional `solver` object: the previous Equation expression and selectors could leak into the imported project. The import now resets the expression, operation/engine, variable, limit point/direction, ODE initial condition and assumptions to documented defaults for missing/empty solver state.
+- Added browser coverage for v1 and v2 missing-solver imports, an empty v2 solver object, valid v2 solver round-trip and restoration of non-default solver state after injected failures. Updated Project Format documentation, this plan, execution ledger and changelog.
+- Local checkout is absent; full local test/build suite is not claimed. Isolated V8 behavior checks passed; new exact-head Actions are required. No merge or deployment. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged.
 
 ## Latest checkpoint — 27 November 2026, 17:21 CET
 

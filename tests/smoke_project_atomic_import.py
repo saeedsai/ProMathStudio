@@ -45,6 +45,15 @@ def main():
           t.tables[0].rows[0][0] = '42';
           MathStudio.dataTables.restoreState(t);
           MathStudio.customFunctions.restore([{name:'prior', params:['x'], expression:'x+1', source:'x+1', type:'formula'}]);
+          document.querySelector('#equation-input').value = 'x^2+3';
+          document.querySelector('#cas-operation').value = 'differentiate';
+          document.querySelector('#cas-engine').value = 'offline';
+          document.querySelector('#cas-variable').value = 't';
+          document.querySelector('#cas-limit-point').value = '7';
+          document.querySelector('#cas-limit-direction').value = '-';
+          document.querySelector('#cas-ode-ic').value = 'y(0)=2';
+          document.querySelector('#cas-assume-real').checked = true;
+          document.querySelector('#cas-assume-integer').checked = true;
         }""")
         prior = snapshot(page)
         assert prior["matrix"]["a"] == ["4", "1", "2", "3"], prior["matrix"]
@@ -97,11 +106,26 @@ def main():
         # Matrix drafts are left as-is and functions are cleared, as before.
         legacy = json.loads(json.dumps(good)); legacy["version"] = 1
         legacy.pop("matrix"); legacy.pop("customFunctions"); legacy.pop("engineering")
+        legacy.pop("solver", None)
+        default_solver = {
+            "expression": "", "variable": "x", "operation": "auto", "engine": "auto",
+            "limitPoint": "0", "limitDirection": "+-", "odeInitialCondition": "",
+            "assumptions": {"real": False, "positive": False, "negative": False, "integer": False}
+        }
         upload(page, legacy, False)
         after_legacy = snapshot(page)
         assert after_legacy["matrix"] == prior["matrix"], after_legacy["matrix"]
         assert after_legacy["tables"]["tables"][0]["rows"][0][0] == "-1"
         assert after_legacy["customFunctions"] == []
+        assert after_legacy["solver"] == default_solver, after_legacy["solver"]
+
+        # Version 2 and an explicitly empty solver object must use the same defaults.
+        legacy_v2 = json.loads(json.dumps(legacy)); legacy_v2["version"] = 2
+        upload(page, legacy_v2, False)
+        assert snapshot(page)["solver"] == default_solver
+        empty_solver = json.loads(json.dumps(legacy_v2)); empty_solver["solver"] = {}
+        upload(page, empty_solver, False)
+        assert snapshot(page)["solver"] == default_solver
 
         # Valid v2 project imports every module and round-trips exactly.
         upload(page, good, False)
@@ -110,6 +134,7 @@ def main():
         assert imported["tables"] == good["tables"]
         assert imported["customFunctions"] == good["customFunctions"]
         assert imported["working"] == "x+2"
+        assert imported["solver"] == good["solver"]
         upload(page, imported, False)
         assert snapshot(page) == imported
         assert not errors, errors

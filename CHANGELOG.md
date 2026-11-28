@@ -1,3 +1,9 @@
+## 2026-11-28 — Reset omitted solver state when importing legacy projects
+
+- Fixed project replacement semantics for legacy v1/v2 backups that omit the optional `solver` object (or contain an empty/partial object). Previously the Equation workspace retained the preceding project's expression and selector/assumption values. Import now clears the expression and restores the documented defaults: Auto operation/engine, variable `x`, limit point `0`, two-sided direction, blank ODE initial condition and all assumptions off.
+- Extended the registered atomic project-import browser regression with non-default prior solver state, v1/v2 missing-solver imports, an empty v2 solver object, valid v2 solver round-trip and rollback preservation.
+- Updated Project Format documentation and living development records. Implemented on dev; exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Fix Truss selected-example reset regression and expose analysis validity
 
 - Exact-head Push Quality #46090998251 and PR Quality #46091004384 failed at Truss browser step 215 after the scenario selected the `bar` example but compared the final Reset result against a `triangle` reference captured at page initialization. Reset correctly restores the currently selected example. The browser regression now computes its expected energy residual/error from the selected example immediately before reset; no numerical assertions were weakened.

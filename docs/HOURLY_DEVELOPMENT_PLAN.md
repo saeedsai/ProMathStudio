@@ -25,7 +25,7 @@
 - Historical audit remains frozen at **166 gaps / 95 partial**; no counts are reduced.
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 07:00 CET  
+**Last updated:** 28 November 2026, 08:00 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -74,7 +74,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** The previous candidate `99e5abf364249f8e34ecc68020fa3d65daa02018` is now certified by exact-head Push Quality [#46111417397](https://github.com/saeedsai/ProMathStudio/actions/runs/46111417397) and PR Quality [#46111420400](https://github.com/saeedsai/ProMathStudio/actions/runs/46111420400), both 218/218 with zero failures/skips. This run's new Truss candidate requires fresh exact-head checks. PR #191 tracks dev, but independent reviews remain zero; rulesets are empty and branch-protection reads return HTTP 403. No merge is authorized until independent approval and enforceable main protection are verified.
+**Status:** Starting dev/PR head `b2756547873bfe585098254d6fbdf1bc471b384f` is certified by exact-head Push Quality [#46115026179](https://github.com/saeedsai/ProMathStudio/actions/runs/46115026179) and PR Quality [#46115029609](https://github.com/saeedsai/ProMathStudio/actions/runs/46115029609), both 218/218 with zero failures/skips. This iteration's Euler-readiness candidate requires fresh exact-head checks. PR #191 tracks dev, but independent reviews remain zero; both branches report unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge is authorized until independent approval and enforceable main protection are verified.
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -103,7 +103,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial; compensated stiffness, reaction and energy accumulation, seven-shape section-property boundary fixes, aggregate material-mass reporting and range-aware Euler ratios are implemented on dev. Exact-head Push/PR Quality on parent `99e5abf364249f8e34ecc68020fa3d65daa02018` passed 218/218. This iteration fixes a separate force-threshold defect: when I/K are supplied, every strictly negative solved force now participates in Euler screening even below the general ±1e-8 N display threshold; models without I/K retain the previous noise threshold. New Node and desktop/390px Chromium regressions cover below-critical and above-critical sub-threshold loads. Fresh exact-head certification is pending; the independent seven-shape reference matrix remains open.
+**Status:** Partial; compensated stiffness, reaction and energy accumulation, seven-shape section-property boundary fixes, aggregate material-mass reporting and range-aware Euler ratios are implemented on dev. Exact-head Push/PR Quality on `b2756547873bfe585098254d6fbdf1bc471b384f` passed 218/218. That head also fixes sub-threshold compression screening when I/K are supplied. This iteration adds per-member Euler input readiness (`not-supplied`, `missing-I`, `missing-K`, `ready`) to pre-solve inspection and the material table; incomplete pairs remain unassessed rather than treated as zero. Node and desktop/390px Chromium regressions cover every state and edit/reset refresh. Fresh exact-head certification is pending; the independent seven-shape reference matrix remains open.
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.
@@ -271,3 +271,16 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - PR #191 remains open and mergeable with zero independent reviews. Branch protection remains unreadable (HTTP 403); rulesets are empty. No merge or direct main update.
 - Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence from 24-Nov-2026. The current dev work is not deployed.
 - Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## Latest checkpoint — 28 November 2026, 08:00 CET
+
+- Starting refs: dev `b2756547873bfe585098254d6fbdf1bc471b384f`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; 127 ahead / 0 behind; exactly dev/main. Root `AGENTS.md`, this plan, frozen inventory, Structural Truss contract, exact-head Actions, PR #191, reviews, branch list/rulesets and main/Pages evidence inspected. Local checkout absent; one bounded check only.
+- Starting exact-head Push [#46115026179](https://github.com/saeedsai/ProMathStudio/actions/runs/46115026179) and PR [#46115029609](https://github.com/saeedsai/ProMathStudio/actions/runs/46115029609) passed 218/218, zero failures/skips; Truss steps 212/214/215 passed. These parent runs do not certify the new candidate.
+- Added per-member `inspectJSON().memberMetrics[].eulerInputStatus`: `not-supplied`, `missing-I`, `missing-K`, or `ready`. Pre-solve material table labels each member; missing inputs remain unavailable, never zero, and do not prevent the axial FEM solve.
+- Added Node and registered desktop/390px Chromium regressions for all states, Pcr availability, 14-column table and edit/reset refresh. Updated Structural Truss contract, plan, ledger and changelog in the same atomic commit.
+- Isolated V8 execution of production FEM source passed all four states and Pcr semantics; UI/Node syntax and table/browser wiring passed. Full repository Node, Python/Playwright and build checks pending exact-head Actions because no checkout exists.
+- PR #191 open/mergeable; zero independent reviews. Branches both `protected:false`, rulesets empty, branch-protection GET 403. No merge or bypass.
+- Main unchanged `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; Main Quality #45360386408 and Pages #45360367251 last verified successful 24-Nov-2026. This change not live.
+- **NEXT FIVE:** (1) P0 release PR #191 only after exact-head Quality, independent approval and enforceable main protections; acceptance: all checks green, approved review, rules requiring Quality/no direct push/force/delete, ordinary merge, then main Quality/Pages/hosted project smoke. (2) P1 saved-project rollback; acceptance: v1/v2 round-trips, absent/empty/partial solver state, injected failures after each restore stage, full rollback/localStorage, desktop/390px and source/bundle parity. (3) P1 Data Tables; acceptance: PRODUCT boundary/nesting/signed-zero, 132,000-value MIN/MAX, compensated SUM/AVERAGE, A1:AF6000, sort, XLSX CRC/size/descriptors/corruption and transactional preservation. (4) P1 seven-shape Truss references; acceptance: independent Decimal A/centroid/Ixx/Iyy/Sx/Sy/rx/ry for all seven shapes, thin-wall/cavity, sub-ULP, mixed-scale reactions/energy, mechanisms and Euler readiness at 1280/390px. (5) P1 RK45; acceptance: recoverable/unrecoverable overflow, forward/backward ULP monotonicity, subnormal intervals, underflow, attempt exhaustion, endpoint snapping and stale-export.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged.

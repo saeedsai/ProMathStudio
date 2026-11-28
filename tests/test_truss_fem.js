@@ -1062,6 +1062,19 @@ test('inspectJSON exposes immutable per-member SI material metrics without solvi
 });
 
 
+test('inspectJSON identifies per-member Euler input readiness without solving',()=>{
+ const model=clone(fem.examples.triangle);
+ model.members[0].I=1000; model.members[1].K=1; model.members[2].I=1000; model.members[2].K=1;
+ const preview=fem.inspectJSON(JSON.stringify(model));
+ assert.deepEqual(preview.memberMetrics.map(member=>member.eulerInputStatus),['missing-K','missing-I','ready']);
+ assert.equal(preview.memberMetrics[0].eulerCriticalLoad,null,'I without K cannot produce a critical load');
+ assert.equal(preview.memberMetrics[1].eulerCriticalLoad,null,'K without I cannot produce a critical load');
+ assert.ok(preview.memberMetrics[2].eulerCriticalLoad>0,'both positive inputs produce a finite Euler critical load');
+ assert.ok(preview.memberMetrics.every(Object.isFrozen));
+ const omitted=fem.inspectJSON(fem.exportJSON(fem.examples.triangle));
+ assert.deepEqual(omitted.memberMetrics.map(member=>member.eulerInputStatus),['not-supplied','not-supplied','not-supplied']);
+});
+
 test('inspectJSON reports complete and partial aggregate member mass without treating unknown density as zero',()=>{
  const completeModel=clone(fem.examples.triangle);
  completeModel.members.forEach(member=>member.density=7850);

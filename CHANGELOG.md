@@ -1847,3 +1847,9 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 - Python custom functions now require exactly one synchronous top-level declaration of their saved name. Duplicate top-level definitions and async def declarations reject in the editor, direct restore API and saved-project preflight; this prevents a later definition replacing the validated callable and prevents coroutine results from entering the numeric worker.
 - Added Node schema and Chromium import/direct-restore regressions for duplicate, async-only and sync-plus-async declarations. Updated the project-format contract and synchronized src/project-schema.js with its standalone index.html module.
 - Repaired the exact-head project browser regression: it now opens the native custom-function details panel through its summary and asserts the editor is visible before filling controls. The previous failure was a hidden-control test setup error, not a production UI defect. Full exact-head Push/PR Quality is required; implemented on dev, not released.
+
+
+## 2026-11-28 — Per-member Euler input readiness
+
+- Truss Studio now shows each member as Not supplied, Missing I, Missing K or Ready for its optional ideal Euler estimate. `inspectJSON().memberMetrics[].eulerInputStatus` exposes the same stable states. Missing I/K is never treated as zero and does not affect the axial-only FEM solve.
+- Added direct Node and registered Chromium coverage for all states, Pcr availability, 14-column table integrity and edit/reset refresh at desktop/390px. Implemented on dev; exact-head Quality/release pending.

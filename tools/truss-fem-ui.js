@@ -396,7 +396,7 @@
       group.append(svgNode('text',{x:15,y:362,'font-size':12},'Pre-solve geometry · not to scale'));
       $('plot').replaceChildren(group);
       $('plot').setAttribute('aria-label',`Pre-solve truss geometry preview with ${info.nodeCount} joints and ${info.memberCount} members. Supports and applied loads are shown. Topology does not certify stability.`);
-      addResultRows('member-metrics',info.memberMetrics,m=>[m.id,m.startNodeId,m.endNodeId,fmt(m.length,4),fmt(m.area*1e6,4),fmt(m.volume,4),fmt(m.elasticModulus/1e9,4),fmt(m.axialStiffness/1e6,4),m.density===null?'—':fmt(m.density,4),m.mass===null?'—':fmt(m.mass,4),m.secondMoment===null?'—':fmtSectionMoment(m.secondMoment*1e12),m.effectiveLengthFactor===null?'—':fmt(m.effectiveLengthFactor,4),m.eulerCriticalLoad===null?'—':fmt(m.eulerCriticalLoad/1000,5)]);
+      addResultRows('member-metrics',info.memberMetrics,m=>[m.id,m.startNodeId,m.endNodeId,fmt(m.length,4),fmt(m.area*1e6,4),fmt(m.volume,4),fmt(m.elasticModulus/1e9,4),fmt(m.axialStiffness/1e6,4),m.density===null?'—':fmt(m.density,4),m.mass===null?'—':fmt(m.mass,4),m.secondMoment===null?'—':fmtSectionMoment(m.secondMoment*1e12),m.effectiveLengthFactor===null?'—':fmt(m.effectiveLengthFactor,4),m.eulerInputStatus==='ready'?'Ready':m.eulerInputStatus==='missing-I'?'Missing I':m.eulerInputStatus==='missing-K'?'Missing K':'Not supplied',m.eulerCriticalLoad===null?'—':fmt(m.eulerCriticalLoad/1000,5)]);
       const unit=info.inputUnits.forces,divisor=unit==='N'?1:1000;
       const components=info.connectedComponentCount===1?'connected component':'connected components';
       const isolated=info.isolatedNodeCount===1?'isolated joint':'isolated joints';
@@ -415,7 +415,7 @@
         : 'Preview ready · analyze to check structural stability.',false);
     } catch(error) {
       $('preview-summary').textContent='Preview unavailable: '+error.message;
-      const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:13,class:'empty'}));$('member-metrics').replaceChildren(empty);
+      const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:14,class:'empty'}));$('member-metrics').replaceChildren(empty);
       $('plot').replaceChildren(svgNode('text',{x:310,y:190,'text-anchor':'middle'},'Correct model inputs to preview'));
       $('plot').setAttribute('aria-label','Truss preview unavailable because model inputs are invalid.');
       status('Preview unavailable: '+error.message,true);

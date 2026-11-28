@@ -2842,3 +2842,16 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - Truss FEM is an adjacent `tools/` script, not an embedded `src/` module; root `index.html` remains unchanged. Local checkout is absent, so full repository Python/Playwright/build commands cannot run here; isolated V8 execution of the actual fetched production source and syntax compilation of the updated UI are performed before commit. Fresh exact-head Push/PR Quality must certify the full suite.
 - PR #191 remains open/mergeable with zero independent reviews. Branch protections are not verified (both branches report unprotected; rulesets empty; branch-protection API 403). No merge or direct main update.
 - Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on unchanged main from 24-Nov-2026. This change is dev-only, not live. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## 2026-11-28 08:00 CET — Per-member Euler input readiness
+
+- Starting dev `b2756547873bfe585098254d6fbdf1bc471b384f`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`, 127 ahead / 0 behind, exactly two branches. No local checkout; used bounded GitHub integration fallback.
+- Verified starting exact-head Push/PR Quality [#46115026179](https://github.com/saeedsai/ProMathStudio/actions/runs/46115026179) and [#46115029609](https://github.com/saeedsai/ProMathStudio/actions/runs/46115029609): 218/218 each, zero failures/skips; Truss 212/214/215 passed. New candidate requires fresh checks.
+- Added `eulerInputStatus` values `not-supplied`, `missing-I`, `missing-K`, `ready` to pre-solve member metrics and visible per-row labels. Pcr remains blank unless both I and K are valid.
+- Added direct Node and registered Chromium regressions for all states, Pcr availability, table structure and edit/reset refresh at 1280px/390px.
+- Updated source, standalone Truss HTML/UI, tests, Structural Truss contract, plan, ledger and changelog. Root bundle unaffected; Truss is adjacent standalone assets.
+- Isolated V8 production-source execution, UI/Node syntax and structural wiring passed. Full local Node/Playwright/build checks unavailable without checkout; fresh exact-head Actions pending.
+- Atomic commit parent `b2756547873bfe585098254d6fbdf1bc471b384f`; dev update guarded non-force with expected previous SHA.
+- PR #191 open/mergeable; zero reviews; branches unprotected, rulesets empty, protection read 403. No merge/direct main update.
+- Main Quality/Pages latest verified success on 24-Nov-2026; dev change not released. Historical inventory 166/95 unchanged.

@@ -1298,6 +1298,9 @@
         mass: member.mass,
         secondMoment: member.secondMoment,
         effectiveLengthFactor: member.effectiveLengthFactor,
+        eulerInputStatus: member.secondMoment === null
+          ? member.effectiveLengthFactor === null ? 'not-supplied' : 'missing-I'
+          : member.effectiveLengthFactor === null ? 'missing-K' : 'ready',
         eulerCriticalLoad: member.eulerCriticalLoad
       }))),
       // Immutable geometry bounds in metres, including unconnected nodes of otherwise valid imports.

@@ -39,6 +39,27 @@ def main():
             assert 'Analysis complete' in page.locator('#status').inner_text(), page.locator('#status').inner_text()
             initial_preview = page.locator('#preview-summary').inner_text()
             assert 'mass estimate unavailable · 3 members missing density' in initial_preview, initial_preview
+            initial_euler_rows = page.locator('#member-metrics tr').all_inner_texts()
+            assert len(initial_euler_rows) == 3 and all('Not supplied' in row for row in initial_euler_rows), initial_euler_rows
+            euler_readiness = page.evaluate("""() => {
+                const rows = [...document.querySelectorAll('#members tr')];
+                const set = (index, field, value) => {
+                    const input = rows[index].querySelector('[data-field="' + field + '"]');
+                    input.value = value;
+                    input.dispatchEvent(new Event('input', {bubbles:true}));
+                };
+                set(0, 'I', '1000'); set(1, 'K', '1'); set(2, 'I', '1000'); set(2, 'K', '1');
+                return [...document.querySelectorAll('#member-metrics tr')].map(row => [...row.cells].map(cell => cell.textContent.trim()));
+            }""")
+            assert [row[12] for row in euler_readiness] == ['Missing K', 'Missing I', 'Ready'], euler_readiness
+            assert all(len(row) == 14 for row in euler_readiness), euler_readiness
+            assert euler_readiness[0][13] == '—' and euler_readiness[1][13] == '—', euler_readiness
+            assert float(euler_readiness[2][13].replace(',', '')) > 0, euler_readiness
+            assert 'Euler estimate requires both I and K' in page.locator('#status').inner_text()
+            page.locator('#reset').click()
+            reset_euler_rows = page.locator('#member-metrics tr').all_inner_texts()
+            assert len(reset_euler_rows) == 3 and all('Not supplied' in row for row in reset_euler_rows), reset_euler_rows
+
             energy_summary = page.locator('#energy-residual-summary')
             assert energy_summary.is_visible()
             assert 'Energy balance residual =' in energy_summary.inner_text()

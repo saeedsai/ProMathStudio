@@ -40,6 +40,13 @@ def main():
             energy_summary = page.locator('#energy-residual-summary')
             assert energy_summary.is_visible()
             assert 'Energy balance residual =' in energy_summary.inner_text()
+            energy_references = page.evaluate("""() => {
+                const result=ProMathTrussFEM.solve(ProMathTrussFEM.examples.triangle);
+                const roundTrip=value=>Object.is(value,-0)?'-0':String(value);
+                return {residual:roundTrip(result.energyResidual),error:roundTrip(result.energyError)};
+            }""")
+            assert energy_summary.get_attribute('data-energy-residual-j') == energy_references['residual']
+            assert energy_summary.get_attribute('data-energy-error') == energy_references['error']
             assert not page.locator('#verification').is_visible()
             page.locator('#results details > summary').click()
             assert page.locator('#verification').is_visible()
@@ -103,8 +110,12 @@ def main():
                 return {naiveEnergy,elasticEnergy:result.elasticEnergy,energyResidual:result.energyResidual,
                     energyError:result.energyError,forceBalance:result.forceBalance.x};
             }""");
-            assert energy_accumulation['naiveEnergy'] == 2**55, energy_accumulation
-            assert energy_accumulation['elasticEnergy'] == 2**55 + 16, energy_accumulation
+            # Playwright's JSON bridge emits shortest decimal text for JS binary64 values;
+            # Python may parse an integer-looking token as an arbitrary-precision int. Convert
+            # back to binary64 before exact comparison, preserving one-ULP sensitivity.
+            assert float(2**55 + 8) != float(2**55), 'the fixture must distinguish one binary64 ulp'
+            assert float(energy_accumulation['naiveEnergy']) == float(2**55), energy_accumulation
+            assert float(energy_accumulation['elasticEnergy']) == float(2**55 + 16), energy_accumulation
             assert energy_accumulation['energyResidual'] == 0, energy_accumulation
             assert energy_accumulation['energyError'] == 0, energy_accumulation
             assert energy_accumulation['forceBalance'] == 0, energy_accumulation
@@ -2243,8 +2254,12 @@ def main():
             page.locator('#reset').click()
             page.locator('#nodes tr').nth(1).locator('input[data-field="x"]').fill('0.01')
             assert page.locator('#energy-residual-summary').inner_text() == 'Energy balance residual: —'
+            assert page.locator('#energy-residual-summary').get_attribute('data-energy-residual-j') == ''
+            assert page.locator('#energy-residual-summary').get_attribute('data-energy-error') == ''
             page.locator('#reset').click()
             assert 'Energy balance residual =' in page.locator('#energy-residual-summary').inner_text()
+            assert page.locator('#energy-residual-summary').get_attribute('data-energy-residual-j') == energy_references['residual']
+            assert page.locator('#energy-residual-summary').get_attribute('data-energy-error') == energy_references['error']
             assert not errors, errors
             page.close()
         browser.close()

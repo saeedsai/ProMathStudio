@@ -12,6 +12,8 @@
   let importCancelledNotice = false;
   const IMPORT_CANCELLED_STATUS = 'Pending import cancelled because the model was edited.';
   const fmt = (x, digits=5) => Number(x).toPrecision(digits).replace(/(\.\d*?)0+(e|$)/,'$1$2').replace(/\.(e|$)/,'$1');
+  // Preserve the exact binary64 diagnostic value, including negative zero, for browser integrations.
+  const roundTripNumber = value => Object.is(value,-0) ? '-0' : String(value);
   const fmtAngle = x => Number(x).toFixed(3);
   // Keep whole-number section properties readable; retain compact precision for fractional values.
   const fmtSectionMoment = value => Number.isSafeInteger(value) ? String(value) : fmt(value,4);
@@ -344,7 +346,7 @@
   function isCurrentImport(request){return request===importRequest&&importPending;}
   function finishCurrentImport(request){if(!isCurrentImport(request))return false;importPending=false;return true;}
   function cancelPendingImport(){if(!importPending)return false;importRequest++;importPending=false;status(IMPORT_CANCELLED_STATUS);return true;}
-  function invalidate(preserveImportRequest=null){if(preserveImportRequest===null||preserveImportRequest!==importRequest||!importPending)cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('energy-residual-summary').textContent='Energy balance residual: —';$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
+  function invalidate(preserveImportRequest=null){if(preserveImportRequest===null||preserveImportRequest!==importRequest||!importPending)cancelPendingImport();latest=null;latestModel=null;$('disp-card').textContent='—';$('stress-card').textContent='—';$('res-card').textContent='—';$('energy-residual-summary').textContent='Energy balance residual: —';$('energy-residual-summary').setAttribute('data-energy-residual-j','');$('energy-residual-summary').setAttribute('data-energy-error','');$('member-results').replaceChildren(el('tr',null)); $('member-results').firstChild.append(el('td','Run analysis to see results.',{colspan:7}));$('joint-results').replaceChildren();$('reactions').replaceChildren();$('verification').textContent='';updatePreview();}
   function svgNode(tag,attrs,text){const e=document.createElementNS(SVG,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!=null)e.textContent=String(text);return e;}
   function dimensionLabel(name,value,attrs){const formatted=fmt(value,4);return svgNode('text',{...attrs,'data-dimension-label':name,role:'text','aria-label':'Section dimension '+name+': '+formatted+' millimetres'},name+'='+formatted+' mm');}
   function appendCompositeSectionDetail(svg,shape,webThickness,flangeThickness){
@@ -442,7 +444,11 @@
     latest=result;latestModel=model;
     $('disp-card').textContent=fmt(result.maxDisplacement.magnitude*1000)+' mm · '+result.maxDisplacement.id;
     $('stress-card').textContent=fmt(Math.abs(result.maxStress.stress)/1e6)+' MPa · '+result.maxStress.id;
-    $('res-card').textContent=result.residual.toExponential(2);$('energy-residual-summary').textContent='Energy balance residual = '+fmt(result.energyResidual)+' J';
+    $('res-card').textContent=result.residual.toExponential(2);
+    const energySummary=$('energy-residual-summary');
+    energySummary.textContent='Energy balance residual = '+fmt(result.energyResidual)+' J';
+    energySummary.setAttribute('data-energy-residual-j',roundTripNumber(result.energyResidual));
+    energySummary.setAttribute('data-energy-error',roundTripNumber(result.energyError));
     addResultRows('member-results',result.members,m=>[m.id,fmt(m.force/1000),fmt(m.stress/1e6),m.type,
       m.eulerUtilization===null?'—':fmt(m.eulerUtilization*100)+'%',
       m.eulerLoadRatio===null?'—':fmt(m.eulerLoadRatio),m.eulerAssessment]);

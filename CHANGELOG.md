@@ -1,3 +1,10 @@
+## 2026-11-28 — Fix Truss browser binary64 comparison and publish machine-readable energy diagnostics
+
+- Exact-head Push Quality #46086282819 and PR Quality #46086287164 both failed at Truss browser step 215; the 109/109 Node FEM suite passed. The Python smoke compared a Playwright JSON-decoded integer token for JavaScript (2^{55}) directly to Python's arbitrary-precision integer (2^{55}). The shortest decimal representation returned by the browser was `36028797018963970`, which rounds back to the correct binary64 `2^{55}`. The regression now converts both values to binary64 before exact comparison and verifies a one-ULP difference remains detectable.
+- Truss Studio's always-visible energy summary now exposes shortest-round-trip `data-energy-residual-j` and `data-energy-error` attributes. Negative zero is preserved; both attributes clear on model invalidation and repopulate only after successful analysis.
+- Chromium coverage compares both attributes with the solver's own reference, verifies edit/reset clearing and recomputation, and continues at 1280px and 390px. Existing FEM tolerances and numerical assertions are unchanged.
+- Updated the Structural Truss FEM contract, living plan, execution ledger and changelog. Truss Studio uses adjacent standalone `tools/` assets; root `index.html` remains unchanged. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Surface Truss FEM energy residual and repair collapsed-details browser assertion
 
 - Exact-head Push/PR Quality on `989af00d2b697c3d1c5a901626e5fcfcfc144309` failed at Truss browser step 215. The 109/109 Node FEM analytical tests passed. The browser test attempted to read `#verification` while its parent `<details>` disclosure was still collapsed; the production detail had been populated correctly.

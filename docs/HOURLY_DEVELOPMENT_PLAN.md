@@ -1,6 +1,6 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 01:03 CET  
+**Last updated:** 28 November 2026, 01:55 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -15,14 +15,15 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Current `dev` head is `1c2a3f0674b937c649a6ab367c9f7f7ec9bc2a14`; `main` remains `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. The verified compare is **120 ahead / 0 behind** and exactly two branches exist: `dev` and `main`.
-- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable, 120 commits ahead, 48 changed files, with **zero submitted independent reviews**.
+- Starting `dev` head for this iteration: `865de95d5b4e35a6290c9864cf02d31d08142e63`; `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Verified compare: **121 ahead / 0 behind**. The only branch refs are `dev` and `main`. This iteration's atomic checkpoint is committed on the new `dev` head; its parent is the SHA above.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, 121 commits ahead, 48 changed files, with **zero submitted independent reviews**.
 - Both branches report `protected:false`; repository rulesets are empty and branch-protection reads return HTTP 403 (Resource not accessible by integration). Enforceable protection is not verified; no merge is authorized.
-- Exact-head Push Quality [#46080743000](https://github.com/saeedsai/ProMathStudio/actions/runs/46080743000) and PR Quality [#46080748080](https://github.com/saeedsai/ProMathStudio/actions/runs/46080748080) both failed on `989af00d2b697c3d1c5a901626e5fcfcfc144309` at Truss browser step 215. The Node analytical suite at step 214 passed **109/109**. The browser traceback is `tests/smoke_truss_fem.py:40`: it inspected `#verification` while that element was inside a deliberately collapsed `<details>`. The production UI populated the detail correctly; the test queried hidden text before opening the disclosure. This is a browser-test/UI-observability mismatch, not a FEM numerical failure.
-- This checkpoint commits an always-visible, `role="status"` / `aria-live="polite"` energy-residual summary to the Truss results panel. Successful solves publish the signed residual; model edits and failed/invalidation paths clear it. Detailed verification remains collapsible. The registered Chromium smoke now verifies the visible summary, opens the disclosure before reading its hidden detail, and checks stale-summary reset plus recomputation after restoring the selected example at both 1280px and 390px.
-- New current-head exact-head Push Quality [#46086152285](https://github.com/saeedsai/ProMathStudio/actions/runs/46086152285) and PR Quality [#46086157690](https://github.com/saeedsai/ProMathStudio/actions/runs/46086157690) are running on `1c2a3f0674b937c649a6ab367c9f7f7ec9bc2a14`; structural step 7, browser dependency installation and general browser smoke have passed in both, with no failures observed at the latest poll. Truss steps 214/215 and remaining Quality are pending. The local execution container has no checkout (`git rev-parse --show-toplevel` returns “not a git repository”), so repository edits use the connected GitHub integration and full browser/build certification must come from fresh exact-head Actions.
+- Exact-head Push Quality [#46086282819](https://github.com/saeedsai/ProMathStudio/actions/runs/46086282819) and PR Quality [#46086287164](https://github.com/saeedsai/ProMathStudio/actions/runs/46086287164) both failed on starting SHA `865de95d5b4e35a6290c9864cf02d31d08142e63` at Truss browser step 215. The Node analytical suite at step 214 passed **109/109**. The traceback is `tests/smoke_truss_fem.py:106`: Playwright's JSON bridge emits the JavaScript binary64 value (2^{55}) as shortest decimal `36028797018963970`; Python parses the integer-looking token as an arbitrary-precision integer, so comparing it directly with Python's exact integer (2^{55}=36028797018963968) fails even though both represent the same binary64 value. The regression now converts both sides back to binary64 before exact equality and explicitly verifies a one-ULP difference remains detectable.
+- The same checkpoint makes Truss energy diagnostics machine-readable: the visible status summary publishes shortest-round-trip `data-energy-residual-j` and `data-energy-error` attributes after a successful solve, preserving negative zero; model edits/invalidation clear both attributes with the visible summary. The registered Chromium smoke compares the attributes against the solver's own reference and checks reset/recompute at 1280px and 390px.
+- Fresh exact-head Push/PR Quality for this checkpoint are required; the starting-head failures are not certification for the new commit. The local execution container has no checkout (`git rev-parse --show-toplevel` returns “not a git repository”), so repository edits use the connected GitHub integration and full browser/build certification must come from exact-head Actions.
 - Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. No newer production deployment is verified; this dev work is not live.
 - The historical 26-Oct inventory remains frozen at **166 gaps / 95 partial**. Do not edit its baseline counts or claim catalog aliases as completed unique features.
+
 ## Operating contract
 
 1. Read root `AGENTS.md`, this plan, the frozen audit, unified master plan, relevant architecture/catalog contracts and exact-head CI before choosing work.
@@ -37,7 +38,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** The `989af00` exact-head runs failed only at Truss browser step 215; Node analytical step 214 passed 109/109. The collapsed-disclosure mismatch is fixed on current dev `1c2a3f0` with a visible live energy-residual summary and edit/reset regression. Current exact-head Push #46086152285 and PR #46086157690 are running; promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
+**Status:** Starting dev `865de95` failed exact-head Push #46086282819 and PR #46086287164 at Truss browser step 215; the 109/109 Node FEM suite passed. The failure was Python's arbitrary-precision JSON integer comparison against a JavaScript binary64 reference, not a solver defect. This checkpoint corrects the comparison and adds machine-readable energy diagnostic attributes with invalidation coverage; fresh exact-head Quality is pending. Promotion remains blocked by zero independent reviews and unverified branch protection/rulesets.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -65,7 +66,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial; compensated stiffness, reaction and energy accumulation plus seven-shape section-property boundary fixes are implemented on dev. The 2^55+16 J exact reference now passes all 109 Node FEM tests on `989af00`. The remaining exact-head failure was browser step 215 querying the energy residual inside a collapsed disclosure; this checkpoint makes the residual visible in the results panel and tests reset/recompute behavior. Fresh browser/full Quality is pending; the complete seven-shape reference matrix and release evidence remain open.  
+**Status:** Partial; compensated stiffness, reaction and energy accumulation plus seven-shape section-property boundary fixes are implemented on dev. The 109/109 Node FEM suite passed on starting SHA `865de95`; its browser smoke exposed a cross-language binary64/JSON assertion defect, now corrected with exact binary64 comparisons. The visible energy summary also publishes machine-readable residual/error values and clears them on model invalidation. Fresh exact-head browser/full Quality is pending; the complete seven-shape reference matrix and release evidence remain open.  
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.
@@ -198,3 +199,14 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - Current exact-head Push Quality [#46086152285](https://github.com/saeedsai/ProMathStudio/actions/runs/46086152285) and PR Quality [#46086157690](https://github.com/saeedsai/ProMathStudio/actions/runs/46086157690) are running on `1c2a3f0674b937c649a6ab367c9f7f7ec9bc2a14`; both passed structural step 7, browser dependency step 8 and general browser step 9 at last inspection. Truss browser step 215 and full-suite completion remain pending. Local full Python/Chromium/build commands are unavailable because this execution container has no checkout. Isolated JavaScript syntax and source/HTML/test wiring checks are performed before commit.
 - PR #191 remains open; independent reviews 0, both branches unprotected, rulesets empty and branch-protection read 403. No merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence from 24-Nov-2026.
 - Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## Latest checkpoint — 28 November 2026, 01:55 CET
+
+- Starting refs verified from GitHub: `dev` `865de95d5b4e35a6290c9864cf02d31d08142e63`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 121 ahead / 0 behind; exactly two branch refs.
+- Exact-head Push Quality [#46086282819](https://github.com/saeedsai/ProMathStudio/actions/runs/46086282819) and PR Quality [#46086287164](https://github.com/saeedsai/ProMathStudio/actions/runs/46086287164) both failed at Truss browser step 215. Step 214 passed 109/109 Node FEM tests. The exact traceback was line 106 of `tests/smoke_truss_fem.py`: Python compared the JSON-decoded decimal token for JavaScript (2^{55}) as an arbitrary-precision integer rather than converting it back to binary64. The regression now compares `float(actual)` to `float(reference)` and includes a one-ULP guard.
+- Added shortest-round-trip `data-energy-residual-j` and `data-energy-error` attributes to the Truss Studio result summary. The UI populates them only after a successful solve and clears both on invalidation; Chromium asserts reference equality, clearing and recomputation at desktop and 390px.
+- Updated the Truss Studio UI contract, living plan, execution ledger and changelog in the same atomic dev commit. These are adjacent `tools/` assets, not embedded `src/` modules; root standalone `index.html` parity is unaffected.
+- Local V8 UI syntax and structural assertions passed; a Python binary64/JSON reproduction confirmed the decoded integer token rounds back to the exact (2^{55}) binary64 value and that the next ULP remains distinguishable. The local Git checkout is absent, so full Python/Playwright/build commands were not run locally.
+- Fresh exact-head Push and PR Quality for the new commit are pending inspection. PR #191 remains open/mergeable; zero independent reviews, rulesets empty, branch protection unreadable (HTTP 403). No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on 24-Nov-2026 at unchanged main. This dev work is not live. Historical inventory remains **166 gaps / 95 partial**, unchanged.

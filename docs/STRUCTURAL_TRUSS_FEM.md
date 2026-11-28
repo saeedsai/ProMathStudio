@@ -43,7 +43,7 @@ The regression fixture B=H=1 mm, bi=1.2e-16 mm and hi=0.5 mm must return A=0.999
 
 ## Visible energy verification summary
 
-After a successful solve, the results panel displays the signed global energy-balance residual in an always-visible `role="status"` summary, while the detailed force/energy verification remains in its collapsible disclosure. The summary is refreshed only by a successful analysis and resets to an em dash whenever the model is edited or invalidated, so a previous solve cannot be mistaken for the current model. The registered Chromium regression checks the visible summary, expands the detailed disclosure before inspecting its contents, and verifies edit/reset invalidation at desktop and 390px mobile widths.
+After a successful solve, the results panel displays the signed global energy-balance residual in an always-visible `role="status"` summary, while the detailed force/energy verification remains in its collapsible disclosure. The summary exposes the shortest-round-trip binary64 values in `data-energy-residual-j` (joules) and `data-energy-error` (dimensionless) for browser integrations and automated verification; negative zero is preserved as `-0`. Both attributes are cleared to empty strings together with the visible summary whenever the model is edited or invalidated, and are repopulated only after a successful solve, so stale diagnostics cannot be mistaken for the current model. The registered Chromium regression compares both attributes against the solver's own binary64 reference, expands the detailed disclosure before inspecting its contents, and verifies edit/reset invalidation at desktop and 390px mobile widths.
 
 ## BigInt-free section-property summation fallback
 

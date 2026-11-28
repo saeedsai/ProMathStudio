@@ -1,3 +1,17 @@
+## 2026-11-28 01:55 CET — FIX TRUSS BINARY64 BROWSER ASSERTION AND EXPOSE MACHINE-READABLE ENERGY DIAGNOSTICS
+
+- Starting refs: `dev` `865de95d5b4e35a6290c9864cf02d31d08142e63`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 121 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46086282819](https://github.com/saeedsai/ProMathStudio/actions/runs/46086282819) and PR Quality [#46086287164](https://github.com/saeedsai/ProMathStudio/actions/runs/46086287164) both failed at step 215, `tests/smoke_truss_fem.py`. The 109-test Node FEM analytical suite at step 214 passed with 109/109 and zero skips.
+- Exact failure: line 106 compared `energy_accumulation['naiveEnergy']` directly to Python integer `2**55`. The browser returned the JavaScript binary64 value (2^{55}) through JSON using shortest decimal `36028797018963970`; Python parsed the integer-looking token as an arbitrary-precision integer, which differs from Python's exact integer `36028797018963968` even though converting either value to binary64 yields the same `2^55`. The smoke now compares `float(actual)` with `float(reference)` and asserts the next representable ULP remains distinguishable. This repairs the cross-language test contract without relaxing the binary64 numerical assertion.
+- Production UI improvement: added `roundTripNumber()` to preserve shortest-round-trip binary64 strings including negative zero. The visible Truss energy status now publishes `data-energy-residual-j` and `data-energy-error`; invalidation clears both to empty strings, and a successful solve repopulates them.
+- Browser regression compares both attributes with values returned by the solver itself, then edits the model to require both attributes clear and restores the example to require exact republishing. The same flow runs at 1280px and 390px.
+- Updated `tools/truss-fem-ui.js`, `tools/truss-studio.html`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, the living plan, this ledger and changelog in one atomic Git tree/commit on existing dev. Truss Studio uses adjacent standalone `tools/` files; no root `index.html` module synchronization is required.
+- Local checks: V8 syntax parsing of the updated UI and source/HTML/test wiring assertions passed. A Python reproduction confirmed `float(36028797018963970) == float(2**55)` while `float(2**55 + 8) != float(2**55)`. Bounded `git rev-parse --show-toplevel` failed with “not a git repository”; full local Node/Python/Playwright/build checks were not run. Fresh exact-head Actions remain authoritative.
+- New exact-head Push/PR Quality are pending inspection. PR #191 remains open/mergeable with zero independent submitted reviews; branch refs are only dev/main, rulesets are empty, and branch-protection read returns HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 succeeded on 24-Nov-2026 at unchanged main. This dev checkpoint is not deployed. Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
 ## 2026-11-28 01:03 CET — MAKE TRUSS ENERGY RESIDUAL VISIBLE AND FIX COLLAPSED-DISCLOSURE BROWSER REGRESSION
 
 - Starting refs: `dev` 989af00d2b697c3d1c5a901626e5fcfcfc144309; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 119 ahead / 0 behind; exactly two branches. Implementation commit [1c2a3f0](https://github.com/saeedsai/ProMathStudio/commit/1c2a3f0674b937c649a6ab367c9f7f7ec9bc2a14) advances dev to 120 ahead / 0 behind.

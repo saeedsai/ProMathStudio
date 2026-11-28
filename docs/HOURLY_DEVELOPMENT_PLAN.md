@@ -1,3 +1,16 @@
+## Latest checkpoint — 28 November 2026, 07:00 CET
+
+- Starting refs verified from GitHub: `dev` `99e5abf364249f8e34ecc68020fa3d65daa02018`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare was 126 ahead / 0 behind; exactly two branch refs (`dev`, `main`). Local checkout remains absent; the bounded GitHub-integration fallback is in use.
+- Root `AGENTS.md`, the living plan, frozen 26-Oct inventory, current Truss contract/source/tests, PR #191, reviews, branch refs, rulesets, exact-head Actions and main/Pages evidence were inspected.
+- Exact-head Push Quality [#46111417397](https://github.com/saeedsai/ProMathStudio/actions/runs/46111417397) and PR Quality [#46111420400](https://github.com/saeedsai/ProMathStudio/actions/runs/46111420400) both completed **218/218 steps**, zero failures and zero skipped steps on `99e5abf364249f8e34ecc68020fa3d65daa02018`. Truss steps 212, 214 and 215 passed in both. PR #191's synthetic head matches this starting dev SHA.
+- Found a real Euler-screen threshold defect: member type classification used a ±1e-8 N zero-force tolerance, and the same tolerance was incorrectly reused to decide whether compression demand existed. In small-scale models, a negative force below 1e-8 N can exceed an even smaller supplied Euler critical load, yet was reported as “No compression demand.”
+- Implemented a separate rule: when both I and K are supplied, every strictly negative solved axial force now contributes to Euler compression demand and is classified as compression for that screen. Members without I/K retain the existing ±1e-8 N noise threshold. The comparison still uses original operands and does not rely on rounded ratios.
+- Added a direct Node regression and registered Chromium regression for a 2 m bar (E=1 GPa, area=1e-3 mm², I=4e-9 mm⁴, K=1): 5e-12 N is below Pcr≈9.869604401089358e-12 N; 5e-9 N is above Pcr. Both are below the former 1e-8 N threshold. A no-I/K case verifies unchanged near-zero behavior. Browser assertions also retain finite equilibrium and energy checks at desktop and 390px.
+- The seven-file source/test/docs/plan/ledger/changelog candidate was committed atomically from the starting dev parent with a guarded, non-force fast-forward. Isolated independent binary64 calculations confirmed expected Pcr/utilizations (0.5066059182 below, 506.6059182 above). Full local Node/Playwright/build checks were unavailable because there is no checkout; fresh exact-head Actions are required.
+- PR #191 remains open/mergeable. Submitted independent reviews: **0**. Exactly dev/main refs exist; rulesets are empty; branch-protection reads return HTTP 403, so enforceable protection is unverified. No merge is authorized.
+- Latest production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. This dev candidate is not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
 ## Latest checkpoint — 28 November 2026, 06:00 CET
 
 - Starting refs verified from GitHub: `dev` `585fa5b8372cac1367bb3f1611e5e95f436ef681`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare **125 ahead / 0 behind**; exactly two branch refs (`dev`, `main`). Local `git rev-parse --show-toplevel` confirmed there is no checkout, so the bounded GitHub-integration fallback is in use.
@@ -12,7 +25,7 @@
 - Historical audit remains frozen at **166 gaps / 95 partial**; no counts are reduced.
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 06:00 CET  
+**Last updated:** 28 November 2026, 07:00 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -61,7 +74,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** Exact-head Push Quality [#46103439003](https://github.com/saeedsai/ProMathStudio/actions/runs/46103439003) and PR Quality [#46103444489](https://github.com/saeedsai/ProMathStudio/actions/runs/46103444489) passed **218/218** on starting head `a7803049451699f1b0f18829921b92de1f516995`, zero failures/skips. The current candidate still requires fresh exact-head certification. The remaining P0 blocker is governance: PR #191 has zero independent reviews; both branches report unprotected, rulesets are empty, and branch-protection reads return HTTP 403. No merge is authorized until an eligible independent approval and enforceable main protection are verified.  
+**Status:** The previous candidate `99e5abf364249f8e34ecc68020fa3d65daa02018` is now certified by exact-head Push Quality [#46111417397](https://github.com/saeedsai/ProMathStudio/actions/runs/46111417397) and PR Quality [#46111420400](https://github.com/saeedsai/ProMathStudio/actions/runs/46111420400), both 218/218 with zero failures/skips. This run's new Truss candidate requires fresh exact-head checks. PR #191 tracks dev, but independent reviews remain zero; rulesets are empty and branch-protection reads return HTTP 403. No merge is authorized until independent approval and enforceable main protection are verified.
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -90,13 +103,14 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial; compensated stiffness, reaction and energy accumulation plus seven-shape section-property boundary fixes are implemented on dev. The previous exact-head Push/PR workflows passed 218/218, including Truss steps 212/214/215. Aggregate material-mass reporting is implemented on dev. This iteration fixes a separate post-solve defect where optional Euler utilization or load-ratio overflow/underflow rejected otherwise finite FEM results; new Node and desktop/390px Chromium regressions cover both reciprocal overflow directions and minimum-subnormal underflow. Fresh exact-head certification is pending. The complete independent seven-shape reference matrix and release evidence remain open.  
+**Status:** Partial; compensated stiffness, reaction and energy accumulation, seven-shape section-property boundary fixes, aggregate material-mass reporting and range-aware Euler ratios are implemented on dev. Exact-head Push/PR Quality on parent `99e5abf364249f8e34ecc68020fa3d65daa02018` passed 218/218. This iteration fixes a separate force-threshold defect: when I/K are supplied, every strictly negative solved force now participates in Euler screening even below the general ±1e-8 N display threshold; models without I/K retain the previous noise threshold. New Node and desktop/390px Chromium regressions cover below-critical and above-critical sub-threshold loads. Fresh exact-head certification is pending; the independent seven-shape reference matrix remains open.
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.
 - Equilibrium residual, strain energy, displacement and member-force references; exact power-of-two energy fixture retains 16 J from thirty-two 0.5 J bars beside a 2^55 J member and exposes zero signed energy residual.
 - Pre-solve material mass reports a total only when every member has explicit density; partial inputs show a known subtotal plus missing-density count, all-unknown inputs show unavailable, explicit zero density counts as known, and unrepresentable aggregate mass rejects. Node and desktop/390px browser regressions cover each case.
 - The Truss results summary reports `pending` before first successful solve, `valid` after success and `stale` after edits/failure; energy diagnostics clear while stale and republish only after success. Reset references follow the currently selected example.
+- When I/K are supplied, every strictly negative solved member force is included in Euler demand even when its magnitude is below 1e-8 N; a 5e-12 N load below Pcr and a 5e-9 N load above Pcr both classify correctly. Without I/K, the existing near-zero threshold remains.
 
 ### 5. P1 — Harden adaptive RK45 difficult-workload boundaries
 

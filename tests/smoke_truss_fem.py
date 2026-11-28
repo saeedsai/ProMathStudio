@@ -419,6 +419,16 @@ def main():
                 const below = solve(200, 1e-300, 1e301, -2e-11);
                 const above = solve(1e-300, 1e300, 4e-15, -2e-11);
                 const underflow = solve(1e-300, 1e300, 2e-21, -0.002);
+                const tinyBelow = solve(1, 1e-3, 4e-9, -5e-15);
+                const tinyAbove = solve(1, 1e-3, 4e-9, -5e-12);
+                const tinySummary = result => ({
+                    force: result.members[0].force, type: result.members[0].type,
+                    compressionDemand: result.members[0].compressionDemand,
+                    pcr: result.members[0].eulerCriticalLoad,
+                    utilization: result.members[0].eulerUtilization,
+                    assessment: result.members[0].eulerAssessment,
+                    residual: result.residual, energyError: result.energyError
+                });
                 return {
                     below: {force:below.members[0].force, utilization:below.members[0].eulerUtilization,
                         utilizationRange:below.members[0].eulerUtilizationRange,
@@ -431,7 +441,9 @@ def main():
                     underflow: {pcr:underflow.members[0].eulerCriticalLoad, utilization:underflow.members[0].eulerUtilization,
                         utilizationRange:underflow.members[0].eulerUtilizationRange,
                         loadRatio:underflow.members[0].eulerLoadRatio, loadRatioRange:underflow.members[0].eulerLoadRatioRange,
-                        assessment:underflow.members[0].eulerAssessment, residual:underflow.residual, energyError:underflow.energyError}
+                        assessment:underflow.members[0].eulerAssessment, residual:underflow.residual, energyError:underflow.energyError},
+                    tinyBelow: tinySummary(tinyBelow),
+                    tinyAbove: tinySummary(tinyAbove)
                 };
             }""")
             assert euler_ratio_range['below']['force'] < 0
@@ -458,6 +470,17 @@ def main():
             assert euler_ratio_range['underflow']['assessment'] == 'At/above ideal Euler load (utilization exceeds binary64 range)'
             assert euler_ratio_range['underflow']['residual'] == 0
             assert euler_ratio_range['underflow']['energyError'] == 0
+            for key, assessment in [('tinyBelow', 'Below ideal Euler load'),
+                                    ('tinyAbove', 'At/above ideal Euler load')]:
+                result = euler_ratio_range[key]
+                assert result['force'] < 0 and abs(result['force']) < 1e-8
+                assert result['type'] == 'Compression'
+                assert result['compressionDemand'] == -result['force']
+                assert result['pcr'] > 0 and math.isfinite(result['pcr'])
+                assert result['assessment'] == assessment
+                assert math.isfinite(result['residual']) and math.isfinite(result['energyError'])
+            assert 0 < euler_ratio_range['tinyBelow']['utilization'] < 1
+            assert euler_ratio_range['tinyAbove']['utilization'] > 1
             # The section helper is intentionally collapsed with the material breakdown.
             # Exercise the real disclosure before interacting with its controls at both widths.
             details = page.locator('#member-material-details')

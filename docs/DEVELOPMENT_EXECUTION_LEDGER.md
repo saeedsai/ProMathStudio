@@ -1,3 +1,16 @@
+## 2026-11-28 07:00 CET — RETAIN SUB-THRESHOLD COMPRESSION IN THE OPTIONAL EULER SCREEN
+
+- Starting refs: `dev` `99e5abf364249f8e34ecc68020fa3d65daa02018`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 126 ahead / 0 behind; exactly two branches. Local checkout absent; GitHub integration fallback used.
+- Exact-head Push Quality [#46111417397](https://github.com/saeedsai/ProMathStudio/actions/runs/46111417397) and PR Quality [#46111420400](https://github.com/saeedsai/ProMathStudio/actions/runs/46111420400) passed 218/218 on the starting SHA, zero failures/skips. Truss steps 212, 214 and 215 passed in both.
+- Reproduced a semantic defect in the actual production path: the generic ±1e-8 N force-classification threshold was also suppressing Euler compression demand. A negative force can be smaller than 1e-8 N yet exceed a supplied, still smaller Euler critical load.
+- Updated the solver so Euler-enabled members use every strictly negative solved axial force as compression demand and are classified as compression for that screen. Members without I/K preserve the prior ±1e-8 N noise threshold. No Euler acceptance ratio or solver tolerance was weakened.
+- Added direct Node and registered desktop/390px Chromium regressions. For a 2 m bar with E=1 GPa, area=1e-3 mm², I=4e-9 mm⁴ and K=1, 5e-12 N is below Pcr≈9.869604401089358e-12 N (utilization≈0.5066), while 5e-9 N is above Pcr (utilization≈506.6); both are below the old threshold. A no-I/K case confirms unchanged near-zero classification. Browser checks retain finite equilibrium and energy diagnostics.
+- Updated the Structural Truss FEM contract, NEXT FIVE status, living checkpoint, execution ledger and changelog in the same seven-file atomic dev commit. The standalone Truss scripts do not require root `index.html` changes.
+- Independent Python binary64 calculation reproduced the two reference Pcr/utilization cases. Full local Node/Playwright/build tests were not run because the checkout is absent; fresh exact-head Push/PR Quality is pending for the new commit.
+- PR #191 remains open/mergeable with zero independent reviews. Branches are unprotected, rulesets empty and branch-protection read returns HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026 at unchanged main. Not released. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
 ## 2026-11-28 06:00 CET — PRESERVE FINITE TRUSS SOLVES WHEN OPTIONAL EULER RATIOS EXCEED BINARY64 RANGE
 
 - Starting refs: `dev` `585fa5b8372cac1367bb3f1611e5e95f436ef681`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 125 ahead / 0 behind; exactly two branches. Local checkout absent; GitHub integration fallback used.

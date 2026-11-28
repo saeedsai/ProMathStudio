@@ -1,3 +1,9 @@
+## 2026-11-28 — Preserve sub-threshold compression in the optional Euler screen
+
+- Fixed an optional Truss buckling-screen defect: the generic ±1e-8 N near-zero classification threshold was also suppressing compression demand. When member I and K are supplied, every strictly negative solved axial force now participates in Euler screening and is classified as compression for that screen. Members without I/K retain the established noise threshold.
+- Added Node and registered Chromium regressions for a 5e-12 N load below Pcr≈9.869604401089358e-12 N and a 5e-9 N load above Pcr; both are below the former 1e-8 N threshold. A no-I/K case confirms unchanged near-zero behavior. Browser checks include finite equilibrium/energy diagnostics at 1280px and 390px.
+- Updated the Structural Truss FEM contract and living development records. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Keep finite Truss FEM solutions when optional Euler ratios exceed binary64 range
 
 - Fixed a post-solve reporting defect: an otherwise finite compressed-bar FEM solution was rejected if either optional Euler utilization or reciprocal load ratio overflowed binary64. Each representable ratio remains numeric; an unrepresentable positive ratio is `null` with an explicit `overflow`/`underflow` range field. The below/at-or-above assessment compares the original compression demand and Euler critical load directly.

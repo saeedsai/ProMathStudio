@@ -1084,7 +1084,11 @@
     const results = members.map(m => {
       const extension = m.c*(u[2*m.b]-u[2*m.a]) + m.s*(u[2*m.b+1]-u[2*m.a+1]);
       const force = m.stiffness * extension;
-      const compressionDemand = force < -1e-8 ? -force : 0;
+      // With I/K supplied, the Euler screen must see every strictly negative force;
+      // the general zero-force display threshold must not hide a small over-critical load.
+      // Without the optional screen, retain the established noise threshold.
+      const compressionDemand = m.eulerCriticalLoad !== null && force < 0
+        ? -force : force < -1e-8 ? -force : 0;
       // Only compression has an Euler demand. Tension and zero force deliberately avoid division.
       const utilization = m.eulerCriticalLoad !== null && compressionDemand > 0
         ? positiveRatioResult(compressionDemand, m.eulerCriticalLoad) : {value:null, range:null};
@@ -1105,7 +1109,8 @@
         eulerAssessment = (atOrAbove ? 'At/above' : 'Below') + ' ideal Euler load' + rangeNote;
       } else eulerAssessment = force > 1e-8 ? 'Tension — not applicable' : 'No compression demand';
       return {id: m.id, a: nodes[m.a].id, b: nodes[m.b].id, length: m.L, extension, force, stress: force/m.A,
-        strain: extension/m.L, type: force > 1e-8 ? 'Tension' : force < -1e-8 ? 'Compression' : 'Zero',
+        strain: extension/m.L, type: compressionDemand > 0 ? 'Compression' :
+          force > 1e-8 ? 'Tension' : force < -1e-8 ? 'Compression' : 'Zero',
         compressionDemand,eulerCriticalLoad:m.eulerCriticalLoad,eulerUtilization,eulerUtilizationRange,
         eulerLoadRatio,eulerLoadRatioRange,eulerAssessment};
     });

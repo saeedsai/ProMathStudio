@@ -2683,3 +2683,41 @@ test('global stiffness assembly scales before direction-cosine products near the
  assert.equal(result.members.length,20);
  assert.deepEqual(model,original,'FEM solve must not mutate the source model');
 });
+
+
+test('optional Euler screening retains sub-threshold compressive demand',()=>{
+ const make=(fx,withEuler=true)=>{
+  const member={id:'AB',a:'A',b:'B',E:1,area:1e-3};
+  if(withEuler){member.I=4e-9;member.K=1;}
+  return {
+   nodes:[
+    {id:'A',x:0,y:0,fixX:true,fixY:true},
+    {id:'B',x:2,y:0,fixY:true,fx,fy:0}
+   ],
+   members:[member]
+  };
+ };
+ const below=fem.solve(make(-5e-15)).members[0];
+ assert.ok(below.force<0&&Math.abs(below.force)<1e-8,
+  'the below-critical compression must be smaller than the general zero-force threshold');
+ assert.equal(below.type,'Compression');
+ assert.equal(below.compressionDemand,-below.force);
+ assert.ok(below.compressionDemand<below.eulerCriticalLoad);
+ assert.ok(below.eulerUtilization>0&&below.eulerUtilization<1);
+ assert.equal(below.eulerAssessment,'Below ideal Euler load');
+
+ const above=fem.solve(make(-5e-12)).members[0];
+ assert.ok(above.force<0&&Math.abs(above.force)<1e-8,
+  'the above-critical compression must be smaller than the general zero-force threshold');
+ assert.equal(above.type,'Compression');
+ assert.equal(above.compressionDemand,-above.force);
+ assert.ok(above.compressionDemand>above.eulerCriticalLoad);
+ assert.ok(above.eulerUtilization>1);
+ assert.equal(above.eulerAssessment,'At/above ideal Euler load');
+
+ const withoutScreen=fem.solve(make(-5e-12,false)).members[0];
+ assert.equal(withoutScreen.type,'Zero',
+  'members without I/K retain the established near-zero force classification');
+ assert.equal(withoutScreen.compressionDemand,0);
+ assert.equal(withoutScreen.eulerAssessment,'Not assessed (I/K missing)');
+});

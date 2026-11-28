@@ -202,6 +202,85 @@
     if (exponent >= -1075) return (mantissa * (2 ** (exponent + 1022))) * minNormal;
     return 0;
   }
+
+  // Sum signed binary64 products without rounding each underflowed product to zero.
+  // Normal products keep the existing direct multiply + compensated-sum behavior.
+  function exactFiniteProductSum(pairs, name) {
+    const terms = Array.from(pairs, pair => {
+      if (!Array.isArray(pair) || pair.length !== 2) throw Error(name + ' terms must be pairs.');
+      return [finite(pair[0], name), finite(pair[1], name)];
+    });
+    if (typeof BigInt !== 'function' || typeof DataView !== 'function') {
+      const leftScale = Math.max(0, ...terms.map(pair => Math.abs(pair[0])));
+      const rightScale = Math.max(0, ...terms.map(pair => Math.abs(pair[1])));
+      if (leftScale === 0 || rightScale === 0) return 0;
+      const normalized = terms.map(([left, right]) => (left / leftScale) * (right / rightScale));
+      const total = finiteSignedSum(normalized, name);
+      if (total === 0) return 0;
+      const magnitude = positiveProduct(Math.abs(total), leftScale, rightScale);
+      return finite(total < 0 ? -magnitude : magnitude, name);
+    }
+    const zero = BigInt(0), one = BigInt(1);
+    const shift32 = BigInt(32), shift52 = BigInt(52), shift63 = BigInt(63);
+    const signMask = one << shift63, exponentMask = BigInt(2047);
+    const fractionMask = (one << shift52) - one;
+    const view = new DataView(new ArrayBuffer(8));
+    const binaryParts = value => {
+      view.setFloat64(0, value, false);
+      const bits = (BigInt(view.getUint32(0, false)) << shift32) |
+        BigInt(view.getUint32(4, false));
+      const negative = (bits & signMask) !== zero;
+      const exponentBits = Number((bits >> shift52) & exponentMask);
+      const fraction = bits & fractionMask;
+      return exponentBits === 0
+        ? {negative, significand:fraction, exponent:-1074}
+        : {negative, significand:(one << shift52) | fraction, exponent:exponentBits - 1075};
+    };
+    let total = zero;
+    for (const [left, right] of terms) {
+      if (left === 0 || right === 0) continue;
+      const a = binaryParts(left), b = binaryParts(right);
+      const shift = a.exponent + b.exponent + 2148;
+      const magnitude = (a.significand * b.significand) << BigInt(shift);
+      total += a.negative !== b.negative ? -magnitude : magnitude;
+    }
+    if (total === zero) return 0;
+    const negative = total < zero;
+    const magnitude = negative ? -total : total;
+    const bitLength = magnitude.toString(2).length;
+    let result;
+    if (bitLength <= 53) {
+      result = Number(magnitude) * Math.pow(2, -2148);
+    } else {
+      let shift = bitLength - 53;
+      let significand = magnitude >> BigInt(shift);
+      const remainder = magnitude - (significand << BigInt(shift));
+      const halfway = one << BigInt(shift - 1);
+      if (remainder > halfway || (remainder === halfway && (significand & one) !== zero)) significand += one;
+      if (significand === (one << BigInt(53))) { significand >>= one; shift++; }
+      const exponent = shift - 2148;
+      if (exponent > 971) result = Infinity;
+      else if (exponent >= -1074) result = Number(significand) * Math.pow(2, exponent);
+      else if (exponent >= -1127) {
+        result = (Number(significand) * Math.pow(2, exponent + 1022)) * 2.2250738585072014e-308;
+      } else result = 0;
+    }
+    return finite(negative ? -result : result, name);
+  }
+  function finiteSignedProductSum(pairs, name) {
+    const products = Array.from(pairs, pair => {
+      if (!Array.isArray(pair) || pair.length !== 2) throw Error(name + ' terms must be pairs.');
+      const left = finite(pair[0], name), right = finite(pair[1], name);
+      const product = left * right;
+      if (!Number.isFinite(product)) throw Error(name + ' must be a finite number.');
+      return {left, right, product, underflowed:left !== 0 && right !== 0 && product === 0};
+    });
+    if (!products.some(term => term.underflowed)) {
+      return finiteSignedSum(products.map(term => term.product), name);
+    }
+    return exactFiniteProductSum(products.map(term =>
+      term.underflowed ? [term.left, term.right] : [term.product, 1]), name);
+  }
   // Preserve a representable product of positive factors divided by positive factors.
   // The caller supplies the old direct intermediates so ordinary calculations retain their exact order.
   function positiveProductQuotientFactors(numerators, denominators, directNumerator, directDenominator) {
@@ -1248,10 +1327,10 @@
     // overflowing a partial resultant when later nodes cancel it.
     const appliedMomentTerms = [];
     for (const node of normalized.nodes) {
-      appliedMomentTerms.push(finite(node.x * node.fy, 'Applied moment term (N·m)'));
-      appliedMomentTerms.push(finite(-node.y * node.fx, 'Applied moment term (N·m)'));
+      appliedMomentTerms.push([node.x, node.fy]);
+      appliedMomentTerms.push([-node.y, node.fx]);
     }
-    const appliedMoment = finiteSignedSum(appliedMomentTerms, 'Applied moment (N·m)');
+    const appliedMoment = finiteSignedProductSum(appliedMomentTerms, 'Applied moment (N·m)');
     return {model, inputUnits: describeUnits(model), nodeCount: model.nodes.length,
       memberCount: model.members.length,
       // Topological components include isolated nodes; this is not a stability certificate.

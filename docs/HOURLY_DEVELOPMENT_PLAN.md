@@ -1,4 +1,17 @@
-## Latest checkpoint — 28 November 2026, 11:02 CET
+## Latest checkpoint — 28 November 2026, 11:59 CET
+
+- Starting refs verified from GitHub: dev de9fc2513cc87273f4df70f669e21499f92c8220, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare main...dev = 133 ahead / 0 behind; exactly two branches (dev, main). A bounded local git rev-parse --show-toplevel is unavailable because no checkout is mounted; the connected GitHub integration fallback is used without repeated network retries.
+- Re-read root AGENTS.md, this plan, the frozen 26-Oct inventory, Truss FEM contract/source/tests, PR #191, reviews, branch refs, rulesets, exact-head Actions and main/Pages evidence.
+- Starting exact-head Push Quality #46134287329 and PR Quality #46134292496 both completed 218/218 steps, zero failures and zero skipped steps on de9fc2513cc87273f4df70f669e21499f92c8220; Truss steps 212, 214 and 215 passed in both.
+- Found an applied-moment precision defect in inspectJSON(): the preview multiplied each coordinate/load pair before summing. With 78 nodes at x=1e-162 m and Fy=1e-165 kN, each SI product rounds to zero, so the old preview returned zero even though the exact sum of the binary64 input products rounds to 16*Number.MIN_VALUE = 8e-323 N m. The mirrored -y*Fx case lost the same negative resultant.
+- Added a signed product accumulator for the preview moment. Representable products preserve the existing direct-multiply/compensated-sum path. Only nonzero factor pairs whose product underflows to zero are retained as exact binary64 significand/exponent products, summed with BigInt and rounded once to nearest-even. A scale-normalized compensated fallback covers environments without BigInt. Non-finite individual products remain rejected.
+- Added direct Node and registered Chromium regressions for positive and negative product-underflow moments; the Node test also disables BigInt to exercise the fallback. The tests verify the naive result is zero, the corrected result is +/-16 minimum subnormals, and aggregate force remains finite. Browser coverage is registered in the existing 1280px/390px Truss loop.
+- The Truss FEM page uses adjacent standalone tools assets, so no oversized root index.html bundle change is required. Full local Node/Playwright/build execution remains unavailable because the execution environment has no checkout; isolated V8 execution of the actual modified production module passed both signs and the BigInt-free fallback. Fresh exact-head Push/PR Quality must certify the new commit.
+- PR #191 is open and mergeable at the starting head (133 commits, 49 changed files); submitted independent reviews: 0. Both branches report protected:false; repository rulesets are empty and branch-protection GET returns HTTP 403 (Resource not accessible by integration). No merge is authorized.
+- Latest verified production evidence remains Main Quality #45360386408 and Pages #45360367251, both successful on 24-Nov-2026 at unchanged main SHA 0d8ac89f7c9177806a266e56b27980c83d2c3ff5. This dev correction is not live.
+- Frozen historical inventory remains 166 gaps / 95 partial, unchanged.
+
+## Previous checkpoint — 28 November 2026, 11:02 CET
 
 - Starting refs verified from GitHub: `dev` `63af531f475ab43a0f0cd3765771069cc96b0a24`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare main...dev = **132 ahead / 0 behind**; exactly two branches (`dev`, `main`). A bounded local `git rev-parse --show-toplevel` failed with `fatal: not a git repository`; the connected GitHub integration fallback is used without repeated network retries.
 - Re-read root `AGENTS.md`, this plan, the frozen 26-Oct inventory, Unified Master Implementation Plan, Engineering Architecture/Workspace plan, Engineering Toolbox catalog, Structural Engineering catalog, Truss FEM contract/source/tests, PR #191, reviews, branch refs, rulesets, exact-head Actions and main/Pages evidence.
@@ -73,7 +86,7 @@
 - Historical audit remains frozen at **166 gaps / 95 partial**; no counts are reduced.
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 11:02 CET  
+**Last updated:** 28 November 2026, 11:59 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -113,7 +126,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Certify and release PR #191 safely
 
-**Status:** Exact-head Quality passed on starting candidate `63af531f475ab43a0f0cd3765771069cc96b0a24` (Push and PR, 218/218 each, zero failures/skips). The new results-CSV candidate requires fresh exact-head runs. Promotion remains blocked by zero independent submitted reviews, both branches reporting unprotected, empty repository rulesets and branch-protection GET 403. No merge is authorized.
+**Status:** Exact-head Push and PR Quality passed 218/218 on starting candidate `de9fc2513cc87273f4df70f669e21499f92c8220` (runs #46134287329 and #46134292496, zero failures/skips). This iteration's applied-moment correction requires fresh exact-head runs. Promotion remains blocked by zero independent submitted reviews, both branches reporting unprotected, empty repository rulesets and branch-protection GET 403. No merge is authorized.
 **Acceptance tests:**
 - Fresh Push and PR Quality both pass on the same exact candidate SHA; all 218 steps complete with zero failures and zero skipped tests.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -141,12 +154,13 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM reference and disclosure coverage
 
-**Status:** Partial. Truss FEM has compensated stiffness/reaction/energy accumulation, seven-shape boundary fixes, aggregate material mass, range-aware Euler ratios, sub-threshold compression screening and per-member Euler readiness. This iteration adds signed-zero/non-finite-safe results CSV serialization; the independent seven-shape Decimal reference matrix remains open.
+**Status:** Partial. Truss FEM has compensated stiffness/reaction/energy accumulation, seven-shape boundary fixes, aggregate material mass, range-aware Euler ratios, sub-threshold compression screening, per-member Euler readiness and signed-zero/non-finite-safe results CSV serialization. This iteration adds exact aggregation when individual applied-moment products underflow; the independent seven-shape Decimal reference matrix remains open.
 **Acceptance tests:**
 - Independent Decimal area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall/cavity transitions, sub-ULP contributions, mixed-scale stiffness, mechanism rejection, SI boundaries, equilibrium residual and energy references.
 - Euler mass/readiness/ratio boundaries: unknown density is not zero; explicit zero density is known; partial subtotal never claims a complete total; overflow rejects; tiny compression with supplied I/K is assessed.
 - Results CSV preserves `-0` for member force/stress/strain, joint displacement and support reaction; positive zero remains `0`; finite values round-trip; numeric NaN/±Infinity abort without a download.
+- Import-preview applied moments preserve a representable signed sum when individual coordinate×load products underflow to zero; positive and negative 78-term fixtures, exact binary64 accumulation and BigInt-free fallback agree at desktop/mobile.
 - The member disclosure starts collapsed, visibly names Euler readiness, and exposes a polite live singular/plural member count. Browser tests verify 3→1→3 members and idempotent helper access.
 - All affected Node and Chromium regressions pass at 1280px and 390px; Truss steps 212, 214 and 215 pass on exact-head Quality.
 

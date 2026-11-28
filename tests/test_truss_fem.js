@@ -832,6 +832,34 @@ test('inspectJSON reports signed applied moment about origin in SI N m',()=>{
 });
 
 
+
+test('inspectJSON retains aggregate applied moment when individual products underflow',()=>{
+ const make=positive=>{
+  const model=clone(fem.examples.bar);
+  model.nodes.push(...Array.from({length:78},(_,i)=>positive
+   ? {id:'P'+i,x:1e-162,y:0,fixX:true,fixY:true,fx:0,fy:1e-165}
+   : {id:'N'+i,x:0,y:1e-162,fixX:true,fixY:true,fx:1e-165,fy:0}));
+  return model;
+ };
+ const positive=make(true),negative=make(false),expected=16*Number.MIN_VALUE;
+ const naivePositive=positive.nodes.reduce((sum,node)=>sum+node.x*(node.fy*1000)-node.y*(node.fx*1000),0);
+ const naiveNegative=negative.nodes.reduce((sum,node)=>sum+node.x*(node.fy*1000)-node.y*(node.fx*1000),0);
+ assert.equal(positive.nodes.length,80);
+ assert.equal(negative.nodes.length,80);
+ assert.equal(naivePositive,0,'each positive coordinate×load product rounds to zero');
+ assert.equal(naiveNegative,0,'each negative coordinate×load product rounds to zero');
+ assert.equal(fem.inspectJSON(JSON.stringify(positive)).appliedMoment,expected);
+ assert.equal(fem.inspectJSON(JSON.stringify(negative)).appliedMoment,-expected);
+ const originalBigInt=globalThis.BigInt;
+ try{
+  globalThis.BigInt=undefined;
+  assert.equal(fem.inspectJSON(JSON.stringify(positive)).appliedMoment,expected,
+   'the scaled compensated fallback must retain the aggregate subnormal moment');
+ }finally{
+  globalThis.BigInt=originalBigInt;
+ }
+});
+
 test('inspectJSON rejects nonfinite global moment instead of returning invalid preview physics',()=>{
  const huge=clone(fem.examples.bar);
  huge.nodes[0].x=1e200;huge.nodes[1].x=1e200+1e190;

@@ -352,6 +352,31 @@ def main():
             assert resultant_range['naiveForceBalanceNonFinite'] is True
             assert resultant_range['forceBalanceX'] == 0
             assert resultant_range['forceBalanceY'] == 0
+
+            # Individually underflowing coordinate×load products can have a representable sum.
+            product_underflow = page.evaluate("""() => {
+                const make = positive => {
+                    const model = JSON.parse(JSON.stringify(ProMathTrussFEM.examples.bar));
+                    model.nodes.push(...Array.from({length:78},(_,i) => positive
+                        ? {id:'P'+i,x:1e-162,y:0,fixX:true,fixY:true,fx:0,fy:1e-165}
+                        : {id:'N'+i,x:0,y:1e-162,fixX:true,fixY:true,fx:1e-165,fy:0}));
+                    const naive = model.nodes.reduce((sum,node) =>
+                        sum + node.x*(node.fy*1000) - node.y*(node.fx*1000), 0);
+                    return {naive, preview:ProMathTrussFEM.inspectJSON(JSON.stringify(model))};
+                };
+                const positive=make(true),negative=make(false);
+                return {positiveNaive:positive.naive,negativeNaive:negative.naive,
+                    positive:positive.preview.appliedMoment,negative:negative.preview.appliedMoment,
+                    positiveForce:positive.preview.appliedForce.y,negativeForce:negative.preview.appliedForce.x};
+            }""")
+            expected_product_underflow_moment = math.ulp(0.0) * 16
+            assert product_underflow['positiveNaive'] == 0, product_underflow
+            assert product_underflow['negativeNaive'] == 0, product_underflow
+            assert product_underflow['positive'] == expected_product_underflow_moment, product_underflow
+            assert product_underflow['negative'] == -expected_product_underflow_moment, product_underflow
+            assert product_underflow['positiveForce'] == 78 * 1e-162, product_underflow
+            assert product_underflow['negativeForce'] == 78 * 1e-162, product_underflow
+
             reaction_precision = page.evaluate("""() => {
                 const model = {
                     nodes: [

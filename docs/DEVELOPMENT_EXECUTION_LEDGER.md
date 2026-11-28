@@ -2921,3 +2921,18 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - Updated `tools/truss-fem-ui.js`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, this plan, this ledger and `CHANGELOG.md` in one atomic Git tree/commit on existing dev. No root bundle change is required because Truss uses adjacent standalone assets.
 - Isolated V8 syntax compilation of the modified UI and direct formatter checks cover -0, +0, Number.MIN_VALUE, NaN and ±Infinity. Full local Python/Playwright/build commands were not run because no checkout is mounted; new exact-head Push/PR Quality must certify the browser regression.
 - Main Quality #45360386408 and Pages deployment #45360367251 remain the latest verified successful production evidence on 24-Nov-2026 at unchanged main. The new change is dev-only, not live. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+---
+
+## 2026-11-28 11:59 CET — Preserve applied moments when individual coordinate×load products underflow
+
+- Starting refs: dev de9fc2513cc87273f4df70f669e21499f92c8220, main 0d8ac89f7c9177806a266e56b27980c83d2c3ff5; compare 133 ahead / 0 behind; exactly dev/main branches. No local checkout is mounted; connected GitHub integration fallback used.
+- Exact-head Push Quality #46134287329 and PR Quality #46134292496 both passed 218/218 on the starting SHA, zero failures/skips; Truss steps 212, 214 and 215 passed.
+- Reproduced a preview-resultant loss: 78 nodes each contribute an exact product from 1e-162 m × 1e-162 N, but every individual binary64 multiplication rounds to zero. The exact combined product sum rounds to 8e-323 N m. The mirrored -y*Fx case should retain the negative value; the old implementation returned zero for both.
+- Added exactFiniteProductSum and finiteSignedProductSum for the preview's applied moment. Ordinary representable products retain the old direct product plus compensated sum. Underflowed nonzero products are accumulated as exact binary64 significand/exponent integers with one nearest-even rounding; the no-BigInt path uses scale-normalized compensated products. Individual product overflow still rejects.
+- Added a direct Node regression for both signs and the BigInt-free fallback, plus registered Chromium checks in the 1280px/390px Truss smoke. The tests assert the naive result is zero and the preview reports +/-16 minimum subnormal values while the aggregate forces remain finite.
+- Isolated V8 execution of the actual modified production FEM module passed: positive result 8e-323, negative result -8e-323, BigInt-free fallback 8e-323, naive results both zero. The source change is confined to adjacent standalone Truss assets; no root bundle parity change is required.
+- Local Node/Playwright/build commands remain unavailable because there is no checkout. Fresh exact-head Push and PR Quality are pending for the new commit; the starting SHA's 218/218 runs do not certify it.
+- PR #191 remains open/mergeable; zero independent reviews, both branches unprotected, rulesets empty and branch-protection GET 403. No merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on 24-Nov-2026 at unchanged main; this dev work is not live.
+- Historical inventory remains 166 gaps / 95 partial, unchanged.

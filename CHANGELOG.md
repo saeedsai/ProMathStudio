@@ -1885,3 +1885,9 @@ Recent entries are listed here (newest first). Earlier release notes through 202
 
 - Truss Studio now shows each member as Not supplied, Missing I, Missing K or Ready for its optional ideal Euler estimate. `inspectJSON().memberMetrics[].eulerInputStatus` exposes the same stable states. Missing I/K is never treated as zero and does not affect the axial-only FEM solve.
 - Added direct Node and registered Chromium coverage for all states, Pcr availability, 14-column table integrity and edit/reset refresh at desktop/390px. Implemented on dev; exact-head Quality/release pending.
+
+
+## 2026-11-28 — Preserve applied moments when individual products underflow
+
+- Truss JSON preview now retains a representable signed applied-moment resultant when nonzero coordinate×load products individually underflow to zero. The exact binary64 product accumulator rounds the combined sum once; ordinary representable products retain their established path, and the BigInt-free fallback uses scale-normalized compensated accumulation. Non-finite individual products still reject.
+- Added direct Node and registered Chromium regressions for positive and negative 78-term subnormal moment sums; Node also exercises the BigInt-free fallback. The naive per-node products return zero while the preview correctly returns +/-16 minimum binary64 subnormals. Implemented on dev; fresh exact-head Push/PR Quality and release are pending.

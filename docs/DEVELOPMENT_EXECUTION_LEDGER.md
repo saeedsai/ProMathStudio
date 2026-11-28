@@ -2906,3 +2906,18 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - The changed JavaScript is syntax-checked in the isolated V8 runtime; HTML/UI/test wiring is checked before commit. Full local Python/Playwright/build commands remain unavailable because no repository checkout is present; fresh exact-head GitHub Actions are required.
 - PR #191 remains open/mergeable with zero independent reviews. Branches report unprotected, rulesets empty, branch-protection read 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest successful production evidence on 24-Nov-2026 at unchanged main. Candidate is dev-only, not live.
 - Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+---
+
+## 2026-11-28 11:02 CET — Preserve signed zero and reject non-finite Truss results CSV values
+
+- Starting refs: `dev` `63af531f475ab43a0f0cd3765771069cc96b0a24`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 132 ahead / 0 behind; exactly dev/main branches. A bounded local `git rev-parse --show-toplevel` returned `fatal: not a git repository`; connected GitHub integration fallback used.
+- Exact-head Push Quality [#46129931747](https://github.com/saeedsai/ProMathStudio/actions/runs/46129931747) and PR Quality [#46129935428](https://github.com/saeedsai/ProMathStudio/actions/runs/46129935428) both passed **218/218** on the starting dev SHA, zero failures/skips. Truss steps 212, 214 and 215 passed in both.
+- PR #191 is open/mergeable at the starting dev head, 132 commits and 49 changed files; independent reviews 0. Both branches report unprotected, rulesets empty, branch-protection GET 403. No merge or direct main update.
+- The results CSV used `String(value)` for every cell; JavaScript converts `-0` to `0`, losing the sign when a tiny signed result rounds to zero during unit conversion.
+- Added `csvCell`: finite numbers use shortest round-trip text, `-0` remains `-0`, +0 remains `0`, null/undefined remain blank, and numeric NaN/±Infinity reject. Wrapped the results export so invalid numeric data produces a visible error and no download.
+- Added registered Chromium assertions for formatter boundaries and the actual results CSV path using a synthetic result snapshot. The test checks signed-zero member force/stress/strain, joint displacement and support reaction, plus non-finite rejection with zero created downloads. It runs in the existing desktop/390px Truss browser loop.
+- Updated `tools/truss-fem-ui.js`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, this plan, this ledger and `CHANGELOG.md` in one atomic Git tree/commit on existing dev. No root bundle change is required because Truss uses adjacent standalone assets.
+- Isolated V8 syntax compilation of the modified UI and direct formatter checks cover -0, +0, Number.MIN_VALUE, NaN and ±Infinity. Full local Python/Playwright/build commands were not run because no checkout is mounted; new exact-head Push/PR Quality must certify the browser regression.
+- Main Quality #45360386408 and Pages deployment #45360367251 remain the latest verified successful production evidence on 24-Nov-2026 at unchanged main. The new change is dev-only, not live. Historical inventory remains **166 gaps / 95 partial**, unchanged.

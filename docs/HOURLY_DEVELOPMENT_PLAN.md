@@ -1,3 +1,17 @@
+## Latest checkpoint — 28 November 2026, 11:02 CET
+
+- Starting refs verified from GitHub: `dev` `63af531f475ab43a0f0cd3765771069cc96b0a24`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare main...dev = **132 ahead / 0 behind**; exactly two branches (`dev`, `main`). A bounded local `git rev-parse --show-toplevel` failed with `fatal: not a git repository`; the connected GitHub integration fallback is used without repeated network retries.
+- Re-read root `AGENTS.md`, this plan, the frozen 26-Oct inventory, Unified Master Implementation Plan, Engineering Architecture/Workspace plan, Engineering Toolbox catalog, Structural Engineering catalog, Truss FEM contract/source/tests, PR #191, reviews, branch refs, rulesets, exact-head Actions and main/Pages evidence.
+- Starting exact-head Push Quality [#46129931747](https://github.com/saeedsai/ProMathStudio/actions/runs/46129931747) and PR Quality [#46129935428](https://github.com/saeedsai/ProMathStudio/actions/runs/46129935428) both completed **218/218 steps**, zero failures and zero skipped steps on `63af531f475ab43a0f0cd3765771069cc96b0a24`. Truss steps 212, 214 and 215 all passed in both workflows.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is open and mergeable at the starting dev head (132 commits, 49 changed files). Submitted independent reviews: **0**. Both branches report `protected:false`; repository rulesets are empty and branch-protection GET returns HTTP 403 (Resource not accessible by integration). Exact-head CI is green, but governance still blocks promotion; no merge is authorized.
+- Found a results-export data-fidelity gap: JavaScript `String(-0)` emits `0`, so the Truss results CSV could erase the sign of a negative-zero force/stress/strain/displacement/reaction after unit conversion. The material-schedule serializer already preserves `-0`, and the energy diagnostic exposes negative zero explicitly.
+- Added a dedicated results-CSV cell formatter: finite numbers use shortest round-trippable decimal text, negative zero is written as `-0`, null/undefined remain blank, and numeric NaN/±Infinity abort the export with a visible status error. The results CSV now catches and reports serialization failures instead of downloading misleading numeric tokens.
+- Extended the registered Chromium regression to exercise the real CSV export path with synthetic signed-zero member, displacement and reaction values; it also checks positive zero, `Number.MIN_VALUE`, all three non-finite classes and that a rejected export creates no Blob. Browser coverage runs at 1280px and 390px.
+- Updated the standalone Truss UI, browser regression, Structural Truss contract, living plan, execution ledger and changelog in one atomic Git tree/commit on existing `dev`. Truss uses adjacent standalone assets; root `index.html` bundle parity is unaffected.
+- The updated production UI JavaScript is syntax-compiled in the isolated V8 runtime; the extracted formatter is exercised against -0, +0, the minimum subnormal and NaN/±Infinity. Full local Python/Playwright/build commands remain unavailable because no repository checkout is mounted; fresh exact-head Push and PR Quality are required for the new commit.
+- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main SHA `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. This dev change is not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
 ## Latest checkpoint — 28 November 2026, 10:03 CET
 
 - Starting refs verified from GitHub: `dev` `13cdfed2c7ff6ad515a63fd02f85cc5cf0c5246d`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare main...dev = **131 ahead / 0 behind**; exactly two branches (`dev`, `main`). A bounded local `git rev-parse --show-toplevel` failed with `fatal: not a git repository`; the connected GitHub integration fallback is used without repeated network retries.
@@ -59,7 +73,7 @@
 - Historical audit remains frozen at **166 gaps / 95 partial**; no counts are reduced.
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 09:02 CET  
+**Last updated:** 28 November 2026, 11:02 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -86,38 +100,29 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting refs for this iteration: `dev` `13cdfed2c7ff6ad515a63fd02f85cc5cf0c5246d`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; verified compare **131 ahead / 0 behind** and exactly two branch refs. This iteration adds one atomic child commit to the existing `dev` ref; its resulting SHA is verified in the execution report and GitHub history.
-- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable, 131 commits and 49 changed files at the starting head. The PR head follows `dev` after the guarded ref update.
-- Both branches report `protected:false`; repository rulesets are empty and branch-protection reads return HTTP 403 (Resource not accessible by integration). Submitted independent reviews: **0**. Enforceable protection is not verified; no merge is authorized.
-- Starting exact-head Push Quality [#46124651626](https://github.com/saeedsai/ProMathStudio/actions/runs/46124651626) and PR Quality [#46124656267](https://github.com/saeedsai/ProMathStudio/actions/runs/46124656267) both failed at Truss browser step 215. Steps 212 and 214 passed. The root cause is a stale test-state assertion after an earlier test interaction already expanded the native disclosure; this iteration repairs the sequence and adds live member-count coverage. New exact-head Push/PR checks are required for the resulting candidate.
+- Starting refs for this iteration: `dev` `63af531f475ab43a0f0cd3765771069cc96b0a24`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; verified compare **132 ahead / 0 behind** and exactly two branch refs.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, 132 commits and 49 changed files; submitted independent reviews: **0**.
+- Both branches report `protected:false`; repository rulesets are empty and branch-protection reads return HTTP 403 (Resource not accessible by integration). No merge is authorized.
+- Starting exact-head Push Quality [#46129931747](https://github.com/saeedsai/ProMathStudio/actions/runs/46129931747) and PR Quality [#46129935428](https://github.com/saeedsai/ProMathStudio/actions/runs/46129935428) both passed **218/218** on the exact starting SHA, zero failures/skips; Truss steps 212, 214 and 215 passed in both. The new results-CSV change requires fresh exact-head Push/PR checks.
 - The local execution container has no Git checkout. The connected GitHub integration cannot return the oversized standalone `index.html`, so this iteration edits only independently retrievable Truss standalone assets, tests and docs. No claim of full local Python/Chromium/build certification.
-- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not live.
+- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new change is dev-only, not released.
 - The historical 26-Oct inventory remains frozen at **166 gaps / 95 partial**.
 
-## Operating contract
-
-1. Read root `AGENTS.md`, this plan, the frozen audit, unified master plan, relevant architecture/catalog contracts and exact-head CI before choosing work.
-2. Work only on existing `dev`; preserve the standalone offline `index.html` and synchronize every modular source change with its embedded module.
-3. Every source change has direct positive, negative and boundary regression coverage. Keep browser smoke registration and full Quality gates enabled.
-4. Commit source, synchronized bundle, tests, documentation, this plan, execution ledger and changelog together in one bounded atomic dev commit.
-5. Inspect exact-commit Push and PR checks; read failures and repair root causes without removing assertions or weakening checks.
-6. Merge only through ordinary PR #191 after exact-head Quality, independent review and enforceable protections are verified. Then verify main Quality, Pages deployment and hosted critical paths.
-7. Maintain the historical 166-gap / 95-partial baseline until a separately documented re-audit is supported by evidence.
 
 ## Next five features — NEXT FIVE priorities
 
 ### 1. P0 — Certify and release PR #191 safely
 
-**Status:** Blocked. Starting exact-head Push Quality [#46124651626](https://github.com/saeedsai/ProMathStudio/actions/runs/46124651626) and PR Quality [#46124656267](https://github.com/saeedsai/ProMathStudio/actions/runs/46124656267) both failed at Truss browser step 215 on `13cdfed`; steps 212 and 214 passed. This iteration fixes the stale disclosure-state assertion and adds member-count regression coverage. Independent submitted reviews remain zero; both branches report unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge is authorized.
+**Status:** Exact-head Quality passed on starting candidate `63af531f475ab43a0f0cd3765771069cc96b0a24` (Push and PR, 218/218 each, zero failures/skips). The new results-CSV candidate requires fresh exact-head runs. Promotion remains blocked by zero independent submitted reviews, both branches reporting unprotected, empty repository rulesets and branch-protection GET 403. No merge is authorized.
 **Acceptance tests:**
-- Fresh Push and PR Quality both pass on the same exact candidate SHA; all required steps complete with zero failures and zero skipped tests.
+- Fresh Push and PR Quality both pass on the same exact candidate SHA; all 218 steps complete with zero failures and zero skipped tests.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
 - Verify enforceable main rules require Quality and prohibit direct pushes, force pushes and deletion.
 - Merge only through the ordinary PR merge operation; verify resulting main SHA, main Quality, Pages deployment and hosted project save/import smoke.
 
 ### 2. P1 — Complete saved-project compatibility and rollback
 
-**Status:** Partial. v1/v2 migration and omitted/empty solver-state reset are covered; valid solver state and rollback preservation have focused tests. The complete restore-stage failure matrix, all-workspace round-trips and 390px mobile path remain open.
+**Status:** Partial. v1/v2 migration and omitted/empty solver-state reset are covered; valid solver state and rollback preservation have focused tests. The complete restore-stage failure matrix, all-workspace round-trips and 390px mobile path remain open. The embedded implementation is in the oversized root `index.html`, which is not retrievable through the current file reader and must not be edited without source/bundle parity.
 **Acceptance tests:**
 - v1→v2 migration and v2 round-trips preserve notebook, calculator, Equation/Solver controls and assumptions, Matrix drafts, Graph datasets/overlays, Curve fit, Data Tables workbook/selection, Engineering filters and custom functions.
 - Missing/empty solver state resets to documented defaults; valid v2 solver settings round-trip; injected failure after every restore stage restores all previous non-default state and localStorage.
@@ -136,13 +141,14 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM reference and disclosure coverage
 
-**Status:** Partial. Truss FEM has compensated stiffness/reaction/energy accumulation, seven-shape boundary fixes, aggregate material mass, range-aware Euler ratios, sub-threshold compression screening and per-member Euler readiness. The current candidate repairs a browser test-state defect and adds a live member count to the disclosure; the independent seven-shape Decimal reference matrix remains open.
+**Status:** Partial. Truss FEM has compensated stiffness/reaction/energy accumulation, seven-shape boundary fixes, aggregate material mass, range-aware Euler ratios, sub-threshold compression screening and per-member Euler readiness. This iteration adds signed-zero/non-finite-safe results CSV serialization; the independent seven-shape Decimal reference matrix remains open.
 **Acceptance tests:**
 - Independent Decimal area, centroid, Ixx/Iyy, Sx/Sy and rx/ry references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall/cavity transitions, sub-ULP contributions, mixed-scale stiffness, mechanism rejection, SI boundaries, equilibrium residual and energy references.
 - Euler mass/readiness/ratio boundaries: unknown density is not zero; explicit zero density is known; partial subtotal never claims a complete total; overflow rejects; tiny compression with supplied I/K is assessed.
-- The member disclosure starts collapsed, visibly names Euler readiness, and exposes a polite live singular/plural member count. Browser tests verify 3→1→3 members across triangle/bar/triangle, one initial summary activation, and idempotent later helper access without toggling an already-open disclosure.
-- All affected Node and Chromium regressions pass at 1280px and 390px; step 215 must pass on exact-head Quality.
+- Results CSV preserves `-0` for member force/stress/strain, joint displacement and support reaction; positive zero remains `0`; finite values round-trip; numeric NaN/±Infinity abort without a download.
+- The member disclosure starts collapsed, visibly names Euler readiness, and exposes a polite live singular/plural member count. Browser tests verify 3→1→3 members and idempotent helper access.
+- All affected Node and Chromium regressions pass at 1280px and 390px; Truss steps 212, 214 and 215 pass on exact-head Quality.
 
 ### 5. P1 — Harden adaptive RK45 difficult-workload boundaries
 
@@ -152,6 +158,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - Forward/backward sample times remain strictly monotone near ULP spacing and at large epochs.
 - Smallest/two-subnormal intervals preserve exact endpoints, report collapsed stages and show accuracy warnings.
 - Underflow, maximum attempts, exhausted retries, endpoint snapping and stale-export protection have direct numerical and browser regressions.
+
 
 ## Latest checkpoint — 28 November 2026, 04:27 CET
 

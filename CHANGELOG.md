@@ -1,3 +1,10 @@
+## 2026-11-28 — Preserve signed zero in Truss results CSV and reject non-finite cells
+
+- Fixed a results-export fidelity issue: JavaScript's `String(-0)` emits `0`, losing the sign when a tiny signed force, stress, strain, displacement or reaction rounds to zero during unit conversion.
+- Results CSV numeric cells now use shortest round-trip binary64 text, preserve negative zero as `-0`, keep null/undefined cells blank, and reject numeric NaN/±Infinity with a visible export error instead of downloading misleading values.
+- Added registered Chromium coverage for positive/negative zero, the smallest positive subnormal, all three non-finite classes, actual member/displacement/reaction CSV rows and no-download behavior after rejection at desktop and 390px.
+- Implemented on dev; fresh exact-head Push/PR Quality is required. No solver math, tolerances or CI gates changed. Not live on main. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Keep Truss disclosure checks idempotent and show the live member count
 
 - Repaired the exact-head Truss browser failure at step 215: the first Euler-readiness scenario already opens the native member disclosure, so the later section-helper scenario now opens it only when needed instead of incorrectly asserting that it has re-collapsed. The later assertion also checks the current Euler-readiness summary instead of the obsolete label.

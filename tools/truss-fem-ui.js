@@ -495,7 +495,26 @@
     const records=body && !body.endsWith('\r\n') ? body+'\r\n' : body;
     download(name,'\uFEFF'+records,mime||'text/csv;charset=utf-8');
   }
-  function csv(){if(!latest){status('Run analysis before exporting results.',true);return;}const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment'],...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain,m.eulerUtilization===null?'':m.eulerUtilization*100,m.eulerLoadRatio===null?'':m.eulerLoadRatio,m.eulerAssessment]),[],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),[],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];downloadCsv('promath-truss-results.csv',rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n','text/csv;charset=utf-8');}
+  const csvCell = value => {
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value)) throw Error('Results CSV numeric values must be finite.');
+      return Object.is(value,-0) ? '-0' : String(value);
+    }
+    return String(value ?? '');
+  };
+  function csv() {
+    if(!latest){status('Run analysis before exporting results.',true);return;}
+    try {
+      const rows=[['Member','Axial force (kN)','Stress (MPa)','Strain','Euler utilization (%)','Euler load ratio Pcr/Pcomp (-)','Euler assessment'],
+        ...latest.members.map(m=>[m.id,m.force/1000,m.stress/1e6,m.strain,m.eulerUtilization===null?'':m.eulerUtilization*100,m.eulerLoadRatio===null?'':m.eulerLoadRatio,m.eulerAssessment]),
+        [],['Joint','Ux (mm)','Uy (mm)'],...latest.displacements.map(n=>[n.id,n.x*1000,n.y*1000]),
+        [],['Support','Rx (kN)','Ry (kN)'],...latest.reactions.map(r=>[r.id,r.rx/1000,r.ry/1000])];
+      const content=rows.map(row=>row.map(value=>'"'+csvCell(value).replace(/"/g,'""')+'"').join(',')).join('\r\n')+'\r\n';
+      downloadCsv('promath-truss-results.csv',content,'text/csv;charset=utf-8');
+    } catch(error) {
+      status('Results CSV export failed: '+error.message,true);
+    }
+  }
   function materialCsv(){try{downloadCsv('promath-truss-material-schedule.csv',fem.exportMaterialCSV(readModel()),'text/csv;charset=utf-8');status('Validated member material schedule exported.');}catch(error){status('Material schedule export failed: '+error.message,true);}}
   $('section-shape').addEventListener('change',updateSectionShape);
   ['section-width','section-height','section-inner-width','section-inner-height','section-web-thickness','section-flange-thickness','section-angle-thickness','section-diameter','section-inner-diameter'].forEach(id=>$(id).addEventListener('input',updateSectionSketch));

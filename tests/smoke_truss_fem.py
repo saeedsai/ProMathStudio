@@ -18,8 +18,10 @@ FEM_JS = (ROOT / 'tools' / 'truss-fem.js').read_text(encoding='utf-8')
 UI_JS = (ROOT / 'tools' / 'truss-fem-ui.js').read_text(encoding='utf-8')
 # Expose the private CSV helper only in this injected test copy; production keeps it scoped.
 UI_JS = UI_JS.replace('  updateSectionShape();',
-                      '  window.__testDownloadCsv = downloadCsv;\n  updateSectionShape();', 1)
+                      '  window.__testDownloadCsv = downloadCsv;\n  window.__testSetLatestForCsv = value => { latest=value; };\n  window.__testCsvCell = csvCell;\n  updateSectionShape();', 1)
 assert 'window.__testDownloadCsv = downloadCsv;' in UI_JS
+assert 'window.__testSetLatestForCsv = value => { latest=value; };' in UI_JS
+assert 'window.__testCsvCell = csvCell;' in UI_JS
 HTML = HTML.replace('</body>', '<script>' + FEM_JS + '</script>'
                     + '<script>' + UI_JS + '</script></body>')
 
@@ -1514,6 +1516,56 @@ def main():
             assert normalized_csv['tail'] == [13, 10], normalized_csv['tail']
             assert normalized_csv['emptyBytes'] == [239, 187, 191], normalized_csv['emptyBytes']
             assert normalized_csv['text'] == 'h1,h2\r\n1,2\r\n3,4\r\n'
+            csv_cells = page.evaluate("""() => {
+                const format = window.__testCsvCell;
+                const rejectsNonFinite = [NaN, Infinity, -Infinity].every(value => {
+                    try { format(value); return false; } catch (_) { return true; }
+                });
+                return {
+                    negativeZero: format(-0),
+                    positiveZero: format(0),
+                    smallestSubnormal: format(Number.MIN_VALUE),
+                    rejectsNonFinite
+                };
+            }""")
+            assert csv_cells == {
+                'negativeZero': '-0', 'positiveZero': '0',
+                'smallestSubnormal': '5e-324', 'rejectsNonFinite': True
+            }, csv_cells
+
+            # Exercise the real results CSV path with signed-zero member, displacement and reaction values.
+            page.evaluate("""() => {
+                window.__exports=[];
+                window.__testSetLatestForCsv({
+                    members:[{id:'NEG',force:-0,stress:-0,strain:-0,
+                        eulerUtilization:null,eulerLoadRatio:null,eulerAssessment:'No compression demand'}],
+                    displacements:[{id:'A',x:-0,y:0}],
+                    reactions:[{id:'A',rx:-0,ry:0}]
+                });
+                document.querySelector('#export-csv').click();
+            }""")
+            signed_zero_csv = page.evaluate("async () => await window.__exports[0].blob.text()")
+            signed_zero_rows = list(csv.reader(io.StringIO(signed_zero_csv.lstrip('\ufeff'), newline='')))
+            assert signed_zero_rows[1] == ['NEG', '-0', '-0', '-0', '', '', 'No compression demand'], signed_zero_rows
+            assert signed_zero_rows[4] == ['A', '-0', '0'], signed_zero_rows
+            assert signed_zero_rows[7] == ['A', '-0', '0'], signed_zero_rows
+
+            # Invalid numeric results must not produce a misleading Infinity/NaN CSV download.
+            page.evaluate("""() => {
+                window.__exports=[];
+                window.__testSetLatestForCsv({
+                    members:[{id:'BAD',force:Infinity,stress:0,strain:0,
+                        eulerUtilization:null,eulerLoadRatio:null,eulerAssessment:'No compression demand'}],
+                    displacements:[],reactions:[]
+                });
+                document.querySelector('#export-csv').click();
+            }""")
+            assert page.locator('#status').inner_text() == (
+                'Results CSV export failed: Results CSV numeric values must be finite.'
+            )
+            assert page.locator('#status').evaluate("(node) => node.classList.contains('error')")
+            assert page.evaluate("window.__exports.length") == 0
+            page.evaluate("window.__testSetLatestForCsv(window.ProMathTrussFEM.solve(window.ProMathTrussFEM.examples.triangle))")
             page.locator('#example').select_option('bar')
             page.get_by_role('button', name='Load example').click()
             assert page.locator('#member-results tr').count() == 1

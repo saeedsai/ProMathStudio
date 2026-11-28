@@ -1,3 +1,16 @@
+## 2026-11-28 02:56 CET — FIX TRUSS RESET REFERENCE REGRESSION AND EXPOSE ANALYSIS VALIDITY
+
+- Starting refs: `dev` `a8e9ef150e13bb3ed6efef84b02cb91257f8456a`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 122 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46090998251](https://github.com/saeedsai/ProMathStudio/actions/runs/46090998251) and PR Quality [#46091004384](https://github.com/saeedsai/ProMathStudio/actions/runs/46091004384) both failed at Truss browser step 215. Steps 212 and 214 passed in both, including the 109/109 Node FEM analytical suite. The exact failure at `tests/smoke_truss_fem.py:2261` compared a final Reset result to a stale triangle reference even though the long browser scenario had selected the bar example; Reset correctly restores the selected example.
+- Fixed the regression by computing the expected energy residual/error from `ProMathTrussFEM.examples[document.querySelector('#example').value]` immediately before the reset scenario. Existing exact binary64 assertions are retained; no numerical tolerance or workflow gate was weakened.
+- Production UI now publishes `data-analysis-state`: `pending` before the first successful solve, `valid` after successful analysis, and `stale` whenever the model is invalidated or a solve fails. Existing `data-energy-residual-j` and `data-energy-error` remain shortest-round-trip binary64 values and clear on invalidation. Chromium verifies state transitions and selected-example reset behavior at 1280px and 390px.
+- Updated `tools/truss-fem-ui.js`, `tools/truss-studio.html`, `tests/smoke_truss_fem.py`, `docs/STRUCTURAL_TRUSS_FEM.md`, the living plan, this ledger and changelog in one atomic Git tree/commit on existing dev. Truss Studio is an adjacent standalone `tools/` page; root `index.html` module parity is not implicated.
+- Local checkout is absent. Full local Python/Node/Playwright/build checks were not run; exact-head Push and PR Quality on the new commit remain pending.
+- PR #191 remains open/mergeable, zero independent reviews. Branch protection read returns HTTP 403; rulesets are empty. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on 24-Nov-2026 at unchanged main. The new implementation is not deployed. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
 ## 2026-11-28 01:55 CET — FIX TRUSS BINARY64 BROWSER ASSERTION AND EXPOSE MACHINE-READABLE ENERGY DIAGNOSTICS
 
 - Starting refs: `dev` `865de95d5b4e35a6290c9864cf02d31d08142e63`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 121 ahead / 0 behind; exactly two branches.

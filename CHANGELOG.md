@@ -1,3 +1,10 @@
+## 2026-11-28 — Fix Truss selected-example reset regression and expose analysis validity
+
+- Exact-head Push Quality #46090998251 and PR Quality #46091004384 failed at Truss browser step 215 after the scenario selected the `bar` example but compared the final Reset result against a `triangle` reference captured at page initialization. Reset correctly restores the currently selected example. The browser regression now computes its expected energy residual/error from the selected example immediately before reset; no numerical assertions were weakened.
+- Truss Studio's energy summary now exposes `data-analysis-state`: `pending` before first successful analysis, `valid` after a successful solve, and `stale` after model invalidation or failed analysis. Existing shortest-round-trip energy residual/error attributes continue to clear and republish with the result.
+- Chromium checks verify valid → stale → valid state transitions, exact selected-example reset behavior, and diagnostic values at 1280px and 390px.
+- Updated the Structural Truss contract, living plan and execution ledger. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Fix Truss browser binary64 comparison and publish machine-readable energy diagnostics
 
 - Exact-head Push Quality #46086282819 and PR Quality #46086287164 both failed at Truss browser step 215; the 109/109 Node FEM suite passed. The Python smoke compared a Playwright JSON-decoded integer token for JavaScript (2^{55}) directly to Python's arbitrary-precision integer (2^{55}). The shortest decimal representation returned by the browser was `36028797018963970`, which rounds back to the correct binary64 `2^{55}`. The regression now converts both values to binary64 before exact comparison and verifies a one-ULP difference remains detectable.

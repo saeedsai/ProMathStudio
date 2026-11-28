@@ -40,6 +40,7 @@ def main():
             energy_summary = page.locator('#energy-residual-summary')
             assert energy_summary.is_visible()
             assert 'Energy balance residual =' in energy_summary.inner_text()
+            assert energy_summary.get_attribute('data-analysis-state') == 'valid'
             energy_references = page.evaluate("""() => {
                 const result=ProMathTrussFEM.solve(ProMathTrussFEM.examples.triangle);
                 const roundTrip=value=>Object.is(value,-0)?'-0':String(value);
@@ -2250,14 +2251,25 @@ def main():
 
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
+            # The scenario above intentionally switches the example selector to "bar".
+            # Reset restores the selected example, so compute its reference now rather than
+            # reusing the initial triangle reference captured before those later interactions.
+            energy_references = page.evaluate("""() => {
+                const model=ProMathTrussFEM.examples[document.querySelector('#example').value];
+                const result=ProMathTrussFEM.solve(model);
+                const roundTrip=value=>Object.is(value,-0)?'-0':String(value);
+                return {residual:roundTrip(result.energyResidual),error:roundTrip(result.energyError)};
+            }""")
             # Editing the model clears the previous energy diagnostic; reset recomputes it.
             page.locator('#reset').click()
             page.locator('#nodes tr').nth(1).locator('input[data-field="x"]').fill('0.01')
             assert page.locator('#energy-residual-summary').inner_text() == 'Energy balance residual: —'
+            assert page.locator('#energy-residual-summary').get_attribute('data-analysis-state') == 'stale'
             assert page.locator('#energy-residual-summary').get_attribute('data-energy-residual-j') == ''
             assert page.locator('#energy-residual-summary').get_attribute('data-energy-error') == ''
             page.locator('#reset').click()
             assert 'Energy balance residual =' in page.locator('#energy-residual-summary').inner_text()
+            assert page.locator('#energy-residual-summary').get_attribute('data-analysis-state') == 'valid'
             assert page.locator('#energy-residual-summary').get_attribute('data-energy-residual-j') == energy_references['residual']
             assert page.locator('#energy-residual-summary').get_attribute('data-energy-error') == energy_references['error']
             assert not errors, errors

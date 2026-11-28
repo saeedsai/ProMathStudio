@@ -3,7 +3,7 @@
 - Exact-head Push/PR Quality on `989af00d2b697c3d1c5a901626e5fcfcfc144309` failed at Truss browser step 215. The 109/109 Node FEM analytical tests passed. The browser test attempted to read `#verification` while its parent `<details>` disclosure was still collapsed; the production detail had been populated correctly.
 - Added an always-visible, polite live status summary of the signed energy-balance residual to Truss Studio. Successful analysis updates it; model edits and invalidation clear it to prevent stale verification from appearing current. Detailed force/energy verification remains collapsible.
 - Updated Chromium smoke to assert the visible summary, explicitly open the details disclosure before inspecting its content, and verify edit/reset invalidation and recomputation at 1280px and 390px.
-- Updated the Structural Truss FEM UI contract and living development records. These are adjacent standalone `tools/` assets, so no root `index.html` bundle edit is required. Fresh exact-head Push/PR Quality is pending; not released. Historical inventory remains 166 gaps / 95 partial.
+- Updated the Structural Truss FEM UI contract and living development records. These are adjacent standalone `tools/` assets, so no root `index.html` bundle edit is required. Implementation commit: [1c2a3f0](https://github.com/saeedsai/ProMathStudio/commit/1c2a3f0674b937c649a6ab367c9f7f7ec9bc2a14). Fresh exact-head Push #46086152285 and PR #46086157690 are running; not released. Historical inventory remains 166 gaps / 95 partial.
 
 ## 2026-11-28 — Correct Truss FEM energy reference and expose signed balance residual
 

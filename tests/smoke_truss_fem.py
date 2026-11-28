@@ -55,10 +55,33 @@ def main():
             assert all(len(row) == 14 for row in euler_readiness), euler_readiness
             assert euler_readiness[0][13] == '—' and euler_readiness[1][13] == '—', euler_readiness
             assert float(euler_readiness[2][13].replace(',', '')) > 0, euler_readiness
-            assert 'Euler estimate requires both I and K' in page.locator('#status').inner_text()
+            mixed_euler_status = page.locator('#status').inner_text()
+            assert 'Euler estimates require both I and K per member' in mixed_euler_status, mixed_euler_status
+            assert 'Ready: 1/3' in mixed_euler_status, mixed_euler_status
+            assert 'missing I: 1' in mixed_euler_status and 'missing K: 1' in mixed_euler_status, mixed_euler_status
+            assert 'not supplied: 0' in mixed_euler_status, mixed_euler_status
+            all_ready_status = page.evaluate("""() => {
+                for (const row of document.querySelectorAll('#members tr')) {
+                    for (const field of ['I','K']) {
+                        const input=row.querySelector('[data-field="'+field+'"]');
+                        input.value=field==='I'?'1000':'1';
+                        input.dispatchEvent(new Event('input',{bubbles:true}));
+                    }
+                }
+                return document.querySelector('#status').innerText;
+            }""")
+            assert 'Euler inputs complete for all 3 members' in all_ready_status, all_ready_status
             page.locator('#reset').click()
             reset_euler_rows = page.locator('#member-metrics tr').all_inner_texts()
             assert len(reset_euler_rows) == 3 and all('Not supplied' in row for row in reset_euler_rows), reset_euler_rows
+            reset_preview_status = page.evaluate("""() => {
+                const input=document.querySelector('#members tr [data-field="area"]');
+                input.dispatchEvent(new Event('input',{bubbles:true}));
+                return document.querySelector('#status').innerText;
+            }""")
+            assert 'Ready: 0/3' in reset_preview_status and 'not supplied: 3' in reset_preview_status, reset_preview_status
+            page.locator('#solve').click()
+            assert 'Analysis complete' in page.locator('#status').inner_text()
 
             energy_summary = page.locator('#energy-residual-summary')
             assert energy_summary.is_visible()

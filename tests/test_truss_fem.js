@@ -1075,6 +1075,27 @@ test('inspectJSON identifies per-member Euler input readiness without solving',(
  assert.deepEqual(omitted.memberMetrics.map(member=>member.eulerInputStatus),['not-supplied','not-supplied','not-supplied']);
 });
 
+test('summarizeEulerInputReadiness counts every state and rejects malformed metrics',()=>{
+ const model=clone(fem.examples.triangle);
+ model.members[0].I=1000;
+ model.members[1].K=1;
+ model.members[2].I=1000; model.members[2].K=1;
+ const mixed=fem.summarizeEulerInputReadiness(fem.inspectJSON(JSON.stringify(model)).memberMetrics);
+ assert.deepEqual(mixed,{total:3,ready:1,missingI:1,missingK:1,notSupplied:0,complete:false});
+ assert.ok(Object.isFrozen(mixed),'summary must be immutable');
+ const omitted=fem.inspectJSON(fem.exportJSON(fem.examples.triangle)).memberMetrics;
+ assert.deepEqual(fem.summarizeEulerInputReadiness(omitted),
+  {total:3,ready:0,missingI:0,missingK:0,notSupplied:3,complete:false});
+ const completeModel=clone(fem.examples.triangle);
+ completeModel.members.forEach(member=>{member.I=1000;member.K=1;});
+ assert.deepEqual(fem.summarizeEulerInputReadiness(fem.inspectJSON(JSON.stringify(completeModel)).memberMetrics),
+  {total:3,ready:3,missingI:0,missingK:0,notSupplied:0,complete:true});
+ assert.deepEqual(fem.summarizeEulerInputReadiness([]),
+  {total:0,ready:0,missingI:0,missingK:0,notSupplied:0,complete:false});
+ assert.throws(()=>fem.summarizeEulerInputReadiness(null),/must be an array/);
+ assert.throws(()=>fem.summarizeEulerInputReadiness([{eulerInputStatus:'unknown'}]),/invalid Euler input status/);
+});
+
 test('inspectJSON reports complete and partial aggregate member mass without treating unknown density as zero',()=>{
  const completeModel=clone(fem.examples.triangle);
  completeModel.members.forEach(member=>member.density=7850);

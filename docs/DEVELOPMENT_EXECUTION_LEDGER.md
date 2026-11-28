@@ -2855,3 +2855,16 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - Atomic commit parent `b2756547873bfe585098254d6fbdf1bc471b384f`; dev update guarded non-force with expected previous SHA.
 - PR #191 open/mergeable; zero reviews; branches unprotected, rulesets empty, protection read 403. No merge/direct main update.
 - Main Quality/Pages latest verified success on 24-Nov-2026; dev change not released. Historical inventory 166/95 unchanged.
+
+
+## 2026-11-28 08:28 CET — Report complete Truss Euler input readiness in the live preview
+
+- Starting dev `a5721e3b87f640dfe87ff74020892a7124045a67`, main `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare main...dev 128 ahead / 0 behind; exactly two branches. Re-read AGENTS, living plan, frozen inventory, engineering architecture/catalog, Truss contract/source/tests, PR #191, reviews, refs, rulesets, exact-head Actions and main/Pages evidence. Local checkout absent; bounded GitHub integration fallback used.
+- Exact-head Push Quality #46120933444 and PR Quality #46120935574 on `a5721e3` were still running at 08:28 CET (191/217 and 151/217 completed respectively; zero failures/skips observed; steps 212/214/215 pending). No existing failed exact-head step was available to repair.
+- Found a readiness-status bug: the previous UI detected only XOR (I missing vs K missing), so all members with neither I nor K were not warned and the live status implied the model was simply ready for analysis. Mixed states also lacked actionable counts.
+- Added immutable `summarizeEulerInputReadiness` to the canonical FEM API. It counts total/ready/missing-I/missing-K/not-supplied, marks complete only for a non-empty all-ready list, and rejects malformed input/state. The pre-solve live status now reports exact counts for all-missing and mixed models, an all-ready message, and an explicit empty case.
+- Direct Node regression covers four states, empty list, immutable result and invalid inputs. Registered Chromium smoke checks mixed 1/3-ready with one missing I and one missing K, all-ready 3/3, and after reset 0/3-ready at 1280px and 390px.
+- Updated `tools/truss-fem.js`, `tools/truss-fem-ui.js`, `tests/test_truss_fem.js`, `tests/smoke_truss_fem.py`, Structural Truss contract, living plan and changelog in one atomic Git tree/commit. Truss remains adjacent standalone assets; root `index.html` is unaffected.
+- Isolated V8 syntax and pure readiness-summary assertions passed. Full local Node/Playwright/build suite not run because `git rev-parse --show-toplevel` returned `fatal: not a git repository`; exact-head GitHub Actions required.
+- PR #191 remains open/mergeable, zero independent reviews. Branches unprotected, rulesets empty, branch-protection read 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026. Candidate is dev-only, not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.

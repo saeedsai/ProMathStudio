@@ -1328,6 +1328,21 @@
       appliedForce,
       appliedMoment};
   }
+  // Summarize optional Euler input completeness without implying a stability assessment.
+  function summarizeEulerInputReadiness(memberMetrics) {
+    if (!Array.isArray(memberMetrics)) throw Error('Euler member metrics must be an array.');
+    const summary = {total:memberMetrics.length,ready:0,missingI:0,missingK:0,notSupplied:0};
+    memberMetrics.forEach((member,index) => {
+      const state = member && member.eulerInputStatus;
+      if (state === 'ready') summary.ready++;
+      else if (state === 'missing-I') summary.missingI++;
+      else if (state === 'missing-K') summary.missingK++;
+      else if (state === 'not-supplied') summary.notSupplied++;
+      else throw Error('Member metric ' + (index + 1) + ' has invalid Euler input status.');
+    });
+    summary.complete = summary.total > 0 && summary.ready === summary.total;
+    return Object.freeze(summary);
+  }
   // Export a validated per-member material schedule in explicit SI units without solving.
   function exportMaterialCSV(model) {
     const preview = inspectJSON(exportJSON(model));
@@ -1364,5 +1379,5 @@
   function solveJSON(text) {
     return solveDocument(importJSON(text));
   }
-  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, validateImportByteLength, decodeImportBytes, MAX_IMPORT_BYTES, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
+  return Object.freeze({solve, solveDocument, solveJSON, inspectJSON, summarizeEulerInputReadiness, exportMaterialCSV, sectionProperties, parseModel, fromLegacy, importJSON, exportJSON, validateImportByteLength, decodeImportBytes, MAX_IMPORT_BYTES, describeUnits, getExample, examples, id:'structural-truss-fem-2d'});
 });

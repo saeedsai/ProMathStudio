@@ -408,11 +408,13 @@
           ? `known mass subtotal ${fmt(info.knownMemberMassSubtotal,4)} kg · ${info.unknownDensityMemberCount} ${missingDensityLabel} missing density`
           : `mass estimate unavailable · ${info.unknownDensityMemberCount} ${missingDensityLabel} missing density`;
       $('preview-summary').textContent=`Model overview · ${info.nodeCount} joints · ${info.memberCount} members · ${info.connectedComponentCount} ${components} · ${info.isolatedNodeCount} ${isolated} · total member length ${fmt(info.totalMemberLength,4)} m · axial member volume Σ(L·A) ${fmt(info.totalMemberVolume,4)} m³ · ${massSummary} · bounds ${fmt(bounds.width,4)} × ${fmt(bounds.height,4)} m · applied load ΣFx ${fmt(info.appliedForce.x/divisor,4)} ${unit}, ΣFy ${fmt(info.appliedForce.y/divisor,4)} ${unit} (${info.loadedDofCount} loaded DOFs). Topology is not a stability check.`;
-      const hasIncompleteEulerInputs=info.memberMetrics.some(metric =>
-        (metric.secondMoment===null)!==(metric.effectiveLengthFactor===null));
-      status(hasIncompleteEulerInputs
-        ? 'Preview ready · Euler estimate requires both I and K.'
-        : 'Preview ready · analyze to check structural stability.',false);
+      const eulerReadiness=fem.summarizeEulerInputReadiness(info.memberMetrics);
+      const eulerReadinessStatus=eulerReadiness.total===0
+        ? 'No members are available for Euler screening.'
+        : eulerReadiness.complete
+          ? `Euler inputs complete for all ${eulerReadiness.total} members. Analyze to assess ideal buckling.`
+          : `Euler estimates require both I and K per member. Ready: ${eulerReadiness.ready}/${eulerReadiness.total} · missing I: ${eulerReadiness.missingI} · missing K: ${eulerReadiness.missingK} · not supplied: ${eulerReadiness.notSupplied}.`;
+      status(`Preview ready · ${eulerReadinessStatus}`,false);
     } catch(error) {
       $('preview-summary').textContent='Preview unavailable: '+error.message;
       const empty=el('tr',null);empty.append(el('td','Correct model inputs to see member metrics.',{colspan:14,class:'empty'}));$('member-metrics').replaceChildren(empty);

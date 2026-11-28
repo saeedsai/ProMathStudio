@@ -1,3 +1,16 @@
+## Latest checkpoint — 28 November 2026, 08:28 CET
+
+- Verified GitHub refs: `dev` `a5721e3b87f640dfe87ff74020892a7124045a67`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare main...dev = **128 ahead / 0 behind**; exactly two branch refs. A bounded local `git rev-parse --show-toplevel` failed with `fatal: not a git repository`; the GitHub integration fallback is used without repeated DNS/checkout retries.
+- Re-read root `AGENTS.md`, this plan, frozen 26-Oct inventory, Engineering Architecture/Workspace plan, Structural Engineering Toolbox catalog, Structural Truss FEM contract/source/tests, PR #191, reviews, branch refs, rulesets, exact-head Actions and main/Pages evidence.
+- Exact-head Push Quality [#46120933444](https://github.com/saeedsai/ProMathStudio/actions/runs/46120933444) and PR Quality [#46120935574](https://github.com/saeedsai/ProMathStudio/actions/runs/46120935574) both reference `a5721e3`. At 08:28 CET Push had 191/217 steps complete (step 192 in progress) and PR had 151/217 (step 152 in progress); zero failures or skipped steps observed. Truss steps 212/214/215 remain pending; full certification is not yet available.
+- Found a user-facing readiness defect in the previous commit: `updatePreview()` warned only when exactly one of I/K was missing. When both were absent (`not-supplied`), the status incorrectly said only “analyze to check structural stability,” even though no member had Euler inputs. Mixed models also received no counts.
+- Implemented `summarizeEulerInputReadiness(memberMetrics)` in the canonical FEM API. It returns frozen counts for total, ready, missing I, missing K and not supplied; `complete` is true only for a non-empty all-ready list; malformed statuses and non-arrays reject. The pre-solve live status now distinguishes all-missing, mixed and all-ready cases with exact counts.
+- Added direct Node regressions for all states, immutability, empty input and invalid status; expanded registered Chromium coverage for all-missing, mixed, all-ready and reset at 1280px and 390px. Updated the Structural Truss FEM contract, NEXT FIVE acceptance tests, execution ledger and changelog in the same atomic commit. Truss uses adjacent standalone scripts; no root bundle change is required.
+- Isolated V8 checks cover the pure readiness summary and syntax parsing for the changed JavaScript. Full local Node/Playwright/build checks remain unavailable because there is no checkout; fresh exact-head Actions must certify the candidate.
+- PR #191 remains open/mergeable and tracks dev; independent reviews: **0**. Both branches report `protected:false`; rulesets are empty; branch-protection GET returns HTTP 403. No merge is authorized.
+- Latest production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. This candidate is not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
 ## Latest checkpoint — 28 November 2026, 07:00 CET
 
 - Starting refs verified from GitHub: `dev` `99e5abf364249f8e34ecc68020fa3d65daa02018`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare was 126 ahead / 0 behind; exactly two branch refs (`dev`, `main`). Local checkout remains absent; the bounded GitHub-integration fallback is in use.
@@ -25,7 +38,7 @@
 - Historical audit remains frozen at **166 gaps / 95 partial**; no counts are reduced.
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 08:00 CET  
+**Last updated:** 28 November 2026, 08:28 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -74,7 +87,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** Starting dev/PR head `b2756547873bfe585098254d6fbdf1bc471b384f` is certified by exact-head Push Quality [#46115026179](https://github.com/saeedsai/ProMathStudio/actions/runs/46115026179) and PR Quality [#46115029609](https://github.com/saeedsai/ProMathStudio/actions/runs/46115029609), both 218/218 with zero failures/skips. This iteration's Euler-readiness candidate requires fresh exact-head checks. PR #191 tracks dev, but independent reviews remain zero; both branches report unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge is authorized until independent approval and enforceable main protection are verified.
+**Status:** Current dev/PR head `a5721e3b87f640dfe87ff74020892a7124045a67` has exact-head Push Quality [#46120933444](https://github.com/saeedsai/ProMathStudio/actions/runs/46120933444) and PR Quality [#46120935574](https://github.com/saeedsai/ProMathStudio/actions/runs/46120935574) still in progress at 08:28 CET: Push 191/217 steps and PR 151/217 steps completed, zero failures/skips observed, Truss steps 212/214/215 pending. PR #191 tracks dev (128 commits, 49 changed files). Independent reviews remain zero; both branches report unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge is authorized until exact-head Quality, independent approval and enforceable main protection are verified.
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -103,7 +116,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial; compensated stiffness, reaction and energy accumulation, seven-shape section-property boundary fixes, aggregate material-mass reporting and range-aware Euler ratios are implemented on dev. Exact-head Push/PR Quality on `b2756547873bfe585098254d6fbdf1bc471b384f` passed 218/218. That head also fixes sub-threshold compression screening when I/K are supplied. This iteration adds per-member Euler input readiness (`not-supplied`, `missing-I`, `missing-K`, `ready`) to pre-solve inspection and the material table; incomplete pairs remain unassessed rather than treated as zero. Node and desktop/390px Chromium regressions cover every state and edit/reset refresh. Fresh exact-head certification is pending; the independent seven-shape reference matrix remains open.
+**Status:** Partial. Compensated stiffness/reaction/energy accumulation, seven-shape section-property boundary fixes, aggregate material-mass reporting, range-aware Euler ratios, sub-threshold compression screening and per-member Euler input readiness are implemented on dev. This iteration adds an immutable `summarizeEulerInputReadiness` API and truthful live status counts: the all-not-supplied case now reports 0/N ready instead of silently appearing fully ready; mixed one-sided inputs report missing-I/missing-K counts; all-ready and empty states are explicit. Direct Node and registered 1280px/390px Chromium regressions cover all four states, malformed metrics, edit/reset and all-ready transitions. The independent seven-shape reference matrix remains open; this candidate requires fresh exact-head certification.
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.
@@ -111,6 +124,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - Pre-solve material mass reports a total only when every member has explicit density; partial inputs show a known subtotal plus missing-density count, all-unknown inputs show unavailable, explicit zero density counts as known, and unrepresentable aggregate mass rejects. Node and desktop/390px browser regressions cover each case.
 - The Truss results summary reports `pending` before first successful solve, `valid` after success and `stale` after edits/failure; energy diagnostics clear while stale and republish only after success. Reset references follow the currently selected example.
 - When I/K are supplied, every strictly negative solved member force is included in Euler demand even when its magnitude is below 1e-8 N; a 5e-12 N load below Pcr and a 5e-9 N load above Pcr both classify correctly. Without I/K, the existing near-zero threshold remains.
+- `summarizeEulerInputReadiness` counts `not-supplied`, `missing-I`, `missing-K` and `ready` without mutating metrics; it returns a frozen summary, treats an empty list as incomplete and rejects unknown states. The live status reports 0/N ready for all-not-supplied models, exact mixed-state counts, an all-ready message and correct reset refresh at 1280px/390px.
 
 ### 5. P1 — Harden adaptive RK45 difficult-workload boundaries
 

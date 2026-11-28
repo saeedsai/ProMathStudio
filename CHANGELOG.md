@@ -1,3 +1,9 @@
+## 2026-11-28 — Report complete, partial and missing Euler inputs in the Truss preview
+
+- Fixed a pre-solve messaging gap: models with no I/K inputs previously received a generic “analyze to check structural stability” status, because the warning only detected one-sided inputs. The preview now reports ready/total, missing-I, missing-K and not-supplied counts; a complete set explicitly says inputs are ready but buckling assessment still requires analysis.
+- Added immutable `summarizeEulerInputReadiness` to the Truss FEM API. It validates all four states, treats an empty list as incomplete, and rejects malformed statuses rather than silently omitting members.
+- Direct Node and registered Chromium regressions cover all-missing, mixed, all-ready, empty and invalid states, plus edit/reset refresh at 1280px and 390px. Updated the Structural Truss FEM contract and living records. Implemented on dev; exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Preserve sub-threshold compression in the optional Euler screen
 
 - Fixed an optional Truss buckling-screen defect: the generic ±1e-8 N near-zero classification threshold was also suppressing compression demand. When member I and K are supplied, every strictly negative solved axial force now participates in Euler screening and is classified as compression for that screen. Members without I/K retain the established noise threshold.

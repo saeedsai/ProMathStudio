@@ -41,6 +41,10 @@ The regression fixture B=H=1 mm, bi=1.2e-16 mm and hi=0.5 mm must return A=0.999
 
 # 2D Truss Studio — canonical structural-truss-fem-2d
 
+## Visible energy verification summary
+
+After a successful solve, the results panel displays the signed global energy-balance residual in an always-visible `role="status"` summary, while the detailed force/energy verification remains in its collapsible disclosure. The summary is refreshed only by a successful analysis and resets to an em dash whenever the model is edited or invalidated, so a previous solve cannot be mistaken for the current model. The registered Chromium regression checks the visible summary, expands the detailed disclosure before inspecting its contents, and verifies edit/reset invalidation at desktop and 390px mobile widths.
+
 ## BigInt-free section-property summation fallback
 
 The exact binary64 accumulator is used when the browser provides BigInt. When BigInt is unavailable, same-sign finite terms now use Neumaier compensation in their original units instead of normalizing by the largest term and multiplying back. This avoids an unnecessary second rounding during scale restoration and retains small same-sign contributions that can combine to change the rounded section property. Mixed-sign terms keep the existing exact-when-available and normalized compensated-residual fallback. The no-BigInt path is compensated, not exact; all returned values remain binary64, and genuinely non-finite final results are still rejected.

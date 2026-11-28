@@ -37,6 +37,12 @@ def main():
             page.set_content(HTML, wait_until='load')
             page.locator('#status').wait_for()
             assert 'Analysis complete' in page.locator('#status').inner_text(), page.locator('#status').inner_text()
+            energy_summary = page.locator('#energy-residual-summary')
+            assert energy_summary.is_visible()
+            assert 'Energy balance residual =' in energy_summary.inner_text()
+            assert not page.locator('#verification').is_visible()
+            page.locator('#results details > summary').click()
+            assert page.locator('#verification').is_visible()
             assert 'Energy balance residual =' in page.locator('#verification').inner_text()
             assert 'mm' in page.locator('#disp-card').inner_text()
             assert page.locator('#plot line').count() >= 6
@@ -2233,6 +2239,12 @@ def main():
 
             # Layout is contained even on 390px viewport; inner tables scroll independently.
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2'), page.evaluate('''() => ({width: innerWidth, scroll:document.documentElement.scrollWidth, wide:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+2).slice(0,12).map(e=>[e.tagName,e.id,e.className?.baseVal||e.className,Math.round(e.getBoundingClientRect().right)])})''')
+            # Editing the model clears the previous energy diagnostic; reset recomputes it.
+            page.locator('#reset').click()
+            page.locator('#nodes tr').nth(1).locator('input[data-field="x"]').fill('0.01')
+            assert page.locator('#energy-residual-summary').inner_text() == 'Energy balance residual: —'
+            page.locator('#reset').click()
+            assert 'Energy balance residual =' in page.locator('#energy-residual-summary').inner_text()
             assert not errors, errors
             page.close()
         browser.close()

@@ -1,3 +1,10 @@
+## 2026-11-28 — Surface Truss FEM energy residual and repair collapsed-details browser assertion
+
+- Exact-head Push/PR Quality on `989af00d2b697c3d1c5a901626e5fcfcfc144309` failed at Truss browser step 215. The 109/109 Node FEM analytical tests passed. The browser test attempted to read `#verification` while its parent `<details>` disclosure was still collapsed; the production detail had been populated correctly.
+- Added an always-visible, polite live status summary of the signed energy-balance residual to Truss Studio. Successful analysis updates it; model edits and invalidation clear it to prevent stale verification from appearing current. Detailed force/energy verification remains collapsible.
+- Updated Chromium smoke to assert the visible summary, explicitly open the details disclosure before inspecting its content, and verify edit/reset invalidation and recomputation at 1280px and 390px.
+- Updated the Structural Truss FEM UI contract and living development records. These are adjacent standalone `tools/` assets, so no root `index.html` bundle edit is required. Fresh exact-head Push/PR Quality is pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-28 — Correct Truss FEM energy reference and expose signed balance residual
 
 - Exact-head Push/PR Quality on parent 00c2fed failed at Truss analytical step 214 because the energy regression assumed the solver-generated large-member term was exactly 1e16 J; the actual term included binary64 solve-rounding noise, so its naive sum was 10000000000000046. The failure was a brittle test reference, not evidence of a production accumulator defect.

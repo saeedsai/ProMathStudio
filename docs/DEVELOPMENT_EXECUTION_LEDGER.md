@@ -1,3 +1,15 @@
+## 2026-11-28 01:03 CET — MAKE TRUSS ENERGY RESIDUAL VISIBLE AND FIX COLLAPSED-DISCLOSURE BROWSER REGRESSION
+
+- Starting refs: `dev` 989af00d2b697c3d1c5a901626e5fcfcfc144309; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 119 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46080743000](https://github.com/saeedsai/ProMathStudio/actions/runs/46080743000) and PR Quality [#46080748080](https://github.com/saeedsai/ProMathStudio/actions/runs/46080748080) both failed at Truss browser step 215. Step 214's Node FEM suite passed 109/109. The exact traceback was `tests/smoke_truss_fem.py:40`, where the test read `#verification` before opening its parent `<details>`; the detail was intentionally hidden, not absent.
+- Added an always-visible `#energy-residual-summary` status paragraph to the Truss results panel with `role="status"` and `aria-live="polite"`. `showResult()` publishes the signed residual after a successful solve; `invalidate()` clears it to an em dash so stale results are not presented for an edited/invalid model. Detailed force/energy diagnostics remain inside the existing disclosure.
+- Updated the registered Chromium regression to assert the visible live summary, verify the detailed element is initially hidden, open the disclosure before reading it, then edit a model input to check stale-summary clearing and restore/reanalyze to check republishing. Existing FEM references, solver thresholds and numerical assertions are unchanged; both 1280px and 390px viewports execute this flow.
+- Updated the Truss Studio numerical/UI contract, living plan, this ledger and changelog. Truss Studio uses adjacent standalone `tools/` files, not the root modular bundle; no `index.html` edit is required.
+- Local checkout is absent (`git rev-parse --show-toplevel`: “not a git repository”). Full local Python/Playwright/build commands cannot run. Isolated UI JavaScript syntax, HTML status wiring, test assertion wiring and source-change checks are run before commit; fresh exact-head GitHub Actions remain authoritative for full QA.
+- PR #191 remains open and mergeable, 119 commits ahead / 0 behind, zero independent reviews. Both branches report unprotected; rulesets empty; branch-protection read 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain successful on 24-Nov-2026 at unchanged main; this dev change is not deployed. Historical inventory remains 166 gaps / 95 partial, unchanged.
+
+---
 ## 2026-11-27 18:58 CET — CORRECT PROJECT SMOKE ASSERTION SCOPE BEFORE QA
 
 - Follow-up review of candidate `c535d26e968f61ba5b728fe6b6a0eceabf6a97c8` found the newly inserted editor-save assertions were indented one level outside the Playwright `with` block. Corrected them to run while the page/browser are active, and changed the valid two-argument Python fixture to contain a real newline rather than a literal backslash-n.

@@ -409,6 +409,55 @@ def main():
             assert euler_range['smallNumerator'] == 0
             assert euler_range['smallDenominator'] == 0
             assert abs(euler_range['smallPcr'] / 9.752452739990855e-307 - 1) <= 5e-15
+            # An out-of-range Euler ratio must not invalidate an otherwise finite FEM solution.
+            euler_ratio_range = page.evaluate("""() => {
+                const solve = (E, area, I, fx) => ProMathTrussFEM.solve({
+                    nodes: [{id:'A',x:0,y:0,fixX:true,fixY:true},
+                            {id:'B',x:2,y:0,fixY:true,fx}],
+                    members: [{id:'AB',a:'A',b:'B',E,area,I,K:1}]
+                });
+                const below = solve(200, 1e-300, 1e301, -2e-11);
+                const above = solve(1e-300, 1e300, 4e-15, -2e-11);
+                const underflow = solve(1e-300, 1e300, 2e-21, -0.002);
+                return {
+                    below: {force:below.members[0].force, utilization:below.members[0].eulerUtilization,
+                        utilizationRange:below.members[0].eulerUtilizationRange,
+                        loadRatio:below.members[0].eulerLoadRatio, loadRatioRange:below.members[0].eulerLoadRatioRange,
+                        assessment:below.members[0].eulerAssessment, residual:below.residual, energyError:below.energyError},
+                    above: {force:above.members[0].force, utilization:above.members[0].eulerUtilization,
+                        utilizationRange:above.members[0].eulerUtilizationRange,
+                        loadRatio:above.members[0].eulerLoadRatio, loadRatioRange:above.members[0].eulerLoadRatioRange,
+                        assessment:above.members[0].eulerAssessment, residual:above.residual, energyError:above.energyError},
+                    underflow: {pcr:underflow.members[0].eulerCriticalLoad, utilization:underflow.members[0].eulerUtilization,
+                        utilizationRange:underflow.members[0].eulerUtilizationRange,
+                        loadRatio:underflow.members[0].eulerLoadRatio, loadRatioRange:underflow.members[0].eulerLoadRatioRange,
+                        assessment:underflow.members[0].eulerAssessment, residual:underflow.residual, energyError:underflow.energyError}
+                };
+            }""")
+            assert euler_ratio_range['below']['force'] < 0
+            assert euler_ratio_range['below']['utilization'] > 0
+            assert euler_ratio_range['below']['utilizationRange'] is None
+            assert euler_ratio_range['below']['loadRatio'] is None
+            assert euler_ratio_range['below']['loadRatioRange'] == 'overflow'
+            assert euler_ratio_range['below']['assessment'] == 'Below ideal Euler load (load ratio exceeds binary64 range)'
+            assert math.isfinite(euler_ratio_range['below']['residual'])
+            assert math.isfinite(euler_ratio_range['below']['energyError'])
+            assert euler_ratio_range['above']['force'] < 0
+            assert euler_ratio_range['above']['utilization'] is None
+            assert euler_ratio_range['above']['utilizationRange'] == 'overflow'
+            assert euler_ratio_range['above']['loadRatio'] > 0
+            assert euler_ratio_range['above']['loadRatioRange'] is None
+            assert euler_ratio_range['above']['assessment'] == 'At/above ideal Euler load (utilization exceeds binary64 range)'
+            assert math.isfinite(euler_ratio_range['above']['residual'])
+            assert math.isfinite(euler_ratio_range['above']['energyError'])
+            assert euler_ratio_range['underflow']['pcr'] == 5e-324
+            assert euler_ratio_range['underflow']['utilization'] is None
+            assert euler_ratio_range['underflow']['utilizationRange'] == 'overflow'
+            assert euler_ratio_range['underflow']['loadRatio'] is None
+            assert euler_ratio_range['underflow']['loadRatioRange'] == 'underflow'
+            assert euler_ratio_range['underflow']['assessment'] == 'At/above ideal Euler load (utilization exceeds binary64 range)'
+            assert euler_ratio_range['underflow']['residual'] == 0
+            assert euler_ratio_range['underflow']['energyError'] == 0
             # The section helper is intentionally collapsed with the material breakdown.
             # Exercise the real disclosure before interacting with its controls at both widths.
             details = page.locator('#member-material-details')

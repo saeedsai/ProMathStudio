@@ -1,3 +1,15 @@
+## 2026-11-28 06:00 CET — PRESERVE FINITE TRUSS SOLVES WHEN OPTIONAL EULER RATIOS EXCEED BINARY64 RANGE
+
+- Starting refs: `dev` `585fa5b8372cac1367bb3f1611e5e95f436ef681`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 125 ahead / 0 behind; exactly two branches. Local checkout absent; GitHub integration fallback used.
+- Exact-head Push Quality [#46105968818](https://github.com/saeedsai/ProMathStudio/actions/runs/46105968818) and PR Quality [#46105973722](https://github.com/saeedsai/ProMathStudio/actions/runs/46105973722) passed 218/218 on starting SHA, zero failures/skips; Truss steps 212/214/215 passed.
+- Reproduced two real defects with the fetched production FEM source: a finite compression solve was rejected when `Pcr/Pcomp` overflowed, and the reciprocal case was rejected when `Pcomp/Pcr` overflowed. Both models retain finite stiffness, displacement, member force/stress, equilibrium and energy values.
+- Added `eulerUtilizationRange` and `eulerLoadRatioRange` metadata. Representable positive ratios remain numeric; overflow/underflow becomes `null` plus an explicit range status. The assessment compares positive compression demand directly against Euler Pcr, independently of quotient range. UI cells display `> max`/`< min`; the assessment explains which ratio exceeded range.
+- Added Node and registered Chromium regressions for both reciprocal overflow directions and a minimum-subnormal load-ratio underflow case. Tests assert finite solve diagnostics, correct below/at-or-above assessment, and explicit range metadata. Updated the Structural Truss FEM contract, NEXT FIVE status, living plan and changelog in the same atomic candidate commit.
+- Actual production-source V8 reproductions confirmed the pre-fix failure. Post-fix V8 validation, JavaScript syntax checks and the exact browser test harness assertions are checked before commit. Full repository Node, Python/Chromium and build checks remain delegated to fresh exact-head GitHub Actions; pending until they pass.
+- PR #191 remains open/mergeable, zero independent reviews; both branches unprotected, rulesets empty, branch-protection read HTTP 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026 at unchanged main. Not released. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
 ## 2026-11-28 04:57 CET — REPORT COMPLETE OR PARTIAL TRUSS MEMBER MASS IN PRE-SOLVE PREVIEW
 
 - Starting refs: `dev` `a7803049451699f1b0f18829921b92de1f516995`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 124 ahead / 0 behind; exactly two branches.

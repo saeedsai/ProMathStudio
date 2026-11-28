@@ -1,12 +1,24 @@
+## Latest checkpoint — 28 November 2026, 06:00 CET
+
+- Starting refs verified from GitHub: `dev` `585fa5b8372cac1367bb3f1611e5e95f436ef681`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare **125 ahead / 0 behind**; exactly two branch refs (`dev`, `main`). Local `git rev-parse --show-toplevel` confirmed there is no checkout, so the bounded GitHub-integration fallback is in use.
+- Root `AGENTS.md`, this plan, frozen 26-Oct inventory, Unified Master Implementation Plan, Engineering Architecture/Toolbox contracts, Structural Truss FEM specification, PR #191, reviews, branch refs, rulesets, exact-head Actions and production deployment evidence were inspected.
+- Previous exact-head Push Quality [#46105968818](https://github.com/saeedsai/ProMathStudio/actions/runs/46105968818) and PR Quality [#46105973722](https://github.com/saeedsai/ProMathStudio/actions/runs/46105973722) both passed **218/218 steps**, zero failures and zero skipped steps on `585fa5b8372cac1367bb3f1611e5e95f436ef681`; Truss steps 212, 214 and 215 all passed. No existing exact-head CI failure remains.
+- Found a real post-solve diagnostic defect using the actual production FEM source: a valid compressed bar with finite stiffness, force, displacement, reactions and energy was rejected solely because `Pcr/Pcomp` overflowed; the reciprocal case rejected a valid solve because utilization overflowed. Reproductions use synthetic binary64 boundary models, not physical design examples.
+- Implemented range-aware Euler ratios. Each ratio is finite when representable; otherwise its numeric field is `null` with a machine-readable `overflow`/`underflow` companion. The below/at-or-above assessment compares the original demand and critical-load operands directly. The UI shows `> max` or `< min` rather than aborting or displaying Infinity.
+- Added direct Node and registered Chromium regressions for reciprocal overflow and minimum-subnormal underflow, checking compression classification, range metadata, finite equilibrium/energy diagnostics and exact assessment wording. Updated the Structural Truss FEM numerical contract.
+- The current change is an adjacent standalone Truss tool; no root `index.html` bundle change is required. Isolated production-source V8 validation is performed before the atomic commit; full Node/Chromium/build certification will be pending fresh exact-head Push/PR Quality.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) remains open and mergeable, 125 commits / 49 changed files, zero independent reviews. Only `dev` and `main` branches exist; both report `protected:false`, rulesets are empty, and branch-protection GET returns HTTP 403. No merge is authorized.
+- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not live.
+- Historical audit remains frozen at **166 gaps / 95 partial**; no counts are reduced.
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 04:57 CET  
+**Last updated:** 28 November 2026, 06:00 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
 This is the living execution queue. The 26-Oct audit remains the frozen historical baseline; this plan records implementation and verification state without rewriting historical counts.
 
-## Latest checkpoint — 28 November 2026, 04:57 CET
+## Previous checkpoint — 28 November 2026, 04:57 CET
 
 - Starting refs verified from GitHub: `dev` `a7803049451699f1b0f18829921b92de1f516995`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare **124 ahead / 0 behind**; exactly two branch refs (`dev`, `main`).
 - Exact-head Push Quality [#46103439003](https://github.com/saeedsai/ProMathStudio/actions/runs/46103439003) and PR Quality [#46103444489](https://github.com/saeedsai/ProMathStudio/actions/runs/46103444489) both completed **218/218 steps**, zero failures and zero skipped steps on `a7803049451699f1b0f18829921b92de1f516995`. Project-import rollback step 50 and atomic v1/v2 import step 105 passed; Truss steps 212, 214 and 215 passed.
@@ -27,10 +39,10 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting refs for this iteration: `dev` `a7803049451699f1b0f18829921b92de1f516995`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; verified compare **124 ahead / 0 behind**. Exactly two branch refs exist.
-- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, 124 commits, 49 changed files, and **zero submitted independent reviews**.
+- Starting refs for this iteration: `dev` `585fa5b8372cac1367bb3f1611e5e95f436ef681`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; verified compare **125 ahead / 0 behind**. Exactly two branch refs exist.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, 125 commits, 49 changed files, and **zero submitted independent reviews**.
 - Both branches report `protected:false`; repository rulesets are empty and branch-protection reads return HTTP 403 (Resource not accessible by integration). Enforceable protection is not verified; no merge is authorized.
-- Exact-head Push Quality [#46103439003](https://github.com/saeedsai/ProMathStudio/actions/runs/46103439003) and PR Quality [#46103444489](https://github.com/saeedsai/ProMathStudio/actions/runs/46103444489) both passed **218/218** on `a7803049451699f1b0f18829921b92de1f516995`, with zero failed/skipped steps. Project-import step 50, atomic v1/v2 import step 105 and Truss steps 212/214/215 all passed. Fresh exact-head checks are required for the new aggregate-mass candidate.
+- Exact-head Push Quality [#46105968818](https://github.com/saeedsai/ProMathStudio/actions/runs/46105968818) and PR Quality [#46105973722](https://github.com/saeedsai/ProMathStudio/actions/runs/46105973722) both passed **218/218** on `585fa5b8372cac1367bb3f1611e5e95f436ef681`, with zero failed/skipped steps. Truss steps 212, 214 and 215 passed. Fresh exact-head checks are required for the new Euler-ratio range candidate.
 - The local execution container has no Git checkout. The GitHub integration also cannot return the oversized standalone `index.html` contents, so this iteration follows the bounded fallback and edits only independently retrievable Truss scripts, tests and docs. No claim of full local Python/Chromium/build certification.
 - Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not live.
 - The historical 26-Oct inventory remains frozen at **166 gaps / 95 partial**.
@@ -78,7 +90,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial; compensated stiffness, reaction and energy accumulation plus seven-shape section-property boundary fixes are implemented on dev. The 109/109 Node FEM suite and registered browser steps 212/214/215 passed in both previous exact-head Quality workflows. This iteration adds complete/partial pre-solve aggregate member-mass reporting with explicit unknown-density semantics; fresh exact-head certification is pending. The complete independent seven-shape reference matrix and release evidence remain open.  
+**Status:** Partial; compensated stiffness, reaction and energy accumulation plus seven-shape section-property boundary fixes are implemented on dev. The previous exact-head Push/PR workflows passed 218/218, including Truss steps 212/214/215. Aggregate material-mass reporting is implemented on dev. This iteration fixes a separate post-solve defect where optional Euler utilization or load-ratio overflow/underflow rejected otherwise finite FEM results; new Node and desktop/390px Chromium regressions cover both reciprocal overflow directions and minimum-subnormal underflow. Fresh exact-head certification is pending. The complete independent seven-shape reference matrix and release evidence remain open.  
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.

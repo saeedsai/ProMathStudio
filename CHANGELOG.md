@@ -1,3 +1,8 @@
+## 2026-11-28 — Keep finite Truss FEM solutions when optional Euler ratios exceed binary64 range
+
+- Fixed a post-solve reporting defect: an otherwise finite compressed-bar FEM solution was rejected if either optional Euler utilization or reciprocal load ratio overflowed binary64. Each representable ratio remains numeric; an unrepresentable positive ratio is `null` with an explicit `overflow`/`underflow` range field. The below/at-or-above assessment compares the original compression demand and Euler critical load directly.
+- Truss Studio displays `> max`/`< min` for an out-of-range ratio and retains the explanatory assessment. No Infinity/NaN is exposed and no solver acceptance tolerance changed.
+- Added direct Node and registered Chromium regressions for reciprocal overflow and minimum-subnormal underflow, including finite equilibrium/energy diagnostics and the correct Euler assessment. Updated the Structural Truss FEM contract, living plan and execution ledger. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
 ## 2026-11-28 — Report complete or partial Truss member mass in the pre-solve preview
 
 - The Truss `inspectJSON` preview now returns a known-density mass subtotal, a complete total only when every member density is supplied, and an explicit count of members with unknown density. Explicit density zero remains known data; missing density is never silently treated as zero. A genuinely overflowing aggregate subtotal is rejected.

@@ -12,6 +12,13 @@
   let importCancelledNotice = false;
   const IMPORT_CANCELLED_STATUS = 'Pending import cancelled because the model was edited.';
   const fmt = (x, digits=5) => Number(x).toPrecision(digits).replace(/(\.\d*?)0+(e|$)/,'$1$2').replace(/\.(e|$)/,'$1');
+  const fmtEulerRange = (value, range) => value !== null ? fmt(value) :
+    range === 'overflow' ? '> max' : range === 'underflow' ? '< min' : '—';
+  const fmtEulerPercent = (value, range) => {
+    if (value === null) return fmtEulerRange(null, range);
+    const percent = value * 100;
+    return Number.isFinite(percent) ? fmt(percent) + '%' : '> max';
+  };
   // Preserve the exact binary64 diagnostic value, including negative zero, for browser integrations.
   const roundTripNumber = value => Object.is(value,-0) ? '-0' : String(value);
   const fmtAngle = x => Number(x).toFixed(3);
@@ -458,8 +465,8 @@
     energySummary.setAttribute('data-energy-residual-j',roundTripNumber(result.energyResidual));
     energySummary.setAttribute('data-energy-error',roundTripNumber(result.energyError));
     addResultRows('member-results',result.members,m=>[m.id,fmt(m.force/1000),fmt(m.stress/1e6),m.type,
-      m.eulerUtilization===null?'—':fmt(m.eulerUtilization*100)+'%',
-      m.eulerLoadRatio===null?'—':fmt(m.eulerLoadRatio),m.eulerAssessment]);
+      fmtEulerPercent(m.eulerUtilization,m.eulerUtilizationRange),
+      fmtEulerRange(m.eulerLoadRatio,m.eulerLoadRatioRange),m.eulerAssessment]);
     addResultRows('joint-results',result.displacements,n=>[n.id,fmt(n.x*1000),fmt(n.y*1000),fmt(n.magnitude*1000)]);
     addResultRows('reactions',result.reactions,r=>[r.id,fmt(r.rx/1000),fmt(r.ry/1000)]);
     $('verification').textContent='Force balance: ΣFx = '+fmt(result.forceBalance.x)+' N, ΣFy = '+fmt(result.forceBalance.y)+' N. Max free DOF residual / load scale = '+result.residual.toExponential(3)+'. Elastic strain energy = '+fmt(result.elasticEnergy)+' J. Energy balance residual = '+fmt(result.energyResidual)+' J. Normalized energy identity error = '+result.energyError.toExponential(3)+'.';

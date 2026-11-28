@@ -1073,21 +1073,41 @@
     const residual = Math.max(0, ...free.map(i => Math.abs(r[i]))) / loadScale;
     if (!Number.isFinite(residual) || residual > 1e-6) throw Error('Numerical equilibrium residual too large; check member stiffness contrast or mechanism.');
     const displacements = nodes.map((node, i) => ({id: node.id, x: u[i*2], y: u[i*2+1], magnitude: Math.hypot(u[i*2], u[i*2+1])}));
+    // Optional Euler ratios are diagnostics, not prerequisites for a valid FEM solution.
+    // Keep an unrepresentable positive ratio explicit instead of rejecting otherwise finite results.
+    const positiveRatioResult = (numerator, denominator) => {
+      const value = numerator / denominator;
+      if (value === 0) return {value:null, range:'underflow'};
+      if (!Number.isFinite(value)) return {value:null, range:'overflow'};
+      return {value, range:null};
+    };
     const results = members.map(m => {
       const extension = m.c*(u[2*m.b]-u[2*m.a]) + m.s*(u[2*m.b+1]-u[2*m.a+1]);
       const force = m.stiffness * extension;
       const compressionDemand = force < -1e-8 ? -force : 0;
       // Only compression has an Euler demand. Tension and zero force deliberately avoid division.
-      const eulerUtilization = m.eulerCriticalLoad !== null && compressionDemand > 0
-        ? finite(compressionDemand / m.eulerCriticalLoad, 'Member ' + m.id + ' Euler utilization') : null;
-      const eulerLoadRatio = m.eulerCriticalLoad !== null && compressionDemand > 0
-        ? finite(m.eulerCriticalLoad / compressionDemand, 'Member ' + m.id + ' Euler load ratio') : null;
-      const eulerAssessment = m.eulerCriticalLoad === null ? 'Not assessed (I/K missing)' :
-        compressionDemand > 0 ? (eulerUtilization >= 1 ? 'At/above ideal Euler load' : 'Below ideal Euler load') :
-        force > 1e-8 ? 'Tension — not applicable' : 'No compression demand';
+      const utilization = m.eulerCriticalLoad !== null && compressionDemand > 0
+        ? positiveRatioResult(compressionDemand, m.eulerCriticalLoad) : {value:null, range:null};
+      const loadRatio = m.eulerCriticalLoad !== null && compressionDemand > 0
+        ? positiveRatioResult(m.eulerCriticalLoad, compressionDemand) : {value:null, range:null};
+      const eulerUtilization = utilization.value, eulerUtilizationRange = utilization.range;
+      const eulerLoadRatio = loadRatio.value, eulerLoadRatioRange = loadRatio.range;
+      let eulerAssessment;
+      if (m.eulerCriticalLoad === null) eulerAssessment = 'Not assessed (I/K missing)';
+      else if (compressionDemand > 0) {
+        // Compare the original positive operands, not a possibly overflowed/underflowed quotient.
+        const atOrAbove = compressionDemand >= m.eulerCriticalLoad;
+        const rangeNote = atOrAbove
+          ? (eulerUtilizationRange === 'overflow' ? ' (utilization exceeds binary64 range)' :
+             eulerLoadRatioRange === 'underflow' ? ' (load ratio is below binary64 range)' : '')
+          : (eulerLoadRatioRange === 'overflow' ? ' (load ratio exceeds binary64 range)' :
+             eulerUtilizationRange === 'underflow' ? ' (utilization is below binary64 range)' : '');
+        eulerAssessment = (atOrAbove ? 'At/above' : 'Below') + ' ideal Euler load' + rangeNote;
+      } else eulerAssessment = force > 1e-8 ? 'Tension — not applicable' : 'No compression demand';
       return {id: m.id, a: nodes[m.a].id, b: nodes[m.b].id, length: m.L, extension, force, stress: force/m.A,
         strain: extension/m.L, type: force > 1e-8 ? 'Tension' : force < -1e-8 ? 'Compression' : 'Zero',
-        compressionDemand,eulerCriticalLoad:m.eulerCriticalLoad,eulerUtilization,eulerLoadRatio,eulerAssessment};
+        compressionDemand,eulerCriticalLoad:m.eulerCriticalLoad,eulerUtilization,eulerUtilizationRange,
+        eulerLoadRatio,eulerLoadRatioRange,eulerAssessment};
     });
     const reactions = nodes.map((node, i) => ({id: node.id, rx: node.fixX ? r[2*i] : 0, ry: node.fixY ? r[2*i+1] : 0}))
       .filter(q => nodes.find(n => n.id === q.id).fixX || nodes.find(n => n.id === q.id).fixY);

@@ -1308,6 +1308,47 @@ test('post-solve Euler comparison reports compression-only utilization and load 
 });
 
 
+test('post-solve Euler ratios preserve valid FEM results outside binary64 ratio range',()=>{
+ const loadRatioOverflow={
+  nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:-2e-11}],
+  members:[{id:'AB',a:'A',b:'B',E:200,area:1e-300,I:1e301,K:1}]
+ };
+ const below=fem.solve(loadRatioOverflow), belowMember=below.members[0];
+ assert.equal(belowMember.type,'Compression');
+ assert.ok(Number.isFinite(belowMember.eulerUtilization)&&belowMember.eulerUtilization>0);
+ assert.equal(belowMember.eulerUtilizationRange,null);
+ assert.equal(belowMember.eulerLoadRatio,null);
+ assert.equal(belowMember.eulerLoadRatioRange,'overflow');
+ assert.equal(belowMember.eulerAssessment,'Below ideal Euler load (load ratio exceeds binary64 range)');
+ assert.ok(Number.isFinite(below.energyResidual)&&Number.isFinite(below.energyError));
+ const utilizationOverflow={
+  nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:-2e-11}],
+  members:[{id:'AB',a:'A',b:'B',E:1e-300,area:1e300,I:4e-15,K:1}]
+ };
+ const above=fem.solve(utilizationOverflow), aboveMember=above.members[0];
+ assert.equal(aboveMember.type,'Compression');
+ assert.equal(aboveMember.eulerUtilization,null);
+ assert.equal(aboveMember.eulerUtilizationRange,'overflow');
+ assert.ok(Number.isFinite(aboveMember.eulerLoadRatio)&&aboveMember.eulerLoadRatio>0);
+ assert.equal(aboveMember.eulerLoadRatioRange,null);
+ assert.equal(aboveMember.eulerAssessment,'At/above ideal Euler load (utilization exceeds binary64 range)');
+ assert.ok(Number.isFinite(above.energyResidual)&&Number.isFinite(above.energyError));
+ const loadRatioUnderflow={
+  nodes:[{id:'A',x:0,y:0,fixX:true,fixY:true},{id:'B',x:2,y:0,fixY:true,fx:-0.002}],
+  members:[{id:'AB',a:'A',b:'B',E:1e-300,area:1e300,I:2e-21,K:1}]
+ };
+ const underflow=fem.solve(loadRatioUnderflow), underflowMember=underflow.members[0];
+ assert.equal(underflowMember.eulerCriticalLoad,Number.MIN_VALUE);
+ assert.equal(underflowMember.eulerUtilization,null);
+ assert.equal(underflowMember.eulerUtilizationRange,'overflow');
+ assert.equal(underflowMember.eulerLoadRatio,null);
+ assert.equal(underflowMember.eulerLoadRatioRange,'underflow');
+ assert.equal(underflowMember.eulerAssessment,'At/above ideal Euler load (utilization exceeds binary64 range)');
+ assert.equal(underflow.energyResidual,0);
+ assert.equal(underflow.energyError,0);
+});
+
+
 test('radius of gyration uses a finite quotient and a range-safe split-root fallback',()=>{
  const circle=fem.sectionProperties('solid-circle',{diameter:40});
  assert.equal(circle.secondMoment/circle.area,100);

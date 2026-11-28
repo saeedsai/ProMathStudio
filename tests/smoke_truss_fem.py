@@ -56,7 +56,7 @@ def main():
             assert euler_readiness[0][13] == '—' and euler_readiness[1][13] == '—', euler_readiness
             assert float(euler_readiness[2][13].replace(',', '')) > 0, euler_readiness
             mixed_euler_status = page.locator('#status').inner_text()
-            assert 'Euler estimates require both I and K per member' in mixed_euler_status, mixed_euler_status
+            assert 'Euler estimate requires both I and K per member' in mixed_euler_status, mixed_euler_status
             assert 'Ready: 1/3' in mixed_euler_status, mixed_euler_status
             assert 'missing I: 1' in mixed_euler_status and 'missing K: 1' in mixed_euler_status, mixed_euler_status
             assert 'not supplied: 0' in mixed_euler_status, mixed_euler_status

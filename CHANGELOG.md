@@ -1,3 +1,9 @@
+## 2026-11-28 — Repair Truss Studio browser assertions for the Euler readiness column
+
+- Exact-head Push/PR Quality on a5721e3 both failed at Truss step 212 because the companion tests/smoke_truss_studio.py still expected the old 13-column table and read Euler Pcr from zero-based index 12. The new readiness column correctly occupies index 12, shifting Pcr to index 13.
+- Updated every affected companion smoke assertion: 14 columns, per-member Not supplied/Missing I/Missing K labels at index 12, and Pcr at index 13 across default, partial, solved and legacy-import scenarios. Kept the prior singular readiness-message substring while retaining the new counts. No test gates or numerical tolerances were weakened.
+- Implemented on dev; new exact-head Push/PR Quality pending; not released. Historical inventory remains 166 gaps / 95 partial.
+
 ## 2026-11-28 — Report complete, partial and missing Euler inputs in the Truss preview
 
 - Fixed a pre-solve messaging gap: models with no I/K inputs previously received a generic “analyze to check structural stability” status, because the warning only detected one-sided inputs. The preview now reports ready/total, missing-I, missing-K and not-supplied counts; a complete set explicitly says inputs are ready but buckling assessment still requires analysis.

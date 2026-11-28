@@ -186,7 +186,8 @@ def main():
         assert page.locator('#member-metrics tr').nth(0).locator('td').nth(4).inner_text() == '2400'
         assert page.locator('#member-metrics tr').nth(0).locator('td').nth(10).inner_text() == '720000'
         assert 'Preview ready' in page.locator('#status').inner_text()
-        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(12).inner_text() == '—'
+        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(12).inner_text() == 'Missing K'
+        assert page.locator('#member-metrics tr').nth(0).locator('td').nth(13).inner_text() == '—'
         # A solid circle uses its centroidal diameter axis and does not change another member.
         page.locator('#section-member').select_option('AC')
         page.locator('#section-shape').select_option('solid-circle')
@@ -1011,9 +1012,9 @@ def main():
         density_input = page.locator('#members tr').first.locator('input[data-field="density"]')
         assert density_input.input_value() == ''
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.count() == 13
+        assert metric_cells.count() == 14
         assert metric_cells.nth(8).inner_text() == '—' and metric_cells.nth(9).inner_text() == '—'
-        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['—','—','—']
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12,13)] == ['—','—','Not supplied','—']
         density_input.fill('7850')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(8).inner_text() == '7850'
@@ -1038,15 +1039,15 @@ def main():
         assert 'Model overview' in page.locator('#preview-summary').inner_text()
         assert 'Euler estimate requires both I and K' in page.locator('#status').inner_text()
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.count() == 13
-        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['1000000','—','—']
+        assert metric_cells.count() == 14
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12,13)] == ['1000000','—','Missing K','—']
         # K-only is also a valid partial member property; the preview stays available without Pcr.
         i_input.fill('')
         k_input.fill('1')
         assert 'Model overview' in page.locator('#preview-summary').inner_text()
         assert 'Euler estimate requires both I and K' in page.locator('#status').inner_text()
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert [metric_cells.nth(i).inner_text() for i in (10,11,12)] == ['—','1','—']
+        assert [metric_cells.nth(i).inner_text() for i in (10,11,12,13)] == ['—','1','Missing I','—']
         # Supplying the missing I restores the Euler estimate without invalidating the preview.
         i_input.fill('1000000')
         assert 'Preview ready' in page.locator('#status').inner_text()
@@ -1061,14 +1062,14 @@ def main():
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
         assert metric_cells.nth(10).inner_text() == '1000000'
         assert metric_cells.nth(11).inner_text() == '1'
-        assert metric_cells.nth(12).inner_text() == '493.48'
+        assert metric_cells.nth(13).inner_text() == '493.48'
         # Display precision follows the inverse-square effective-length relationship.
         k_input.fill('2')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.nth(12).inner_text() == '123.37'
+        assert metric_cells.nth(13).inner_text() == '123.37'
         k_input.fill('1')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.nth(12).inner_text() == '493.48'
+        assert metric_cells.nth(13).inner_text() == '493.48'
         export_index = page.evaluate('window.__exports.length')
         page.locator('#export-material-csv').click()
         euler_export = page.evaluate('''async index => ({name:window.__exports[index].name,body:await window.__exports[index].blob.text()})''', export_index)
@@ -1112,7 +1113,7 @@ def main():
         page.locator('#solve').click()
         k_input.fill('2')
         metric_cells = page.locator('#member-metrics tr').first.locator('td')
-        assert metric_cells.nth(12).inner_text() == '123.37'
+        assert metric_cells.nth(13).inner_text() == '123.37'
         k_input.fill('0')
         assert 'Preview unavailable' in page.locator('#preview-summary').inner_text()
         assert 'K must be positive' in page.locator('#status').inner_text()
@@ -1202,7 +1203,7 @@ def main():
         assert legacy_cells.nth(9).inner_text() == '15.7'
         assert legacy_cells.nth(10).inner_text() == '1000000'
         assert legacy_cells.nth(11).inner_text() == '1'
-        assert legacy_cells.nth(12).inner_text() == '493.48'
+        assert legacy_cells.nth(13).inner_text() == '493.48'
         # A genuine value edit still cancels a pending read; its late bytes cannot replace the edit.
         page.evaluate("""json => {
             const nativeRead = Blob.prototype.arrayBuffer;

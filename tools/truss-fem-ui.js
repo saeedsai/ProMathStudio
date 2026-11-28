@@ -413,7 +413,7 @@
         ? 'No members are available for Euler screening.'
         : eulerReadiness.complete
           ? `Euler inputs complete for all ${eulerReadiness.total} members. Analyze to assess ideal buckling.`
-          : `Euler estimates require both I and K per member. Ready: ${eulerReadiness.ready}/${eulerReadiness.total} · missing I: ${eulerReadiness.missingI} · missing K: ${eulerReadiness.missingK} · not supplied: ${eulerReadiness.notSupplied}.`;
+          : `Euler estimate requires both I and K per member. Ready: ${eulerReadiness.ready}/${eulerReadiness.total} · missing I: ${eulerReadiness.missingI} · missing K: ${eulerReadiness.missingK} · not supplied: ${eulerReadiness.notSupplied}.`;
       status(`Preview ready · ${eulerReadinessStatus}`,false);
     } catch(error) {
       $('preview-summary').textContent='Preview unavailable: '+error.message;

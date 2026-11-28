@@ -6,7 +6,7 @@ Each member preview distinguishes four input states: `not-supplied` (neither I n
 
 The pre-solve live status always reports the readiness counts. This includes the all-not-supplied case: it must not claim merely that the model is ready for analysis while omitting that no member can receive the optional Euler screen. A complete input set says that the inputs are ready, not that the structure is stable or safe; buckling assessment remains a separate post-solve ideal elastic compression-only screen with the limitations described above.
 
-Direct Node tests cover all four states, all-missing, all-ready, empty input, immutable output and invalid status rejection. Registered Chromium tests verify all-missing, mixed, all-ready and reset summaries at 1280px and 390px.
+Direct Node tests cover all four states, all-missing, all-ready, empty input, immutable output and invalid status rejection. Registered Chromium tests verify all-missing, mixed, all-ready and reset summaries at 1280px and 390px. The companion Truss Studio browser smoke also verifies the 14-column preview schema: `Euler inputs` is column 13 and `Euler Pcr` is column 14 (zero-based indices 12 and 13).
 
 For a concentric annulus, use direct dimensionless differences 1-r² and 1-r⁴ while the cavity area ratio r² is at most 0.5. In this range the remaining area and inertia factors are bounded below by 0.5 and 0.75, so subtraction is well-conditioned and avoids the extra multiplication rounding of complementary factors. When r² > 0.5, retain the factored radial-gap expression to protect near-unity thin walls.
 

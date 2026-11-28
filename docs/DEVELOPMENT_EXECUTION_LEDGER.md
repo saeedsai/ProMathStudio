@@ -2868,3 +2868,13 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - Isolated V8 syntax and pure readiness-summary assertions passed. Full local Node/Playwright/build suite not run because `git rev-parse --show-toplevel` returned `fatal: not a git repository`; exact-head GitHub Actions required.
 - PR #191 remains open/mergeable, zero independent reviews. Branches unprotected, rulesets empty, branch-protection read 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026. Candidate is dev-only, not live.
 - Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+
+## 2026-11-28 08:28 CET — Repair companion Truss Studio smoke after Euler readiness column shift
+
+- Inspected exact-head failures on parent a5721e3b87f640dfe87ff74020892a7124045a67: Push Quality #46120933444 and PR Quality #46120935574 both failed only at Truss step 212. The traceback was tests/smoke_truss_studio.py:189, which expected Pcr in cell index 12 after the new Euler-input readiness column was inserted at index 12. Other assertions still expected 13 cells and used index 12 for Pcr.
+- Corrected the companion browser regression to expect 14 columns, assert the readiness label at index 12 (Not supplied, Missing I, or Missing K) and read Euler Pcr at index 13. Updated all affected Pcr assertions, default/partial input tuples, and density/material-table counts. No production calculation or CI gate was weakened.
+- Preserved the existing status-message substring Euler estimate requires both I and K while appending the new ready/missing counts, so earlier browser assertions remain compatible. The new Truss FEM smoke checks the same wording and still verifies mixed/all-ready/all-missing states.
+- Parent c5243d44af44cd952a73d15dce972e65006ed29c Push #46122160709 and PR #46122164141 were still early at step 8; they predate this repair. Fresh exact-head workflows for the follow-up commit are required.
+- Updated the Truss UI wording, both Truss browser smoke suites, Structural Truss contract, living plan, ledger and changelog in one atomic Git tree/commit. V8 syntax and pure summary logic checks were previously passed on the parent; the corrected candidate still needs full CI/browser certification.
+- PR #191 remains open; zero independent reviews; branches unprotected, rulesets empty, branch-protection read 403. No merge or direct main update. Main Quality/Pages remain the latest successful evidence on 24-Nov-2026. Historical inventory 166 gaps / 95 partial, unchanged.

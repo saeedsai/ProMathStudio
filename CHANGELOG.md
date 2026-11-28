@@ -1,3 +1,9 @@
+## 2026-11-28 — Expose Euler readiness in the Truss member-details disclosure
+
+- Exact-head Push Quality #46122489452 and PR Quality #46122493381 both failed at Truss browser step 215, while the direct Node FEM suite passed 114/114. The traceback at `tests/smoke_truss_fem.py:43` returned three blank row strings because the per-member table is inside the initially collapsed native `#member-material-details` disclosure.
+- Improved the visible summary to “Member materials, section properties and Euler readiness”. The Chromium regression now verifies the disclosure starts closed, checks the summary text, opens it through the native summary interaction, confirms the expanded state, then asserts all three initial `Not supplied` readiness rows. The test now covers the intended user interaction instead of reading hidden content.
+- Updated the Structural Truss FEM contract and living development records. No FEM algorithm, numerical tolerance or CI gate changed. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Repair Truss Studio browser assertions for the Euler readiness column
 
 - Exact-head Push/PR Quality on a5721e3 both failed at Truss step 212 because the companion tests/smoke_truss_studio.py still expected the old 13-column table and read Euler Pcr from zero-based index 12. The new readiness column correctly occupies index 12, shifting Pcr to index 13.

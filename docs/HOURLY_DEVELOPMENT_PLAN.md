@@ -1,3 +1,15 @@
+## Latest checkpoint — 28 November 2026, 09:02 CET
+
+- Starting refs verified from GitHub: `dev` `75dfce6f2bbd1aec5d79441e32fe24477debc02b`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare main...dev = **130 ahead / 0 behind**; exactly two branches (`dev`, `main`). A bounded local `git rev-parse --show-toplevel` failed with `fatal: not a git repository`; the connected GitHub integration fallback is used without repeated network retries.
+- Re-read root `AGENTS.md`, this plan, the frozen 26-Oct inventory, Engineering Architecture/Workspace plan, Truss FEM contract/source/tests, PR #191, reviews, branch refs, rulesets, exact-head Actions and main/Pages evidence.
+- Exact-head Push Quality [#46122489452](https://github.com/saeedsai/ProMathStudio/actions/runs/46122489452) and PR Quality [#46122493381](https://github.com/saeedsai/ProMathStudio/actions/runs/46122493381) both reference `75dfce6f2bbd1aec5d79441e32fe24477debc02b` and failed only at Truss FEM browser step 215. The Node FEM suite passed **114/114** in both. The traceback at `tests/smoke_truss_fem.py:43` was `AssertionError: ['', '', '']`: the per-member table is correctly inside the initially collapsed `#member-material-details` disclosure, but the smoke queried its hidden rows before opening it.
+- Repaired the user-facing discovery and regression: the disclosure summary now says “Member materials, section properties and Euler readiness”; the browser smoke asserts it starts collapsed, verifies the visible summary names Euler readiness, opens it using the native summary interaction, confirms it is open, then reads the three `Not supplied` rows. No production calculation, numerical tolerance or CI gate was weakened.
+- Updated the standalone Truss HTML, registered Chromium regression, Structural Truss FEM contract, living plan, execution ledger and changelog in one atomic Git tree/commit on existing `dev`. No root `index.html` bundle change is required because Truss Studio uses adjacent standalone assets.
+- Full local browser/build checks remain unavailable because there is no checkout. Fresh exact-head Push/PR Quality must certify the correction; pending until both finish.
+- PR #191 is open/mergeable and tracks the starting dev head (130 commits, 49 files); independent reviews: **0**. Both branches report unprotected, rulesets are empty and branch-protection GET returns HTTP 403. No merge is authorized.
+- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. This dev correction is not live.
+- Frozen historical inventory remains **166 gaps / 95 partial**, unchanged.
+
 ## Follow-up checkpoint — 28 November 2026, 08:28 CET
 
 - The new Euler readiness API and live status counts were committed on parent c5243d44af44cd952a73d15dce972e65006ed29c (129 ahead / 0 behind main); current main remains 0d8ac89f7c9177806a266e56b27980c83d2c3ff5.
@@ -46,7 +58,7 @@
 - Historical audit remains frozen at **166 gaps / 95 partial**; no counts are reduced.
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 08:28 CET  
+**Last updated:** 28 November 2026, 09:02 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
@@ -95,7 +107,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** Current dev/PR parent `c5243d44af44cd952a73d15dce972e65006ed29c` has exact-head Push Quality [#46122160709](https://github.com/saeedsai/ProMathStudio/actions/runs/46122160709) and PR Quality [#46122164141](https://github.com/saeedsai/ProMathStudio/actions/runs/46122164141) in progress (both were at browser-dependency step 8 when inspected). The preceding `a5721e3` Push/PR runs [#46120933444](https://github.com/saeedsai/ProMathStudio/actions/runs/46120933444) and [#46120935574](https://github.com/saeedsai/ProMathStudio/actions/runs/46120935574) both failed at Truss step 212: `tests/smoke_truss_studio.py` still expected 13 columns and Euler Pcr at index 12 after the new Euler-input status column shifted Pcr to index 13. This follow-up updates every affected assertion and verifies the new 14-column contract; the c524 runs predate that repair and do not certify it. PR #191 tracks dev (129 commits, 49 changed files). Independent reviews remain zero; both branches report unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge is authorized until the corrected exact head is fully green, independently approved and enforceable main protection is verified.
+**Status:** Current dev/PR head `75dfce6f2bbd1aec5d79441e32fe24477debc02b` has exact-head Push Quality [#46122489452](https://github.com/saeedsai/ProMathStudio/actions/runs/46122489452) and PR Quality [#46122493381](https://github.com/saeedsai/ProMathStudio/actions/runs/46122493381); both completed with a failure at Truss browser step 215. Their 114/114 Node FEM suites passed. The browser failure was a test reading per-member rows while the native `#member-material-details` disclosure was collapsed; the current follow-up explicitly verifies and opens that disclosure before inspecting readiness cells. Fresh exact-head Push/PR Quality for this correction are pending. PR #191 tracks dev (130 commits, 49 changed files). Independent reviews remain zero; both branches report unprotected, rulesets are empty and branch-protection reads return HTTP 403. No merge is authorized until the corrected exact head is fully green, independently approved and enforceable main protection is verified.
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -124,7 +136,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial. Compensated stiffness/reaction/energy accumulation, seven-shape section-property boundary fixes, aggregate material-mass reporting, range-aware Euler ratios, sub-threshold compression screening, per-member Euler input readiness and live readiness counts are implemented on dev. Exact-head a5721e3 Push/PR Quality exposed a separate companion-smoke regression: the new Euler inputs column shifted Pcr from zero-based index 12 to 13, but tests/smoke_truss_studio.py retained old 13-column assertions. This follow-up changes the schema expectation to 14 columns, asserts readiness at index 12 and Pcr at index 13 across default, partial, solved and legacy-import cases, and preserves the existing singular readiness-message substring while adding counts. Fresh exact-head certification is required; the independent seven-shape reference matrix remains open.
+**Status:** Partial. Compensated stiffness/reaction/energy accumulation, seven-shape section-property boundary fixes, aggregate material-mass reporting, range-aware Euler ratios, sub-threshold compression screening, per-member Euler input readiness and live readiness counts are implemented on dev. The latest exact-head browser failure was not a solver defect: the 14-column member-material table is inside a native collapsed disclosure, so the smoke's initial hidden-row read returned three blank strings. This follow-up improves the visible disclosure label to name Euler readiness and tests the collapsed → summary-click → expanded sequence before asserting the three per-member states. Fresh exact-head certification is required. The independent seven-shape Decimal reference matrix remains open.
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.
@@ -134,6 +146,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 - When I/K are supplied, every strictly negative solved member force is included in Euler demand even when its magnitude is below 1e-8 N; a 5e-12 N load below Pcr and a 5e-9 N load above Pcr both classify correctly. Without I/K, the existing near-zero threshold remains.
 - `summarizeEulerInputReadiness` counts `not-supplied`, `missing-I`, `missing-K` and `ready` without mutating metrics; it returns a frozen summary, treats an empty list as incomplete and rejects unknown states. The live status reports 0/N ready for all-not-supplied models, exact mixed-state counts, an all-ready message and correct reset refresh at 1280px/390px.
 - Both Truss browser suites verify the 14-column pre-solve schema: `Euler inputs` at zero-based index 12 and `Euler Pcr` at index 13. The companion Studio smoke checks all-missing, one-sided I/K, finite Pcr precision, density defaults and legacy SI import without stale column offsets.
+- The per-member table remains in a collapsed native disclosure; its visible summary explicitly names Euler readiness, and Chromium verifies collapsed state, opens it through the summary, confirms expanded state, then reads the 14-column member rows at 1280px and 390px.
 
 ### 5. P1 — Harden adaptive RK45 difficult-workload boundaries
 

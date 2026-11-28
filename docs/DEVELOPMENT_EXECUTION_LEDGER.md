@@ -2878,3 +2878,17 @@ Status: source, synchronized standalone bundle, Node/Chromium regressions, proje
 - Parent c5243d44af44cd952a73d15dce972e65006ed29c Push #46122160709 and PR #46122164141 were still early at step 8; they predate this repair. Fresh exact-head workflows for the follow-up commit are required.
 - Updated the Truss UI wording, both Truss browser smoke suites, Structural Truss contract, living plan, ledger and changelog in one atomic Git tree/commit. V8 syntax and pure summary logic checks were previously passed on the parent; the corrected candidate still needs full CI/browser certification.
 - PR #191 remains open; zero independent reviews; branches unprotected, rulesets empty, branch-protection read 403. No merge or direct main update. Main Quality/Pages remain the latest successful evidence on 24-Nov-2026. Historical inventory 166 gaps / 95 partial, unchanged.
+
+
+---
+
+## 2026-11-28 09:02 CET — OPEN THE TRUSS MEMBER-READINESS DISCLOSURE BEFORE BROWSER ASSERTIONS
+
+- Starting refs: `dev` `75dfce6f2bbd1aec5d79441e32fe24477debc02b`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 130 ahead / 0 behind; exactly dev/main branches. Local `git rev-parse --show-toplevel` returned `fatal: not a git repository`; connected GitHub integration used.
+- Exact-head Push Quality [#46122489452](https://github.com/saeedsai/ProMathStudio/actions/runs/46122489452) and PR Quality [#46122493381](https://github.com/saeedsai/ProMathStudio/actions/runs/46122493381) both failed only at step 215. The Node Truss FEM suite passed 114/114. Both browser logs show `tests/smoke_truss_fem.py:43` failing with `AssertionError: ['', '', '']`.
+- Root cause: `#member-metrics` is correctly nested inside the initially collapsed native `#member-material-details` disclosure. Playwright's `all_inner_texts()` returned blank strings because the test queried hidden rows before opening the disclosure; the production table and live Euler readiness status were populated.
+- Changed the visible disclosure summary to “Member materials, section properties and Euler readiness”. The registered browser smoke now asserts the disclosure is initially closed, checks the visible summary, opens it through the native `summary` element, confirms `details.open`, and only then checks the three `Not supplied` rows. This preserves the intended collapsed layout and exercises the real user interaction.
+- Updated `tools/truss-studio.html`, `tests/smoke_truss_fem.py`, the Structural Truss contract, living plan, this ledger and changelog in one atomic dev commit. No FEM calculations or tolerances changed; no workflow steps were skipped or weakened.
+- Full local Playwright/build checks could not run because no repository checkout is present. Fresh exact-head Push and PR Quality are required; pending until completed.
+- PR #191 remains open/mergeable, zero independent reviews. Branches unprotected, rulesets empty, branch-protection read HTTP 403; no merge or direct main update. Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production evidence on 24-Nov-2026; this dev change is not live.
+- Historical inventory remains **166 gaps / 95 partial**, unchanged.

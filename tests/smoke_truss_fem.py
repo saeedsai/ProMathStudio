@@ -39,6 +39,12 @@ def main():
             assert 'Analysis complete' in page.locator('#status').inner_text(), page.locator('#status').inner_text()
             initial_preview = page.locator('#preview-summary').inner_text()
             assert 'mass estimate unavailable · 3 members missing density' in initial_preview, initial_preview
+            member_details = page.locator('#member-material-details')
+            assert not member_details.evaluate('(details) => details.open')
+            member_summary = member_details.locator('summary')
+            assert 'Euler readiness' in member_summary.inner_text()
+            member_summary.click()
+            assert member_details.evaluate('(details) => details.open')
             initial_euler_rows = page.locator('#member-metrics tr').all_inner_texts()
             assert len(initial_euler_rows) == 3 and all('Not supplied' in row for row in initial_euler_rows), initial_euler_rows
             euler_readiness = page.evaluate("""() => {

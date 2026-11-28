@@ -1,3 +1,10 @@
+## 2026-11-28 — Report complete or partial Truss member mass in the pre-solve preview
+
+- The Truss `inspectJSON` preview now returns a known-density mass subtotal, a complete total only when every member density is supplied, and an explicit count of members with unknown density. Explicit density zero remains known data; missing density is never silently treated as zero. A genuinely overflowing aggregate subtotal is rejected.
+- The pre-solve UI labels a complete estimated total, a partial subtotal with the missing-density count, or an unavailable estimate when no member density is known.
+- Added Node and registered Chromium regressions for all-known, partial, all-unknown, explicit-zero and overflowing totals. Browser coverage verifies the default triangle and 15.7 kg legacy SI import at desktop and 390px.
+- Updated the Structural Truss FEM contract, living plan and execution ledger. Implemented on dev; fresh exact-head Push/PR Quality pending; not released. Historical inventory remains **166 gaps / 95 partial**.
+
 ## 2026-11-28 — Reset omitted solver state when importing legacy projects
 
 - Fixed project replacement semantics for legacy v1/v2 backups that omit the optional `solver` object (or contain an empty/partial object). Previously the Equation workspace retained the preceding project's expression and selector/assumption values. Import now clears the expression and restores the documented defaults: Auto operation/engine, variable `x`, limit point `0`, two-sided direction, blank ODE initial condition and all assumptions off.

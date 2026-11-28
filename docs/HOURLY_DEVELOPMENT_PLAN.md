@@ -1,10 +1,22 @@
 # ProMathStudio — Hourly Development Plan
 
-**Last updated:** 28 November 2026, 04:27 CET  
+**Last updated:** 28 November 2026, 04:57 CET  
 **Repository:** [saeedsai/ProMathStudio](https://github.com/saeedsai/ProMathStudio)  
 **Development branch:** `dev` · **Release branch:** `main`
 
 This is the living execution queue. The 26-Oct audit remains the frozen historical baseline; this plan records implementation and verification state without rewriting historical counts.
+
+## Latest checkpoint — 28 November 2026, 04:57 CET
+
+- Starting refs verified from GitHub: `dev` `a7803049451699f1b0f18829921b92de1f516995`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare **124 ahead / 0 behind**; exactly two branch refs (`dev`, `main`).
+- Exact-head Push Quality [#46103439003](https://github.com/saeedsai/ProMathStudio/actions/runs/46103439003) and PR Quality [#46103444489](https://github.com/saeedsai/ProMathStudio/actions/runs/46103444489) both completed **218/218 steps**, zero failures and zero skipped steps on `a7803049451699f1b0f18829921b92de1f516995`. Project-import rollback step 50 and atomic v1/v2 import step 105 passed; Truss steps 212, 214 and 215 passed.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) remains the sole open `dev`→`main` PR, mergeable at the starting head, 124 commits and 49 changed files; submitted independent reviews: **0**. Both branches report `protected:false`; rulesets are empty and branch-protection GET returns HTTP 403 (Resource not accessible by integration). No merge is authorized.
+- The standalone Truss FEM files are retrievable through the GitHub integration; the root `index.html` content is too large for the available GitHub file reader (empty contents response and raw-file read rejected). The local execution environment has no checkout. Per the repository fallback, this iteration avoids editing embedded code and continues with adjacent standalone Truss sources.
+- Implemented on the candidate dev commit: pre-solve aggregate material-mass reporting. `inspectJSON` exposes the known-density subtotal, a complete total only when every member density is supplied, and the number of members with unknown density. Explicit zero density counts as known; overflowing aggregate mass rejects. The Truss preview distinguishes complete total, partial subtotal and unavailable estimate.
+- Added direct Node and registered Chromium regressions for all-known, partially-known, all-unknown, explicit-zero and overflowing mass totals. Browser checks cover the default triangle, a 15.7 kg legacy SI member and a two-member partial-density import at desktop and 390px.
+- Actual production-source V8 validation passed for all five mass states; updated FEM/UI/Node-test JavaScript syntax compilation passed. Full Python/Chromium/build certification is delegated to fresh exact-head Push and PR Quality. This candidate is not released.
+- Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. No newer production deployment is verified.
+- Historical inventory remains frozen at **166 gaps / 95 partial**.
 
 ## Frozen baseline and accounting
 
@@ -15,14 +27,13 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ## Current repository and release checkpoint
 
-- Starting `dev` head for this iteration: `161895dd9071999e28183102d46d54ccf4f194d2`; `main`: `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`. Verified compare: **123 ahead / 0 behind**. Exactly two branch refs exist: `dev` and `main`.
-- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, 123 commits, 48 changed files, with **zero submitted independent reviews**.
+- Starting refs for this iteration: `dev` `a7803049451699f1b0f18829921b92de1f516995`; `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; verified compare **124 ahead / 0 behind**. Exactly two branch refs exist.
+- PR [#191](https://github.com/saeedsai/ProMathStudio/pull/191) is the sole `dev`→`main` release PR, open and mergeable at the starting head, 124 commits, 49 changed files, and **zero submitted independent reviews**.
 - Both branches report `protected:false`; repository rulesets are empty and branch-protection reads return HTTP 403 (Resource not accessible by integration). Enforceable protection is not verified; no merge is authorized.
-- Exact-head Push Quality [#46096512088](https://github.com/saeedsai/ProMathStudio/actions/runs/46096512088) and PR Quality [#46096516504](https://github.com/saeedsai/ProMathStudio/actions/runs/46096516504) both **passed all 218/218 steps** on `161895dd9071999e28183102d46d54ccf4f194d2`, with zero failed and zero skipped steps. Truss steps 212, 214 and 215 all passed. The previous Truss selected-example reset regression is resolved at this exact head.
-- This iteration fixes a separate saved-project compatibility defect: importing a legacy v1/v2 project with no `solver` object (or an empty/partial object) previously left the previous project's Equation expression, operation, engine, variable, limit and assumption controls in place. Import now resets missing solver state to documented Equation defaults and clears the old expression. Regression coverage verifies v1, v2, empty solver objects, valid v2 round-trip and preservation of non-default solver state after injected rollback failures.
-- The local execution container has no Git checkout (`git rev-parse --show-toplevel` returns “not a git repository”), so this bounded iteration uses the connected GitHub integration. Full local Python/Node/Chromium/build certification is unavailable; fresh exact-head Push and PR Quality must certify this new commit.
+- Exact-head Push Quality [#46103439003](https://github.com/saeedsai/ProMathStudio/actions/runs/46103439003) and PR Quality [#46103444489](https://github.com/saeedsai/ProMathStudio/actions/runs/46103444489) both passed **218/218** on `a7803049451699f1b0f18829921b92de1f516995`, with zero failed/skipped steps. Project-import step 50, atomic v1/v2 import step 105 and Truss steps 212/214/215 all passed. Fresh exact-head checks are required for the new aggregate-mass candidate.
+- The local execution container has no Git checkout. The GitHub integration also cannot return the oversized standalone `index.html` contents, so this iteration follows the bounded fallback and edits only independently retrievable Truss scripts, tests and docs. No claim of full local Python/Chromium/build certification.
 - Latest verified production evidence remains Main Quality [#45360386408](https://github.com/saeedsai/ProMathStudio/actions/runs/45360386408) and Pages [#45360367251](https://github.com/saeedsai/ProMathStudio/actions/runs/45360367251), both successful on 24-Nov-2026 at unchanged main. The new dev work is not live.
-- The historical 26-Oct inventory remains frozen at **166 gaps / 95 partial**. Do not edit its baseline counts or claim catalog aliases as completed unique features.
+- The historical 26-Oct inventory remains frozen at **166 gaps / 95 partial**.
 
 ## Operating contract
 
@@ -38,7 +49,7 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 1. P0 — Release PR #191 safely
 
-**Status:** The prior Truss selected-example reset failure is resolved. Exact-head Push #46096512088 and PR #46096516504 both passed **218/218** on `161895dd9071999e28183102d46d54ccf4f194d2`, zero failures/skips, including Truss steps 212, 214 and 215. The P0 blocker is now governance only: PR #191 has zero independent reviews; both branches report unprotected, rulesets are empty, and branch-protection reads return HTTP 403. No merge is authorized until an eligible independent approval and enforceable main protection are verified.  
+**Status:** Exact-head Push Quality [#46103439003](https://github.com/saeedsai/ProMathStudio/actions/runs/46103439003) and PR Quality [#46103444489](https://github.com/saeedsai/ProMathStudio/actions/runs/46103444489) passed **218/218** on starting head `a7803049451699f1b0f18829921b92de1f516995`, zero failures/skips. The current candidate still requires fresh exact-head certification. The remaining P0 blocker is governance: PR #191 has zero independent reviews; both branches report unprotected, rulesets are empty, and branch-protection reads return HTTP 403. No merge is authorized until an eligible independent approval and enforceable main protection are verified.  
 **Acceptance tests:**
 - Full Push and PR Quality pass on the exact candidate SHA with all required steps completed and zero skips.
 - Inspect the complete PR diff and review threads; an eligible independent reviewer approves.
@@ -67,12 +78,13 @@ This is the living execution queue. The 26-Oct audit remains the frozen historic
 
 ### 4. P1 — Finish seven-shape Truss FEM numerical boundaries
 
-**Status:** Partial; compensated stiffness, reaction and energy accumulation plus seven-shape section-property boundary fixes are implemented on dev. The 109/109 Node FEM suite and Truss steps 212/214 passed on `a8e9ef1`; step 215 exposed a stale test reference after the example selector changed from `triangle` to `bar`. This checkpoint makes the browser reference follow the selected example and adds an explicit machine-readable analysis state (`pending`, `valid`, `stale`) with desktop/mobile assertions. Fresh exact-head browser/full Quality is pending; the complete seven-shape reference matrix and release evidence remain open.  
+**Status:** Partial; compensated stiffness, reaction and energy accumulation plus seven-shape section-property boundary fixes are implemented on dev. The 109/109 Node FEM suite and registered browser steps 212/214/215 passed in both previous exact-head Quality workflows. This iteration adds complete/partial pre-solve aggregate member-mass reporting with explicit unknown-density semantics; fresh exact-head certification is pending. The complete independent seven-shape reference matrix and release evidence remain open.  
 **Acceptance tests:**
 - Independent area, centroid, Ixx/Iyy, section modulus and radius references for solid/hollow rectangles, solid/hollow circles, channel, I-section and L-angle.
 - Thin-wall and cavity transitions, sub-ULP contributions, mixed-scale compensated stiffness, mechanism/singularity rejection and SI boundaries.
-- Equilibrium residual, strain energy, displacement and member-force references; an exact power-of-two fixture must retain 16 J from thirty-two 0.5 J bars beside a 2^55 J member, expose a zero signed energy residual, and preserve the normalized error; invalid-input rollback and 390px keyboard/mobile checks.
-- The Truss results summary reports `pending` before its first successful solve, `valid` after a successful solve, and `stale` after edits or failed analysis; energy diagnostic attributes clear while stale and republish only after a successful solve. Reset references follow the currently selected example, not a prior fixture snapshot.
+- Equilibrium residual, strain energy, displacement and member-force references; exact power-of-two energy fixture retains 16 J from thirty-two 0.5 J bars beside a 2^55 J member and exposes zero signed energy residual.
+- Pre-solve material mass reports a total only when every member has explicit density; partial inputs show a known subtotal plus missing-density count, all-unknown inputs show unavailable, explicit zero density counts as known, and unrepresentable aggregate mass rejects. Node and desktop/390px browser regressions cover each case.
+- The Truss results summary reports `pending` before first successful solve, `valid` after success and `stale` after edits/failure; energy diagnostics clear while stale and republish only after success. Reset references follow the currently selected example.
 
 ### 5. P1 — Harden adaptive RK45 difficult-workload boundaries
 

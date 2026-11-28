@@ -1,3 +1,18 @@
+## 2026-11-28 04:57 CET — REPORT COMPLETE OR PARTIAL TRUSS MEMBER MASS IN PRE-SOLVE PREVIEW
+
+- Starting refs: `dev` `a7803049451699f1b0f18829921b92de1f516995`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 124 ahead / 0 behind; exactly two branches.
+- Exact-head Push Quality [#46103439003](https://github.com/saeedsai/ProMathStudio/actions/runs/46103439003) and PR Quality [#46103444489](https://github.com/saeedsai/ProMathStudio/actions/runs/46103444489) both passed 218/218 on the starting dev SHA, zero failures/skips. Project import steps 50/105 and Truss steps 212/214/215 passed.
+- The saved-project rollback matrix remains the next higher roadmap item, but its source is embedded in the oversized root `index.html`; the connected file reader returns no content and raw-file retrieval rejects the file. The local execution environment has no checkout. Per AGENTS.md fallback, no embedded module was edited or desynchronized; work continued on retrievable standalone Truss assets.
+- Added `knownMemberMassSubtotal`, `totalMemberMass` and `unknownDensityMemberCount` to the validated Truss `inspectJSON` preview. A total is exposed only when every member has known density; explicit density zero is valid known data. Unknown densities are not silently treated as zero, and an overflowing known subtotal is rejected through the existing finite accumulator.
+- Truss Studio's pre-solve summary now distinguishes a complete estimated total, a partial known-mass subtotal with the missing-density count, and a wholly unavailable estimate.
+- Added direct Node coverage for all-known, partially-known, all-unknown, explicit-zero and overflowing totals. Extended the registered Chromium regression to check the default triangle, a 15.7 kg legacy SI bar and a two-member partial-density import at 1280px and 390px.
+- Updated the Structural Truss FEM contract, living plan, execution ledger and changelog in the same atomic candidate commit. Root `index.html` is unchanged because Truss uses adjacent standalone scripts.
+- Actual production-source V8 validation passed for all five mass states; updated FEM/UI/Node-test JavaScript syntax compilation passed. Full Python/Chromium/build certification requires fresh exact-head GitHub Actions; pending for the candidate. No release claim.
+- PR #191 remains open/mergeable with zero independent reviews. Both branches report unprotected; rulesets empty; branch-protection GET 403. No merge or direct main update.
+- Main Quality #45360386408 and Pages #45360367251 remain the latest verified successful production runs on 24-Nov-2026 at unchanged main. Historical inventory remains **166 gaps / 95 partial**, unchanged.
+
+---
+
 ## 2026-11-28 04:27 CET — RESET OMITTED SOLVER STATE DURING LEGACY PROJECT IMPORT
 
 - Starting refs: `dev` `161895dd9071999e28183102d46d54ccf4f194d2`, `main` `0d8ac89f7c9177806a266e56b27980c83d2c3ff5`; compare 123 ahead / 0 behind; exactly two branches.

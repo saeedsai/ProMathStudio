@@ -1206,6 +1206,15 @@
       return volume;
     });
     const totalMemberVolume = finiteSignedSum(memberVolumes, 'Total member volume (m³)');
+    const knownMemberMasses = normalized.members
+      .filter(member => member.mass !== null)
+      .map(member => member.mass);
+    const unknownDensityMemberCount = normalized.members.length - knownMemberMasses.length;
+    const knownMemberMassSubtotal = knownMemberMasses.length
+      ? finiteSignedSum(knownMemberMasses, 'Known member mass subtotal (kg)')
+      : 0;
+    // Never label a partial subtotal as total mass; explicit zero density is known data.
+    const totalMemberMass = unknownDensityMemberCount === 0 ? knownMemberMassSubtotal : null;
     const appliedForce = Object.freeze({
       x: finiteSignedSum(normalized.nodes.map(node => node.fx), 'Applied force x (N)'),
       y: finiteSignedSum(normalized.nodes.map(node => node.fy), 'Applied force y (N)')
@@ -1246,6 +1255,9 @@
       totalMemberLength: finiteSignedSum(normalized.members.map(m => m.L), 'Total member length (m)'),
       // Sum physical axial-bar volumes in m³; reject overflow before UI/material estimates.
       totalMemberVolume,
+      knownMemberMassSubtotal,
+      totalMemberMass,
+      unknownDensityMemberCount,
       // Per-member quantities stay in SI and are available even when the structure is unstable.
       memberMetrics: Object.freeze(normalized.members.map((member, index) => Object.freeze({
         id: member.id,

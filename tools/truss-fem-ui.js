@@ -393,7 +393,14 @@
       const unit=info.inputUnits.forces,divisor=unit==='N'?1:1000;
       const components=info.connectedComponentCount===1?'connected component':'connected components';
       const isolated=info.isolatedNodeCount===1?'isolated joint':'isolated joints';
-      $('preview-summary').textContent=`Model overview · ${info.nodeCount} joints · ${info.memberCount} members · ${info.connectedComponentCount} ${components} · ${info.isolatedNodeCount} ${isolated} · total member length ${fmt(info.totalMemberLength,4)} m · axial member volume Σ(L·A) ${fmt(info.totalMemberVolume,4)} m³ · bounds ${fmt(bounds.width,4)} × ${fmt(bounds.height,4)} m · applied load ΣFx ${fmt(info.appliedForce.x/divisor,4)} ${unit}, ΣFy ${fmt(info.appliedForce.y/divisor,4)} ${unit} (${info.loadedDofCount} loaded DOFs). Topology is not a stability check.`;
+      const knownDensityMemberCount=info.memberCount-info.unknownDensityMemberCount;
+      const missingDensityLabel=info.unknownDensityMemberCount===1?'member':'members';
+      const massSummary=info.totalMemberMass!==null
+        ? `estimated total mass ${fmt(info.totalMemberMass,4)} kg`
+        : knownDensityMemberCount
+          ? `known mass subtotal ${fmt(info.knownMemberMassSubtotal,4)} kg · ${info.unknownDensityMemberCount} ${missingDensityLabel} missing density`
+          : `mass estimate unavailable · ${info.unknownDensityMemberCount} ${missingDensityLabel} missing density`;
+      $('preview-summary').textContent=`Model overview · ${info.nodeCount} joints · ${info.memberCount} members · ${info.connectedComponentCount} ${components} · ${info.isolatedNodeCount} ${isolated} · total member length ${fmt(info.totalMemberLength,4)} m · axial member volume Σ(L·A) ${fmt(info.totalMemberVolume,4)} m³ · ${massSummary} · bounds ${fmt(bounds.width,4)} × ${fmt(bounds.height,4)} m · applied load ΣFx ${fmt(info.appliedForce.x/divisor,4)} ${unit}, ΣFy ${fmt(info.appliedForce.y/divisor,4)} ${unit} (${info.loadedDofCount} loaded DOFs). Topology is not a stability check.`;
       const hasIncompleteEulerInputs=info.memberMetrics.some(metric =>
         (metric.secondMoment===null)!==(metric.effectiveLengthFactor===null));
       status(hasIncompleteEulerInputs

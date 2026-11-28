@@ -37,6 +37,8 @@ def main():
             page.set_content(HTML, wait_until='load')
             page.locator('#status').wait_for()
             assert 'Analysis complete' in page.locator('#status').inner_text(), page.locator('#status').inner_text()
+            initial_preview = page.locator('#preview-summary').inner_text()
+            assert 'mass estimate unavailable · 3 members missing density' in initial_preview, initial_preview
             energy_summary = page.locator('#energy-residual-summary')
             assert energy_summary.is_visible()
             assert 'Energy balance residual =' in energy_summary.inner_text()
@@ -1159,6 +1161,8 @@ def main():
             page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
                 'Legacy SI input converted to Studio units.')""")
             assert 'Optional property units in file: density kg/m³, I m⁴, K dimensionless.' in page.locator('#status').inner_text()
+            preview_summary = page.locator('#preview-summary').inner_text()
+            assert 'estimated total mass 15.7 kg' in preview_summary, preview_summary
             assert page.locator('#nodes tr').count() == 2
             assert page.locator('#members tr').count() == 1
             assert page.locator('#nodes tr').nth(1).locator('input[data-field="fx"]').input_value() == '1'
@@ -1168,6 +1172,28 @@ def main():
             assert legacy_row.locator('input[data-field="density"]').input_value() == '7850'
             assert legacy_row.locator('input[data-field="I"]').input_value() == '1000000'
             assert legacy_row.locator('input[data-field="K"]').input_value() == '1'
+            partial_model = json.loads(json.dumps(legacy_model))
+            partial_model['members'].append({
+                'id': 'AB2', 'a': 'A', 'b': 'B', 'E': 200e9, 'A': 0.0005
+            })
+            page.locator('#import-model').set_input_files({
+                'name': 'partial-density.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(partial_model).encode('utf-8')
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
+                'Legacy SI input converted to Studio units.')""")
+            partial_summary = page.locator('#preview-summary').inner_text()
+            assert 'known mass subtotal 15.7 kg' in partial_summary, partial_summary
+            assert '1 member missing density' in partial_summary, partial_summary
+            assert page.locator('#members tr').count() == 2
+            page.locator('#import-model').set_input_files({
+                'name': 'legacy-truss-restored.json', 'mimeType': 'application/json',
+                'buffer': json.dumps(legacy_model).encode('utf-8')
+            })
+            page.wait_for_function("""() => document.querySelector('#status').textContent.includes(
+                'Legacy SI input converted to Studio units.')""")
+            assert 'estimated total mass 15.7 kg' in page.locator('#preview-summary').inner_text()
+            assert page.locator('#members tr').count() == 1
             assert '0.01 mm' in page.locator('#disp-card').inner_text()
 
             page.get_by_role('button', name='Export JSON').click()

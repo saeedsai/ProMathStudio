@@ -509,3 +509,7 @@ A regression fixture uses exact binary powers: each member has stiffness 65536 N
 
 
 The solve result exposes the signed `energyResidual` in joules, computed from the same rounded binary64 elastic-energy and external-work totals used by the identity check. The Truss Studio verification panel displays this absolute signed residual alongside the normalized error, so users can distinguish the energy scale from the relative consistency measure. Neither value certifies material strength, stability or code compliance.
+
+## Aggregate member-mass preview
+
+The pre-solve `inspectJSON` result reports `knownMemberMassSubtotal` in kg, `unknownDensityMemberCount`, and `totalMemberMass`. A total is present only when every member has an explicit density; an omitted or blank density remains unknown and never silently contributes zero. Explicit density zero is valid known data. When only some densities are known, the UI labels their sum as a subtotal and states how many members still lack density; when none are known it reports that a mass estimate is unavailable. The aggregate uses the shared finite signed accumulator and rejects a genuinely unrepresentable subtotal rather than displaying Infinity. This is a material estimate, not a structural-capacity or safety certification.

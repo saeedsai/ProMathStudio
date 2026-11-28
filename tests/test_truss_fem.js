@@ -1061,6 +1061,54 @@ test('inspectJSON exposes immutable per-member SI material metrics without solvi
  assert.throws(()=>fem.inspectJSON('{bad'),/Invalid truss JSON/);
 });
 
+
+test('inspectJSON reports complete and partial aggregate member mass without treating unknown density as zero',()=>{
+ const completeModel=clone(fem.examples.triangle);
+ completeModel.members.forEach(member=>member.density=7850);
+ const complete=fem.inspectJSON(JSON.stringify(completeModel));
+ const expected=(4+2*Math.hypot(2,3))*0.0012*7850;
+ assert.equal(complete.unknownDensityMemberCount,0);
+ assert.equal(complete.totalMemberMass,complete.knownMemberMassSubtotal);
+ close(complete.totalMemberMass,expected,1e-12);
+
+ const partialModel=clone(completeModel);
+ delete partialModel.members[1].density;
+ const partial=fem.inspectJSON(JSON.stringify(partialModel));
+ assert.equal(partial.unknownDensityMemberCount,1);
+ assert.equal(partial.totalMemberMass,null,
+  'a known subtotal must not be presented as the complete truss mass');
+ close(partial.knownMemberMassSubtotal,
+  partial.memberMetrics[0].mass+partial.memberMetrics[2].mass,1e-12);
+
+ const unknownModel=clone(completeModel);
+ unknownModel.members.forEach(member=>delete member.density);
+ const unknown=fem.inspectJSON(JSON.stringify(unknownModel));
+ assert.equal(unknown.unknownDensityMemberCount,3);
+ assert.equal(unknown.knownMemberMassSubtotal,0);
+ assert.equal(unknown.totalMemberMass,null);
+
+ const zeroModel=clone(completeModel);
+ zeroModel.members[0].density=0;
+ const zero=fem.inspectJSON(JSON.stringify(zeroModel));
+ assert.equal(zero.unknownDensityMemberCount,0,
+  'an explicit zero density is known data, not a missing value');
+ assert.equal(zero.memberMetrics[0].mass,0);
+ close(zero.totalMemberMass,zero.memberMetrics[1].mass+zero.memberMetrics[2].mass,1e-12);
+
+ const overflow={
+  nodes:[
+   {id:'A',x:0,y:0,fixX:true,fixY:true},
+   {id:'B',x:1,y:0,fixX:true,fixY:true}
+  ],
+  members:[
+   {id:'AB1',a:'A',b:'B',E:200,area:1e6,density:1e308},
+   {id:'AB2',a:'A',b:'B',E:200,area:1e6,density:1e308}
+  ]
+ };
+ assert.throws(()=>fem.inspectJSON(JSON.stringify(overflow)),/Known member mass subtotal.*finite number/,
+  'an unrepresentable aggregate must be rejected rather than reported as Infinity');
+});
+
 test('material schedule CSV exports validated per-member SI quantities without solving',()=>{
  const barCSV=fem.exportMaterialCSV(fem.examples.bar);
  const header='"Member ID","Start joint ID","End joint ID","Centreline length (m)","Cross-sectional area (m²)","Axial material volume (m³)","Elastic modulus (GPa)","Axial stiffness EA/L (kN/mm)","Density (kg/m³)","Member mass (kg)","Second moment of area I (mm⁴)","Effective length factor K (-)","Euler critical load Pcr (kN)"';
